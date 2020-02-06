@@ -41,5 +41,7 @@ jobs:
         helm repo index repo --url ${HELM_REPO_BASE_URL}/${HELM_REPO} --merge charts/${HELM_REPO}/index.yaml
         mv repo/* charts/${HELM_REPO}
         cd charts
+        git config --global user.email "alfresco-build@alfresco.com"
+        git config --global user.name "alfresco-build"
         git commit -am "${COMMIT_MESSAGE_FIRST_LINE}"
         git push --quiet origin master
