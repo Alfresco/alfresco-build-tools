@@ -1,0 +1,23 @@
+import: Alfresco/alfresco-process-tools:.travis.common.yml@master
+language: java
+jdk:
+  - openjdk11
+env:
+  global:
+    - MAVEN_CLI_OPTS="--batch-mode --quiet --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true -U"
+install: travis_wait ${TRAVIS_WAIT_TIMEOUT} mvn ${MAVEN_CLI_OPTS} dependency:resolve dependency:resolve-plugins || true
+cache:
+  directories:
+    - ${HOME}/.m2/repository
+    - ${HOME}/sourceclear
+jobs:
+  include:
+    - name: sourceclear sca scan
+      stage: test
+      script: curl -sSL https://download.sourceclear.com/ci.sh | CACHE_DIR=${HOME}/sourceclear travis_wait ${TRAVIS_WAIT_TIMEOUT} bash
+    - name: deploy application
+      stage: deploy
+      script: travis_wait ${TRAVIS_WAIT_TIMEOUT} mvn ${MAVEN_CLI_OPTS} source:jar javadoc:jar deploy -DskipTests
+before_install:
+  - mkdir -p $HOME/.m2
+  - cp settings.xml $HOME/.m2

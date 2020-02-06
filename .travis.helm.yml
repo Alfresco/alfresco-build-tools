@@ -1,0 +1,41 @@
+import: Alfresco/alfresco-process-tools:.travis.common.yml@master
+env:
+  global:
+    - HELM_VERSION=2.9.1
+    - HELM_REPO_BASE_URL=http://kubernetes-charts.alfresco.com
+    - HELM_REPO=stable
+install: |
+  curl https://kubernetes-helm.storage.googleapis.com/helm-v${HELM_VERSION}-linux-amd64.tar.gz | tar zx
+  sudo mv linux-amd64/helm /usr/local/bin/
+before_script: |
+  PROJECT_NAME=${TRAVIS_REPO_SLUG}
+  PROJECT_NAME=${PROJECT_NAME##*/}
+  PROJECT_NAME=${PROJECT_NAME%%-deployment}
+  BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-${TRAVIS_BRANCH}}
+  helm init --client-only
+  helm repo add activiti https://activiti.github.io/activiti-cloud-helm-charts
+  helm repo add alfresco ${HELM_REPO_BASE_URL}/stable
+  if [[ "${TRAVIS_BRANCH}" == 'develop' ]]; then
+    HELM_REPO=incubator
+    helm repo add alfresco-incubator ${HELM_REPO_BASE_URL}/${HELM_REPO}
+  fi
+  echo using PROJECT_NAME=${PROJECT_NAME},BRANCH=${BRANCH},HELM_REPO=${HELM_REPO}
+jobs:
+  include:
+    - name: test chart
+      stage: test
+      script: |
+        helm lint helm/${PROJECT_NAME}
+    - name: package and publish chart
+      stage: deploy
+      script: |
+        COMMIT_MESSAGE_FIRST_LINE=$(git log --pretty=format:%s --max-count=1)
+        echo using COMMIT_MESSAGE_FIRST_LINE=${COMMIT_MESSAGE_FIRST_LINE}
+        git clone https://${GITHUB_TOKEN}@github.com/Alfresco/charts.git
+        mkdir repo
+        helm package --dependency-update --destination repo helm/${PROJECT_NAME}
+        helm repo index repo --url ${HELM_REPO_BASE_URL}/${HELM_REPO} --merge charts/${HELM_REPO}/index.yaml
+        mv repo/* charts/${HELM_REPO}
+        cd charts
+        git commit -am "${COMMIT_MESSAGE_FIRST_LINE}"
+        git push --quiet origin master

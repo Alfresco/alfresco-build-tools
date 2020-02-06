@@ -1,0 +1,15 @@
+language: minimal
+env:
+  global:
+    - TRAVIS_WAIT_TIMEOUT=${TRAVIS_WAIT_TIMEOUT:-30}
+branches:
+  only:
+    - master
+    - develop
+stages:
+  - name: build
+  - name: test
+  - name: deploy
+    if: type != pull_request
+  - name: trigger
+    if: type != pull_request

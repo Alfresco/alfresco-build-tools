@@ -1,0 +1,8 @@
+import: Alfresco/alfresco-process-tools:.travis.java.yml@master
+
+jobs:
+  include:
+    - name: build application
+      stage: build
+      script:
+        - travis_wait ${TRAVIS_WAIT_TIMEOUT} mvn ${MAVEN_CLI_OPTS} clean install -Dlogging.root.level=off -Dspring.main.banner-mode=off

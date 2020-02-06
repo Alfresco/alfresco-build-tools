@@ -1,0 +1,35 @@
+import: Alfresco/alfresco-process-tools:.travis.docker.yml@master
+
+env:
+  global:
+    - MAVEN_CLI_OPTS="--batch-mode --quiet --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true -U"
+    - KUBERNETES_VERSION=1.14.8
+    - HELM_VERSION=2.14.3
+
+jobs:
+  include:
+    - name: deploy image to k8s
+      stage: deploy
+      before_script:
+        - curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl &&
+          chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+        - kubectl config set-cluster default-cluster --server=${K8S_API_URL} &&
+          kubectl config set-credentials default-admin --token=${K8S_API_TOKEN} &&
+          kubectl config set-context default-system --cluster=default-cluster --user=default-admin &&
+          kubectl config use-context default-system
+      script: kubectl set image deployment/aae-"$PROJECT_NAME" "$PROJECT_NAME"="$DOCKER_REGISTRY/$DOCKER_IMAGE_REPOSITORY:$DOCKER_IMAGE_TAG-$TRAVIS_BUILD_NUMBER"
+    - name: trigger acceptance tests
+      stage: trigger
+      script: |
+        curl -s --fail -X POST \
+          -H "Content-Type: application/json" \
+          -H "Accept: application/json" \
+          -H "Travis-API-Version: 3" \
+          -H "Authorization: token ${TRAVIS_API_TOKEN}" \
+          -d "{\"request\":{\"branch\":\"${TRAVIS_BRANCH}\"}}" \
+          https://api.travis-ci.com/repo/Alfresco%2Falfresco-process-acceptance-tests/requests
+
+before_install:
+  - curl https://kubernetes-helm.storage.googleapis.com/helm-v${HELM_VERSION}-linux-amd64.tar.gz | tar zx &&
+    sudo mv linux-amd64/helm /usr/local/bin/ && helm version --client
+  - export PROJECT_NAME=${TRAVIS_REPO_SLUG##*/}

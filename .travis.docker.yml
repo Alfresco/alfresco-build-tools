@@ -1,0 +1,25 @@
+import: Alfresco/alfresco-process-tools:.travis.common.yml@master
+
+jobs:
+  include:
+    - name: build application
+      stage: build
+      script:
+        - travis_wait ${TRAVIS_WAIT_TIMEOUT} mvn ${MAVEN_CLI_OPTS} clean install -Dlogging.root.level=off -Dspring.main.banner-mode=off
+        - docker build --label "GIT_COMMIT=$TRAVIS_COMMIT" --tag "$DOCKER_IMAGE_REPOSITORY:$DOCKER_IMAGE_TAG" .
+        - curl -sSL https://download.sourceclear.com/ci.sh | CACHE_DIR=${HOME}/sourceclear travis_wait ${TRAVIS_WAIT_TIMEOUT} bash -s -- scan --image "$DOCKER_IMAGE_REPOSITORY:$DOCKER_IMAGE_TAG"
+        - |
+          if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]
+          then
+            docker tag "$DOCKER_IMAGE_REPOSITORY:$DOCKER_IMAGE_TAG" "$DOCKER_REGISTRY/$DOCKER_IMAGE_REPOSITORY:$DOCKER_IMAGE_TAG"
+            docker push "$DOCKER_REGISTRY/$DOCKER_IMAGE_REPOSITORY:$DOCKER_IMAGE_TAG"
+            docker tag "$DOCKER_IMAGE_REPOSITORY:$DOCKER_IMAGE_TAG" "$DOCKER_REGISTRY/$DOCKER_IMAGE_REPOSITORY:$DOCKER_IMAGE_TAG-$TRAVIS_BUILD_NUMBER"
+            docker push "$DOCKER_REGISTRY/$DOCKER_IMAGE_REPOSITORY:$DOCKER_IMAGE_TAG-$TRAVIS_BUILD_NUMBER"
+          else
+            echo skip scan and push docker image on pull request
+          fi
+
+before_install:
+  - source ./build.properties
+  - export DOCKER_IMAGE_TAG=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}
+  - echo "$DOCKER_REGISTRY_PASSWORD" | docker login -u "$DOCKER_REGISTRY_USERNAME" --password-stdin "$DOCKER_REGISTRY"
