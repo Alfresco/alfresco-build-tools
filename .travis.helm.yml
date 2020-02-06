@@ -14,8 +14,9 @@ before_script: |
   helm init --client-only
   helm repo add activiti https://activiti.github.io/activiti-cloud-helm-charts
   helm repo add alfresco ${HELM_REPO_BASE_URL}/stable
-  if [[ "${TRAVIS_BRANCH}" == 'develop' ]]; then
-    HELM_REPO=incubator
+  if [[ "${TRAVIS_BRANCH}" == 'develop' ]]
+  then
+    export HELM_REPO=incubator
     helm repo add alfresco-incubator ${HELM_REPO_BASE_URL}/${HELM_REPO}
   fi
   echo using PROJECT_NAME=${PROJECT_NAME},BRANCH=${BRANCH},HELM_REPO=${HELM_REPO}
@@ -36,12 +37,11 @@ jobs:
         COMMIT_MESSAGE_FIRST_LINE=$(git log --pretty=format:%s --max-count=1)
         echo using COMMIT_MESSAGE_FIRST_LINE=${COMMIT_MESSAGE_FIRST_LINE}
         git clone https://${GITHUB_TOKEN}@github.com/Alfresco/charts.git
+        echo using HELM_REPO=${HELM_REPO}
         mkdir repo
         helm package --dependency-update --destination repo helm/${PROJECT_NAME}
         helm repo index repo --url ${HELM_REPO_BASE_URL}/${HELM_REPO} --merge charts/${HELM_REPO}/index.yaml
-        mv repo/* charts/${HELM_REPO}
+        mv repo/* charts/${HELM_REPO}/
         cd charts
-        git config --global user.email "alfresco-build@alfresco.com"
-        git config --global user.name "alfresco-build"
         git commit -am "${COMMIT_MESSAGE_FIRST_LINE}"
         git push --quiet origin master
