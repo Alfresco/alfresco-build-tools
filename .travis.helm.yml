@@ -24,6 +24,7 @@ jobs:
     - name: test chart
       stage: test
       script: |
+        helm dep up helm/${PROJECT_NAME}
         helm lint helm/${PROJECT_NAME}
     - name: package and publish chart
       stage: deploy
