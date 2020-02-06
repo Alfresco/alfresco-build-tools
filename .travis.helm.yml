@@ -11,7 +11,6 @@ before_script: |
   PROJECT_NAME=${TRAVIS_REPO_SLUG}
   PROJECT_NAME=${PROJECT_NAME##*/}
   PROJECT_NAME=${PROJECT_NAME%%-deployment}
-  BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-${TRAVIS_BRANCH}}
   helm init --client-only
   helm repo add activiti https://activiti.github.io/activiti-cloud-helm-charts
   helm repo add alfresco ${HELM_REPO_BASE_URL}/stable

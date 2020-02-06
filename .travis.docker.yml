@@ -1,9 +1,11 @@
-import: Alfresco/alfresco-process-tools:.travis.common.yml@master
+import: Alfresco/alfresco-process-tools:.travis.dockermulti.yml@master
 
 jobs:
   include:
     - name: build application
       stage: build
+      before_script:
+        - source ./build.properties
       script:
         - travis_wait ${TRAVIS_WAIT_TIMEOUT} mvn ${MAVEN_CLI_OPTS} clean install -Dlogging.root.level=off -Dspring.main.banner-mode=off
         - docker build --label "GIT_COMMIT=$TRAVIS_COMMIT" --tag "$DOCKER_IMAGE_REPOSITORY:$DOCKER_IMAGE_TAG" .
@@ -18,8 +20,3 @@ jobs:
           else
             echo skip scan and push docker image on pull request
           fi
-
-before_install:
-  - source ./build.properties
-  - export DOCKER_IMAGE_TAG=${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}
-  - echo "$DOCKER_REGISTRY_PASSWORD" | docker login -u "$DOCKER_REGISTRY_USERNAME" --password-stdin "$DOCKER_REGISTRY"
