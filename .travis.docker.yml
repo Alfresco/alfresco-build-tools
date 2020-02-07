@@ -1,6 +1,4 @@
-import: Alfresco/alfresco-process-tools:.travis.dockermulti.yml@master
-before_install:
-  - source ./build.properties
+import: Alfresco/alfresco-process-tools:.travis.java.yml@master
 jobs:
   include:
     - name: build application
@@ -19,3 +17,7 @@ jobs:
           else
             echo skip scan and push docker image on pull request
           fi
+before_install:
+  - source ./build.properties
+  - export DOCKER_IMAGE_TAG=${BRANCH}
+  - echo "$DOCKER_REGISTRY_PASSWORD" | docker login -u "$DOCKER_REGISTRY_USERNAME" --password-stdin "$DOCKER_REGISTRY"
