@@ -1,5 +1,4 @@
 import: Alfresco/alfresco-process-tools:.travis.library.yml@master
-
 before_install:
   - export DOCKER_IMAGE_TAG=${BRANCH}
   - echo "$DOCKER_REGISTRY_PASSWORD" | docker login -u "$DOCKER_REGISTRY_USERNAME" --password-stdin "$DOCKER_REGISTRY"

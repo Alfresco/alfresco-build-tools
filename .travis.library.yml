@@ -1,5 +1,4 @@
 import: Alfresco/alfresco-process-tools:.travis.java.yml@master
-
 jobs:
   include:
     - name: build application
