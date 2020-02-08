@@ -14,7 +14,7 @@ before_script: |
   helm init --client-only
   helm repo add activiti https://activiti.github.io/activiti-cloud-helm-charts
   helm repo add alfresco ${HELM_REPO_BASE_URL}/stable
-  if [[ "${TRAVIS_BRANCH}" == 'develop' ]]
+  if [[ "${BRANCH}" == 'develop' ]]
   then
     export HELM_REPO=incubator
     helm repo add alfresco-incubator ${HELM_REPO_BASE_URL}/${HELM_REPO}
@@ -41,7 +41,8 @@ jobs:
         mkdir repo
         helm package --dependency-update --destination repo helm/${PROJECT_NAME}
         helm repo index repo --url ${HELM_REPO_BASE_URL}/${HELM_REPO} --merge charts/${HELM_REPO}/index.yaml
-        mv repo/* charts/${HELM_REPO}/
+        mv repo/* charts/${HELM_REPO}
         cd charts
-        git commit -am "${COMMIT_MESSAGE_FIRST_LINE}"
+        git add ${HELM_REPO}
+        git commit -m "${COMMIT_MESSAGE_FIRST_LINE}"
         git push --quiet origin master
