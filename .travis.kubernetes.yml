@@ -15,7 +15,7 @@ jobs:
           kubectl config set-credentials default-admin --token=${K8S_API_TOKEN} &&
           kubectl config set-context default-system --cluster=default-cluster --user=default-admin &&
           kubectl config use-context default-system
-      script: kubectl set image deployment/aae-"$PROJECT_NAME" "$PROJECT_NAME"="$DOCKER_REGISTRY/$DOCKER_IMAGE_REPOSITORY:$DOCKER_IMAGE_TAG-$TRAVIS_BUILD_NUMBER"
+      script: kubectl set image deployment/aae-"$PROJECT_NAME" "$PROJECT_NAME"="$DOCKER_REGISTRY/$DOCKER_IMAGE_REPOSITORY:$BRANCH-$TRAVIS_BUILD_NUMBER"
     - name: trigger acceptance tests
       stage: trigger
       script: |
