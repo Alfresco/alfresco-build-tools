@@ -7,6 +7,7 @@ jobs:
         - openjdk8
       script:
         - travis_wait ${TRAVIS_WAIT_TIMEOUT} mvn ${MAVEN_CLI_OPTS} clean install -Dlogging.root.level=off -Dspring.main.banner-mode=off
+      if: env(BUILD_JAVA8) = true
     - name: build application
       stage: build
       script:

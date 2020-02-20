@@ -9,5 +9,6 @@ jobs:
     - name: build application on openjdk8
       jdk: openjdk8
       <<: *shared_job
+      if: env(BUILD_JAVA8) = true
     - name: build application
       <<: *shared_job
