@@ -50,3 +50,6 @@ hs_err_pid*
 
 #mac osx
 *.DS_Store
+
+# Node packages and dependencies
+node_modules
