@@ -26,8 +26,7 @@ function updateProcessXML(processName, processId) {
     try {
         const processContent = fs.readFileSync(path.join(getExtractedProjectPath(), 'processes', processName));
         const xmlParsedFile = JSON.parse(parser.toJson(processContent, { reversible: true }));
-        let xmlNameSpace = Object.keys(xmlParsedFile)[0].split(':')[0];
-        xmlNameSpace = xmlNameSpace ? xmlNameSpace + ':' : '';
+        const xmlNameSpace = extractNameSpace(xmlParsedFile);
         xmlParsedFile[`${xmlNameSpace}definitions`].id = xmlParsedFile[`${xmlNameSpace}definitions`][`${xmlNameSpace}process`].id.replace('process', 'model');
         xmlParsedFile[`${xmlNameSpace}definitions`][`${xmlNameSpace}process`].id = processId;
         xmlParsedFile[`${xmlNameSpace}definitions`]['bpmndi:BPMNDiagram']['bpmndi:BPMNPlane'].bpmnElement = processId;
@@ -37,11 +36,23 @@ function updateProcessXML(processName, processId) {
             fs.writeFileSync(path.join(getExtractedProjectPath(), 'processes', processName), updatedXML);
             console.log('\t-> Process file: ' + processName + ' successfully updated');
         } catch (error) {
+            console.log('\t-> Failed to update file: ' + processName );
             console.log(error);
         }
     } catch (error) {
         console.log(error);
     }
+}
+
+function extractNameSpace(xmlParsedFile) {
+    let xmlNameSpaceArray = Object.keys(xmlParsedFile)[0].split(':');
+    let xmlNameSpace;
+    if (xmlNameSpaceArray.length == 2) {
+        xmlNameSpace = xmlNameSpaceArray[0] + ':';
+    } else {
+        xmlNameSpace = '';
+    }
+    return xmlNameSpace;
 }
 
 function updateProcessExtensionsJSON(processExtensionsName, processId) {
@@ -58,6 +69,7 @@ function updateProcessExtensionsJSON(processExtensionsName, processId) {
             fs.writeFileSync(path.join(getExtractedProjectPath(), 'processes', processExtensionsName), updatedProcessExtensions);
             console.log('\t-> Extensions file: ' + processExtensionsName + ' successfully updated');
         } catch (error) {
+            console.log('\t-> Failed to update file: ' + processExtensionsName );
             console.log(error);
         }
     } catch (error) {
