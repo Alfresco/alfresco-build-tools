@@ -1,4 +1,4 @@
 import: Alfresco/alfresco-process-tools:.travis.library.yml@master
 before_install:
   - echo "$DOCKER_REGISTRY_PASSWORD" | docker login -u "$DOCKER_REGISTRY_USERNAME" --password-stdin "$DOCKER_REGISTRY"
-  - export MAVEN_CLI_OPTS="${MAVEN_CLI_OPTS} -DskipITs -Ddocker.tag=${BRANCH}"
+  - export MAVEN_CLI_OPTS="${MAVEN_CLI_OPTS} -Ddocker.tag=${BRANCH}"
