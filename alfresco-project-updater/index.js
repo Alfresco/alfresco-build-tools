@@ -31,7 +31,8 @@ function updateProcessXML(processName, processId) {
         xmlParsedFile[`${xmlNameSpace}definitions`][`${xmlNameSpace}process`].id = processId;
         xmlParsedFile[`${xmlNameSpace}definitions`]['bpmndi:BPMNDiagram']['bpmndi:BPMNPlane'].bpmnElement = processId;
 
-        const updatedXML = parser.toXml(JSON.stringify(xmlParsedFile));
+		const updatedXML = parser.toXml(JSON.stringify(xmlParsedFile), {  sanitize: true});
+        
         try {
             fs.writeFileSync(path.join(getExtractedProjectPath(), 'processes', processName), updatedXML);
             console.log('\t-> Process file: ' + processName + ' successfully updated');
