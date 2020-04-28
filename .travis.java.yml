@@ -14,7 +14,7 @@ jobs:
   include:
     - name: sourceclear sca scan
       stage: test
-      script: curl -sSL https://download.sourceclear.com/ci.sh | CACHE_DIR=${HOME}/sourceclear travis_wait ${TRAVIS_WAIT_TIMEOUT} bash
+      script: curl -sSL https://download.sourceclear.com/ci.sh | CACHE_DIR=${HOME}/sourceclear bash
     - name: deploy application
       stage: deploy
       script: travis_wait ${TRAVIS_WAIT_TIMEOUT} mvn ${MAVEN_CLI_OPTS} source:jar javadoc:jar deploy -DskipTests
