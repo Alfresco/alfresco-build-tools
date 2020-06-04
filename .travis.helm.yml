@@ -1,17 +1,13 @@
-import: Alfresco/alfresco-process-tools:.travis.common.yml@master
+import:
+  - Alfresco/alfresco-process-tools:.travis.common.yml@master
+  - Alfresco/alfresco-process-tools:.travis.helm_install.yml@master
 env:
   global:
-    - HELM_VERSION=2.14.3
     - HELM_REPO_BASE_URL=https://kubernetes-charts.alfresco.com
     - HELM_REPO=stable
-before_install: |
-  curl https://kubernetes-helm.storage.googleapis.com/helm-v${HELM_VERSION}-linux-amd64.tar.gz | tar zx
-  sudo mv linux-amd64/helm /usr/local/bin/
 before_script: |
-  PROJECT_NAME=${TRAVIS_REPO_SLUG}
-  PROJECT_NAME=${PROJECT_NAME##*/}
-  PROJECT_NAME=${PROJECT_NAME%%-deployment}
-  helm init --client-only
+  REPO_NAME=${TRAVIS_REPO_SLUG##*/}
+  PROJECT_NAME=${REPO_NAME%%-deployment}
   helm repo add activiti https://activiti.github.io/activiti-cloud-helm-charts
   helm repo add alfresco ${HELM_REPO_BASE_URL}/stable
   if [[ "${TRAVIS_BRANCH}" == 'develop' ]]
@@ -28,11 +24,11 @@ jobs:
         helm dep up helm/${PROJECT_NAME}
         helm lint helm/${PROJECT_NAME}
     - name: package and publish chart
-      stage: deploy
+      stage: publish
       before_install: |
         export HELM_VERSION=2.9.1
         curl https://kubernetes-helm.storage.googleapis.com/helm-v${HELM_VERSION}-linux-amd64.tar.gz | tar zx
-        sudo mv linux-amd64/helm /usr/local/bin/
+        sudo mv linux-amd64/helm /usr/local/bin/ && helm init --client-only
       script: |
         COMMIT_MESSAGE_FIRST_LINE=$(git log --pretty=format:%s --max-count=1)
         echo using COMMIT_MESSAGE_FIRST_LINE=${COMMIT_MESSAGE_FIRST_LINE}

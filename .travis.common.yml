@@ -10,6 +10,8 @@ branches:
 stages:
   - name: build
   - name: test
+  - name: publish
+    if: type != pull_request
   - name: deploy
     if: type != pull_request
   - name: trigger

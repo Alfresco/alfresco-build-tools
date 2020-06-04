@@ -1,4 +1,6 @@
-import: Alfresco/alfresco-process-tools:.travis.java.yml@master
+import:
+  - Alfresco/alfresco-process-tools:.travis.java.yml@master
+  - Alfresco/alfresco-process-tools:.travis.docker_login.yml@master
 jobs:
   include:
     - name: build application on openjdk8
@@ -27,4 +29,3 @@ jobs:
           fi
 before_install:
   - source ./build.properties
-  - echo "$DOCKER_REGISTRY_PASSWORD" | docker login -u "$DOCKER_REGISTRY_USERNAME" --password-stdin "$DOCKER_REGISTRY"

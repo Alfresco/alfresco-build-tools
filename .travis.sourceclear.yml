@@ -1,0 +1,8 @@
+cache:
+  directories:
+    - ${HOME}/sourceclear
+jobs:
+  include:
+    - name: sourceclear sca scan
+      stage: test
+      script: curl -sSL https://download.sourceclear.com/ci.sh | CACHE_DIR=${HOME}/sourceclear bash

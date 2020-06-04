@@ -1,0 +1,16 @@
+jobs:
+  include:
+    - name: trigger dependants
+      stage: trigger
+      script:
+        - |
+          for REPO in ${TRIGGER_REPOS[*]}
+          do
+            curl -s -X POST --fail \
+              -H "Content-Type: application/json" \
+              -H "Accept: application/json" \
+              -H "Travis-API-Version: 3" \
+              -H "Authorization: token ${TRAVIS_API_TOKEN}" \
+              -d "{\"request\":{\"branch\":\"${TRAVIS_BRANCH}\"}}" \
+              https://api.travis-ci.com/repo/Alfresco%2F${REPO}/requests
+          done
