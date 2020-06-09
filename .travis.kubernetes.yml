@@ -1,5 +1,6 @@
 import:
   - Alfresco/alfresco-process-tools:.travis.dockermulti.yml@master
+  - Alfresco/alfresco-process-tools:.travis.kubernetes_config.yml@master
   - Alfresco/alfresco-process-tools:.travis.kubernetes_install.yml@master
 env:
   global:

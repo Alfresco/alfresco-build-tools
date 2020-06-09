@@ -1,0 +1,11 @@
+cache:
+  directories:
+    - $HOME/veracode
+jobs:
+  include:
+    - name: veracode static scan
+      stage: test
+      before_install:
+        - curl -sLo /tmp/pipeline-scan.zip https://downloads.veracode.com/securityscan/pipeline-scan-LATEST.zip &&
+          unzip /tmp/pipeline-scan.zip -d /tmp
+      script: find . -name \*.jar -exec java -jar /tmp/pipeline-scan.jar --veracode_api_id $VERACODE_API_ID --veracode_api_key $VERACODE_API_KEY --fail_on_severity="Very High, High" --file {} \;
