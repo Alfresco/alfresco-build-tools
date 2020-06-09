@@ -1,0 +1,11 @@
+cache:
+  directories:
+    - $HOME/.cache/pip
+    - $HOME/.cache/pre-commit
+jobs:
+  include:
+    - name: pre-commit
+      stage: lint
+      python: 3.8
+      install: curl https://pre-commit.com/install-local.py | python -
+      script: pre-commit run --all-files

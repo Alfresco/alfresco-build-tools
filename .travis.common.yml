@@ -8,6 +8,7 @@ branches:
     - master
     - develop
 stages:
+  - name: lint
   - name: build
   - name: test
   - name: publish
