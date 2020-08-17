@@ -5,4 +5,5 @@ jobs:
   include:
     - name: sourceclear sca scan
       stage: test
+      if: env(SRCCLR_API_TOKEN) AND (type = cron OR branch = develop)
       script: curl -sSL https://download.sourceclear.com/ci.sh | CACHE_DIR=${HOME}/sourceclear bash
