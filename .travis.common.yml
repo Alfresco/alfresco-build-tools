@@ -5,7 +5,6 @@ env:
     - BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-${TRAVIS_BRANCH}}
 branches:
   only:
-    - master
     - develop
 stages:
   - name: lint
