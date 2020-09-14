@@ -35,11 +35,11 @@ This script takes the name of the project as the only parameter. Notice that it'
 
 It you have cloned this repo into the same directory where you have your projects you just need to specify the project you want to update.
 
-    node alfrescoProjectUpdater yourProject.zip
+    node alfresco-project-updater-M9-M10 yourProject.zip
 
 If the projects are in a different directory you need to pass the relative path to your project and the script will do the rest.
 
-    node alfrescoProjectUpdater ../FOLDER/SUBFOLDER/yourProject.zip
+    node alfresco-project-updater-M9-M10 ../FOLDER/SUBFOLDER/yourProject.zip
 
 After the script has finished, you will get a new compressed project compatible with the latest version. 
 

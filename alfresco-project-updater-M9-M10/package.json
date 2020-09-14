@@ -1,0 +1,17 @@
+{
+  "name": "alfresco-project-updater",
+  "version": "1.0.0",
+  "description": "Script to update Alfresco Modeler Projects to M6 structure",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "adm-zip": "^0.4.14",
+    "rimraf": "^3.0.2",
+    "shortid": "^2.2.15",
+    "xml2json": "^0.12.0"
+  }
+}
