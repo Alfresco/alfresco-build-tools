@@ -1,6 +1,10 @@
 import:
   - Alfresco/alfresco-process-tools:.travis.common.yml@master
   - Alfresco/alfresco-process-tools:.travis.helm_install.yml@master
+branches:
+  only:
+    - develop
+    - master
 env:
   global:
     - HELM_REPO_BASE_URL=https://kubernetes-charts.alfresco.com
@@ -26,10 +30,6 @@ jobs:
         helm lint helm/${PROJECT_NAME}
     - name: package and publish chart
       stage: publish
-      before_install: |
-        export HELM_VERSION=2.9.1
-        curl https://kubernetes-helm.storage.googleapis.com/helm-v${HELM_VERSION}-linux-amd64.tar.gz | tar zx
-        sudo mv linux-amd64/helm /usr/local/bin/ && helm init --client-only
       script: |
         COMMIT_MESSAGE_FIRST_LINE=$(git log --pretty=format:%s --max-count=1)
         echo using COMMIT_MESSAGE_FIRST_LINE=${COMMIT_MESSAGE_FIRST_LINE}
