@@ -7,12 +7,30 @@ branches:
   only:
     - develop
 stages:
+  - name: pre-lint
   - name: lint
+  - name: post-lint
+  - name: pre-build
   - name: build
+  - name: post-build
+  - name: pre-test
   - name: test
+  - name: post-test
+  - name: pre-publish
+    if: type != pull_request
   - name: publish
+    if: type != pull_request
+  - name: post-publish
+    if: type != pull_request
+  - name: pre-deploy
     if: type != pull_request
   - name: deploy
     if: type != pull_request
+  - name: post-deploy
+    if: type != pull_request
+  - name: pre-trigger
+    if: type != pull_request
   - name: trigger
+    if: type != pull_request
+  - name: post-trigger
     if: type != pull_request
