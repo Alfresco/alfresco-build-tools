@@ -15,7 +15,6 @@ jobs:
       script:
         - travis_wait ${TRAVIS_WAIT_TIMEOUT} mvn ${MAVEN_CLI_OPTS} clean install -Dlogging.root.level=off -Dspring.main.banner-mode=off
         - docker build --label "GIT_COMMIT=$TRAVIS_COMMIT" --label "GIT_BRANCH=$BRANCH" --tag "$DOCKER_IMAGE_REPOSITORY:$TRAVIS_BUILD_NUMBER" .
-        - curl -sSL https://download.sourceclear.com/ci.sh | CACHE_DIR=${HOME}/sourceclear travis_wait ${TRAVIS_WAIT_TIMEOUT} bash -s -- scan --image "$DOCKER_IMAGE_REPOSITORY:$TRAVIS_BUILD_NUMBER"
         - |
           if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]
           then
