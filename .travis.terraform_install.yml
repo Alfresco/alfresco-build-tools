@@ -2,5 +2,6 @@ env:
   global:
     - TERRAFORM_VERSION=${TERRAFORM_VERSION:-0.12.29}
 before_install:
-  - curl -sLo /tmp/terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip &&
-    unzip /tmp/terraform.zip -d /tmp && sudo mv /tmp/terraform /usr/local/bin/ && terraform version
+  - [[ ":$PATH:" != *:$HOME/bin:* ]] && PATH=$PATH:$HOME/bin
+  - curl -fsSLo terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_$(uname | tr '[:upper:]' '[:lower:]')_amd64.zip &&
+    unzip terraform.zip terraform && rm terraform.zip && mv terraform $HOME/bin/ && terraform version

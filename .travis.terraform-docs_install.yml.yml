@@ -1,0 +1,7 @@
+env:
+  global:
+    - TERRAFORM_DOCS_VERSION=${TERRAFORM_DOCS_VERSION:-0.9.1}
+before_install:
+  - [[ ":$PATH:" != *:$HOME/bin:* ]] && PATH=$PATH:$HOME/bin
+  - curl -fsSLo terraform-docs https://github.com/terraform-docs/terraform-docs/releases/download/v$TERRAFORM_DOCS_VERSION/terraform-docs-v$TERRAFORM_DOCS_VERSION-$(uname | tr '[:upper:]' '[:lower:]')-amd64 &&
+    chmod +x terraform-docs && mv terraform-docs $HOME/bin/ && terraform-docs --version

@@ -1,0 +1,7 @@
+env:
+  global:
+    - TFLINT_VERSION=${TFLINT_VERSION:-0.20.2}
+before_install:
+  - [[ ":$PATH:" != *:$HOME/bin:* ]] && PATH=$PATH:$HOME/bin
+  - curl -fsSLo tflint.zip https://github.com/terraform-linters/tflint/releases/download/v$TFLINT_VERSION/tflint_$(uname | tr '[:upper:]' '[:lower:]')_amd64.zip &&
+    unzip -o tflint.zip tflint && rm tflint.zip && mv tflint $HOME/bin/ && tflint --version

@@ -2,5 +2,6 @@ env:
   global:
     - HELM_VERSION=${HELM_VERSION:-3.2.4}
 before_install:
-  - curl https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz | tar zx &&
-    sudo mv linux-amd64/helm /usr/local/bin/ && helm version --client
+  - [[ ":$PATH:" != *:$HOME/bin:* ]] && PATH=$PATH:$HOME/bin
+  - curl -fsSL https://get.helm.sh/helm-v${HELM_VERSION}-$(uname | tr '[:upper:]' '[:lower:]')-amd64.tar.gz | tar xz --strip=1 -C $HOME/bin/ $(uname | tr '[:upper:]' '[:lower:]')-amd64/helm &&
+    echo helm $(helm version --client --short)

@@ -1,6 +1,7 @@
 env:
   global:
-    - KUBERNETES_VERSION=${KUBERNETES_VERSION:-1.15.11}
+    - KUBERNETES_VERSION=${KUBERNETES_VERSION:-1.18.8}
 before_install:
-  - curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl &&
-    chmod +x kubectl && sudo mv kubectl /usr/local/bin/ && kubectl version --client
+  - [[ ":$PATH:" != *:$HOME/bin:* ]] && PATH=$PATH:$HOME/bin
+  - curl -fsSL https://dl.k8s.io/v${KUBERNETES_VERSION}/kubernetes-client-$(uname | tr '[:upper:]' '[:lower:]')-amd64.tar.gz | tar xz --strip=3 -C $HOME/bin/ kubernetes/client/bin/kubectl &&
+    echo kubectl $(kubectl version --client --short)
