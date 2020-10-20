@@ -1,9 +1,0 @@
-cache:
-  directories:
-    - ${HOME}/sourceclear
-jobs:
-  include:
-    - name: sourceclear sca scan
-      stage: test
-      if: env(SRCCLR_API_TOKEN) AND branch = develop AND type != pull_request
-      script: curl -sSL https://download.sourceclear.com/ci.sh | CACHE_DIR=${HOME}/sourceclear bash
