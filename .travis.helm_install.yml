@@ -3,7 +3,8 @@ env:
     - HELM_VERSION=${HELM_VERSION:-3.2.4}
 before_install:
   - if [[ ":$PATH:" != *:$HOME/bin:* ]]; then PATH=$PATH:$HOME/bin; fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+  - |-
+    if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
       curl -fsSLo helm.zip https://get.helm.sh/helm-v${HELM_VERSION}-windows-amd64.zip
       unzip -o helm.zip windows-amd64/helm.exe && rm helm.zip && mv windows-amd64/helm.exe $HOME/bin/ && rmdir windows-amd64
     else

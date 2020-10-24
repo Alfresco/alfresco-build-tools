@@ -3,7 +3,8 @@ env:
     - AWS_IAM_AUTHENTICATOR_VERSION=${AWS_IAM_AUTHENTICATOR_VERSION:-1.18.8/2020-09-18}
 before_install:
   - if [[ ":$PATH:" != *:$HOME/bin:* ]]; then PATH=$PATH:$HOME/bin; fi
-  - if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then
+  - |-
+    if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then
       curl -sSLO https://amazon-eks.s3.us-west-2.amazonaws.com/$AWS_IAM_AUTHENTICATOR_VERSION/bin/$(uname | tr '[:upper:]' '[:lower:]')/amd64/aws-iam-authenticator{,.sha256}
       openssl sha1 -sha256 aws-iam-authenticator
       chmod +x ./aws-iam-authenticator
