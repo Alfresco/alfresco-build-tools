@@ -3,5 +3,10 @@ env:
     - HELM_VERSION=${HELM_VERSION:-3.2.4}
 before_install:
   - if [[ ":$PATH:" != *:$HOME/bin:* ]]; then PATH=$PATH:$HOME/bin; fi
-  - curl -fsSL https://get.helm.sh/helm-v${HELM_VERSION}-$(uname | tr '[:upper:]' '[:lower:]')-amd64.tar.gz | tar xz --strip=1 -C $HOME/bin/ $(uname | tr '[:upper:]' '[:lower:]')-amd64/helm &&
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+      curl -fsSLo helm.zip https://get.helm.sh/helm-v${HELM_VERSION}-windows-amd64.zip
+      unzip -o helm.zip windows-amd64/helm.exe && rm helm.zip && mv windows-amd64/helm.exe $HOME/bin/ && rmdir windows-amd64
+    else
+      curl -fsSL https://get.helm.sh/helm-v${HELM_VERSION}-$(uname | tr '[:upper:]' '[:lower:]')-amd64.tar.gz | tar xz --strip=1 -C $HOME/bin/ $(uname | tr '[:upper:]' '[:lower:]')-amd64/helm
+    fi
     echo helm $(helm version --client --short)
