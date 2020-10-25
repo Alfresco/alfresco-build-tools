@@ -40,3 +40,10 @@
   language: system
   types: [file]
   files: \.puml$
+- id: drawio-export
+  name: DrawIO PNG converter
+  entry: docker run --rm -it -v $(pwd):/data rlespinasse/drawio-export --fileext svg --on-changes --remove-page-suffix
+  language: system
+  types: [file]
+  files: \.drawio$
+  pass_filenames: false
