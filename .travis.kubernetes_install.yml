@@ -1,7 +1,8 @@
+import:
+  - source: Alfresco/alfresco-process-tools:.travis.home_bin_path.yml@master
 env:
   global:
     - KUBERNETES_VERSION=${KUBERNETES_VERSION:-1.18.8}
 before_install:
-  - if [[ ":$PATH:" != *:$HOME/bin:* ]]; then PATH=$PATH:$HOME/bin; fi
   - curl -fsSL https://dl.k8s.io/v${KUBERNETES_VERSION}/kubernetes-client-$(uname | tr '[:upper:]' '[:lower:]')-amd64.tar.gz | tar xz --strip=3 -C $HOME/bin/ kubernetes/client/bin/kubectl &&
     echo kubectl $(kubectl version --client --short)

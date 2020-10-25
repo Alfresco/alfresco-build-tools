@@ -1,8 +1,9 @@
+import:
+  - source: Alfresco/alfresco-process-tools:.travis.home_bin_path.yml@master
 env:
   global:
     - HELM_VERSION=${HELM_VERSION:-3.2.4}
 before_install:
-  - if [[ ":$PATH:" != *:$HOME/bin:* ]]; then PATH=$PATH:$HOME/bin; fi
   - |-
     if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
       curl -fsSLo helm.zip https://get.helm.sh/helm-v${HELM_VERSION}-windows-amd64.zip

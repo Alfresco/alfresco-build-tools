@@ -1,8 +1,9 @@
+import:
+  - source: Alfresco/alfresco-process-tools:.travis.home_bin_path.yml@master
 env:
   global:
     - KUBEPUG_VERSION=${KUBEPUG_VERSION:-1.1.3}
 before_install:
-  - if [[ ":$PATH:" != *:$HOME/bin:* ]]; then PATH=$PATH:$HOME/bin; fi
   - |-
     if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
       curl -fsSLo kubepug.zip https://github.com/rikatz/kubepug/releases/download/v$KUBEPUG_VERSION/kubepug_windows_amd64.zip

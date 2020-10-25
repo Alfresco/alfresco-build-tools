@@ -1,0 +1,5 @@
+env:
+  global:
+    - AWSCLI_VERSION=${AWSCLI_VERSION:-2.0.59}
+before_install:
+  - pip install awscli==$AWSCLI_VERSION

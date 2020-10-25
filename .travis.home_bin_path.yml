@@ -1,0 +1,2 @@
+before_install:
+  - if [[ ":$PATH:" != *:$HOME/bin:* ]]; then mkdir -p $HOME/bin && PATH=$PATH:$HOME/bin; fi

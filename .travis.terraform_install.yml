@@ -1,7 +1,8 @@
+import:
+  - source: Alfresco/alfresco-process-tools:.travis.home_bin_path.yml@master
 env:
   global:
     - TERRAFORM_VERSION=${TERRAFORM_VERSION:-0.12.29}
 before_install:
-  - if [[ ":$PATH:" != *:$HOME/bin:* ]]; then PATH=$PATH:$HOME/bin; fi
   - curl -fsSLo terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_$(uname | tr '[:upper:]' '[:lower:]')_amd64.zip &&
     unzip terraform.zip terraform && rm terraform.zip && mv terraform $HOME/bin/ && terraform version
