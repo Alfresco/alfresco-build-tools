@@ -28,3 +28,15 @@
   entry: bash -c 'find helm -mindepth 1 -maxdepth 1 -type d | xargs -t -n1 -I% bash -c "helm template % | kubepug --error-on-deprecated --error-on-deleted --input-file /dev/stdin"'
   language: system
   pass_filenames: false
+- id: plantuml-svg
+  name: PlantUML SVG converter
+  entry: bash -c "for FILE in $@; do cat $FILE | docker run --rm -i think/plantuml > ${FILE%.*}.svg; done"
+  language: system
+  types: [file]
+  files: \.puml$
+- id: plantuml-png
+  name: PlantUML PNG converter
+  entry: bash -c "for FILE in $@; do cat $FILE | docker run --rm -i think/plantuml -tpng > ${FILE%.*}.png; done"
+  language: system
+  types: [file]
+  files: \.puml$
