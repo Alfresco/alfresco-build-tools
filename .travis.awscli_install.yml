@@ -1,5 +1,8 @@
 env:
   global:
-    - AWSCLI_VERSION=${AWSCLI_VERSION:-2.0.59}
+    - AWSCLI_VERSION=${AWSCLI_VERSION:-2.0.61}
 before_install:
-  - pip install awscli==$AWSCLI_VERSION
+  - |-
+    curl -fsSLo awscliv2.zip https://awscli.amazonaws.com/awscli-exe-linux-x86_64-$AWSCLI_VERSION.zip
+    unzip -o awscliv2.zip && sudo ./aws/install && rm -rf aws
+    aws --version
