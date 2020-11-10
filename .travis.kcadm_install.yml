@@ -1,0 +1,10 @@
+import:
+  - source: Alfresco/alfresco-process-tools:.travis.home_bin_path.yml@master
+env:
+  global:
+    - KEYCLOAK_VERSION=${KEYCLOAK_VERSION:-11.0.0-alfresco-001}
+before_install:
+  - |-
+    curl -fsSLo keycloak.zip https://github.com/Alfresco/keycloak/releases/download/$KEYCLOAK_VERSION/keycloak-$KEYCLOAK_VERSION.zip
+    unzip -q keycloak.zip && rm keycloak.zip && mv keycloak-$KEYCLOAK_VERSION keycloak && ln -s $PWD/keycloak/bin/kcadm.sh $HOME/bin
+    kcadm.sh help
