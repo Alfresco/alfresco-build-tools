@@ -48,3 +48,8 @@
   types: [file]
   files: \.drawio$
   pass_filenames: false
+- id: checkov-helm
+  name: Checkov - Helm check
+  entry: bash -c 'find helm -mindepth 1 -maxdepth 1 -type d | xargs -t -n1 -I% bash -c "helm template % > %.yaml && checkov -f %.yaml" || true' --
+  language: system
+  pass_filenames: false
