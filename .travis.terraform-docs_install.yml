@@ -2,7 +2,7 @@ import:
   - source: Alfresco/alfresco-process-tools:.travis.home_bin_path.yml@master
 env:
   global:
-    - TERRAFORM_DOCS_VERSION=${TERRAFORM_DOCS_VERSION:-0.9.1}
+    - TERRAFORM_DOCS_VERSION=${TERRAFORM_DOCS_VERSION:-0.10.1}
 before_install:
   - curl -fsSLo terraform-docs https://github.com/terraform-docs/terraform-docs/releases/download/v$TERRAFORM_DOCS_VERSION/terraform-docs-v$TERRAFORM_DOCS_VERSION-$(uname | tr '[:upper:]' '[:lower:]')-amd64 &&
     chmod +x terraform-docs && mv terraform-docs $HOME/bin/ && terraform-docs --version
