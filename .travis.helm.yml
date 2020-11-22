@@ -13,9 +13,6 @@ before_script:
   - |
     REPO_NAME=${TRAVIS_REPO_SLUG##*/}
     PROJECT_NAME=${REPO_NAME%%-deployment}
-    helm repo add activiti https://activiti.github.io/activiti-cloud-helm-charts
-    helm repo add alfresco ${HELM_REPO_BASE_URL}/stable
-    helm repo add alfresco-incubator ${HELM_REPO_BASE_URL}/incubator
     if [[ "${TRAVIS_BRANCH}" == 'develop' ]]
     then
       export HELM_REPO=incubator
