@@ -1,5 +1,5 @@
 import:
-  - source: Alfresco/alfresco-process-tools:.travis.home_bin_path.yml@master
+  - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@master
 env:
   global:
     - TERRAFORM_DOCS_VERSION=${TERRAFORM_DOCS_VERSION:-0.10.1}

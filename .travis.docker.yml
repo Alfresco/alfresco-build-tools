@@ -1,12 +1,11 @@
 import:
-  - Alfresco/alfresco-process-tools:.travis.java.yml@master
-  - Alfresco/alfresco-process-tools:.travis.docker_login.yml@master
+  - source: Alfresco/alfresco-build-tools:.travis.java.yml@master
+  - source: Alfresco/alfresco-build-tools:.travis.docker_login.yml@master
 jobs:
   include:
     - name: build application on openjdk8
       stage: build
-      jdk:
-        - openjdk8
+      jdk: openjdk8
       script:
         - travis_wait ${TRAVIS_WAIT_TIMEOUT} mvn ${MAVEN_CLI_OPTS} clean install -Dlogging.root.level=off -Dspring.main.banner-mode=off
       if: env(BUILD_JAVA8) = true

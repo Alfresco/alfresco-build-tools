@@ -1,4 +1,4 @@
-import: Alfresco/alfresco-process-tools:.travis.java.yml@master
+import: Alfresco/alfresco-build-tools:.travis.java.yml@master
 
 _shared_build_application_job: &shared_job
   stage: build

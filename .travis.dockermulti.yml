@@ -1,6 +1,6 @@
 import:
-  - Alfresco/alfresco-process-tools:.travis.library.yml@master
-  - Alfresco/alfresco-process-tools:.travis.docker_login.yml@master
+  - source: Alfresco/alfresco-build-tools:.travis.library.yml@master
+  - source: Alfresco/alfresco-build-tools:.travis.docker_login.yml@master
 before_script:
   - |
     if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]
