@@ -1,6 +1,6 @@
 import:
-  - source: Alfresco/alfresco-build-tools:.travis.java.yml@master
-  - source: Alfresco/alfresco-build-tools:.travis.docker_login.yml@master
+  - source: Alfresco/alfresco-build-tools:.travis.java.yml@v1.0.0
+  - source: Alfresco/alfresco-build-tools:.travis.docker_login.yml@v1.0.0
 jobs:
   include:
     - name: build application on openjdk8

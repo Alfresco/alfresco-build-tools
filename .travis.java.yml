@@ -1,5 +1,5 @@
 import:
-  - source: Alfresco/alfresco-build-tools:.travis.common.yml@master
+  - source: Alfresco/alfresco-build-tools:.travis.common.yml@v1.0.0
 language: java
 jdk:
   - openjdk11
