@@ -1,0 +1,14 @@
+import:
+  - source: Alfresco/alfresco-process-tools:.travis.home_bin_path.yml@master
+env:
+  global:
+    - YQ_VERSION=${YQ_VERSION:-3.4.1}
+before_install:
+  - |-
+    if [[ "$TRAVIS_OS_NAME" == "windows" ]]
+    then
+      curl -fsSLo yq.exe https://github.com/mikefarah/yq/releases/download/$YQ_VERSION/yq_$(uname | tr '[:upper:]' '[:lower:]')_amd64.exe && chmod +x yq.exe && mv yq.exe $HOME/bin/
+    else
+      curl -fsSLo yq https://github.com/mikefarah/yq/releases/download/$YQ_VERSION/yq_$(uname | tr '[:upper:]' '[:lower:]')_amd64 && chmod +x yq && mv yq $HOME/bin/
+    fi
+    yq --version
