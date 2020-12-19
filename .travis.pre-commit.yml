@@ -6,6 +6,7 @@ jobs:
   include:
     - name: pre-commit
       stage: lint
+      language: python
       python: 3.8
-      install: curl https://pre-commit.com/install-local.py | python -
+      install: curl https://pre-commit.com/install-local.py | python3 -
       script: pre-commit run --all-files
