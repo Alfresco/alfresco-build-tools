@@ -9,4 +9,6 @@ jobs:
       language: python
       python: 3.8
       install: curl https://pre-commit.com/install-local.py | python3 -
-      script: pre-commit run --all-files
+      script: 
+        - pre-commit run --all-files -v
+        - cat /home/travis/.cache/pre-commit/pre-commit.log
