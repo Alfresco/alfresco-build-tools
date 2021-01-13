@@ -1,7 +1,7 @@
-cache:
-  directories:
-    - $HOME/.cache/pip
-    - $HOME/.cache/pre-commit
+# cache:
+#   directories:
+#     - $HOME/.cache/pip
+#     - $HOME/.cache/pre-commit
 jobs:
   include:
     - name: pre-commit
