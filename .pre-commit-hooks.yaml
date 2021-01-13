@@ -49,8 +49,7 @@
   pass_filenames: false
 - id: checkov-helm
   name: Checkov - Helm check
-  entry: bash -c "find . -name Chart.yaml" | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% bash -c "helm template % > %.yaml && checkov -f %.yaml --framework kubernetes"
+  entry: env LOG_LEVEL=DEBUG checkov -f ./helm/alfresco-content-services/Chart.yaml --framework kubernetes
   language: system
   pass_filenames: false
   verbose: true
-  
