@@ -5,7 +5,7 @@ env:
     - BRANCH=${TRAVIS_PULL_REQUEST_BRANCH:-${TRAVIS_BRANCH}}
 branches:
   only:
-    - aae-4356
+    - develop
 stages:
   - name: pre-lint
   - name: lint
