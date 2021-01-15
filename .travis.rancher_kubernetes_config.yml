@@ -1,6 +1,6 @@
 import:
   - source: Alfresco/alfresco-build-tools:.travis.rancher_cli_install.yml@v1.0.0
 before_install:
-  - rancher login ${RANCHER2_URL} -t ${RANCHER_TOKEN} --context ${RANCHER_DEFAULT_CONTEXT}
+  - rancher login ${RANCHER2_URL} -t ${RANCHER2_ACCESS_KEY}:${RANCHER2_SECRET_KEY} --context ${RANCHER_DEFAULT_CONTEXT}
   - export K8S_API_URL=$(rancher cluster kubeconfig ${CLUSTER_NAME} | awk '$1=="server:" {gsub(/"/,"",$2); print $2}')
 
