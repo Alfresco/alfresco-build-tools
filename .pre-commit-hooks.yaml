@@ -15,12 +15,12 @@
   pass_filenames: false
 - id: kubepug-minimum
   name: KubePug - k8s v1.15 minimum
-  entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% env K8S_TARGET_VERSION=v1.15.0 bash -c "helm template % --api-versions $K8S_TARGET_VERSION | kubepug --error-on-deleted --k8s-version $K8S_TARGET_VERSION"'
+  entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% bash -c "helm template % --api-versions v1.15.0 | kubepug --error-on-deleted --k8s-version v1.15.0"'
   language: system
   pass_filenames: false
 - id: kubepug-recommended
   name: KubePug - k8s v1.18 recommended
-  entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% env K8S_TARGET_VERSION=v1.18.0 bash -c "helm template % --api-versions $K8S_TARGET_VERSION | kubepug --error-on-deleted --k8s-version $K8S_TARGET_VERSION"'
+  entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% bash -c "helm template % --api-versions v1.18.0 | kubepug --error-on-deleted --k8s-version v1.18.0"'
   language: system
   pass_filenames: false
 - id: kubepug-latest
