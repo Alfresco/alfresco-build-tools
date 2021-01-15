@@ -1,1 +1,0 @@
-find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% bash -c "helm template % > %.yaml && checkov -f %.yaml --framework kubernetes"
