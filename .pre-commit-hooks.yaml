@@ -15,17 +15,17 @@
   pass_filenames: false
 - id: kubepug-minimum
   name: KubePug - k8s v1.15 minimum
-  entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% bash -c "helm template % --api-versions v1.15.0 | kubepug --error-on-deleted --k8s-version v1.15.0"'
+  entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% bash -c "helm template % --api-versions v1.15.0 | kubepug --error-on-deprecated --error-on-deleted --k8s-version v1.15.0 --input-file /dev/stdin"'
   language: system
   pass_filenames: false
 - id: kubepug-recommended
   name: KubePug - k8s v1.18 recommended
-  entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% bash -c "helm template % --api-versions v1.18.0 | kubepug --error-on-deleted --k8s-version v1.18.0"'
+  entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% bash -c "helm template % --api-versions v1.18.0 | kubepug --error-on-deprecated --error-on-deleted --k8s-version v1.18.0 --input-file /dev/stdin"'
   language: system
   pass_filenames: false
 - id: kubepug-latest
   name: KubePug - k8s latest
-  entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% bash -c "helm template % | kubepug --error-on-deleted"'
+  entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% bash -c "helm template % | kubepug --error-on-deprecated --error-on-deleted --input-file /dev/stdin"'
   language: system
   pass_filenames: false
 - id: plantuml-svg

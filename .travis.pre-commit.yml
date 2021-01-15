@@ -1,7 +1,6 @@
 cache:
   directories:
     - $HOME/.cache/pip
-    # - $HOME/.cache/pre-commit
 jobs:
   include:
     - name: pre-commit
@@ -9,4 +8,6 @@ jobs:
       language: python
       python: 3.8
       install: curl https://pre-commit.com/install-local.py | python3 -
-      script: pre-commit run --all-files -v
+      script: 
+        - rm -rf ~/.cache/pre-commit
+        - pre-commit run --all-files
