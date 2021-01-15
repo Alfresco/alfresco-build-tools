@@ -1,4 +1,5 @@
 before_install:
-  - rancher login ${RANCHER2_URL} -t ${RANCHER2_ACCESS_KEY}:${RANCHER2_SECRET_KEY} --context ${RANCHER_DEFAULT_CONTEXT}
-  - export K8S_API_URL=$(rancher cluster kubeconfig ${CLUSTER_NAME} | awk '$1=="server:" {gsub(/"/,"",$2); print $2}')
-
+  - |
+    RANCHER_SYSTEM_CONTEXT_INDEX=$(echo 1 | rancher login ${RANCHER2_URL} -t ${RANCHER2_BEARER_TOKEN} | grep local | grep System | cut -d ' ' -f1)
+    echo $RANCHER_SYSTEM_CONTEXT_INDEX | rancher login ${RANCHER2_URL} -t ${RANCHER2_BEARER_TOKEN:-{RANCHER2_ACCESS_KEY}:${RANCHER2_SECRET_KEY}} > /dev/null
+    export K8S_API_URL=$(rancher cluster kubeconfig $CLUSTER_NAME | awk '$1=="server:" {gsub(/"/,"",$2); print $2}')
