@@ -2,7 +2,7 @@ import:
   - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.0.0
 env:
   global:
-    - RANCHER_CLI_VERSION=${RANCHER_CLI_VERSION:-v2.4.10}
+    - RANCHER_CLI_VERSION=${RANCHER_CLI_VERSION:-2.4.10}
 before_install:
-  - curl -fsSL https://github.com/rancher/cli/releases/download/${RANCHER_CLI_VERSION}/rancher-$(uname | tr '[:upper:]' '[:lower:]')-amd64-${RANCHER_CLI_VERSION}.tar.gz | tar xz -C $HOME/bin --strip=2 rancher-${RANCHER_CLI_VERSION}/rancher &&
+  - curl -fsSL https://github.com/rancher/cli/releases/download/v${RANCHER_CLI_VERSION}/rancher-$(uname | tr '[:upper:]' '[:lower:]')-amd64-v${RANCHER_CLI_VERSION}.tar.gz | tar xz -C $HOME/bin --strip=1 ./rancher-v${RANCHER_CLI_VERSION}/rancher &&
     rancher --version
