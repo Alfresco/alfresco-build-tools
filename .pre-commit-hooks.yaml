@@ -49,6 +49,6 @@
   pass_filenames: false
 - id: checkov-helm
   name: Checkov - Helm check
-  entry: echo "Hello from the checkov pre-commit hook"
+  entry: echo "Hello" | echo "World"
   language: system
   pass_filenames: false
