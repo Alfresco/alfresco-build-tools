@@ -5,38 +5,38 @@
   files: \.travis.*\.y(a?)ml$
 - id: helm-deps
   name: Helm Dependency Update
-  entry: bash -c 'find . -name Chart.yaml' | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% helm dep up %
+  entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% helm dep up %'
   language: system
   pass_filenames: false
 - id: helm-lint
   name: Helm Lint
-  entry: bash -c "find . -name Chart.yaml" | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% helm lint %
+  entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% helm lint %'
   language: system
   pass_filenames: false
 - id: kubepug-minimum
   name: KubePug - k8s v1.15 minimum
-  entry: bash -c "find . -name Chart.yaml" | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% env K8S_TARGET_VERSION=v1.15.0 bash -c 'helm template % --api-versions $K8S_TARGET_VERSION | kubepug --error-on-deleted --k8s-version $K8S_TARGET_VERSION'
+  entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% bash -c "helm template % --api-versions v1.15.0 | kubepug --error-on-deprecated --error-on-deleted --k8s-version v1.15.0 --input-file /dev/stdin"'
   language: system
   pass_filenames: false
 - id: kubepug-recommended
   name: KubePug - k8s v1.18 recommended
-  entry: bash -c "find . -name Chart.yaml" | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% env K8S_TARGET_VERSION=v1.18.0 bash -c 'helm template % --api-versions $K8S_TARGET_VERSION | kubepug --error-on-deleted --k8s-version $K8S_TARGET_VERSION'
+  entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% bash -c "helm template % --api-versions v1.18.0 | kubepug --error-on-deprecated --error-on-deleted --k8s-version v1.18.0 --input-file /dev/stdin"'
   language: system
   pass_filenames: false
 - id: kubepug-latest
   name: KubePug - k8s latest
-  entry: bash -c "find . -name Chart.yaml" | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% bash -c "helm template % | kubepug --error-on-deleted" || true  # allowed to fail
+  entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% bash -c "helm template % | kubepug --error-on-deprecated --error-on-deleted --input-file /dev/stdin"'
   language: system
   pass_filenames: false
 - id: plantuml-svg
   name: PlantUML SVG converter
-  entry: bash -c "for FILE in $@; do cat $FILE | docker run --rm -i think/plantuml > ${FILE%.*}.svg; done"
+  entry: bash -c 'for FILE in $@; do cat $FILE | docker run --rm -i think/plantuml > ${FILE%.*}.svg; done'
   language: system
   types: [file]
   files: \.puml$
 - id: plantuml-png
   name: PlantUML PNG converter
-  entry: bash -c "for FILE in $@; do cat $FILE | docker run --rm -i think/plantuml -tpng > ${FILE%.*}.png; done"
+  entry: bash -c 'for FILE in $@; do cat $FILE | docker run --rm -i think/plantuml -tpng > ${FILE%.*}.png; done'
   language: system
   types: [file]
   files: \.puml$
@@ -49,6 +49,6 @@
   pass_filenames: false
 - id: checkov-helm
   name: Checkov - Helm check
-  entry: bash -c "find . -name Chart.yaml" | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% bash -c "helm template % > %.yaml && checkov -f %.yaml --framework kubernetes" || true  # allowed to fail
+  entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% bash -c "helm template % > %.yaml && checkov -f %.yaml --framework kubernetes"'
   language: system
   pass_filenames: false
