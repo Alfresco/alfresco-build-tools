@@ -2,6 +2,6 @@ import:
   - source: Alfresco/alfresco-build-tools:.travis.rancher_cli_config.yml@master
 before_install:
   - |
-    mkdir -p $HOME/.kube && rancher cluster kubeconfig $CLUSTER_NAME > $HOME/.kube/.kube/config
+    mkdir -p $HOME/.kube && rancher cluster kubeconfig $CLUSTER_NAME > $HOME/.kube/config
     export K8S_API_URL=$(cat ~/.kube/config | awk '$1=="server:" {gsub(/"/,"",$2); print $2}')
     export K8S_API_TOKEN=$(cat ~/.kube/config | awk '$1=="token:" {gsub(/"/,"",$2); print $2}')
