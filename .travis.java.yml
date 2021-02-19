@@ -1,7 +1,6 @@
 import:
   - source: Alfresco/alfresco-build-tools:.travis.common.yml@v1.0.0
   - source: Alfresco/alfresco-build-tools:.travis.maven_config.yml@OPSEXP-715
-dist: focal
 language: java
 jdk:
   - openjdk11
@@ -15,10 +14,15 @@ jobs:
       script: travis_wait $TRAVIS_WAIT_TIMEOUT mvn $MAVEN_CLI_OPTS source:jar javadoc:jar deploy -DskipTests
 before_install:
   - |-
-    export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
-    export PATH=$JAVA_HOME/bin:$PATH
+    if [[ "$TRAVIS_JDK_VERSION" == "openjdk11" ]]
+    then
+      echo "use latest OS provided openjdk11"
+      export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+      export PATH=$JAVA_HOME/bin:$PATH
+    else
+      echo "use Travis provided jdk"
+    fi
+    which java
     java -version
-    mvn --version
     export MAVEN_CLI_OPTS="$MAVEN_CLI_OPTS --batch-mode --quiet --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true -U"
-    env
 
