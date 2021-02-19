@@ -1,7 +1,7 @@
 import:
   - source: .travis.common.yml
   - source: .travis.pre-commit.yml
-  - source: .travis.library.yml@06cb3b7
+  - source: .travis.java.yml@2b56302
 branches:
   only:
     - master
