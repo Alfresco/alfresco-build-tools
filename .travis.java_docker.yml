@@ -1,6 +1,6 @@
 import:
-  - source: Alfresco/alfresco-build-tools:.travis.java.yml@v1.1.0
-  - source: Alfresco/alfresco-build-tools:.travis.docker_login.yml@v1.1.0
+  - source: Alfresco/alfresco-build-tools:.travis.java.yml@v1.0.2
+  - source: Alfresco/alfresco-build-tools:.travis.docker_login.yml@v1.0.2
 before_script:
   - |
     if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]
@@ -8,4 +8,3 @@ before_script:
       export MAVEN_CLI_OPTS="${MAVEN_CLI_OPTS} -Ddocker.tag=${BRANCH}"
     fi
     echo using MAVEN_CLI_OPTS=$MAVEN_CLI_OPTS
-
