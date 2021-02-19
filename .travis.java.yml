@@ -12,6 +12,7 @@ jobs:
 before_install:
   - |-
     mvn --version
+    sudo apt-get update
     #sudo apt-get update && apt-get install -y openjdk-11-jdk-headless
     echo PATH=$PATH
     export MAVEN_CLI_OPTS="$MAVEN_CLI_OPTS --batch-mode --quiet --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true -U"
