@@ -1,14 +1,2 @@
-import: Alfresco/alfresco-build-tools:.travis.java.yml@v1.0.0
-
-_shared_build_application_job: &shared_job
-  stage: build
-  script: travis_wait ${TRAVIS_WAIT_TIMEOUT} mvn ${MAVEN_CLI_OPTS} clean install -Dlogging.root.level=off -Dspring.main.banner-mode=off
-
-jobs:
-  include:
-    - name: build application on openjdk8
-      jdk: openjdk8
-      <<: *shared_job
-      if: env(BUILD_JAVA8) = true
-    - name: build application
-      <<: *shared_job
+# DEPRECATED
+import: Alfresco/alfresco-build-tools:.travis.java.yml@32add28
