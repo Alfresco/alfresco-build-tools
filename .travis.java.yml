@@ -11,6 +11,10 @@ jobs:
       script: travis_wait $TRAVIS_WAIT_TIMEOUT mvn $MAVEN_CLI_OPTS source:jar javadoc:jar deploy -DskipTests
 before_install:
   - |-
-    sudo apt-get update && apt-get install -y openjdk-11-jdk-headless
+    export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+    echo PATH=$PATH
+    echo $PATH
+    which java
+    java -version
     export MAVEN_CLI_OPTS="$MAVEN_CLI_OPTS --batch-mode --quiet --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true -U"
     mvn --version
