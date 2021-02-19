@@ -1,0 +1,18 @@
+os: linux
+dist: focal
+language: java
+jdk:
+  - openjdk11
+before_install:
+  - |-
+    if [[ "$TRAVIS_JDK_VERSION" == "openjdk11" ]]
+    then
+      echo "using latest OS provided openjdk11"
+      export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+      export PATH=$JAVA_HOME/bin:$PATH
+    else
+      echo "using Travis provided jdk"
+    fi
+    which java
+    java --version
+

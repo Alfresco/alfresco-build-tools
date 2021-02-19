@@ -1,20 +1,12 @@
 import:
-  - source: Alfresco/alfresco-build-tools:.travis.common.yml@v1.0.0
-language: java
-jdk:
-  - openjdk11
-env:
-  global:
-    - MAVEN_CLI_OPTS="$MAVEN_CLI_OPTS --batch-mode --quiet --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true -U"
-install: travis_wait $TRAVIS_WAIT_TIMEOUT mvn $MAVEN_CLI_OPTS dependency:resolve dependency:resolve-plugins || true
-cache:
-  directories:
-    - $HOME/.m2/repository
+  - source: Alfresco/alfresco-build-tools:.travis.maven_config.yml@v1.0.2
+  - source: Alfresco/alfresco-build-tools:.travis.java_config.yml@v1.0.2
+  - source: Alfresco/alfresco-build-tools:.travis.common.yml@v1.0.2
 jobs:
   include:
+    - name: build application
+      stage: build
+      script: travis_wait $TRAVIS_WAIT_TIMEOUT mvn $MAVEN_CLI_OPTS verify -Dlogging.root.level=off -Dspring.main.banner-mode=off
     - name: publish artifacts
       stage: publish
-      script: travis_wait $TRAVIS_WAIT_TIMEOUT mvn $MAVEN_CLI_OPTS source:jar javadoc:jar deploy -DskipTests
-before_install:
-  - mkdir -p $HOME/.m2
-  - cp settings.xml $HOME/.m2
+      script: travis_wait $TRAVIS_WAIT_TIMEOUT mvn $MAVEN_CLI_OPTS deploy -DskipTests

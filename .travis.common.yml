@@ -1,4 +1,4 @@
-language: minimal
+language: shell
 env:
   global:
     - TRAVIS_WAIT_TIMEOUT=${TRAVIS_WAIT_TIMEOUT:-30}
