@@ -1,6 +1,6 @@
 import:
   - source: Alfresco/alfresco-build-tools:.travis.common.yml@v1.0.0
-  - source: Alfresco/alfresco-build-tools:.travis.maven_config.yml@OPSEXP-715
+  - source: Alfresco/alfresco-build-tools:.travis.maven_config.yml@9403fff
 language: java
 dist: focal
 install: travis_wait $TRAVIS_WAIT_TIMEOUT mvn $MAVEN_CLI_OPTS dependency:resolve dependency:resolve-plugins || true
