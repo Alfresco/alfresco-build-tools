@@ -11,6 +11,7 @@ jobs:
       python: 3.9
       env:
         - PRE_COMMIT_VERSION=${PRE_COMMIT_VERSION:-2.10.1}
+        - XDG_CACHE_HOME=$HOME/.cache
       install: |
         ls -l $HOME/.cache
         pip install pre-commit==${PRE_COMMIT_VERSION}
