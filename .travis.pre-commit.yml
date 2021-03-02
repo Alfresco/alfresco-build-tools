@@ -10,7 +10,9 @@ jobs:
       stage: lint
       language: python
       python: 3.9
+      env:
+        - PRE_COMMIT_VERSION=${PRE_COMMIT_VERSION:-2.10.1}
       install: |
-        curl https://pre-commit.com/install-local.py | python3 -
+        pip install pre-commit==${PRE_COMMIT_VERSION}
         pre-commit --version
       script: pre-commit run --all-files
