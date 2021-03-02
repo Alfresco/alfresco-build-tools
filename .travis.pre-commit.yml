@@ -1,3 +1,5 @@
+os: linux
+dist: focal
 cache:
   directories:
     - $HOME/.cache/pip
@@ -7,6 +9,10 @@ jobs:
     - name: pre-commit
       stage: lint
       language: python
-      python: 3.8
-      install: curl https://pre-commit.com/install-local.py | python3 -
+      python: 3.9
+      env:
+        - PRE_COMMIT_VERSION=${PRE_COMMIT_VERSION:-2.10.1}
+      install: |
+        pip install pre-commit==${PRE_COMMIT_VERSION}
+        pre-commit --version
       script: pre-commit run --all-files

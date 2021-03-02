@@ -1,5 +1,16 @@
 repos:
   - repo: https://github.com/Alfresco/alfresco-build-tools
-    rev: v1.0.0
+    rev: v1.1.0
     hooks:
       - id: travis-yml-lint
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/sirosen/check-jsonschema
+    rev: 0.3.0
+    hooks:
+      - id: check-github-actions
+      - id: check-travis
