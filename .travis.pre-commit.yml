@@ -10,5 +10,7 @@ jobs:
       stage: lint
       language: python
       python: 3.9
-      install: curl https://pre-commit.com/install-local.py | python3 -
+      install: |
+        curl https://pre-commit.com/install-local.py | python3 -
+        pre-commit --version
       script: pre-commit run --all-files
