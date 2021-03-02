@@ -2,8 +2,7 @@ os: linux
 dist: focal
 cache:
   directories:
-    - $HOME/.cache/pip
-    - $HOME/.cache/pre-commit
+    - $HOME/.cache
 jobs:
   include:
     - name: pre-commit
