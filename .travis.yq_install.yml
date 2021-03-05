@@ -1,14 +1,19 @@
 import:
   - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.1.0
-env:
-  global:
-    - YQ_VERSION=${YQ_VERSION:-3.4.1}
 before_install:
   - |-
+    TOOL_VERSION=${YQ_VERSION:-4.6.1}
+    TOOL_NAME=yq
+    TOOL_REPO=mikefarah/$TOOL_NAME
+    TOOL_OS=$(uname | tr '[:upper:]' '[:lower:]')
+    TOOL_ARCH=amd64
     if [[ "$TRAVIS_OS_NAME" == "windows" ]]
     then
-      curl -fsSLo yq.exe https://github.com/mikefarah/yq/releases/download/$YQ_VERSION/yq_$(uname | tr '[:upper:]' '[:lower:]')_amd64.exe && chmod +x yq.exe && mv yq.exe $HOME/bin/
+      curl -fsSLO https://github.com/$TOOL_REPO/releases/download/v$TOOL_VERSION/${TOOL_NAME}_${TOOL_OS}_${TOOL_ARCH}.zip
+      unzip ${TOOL_NAME}_${TOOL_OS}_${TOOL_ARCH}.zip
+      mv ${TOOL_NAME}_${TOOL_OS}_${TOOL_ARCH}.exe $HOME/bin/$TOOL_NAME.exe
     else
-      curl -fsSLo yq https://github.com/mikefarah/yq/releases/download/$YQ_VERSION/yq_$(uname | tr '[:upper:]' '[:lower:]')_amd64 && chmod +x yq && mv yq $HOME/bin/
+      curl -fsSL https://github.com/$TOOL_REPO/releases/download/v$TOOL_VERSION/${TOOL_NAME}_${TOOL_OS}_${TOOL_ARCH}.tar.gz | tar xz
+      mv ${TOOL_NAME}_${TOOL_OS}_${TOOL_ARCH} $HOME/bin/$TOOL_NAME
     fi
-    yq --version
+    echo $($TOOL_NAME --version)
