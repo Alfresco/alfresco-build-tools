@@ -15,4 +15,4 @@ jobs:
       install: |
         pip install pre-commit==${PRE_COMMIT_VERSION}
         pre-commit --version
-      script: pre-commit run --all-files
+      script: pre-commit run --all-files --show-diff-on-failure
