@@ -1,2 +1,2 @@
 # DEPRECATED
-import: Alfresco/alfresco-build-tools:.travis.java.yml@v1.1.2
+import: Alfresco/alfresco-build-tools:.travis.java.yml@v1.1.3
