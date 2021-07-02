@@ -1,6 +1,6 @@
 import:
-  - source: Alfresco/alfresco-build-tools:.travis.helm_install.yml@v1.1.4
-  - source: Alfresco/alfresco-build-tools:.travis.common.yml@v1.1.4
+  - source: Alfresco/alfresco-build-tools:.travis.helm_install.yml@v1.1.5
+  - source: Alfresco/alfresco-build-tools:.travis.common.yml@v1.1.5
 branches:
   only:
     - develop
