@@ -1,6 +1,6 @@
 language: python
 env:
   global:
-    - CHECKOV_VERSION=${CHECKOV_VERSION:-2.0.150}
+    - CHECKOV_VERSION=${CHECKOV_VERSION:-2.0.630}
 before_install:
   - pip install checkov==$CHECKOV_VERSION
