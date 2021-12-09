@@ -2,7 +2,7 @@ import:
   - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.1.5
 env:
   global:
-    - KEYCLOAK_VERSION=${KEYCLOAK_VERSION:-12.0.3-patch}
+    - KEYCLOAK_VERSION=${KEYCLOAK_VERSION:-15.0.2-patch}
 before_install:
   - |-
     curl -fsSLo keycloak.zip https://github.com/Alfresco/keycloak/releases/download/$KEYCLOAK_VERSION/keycloak-$KEYCLOAK_VERSION.zip
