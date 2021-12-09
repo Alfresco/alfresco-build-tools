@@ -11,7 +11,7 @@ jobs:
       language: python
       python: 3.9
       env:
-        - PRE_COMMIT_VERSION=${PRE_COMMIT_VERSION:-2.12.1}
+        - PRE_COMMIT_VERSION=${PRE_COMMIT_VERSION:-2.16.0}
       install: |
         pip install pre-commit==${PRE_COMMIT_VERSION}
         pre-commit --version
