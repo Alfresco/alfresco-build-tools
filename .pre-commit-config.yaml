@@ -10,7 +10,7 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: https://github.com/sirosen/check-jsonschema
-    rev: 0.7.1
+    rev: 0.9.1
     hooks:
       - id: check-github-actions
       - id: check-travis
