@@ -2,7 +2,7 @@ import:
   - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.1.6
 env:
   global:
-    - AWS_IAM_AUTHENTICATOR_VERSION=${AWS_IAM_AUTHENTICATOR_VERSION:-1.18.8/2020-09-18}
+    - AWS_IAM_AUTHENTICATOR_VERSION=${AWS_IAM_AUTHENTICATOR_VERSION:-1.21.2/2021-07-05}
 before_install:
   - |-
     if [[ "$TRAVIS_OS_NAME" != "windows" ]]; then
