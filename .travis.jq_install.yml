@@ -1,10 +1,10 @@
 import:
-  - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.1.8
+  - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.1.9
 before_install:
   - |-
     TOOL_VERSION=${JQ_VERSION:-1.6}
     TOOL_NAME=jq
     TOOL_REPO=stedolan/$TOOL_NAME
-    curl -fsSL https://github.com/${TOOL_REPO}/releases/download/jq-${TOOL_VERSION}/jq-linux64 | tar xz
+    curl -fsSL https://github.com/${TOOL_REPO}/releases/download/jq-${TOOL_VERSION}/jq-linux64
     mv jq-linux64 $HOME/bin/$TOOL_NAME
     echo $($TOOL_NAME --version)
