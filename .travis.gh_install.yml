@@ -2,6 +2,8 @@ addons:
   apt:
     sources:
       - sourceline: 'deb https://cli.github.com/packages stable main'
-        key_url: 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0xC99B11DEB97541F0'
+        key_url: 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xC99B11DEB97541F0'
     packages:
       - gh
+before_install:
+  - gh --version
