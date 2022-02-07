@@ -5,8 +5,5 @@ addons:
         key_url: 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xdf7dd7a50b746dd4'
     packages:
       - srcclr
-jobs:
-  include:
-    - name: srcclr
-      stage: test
-      script: echo srcclr $(srcclr --version)
+before_install:
+  - echo srcclr $(srcclr --version)
