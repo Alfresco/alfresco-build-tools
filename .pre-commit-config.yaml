@@ -4,13 +4,13 @@ repos:
     hooks:
       - id: travis-yml-lint
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
+    rev: v4.1.0
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: https://github.com/sirosen/check-jsonschema
-    rev: 0.9.1
+    rev: 0.10.2
     hooks:
       - id: check-github-actions
       - id: check-travis
