@@ -1,8 +1,6 @@
 import:
   - source: .travis.common.yml
   - source: .travis.pre-commit.yml
-  - source: .travis.gh_install.yml
-  - source: .travis.srcclr_install.yml
 branches:
   only:
     - master
