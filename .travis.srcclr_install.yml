@@ -1,0 +1,12 @@
+addons:
+  apt:
+    sources:
+      - sourceline: 'deb https://download.sourceclear.com/ubuntu stable main'
+        key_url: 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xdf7dd7a50b746dd4'
+    packages:
+      - srcclr
+jobs:
+  include:
+    - name: srcclr
+      stage: lint
+      script: echo srcclr $(srcclr --version)
