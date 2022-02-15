@@ -1,0 +1,9 @@
+name: 'Setup pysemver'
+description: 'Set up pysemver'
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        pip install pysemver
+        pysemver --version
+      shell: bash
