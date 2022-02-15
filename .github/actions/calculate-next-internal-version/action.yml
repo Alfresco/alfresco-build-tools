@@ -3,5 +3,5 @@ description: 'Calculate next internal version based on existing tags'
 runs:
   using: "composite"
   steps:
-    - run: next-prerelease.sh
+    - run: ${{ github.action_path }}/next-prerelease.sh
       shell: bash
