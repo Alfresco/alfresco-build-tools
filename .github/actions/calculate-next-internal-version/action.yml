@@ -5,6 +5,8 @@ runs:
   steps:
     - uses: actions/setup-python@v2
     - uses: actions/checkout@v1
+      with:
+        repository: Alfresco/alfresco-build-tools
     - uses: ./.github/actions/setup-pysemver
     - run: next-prerelease.sh
       shell: bash
