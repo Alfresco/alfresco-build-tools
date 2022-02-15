@@ -3,5 +3,7 @@ description: 'Calculate next internal version based on existing tags'
 runs:
   using: "composite"
   steps:
+    - name: Set up python
+      uses: actions/setup-python@v2
     - run: next-prerelease.sh
       shell: bash
