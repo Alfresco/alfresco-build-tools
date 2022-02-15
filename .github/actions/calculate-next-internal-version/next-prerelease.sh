@@ -3,6 +3,10 @@ set -e
 
 CURRENT_YEAR=$(date +%y)
 echo "Year: $CURRENT_YEAR"
+
+echo "Fetching tags ... "
+git fetch --tags
+
 LATEST_MINOR=$(git tag --sort=-creatordate | grep -m 1  "^$CURRENT_YEAR\.[[:digit:]]\{1,2\}\.[[:digit:]]\{1,2\}$" | cat)
 PRERELEASE_LABEL="alpha"
 FIRST_PRERELEASE_SUFFIX="-${PRERELEASE_LABEL}.1"
