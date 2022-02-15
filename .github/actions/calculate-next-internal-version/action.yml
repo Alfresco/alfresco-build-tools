@@ -1,0 +1,7 @@
+name: 'Calculate next internal version'
+description: 'Calculate next internal version based on existing tags'
+runs:
+  using: "composite"
+  steps:
+    - run: next-prerelease.sh
+      shell: bash
