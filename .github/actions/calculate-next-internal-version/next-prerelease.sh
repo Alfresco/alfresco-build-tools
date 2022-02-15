@@ -24,3 +24,4 @@ else
   echo "No minor version found for year '$CURRENT_YEAR'"
 fi
 echo "Next prerelease: $NEXT_PRERELEASE"
+echo "::set-output name=next-prerelease::$NEXT_PRERELEASE"

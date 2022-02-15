@@ -1,7 +1,12 @@
 name: 'Calculate next internal version'
 description: 'Calculate next internal version based on existing tags'
+outputs:
+  next-prerelease:
+    description: "Next prerelease"
+    value: ${{ steps.next-prerelease-resolver.outputs.next-prerelease }}
 runs:
   using: "composite"
   steps:
-    - run: ${{ github.action_path }}/next-prerelease.sh
+    - id: next-prerelease-resolver
+      run: ${{ github.action_path }}/next-prerelease.sh
       shell: bash
