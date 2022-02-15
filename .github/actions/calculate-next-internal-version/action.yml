@@ -3,13 +3,5 @@ description: 'Calculate next internal version based on existing tags'
 runs:
   using: "composite"
   steps:
-    - name: setup Python
-      uses: actions/setup-python@v2
-    - name: Checkout build tools
-      uses: actions/checkout@v2
-      with:
-        repository: Alfresco/alfresco-build-tools
-    - name: Install pysemver
-      uses: ./.github/actions/setup-pysemver
     - run: next-prerelease.sh
       shell: bash
