@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-git fetch --tags
-echo "Fetching tags ... "
 CURRENT_YEAR=$(date +%y)
 echo "Year: $CURRENT_YEAR"
 LATEST_MINOR=$(git tag --sort=-creatordate | grep -m 1  "^$CURRENT_YEAR\.[[:digit:]]\{1,2\}\.[[:digit:]]\{1,2\}$" | cat)
