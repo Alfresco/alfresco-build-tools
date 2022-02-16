@@ -1,0 +1,15 @@
+name: 'Setup pysemver'
+description: 'Set up a specific version of pysemver'
+inputs:
+  version:
+    description: 'Version of pysemver'
+    required: false
+    default: 2.13.0
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        TOOL_VERSION=${{ inputs.version }}
+        pip3 install git+https://github.com/python-semver/python-semver.git@$TOOL_VERSION
+        pysemver --version
+      shell: bash
