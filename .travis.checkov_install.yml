@@ -8,5 +8,5 @@ jobs:
       stage: lint
       language: python
       python: 3.9
-before_install:
-  - pip install checkov==$CHECKOV_VERSION
+      install:
+        - pip install checkov==$CHECKOV_VERSION
