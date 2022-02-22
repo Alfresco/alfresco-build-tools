@@ -2,7 +2,7 @@ language: python
 env:
   global:
     - CHECKOV_VERSION=${CHECKOV_VERSION:-2.0.795}
-jobes:
+jobs:
   include:
     - name: checkov
       stage: lint
