@@ -2,5 +2,11 @@ language: python
 env:
   global:
     - CHECKOV_VERSION=${CHECKOV_VERSION:-2.0.795}
+jobes:
+  include:
+    - name: checkov
+      stage: lint
+      language: python
+      python: 3.9
 before_install:
   - pip install checkov==$CHECKOV_VERSION
