@@ -1,4 +1,5 @@
 language: python
+python: 3.9
 env:
   global:
     - CHECKOV_VERSION=${CHECKOV_VERSION:-2.0.795}
