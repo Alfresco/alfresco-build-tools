@@ -1,5 +1,9 @@
 name: 'Calculate next internal version'
 description: 'Calculate next internal version based on existing tags'
+inputs:
+  next-version:
+    description: 'Next version following the pattern MAJOR.MINOR.PATCH'
+    required: true
 outputs:
   next-prerelease:
     description: "Next prerelease"
@@ -10,3 +14,5 @@ runs:
     - id: next-prerelease-resolver
       run: ${{ github.action_path }}/next-prerelease.sh
       shell: bash
+      env:
+        NEXT_VERSION: ${{inputs.next-version}}
