@@ -3,6 +3,7 @@ import:
   - source: .travis.pre-commit.yml
   - source: .travis.helm-docs_install.yml
   - source: .travis.helm_install.yml
+  - source: .travis.kubernetes_install.yml
 branches:
   only:
     - master
