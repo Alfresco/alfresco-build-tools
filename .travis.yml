@@ -2,6 +2,7 @@ import:
   - source: .travis.common.yml
   - source: .travis.pre-commit.yml
   - source: .travis.helm-docs_install.yml
+  - source: .travis.helm_install.yml
 branches:
   only:
     - master
