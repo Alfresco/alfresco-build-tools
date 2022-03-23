@@ -9,7 +9,7 @@ on:
         default: "3.9"
 
 jobs:
-  example_job:
+  pre-commit:
     runs-on: ubuntu-latest
     steps:
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit
