@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       python-version:
-        required: true
+        required: false
         type: string
         default: "3.9"
 
