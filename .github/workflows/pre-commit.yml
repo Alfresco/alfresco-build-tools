@@ -13,6 +13,6 @@ jobs:
     name: Run pre-commit
     runs-on: ubuntu-latest
     steps:
-      - uses: ./.github/actions/pre-commit
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@OPSEXP-1357-pre-commit-gha
         with:
           python-version: ${{ inputs.python-version }}
