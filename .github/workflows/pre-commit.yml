@@ -1,0 +1,16 @@
+name: pre-commit
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        required: true
+        type: string
+        default: "3.9"
+
+jobs:
+  example_job:
+    name: Run pre-commit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/pre-commit

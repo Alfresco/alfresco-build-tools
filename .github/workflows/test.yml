@@ -13,6 +13,9 @@ on:
 
 jobs:
 
+  pre-commit:
+    uses: ./.github/workflows/pre-commit.yml
+
   test:
     runs-on: ubuntu-latest
     steps:
