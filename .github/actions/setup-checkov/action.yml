@@ -1,0 +1,12 @@
+name: 'Setup checkov'
+description: 'Set up a specific version of checkov'
+inputs:
+  version:
+    description: 'Version of checkov'
+    required: false
+    default: 2.0.930
+runs:
+  using: "composite"
+  steps:
+    - run: pip install checkov==${{ inputs.version }}
+      shell: bash
