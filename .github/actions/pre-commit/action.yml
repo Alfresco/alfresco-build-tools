@@ -1,0 +1,17 @@
+name: "Pre-commit run"
+description: "Install and run pre-commit"
+inputs:
+  python-version:
+    description: The python version of the local runner
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ inputs.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - uses: pre-commit/action@v2.0.3

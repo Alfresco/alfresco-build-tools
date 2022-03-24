@@ -16,6 +16,30 @@ Hosted runners come with many bundled packages, see
 [Available Environments](https://github.com/actions/virtual-environments#available-environments)
 for details.
 
+### pre-commit
+
+You can execute pre-commit step in a dedicated new workflow:
+
+```yml
+name: pre-commit
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@master
+```
+
+or into an existing workflow of your choice just declaring the step:
+
+```yml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@master
+```
+
 ### calculate-next-internal-version
 
 ### setup-checkov
