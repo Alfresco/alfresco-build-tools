@@ -1,0 +1,16 @@
+name: 'Setup awscli'
+description: 'Set up a specific version of awscli'
+inputs:
+  version:
+    description: 'Version of awscli'
+    required: false
+    default: 2.4.25
+runs:
+  using: "composite"
+  steps:
+    - run: | 
+        AWSCLI_VERSION=${{ inputs.version }}
+        curl -fsSLo awscliv2.zip https://awscli.amazonaws.com/awscli-exe-linux-x86_64-$AWSCLI_VERSION.zip
+        unzip -oq awscliv2.zip && sudo ./aws/install && rm -rf aws
+        aws --version
+      shell: bash
