@@ -30,3 +30,4 @@ jobs:
       - uses: ./.github/actions/setup-pysemver
       - uses: ./.github/actions/calculate-next-internal-version
       - uses: ./.github/actions/setup-checkov
+      - uses: ./.github/actions/setup-kubectl

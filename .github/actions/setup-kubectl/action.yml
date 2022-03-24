@@ -1,0 +1,15 @@
+name: 'Setup kubectl'
+description: 'Set up a specific version of kubectl'
+inputs:
+  version:
+    description: 'Version of kubectl'
+    required: false
+    default: 1.21.10
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        KUBERNETES_VERSION=${{ inputs.version }}
+        curl -fsSL https://dl.k8s.io/v${KUBERNETES_VERSION}/kubernetes-client-$(uname | tr '[:upper:]' '[:lower:]')-amd64.tar.gz | tar xz --strip=3 -C $HOME/bin/ kubernetes/client/bin/kubectl &&
+        echo kubectl $(kubectl version --client --short)
+      shell: bash
