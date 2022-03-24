@@ -29,3 +29,4 @@ jobs:
       - uses: ./.github/actions/setup-yq
       - uses: ./.github/actions/setup-pysemver
       - uses: ./.github/actions/calculate-next-internal-version
+      - uses: ./.github/actions/setup-checkov
