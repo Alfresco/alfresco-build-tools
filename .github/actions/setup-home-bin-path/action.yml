@@ -1,0 +1,6 @@
+name: 'Setup home bin path'
+description: 'Set up a home bin path'
+runs:
+  steps:
+    - run: if [[ ":$PATH:" != *:$HOME/bin:* ]]; then mkdir -p $HOME/bin && PATH=$PATH:$HOME/bin; fi
+      shell: bash
