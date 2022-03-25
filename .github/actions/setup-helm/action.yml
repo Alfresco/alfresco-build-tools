@@ -1,4 +1,4 @@
-name: "Helm cli install"
+name: "Setup Helm"
 description: "Install the helm CLI"
 inputs:
   helm-version:

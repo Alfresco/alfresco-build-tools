@@ -12,4 +12,4 @@ else
     exit 1
 fi
 
-echo helm $(helm version --client --short)
+echo helm $(helm version --client --short) has been installed
