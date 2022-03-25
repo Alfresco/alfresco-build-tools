@@ -12,6 +12,10 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/alfresco/alfresco-build-tools/CI)
 
+Hosted runners come with many bundled packages, see
+[Available Environments](https://github.com/actions/virtual-environments#available-environments)
+for details.
+
 ### calculate-next-internal-version
 
 ### setup-checkov
