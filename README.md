@@ -25,6 +25,7 @@ name: pre-commit
 
 on:
   pull_request:
+    branches: [ master ]
   push:
 
 jobs:
