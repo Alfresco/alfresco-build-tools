@@ -3,7 +3,8 @@ description: "Install and run pre-commit"
 inputs:
   python-version:
     description: The python version of the local runner
-    required: true
+    required: false
+    default: "3.9"
 runs:
   using: "composite"
   steps:
