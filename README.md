@@ -57,6 +57,28 @@ Here follows a table to ease migrating Travis build that were using config offer
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/alfresco/alfresco-build-tools/CI)
 
+### docker/login-action
+
+Credentials should be already available via organization secrets or needs to be
+provided as repository secrets.
+
+```yml
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Login to Quay.io
+        uses: docker/login-action@v1
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+```
+
+## GitHub Actions provided by us
+
 ### calculate-next-internal-version
 
 ### setup-checkov
