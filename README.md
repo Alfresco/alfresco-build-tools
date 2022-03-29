@@ -23,8 +23,8 @@ Here follows a table to ease migrating Travis build that were using config offer
 | .travis.checkov_install.yml               | [setup-checkov](.github/actions/setup-checkov/action.yml)         |
 | .travis.common.yml                        | Not yet determined                                                |
 | .travis.docker-buildx_install.yml         | Not yet determined                                                |
-| .travis.docker_hub_login.yml              | Not yet determined                                                |
-| .travis.docker_login.yml                  | Not yet determined                                                |
+| .travis.docker_hub_login.yml              | [docker/login-action](#dockerlogin-action)                        |
+| .travis.docker_login.yml                  | [docker/login-action](#dockerlogin-action)                        |
 | .travis.gh_install.yml                    | Preinstalled                                                      |
 | .travis.helm-docs_install.yml             | [setup-helm-docs](.github/actions/setup-helm-docs/action.yml)     |
 | .travis.helm.yml                          | Not yet determined                                                |
