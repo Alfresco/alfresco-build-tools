@@ -10,6 +10,8 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
 
 ## Migrate from Travis to GitHub Action
 
+Before starting migrating your first repository, make sure you read [Migrating from Travis CI to GitHub Actions](https://docs.github.com/en/actions/migrating-to-github-actions/migrating-from-travis-ci-to-github-actions).
+
 Hosted runners come with many bundled packages, see
 [Available Environments](https://github.com/actions/virtual-environments#available-environments)
 for details of what is already available when running GitHub Actions.
