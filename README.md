@@ -81,6 +81,31 @@ provided as repository secrets.
 
 ## GitHub Actions provided by us
 
+### pre-commit
+
+You can execute pre-commit step in a dedicated new workflow:
+
+```yml
+name: pre-commit
+
+on:
+  pull_request:
+    branches: [ master ]
+  push:
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@master
+```
+
+or into an existing workflow of your choice just declaring the step:
+
+```yml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@master
+```
+
 ### calculate-next-internal-version
 
 ### setup-checkov
