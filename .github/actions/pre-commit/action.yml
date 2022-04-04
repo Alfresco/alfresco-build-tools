@@ -9,8 +9,6 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v3
-    - run: echo "current dicrectory content:" && ls
-      shell: bash
     - name: Set up Python ${{ inputs.python-version }}
       uses: actions/setup-python@v3
       with:
