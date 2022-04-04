@@ -1,11 +1,8 @@
 name: 'Configure git for commit'
-description: 'Set username, email and token'
+description: 'Set username and email'
 inputs:
   username:
     description: 'Committer username'
-    required: true
-  githubToken:
-    description: 'Committer Github token'
     required: true
 runs:
   using: "composite"
@@ -13,8 +10,6 @@ runs:
     - run: |
         git config --global user.name $GITHUB_USERNAME
         git config --global user.email $GITHUB_USERNAME@users.noreply.github.com
-        echo -e "https://$GITHUB_USERNAME:$GITHUB_TOKEN@github.com" >>  ~/.git-credentials
       shell: bash
       env:
         GITHUB_USERNAME: ${{ inputs.username }}
-        GITHUB_TOKEN: ${{ inputs.githubToken }}
