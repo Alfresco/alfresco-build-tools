@@ -1,0 +1,14 @@
+name: "Run pre-commit for helm-charts"
+description: "Run pre-commit for helm-charts"
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        repository: Alfresco/alfresco-build-tools
+        ref: dev-elias-3898-gh-actions
+        path: build-tools
+    - uses: ./build-tools/.github/actions/setup-helm-docs
+    - uses: ./build-tools/.github/actions/setup-kubepug
+    - uses: ./build-tools/.github/actions/setup-checkov
+    - uses: ./build-tools/.github/actions/pre-commit
