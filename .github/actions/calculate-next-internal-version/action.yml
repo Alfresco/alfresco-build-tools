@@ -11,6 +11,13 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - uses: actions/setup-python@v2
+    - uses: actions/checkout@v3
+        with:
+          repository: Alfresco/alfresco-build-tools
+          ref: dev-elias-3898-gh-actions
+          path: 1.3.0
+    - uses: ./build-tools/.github/actions/setup-pysemver
     - id: next-prerelease-resolver
       run: ${{ github.action_path }}/next-prerelease.sh
       shell: bash
