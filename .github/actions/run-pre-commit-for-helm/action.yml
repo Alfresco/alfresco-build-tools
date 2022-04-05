@@ -3,12 +3,24 @@ description: "Run pre-commit for helm-charts"
 runs:
   using: "composite"
   steps:
+    - id: get-current-action-branch
+      run: |
+        readonly STRIPPED_LEFT_PATH=${FULL_PATH/*alfresco-build-tools\/}
+        readonly ACTION_BRANCH=${STRIPPED_LEFT_PATH/\/.github*}
+        echo "Action branch: $ACTION_BRANCH"
+        echo "::set-output name=action-branch::$ACTION_BRANCH"
+      env:
+        FULL_PATH: ${{github.action_path}}
+      shell: bash
     - uses: actions/checkout@v3
       with:
-        repository: Alfresco/alfresco-build-tools
-        ref: dev-elias-3898-gh-actions
-        path: build-tools
+       repository: Alfresco/alfresco-build-tools
+       ref: ${{steps.get-current-action-branch.outputs.action-branch}}
+       path: build-tools
     - uses: ./build-tools/.github/actions/setup-helm-docs
     - uses: ./build-tools/.github/actions/setup-kubepug
     - uses: ./build-tools/.github/actions/setup-checkov
     - uses: ./build-tools/.github/actions/pre-commit
+
+
+
