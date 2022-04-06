@@ -15,6 +15,3 @@ runs:
     - uses: ./build-tools/.github/actions/setup-kubepug
     - uses: ./build-tools/.github/actions/setup-checkov
     - uses: ./build-tools/.github/actions/pre-commit
-
-
-
