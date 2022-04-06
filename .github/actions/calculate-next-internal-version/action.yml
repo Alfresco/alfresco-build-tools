@@ -12,10 +12,13 @@ runs:
   using: "composite"
   steps:
     - uses: actions/setup-python@v2
+    - id: get-current-action-branch
+      run: ${{ github.action_path }}/../shared-scripts/get-current-action-branch.sh
+      shell: bash
     - uses: actions/checkout@v3
       with:
         repository: Alfresco/alfresco-build-tools
-        ref: v1.3.0
+        ref: ${{steps.get-current-action-branch.outputs.action-branch}}
         path: build-tools
     - uses: ./build-tools/.github/actions/setup-pysemver
     - id: next-prerelease-resolver
