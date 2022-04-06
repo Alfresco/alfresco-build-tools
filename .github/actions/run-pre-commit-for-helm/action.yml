@@ -4,13 +4,7 @@ runs:
   using: "composite"
   steps:
     - id: get-current-action-branch
-      run: |
-        readonly STRIPPED_LEFT_PATH=${FULL_PATH/*alfresco-build-tools\/}
-        readonly ACTION_BRANCH=${STRIPPED_LEFT_PATH/\/.github*}
-        echo "Action branch: $ACTION_BRANCH"
-        echo "::set-output name=action-branch::$ACTION_BRANCH"
-      env:
-        FULL_PATH: ${{github.action_path}}
+      run: ${{ github.action_path }}/../shared-scripts/get-current-action-branch.sh
       shell: bash
     - uses: actions/checkout@v3
       with:
