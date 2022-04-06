@@ -55,7 +55,7 @@ Here follows a table to ease migrating Travis build that were using config offer
 | .travis.yml                               | Not yet determined                                                |
 | .travis.yq_install.yml                    | Preinstalled                                                      |
 
-## GitHub Actions
+## GitHub Actions provided by community
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/alfresco/alfresco-build-tools/CI)
 
@@ -82,6 +82,12 @@ provided as repository secrets.
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
 ```
+
+### n1hility/cancel-previous-runs
+
+Replacement for the Travis settings **Auto cancel branch builds** and **Auto cancel pull request builds**.
+
+See https://github.com/marketplace/actions/cancel-previous-workflow-runs
 
 ## GitHub Actions provided by us
 
