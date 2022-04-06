@@ -32,4 +32,6 @@ jobs:
       - uses: ./.github/actions/setup-yq
       - uses: ./.github/actions/setup-pysemver
       - uses: ./.github/actions/calculate-next-internal-version
+        with:
+          next-version: 7.3.0
       - uses: ./.github/actions/setup-checkov
