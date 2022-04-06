@@ -24,7 +24,7 @@ Here follows a table to ease migrating Travis build that were using config offer
 | .travis.awscli_install.yml                | Preinstalled                                                      |
 | .travis.checkov_install.yml               | [setup-checkov](.github/actions/setup-checkov/action.yml)         |
 | .travis.common.yml                        | Not yet determined                                                |
-| .travis.docker-buildx_install.yml         | Not yet determined                                                |
+| .travis.docker-buildx_install.yml         | [docker/build-push-action](#dockerbuild-push-action)                                                |
 | .travis.docker_hub_login.yml              | [docker/login-action](#dockerlogin-action)                        |
 | .travis.docker_login.yml                  | [docker/login-action](#dockerlogin-action)                        |
 | .travis.gh_install.yml                    | Preinstalled                                                      |
@@ -58,6 +58,10 @@ Here follows a table to ease migrating Travis build that were using config offer
 ## GitHub Actions
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/alfresco/alfresco-build-tools/CI)
+
+### docker/build-push-action
+
+Consider using this official [Docker action](https://github.com/marketplace/actions/build-and-push-docker-images) for building and pushing containers instead of doing it by hand, for buildx support, caching and more.
 
 ### docker/login-action
 
