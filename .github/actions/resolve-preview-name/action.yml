@@ -1,0 +1,10 @@
+name: "Resolve preview name"
+description: "Resolve preview name based on the PR number and run number"
+runs:
+  using: "composite"
+  steps:
+    - name: Resolve preview name
+      shell: bash
+      run: |
+        test ${GITHUB_PR_NUMBER} && PREVIEW_NAME=pr-${GITHUB_PR_NUMBER} || PREVIEW_NAME=gh-$GITHUB_RUN_NUMBER
+        echo "::set-output name=preview-name::$PREVIEW_NAME"
