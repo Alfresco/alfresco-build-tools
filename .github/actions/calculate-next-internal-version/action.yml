@@ -18,11 +18,11 @@ runs:
     - uses: actions/checkout@v3
       with:
         repository: Alfresco/alfresco-build-tools
-        ref: ${{steps.get-current-action-branch.outputs.action-branch}}
+        ref: ${{ steps.get-current-action-branch.outputs.action-branch }}
         path: build-tools
     - uses: ./build-tools/.github/actions/setup-pysemver
     - id: next-prerelease-resolver
       run: ${{ github.action_path }}/next-prerelease.sh
       shell: bash
       env:
-        NEXT_VERSION: ${{inputs.next-version}}
+        NEXT_VERSION: ${{ inputs.next-version }}

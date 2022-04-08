@@ -9,7 +9,7 @@ runs:
     - uses: actions/checkout@v3
       with:
        repository: Alfresco/alfresco-build-tools
-       ref: ${{steps.get-current-action-branch.outputs.action-branch}}
+       ref: ${{ steps.get-current-action-branch.outputs.action-branch }}
        path: build-tools
     - uses: ./build-tools/.github/actions/setup-helm-docs
     - uses: ./build-tools/.github/actions/setup-kubepug
