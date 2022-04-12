@@ -84,11 +84,9 @@ provided as repository secrets.
           password: ${{ secrets.QUAY_PASSWORD }}
 ```
 
-### n1hility/cancel-previous-runs
+### styfle/cancel-workflow-action
 
-Replacement for the Travis settings **Auto cancel branch builds** and **Auto cancel pull request builds**.
-
-See https://github.com/marketplace/actions/cancel-previous-workflow-runs
+[This action](https://github.com/styfle/cancel-workflow-action) is a replacement for the Travis settings **Auto cancel branch builds** and **Auto cancel pull request builds**.
 
 ## GitHub Actions provided by us
 
