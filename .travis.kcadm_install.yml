@@ -1,5 +1,5 @@
 import:
-  - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.3.0
+  - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.4.0
 env:
   global:
     - KEYCLOAK_VERSION=${KEYCLOAK_VERSION:-16.1.1}
