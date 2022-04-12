@@ -35,3 +35,8 @@ jobs:
         with:
           next-version: 7.3.0
       - uses: ./.github/actions/setup-checkov
+      - uses: ./.github/actions/configure-git-user
+        with:
+          username: ${{  secrets.BOT_GITHUB_USERNAME }}
+      - uses: ./.github/actions/resolve-preview-name
+      - uses: ./.github/actions/run-pre-commit-for-helm
