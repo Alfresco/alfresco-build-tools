@@ -4,7 +4,7 @@ inputs:
   version:
     description: 'Version of yq'
     required: false
-    default: 4.6.1
+    default: 4.24.4
 runs:
   using: "composite"
   steps:
