@@ -45,7 +45,7 @@ Here follows a table to ease migrating Travis build that were using config offer
 | .travis.kubernetes_config.yml             | Not yet determined                                                          |
 | .travis.kubernetes_install.yml            | Not yet determined                                                          |
 | .travis.maven_config.yml                  | Not yet determined                                                          |
-| .travis.pre-commit.yml                    | Not yet determined                                                          |
+| .travis.pre-commit.yml                    | [pre-commit](.github/actions/pre-commit)                                    |
 | .travis.rancher_cli_config.yml            | [setup-rancher-cli](.github/actions/setup-rancher-cli/action.yml)           |
 | .travis.rancher_cli_install.yml           | [setup-rancher-cli](.github/actions/setup-rancher-cli/action.yml)           |
 | .travis.rancher_cli_kubernetes_config.yml | [setup-rancher-cli](.github/actions/setup-rancher-cli/action.yml)           |

@@ -1,0 +1,13 @@
+name: "Resolve preview name"
+description: "Resolve preview name based on the PR number and run number"
+outputs:
+  preview-name:
+    description: "Preview name resolved for the current context"
+    value: ${{ steps.resolve-preview-name.outputs.preview-name }}
+runs:
+  using: "composite"
+  steps:
+    - name: Resolve preview name
+      id: resolve-preview-name
+      shell: bash
+      run: ${{ github.action_path }}/resolve-preview-name.sh
