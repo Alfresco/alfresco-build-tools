@@ -2,11 +2,14 @@
 
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 
+| Build     | Status                                                                                                                                                                      |
+|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Travis CI | [![Build Status](https://app.travis-ci.com/Alfresco/alfresco-build-tools.svg?branch=master)](https://app.travis-ci.com/Alfresco/alfresco-build-tools)                       |
+| GitHub    | [![CI](https://github.com/Alfresco/alfresco-build-tools/actions/workflows/test.yml/badge.svg)](https://github.com/Alfresco/alfresco-build-tools/actions/workflows/test.yml) |
+
 Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github.com/en/actions) and [pre-commit](https://pre-commit.com/) configuration files plus misc tools.
 
 ## Travis
-
-[![Build Status](https://travis-ci.com/Alfresco/alfresco-build-tools.svg?branch=master)](https://travis-ci.com/Alfresco/alfresco-build-tools)
 
 ## Migrate from Travis to GitHub Action
 
@@ -56,8 +59,6 @@ Here follows a table to ease migrating Travis build that were using config offer
 | .travis.yq_install.yml                    | Preinstalled                                                      |
 
 ## GitHub Actions provided by community
-
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/alfresco/alfresco-build-tools/CI)
 
 ### docker/build-push-action
 
