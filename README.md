@@ -155,7 +155,7 @@ When running pre-commit locally you may get failures with the following error:
 realpath: command not found
 ```
 
-This is because macosx lacks support for that, and can be fixed via:
+This is because macosx lacks support for that, and it can be fixed with:
 
 ```
 brew install coreutils
