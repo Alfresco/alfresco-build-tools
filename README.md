@@ -144,3 +144,19 @@ jobs:
 ### setup-updatebot
 
 ### setup-yq
+
+## Known issues
+
+### realpath not available under macosx
+
+When running pre-commit locally you may get failures with the following error:
+
+```
+realpath: command not found
+```
+
+This is because macosx lacks support for that, and it can be fixed with:
+
+```
+brew install coreutils
+```
