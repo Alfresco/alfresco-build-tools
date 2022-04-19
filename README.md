@@ -21,7 +21,7 @@ for details of what is already available when running GitHub Actions.
 
 Here follows a table to ease migrating Travis build that were using config offered by this repo:
 
-| Travis config file                        | GitHub action replacement                                                   |
+| Travis CI config file                     | GitHub Actions replacement                                                  |
 |-------------------------------------------|-----------------------------------------------------------------------------|
 | .travis.aws-iam-authenticator_install.yml | Not yet determined                                                          |
 | .travis.awscli_install.yml                | Preinstalled                                                                |
@@ -42,8 +42,6 @@ Here follows a table to ease migrating Travis build that were using config offer
 | .travis.kcadm_install.yml                 | Not yet determined                                                          |
 | .travis.kubepug_install.yml               | [setup-kubepug](.github/actions/setup-kubepug/action.yml)                   |
 | .travis.kubernetes_install.yml            | Preinstalled                                                                |
-| .travis.kubernetes_config.yml             | Not yet determined                                                          |
-| .travis.kubernetes_install.yml            | Not yet determined                                                          |
 | .travis.maven_config.yml                  | Not yet determined                                                          |
 | .travis.pre-commit.yml                    | [pre-commit](.github/actions/pre-commit)                                    |
 | .travis.rancher_cli_config.yml            | [setup-rancher-cli](.github/actions/setup-rancher-cli/action.yml)           |
