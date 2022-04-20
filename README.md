@@ -117,20 +117,6 @@ or into an existing workflow of your choice just declaring the step:
 
 ### setup-checkov
 
-### setup-helm
-
-If you need the helm cli available in the runner path:
-
-```yml
-jobs:
-
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm@master
-```
-
 ### setup-helm-docs
 
 ### setup-jx-release-version
