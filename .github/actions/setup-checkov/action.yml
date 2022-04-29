@@ -4,7 +4,7 @@ inputs:
   version:
     description: 'Version of checkov'
     required: false
-    default: 2.0.930
+    default: 2.0.1080
 runs:
   using: "composite"
   steps:
