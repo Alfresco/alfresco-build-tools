@@ -2,7 +2,7 @@ import:
   - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.4.0
 env:
   global:
-    - HELM_DOCS_VERSION=${HELM_DOCS_VERSION:-1.8.1}
+    - HELM_DOCS_VERSION=${HELM_DOCS_VERSION:-1.9.1}
 before_install:
   - |-
     if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
