@@ -4,7 +4,7 @@ env:
   global:
     - TERRAFORM_LOCAL_VERSION=$(cat .terraform-version)
     - TERRAFORM_VERSION=${TERRAFORM_VERSION:-$TERRAFORM_LOCAL_VERSION}
-    - TERRAFORM_VERSION=${TERRAFORM_VERSION:-1.1.5}
+    - TERRAFORM_VERSION=${TERRAFORM_VERSION:-1.1.9}
 before_install:
   - curl -fsSLo terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_$(uname | tr '[:upper:]' '[:lower:]')_amd64.zip &&
     unzip terraform.zip terraform && rm terraform.zip && mv terraform $HOME/bin/ && terraform version
