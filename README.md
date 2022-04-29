@@ -104,6 +104,7 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@master
 ```
 
