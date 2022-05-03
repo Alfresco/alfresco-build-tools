@@ -82,6 +82,10 @@ provided as repository secrets.
           password: ${{ secrets.QUAY_PASSWORD }}
 ```
 
+### nick-fields/retry
+
+[This action](https://github.com/nick-fields/retry) retries an Action step on failure or timeout. Useful for unstable commands or that relies on remote resources that can be flaky sometimes.
+
 ### styfle/cancel-workflow-action
 
 [This action](https://github.com/styfle/cancel-workflow-action) is a replacement for the Travis settings **Auto cancel branch builds** and **Auto cancel pull request builds**.
