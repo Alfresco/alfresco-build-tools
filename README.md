@@ -165,6 +165,52 @@ provided as repository secrets.
 
 [This action](https://github.com/styfle/cancel-workflow-action) is a replacement for the Travis settings **Auto cancel branch builds** and **Auto cancel pull request builds**.
 
+### Triggering a workflow in another repository
+
+[actions/github-script](https://github.com/actions/github-script) can be used, here is a sample:
+
+```yml
+      - name: Trigger Downstream Builds
+        if: steps.is_default_branch.outputs.result == 'true'
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: 'Alfresco',
+              repo: 'alfresco-process-connector-services',
+              workflow_id: 'build.yml',
+              ref: 'develop'
+            });
+```
+
+Note that this requires using a dedicated token.
+
+Also, the triggered workflow should allow workflow dispatch in its definition (and this configuration should be setup
+on the default branch):
+
+```yml
+on:
+  # allows triggering workflow manually or from other jobs
+  workflow_dispatch:
+```
+
+### rtCamp/action-slack-notif
+
+[rtCamp/action-slack-notify](https://github.com/rtCamp/action-slack-notify) can be used to send a slack notification,
+here is a sample:
+
+```yml
+      - name: Slack Notification
+        if: ${{ failure() && steps.is_default_branch.outputs.result == 'true' }}
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_WEBHOOK: ${{ secrets.APA_SLACK_WEBHOOK }}
+```
+
+This requires [setting up a slack webhook](https://slack.com/help/articles/115005265063-Incoming-webhooks-for-Slack?eu_nc=1) for the target slack channel.
+
 ## GitHub Actions provided by us
 
 ### pre-commit
