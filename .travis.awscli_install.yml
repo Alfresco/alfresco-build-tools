@@ -1,6 +1,6 @@
 env:
   global:
-    - AWSCLI_VERSION=${AWSCLI_VERSION:-2.6.1}
+    - AWSCLI_VERSION=${AWSCLI_VERSION:-2.7.0}
 before_install:
   - |-
     curl -fsSLo awscliv2.zip https://awscli.amazonaws.com/awscli-exe-linux-x86_64-$AWSCLI_VERSION.zip
