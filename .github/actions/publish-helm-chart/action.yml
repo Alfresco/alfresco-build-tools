@@ -1,0 +1,43 @@
+name: "Add package to helm repository"
+description: "Add a new package to the helm repository, updates the index file and commit the change"
+inputs:
+  chart-package:
+    description: "The name of the packaged chart been added to the repository. I.e. common-x.y.z.tgz"
+    required: true
+  helm-chart-repository:
+    description: "The name of the repository where the package will be added"
+    required: true
+  token:
+    description: "The github token"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Set HELM_REPO_CHECKOUT_DIR
+      shell: bash
+      run: echo "HELM_REPO_CHECKOUT_DIR=charts-repo" >> $GITHUB_ENV
+
+    - name: Checkout activiti-cloud-helm-charts
+      uses: actions/checkout@v3
+      with:
+        path: ${{ env.HELM_REPO_CHECKOUT_DIR }}
+        repository: ${{ inputs.helm-chart-repository }}
+        ref: gh-pages
+        token: ${{ inputs.token}}
+
+    - name: Add package to Helm repository
+      shell: bash
+      run: |
+          mkdir ${HELM_REPO_CHECKOUT_DIR}/new-charts
+          RELEASE_PACKAGE_NAME=${{ inputs.chart-package }}
+          cp "$RELEASE_PACKAGE_NAME" ${HELM_REPO_CHECKOUT_DIR}/new-charts
+          cd $HELM_REPO_CHECKOUT_DIR
+          helm repo index new-charts --merge index.yaml
+          cp new-charts/* .
+          rm -fr new-charts
+          git add .
+          git status
+          git --no-pager diff --cached
+          git commit -m "Release $RELEASE_PACKAGE_NAME"
+          git push

@@ -1,0 +1,34 @@
+name: "Commit changes"
+description: "Commit current changes"
+inputs:
+  username:
+    description: "The username to be set as global user"
+    required: true
+  add-options:
+    description: "Options to be added to `git add`"
+    required: true
+  commit-message:
+    description: "The commit message to be used while committing"
+    required: true
+  repository-directory:
+    description: "Path to the the directory holding the git repository"
+    required: false
+
+
+runs:
+  using: composite
+  steps:
+    - name: Commit stagged changes
+      shell: bash
+      run: |
+        REPO_DIR="${{inputs.repository-directory}}"
+        if [ -n "$REPO_DIR" ]
+        then
+          cd $REPO_DIR
+        fi
+        git config --global user.name ${{ inputs.username }}
+        git config --global user.email ${{ inputs.username }}@users.noreply.github.com
+        git add "${{ inputs.add-options }}"
+        git status
+        git --no-pager diff --cached
+        git commit -m "${{ inputs.commit-message }}"
