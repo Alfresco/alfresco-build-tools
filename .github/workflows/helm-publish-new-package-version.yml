@@ -11,6 +11,10 @@ on:
         description: "Path to the directory holding Chart.yml file"
         type: string
         required: false
+      internal-actions-version:
+        description: "Version to be used for internal Github Actions hold on build-tools"
+        required: false
+        type: string
 
 jobs:
   publish:
@@ -21,13 +25,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - id: get-current-action-branch
-        run: ${{ github.action_path }}/../shared-scripts/get-current-action-branch.sh
-        shell: bash
       - uses: actions/checkout@v3
         with:
           repository: Alfresco/alfresco-build-tools
-          ref: ${{ steps.get-current-action-branch.outputs.action-branch }}
+          ref: ${{ inputs.internal-actions-version }}
           path: build-tools
 
       - id: next-release
