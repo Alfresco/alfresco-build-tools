@@ -11,10 +11,6 @@ on:
         description: "Path to the directory holding Chart.yml file"
         type: string
         required: false
-      internal-actions-version:
-        description: "Version to be used for internal Github Actions hold on build-tools"
-        required: false
-        type: string
 
 jobs:
   publish:
@@ -25,15 +21,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: actions/checkout@v3
-        with:
-          repository: Alfresco/alfresco-build-tools
-          ref: ${{ inputs.internal-actions-version }}
-          path: build-tools
-
       - id: next-release
         name: Calculate next internal release
-        uses: ./build-tools/.github/actions/calculate-next-internal-version
+        uses: Alfresco/alfresco-build-tools/.github/actions/calculate-next-internal-version@aae-8518-add-actions-for-helm
         with:
           next-version: ${{ inputs.next-version }}
 
@@ -44,12 +34,12 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Update chart version
-        uses: ./build-tools/.github/actions/update-chart-version
+        uses: Alfresco/alfresco-build-tools/.github/actions/update-chart-version@aae-8518-add-actions-for-helm
         with:
           new-version: ${{env.VERSION}}
           chart-dir: ${{ inputs.chart-dir }}
 
-      - uses: ./build-tools/.github/actions/git-commit-changes
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@aae-8518-add-actions-for-helm
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
@@ -60,7 +50,7 @@ jobs:
 
       - name: Package Helm Chart
         id: package-helm-chart
-        uses: ./build-tools/.github/actions/package-helm-chart
+        uses: Alfresco/alfresco-build-tools/.github/actions/package-helm-chart@aae-8518-add-actions-for-helm
         with:
           chart-dir: ${{ inputs.chart-dir }}
 
@@ -68,7 +58,7 @@ jobs:
         run: git push origin $VERSION
 
       - name: Publish Helm chart
-        uses: ./build-tools/.github/actions/publish-helm-chart
+        uses: Alfresco/alfresco-build-tools/.github/actions/publish-helm-chart@aae-8518-add-actions-for-helm
         with:
             helm-chart-repository: Activiti/activiti-cloud-helm-charts
             chart-package: ${{ steps.package-helm-chart.outputs.package-file }}
