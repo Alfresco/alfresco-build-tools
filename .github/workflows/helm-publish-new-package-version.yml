@@ -1,15 +1,16 @@
 name: CI
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       next-version:
         description: "Next final version to be release"
+        type: string
         required: true
       chart-dir:
         description: "Path to the directory holding Chart.yml file"
+        type: string
         required: false
-    secrets: inherit
 
 jobs:
   publish:
