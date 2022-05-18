@@ -1,4 +1,4 @@
-name: CI
+name: Publish helm package
 
 on:
   workflow_call:
@@ -11,6 +11,10 @@ on:
         description: "Path to the directory holding Chart.yml file"
         type: string
         required: false
+    outputs:
+      version:
+        description: "The version of the new published pacakage"
+        value: ${{ jobs.publish.outputs.version }}
 
 jobs:
   publish:
