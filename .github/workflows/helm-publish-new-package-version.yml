@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      next-version:
+        description: "Next final version to be release"
+        required: true
+      chart-dir:
+        description: "Path to the directory holding Chart.yml file"
+        required: false
+    secrets: inherit
+
+jobs:
+  publish:
+    runs-on: ubuntu-20.04
+    if: ${{ github.event_name == 'push' }}
+    outputs:
+      version: ${{ steps.next-release.outputs.next-prerelease }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - id: get-current-action-branch
+        run: ${{ github.action_path }}/../shared-scripts/get-current-action-branch.sh
+        shell: bash
+      - uses: actions/checkout@v3
+        with:
+          repository: Alfresco/alfresco-build-tools
+          ref: ${{ steps.get-current-action-branch.outputs.action-branch }}
+          path: build-tools
+
+      - id: next-release
+        name: Calculate next internal release
+        uses: ./build-tools/.github/actions/calculate-next-internal-version
+        with:
+          next-version: ${{ inputs.next-version }}
+
+      - name: Set version env variable
+        env:
+          VERSION: ${{ steps.next-release.outputs.next-prerelease }}
+        run: |
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Update chart version
+        uses: ./build-tools/.github/actions/update-chart-version
+        with:
+          new-version: ${{env.VERSION}}
+          chart-dir: ${{ inputs.chart-dir }}
+
+      - uses: ./build-tools/.github/actions/git-commit-changes
+        with:
+          username: ${{ secrets.BOT_GITHUB_USERNAME }}
+          add-options: -u
+          commit-message: "release $VERSION"
+
+      - name: Create local tag
+        run: git tag -a $VERSION -m "Release version $VERSION"
+
+      - name: Package Helm Chart
+        id: package-helm-chart
+        uses: ./build-tools/.github/actions/package-helm-chart
+        with:
+          chart-dir: ${{ inputs.chart-dir }}
+
+      - name: Push tag
+        run: git push origin $VERSION
+
+      - name: Publish Helm chart
+        uses: ./build-tools/.github/actions/publish-helm-chart
+        with:
+            helm-chart-repository: Activiti/activiti-cloud-helm-charts
+            chart-package: ${{ steps.package-helm-chart.outputs.package-file }}
+            token: ${{ secrets.BOT_GITHUB_TOKEN}}
