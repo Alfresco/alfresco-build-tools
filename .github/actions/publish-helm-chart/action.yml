@@ -4,9 +4,18 @@ inputs:
   chart-package:
     description: "The name of the packaged chart been added to the repository. I.e. common-x.y.z.tgz"
     required: true
-  helm-chart-repository:
+  helm-charts-repo:
     description: "The name of the repository where the package will be added"
     required: true
+  helm-charts-repo-branch:
+    description: "The name of the branch where the package will be added"
+    required: true
+  helm-charts-repo-subfolder:
+    description: "The name of the subfolder inside the charts repository where the package should be added"
+    required: false
+  helm-charts-repo-base-url:
+    description: "Helm chart repo base url"
+    required: false
   token:
     description: "The github token"
     required: true
@@ -22,9 +31,34 @@ runs:
       uses: actions/checkout@v3
       with:
         path: ${{ env.HELM_REPO_CHECKOUT_DIR }}
-        repository: ${{ inputs.helm-chart-repository }}
-        ref: gh-pages
+        repository: ${{ inputs.helm-charts-repo }}
+        ref: ${{ inputs.helm-charts-repo-branch }}
         token: ${{ inputs.token}}
+
+    - name: Build base URL option
+      id: build-base-url-option
+      env:
+        CHARTS_REPO_BASE_URL: ${{ inputs.helm-charts-repo-base-url }}
+      shell: bash
+      run: |
+        if [ -n "$CHARTS_REPO_BASE_URL" ]
+        then
+            echo "::set-output name=result::--url $CHARTS_REPO_BASE_URL"
+        fi
+
+    - name: Build destination path
+      id: build-destination-path
+      shell: bash
+      env:
+        CHARTS_REPO_SUBFOLDER: ${{ inputs.helm-charts-repo-subfolder }}
+      run: |
+        if [ -n "$CHARTS_REPO_SUBFOLDER" ]
+        then
+            echo "::set-output name=result::$CHARTS_REPO_SUBFOLDER"
+        else
+            echo "::set-output name=result::."
+        fi
+
 
     - name: Add package to Helm repository
       shell: bash
@@ -33,8 +67,8 @@ runs:
           RELEASE_PACKAGE_NAME=${{ inputs.chart-package }}
           cp "$RELEASE_PACKAGE_NAME" ${HELM_REPO_CHECKOUT_DIR}/new-charts
           cd $HELM_REPO_CHECKOUT_DIR
-          helm repo index new-charts --merge index.yaml
-          cp new-charts/* .
+          helm repo index new-charts ${{ steps.build-base-url-option.outputs.result }} --merge ${{ steps.build-destination-path.outputs.result }}/index.yaml
+          cp new-charts/* ${{ steps.build-destination-path.outputs.result }}
           rm -fr new-charts
           git add .
           git status

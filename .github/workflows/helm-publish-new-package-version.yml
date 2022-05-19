@@ -11,6 +11,22 @@ on:
         description: "Path to the directory holding Chart.yml file"
         type: string
         required: false
+      helm-charts-repo:
+        description: "The name of the repository where the package will be added"
+        type: string
+        required: true
+      helm-charts-repo-branch:
+        description: "The name of the branch where the package will be added"
+        type: string
+        required: true
+      helm-charts-repo-subfolder:
+        description: "The name of the subfolder inside the charts repository where the package should be added"
+        type: string
+        required: false
+      helm-charts-repo-base-url:
+        description: "Helm chart repo base url"
+        type: string
+        required: false
     outputs:
       version:
         description: "The version of the new published pacakage"
@@ -64,6 +80,7 @@ jobs:
       - name: Publish Helm chart
         uses: Alfresco/alfresco-build-tools/.github/actions/publish-helm-chart@aae-8518-add-actions-for-helm
         with:
-            helm-chart-repository: Activiti/activiti-cloud-helm-charts
+            helm-charts-repo: ${{inputs.helm-charts-repo}}
+            helm-charts-repo-branch: ${{ inputs.helm-charts-repo-branch }}
             chart-package: ${{ steps.package-helm-chart.outputs.package-file }}
             token: ${{ secrets.BOT_GITHUB_TOKEN}}
