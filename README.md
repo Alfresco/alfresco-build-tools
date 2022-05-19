@@ -125,7 +125,45 @@ or into an existing workflow of your choice just declaring the step:
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@master
 ```
 
+### build-helm-chart
+Run `helm dep up` and `helm lint` on the specified chart
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/build-helm-chart@ref
+        with:
+          chart-dir: charts/common
+```
+
 ### calculate-next-internal-version
+
+### git-commit-changes
+Commits local changes after configuring git user and showing the status of what is going be committed.
+```yaml
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@ref
+      with:
+        username: ${{ secrets.BOT_GITHUB_USERNAME }}
+        add-options: -u
+        commit-message: "My commit message"
+```
+
+### package-helm-chart
+Packages a helm chart into a `.tgz` file and provides the name of the file produced in the output named `package-file`
+```yaml
+    - uses: Alfresco/alfresco-build-tools/.github/actions/package-helm-chart@ref
+      id: package-helm-chart
+      with:
+        chart-dir: charts/common
+```
+
+### publish-helm-chart
+Publishes a new helm chart package (`.tgz`) to a helm chart repository
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/publish-helm-chart@aae-8518-add-actions-for-helm
+        with:
+          helm-charts-repo: Activiti/activiti-cloud-helm-charts
+          helm-charts-repo-branch: gh-pages
+          chart-package: ${{ steps.package-helm-chart.outputs.package-file }}
+          token: ${{ secrets.BOT_GITHUB_TOKEN}}
+```
 
 ### setup-checkov
 
@@ -140,6 +178,30 @@ or into an existing workflow of your choice just declaring the step:
 ### setup-updatebot
 
 ### setup-yq
+
+### update-chart-version
+Updates `version` attribute inside `Chart.yaml` file
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-chart-version@aae-8518-add-actions-for-helm
+        with:
+          new-version: 1.0.0
+          chart-dir: charts/common
+```
+
+## Reusable workflows provided by us
+### helm-publish-new-package-version.yml
+Calculates the new alpha version, creates new git tag and publishes the new package to the helm chart repository
+```yaml
+  publish:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/helm-publish-new-package-version.yml@ref
+    needs: build
+    with:
+      next-version: 7.4.0
+      chart-dir: charts/common
+      helm-charts-repo: Activiti/activiti-cloud-helm-charts
+      helm-charts-repo-branch: gh-pages
+    secrets: inherit
+```
 
 ## Known issues
 
