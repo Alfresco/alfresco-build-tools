@@ -1,0 +1,37 @@
+name: 'Setup tool'
+description: 'Set up a specific version of a tool and add it to the PATH.'
+inputs:
+  repo:
+    description: 'Repository of tool'
+    required: true
+  os:
+    description: 'OS of tool, computed if not specified'
+    required: false
+  arch:
+    description: 'Arch of tool, computed if not specified'
+    required: false
+  version:
+    description: 'Version of tool'
+    required: true
+  sep:
+    description: 'Separator in computed url'
+    required: false
+    default: '_'
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      env:
+        TOOL_REPO: ${{ inputs.repo }}
+        TOOL_VERSION: ${{ inputs.version }}
+        TOOL_OS: ${{ inputs.os }}
+        TOOL_ARCH: ${{ inputs.arch }}
+        SEP: ${{ inputs.sep }}
+      run: |
+        TOOL_NAME=${TOOL_REPO##*\/}
+        TOOL_OS=${TOOL_OS:-$(uname | tr '[:upper:]' '[:lower:]')}
+        TOOL_ARCH=${TOOL_ARCH:-$(uname -m)}
+        curl -fsSL https://github.com/$TOOL_REPO/releases/download/v$TOOL_VERSION/${TOOL_NAME}${SEP}v${TOOL_VERSION}${SEP}${TOOL_OS}${SEP}${TOOL_ARCH}.tar.gz \
+          | tar xz $TOOL_NAME
+        sudo mv $TOOL_NAME /usr/local/bin/
+        echo $($TOOL_NAME --version)
