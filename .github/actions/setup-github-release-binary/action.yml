@@ -20,11 +20,11 @@ runs:
         VERSION: ${{ inputs.version }}
         TEMPLATE: ${{ inputs.template }}
       run: |
-        TOOL_NAME=${TOOL_REPO##*\/}
-        TOOL_OS=$(uname | tr '[:upper:]' '[:lower:]')
-        TOOL_ARCH=$(uname -m)
-        TOOL_URL=https://github.com/$TOOL_REPO/releases/download/$(eval echo $TEMPLATE)
-        echo "Downloading $TOOL_URL ..."
-        curl -fsSL $TOOL_URL | tar xz $TOOL_NAME
-        sudo mv $TOOL_NAME /usr/local/bin/
-        echo $($TOOL_NAME --version)
+        NAME=${TOOL_REPO##*\/}
+        OS=$(uname | tr '[:upper:]' '[:lower:]')
+        ARCH=$(uname -m)
+        URL=https://github.com/$TOOL_REPO/releases/download/$(eval echo $TEMPLATE)
+        echo "Downloading $URL ..."
+        curl -fsSL $URL | tar xz $NAME
+        sudo mv $NAME /usr/local/bin/
+        echo $($NAME --version)
