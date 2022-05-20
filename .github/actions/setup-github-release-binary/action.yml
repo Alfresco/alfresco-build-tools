@@ -1,11 +1,11 @@
-name: 'Setup tool'
-description: 'Set up a specific version of a tool and add it to the PATH.'
+name: 'Setup binary'
+description: 'Set up a specific version of a binary from GitHub Releases and add it to the PATH.'
 inputs:
   repo:
-    description: 'Repository of tool'
+    description: 'Repository of binary'
     required: true
   version:
-    description: 'Version of tool'
+    description: 'Version of binary'
     required: true
   template:
     description: 'Template for download url, can use VERSION/NAME/OS/ARCH env vars'
@@ -20,10 +20,10 @@ runs:
         VERSION: ${{ inputs.version }}
         TEMPLATE: ${{ inputs.template }}
       run: |
-        NAME=${TOOL_REPO##*\/}
+        NAME=${REPO##*\/}
         OS=$(uname | tr '[:upper:]' '[:lower:]')
         ARCH=$(uname -m)
-        URL=https://github.com/$TOOL_REPO/releases/download/$(eval echo $TEMPLATE)
+        URL=https://github.com/$REPO/releases/download/$(eval echo $TEMPLATE)
         echo "Downloading $URL ..."
         curl -fsSL $URL | tar xz $NAME
         sudo mv $NAME /usr/local/bin/
