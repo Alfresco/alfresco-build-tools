@@ -12,4 +12,7 @@ runs:
       with:
         repo: mikefarah/yq
         version: ${{ inputs.version }}
-        template: 'v${VERSION}/${NAME}_${OS}_amd64.tar.gz'
+        url_template: 'v${VERSION}/${NAME}_${OS}_${ARCH}.tar.gz'
+        bin_template: '${NAME}_${OS}_${ARCH}'
+      env:
+        ARCH: amd64

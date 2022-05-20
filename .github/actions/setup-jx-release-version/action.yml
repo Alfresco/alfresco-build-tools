@@ -12,4 +12,6 @@ runs:
       with:
         repo: jenkins-x-plugins/jx-release-version
         version: ${{ inputs.version }}
-        template: 'v${VERSION}/${NAME}-${OS}-amd64.tar.gz'
+        url_template: 'v${VERSION}/${NAME}-${OS}-${ARCH}.tar.gz'
+      env:
+        ARCH: amd64

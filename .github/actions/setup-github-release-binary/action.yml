@@ -7,10 +7,14 @@ inputs:
   version:
     description: 'Version of binary'
     required: true
-  template:
+  url_template:
     description: 'Template for download url, can use VERSION/NAME/OS/ARCH env vars'
     required: false
     default: 'v${VERSION}/${NAME}_${VERSION}_${OS}_${ARCH}.tar.gz'
+  bin_template:
+    description: 'Template for binary, can use VERSION/NAME/OS/ARCH env vars'
+    required: false
+    default: '${NAME}'
 runs:
   using: "composite"
   steps:
@@ -18,13 +22,14 @@ runs:
       env:
         REPO: ${{ inputs.repo }}
         VERSION: ${{ inputs.version }}
-        TEMPLATE: ${{ inputs.template }}
+        URL_TEMPLATE: ${{ inputs.url_template }}
+        BIN_TEMPLATE: ${{ inputs.bin_template }}
       run: |
-        NAME=${REPO##*\/}
-        OS=$(uname | tr '[:upper:]' '[:lower:]')
-        ARCH=$(uname -m)
-        URL=https://github.com/$REPO/releases/download/$(eval echo $TEMPLATE)
+        NAME=${NAME:-${REPO##*\/}}
+        OS=${OS:-$(uname | tr '[:upper:]' '[:lower:]')}
+        ARCH=${ARCH:-$(uname -m)}
+        URL=https://github.com/$REPO/releases/download/$(eval echo $URL_TEMPLATE)
         echo "Downloading $URL ..."
         curl -fsSL $URL | tar xz $NAME
-        sudo mv $NAME /usr/local/bin/
+        sudo mv $(eval echo $BIN_TEMPLATE) /usr/local/bin/$NAME
         echo $($NAME --version)
