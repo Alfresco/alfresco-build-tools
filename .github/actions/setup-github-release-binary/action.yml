@@ -31,7 +31,7 @@ runs:
         TOOL_OS: ${{ inputs.os }}
         TOOL_ARCH: ${{ inputs.arch }}
         SEP: ${{ inputs.sep }}
-        V: ${{ inputs.use_v && 'v' || '' }}
+        V: ${{ inputs.use_v == 'true' && 'v' || '' }}
       run: |
         TOOL_NAME=${TOOL_REPO##*\/}
         TOOL_OS=${TOOL_OS:-$(uname | tr '[:upper:]' '[:lower:]')}
