@@ -8,13 +8,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: |
-        TOOL_VERSION=${{ inputs.version }}
-        TOOL_NAME=yq
-        TOOL_REPO=mikefarah/$TOOL_NAME
-        TOOL_OS=$(uname | tr '[:upper:]' '[:lower:]')
-        TOOL_ARCH=amd64
-        curl -fsSL https://github.com/$TOOL_REPO/releases/download/v$TOOL_VERSION/${TOOL_NAME}_${TOOL_OS}_${TOOL_ARCH}.tar.gz | tar xz
-        sudo mv ${TOOL_NAME}_${TOOL_OS}_${TOOL_ARCH} /usr/local/bin/$TOOL_NAME
-        echo $($TOOL_NAME --version)
-      shell: bash
+    - uses: ./.github/actions/setup-github-release-binary
+      with:
+        repo: mikefarah/yq
+        version: ${{ inputs.version }}
+        arch: amd64
+        use_v: false

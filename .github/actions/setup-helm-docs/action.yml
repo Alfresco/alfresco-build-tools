@@ -12,3 +12,4 @@ runs:
       with:
         repo: norwoodj/helm-docs
         version: ${{ inputs.version }}
+        use_v: false
