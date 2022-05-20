@@ -20,7 +20,7 @@ inputs:
   use_v:
     description: 'Use v in file name'
     required: false
-    default: true
+    default: 'true'
 runs:
   using: "composite"
   steps:
@@ -36,7 +36,8 @@ runs:
         TOOL_NAME=${TOOL_REPO##*\/}
         TOOL_OS=${TOOL_OS:-$(uname | tr '[:upper:]' '[:lower:]')}
         TOOL_ARCH=${TOOL_ARCH:-$(uname -m)}
-        curl -fsSL https://github.com/$TOOL_REPO/releases/download/v$TOOL_VERSION/${TOOL_NAME}${SEP}${V}${TOOL_VERSION}${SEP}${TOOL_OS}${SEP}${TOOL_ARCH}.tar.gz \
-          | tar xz $TOOL_NAME
+        TOOL_URL=https://github.com/$TOOL_REPO/releases/download/v$TOOL_VERSION/${TOOL_NAME}${SEP}${V}${TOOL_VERSION}${SEP}${TOOL_OS}${SEP}${TOOL_ARCH}.tar.gz
+        echo "Downloading $TOOL_URL ..."
+        curl -fsSL $TOOL_URL | tar xz $TOOL_NAME
         sudo mv $TOOL_NAME /usr/local/bin/
         echo $($TOOL_NAME --version)
