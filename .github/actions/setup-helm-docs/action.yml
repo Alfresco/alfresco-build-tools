@@ -12,4 +12,4 @@ runs:
       with:
         repo: norwoodj/helm-docs
         version: ${{ inputs.version }}
-        use_v: false
+        template: 'v${VERSION}/${NAME}_${VERSION}_${OS}_${ARCH}.tar.gz'

@@ -12,5 +12,4 @@ runs:
       with:
         repo: jenkins-x-plugins/jx-release-version
         version: ${{ inputs.version }}
-        use_v: false
-        arch: amd64
+        default: 'v${VERSION}/${NAME}-${OS}-amd64.tar.gz'
