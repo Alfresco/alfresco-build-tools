@@ -9,6 +9,7 @@ import:
   - source: .travis.kubernetes_install.yml
   - source: .travis.terraform_install.yml
   - source: .travis.docker-buildx_install.yml
+  - source: .travis.kcadm_install.yml
 branches:
   only:
     - master

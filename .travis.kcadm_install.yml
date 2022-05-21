@@ -2,9 +2,9 @@ import:
   - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.4.0
 env:
   global:
-    - KEYCLOAK_VERSION=${KEYCLOAK_VERSION:-16.1.1}
+    - KEYCLOAK_VERSION=${KEYCLOAK_VERSION:-17.0.1}
 before_install:
   - |-
-    curl -fsSLo keycloak.tar.gz https://github.com/keycloak/keycloak/releases/download/$KEYCLOAK_VERSION/keycloak-$KEYCLOAK_VERSION.tar.gz
-    tar xf keycloak.tar.gz && mv keycloak-$KEYCLOAK_VERSION keycloak && ln -s $PWD/keycloak/bin/kcadm.sh $HOME/bin
+    curl -fsSL https://github.com/keycloak/keycloak/releases/download/${KEYCLOAK_VERSION}/keycloak-${KEYCLOAK_VERSION}.tar.gz | tar xz
+    ln -s keycloak-$KEYCLOAK_VERSION keycloak && ln -s $PWD/keycloak/bin/kcadm.sh $HOME/bin
     kcadm.sh help
