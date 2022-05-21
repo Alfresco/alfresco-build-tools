@@ -237,13 +237,13 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@master
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
 ```
 
 or into an existing workflow of your choice just declaring the step:
 
 ```yml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@master
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
 ```
 
 ### build-helm-chart
