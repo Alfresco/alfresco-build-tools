@@ -1,10 +1,10 @@
-name: 'Setup jx-release-version'
-description: 'Set up a specific version of jx-release-version and add it to the PATH.'
+name: 'Setup terraform-docs'
+description: 'Setup terraform-docs and add it to the PATH.'
 inputs:
   version:
-    description: 'Version of jx-release-version'
+    description: 'Version of terraform-docs'
     required: false
-    default: 2.2.3
+    default: 0.16.0
 runs:
   using: "composite"
   steps:
@@ -18,8 +18,8 @@ runs:
         path: build-tools
     - uses: ./build-tools/.github/actions/setup-github-release-binary
       with:
-        repo: jenkins-x-plugins/jx-release-version
+        repo: terraform-docs/terraform-docs
         version: ${{ inputs.version }}
-        url_template: 'v${VERSION}/${NAME}-${OS}-${ARCH}.tar.gz'
+        url_template: 'v${VERSION}/${NAME}-v${VERSION}-${OS}-${ARCH}.tar.gz'
       env:
         ARCH: amd64
