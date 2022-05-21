@@ -1,0 +1,18 @@
+name: 'Setup kcadm'
+description: 'Setup Keycloak Admin CLI kcadm and add it to the PATH.'
+inputs:
+  version:
+    description: 'Version of Keycloak'
+    required: false
+    default: 17.0.1
+runs:
+  using: "composite"
+  steps:
+    - name: Setup kcadm
+      shell: bash
+      run: |
+        curl -fsSL https://github.com/keycloak/keycloak/releases/download/${KEYCLOAK_VERSION}/keycloak-${KEYCLOAK_VERSION}.tar.gz | tar xz
+        ln -s keycloak-$KEYCLOAK_VERSION keycloak && ln -s ${PWD}/keycloak/bin/kcadm.sh /usr/local/bin
+        kcadm.sh help
+      env:
+        KEYCLOAK_VERSION: ${{ inputs.version }}

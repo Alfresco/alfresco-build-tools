@@ -1,10 +1,10 @@
-name: 'Setup helm-docs'
-description: 'Set up a specific version of helm-docs and add it to the PATH.'
+name: 'Setup terraform-docs'
+description: 'Setup terraform-docs and add it to the PATH.'
 inputs:
   version:
-    description: 'Version of helm-docs'
+    description: 'Version of terraform-docs'
     required: false
-    default: 1.10.0
+    default: 0.16.0
 runs:
   using: "composite"
   steps:
@@ -18,5 +18,8 @@ runs:
         path: build-tools
     - uses: ./build-tools/.github/actions/setup-github-release-binary
       with:
-        repo: norwoodj/helm-docs
+        repo: terraform-docs/terraform-docs
         version: ${{ inputs.version }}
+        url_template: 'v${VERSION}/${NAME}-v${VERSION}-${OS}-${ARCH}.tar.gz'
+      env:
+        ARCH: amd64
