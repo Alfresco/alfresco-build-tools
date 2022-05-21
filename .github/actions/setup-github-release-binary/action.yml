@@ -30,6 +30,7 @@ runs:
         ARCH=${ARCH:-$(uname -m)}
         URL=https://github.com/$REPO/releases/download/$(eval echo $URL_TEMPLATE)
         echo "Downloading $URL ..."
-        curl -fsSL $URL | tar xz $NAME
-        sudo mv $(eval echo $BIN_TEMPLATE) /usr/local/bin/$NAME
+        BIN=$(eval echo $BIN_TEMPLATE)
+        curl -fsSL $URL | tar xz $BIN
+        sudo mv $BIN /usr/local/bin/$NAME
         echo $($NAME --version)
