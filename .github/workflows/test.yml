@@ -35,3 +35,4 @@ jobs:
       - uses: ./.github/actions/setup-checkov
       - uses: ./.github/actions/resolve-preview-name
       - uses: ./.github/actions/setup-terraform-docs
+      - uses: ./.github/actions/setup-kcadm
