@@ -8,15 +8,10 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: |
-        TOOL_VERSION=${{ inputs.version }}
-        TOOL_NAME=jx-release-version
-        TOOL_REPO=jenkins-x-plugins/$TOOL_NAME
-        TOOL_OS=$(uname | tr '[:upper:]' '[:lower:]')
-        TOOL_ARCH=amd64
-        curl -fsSL https://github.com/$TOOL_REPO/releases/download/v$TOOL_VERSION/$TOOL_NAME-$TOOL_OS-$TOOL_ARCH.tar.gz | tar xz $TOOL_NAME
-        sudo mv $TOOL_NAME /usr/local/bin/
-        echo $TOOL_NAME $($TOOL_NAME --version)
-      shell: bash
+    - uses: ./.github/actions/setup-github-release-binary
+      with:
+        repo: jenkins-x-plugins/jx-release-version
+        version: ${{ inputs.version }}
+        url_template: 'v${VERSION}/${NAME}-${OS}-${ARCH}.tar.gz'
       env:
-        JX_RELEASE_VERSION_VERSION: ${{ inputs.version }}
+        ARCH: amd64

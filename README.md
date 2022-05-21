@@ -129,6 +129,12 @@ or into an existing workflow of your choice just declaring the step:
 
 ### setup-checkov
 
+### setup-github-release-binary
+
+[setup-github-release-binary](.github/actions/setup-github-release-binary/action.yml)
+Allows the installation of a generic binary from GitHub Releases and add it to the PATH.
+See [setup-helm-docs](.github/actions/setup-helm-docs/action.yml) for a usage example.
+
 ### setup-helm-docs
 
 ### setup-jx-release-version

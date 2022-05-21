@@ -1,0 +1,30 @@
+name: 'Setup binary'
+description: 'Set up a specific version of a binary from GitHub Releases and add it to the PATH.'
+inputs:
+  repo:
+    description: 'Repository of binary'
+    required: true
+  version:
+    description: 'Version of binary'
+    required: true
+  url_template:
+    description: 'Template for download url, can use VERSION/NAME/OS/ARCH env vars'
+    required: false
+    default: 'v${VERSION}/${NAME}_${VERSION}_${OS}_${ARCH}.tar.gz'
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      env:
+        REPO: ${{ inputs.repo }}
+        VERSION: ${{ inputs.version }}
+        URL_TEMPLATE: ${{ inputs.url_template }}
+      run: |
+        NAME=${NAME:-${REPO##*\/}}
+        OS=${OS:-$(uname | tr '[:upper:]' '[:lower:]')}
+        ARCH=${ARCH:-$(uname -m)}
+        URL=https://github.com/$REPO/releases/download/$(eval echo $URL_TEMPLATE)
+        echo "Downloading $URL ..."
+        curl -fsSL $URL | tar xz $NAME
+        sudo mv $NAME /usr/local/bin/$NAME
+        echo $($NAME --version)
