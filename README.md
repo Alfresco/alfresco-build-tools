@@ -237,13 +237,13 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@master
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
 ```
 
 or into an existing workflow of your choice just declaring the step:
 
 ```yml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@master
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
 ```
 
 ### build-helm-chart
@@ -278,7 +278,7 @@ Packages a helm chart into a `.tgz` file and provides the name of the file produ
 ### publish-helm-chart
 Publishes a new helm chart package (`.tgz`) to a helm chart repository
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/publish-helm-chart@aae-8518-add-actions-for-helm
+      - uses: Alfresco/alfresco-build-tools/.github/actions/publish-helm-chart@ref
         with:
           helm-charts-repo: Activiti/activiti-cloud-helm-charts
           helm-charts-repo-branch: gh-pages
@@ -307,7 +307,7 @@ See [setup-helm-docs](.github/actions/setup-helm-docs/action.yml) for a usage ex
 ### update-chart-version
 Updates `version` attribute inside `Chart.yaml` file
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-chart-version@aae-8518-add-actions-for-helm
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-chart-version@ref
         with:
           new-version: 1.0.0
           chart-dir: charts/common
