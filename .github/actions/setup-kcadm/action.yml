@@ -11,8 +11,8 @@ runs:
     - name: Setup kcadm
       shell: bash
       run: |
-        curl -fsSL https://github.com/keycloak/keycloak/releases/download/${KEYCLOAK_VERSION}/keycloak-${KEYCLOAK_VERSION}.tar.gz | tar xz
-        mv keycloak-$KEYCLOAK_VERSION /usr/local/share/keycloak && ln -s /usr/local/share/keycloak/bin/kcadm.sh /usr/local/bin
+        curl -fsSLo $GITHUB_WORKSPACE https://github.com/keycloak/keycloak/releases/download/${KEYCLOAK_VERSION}/keycloak-${KEYCLOAK_VERSION}.tar.gz | tar xz
+        echo "::add-path::$GITHUB_WORKSPACE/keycloak-$KEYCLOAK_VERSION/bin"
         kcadm.sh help
       env:
         KEYCLOAK_VERSION: ${{ inputs.version }}
