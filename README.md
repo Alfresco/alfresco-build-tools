@@ -145,8 +145,6 @@ See [setup-helm-docs](.github/actions/setup-helm-docs/action.yml) for a usage ex
 
 ### setup-updatebot
 
-### setup-yq
-
 ## Known issues
 
 ### realpath not available under macosx
