@@ -12,8 +12,7 @@ runs:
       shell: bash
       run: |
         curl -fsSL https://github.com/keycloak/keycloak/releases/download/${KEYCLOAK_VERSION}/keycloak-${KEYCLOAK_VERSION}.tar.gz | tar xz
-        ln -s keycloak-$KEYCLOAK_VERSION keycloak
-        echo "::add-path::${PWD}/keycloak/bin"
+        ln -s keycloak-$KEYCLOAK_VERSION keycloak && ln -s ${PWD}/keycloak/bin/kcadm.sh /usr/local/bin
         kcadm.sh help
       env:
         KEYCLOAK_VERSION: ${{ inputs.version }}
