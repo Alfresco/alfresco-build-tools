@@ -9,9 +9,84 @@
 
 Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github.com/en/actions) and [pre-commit](https://pre-commit.com/) configuration files plus misc tools.
 
-## Travis
+## GitHub Actions
 
-## Migrate from Travis to GitHub Action
+### Java setup
+
+#### Setup JDK
+
+[actions/setup-java](https://github.com/actions/setup-java) should be used, here is a sample usage:
+
+```yml
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'maven'
+```
+
+#### Setup Maven Credentials
+
+Credentials should be already available via organization secrets, otherwise they would need to be
+provided as repository secrets.
+
+Since repositories hold a `settings.xml` file at the root with environment variables `MAVEN_USERNAME` and
+`MAVEN_USERNAME` filled for the username and password, only a mapping of variables is needed:
+
+```yml
+      - name: Build with Maven
+        run: mvn --settings settings.xml [...]
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_USERNAME: ${{ secrets.NEXUS_PASSWORD }}
+```
+
+Alternatively, the [s4u/maven-settings-action](https://github.com/s4u/maven-settings-action) could be used.
+
+#### Setup Maven Build Options
+
+Maven build options can be shared for a given step on the mvn command line, or extracted as environment variables.
+
+Sample usage:
+
+```yml
+      - name: Test with Maven
+        run: mvn verify ${{ env.MAVEN_CLI_OPTS }}
+        env:
+          MAVEN_CLI_OPTS: --show-version -Ddocker.skip -Dlogging.root.level=off -Dspring.main.banner-mode=off
+```
+
+When deploying in a second step, these variables can be shared:
+
+```yml
+env:
+  MAVEN_CLI_OPTS: --show-version -Dlogging.root.level=off -Dspring.main.banner-mode=off
+
+[...]
+
+      - name: Test with Maven
+        run: mvn verify ${{ env.MAVEN_CLI_OPTS }}
+      - name: Deploy with Maven
+        run: mvn deploy ${{ env.MAVEN_CLI_OPTS }} -DskipTests
+```
+
+When migrating from Travis, depending on the previous configuration, docker.skip and docker.tag properties might need
+to be setup on the command line.
+
+Here is a sample way to extract a branch name that would be used for docker images built with the `build-and-push-docker-images.sh` script, although using the [dedicated action](#dockerbuild-push-action) can also be
+useful.
+
+```yml
+      - name: Set stripped branch name as tag
+        run: echo "STRIPPED_TAG=$(echo ${{ github.ref_name }} | sed -e 's/[^-_.[:alnum:]]/_/g')" >> $GITHUB_ENV
+      - name: Docker Build and Push
+        run: sh ./build-and-push-docker-images.sh
+        env:
+          TAG: ${{ env.STRIPPED_TAG }}
+```
+
+## Migrate from Travis to GitHub Actions
 
 Before starting migrating your first repository, make sure you read [Migrating from Travis CI to GitHub Actions](https://docs.github.com/en/actions/migrating-to-github-actions/migrating-from-travis-ci-to-github-actions).
 
@@ -26,7 +101,7 @@ Here follows a table to ease migrating Travis build that were using config offer
 | .travis.aws-iam-authenticator_install.yml | Not yet determined                                                          |
 | .travis.awscli_install.yml                | Preinstalled                                                                |
 | .travis.checkov_install.yml               | [setup-checkov](.github/actions/setup-checkov/action.yml)                   |
-| .travis.common.yml                        | Not yet determined                                                          |
+| .travis.common.yml                        | Outdated: use equivalent steps in the workflow                              |
 | .travis.docker-buildx_install.yml         | [docker/setup-buildx-action](https://github.com/docker/setup-buildx-action) |
 | .travis.docker_hub_login.yml              | [docker/login-action](#dockerlogin-action)                                  |
 | .travis.docker_login.yml                  | [docker/login-action](#dockerlogin-action)                                  |
@@ -35,14 +110,14 @@ Here follows a table to ease migrating Travis build that were using config offer
 | .travis.helm.yml                          | Not yet determined                                                          |
 | .travis.helm_install.yml                  | Preinstalled                                                                |
 | .travis.home_bin_path.yml                 | Not yet determined                                                          |
-| .travis.java.yml                          | Not yet determined                                                          |
-| .travis.java_config.yml                   | Not yet determined                                                          |
-| .travis.java_docker.yml                   | Not yet determined                                                          |
+| .travis.java.yml                          | See [Java Setup section](#setup-maven-build-options)                        |
+| .travis.java_config.yml                   | See [Java Setup section](#java-setup)                                       |
+| .travis.java_docker.yml                   | See [Java Setup section](#setup-maven-build-options)                        |
 | .travis.jq_install.yml                    | Preinstalled                                                                |
 | .travis.kcadm_install.yml                 | Not yet determined                                                          |
 | .travis.kubepug_install.yml               | [setup-kubepug](.github/actions/setup-kubepug/action.yml)                   |
 | .travis.kubernetes_install.yml            | Preinstalled                                                                |
-| .travis.maven_config.yml                  | Not yet determined                                                          |
+| .travis.maven_config.yml                  | See [Java Setup section](#java-setup)                                       |
 | .travis.pre-commit.yml                    | [pre-commit](.github/actions/pre-commit)                                    |
 | .travis.rancher_cli_config.yml            | [setup-rancher-cli](.github/actions/setup-rancher-cli/action.yml)           |
 | .travis.rancher_cli_install.yml           | [setup-rancher-cli](.github/actions/setup-rancher-cli/action.yml)           |
@@ -72,7 +147,7 @@ Consider using this official [Docker action](https://github.com/marketplace/acti
 
 ### docker/login-action
 
-Credentials should be already available via organization secrets or needs to be
+Credentials should be already available via organization secrets, otherwise they would need to be
 provided as repository secrets.
 
 ```yml
@@ -97,6 +172,52 @@ provided as repository secrets.
 ### styfle/cancel-workflow-action
 
 [This action](https://github.com/styfle/cancel-workflow-action) is a replacement for the Travis settings **Auto cancel branch builds** and **Auto cancel pull request builds**.
+
+### Triggering a workflow in another repository
+
+[actions/github-script](https://github.com/actions/github-script) can be used, here is a sample:
+
+```yml
+      - name: Trigger Downstream Builds
+        if: steps.is_default_branch.outputs.result == 'true'
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: 'Alfresco',
+              repo: 'alfresco-process-connector-services',
+              workflow_id: 'build.yml',
+              ref: 'develop'
+            });
+```
+
+Note that this requires using a dedicated token.
+
+Also, the triggered workflow should allow workflow dispatch in its definition (and this configuration should be setup
+on the default branch):
+
+```yml
+on:
+  # allows triggering workflow manually or from other jobs
+  workflow_dispatch:
+```
+
+### rtCamp/action-slack-notif
+
+[rtCamp/action-slack-notify](https://github.com/rtCamp/action-slack-notify) can be used to send a slack notification,
+here is a sample:
+
+```yml
+      - name: Slack Notification
+        if: ${{ failure() && steps.is_default_branch.outputs.result == 'true' }}
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_WEBHOOK: ${{ secrets.APA_SLACK_WEBHOOK }}
+```
+
+This requires [setting up a slack webhook](https://slack.com/help/articles/115005265063-Incoming-webhooks-for-Slack?eu_nc=1) for the target slack channel.
 
 ## GitHub Actions provided by us
 
