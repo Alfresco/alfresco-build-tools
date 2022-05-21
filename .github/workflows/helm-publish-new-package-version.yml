@@ -1,0 +1,85 @@
+name: Publish helm package
+
+on:
+  workflow_call:
+    inputs:
+      next-version:
+        description: "Next final version to be release"
+        type: string
+        required: true
+      chart-dir:
+        description: "Path to the directory holding Chart.yml file"
+        type: string
+        required: false
+      helm-charts-repo:
+        description: "The name of the repository where the package will be added"
+        type: string
+        required: true
+      helm-charts-repo-branch:
+        description: "The name of the branch where the package will be added"
+        type: string
+        required: true
+      helm-charts-repo-subfolder:
+        description: "The name of the subfolder inside the charts repository where the package should be added"
+        type: string
+        required: false
+      helm-charts-repo-base-url:
+        description: "Helm chart repo base url"
+        type: string
+        required: false
+    outputs:
+      version:
+        description: "The version of the new published pacakage"
+        value: ${{ jobs.publish.outputs.version }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.next-release.outputs.next-prerelease }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - id: next-release
+        name: Calculate next internal release
+        uses: Alfresco/alfresco-build-tools/.github/actions/calculate-next-internal-version@aae-8518-add-actions-for-helm
+        with:
+          next-version: ${{ inputs.next-version }}
+
+      - name: Set version env variable
+        env:
+          VERSION: ${{ steps.next-release.outputs.next-prerelease }}
+        run: |
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Update chart version
+        uses: Alfresco/alfresco-build-tools/.github/actions/update-chart-version@aae-8518-add-actions-for-helm
+        with:
+          new-version: ${{env.VERSION}}
+          chart-dir: ${{ inputs.chart-dir }}
+
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@aae-8518-add-actions-for-helm
+        with:
+          username: ${{ secrets.BOT_GITHUB_USERNAME }}
+          add-options: -u
+          commit-message: "release $VERSION"
+
+      - name: Create local tag
+        run: git tag -a $VERSION -m "Release version $VERSION"
+
+      - name: Package Helm Chart
+        id: package-helm-chart
+        uses: Alfresco/alfresco-build-tools/.github/actions/package-helm-chart@aae-8518-add-actions-for-helm
+        with:
+          chart-dir: ${{ inputs.chart-dir }}
+
+      - name: Push tag
+        run: git push origin $VERSION
+
+      - name: Publish Helm chart
+        uses: Alfresco/alfresco-build-tools/.github/actions/publish-helm-chart@aae-8518-add-actions-for-helm
+        with:
+            helm-charts-repo: ${{inputs.helm-charts-repo}}
+            helm-charts-repo-branch: ${{ inputs.helm-charts-repo-branch }}
+            chart-package: ${{ steps.package-helm-chart.outputs.package-file }}
+            token: ${{ secrets.BOT_GITHUB_TOKEN}}

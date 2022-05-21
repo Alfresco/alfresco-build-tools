@@ -1,0 +1,18 @@
+name: "Update chart version"
+description: "Update the version field in the Chart.yaml file"
+inputs:
+  new-version:
+    description: "The new version of the chart"
+    required: true
+  chart-dir:
+    description: "The path to the directory holding Chart.yaml"
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@v1.4.0
+    - name: Update version
+      shell: bash
+      run: |
+        yq -i e '.version = "${{ inputs.new-version }}"' ${{ inputs.chart-dir }}/Chart.yaml
+        helm-docs

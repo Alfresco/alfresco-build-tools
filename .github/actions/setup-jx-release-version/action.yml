@@ -8,15 +8,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - id: get-current-action-branch
-      run: ${{ github.action_path }}/../shared-scripts/get-current-action-branch.sh
-      shell: bash
-    - uses: actions/checkout@v3
-      with:
-        repository: Alfresco/alfresco-build-tools
-        ref: ${{ steps.get-current-action-branch.outputs.action-branch }}
-        path: build-tools
-    - uses: ./build-tools/.github/actions/setup-github-release-binary
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@master
       with:
         repo: jenkins-x-plugins/jx-release-version
         version: ${{ inputs.version }}
