@@ -48,7 +48,7 @@ Here follows a table to ease migrating Travis build that were using config offer
 | .travis.rancher_cli_install.yml           | [setup-rancher-cli](.github/actions/setup-rancher-cli/action.yml)           |
 | .travis.rancher_cli_kubernetes_config.yml | [setup-rancher-cli](.github/actions/setup-rancher-cli/action.yml)           |
 | .travis.srcclr_install.yml                | Not yet determined                                                          |
-| .travis.terraform-docs_install.yml        | Not yet determined                                                          |
+| .travis.terraform-docs_install.yml        | [setup-terraform-docs](.github/actions/setup-terraform-docs/action.yml)     |
 | .travis.terraform_install.yml             | Preinstalled                                                                |
 | .travis.tflint_install.yml                | Not yet determined                                                          |
 | .travis.trigger.yml                       | Not yet determined                                                          |
