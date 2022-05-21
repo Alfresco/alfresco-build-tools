@@ -6,5 +6,5 @@ env:
 before_install:
   - |-
     curl -fsSL https://github.com/keycloak/keycloak/releases/download/${KEYCLOAK_VERSION}/keycloak-${KEYCLOAK_VERSION}.tar.gz | tar xz
-    mv keycloak-$KEYCLOAK_VERSION keycloak && ln -s $PWD/keycloak/bin/kcadm.sh $HOME/bin
+    ln -s keycloak-$KEYCLOAK_VERSION keycloak && ln -s $PWD/keycloak/bin/kcadm.sh $HOME/bin
     kcadm.sh help
