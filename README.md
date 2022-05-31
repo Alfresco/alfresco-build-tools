@@ -1,6 +1,7 @@
 # alfresco-build-tools
 
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/fd8899233e1246c0b48a0684ada35d05)](https://www.codacy.com/gh/Alfresco/alfresco-build-tools/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Alfresco/alfresco-build-tools&amp;utm_campaign=Badge_Grade)
 
 | Build     | Status                                                                                                                                                                      |
 |-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -247,7 +248,9 @@ or into an existing workflow of your choice just declaring the step:
 ```
 
 ### build-helm-chart
+
 Run `helm dep up` and `helm lint` on the specified chart
+
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/build-helm-chart@ref
         with:
@@ -257,7 +260,9 @@ Run `helm dep up` and `helm lint` on the specified chart
 ### calculate-next-internal-version
 
 ### git-commit-changes
+
 Commits local changes after configuring git user and showing the status of what is going be committed.
+
 ```yaml
     - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@ref
       with:
@@ -267,7 +272,9 @@ Commits local changes after configuring git user and showing the status of what 
 ```
 
 ### package-helm-chart
+
 Packages a helm chart into a `.tgz` file and provides the name of the file produced in the output named `package-file`
+
 ```yaml
     - uses: Alfresco/alfresco-build-tools/.github/actions/package-helm-chart@ref
       id: package-helm-chart
@@ -276,7 +283,9 @@ Packages a helm chart into a `.tgz` file and provides the name of the file produ
 ```
 
 ### publish-helm-chart
+
 Publishes a new helm chart package (`.tgz`) to a helm chart repository
+
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/publish-helm-chart@ref
         with:
@@ -286,26 +295,16 @@ Publishes a new helm chart package (`.tgz`) to a helm chart repository
           token: ${{ secrets.BOT_GITHUB_TOKEN}}
 ```
 
-### setup-checkov
-
 ### setup-github-release-binary
 
 [setup-github-release-binary](.github/actions/setup-github-release-binary/action.yml)
 Allows the installation of a generic binary from GitHub Releases and add it to the PATH.
 See [setup-helm-docs](.github/actions/setup-helm-docs/action.yml) for a usage example.
 
-### setup-helm-docs
-
-### setup-jx-release-version
-
-### setup-pysemver
-
-### setup-rancher-cli
-
-### setup-updatebot
-
 ### update-chart-version
-Updates `version` attribute inside `Chart.yaml` file
+
+Updates `version` attribute inside `Chart.yaml` file:
+
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/update-chart-version@ref
         with:
@@ -314,8 +313,11 @@ Updates `version` attribute inside `Chart.yaml` file
 ```
 
 ## Reusable workflows provided by us
+
 ### helm-publish-new-package-version.yml
+
 Calculates the new alpha version, creates new git tag and publishes the new package to the helm chart repository
+
 ```yaml
   publish:
     uses: Alfresco/alfresco-build-tools/.github/workflows/helm-publish-new-package-version.yml@ref
@@ -334,12 +336,12 @@ Calculates the new alpha version, creates new git tag and publishes the new pack
 
 When running pre-commit locally you may get failures with the following error:
 
-```
+```sh
 realpath: command not found
 ```
 
 This is because macosx lacks support for that, and it can be fixed with:
 
-```
+```sh
 brew install coreutils
 ```
