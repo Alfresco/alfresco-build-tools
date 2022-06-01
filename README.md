@@ -338,7 +338,8 @@ outcome.
 ### Serialize pull request builds
 
 When a workflow requires to access an external shared resource, it may be
-desirable to prevent concurrent builds of the same pull request with:
+desirable to prevent concurrent builds of the same pull request using
+`concurrency` as a top-level keyword:
 
 ```yml
 name: my-workflow
@@ -346,20 +347,18 @@ on:
   pull_request:
     branches:
       - develop
-concurrency: ${{ github.head_ref || github.run_id }}
-```
-
-or for workflows with push:
-
-```yml
-name: my-workflow
-on:
   push:
-concurrency: ${{ github.ref_name || github.run_id }}
+    branches:
+      - develop
+concurrency:
+  group: ${{ github.head_ref || github.ref_name || github.run_id }}
+  cancel-in-progress: false
 ```
 
-The `github.run_id` is a fallback to handle failure when the main context
-variable is empty (e.g. when building on default branch).
+The `github.head_ref` is available when workflow is triggered by pull_request
+event, while `github.ref_name` when pushing branches and tags. The
+`github.run_id` is just a fallback to avoid failure when both variables are both
+empty.
 
 More docs on [using concurrency](https://docs.github.com/en/actions/using-jobs/using-concurrency)
 
