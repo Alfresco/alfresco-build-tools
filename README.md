@@ -232,8 +232,6 @@ Run `helm dep up` and `helm lint` on the specified chart
           chart-dir: charts/common
 ```
 
-### calculate-next-internal-version
-
 ### git-commit-changes
 
 Commits local changes after configuring git user and showing the status of what is going be committed.
@@ -294,8 +292,6 @@ Publishes a new helm chart package (`.tgz`) to a helm chart repository
           chart-package: ${{ steps.package-helm-chart.outputs.package-file }}
           token: ${{ secrets.BOT_GITHUB_TOKEN}}
 ```
-
-### resolve-preview-name
 
 ### setup-github-release-binary
 
