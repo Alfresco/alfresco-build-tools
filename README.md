@@ -222,31 +222,6 @@ This requires [setting up a slack webhook](https://slack.com/help/articles/11500
 
 ## GitHub Actions provided by us
 
-### pre-commit
-
-You can execute pre-commit step in a dedicated new workflow:
-
-```yml
-name: pre-commit
-
-on:
-  pull_request:
-    branches: [ master ]
-  push:
-
-jobs:
-  pre-commit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
-```
-
-or into an existing workflow of your choice just declaring the step:
-
-```yml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
-```
-
 ### build-helm-chart
 
 Run `helm dep up` and `helm lint` on the specified chart
@@ -282,6 +257,31 @@ Packages a helm chart into a `.tgz` file and provides the name of the file produ
         chart-dir: charts/common
 ```
 
+### pre-commit
+
+You can execute pre-commit step in a dedicated new workflow:
+
+```yml
+name: pre-commit
+
+on:
+  pull_request:
+    branches: [ master ]
+  push:
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
+```
+
+or into an existing workflow of your choice just declaring the step:
+
+```yml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
+```
+
 ### publish-helm-chart
 
 Publishes a new helm chart package (`.tgz`) to a helm chart repository
@@ -294,6 +294,8 @@ Publishes a new helm chart package (`.tgz`) to a helm chart repository
           chart-package: ${{ steps.package-helm-chart.outputs.package-file }}
           token: ${{ secrets.BOT_GITHUB_TOKEN}}
 ```
+
+### resolve-preview-name
 
 ### setup-github-release-binary
 
