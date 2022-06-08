@@ -222,6 +222,39 @@ This requires [setting up a slack webhook](https://slack.com/help/articles/11500
 
 ## GitHub Actions provided by us
 
+### build-helm-chart
+
+Run `helm dep up` and `helm lint` on the specified chart
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/build-helm-chart@ref
+        with:
+          chart-dir: charts/common
+```
+
+### git-commit-changes
+
+Commits local changes after configuring git user and showing the status of what is going be committed.
+
+```yaml
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@ref
+      with:
+        username: ${{ secrets.BOT_GITHUB_USERNAME }}
+        add-options: -u
+        commit-message: "My commit message"
+```
+
+### package-helm-chart
+
+Packages a helm chart into a `.tgz` file and provides the name of the file produced in the output named `package-file`
+
+```yaml
+    - uses: Alfresco/alfresco-build-tools/.github/actions/package-helm-chart@ref
+      id: package-helm-chart
+      with:
+        chart-dir: charts/common
+```
+
 ### pre-commit
 
 You can execute pre-commit step in a dedicated new workflow:
@@ -245,41 +278,6 @@ or into an existing workflow of your choice just declaring the step:
 
 ```yml
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
-```
-
-### build-helm-chart
-
-Run `helm dep up` and `helm lint` on the specified chart
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/build-helm-chart@ref
-        with:
-          chart-dir: charts/common
-```
-
-### calculate-next-internal-version
-
-### git-commit-changes
-
-Commits local changes after configuring git user and showing the status of what is going be committed.
-
-```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@ref
-      with:
-        username: ${{ secrets.BOT_GITHUB_USERNAME }}
-        add-options: -u
-        commit-message: "My commit message"
-```
-
-### package-helm-chart
-
-Packages a helm chart into a `.tgz` file and provides the name of the file produced in the output named `package-file`
-
-```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/package-helm-chart@ref
-      id: package-helm-chart
-      with:
-        chart-dir: charts/common
 ```
 
 ### publish-helm-chart
