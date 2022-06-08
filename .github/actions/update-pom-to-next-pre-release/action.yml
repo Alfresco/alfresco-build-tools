@@ -1,5 +1,9 @@
 description: Update pom files to the next pre-release
 name: Update pom to next pre-release
+inputs:
+  property-to-update:
+    description: property to update in additon to the version of the pom file
+    required: false
 outputs:
   next-prerelease:
     description: "Next prerelease"
@@ -26,3 +30,9 @@ runs:
       env:
         VERSION: ${{ steps.next-prerelease-resolver.outputs.next-prerelease }}
       run: mvn -B versions:set -DnewVersion=$VERSION -DprocessAllModules=true -DgenerateBackupPoms=false
+
+    - name: Update property to the new version
+      shell: bash
+      env:
+        PROPERTY_NAME: ${{ inputs.property-to-update }}
+      run: mvn versions:set-property -DnewVersion=$VERSION -DgenerateBackupPoms=false -Dproperty=$PROPERTY_NAME

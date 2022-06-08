@@ -2,6 +2,11 @@ name: Build and tag Maven project
 
 on:
   workflow_call:
+    inputs:
+      property-to-update:
+        description: property to update in additon to the version of the pom file
+        type: string
+        required: false
 
 jobs:
   pre-commit:
@@ -26,6 +31,8 @@ jobs:
         id: update-pom-to-next-version
         if: ${{ github.event_name == 'push' }}
         uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@aae-8964-produce-alphas
+        with:
+          property-to-update: ${{ inputs.property-to-update }}
 
       - name: Set version env variable
         if: ${{ github.event_name == 'push' }}
