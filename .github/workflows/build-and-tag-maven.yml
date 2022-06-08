@@ -75,7 +75,9 @@ jobs:
         env:
           DO_PUSH: ${{ github.event_name == 'push' }}
       - name: Docker Build (and maybe Push)
-        run: sh ./build-and-push-docker-images.sh
+        run: |
+          TAG="${TAG:=$(echo ${GITHUB_HEAD_REF:$GITHUB_REF_NAME} | sed -e 's/[^-_.[:alnum:]]/_/g')}"
+          sh ./build-and-push-docker-images.sh
         env:
           PUSH_OPTION: ${{ steps.define_docker_push.outputs.command }}
           TAG: ${{env.VERSION}}
