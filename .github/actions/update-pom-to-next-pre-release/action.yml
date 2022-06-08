@@ -29,10 +29,10 @@ runs:
       shell: bash
       env:
         VERSION: ${{ steps.next-prerelease-resolver.outputs.next-prerelease }}
-      run: mvn -B versions:set -DnewVersion=$VERSION -DprocessAllModules=true -DgenerateBackupPoms=false
-
-    - name: Update property to the new version
-      shell: bash
-      env:
         PROPERTY_NAME: ${{ inputs.property-to-update }}
-      run: mvn versions:set-property -DnewVersion=$VERSION -DgenerateBackupPoms=false -Dproperty=$PROPERTY_NAME
+      run: |
+        mvn -B versions:set -DnewVersion=$VERSION -DprocessAllModules=true -DgenerateBackupPoms=false
+        if [ -n "$PROPERTY_NAME" ]
+        then
+          mvn versions:set-property -Dproperty=$PROPERTY_NAME -DnewVersion=$VERSION -DgenerateBackupPoms=false
+        fi
