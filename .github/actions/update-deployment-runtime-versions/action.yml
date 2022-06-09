@@ -1,0 +1,30 @@
+name: Update runtime versions file
+description: Update file runtime-versions-info.json
+inputs:
+  deploymentServiceDir:
+    description: directory holding the deployment service code
+    required: true
+  developmentBranch:
+    description: name of the development branch
+    required: true
+  serviceName:
+    description: the name of the service to be updated
+    required: true
+  dockerImageName:
+    description: the name of the docker image
+    required: true
+  dockerImageTag:
+    description: the tag of the docker image
+    required: true
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        RUNTIME_VERSIONS_FILE: alfresco-deployment-service/src/main/resources/runtime-versions-info.json
+        DEVELOPMENT_BRANCH: ${{ inputs.developmentBranch }}
+        DOCKER_IMAGE: "quay.io/alfresco/${{ inputs.dockerImageName }}:${{ inputs.dockerImageTag }}"
+        SERVICE_NAME: ${{ inputs.serviceName }}
+      working-directory: ${{ inputs.deploymentServiceDir}}
+      run:
+        cat <<< $(jq --arg serviceName "$SERVICE_NAME" '(.[]|select(.version? == env.DEVELOPMENT_BRANCH).services[$serviceName].image) |= env.DOCKER_IMAGE' $RUNTIME_VERSIONS_FILE) > $RUNTIME_VERSIONS_FILE
