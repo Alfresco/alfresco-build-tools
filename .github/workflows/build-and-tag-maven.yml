@@ -105,10 +105,3 @@ jobs:
         run: |
           git tag -a $VERSION -m "Release version $VERSION"
           git push origin $VERSION
-
-      - name: Slack Notification
-        if: ${{ failure() && github.event_name == 'push' }}
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_COLOR: ${{ job.status }}
-          SLACK_WEBHOOK: ${{ secrets.APA_SLACK_WEBHOOK }}
