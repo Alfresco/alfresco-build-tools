@@ -328,6 +328,18 @@ Calculates the new alpha version, creates new git tag and publishes the new pack
     secrets: inherit
 ```
 
+### build-and-tag-maven.yml
+Build a maven project and generates the new alpha version for it:
+- publish maven artifacts to Nexus
+- push docker images to quay.io
+- create GitHub tag for the new alpha release
+
+```yaml
+  build:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/build-and-tag-maven.yml@ref
+    secrets: inherit
+```
+
 ## Cookbook
 
 This section contains a list of recipes and common patterns organized by desired
