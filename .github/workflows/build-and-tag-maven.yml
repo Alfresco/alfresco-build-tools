@@ -32,6 +32,10 @@ jobs:
         uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@aae-8964-produce-alphas
         with:
           property-to-update: ${{ inputs.property-to-update }}
+          maven-cli-opts: --show-version --no-transfer-progress --settings settings.xml
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
       - name: Set version env variable
         if: ${{ github.event_name == 'push' }}

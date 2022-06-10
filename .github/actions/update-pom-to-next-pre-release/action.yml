@@ -1,6 +1,9 @@
 description: Update pom files to the next pre-release
 name: Update pom to next pre-release
 inputs:
+  maven-cli-opts:
+    description: extra maven properties
+    required: false
   property-to-update:
     description: property to update in additon to the version of the pom file
     required: false
@@ -28,11 +31,12 @@ runs:
     - name: Update pom files to the new version
       shell: bash
       env:
+        MAVEN_CLI_OPTS: ${{ inputs.maven-cli-opts }}
         VERSION: ${{ steps.next-prerelease-resolver.outputs.next-prerelease }}
         PROPERTY_NAME: ${{ inputs.property-to-update }}
       run: |
-        mvn -B versions:set -DnewVersion=$VERSION -DprocessAllModules=true -DgenerateBackupPoms=false
+        mvn -B versions:set -DnewVersion=$VERSION -DprocessAllModules=true -DgenerateBackupPoms=false $MAVEN_CLI_OPTS
         if [ -n "$PROPERTY_NAME" ]
         then
-          mvn versions:set-property -Dproperty=$PROPERTY_NAME -DnewVersion=$VERSION -DgenerateBackupPoms=false
+          mvn versions:set-property -Dproperty=$PROPERTY_NAME -DnewVersion=$VERSION -DgenerateBackupPoms=false $MAVEN_CLI_OPTS
         fi
