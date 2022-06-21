@@ -301,8 +301,16 @@ See [setup-helm-docs](.github/actions/setup-helm-docs/action.yml) for a usage ex
 
 ### travis-env-load
 
-To ease the migration to GitHub Actions of repositories that contains one or more yaml files
-containing an `env.global` section of Travis CI.
+To ease the migration to GitHub Actions of repositories that contains one or
+more yaml files containing an `env.global` section of Travis CI. It supports env vars
+referencing as value env vars defined early in the file (like Travis does).
+
+```yaml
+      - uses: ./.github/actions/travis-env-load
+        with:
+          ignore_regex: ^BRANCH_NAME=.*
+          yml_path: .travis/env.yml
+```
 
 ### update-chart-version
 
