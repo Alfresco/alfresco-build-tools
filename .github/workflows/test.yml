@@ -36,3 +36,17 @@ jobs:
       - uses: ./.github/actions/resolve-preview-name
       - uses: ./.github/actions/setup-terraform-docs
       - uses: ./.github/actions/setup-kcadm
+      - uses: ./.github/actions/travis-env-load
+        with:
+          ignore_regex: ^TRAVIS_BRANCH=.*
+          yml_path: ./.github/tests/travis-env-load/env.yml
+      - name: Test travis-env-load
+        run: |
+          if [ -z "$APP_SETTING_ONE" ]; then
+            echo APP_SETTING_ONE should be set!
+            exit 1
+          fi
+          if [ -n "$TRAVIS_BRANCH" ]; then
+            echo TRAVIS_BRANCH should not be set!
+            exit 1
+          fi
