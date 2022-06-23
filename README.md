@@ -400,3 +400,11 @@ This is because macosx lacks support for that, and it can be fixed with:
 ```sh
 brew install coreutils
 ```
+
+## Release
+
+Run the release script to release a new version from this repository:
+
+```sh
+./release.sh v1.2.3
+```
