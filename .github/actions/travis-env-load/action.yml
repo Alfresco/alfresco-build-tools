@@ -12,8 +12,12 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Parse env global
+    - name: Parsing env.global in ${{ inputs.yml_path }}
       run: |
+        if [ ! -f "${{ inputs.yml_path }}" ]; then
+          echo "${{ inputs.yml_path }} not found - skipping"
+          exit 0
+        fi
         while read ENVVAR; do
           if [[ "$ENVVAR" =~ ${{ inputs.ignore_regex }} ]]; then
             echo "Skipping unwanted $ENVVAR"
