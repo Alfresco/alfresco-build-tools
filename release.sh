@@ -21,6 +21,7 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 1
 fi
 
+git fetch
 git checkout master
 git reset --hard origin/master
 
