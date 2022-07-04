@@ -3,7 +3,7 @@ on:
   workflow_call:
 
 jobs:
-  dependabot:
+  enable-auto-merge:
     runs-on: ubuntu-latest
     if: ${{ github.actor == 'alfresco-build' && contains( github.event.pull_request.labels.*.name, 'updatebot') }}
     steps:
