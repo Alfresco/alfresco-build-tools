@@ -7,6 +7,9 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.actor == 'alfresco-build' && contains( github.event.pull_request.labels.*.name, 'updatebot') }}
     steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
       - name: Enable auto-merge for propagation Pull Request
         run: gh pr merge --auto --squash "$PR_URL"
         env:
