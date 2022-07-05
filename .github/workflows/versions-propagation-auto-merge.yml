@@ -2,6 +2,10 @@ name: Versions propagation auto-merge
 on:
   workflow_call:
 
+permissions:
+  pull-requests: write
+  contents: write
+
 jobs:
   enable-auto-merge:
     runs-on: ubuntu-latest
