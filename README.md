@@ -342,7 +342,9 @@ Calculates the new alpha version, creates new git tag and publishes the new pack
 ```
 
 ### build-and-tag-maven.yml
-Build a maven project and generates the new alpha version for it:
+
+Builds a maven project and generates the new alpha version for it:
+
 - publish maven artifacts to Nexus
 - push docker images to quay.io
 - create GitHub tag for the new alpha release
@@ -350,6 +352,31 @@ Build a maven project and generates the new alpha version for it:
 ```yaml
   build:
     uses: Alfresco/alfresco-build-tools/.github/workflows/build-and-tag-maven.yml@ref
+    secrets: inherit
+```
+
+### dependabot-auto-merge.yml
+
+Handles automated approval and merge of dependabot PRs, for minor and patch version updates only.
+
+The workflow requires a [dependabot secret](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/managing-encrypted-secrets-for-dependabot) named `DEPENDABOT_GITHUB_TOKEN`, with the `repo > repo:status` and `repo > public_repo` scopes.
+
+```yaml
+  enable-auto-merge:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/dependabot-auto-merge.yml@AAE-8814-improve-dependabot-usage
+    secrets: inherit
+```
+
+### versions-propagation-auto-merge.yml
+
+Handles automated approval and merge of propagation PRs used to handle alpha releases on builds.
+
+The workflow requires a secret named `BOT_GITHUB_TOKEN` to setup the "auto-merge" behaviour: the default `GITHUB_TOKEN`
+is not used, otherwise a build would not be triggered when the PR is merged, [see reference solution](https://david.gardiner.net.au/2021/07/github-actions-not-running.html).
+
+```yaml
+  enable-auto-merge:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/versions-propagation-auto-merge.yml@v1.8.0
     secrets: inherit
 ```
 
