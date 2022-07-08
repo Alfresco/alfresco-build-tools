@@ -1,0 +1,122 @@
+description: Sends a slack notification
+name: Send a slack notification
+inputs:
+  channel-id:
+    # See also: https://api.slack.com/methods/chat.postMessage#channels
+    description: The slack channel id, channel name, or user id to post to
+    required: true
+  token:
+    description: The slack bot token
+    required: true
+  notification-color:
+    description: The slack notification color
+    required: false
+
+runs:
+  using: composite
+  steps:
+
+    - name: Compute color
+      id: compute-color
+      shell: bash
+      env:
+        INPUT_COLOR: ${{ inputs.notification-color }}
+      run: |
+        if [ -n "$INPUT_COLOR" ]
+        then
+          echo "::set-output name=result::$INPUT_COLOR"
+        else
+          echo "::set-output name=result::#A30200"
+        fi
+
+    - name: Compute small sha
+      id: compute-small-sha
+      shell: bash
+      env:
+        GITHUB_LONG_SHA: ${{ github.sha }}
+      run: |
+        SMALL_SHA=${GITHUB_LONG_SHA:0:6}
+        echo "::set-output name=result::$SMALL_SHA"
+
+    - name: Compute message
+      id: compute-message
+      shell: bash
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+      run: |
+        if [ $EVENT_NAME == 'pull_request' ]
+        then
+          echo "::set-output name=result::${{ github.event.pull_request.title }}"
+        else
+          echo "::set-output name=result::${{ github.event.head_commit.message }}"
+        fi
+
+    - name: Send slack notification
+      id: slack
+      uses: slackapi/slack-github-action@v1.19.0
+      env:
+        SLACK_BOT_TOKEN: ${{ inputs.token }}
+        NOTIFICATION_COLOR: ${{ steps.compute-color.outputs.result }}
+        NOTIFICATION_COMMIT_TITLE: ${{ steps.compute-small-sha.outputs.result }}
+        NOTIFICATION_MESSAGE: ${{ steps.compute-message.outputs.result }}
+      with:
+        channel-id: '${{ inputs.channel-id }}'
+        payload: |
+          {
+            "attachments": [
+              {
+                "color": "${{ env.NOTIFICATION_COLOR }}",
+                "blocks": [
+                  {
+                    "type": "context",
+                    "elements": [
+                      {
+                        "type": "image",
+                        "image_url": "${{ github.server_url }}/${{ github.actor }}.png?size=32",
+                        "alt_text": "${{ github.actor }}"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*<${{ github.server_url }}/${{ github.actor }}|${{ github.actor }}>*"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "section",
+                    "fields": [
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Repository*\n<${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Event*\n${{ github.event_name }} on ${{ github.ref_name }}"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "section",
+                    "fields": [
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Action*\n<${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}/checks|${{ github.workflow }}>"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Commit*\n<${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ env.NOTIFICATION_COMMIT_TITLE }}>"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "section",
+                    "fields": [
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Message*\n${{ env.NOTIFICATION_MESSAGE }}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }

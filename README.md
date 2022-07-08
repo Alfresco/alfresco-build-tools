@@ -204,22 +204,6 @@ on:
   workflow_dispatch:
 ```
 
-### rtCamp/action-slack-notif
-
-[rtCamp/action-slack-notify](https://github.com/rtCamp/action-slack-notify) can be used to send a slack notification,
-here is a sample:
-
-```yml
-      - name: Slack Notification
-        if: ${{ failure() && steps.is_default_branch.outputs.result == 'true' }}
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_COLOR: ${{ job.status }}
-          SLACK_WEBHOOK: ${{ secrets.APA_SLACK_WEBHOOK }}
-```
-
-This requires [setting up a slack webhook](https://slack.com/help/articles/115005265063-Incoming-webhooks-for-Slack?eu_nc=1) for the target slack channel.
-
 ## GitHub Actions provided by us
 
 ### build-helm-chart
@@ -291,6 +275,18 @@ Publishes a new helm chart package (`.tgz`) to a helm chart repository
           helm-charts-repo-branch: gh-pages
           chart-package: ${{ steps.package-helm-chart.outputs.package-file }}
           token: ${{ secrets.BOT_GITHUB_TOKEN}}
+```
+
+### send-slack-notification
+
+Sends a slack notification with a pre-defined payload, relying on the [slackapi/slack-github-action](https://github.com/slackapi/slack-github-action) official action.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@ref
+        with:
+          channel-id: 'channel-id'
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          notification-color: '#A30200'
 ```
 
 ### setup-github-release-binary
