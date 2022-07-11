@@ -17,7 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: ./.github/actions/pre-commit
       - uses: ./.github/actions/setup-helm-docs
       - uses: ./.github/actions/setup-jx-release-version
       - uses: ./.github/actions/setup-kubepug
