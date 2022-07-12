@@ -24,7 +24,7 @@ runs:
 
     - id: next-prerelease-resolver
       name: Calculate next internal release
-      uses: Alfresco/alfresco-build-tools/.github/actions/calculate-next-internal-version@v1.8.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/calculate-next-internal-version@v1.9.0
       with:
         next-version: ${{ steps.parse-next-final-version.outputs.result }}
 
