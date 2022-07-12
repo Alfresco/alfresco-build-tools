@@ -355,7 +355,8 @@ Builds a maven project and generates the new alpha version for it:
 
 Handles automated approval and merge of dependabot PRs, for minor and patch version updates only.
 
-The workflow requires a [dependabot secret](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/managing-encrypted-secrets-for-dependabot), with the `repo > repo:status` and `repo > public_repo` scopes.
+The workflow requires a [dependabot secret](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/managing-encrypted-secrets-for-dependabot), with the `repo > repo:status` and `repo > public_repo` scopes for public repositories.
+The whole list of "repo" scopes might be needed for the workflow to run ok on private repositories.
 
 ```yaml
   enable-auto-merge:
