@@ -359,12 +359,13 @@ Builds a maven project and generates the new alpha version for it:
 
 Handles automated approval and merge of dependabot PRs, for minor and patch version updates only.
 
-The workflow requires a [dependabot secret](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/managing-encrypted-secrets-for-dependabot) named `DEPENDABOT_GITHUB_TOKEN`, with the `repo > repo:status` and `repo > public_repo` scopes.
+The workflow requires a [dependabot secret](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/managing-encrypted-secrets-for-dependabot), with the `repo > repo:status` and `repo > public_repo` scopes.
 
 ```yaml
   enable-auto-merge:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/dependabot-auto-merge.yml@AAE-8814-improve-dependabot-usage
-    secrets: inherit
+    uses: Alfresco/alfresco-build-tools/.github/workflows/dependabot-auto-merge.yml@ref
+    with:
+      token: ${{ secrets.DEPENDABOT_GITHUB_TOKEN }}
 ```
 
 ### versions-propagation-auto-merge.yml
@@ -376,7 +377,7 @@ is not used, otherwise a build would not be triggered when the PR is merged, [se
 
 ```yaml
   enable-auto-merge:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/versions-propagation-auto-merge.yml@v1.8.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/versions-propagation-auto-merge.yml@ref
     secrets: inherit
 ```
 
