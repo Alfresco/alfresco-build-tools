@@ -30,7 +30,11 @@ echo "Current version is $CURRENT_VERSION"
 echo "Going to create a PR to release $1"
 
 git checkout -b "$1"
-grep -Rl "$CURRENT_VERSION" | xargs sed -i '' -e "s/$CURRENT_VERSION/$1/g"
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  grep -Rl "$CURRENT_VERSION" | xargs sed -i '' -e "s/$CURRENT_VERSION/$1/g"
+else
+  grep -Rl "$CURRENT_VERSION" | xargs sed -i -e "s/$CURRENT_VERSION/$1/g"
+fi
 grep -Rl "$1" | xargs git add
 git commit -m "Prepare to release $1"
 git push origin "$1"
