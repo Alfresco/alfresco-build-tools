@@ -49,6 +49,7 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Login to DockerHub Registry
+        if: ${{ github.event_name == 'push' }}
         uses: docker/login-action@v1
         with:
           registry: docker.io
