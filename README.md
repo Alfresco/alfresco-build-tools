@@ -101,7 +101,7 @@ Here follows a table to ease migrating Travis build that were using config offer
 |-------------------------------------------|-----------------------------------------------------------------------------|
 | .travis.aws-iam-authenticator_install.yml | Not yet determined                                                          |
 | .travis.awscli_install.yml                | Preinstalled                                                                |
-| .travis.checkov_install.yml               | [setup-checkov](.github/actions/setup-checkov/action.yml)                   |
+| .travis.checkov_install.yml               | [bridgecrewio/checkov-action](https://github.com/bridgecrewio/checkov-action)|
 | .travis.common.yml                        | Outdated: use equivalent steps in the workflow                              |
 | .travis.docker-buildx_install.yml         | [docker/setup-buildx-action](https://github.com/docker/setup-buildx-action) |
 | .travis.docker_hub_login.yml              | [docker/login-action](#dockerlogin-action)                                  |
