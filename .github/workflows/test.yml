@@ -32,7 +32,6 @@ jobs:
       - uses: ./.github/actions/calculate-next-internal-version
         with:
           next-version: 7.3.0
-      - uses: ./.github/actions/setup-checkov
       - uses: ./.github/actions/resolve-preview-name
       - uses: ./.github/actions/setup-terraform-docs
       - uses: ./.github/actions/setup-kcadm
