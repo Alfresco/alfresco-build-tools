@@ -80,6 +80,8 @@ jobs:
           MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+      - name: Echo Longest Tests run
+        run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
       - name: Define Docker Push
         id: define_docker_push
         run: |
