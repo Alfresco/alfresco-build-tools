@@ -11,6 +11,9 @@ inputs:
   notification-color:
     description: The slack notification color
     required: false
+  message:
+    description: an optional message one can use to override default message
+    required: false
 
 runs:
   using: composite
@@ -43,13 +46,19 @@ runs:
       shell: bash
       env:
         EVENT_NAME: ${{ github.event_name }}
+        BLOCK_MESSAGE: ${{ inputs.message }}
       run: |
-        if [ $EVENT_NAME == 'pull_request' ]
-        then
-          echo "::set-output name=result::${{ github.event.pull_request.title }}"
-        else
-          echo "::set-output name=result::${{ github.event.head_commit.message }}"
-        fi
+        case $EVENT_NAME in
+          pull_request)
+            echo "::set-output name=result::${BLOCK_MESSAGE:-${{ github.event.pull_request.title }}}"
+            ;;
+          issues)
+            echo "::set-output name=result::${BLOCK_MESSAGE:-${{ github.event.issue.body }}}"
+            ;;
+          *)
+            echo "::set-output name=result::${BLOCK_MESSAGE:-${{ github.event.head_commit.message }}}"
+            ;;
+        esac
 
     - name: Send slack notification
       id: slack
