@@ -50,15 +50,16 @@ runs:
       run: |
         case $EVENT_NAME in
           pull_request)
-            echo "::set-output name=result::${BLOCK_MESSAGE:-${{ github.event.pull_request.title }}}"
+            BLOCK_MESSAGE=${BLOCK_MESSAGE:-${{ github.event.pull_request.title }}}
             ;;
           issues)
-            echo "::set-output name=result::${BLOCK_MESSAGE:-${{ github.event.issue.body }}}"
+            BLOCK_MESSAGE=${BLOCK_MESSAGE:-${{ github.event.issue.body }}}
             ;;
           *)
-            echo "::set-output name=result::${BLOCK_MESSAGE:-${{ github.event.head_commit.message }}}"
+            BLOCK_MESSAGE=${BLOCK_MESSAGE:-${{ github.event.head_commit.message }}}
             ;;
         esac
+        echo "::set-output name=result::${BLOCK_MESSAGE}"
 
     - name: Send slack notification
       id: slack
