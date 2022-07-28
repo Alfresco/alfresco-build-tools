@@ -132,6 +132,24 @@ Here follows a table to ease migrating Travis build that were using config offer
 | .travis.yml                               | Not yet determined                                                          |
 | .travis.yq_install.yml                    | Preinstalled                                                                |
 
+### Workflow schema validation
+
+The `.pre-commit-config.yaml` configuration should be updated to remove the obsolete `check-travis` hook and replace it with `check-github-workflows`.
+Note that a recent version of the `check-jsonschema` hook should be used to support reusable workflows.
+Here is a sample configuration:
+
+```yml
+  - repo: https://github.com/sirosen/check-jsonschema
+    rev: 0.17.0
+    hooks:
+      - id: check-github-workflows
+      - id: check-jsonschema
+        alias: check-dependabot
+        name: "Validate Dependabot Config"
+        files: '.github/dependabot\.yml$'
+        args: ["--schemafile", "https://json.schemastore.org/dependabot-2.0.json"]
+```
+
 ## Security hardening for GitHub Actions
 
 Before creating / modifying a GitHub Actions workflow make sure you're familiar with [Security hardening for GitHub Actions](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions). Pay special attention to:
