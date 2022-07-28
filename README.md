@@ -132,6 +132,8 @@ Here follows a table to ease migrating Travis build that were using config offer
 | .travis.yml                               | Not yet determined                                                          |
 | .travis.yq_install.yml                    | Preinstalled                                                                |
 
+### Workflow schema validation
+
 The `.pre-commit-config.yaml` configuration should be updated to remove the obsolete `check-travis` hook and replace it with `check-github-workflows`.
 Note that a recent version of the `check-jsonschema` hook should be used to support reusable workflows.
 Here is a sample configuration:
