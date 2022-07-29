@@ -138,13 +138,13 @@ runs:
       env:
         CHART_DIR: ${{ inputs.chart-dir }}
         BASE_URL: ${{ inputs.helm-repository-url }}
-        HELM_REPO: ${{ steps.destination-path.result  }}
+        SUB_REPO: ${{ steps.destination-path.outputs.result }}
       shell: bash
       run: |
         mkdir $RANDOM_PATH
         helm package --dependency-update --destination $RANDOM_PATH $CHART_DIR
-        helm repo index $RANDOM_PATH --url $BASE_URL/$HELM_REPO --merge $CHECKOUT_PATH/$HELM_REPO/index.yaml
-        mv $RANDOM_PATH/* $CHECKOUT_PATH/$HELM_REPO
+        helm repo index $RANDOM_PATH --url $BASE_URL/$SUB_REPO --merge $CHECKOUT_PATH/$SUB_REPO/index.yaml
+        mv $RANDOM_PATH/* $CHECKOUT_PATH/$SUB_REPO
         rm -rf $RANDOM_PATH
 
     - name: Commit changes
