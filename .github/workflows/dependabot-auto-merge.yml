@@ -16,24 +16,12 @@ permissions:
   pull-requests: write
   contents: write
 
-env:
-  PR_URL: ${{ github.event.pull_request.html_url }}
-  # this token CANNOT be the default `GITHUB_TOKEN` on auto-merge action, otherwise the merge of the PR will not trigger a build
-  GITHUB_TOKEN: ${{ secrets.token }}
-
 jobs:
   dependabot:
     runs-on: ubuntu-latest
-    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
     steps:
-      - name: Dependabot metadata
-        id: metadata
-        uses: dependabot/fetch-metadata@v1.3.3
+      - run: echo "This reusable workflow is deprecated, use Alfresco/alfresco-build-tools/.github/actions/automate-dependabot instead."
+      - uses: Alfresco/alfresco-build-tools/.github/actions/automate-dependabot@AAE-10134-change-automated-reusable-workflows-to-actions
         with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
-      - name: Enable auto-merge for minor and patch Dependabot PRs
-        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-minor' || steps.metadata.outputs.update-type == 'version-update:semver-patch' }}
-        run: gh pr merge --auto ${{ inputs.merge-option }} "$PR_URL"
-      - name: Auto-approve patch Dependabot PRs
-        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' }}
-        run: gh pr review --approve "$PR_URL"
+          merge-option: ${{ inputs.merge-option }}
+          token: ${{ secrets.token }}
