@@ -51,11 +51,11 @@ runs:
     - name: Build
       uses: Alfresco/alfresco-build-tools/.github/actions/build-helm-chart@v1.9.2
       with:
-        chart-dir: ${{ inputs.CHART_DIR }}
+        chart-dir: ${{ inputs.chart-dir }}
 
     - name: Test
       env:
-        CHART_DIR: ${{ inputs.CHART_DIR }}
+        CHART_DIR: ${{ inputs.chart-dir }}
       shell: bash
       run: |
         helm plugin install https://github.com/quintush/helm-unittest
