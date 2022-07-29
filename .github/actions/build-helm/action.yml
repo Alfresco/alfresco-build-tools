@@ -112,25 +112,19 @@ runs:
         echo "::set-output name=message::$MSG"
 
     - name: Generate random path for helm repository checkout
-      id: get-checkout-path
       shell: bash
-      run: |
-        UUID=$(uuidgen)
-        echo "::set-output name=uuid::$UUID"
+      run: echo "CHECKOUT_PATH=$(uuidgen)" >> $GITHUB_ENV
 
     - name: Generate random path for helm package
-      id: get-random-path
       shell: bash
-      run: |
-        UUID=$(uuidgen)
-        echo "::set-output name=uuid::$UUID"
+      run: echo "RANDOM_PATH=$(uuidgen)" >> $GITHUB_ENV
 
     - name: Checkout charts repository
       uses: actions/checkout@v3
       with:
         repository: ${{ inputs.helm-repository }}
         ref: ${{ inputs.helm-repository-branch }}
-        path: ${{ steps.get-checkout-path.output.uuid }}
+        path: ${{ env.CHECKOUT_PATH }}
         token: ${{ inputs.helm-repository-token }}
 
     - name: Build destination path
@@ -143,8 +137,6 @@ runs:
     - name: Package helm chart
       env:
         BASE_URL: ${{ inputs.helm-repository-url }}
-        RANDOM_PATH: ${{ steps.get-random-path.output.uuid }}
-        CHECKOUT_PATH: ${{ steps.get-checkout-path.output.uuid }}
         HELM_REPO: ${{ steps.destination-path.result  }}
       shell: bash
       run: |
@@ -160,13 +152,13 @@ runs:
         username: ${{ inputs.helm-repository-commit-username }}
         add-options: .
         commit-message: ${{ steps.get-commit-message.outputs.message }}
-        repository-directory: ${{ steps.get-checkout-path.output.uuid }}
+        repository-directory: ${{ env.CHECKOUT_PATH }}
 
     - name: Push changes
       if: inputs.do-push == 'true'
       env:
         GITHUB_TOKEN: ${{ inputs.helm-repository-token }}
         BRANCH: ${{ inputs.helm-repository-branch }}
-      working-directory: ${{ steps.get-checkout-path.output.uuid }}
+      working-directory: ${{ env.CHECKOUT_PATH }}
       shell: bash
       run: git push origin $BRANCH
