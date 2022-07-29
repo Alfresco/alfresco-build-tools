@@ -27,7 +27,7 @@ runs:
       shell: bash
       run: echo "HELM_REPO_CHECKOUT_DIR=charts-repo" >> $GITHUB_ENV
 
-    - name: Checkout activiti-cloud-helm-charts
+    - name: Checkout charts repository
       uses: actions/checkout@v3
       with:
         path: ${{ env.HELM_REPO_CHECKOUT_DIR }}
@@ -58,7 +58,6 @@ runs:
         else
             echo "::set-output name=result::."
         fi
-
 
     - name: Add package to Helm repository
       shell: bash

@@ -14,7 +14,6 @@ inputs:
     description: "Path to the the directory holding the git repository"
     required: false
 
-
 runs:
   using: composite
   steps:

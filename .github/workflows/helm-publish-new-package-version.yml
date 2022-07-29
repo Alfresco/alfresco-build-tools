@@ -29,7 +29,7 @@ on:
         required: false
     outputs:
       version:
-        description: "The version of the new published pacakage"
+        description: "The version of the new published package"
         value: ${{ jobs.publish.outputs.version }}
 
 jobs:

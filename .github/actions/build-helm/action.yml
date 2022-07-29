@@ -1,0 +1,172 @@
+name: 'Build, test, package and push helm chart'
+description: 'Build, test, package and maybe push helm chart'
+inputs:
+  chart-dir:
+    description: 'Path to the folder holding Chart.yaml'
+    required: true
+  helm-repository:
+    description: 'Charts repository to checkout'
+    required: true
+  helm-repository-branch:
+    description: 'Branch on the charts repository'
+    required: false
+  helm-repository-subfolder:
+    description: 'Subfolder on the charts repository to receive changes'
+    required: false
+  helm-repository-token:
+    description: 'The Github token to checkout the charts repository'
+    required: true
+  helm-repository-commit-username:
+    description: 'The username to commit on the charts repository'
+    required: true
+  helm-repository-url:
+    description: 'Charts repository URL'
+    required: true
+  test-rancher-url:
+    description: 'Rancher URL for tests, tests are skipped if not filled'
+    required: false
+  test-rancher-access-key:
+    description: 'Rancher access key for tests, tests are skipped if not filled'
+    required: false
+  test-rancher-secret-key:
+    description: 'Rancher secret key for tests, tests are skipped if not filled'
+    required: false
+  test-cluster-name:
+    description: 'Name of the Rancher cluster name for tests'
+    required: false
+  test-namespace:
+    description: >
+      Name of the namespace in rancher for tests (should be unique in PRs),
+      tests are skipped if not filled.
+    required: false
+  do-push:
+    description: "If 'true', changes will be pushed ('false' can be used for PRs)"
+    default: 'false'
+    required: false
+
+runs:
+  using: composite
+  steps:
+
+    - name: Build
+      uses: Alfresco/alfresco-build-tools/.github/actions/build-helm-chart@v1.9.2
+      with:
+        chart-dir: ${{ inputs.CHART_DIR }}
+
+    - name: Test
+      env:
+        CHART_DIR: ${{ inputs.CHART_DIR }}
+      shell: bash
+      run: |
+        helm plugin install https://github.com/quintush/helm-unittest
+        helm unittest $CHART_DIR --helm3
+
+    - name: Check if can dry run helm chart
+      id: check
+      env:
+        NAMESPACE: ${{ inputs.test-namespace }}
+        CLUSTER: ${{ inputs.test-cluster-name }}
+        URL: ${{ inputs.test-rancher-url }}
+        ACCESS_KEY: ${{ inputs.test-rancher-access-key }}
+        SECRET_KEY: ${{ inputs.test-rancher-secret-key }}
+      shell: bash
+      run: |
+        if [[ -z "$NAMESPACE" || -z "$CLUSTER" ||-z "$URL" || -z "$ACCESS_KEY" || -z "$SECRET_KEY" ]]
+        then
+            CONTINUE="false"
+        else
+            CONTINUE="true"
+        fi
+        echo "::set-output name=test::${CONTINUE}"
+
+    - name: Setup rancher
+      if: steps.check.test == 'true'
+      uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v1.9.2
+      with:
+        url: ${{ inputs.rancher-url }}
+        access-key: ${{ inputs.test-rancher-access-key }}
+        secret-key: ${{ inputs.test-rancher-secret-key }}
+        context: ${{ inputs.test-namespace }}
+
+    - name: Execute helm dry-run
+      if: steps.check.test == 'true'
+      env:
+        CHART_DIR: ${{ inputs.chart-dir }}
+        NAMESPACE: ${{ inputs.test-namespace }}
+      shell: bash
+      run: |
+        NAMESPACE_LOWERCASE=$(echo ${NAMESPACE} | tr "[:upper:]" "[:lower:]")
+        helm upgrade $NAMESPACE_LOWERCASE $CHART_DIR \
+          --install \
+          --set global.gateway.domain=example \
+          --set global.keycloak.clientSecret=$(uuidgen) \
+          --namespace ${NAMESPACE_LOWERCASE} \
+          --wait \
+          --dry-run
+
+    - name: Get commit message
+      id: get-commit-message
+      shell: bash
+      run: |
+        MSG=$(git log --pretty=format:%s --max-count=1)
+        echo "::set-output name=message::$MSG"
+
+    - name: Generate random path for helm repository checkout
+      id: get-checkout-path
+      shell: bash
+      run: |
+        UUID=$(uuidgen)
+        echo "::set-output name=uuid::$UUID"
+
+    - name: Generate random path for helm package
+      id: get-random-path
+      shell: bash
+      run: |
+        UUID=$(uuidgen)
+        echo "::set-output name=uuid::$UUID"
+
+    - name: Checkout charts repository
+      uses: actions/checkout@v3
+      with:
+        repository: ${{ inputs.helm-repository }}
+        ref: ${{ inputs.helm-repository-branch }}
+        path: ${{ steps.get-checkout-path.output.uuid }}
+        token: ${{ inputs.helm-repository-token }}
+
+    - name: Build destination path
+      id: destination-path
+      env:
+        SUBFOLDER: ${{ inputs.helm-repository-subfolder }}
+      shell: bash
+      run: echo "::set-output name=result::${SUBFOLDER:=.}"
+
+    - name: Package helm chart
+      env:
+        BASE_URL: ${{ inputs.helm-repository-url }}
+        RANDOM_PATH: ${{ steps.get-random-path.output.uuid }}
+        CHECKOUT_PATH: ${{ steps.get-checkout-path.output.uuid }}
+        HELM_REPO: ${{ steps.destination-path.result  }}
+      shell: bash
+      run: |
+        mkdir $RANDOM_PATH
+        helm package --dependency-update
+        helm $RANDOM_PATH index $RANDOM_PATH --url $BASE_URL/$HELM_REPO --merge $CHECKOUT_PATH/$HELM_REPO/index.yaml
+        mv $RANDOM_PATH/* $CHECKOUT_PATH/$HELM_REPO
+        rm -rf $RANDOM_PATH
+
+    - name: Commit changes
+      uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.9.2
+      with:
+        username: ${{ inputs.helm-repository-commit-username }}
+        add-options: .
+        commit-message: ${{ steps.get-commit-message.outputs.message }}
+        repository-directory: ${{ steps.get-checkout-path.output.uuid }}
+
+    - name: Push changes
+      if: inputs.do-push == 'true'
+      env:
+        GITHUB_TOKEN: ${{ inputs.helm-repository-token }}
+        BRANCH: ${{ inputs.helm-repository-branch }}
+      working-directory: ${{ steps.get-checkout-path.output.uuid }}
+      shell: bash
+      run: git push origin $BRANCH
