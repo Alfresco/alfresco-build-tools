@@ -51,9 +51,11 @@ runs:
     - uses: aws-actions/configure-aws-credentials@v1
       with:
         aws-region: ${{ inputs.aws_region }}
+        aws-access-key-id: ${{ inputs.aws_access_key_id }}
+        aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
     - uses: azure/setup-kubectl@v2.0
       with:
-        version: ${{ inputs.aws_region }}
+        version: ${{ inputs.kubectl_version }}
     - name: Login to Quay.io
       uses: docker/login-action@v1
       with:
@@ -78,5 +80,3 @@ runs:
         ACM_CERTIFICATE: ${{ inputs.acm_certificate }}
         AWS_SG: ${{ inputs.aws_sg }}
         DOMAIN: ${{ inputs.domain }}
-        AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
-        AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
