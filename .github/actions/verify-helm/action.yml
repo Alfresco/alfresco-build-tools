@@ -68,10 +68,6 @@ runs:
       with:
         username: ${{ inputs.docker_username}}
         password: ${{ inputs.docker_password }}
-    - name: Set commit message
-      run: |
-        echo COMMIT_MESSAGE="${{ inputs.commit_message }}" >> $GITHUB_ENV
-      shell: bash
     - name: Run helm chart test script
       run: .github/scripts/aps_helm_install.sh
       shell: bash
@@ -79,3 +75,7 @@ runs:
         BRANCH_NAME: ${{ inputs.branch_name }}
         ACM_CERTIFICATE: ${{ inputs.acm_certificate }}
         AWS_SG: ${{ inputs.aws_sg }}
+        COMMIT_MESSAGE: ${{ inputs.commit_message }}
+        DOMAIN: ${{ inputs.domain }}
+        AWS_ACCESS_KEY_ID: ${{ inputs.aws_access_key_id }}
+        AWS_SECRET_ACCESS_KEY: ${{ inputs.aws_secret_access_key }}
