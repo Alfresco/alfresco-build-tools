@@ -1,0 +1,38 @@
+name: "Verify and test helm chart"
+description: "Setup environment and run helm chart tests"
+inputs:
+  domain:
+    description: ""
+    required: true
+  aws_access_key_id:
+    description: ""
+    required: true
+  aws_secret_access_key:
+    description: ""
+    required: true
+  docker_username:
+    description: "username for Docker Hub"
+    required: true
+  docker_password:
+    description: "password for Docker Hub"
+    required: true
+  quay_username:
+    description: "username for Quay.io"
+    required: false
+  quay_password:
+    description: "password for Quay.io"
+    required: false
+  aws_region:
+    description: ""
+    required: true
+  kubectl_version:
+    description: "version of the Kubectl CLI"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Print debug hello message
+      run: |
+        echo "Hello from the verify-helm action!"
+      shell: bash

@@ -1,0 +1,23 @@
+name: "Verify and test docker compose"
+description: "Setup environment and run docker compose tests"
+inputs:
+  docker_username:
+    description: "username for Docker Hub"
+    required: true
+  docker_password:
+    description: "password for Docker Hub"
+    required: true
+  quay_username:
+    description: "username for Quay.io"
+    required: false
+  quay_password:
+    description: "password for Quay.io"
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Print debug hello message
+      run: |
+        echo "Hello from the verify-compose action!"
+      shell: bash
