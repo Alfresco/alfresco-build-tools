@@ -36,3 +36,8 @@ runs:
       run: |
         echo "Hello from the verify-helm action!"
       shell: bash
+
+    - name: Check inputs passing
+      run: |
+        echo "AWS region is: ${{ inputs.aws_region }}"
+      shell: bash
