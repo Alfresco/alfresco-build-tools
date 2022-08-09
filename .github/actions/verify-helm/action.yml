@@ -55,7 +55,7 @@ runs:
         echo "Service can be either 'acs' or 'aps'"
         exit 1
       shell: bash
-      if: ${{ input.service }} != 'acs' || ${{ input.service }} != 'aps'
+      if: ${{ inputs.service }} != 'acs' || ${{ inputs.service }} != 'aps'
     - name: Checkout
       uses: actions/checkout@v3
       with:
@@ -74,7 +74,7 @@ runs:
         registry: quay.io
         username: ${{ inputs.quay_username }}
         password: ${{ inputs.quay_password }}
-      if: ${{ input.service }} == aps || ${{ inputs.acs_version }} != 'community'
+      if: ${{ inputs.service }} == aps || ${{ inputs.acs_version }} != 'community'
     - name: Login to Docker Hub
       uses: docker/login-action@v1
       with:
