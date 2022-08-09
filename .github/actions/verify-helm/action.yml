@@ -46,20 +46,15 @@ inputs:
     description: "version of the kubectl CLI"
     required: false
     default: 'v1.23.6'
-  debug_if:
-    description: ""
-    required: false
-    default: 'aps'
 
 runs:
   using: composite
   steps:
     - name: Check service configuration
-      if: ${{ inputs.service != 'aps' }}
+      if: ${{ inputs.service != 'aps' && inputs.service != 'acs' }}
       run: |
-        echo "debug_if is ${{ inputs.debug_if }}"
         echo "Service name can be either 'acs' or 'aps' got ${{ inputs.service }}"
-        echo "Comparision result: ${{ inputs.service == 'aps' }}"
+        exit 1
       shell: bash
     - name: Checkout
       uses: actions/checkout@v3
