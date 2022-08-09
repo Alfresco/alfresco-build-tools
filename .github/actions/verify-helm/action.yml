@@ -52,8 +52,7 @@ runs:
   steps:
     - name: Check service configuration
       run: |
-        echo "Service can be either 'acs' or 'aps'"
-        echo "Got service ${{ inputs.service }}"
+        echo "Service name can be either 'acs' or 'aps' got ${{ inputs.service }}"
         exit 1
       shell: bash
       if: ${{ inputs.service != 'acs' || inputs.service != 'aps' }}
@@ -75,7 +74,7 @@ runs:
         registry: quay.io
         username: ${{ inputs.quay_username }}
         password: ${{ inputs.quay_password }}
-      if: ${{ inputs.service == aps || inputs.acs_version != 'community' }}
+      if: ${{ inputs.service == 'aps' || inputs.acs_version != 'community' }}
     - name: Login to Docker Hub
       uses: docker/login-action@v1
       with:
