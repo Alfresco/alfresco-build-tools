@@ -53,6 +53,7 @@ runs:
     - name: Check service configuration
       run: |
         echo "Service can be either 'acs' or 'aps'"
+        echo "Got service ${{ inputs.service }}"
         exit 1
       shell: bash
       if: ${{ inputs.service }} != 'acs' || ${{ inputs.service }} != 'aps'
