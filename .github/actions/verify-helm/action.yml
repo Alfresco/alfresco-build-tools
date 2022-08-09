@@ -8,10 +8,10 @@ inputs:
     description: "version of ACS to verify"
     required: false
   aws_access_key_id:
-    description: ""
+    description: "ID of AWS access key"
     required: true
   aws_secret_access_key:
-    description: ""
+    description: "AWS access key"
     required: true
   docker_username:
     description: "username for Docker Hub"
@@ -26,20 +26,20 @@ inputs:
     description: "password for Quay.io"
     required: false
   branch_name:
-    description: ""
+    description: "name of branch from which workflow was triggered"
     required: true
   acm_certificate:
-    description: ""
+    description: "certificate for Amazon Certificate Manager"
     required: true
   aws_sg:
-    description: ""
+    description: "AWS Security Group"
     required: true
   domain:
-    description: ""
+    description: "domain to access the cluster"
     required: false
     default: dev.envalfresco.com
   aws_region:
-    description: ""
+    description: "AWS region to create cluster in"
     required: false
     default: eu-west-1
   kubectl_version:
