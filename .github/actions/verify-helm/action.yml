@@ -73,7 +73,7 @@ runs:
         echo COMMIT_MESSAGE=\"$MSG\" >> $GITHUB_ENV
       shell: bash
     - name: Run helm chart test script
-      run: .github/scripts/aps_helm_install.sh
+      run: ${{ github.action_path }}/aps_helm_install.sh
       shell: bash
       env:
         BRANCH_NAME: ${{ inputs.branch_name }}
