@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -e
 
 if [ -z "${ACS_VERSION}" ]; then
   echo "ACS_VERSION variable is not set"
