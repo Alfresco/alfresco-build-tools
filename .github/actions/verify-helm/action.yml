@@ -51,10 +51,12 @@ runs:
   using: composite
   steps:
     - name: Check service configuration
+      # if: ${{ inputs.service != 'acs' || inputs.service != 'aps' }}
       run: |
-        echo "Service name can be either 'acs' or 'aps' got ${{ inputs.service }}"
+        if [[ "${{ inputs.service }}" != "acs" || "${{ inputs.service }}" != "aps" ]]; then
+          echo "Service name can be either 'acs' or 'aps' got ${{ inputs.service }}"
+        fi
       shell: bash
-      if: inputs.service != 'acs' || inputs.service != 'aps'
     - name: Checkout
       uses: actions/checkout@v3
       with:
