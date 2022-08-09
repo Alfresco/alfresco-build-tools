@@ -53,9 +53,8 @@ runs:
     - name: Check service configuration
       run: |
         echo "Service name can be either 'acs' or 'aps' got ${{ inputs.service }}"
-        if [[ "${{ inputs.service }} != "aps"  || "${{ inputs.service }} != "acs" ]]; then echo "check failed"; fi
       shell: bash
-      if: ${{ inputs.service != 'acs' || inputs.service != 'aps' }}
+      if: ${{ inputs.service == 'acs' || inputs.service == 'aps' }}
     - name: Checkout
       uses: actions/checkout@v3
       with:
