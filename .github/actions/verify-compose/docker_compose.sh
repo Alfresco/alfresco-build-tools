@@ -27,10 +27,10 @@ else
   exit 0
 fi
 
-# cd "docker-compose" || {
-#   echo "Error: docker compose dir not found"
-#   exit 1
-# }
+cd "docker-compose" || {
+  echo "Error: docker compose dir not found"
+  exit 1
+}
 docker info
 docker-compose --version
 docker-compose -f "${COMPOSE_FILE_PATH}" config
