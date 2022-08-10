@@ -1,4 +1,4 @@
-name: "Load branch name"
+name: "Get branch name"
 description: "Get branch name from GitHub and load it as a variable to the runner env"
 runs:
   using: composite
