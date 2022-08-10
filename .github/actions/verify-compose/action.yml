@@ -27,14 +27,15 @@ runs:
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    - if: ${{ inputs.acs_version != 'community' }}
+    - if: github.repository_owner == 'Alfresco' && ${{ inputs.acs_version != 'community' }}
       name: Login to Quay.io
       uses: docker/login-action@v1
       with:
         registry: quay.io
         username: ${{ inputs.QUAY_USERNAME }}
         password: ${{ inputs.QUAY_PASSWORD }}
-    - name: Login to Docker Hub
+    - if: github.repository_owner == 'Alfresco'
+      name: Login to Docker Hub
       uses: docker/login-action@v1
       with:
         username: ${{ inputs.DOCKER_USERNAME }}
@@ -45,7 +46,7 @@ runs:
         echo COMMIT_MESSAGE=\"$MSG\" >> $GITHUB_ENV
       shell: bash
     - name: Run Docker Compose tests
-      id: compose
+      if: github.repository_owner == 'Alfresco' || ${{ inputs.acs_version == 'community' }}
       run: ${{ github.action_path }}/docker_compose.sh
       shell: bash
       env:
