@@ -1,8 +1,8 @@
 name: "Verify and test docker compose"
 description: "Setup environment and run docker compose tests"
 inputs:
-  acs_version:
-    description: "version of ACS to verify"
+  compose_file_path:
+    description: "full path to docker compose file to test"
     required: true
   docker_username:
     description: "username for Docker Hub"
@@ -16,9 +16,6 @@ inputs:
   quay_password:
     description: "password for Quay.io"
     required: false
-  branch_name:
-    description: "name of branch from which workflow was triggered"
-    required: true
 
 runs:
   using: composite
@@ -40,15 +37,13 @@ runs:
       with:
         username: ${{ inputs.DOCKER_USERNAME }}
         password: ${{ inputs.DOCKER_PASSWORD }}
+    - name: Get branch name
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@OPSEXP-1545-helm-build-actions
     - name: Get commit msg
-      run: |
-        MSG=$(git log --format=%B -n 1 ${{github.event.after}})
-        echo COMMIT_MESSAGE=\"$MSG\" >> $GITHUB_ENV
-      shell: bash
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@OPSEXP-1545-helm-build-actions
     - name: Run Docker Compose tests
       if: github.repository_owner == 'Alfresco' || ${{ inputs.acs_version == 'community' }}
       run: ${{ github.action_path }}/docker_compose.sh
       shell: bash
       env:
-        ACS_VERSION: ${{ inputs.acs_version }}
-        BRANCH_NAME: ${{ inputs.branch_name }}
+        COMPOSE_FILE_PATH: ${{ inputs.compose_file_path }}

@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
-if [ -z "${ACS_VERSION}" ]; then
-  echo "ACS_VERSION variable is not set"
+if [ -z "${COMPOSE_FILE_PATH}" ]; then
+  echo "COMPOSE_FILE_PATH variable is not set"
   exit 2
 fi
 if [ -z "${COMMIT_MESSAGE}" ]; then
@@ -14,34 +14,31 @@ if [ -z "${BRANCH_NAME}" ]; then
 fi
 
 GIT_DIFF=$(git diff origin/master --name-only .)
-compose_file="docker-compose.yml"
+# compose_file="${COMPOSE_FILE}"
 alf_port=8080
 
-if [[ ${ACS_VERSION} != "latest" ]]; then
-  export compose_file="${ACS_VERSION}-docker-compose.yml"
-fi
 if [[ "${BRANCH_NAME}" == "master" ]] ||
   [[ "${COMMIT_MESSAGE}" == *"[run all tests]"* ]] ||
   [[ "${COMMIT_MESSAGE}" == *"[release]"* ]] ||
-  [[ "${GIT_DIFF}" == *$compose_file* ]] ||
+  [[ "${GIT_DIFF}" == *$COMPOSE_FILE_PATH* ]] ||
   [[ "${GIT_DIFF}" == *test/postman/docker-compose* ]]; then
   echo "deploying..."
 else
   exit 0
 fi
 
-cd "docker-compose" || {
-  echo "Error: docker compose dir not found"
-  exit 1
-}
+# cd "docker-compose" || {
+#   echo "Error: docker compose dir not found"
+#   exit 1
+# }
 docker info
 docker-compose --version
-docker-compose -f "${compose_file}" config
+docker-compose -f "${COMPOSE_FILE_PATH}" config
 echo "Starting Alfresco in Docker compose"
 docker-compose ps
-docker-compose -f "${compose_file}" pull
+docker-compose -f "${COMPOSE_FILE_PATH}" pull
 export COMPOSE_HTTP_TIMEOUT=120
-docker-compose -f "${compose_file}" up -d
+docker-compose -f "${COMPOSE_FILE_PATH}" up -d
 # docker-compose up
 WAIT_INTERVAL=1
 COUNTER=0
