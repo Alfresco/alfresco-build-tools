@@ -1,9 +1,6 @@
 name: "Verify and test helm chart"
 description: "Setup environment and run helm chart tests"
 inputs:
-  service:
-    description: "type of Alfresco service to verfiy - either 'acs' or 'aps'"
-    required: true
   aws_access_key_id:
     description: "ID of AWS access key"
     required: true
@@ -48,12 +45,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Check service configuration
-      if: ${{ inputs.service != 'aps' && inputs.service != 'acs' }}
-      run: |
-        echo "Service name can be either 'acs' or 'aps' got ${{ inputs.service }}"
-        exit 1
-      shell: bash
     - name: Checkout
       uses: actions/checkout@v3
       with:
