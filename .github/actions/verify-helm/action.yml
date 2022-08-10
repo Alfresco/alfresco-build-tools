@@ -4,9 +4,6 @@ inputs:
   service:
     description: "type of Alfresco service to verfiy - either 'acs' or 'aps'"
     required: true
-  acs_version:
-    description: "version of ACS to verify"
-    required: false
   aws_access_key_id:
     description: "ID of AWS access key"
     required: true
@@ -31,6 +28,10 @@ inputs:
   aws_sg:
     description: "AWS Security Group"
     required: true
+  acs_version:
+    description: "version of ACS to verify"
+    required: false
+    default: latest
   domain:
     description: "domain to access the cluster"
     required: false
@@ -82,7 +83,7 @@ runs:
     - name: Get commit msg
       uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@OPSEXP-1545-helm-build-actions
     - name: Run helm chart test script
-      run: ${{ github.action_path }}/${{ inputs.service }}_helm_install.sh
+      run: ${{ github.action_path }}/helm_install.sh
       shell: bash
       env:
         ACM_CERTIFICATE: ${{ inputs.acm_certificate }}
