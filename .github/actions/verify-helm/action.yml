@@ -83,10 +83,7 @@ runs:
     - name: Get branch name
       uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@OPSEXP-1545-helm-build-actions
     - name: Get commit msg
-      run: |
-        MSG=$(git log --format=%B -n 1 ${{github.event.after}})
-        echo COMMIT_MESSAGE=\"$MSG\" >> $GITHUB_ENV
-      shell: bash
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@OPSEXP-1545-helm-build-actions
     - name: Run helm chart test script
       run: ${{ github.action_path }}/${{ inputs.service }}_helm_install.sh
       shell: bash
