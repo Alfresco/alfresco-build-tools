@@ -25,9 +25,6 @@ inputs:
   quay_password:
     description: "password for Quay.io"
     required: false
-  branch_name:
-    description: "name of branch from which workflow was triggered"
-    required: false
   acm_certificate:
     description: "certificate for Amazon Certificate Manager"
     required: true
@@ -88,7 +85,6 @@ runs:
       run: ${{ github.action_path }}/${{ inputs.service }}_helm_install.sh
       shell: bash
       env:
-        # BRANCH_NAME: ${{ inputs.branch_name }}
         ACM_CERTIFICATE: ${{ inputs.acm_certificate }}
         AWS_SG: ${{ inputs.aws_sg }}
         DOMAIN: ${{ inputs.domain }}
