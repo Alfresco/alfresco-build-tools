@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 
 if [ -z "${COMMIT_MESSAGE}" ]; then
   echo "COMMIT_MESSAGE variable is not set"
