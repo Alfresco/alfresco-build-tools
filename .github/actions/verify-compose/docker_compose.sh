@@ -36,7 +36,10 @@ docker-compose --version
 docker-compose -f "${COMPOSE_FILE_PATH}" config
 echo "Starting Alfresco in Docker compose"
 
-echo "${COMPOSE_FILE_PATH}"
+echo "Compose file path: ${COMPOSE_FILE_PATH}"
+echo "Path: $(pwd)"
+echo "In this dir:\n$(ls)"
+echo "In docker-compose dir:\n$(ls docker-compose)"
 
 docker-compose ps
 docker-compose -f "${COMPOSE_FILE_PATH}" pull
