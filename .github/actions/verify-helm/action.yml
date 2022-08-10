@@ -27,7 +27,7 @@ inputs:
     required: false
   branch_name:
     description: "name of branch from which workflow was triggered"
-    required: true
+    required: false
   acm_certificate:
     description: "certificate for Amazon Certificate Manager"
     required: true
@@ -80,6 +80,11 @@ runs:
       with:
         username: ${{ inputs.docker_username}}
         password: ${{ inputs.docker_password }}
+    - name: Get branch name
+      run: |
+        BRANCH=${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}
+        echo BRANCH_NAME=\"$BRANCH\" >> $GITHUB_ENV
+      shell: bash
     - name: Get commit msg
       run: |
         MSG=$(git log --format=%B -n 1 ${{github.event.after}})
@@ -89,7 +94,7 @@ runs:
       run: ${{ github.action_path }}/${{ inputs.service }}_helm_install.sh
       shell: bash
       env:
-        BRANCH_NAME: ${{ inputs.branch_name }}
+        # BRANCH_NAME: ${{ inputs.branch_name }}
         ACM_CERTIFICATE: ${{ inputs.acm_certificate }}
         AWS_SG: ${{ inputs.aws_sg }}
         DOMAIN: ${{ inputs.domain }}
