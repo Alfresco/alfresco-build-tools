@@ -35,6 +35,9 @@ docker info
 docker-compose --version
 docker-compose -f "${COMPOSE_FILE_PATH}" config
 echo "Starting Alfresco in Docker compose"
+
+echo "${COMPOSE_FILE_PATH}"
+
 docker-compose ps
 docker-compose -f "${COMPOSE_FILE_PATH}" pull
 export COMPOSE_HTTP_TIMEOUT=120
