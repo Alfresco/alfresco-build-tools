@@ -1,0 +1,10 @@
+name: "Load branch name"
+description: "Get branch name from GitHub and load it as a variable to the runner env"
+runs:
+  using: composite
+  steps:
+    - name: Get branch name
+      run: |
+        BRANCH=${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}
+        echo BRANCH_NAME=\"$BRANCH\" >> $GITHUB_ENV
+      shell: bash
