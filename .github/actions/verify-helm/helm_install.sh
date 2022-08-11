@@ -244,47 +244,51 @@ done
 
 pods_ready || exit 1
 
-# Delay running the tests to give ingress & SOLR a chance to fully initialise
-echo "Waiting 3 minutes from $(date) before running tests..."
-sleep 180
+if [[ ${ACS_VERSION} != "default" ]]; then
 
-# run acs checks
-wait_for_connection
-newman run helm/acs-test-helm-collection.json --global-var "protocol=https" --global-var "url=${HOST}"
-TEST_RESULT=$?
-echo "TEST_RESULT=${TEST_RESULT}"
-if [[ "${TEST_RESULT}" == "0" ]]; then
-  TEST_RESULT=0
-  # run sync service checks
-  if [[ ${ACS_VERSION} != "community" ]]; then
-    wait_for_connection
-    newman run "helm/sync-service-test-helm-collection.json" --global-var "protocol=https" --global-var "url=${HOST}"
-    TEST_RESULT=$?
-    echo "TEST_RESULT=${TEST_RESULT}"
-  fi
+  # Delay running the tests to give ingress & SOLR a chance to fully initialise
+  echo "Waiting 3 minutes from $(date) before running tests..."
+  sleep 180
 
-  if [[ "${TEST_RESULT}" == "0" ]] && [[ ${ACS_VERSION} == "latest" ]]; then
-    # For checking if persistence failover is correctly working with our deployments
-    # in the next phase we delete the acs and postgresql pods,
-    # wait for k8s to recreate them, then check if the data created in the first test run is still there
-    kubectl delete pod -l app="${release_name_acs}"-alfresco-cs-repository,component=repository -n "${namespace}"
-    kubectl delete pod -l app=postgresql-acs,release="${release_name_acs}" -n "${namespace}"
-    helm upgrade "${release_name_acs}" helm/"${PROJECT_NAME}" \
-      --wait \
-      --timeout 10m0s \
-      --reuse-values \
-      --namespace="${namespace}"
+  # run acs checks
+  wait_for_connection
+  newman run helm/acs-test-helm-collection.json --global-var "protocol=https" --global-var "url=${HOST}"
+  TEST_RESULT=$?
+  echo "TEST_RESULT=${TEST_RESULT}"
+  if [[ "${TEST_RESULT}" == "0" ]]; then
+    TEST_RESULT=0
+    # run sync service checks
+    if [[ ${ACS_VERSION} != "community" ]]; then
+      wait_for_connection
+      newman run "helm/sync-service-test-helm-collection.json" --global-var "protocol=https" --global-var "url=${HOST}"
+      TEST_RESULT=$?
+      echo "TEST_RESULT=${TEST_RESULT}"
+    fi
 
-    # check pods
-    pods_ready || exit 1
+    if [[ "${TEST_RESULT}" == "0" ]] && [[ ${ACS_VERSION} == "latest" ]]; then
+      # For checking if persistence failover is correctly working with our deployments
+      # in the next phase we delete the acs and postgresql pods,
+      # wait for k8s to recreate them, then check if the data created in the first test run is still there
+      kubectl delete pod -l app="${release_name_acs}"-alfresco-cs-repository,component=repository -n "${namespace}"
+      kubectl delete pod -l app=postgresql-acs,release="${release_name_acs}" -n "${namespace}"
+      helm upgrade "${release_name_acs}" helm/"${PROJECT_NAME}" \
+        --wait \
+        --timeout 10m0s \
+        --reuse-values \
+        --namespace="${namespace}"
 
-    # run checks after pod deletion
-    wait_for_connection
-    newman run "helm/acs-validate-volume-collection.json" --global-var "protocol=https" --global-var "url=${HOST}"
-    TEST_RESULT=$?
-    echo "TEST_RESULT=${TEST_RESULT}"
+      # check pods
+      pods_ready || exit 1
+
+      # run checks after pod deletion
+      wait_for_connection
+      newman run "helm/acs-validate-volume-collection.json" --global-var "protocol=https" --global-var "url=${HOST}"
+      TEST_RESULT=$?
+      echo "TEST_RESULT=${TEST_RESULT}"
+    fi
   fi
 fi
+
 if [[ "${COMMIT_MESSAGE}" != *"[keep env]"* ]]; then
   helm delete "${release_name_ingress}" "${release_name_acs}" -n "${namespace}"
   kubectl delete namespace "${namespace}" --grace-period=1
