@@ -22,6 +22,7 @@ echo "Commit message is: ${COMMIT_MESSAGE}"
 echo "Branch name is: ${BRANCH_NAME}"
 echo "GitHub run number is: ${GITHUB_RUN_NUMBER}"
 echo "GitHub username is: ${GITHUB_USERNAME}"
+echo "Project name is: ${PROJECT_NAME}"
 
 # HELM_REPO_BASE_URL="https://kubernetes-charts.alfresco.com"
 # HELM_REPO="incubator"
