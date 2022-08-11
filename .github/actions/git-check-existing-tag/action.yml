@@ -21,7 +21,9 @@ runs:
       run: |
         if git ls-remote --exit-code --tags origin "$TAG"
         then
-            echo "::set-output name=tag-exists::true"
+          echo "Tag $TAG exists already"
+          echo "::set-output name=tag-exists::true"
         else
+          echo "Tag $TAG does not exists"
           echo "::set-output name=tag-exists::false"
         fi
