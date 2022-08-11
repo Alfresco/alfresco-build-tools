@@ -1,0 +1,32 @@
+name: "Verify and test docker compose"
+description: "Setup environment and run docker compose tests"
+inputs:
+  github_token:
+    description: "GitHub token"
+    required: true
+  github_username:
+    description: "git config username"
+    required: true
+  github_email:
+    description: "git config email"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Get branch name
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@OPSEXP-1545-helm-build-actions
+    - name: Get commit msg
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@OPSEXP-1545-helm-build-actions
+    - name: Publish
+      run: ${{ github.action_path }}/publish_chart.sh
+      shell: bash
+      if: github.ref_name == github.event.repository.default_branch || env.COMMIT_MESSAGE == '[publish]'
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        GITHUB_USERNAME: ${{ inputs.github_username }}
+        GITHUB_EMAIL: ${{ inputs.github_email }}
