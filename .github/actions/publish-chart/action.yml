@@ -22,10 +22,6 @@ runs:
       uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@OPSEXP-1545-helm-build-actions
     - name: Get commit msg
       uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@OPSEXP-1545-helm-build-actions
-    - name: Debug print commit msg
-      run: |
-        echo "Commit message is: ${{ env.COMMIT_MESSAGE }}"
-      shell: bash
     - name: Publish
       run: ${{ github.action_path }}/publish_chart.sh
       shell: bash
