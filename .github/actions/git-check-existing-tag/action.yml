@@ -4,6 +4,9 @@ inputs:
   tag:
     description: The name of the tag to be checked
     required: true
+  repository-directory:
+    description: "Path to the the directory holding the git repository"
+    required: false
 
 outputs:
   exists:
@@ -19,6 +22,11 @@ runs:
       env:
         TAG: ${{ inputs.tag }}
       run: |
+        REPO_DIR="${{inputs.repository-directory}}"
+        if [ -n "$REPO_DIR" ]
+        then
+          cd $REPO_DIR
+        fi
         if git ls-remote --exit-code --tags origin "$TAG"
         then
           echo "Tag $TAG exists already"
