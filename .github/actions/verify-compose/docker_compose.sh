@@ -14,37 +14,37 @@ if [ -z "${BRANCH_NAME}" ]; then
 fi
 
 GIT_DIFF=$(git diff origin/master --name-only .)
-# compose_file="${COMPOSE_FILE}"
+COMPOSE_FILE=$(basename $COMPOSE_FILE_PATH)
+COMPOSE_PATH=$(dirname $COMPOSE_FILE_PATH)
 alf_port=8080
 
 if [[ "${BRANCH_NAME}" == "master" ]] ||
   [[ "${COMMIT_MESSAGE}" == *"[run all tests]"* ]] ||
   [[ "${COMMIT_MESSAGE}" == *"[release]"* ]] ||
-  [[ "${GIT_DIFF}" == *$COMPOSE_FILE_PATH* ]] ||
+  [[ "${GIT_DIFF}" == *$COMPOSE_FILE* ]] ||
   [[ "${GIT_DIFF}" == *test/postman/docker-compose* ]]; then
   echo "deploying..."
 else
   exit 0
 fi
 
-cd "docker-compose" || {
+cd "$COMPOSE_PATH" || {
   echo "Error: docker compose dir not found"
   exit 1
 }
 docker info
 docker-compose --version
-docker-compose -f "${COMPOSE_FILE_PATH}" config
+docker-compose -f "${COMPOSE_FILE}" config
 echo "Starting Alfresco in Docker compose"
 
 echo "Compose file path: ${COMPOSE_FILE_PATH}"
-echo "Path: $(pwd)"
-echo "In this dir:\n$(ls)"
-echo "In docker-compose dir:\n$(ls docker-compose)"
+echo "Compose file: $COMPOSE_FILE"
+echo "Compose path: $COMPOSE_PATH"
 
 docker-compose ps
-docker-compose -f "${COMPOSE_FILE_PATH}" pull
+docker-compose -f "${COMPOSE_FILE}" pull
 export COMPOSE_HTTP_TIMEOUT=120
-docker-compose -f "${COMPOSE_FILE_PATH}" up -d
+docker-compose -f "${COMPOSE_FILE}" up -d
 # docker-compose up
 WAIT_INTERVAL=1
 COUNTER=0
