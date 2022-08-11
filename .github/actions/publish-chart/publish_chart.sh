@@ -17,6 +17,10 @@ if [ -z "${GITHUB_TOKEN}" ]; then
   exit 2
 fi
 
+if [[ -z $PROJECT_NAME ]]; then
+  PROJECT_NAME="alfresco-content-services"
+fi
+
 echo "Running publish script"
 echo "Commit message is: ${COMMIT_MESSAGE}"
 echo "Branch name is: ${BRANCH_NAME}"
