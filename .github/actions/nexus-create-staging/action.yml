@@ -49,7 +49,7 @@ runs:
             -u "${NEXUS_USERNAME}":"${NEXUS_PASSWORD}" \
             -H "Content-Type:application/xml" \
             "${NEXUS_URL}"/service/local/staging/profiles/"${NEXUS_PROFILE_ID}"/start | \
-            grep stagedRepositoryId | grep -o "$NEXUS_STAGING_PROFILE_PATTERN")
+            yq -p=xml e '.promoteResponse.data.stagedRepositoryId')
           echo "Staging repository $NEXUS_STAGING_REPOSITORY"
         else
           echo "Reusing exising staging repository $NEXUS_STAGING_REPOSITORY"
