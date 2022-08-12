@@ -52,7 +52,7 @@ runs:
             yq -p=xml e '.promoteResponse.data.stagedRepositoryId')
           echo "Staging repository $NEXUS_STAGING_REPOSITORY created."
         else
-          echo "Reusing exising staging repository $NEXUS_STAGING_REPOSITORY"
+          echo "Reusing existing staging repository $NEXUS_STAGING_REPOSITORY"
         fi
 
         echo "::set-output name=staging-repository::$NEXUS_STAGING_REPOSITORY"
