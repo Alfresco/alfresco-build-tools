@@ -1,0 +1,58 @@
+name: Create stating repository
+description: Create a new staging repository on Nexus, unless there is a existing repository with the same description
+inputs:
+  staging-description:
+    description: The description of the staging repository
+    required: true
+  nexus-profile-id:
+    description: The id of the staging profile to be used to create the staging repository
+    required: true
+  nexus-username:
+    description: "Nexus user name"
+    required: true
+  nexus-password:
+    description: "Nexus password"
+    required: true
+  nexus-url:
+    description: "Base URL to nexus server"
+    required: false
+    default: "https://artifacts.alfresco.com/nexus"
+outputs:
+  staging-repository:
+    description: The staging repository created or already existing that matches the provided description
+    value: ${{steps.staging.outputs.staging-repository}}
+
+runs:
+  using: composite
+  steps:
+    - name: create-staging-repository
+      id: staging
+      shell: bash
+      env:
+        STAGING_DESCRIPTION: ${{ inputs.staging-description }}
+        NEXUS_PROFILE_ID: ${{ inputs.nexus-profile-id }}
+        NEXUS_USERNAME: ${{ inputs.nexus-username }}
+        NEXUS_PASSWORD: ${{ inputs.nexus-password }}
+        NEXUS_URL: ${{ inputs.nexus-url }}
+      run: |
+        echo "Checking repository to be used for $STAGING_DESCRIPTION"
+        NEXUS_STAGING_REPOSITORY=$(curl -u "${NEXUS_USERNAME}":"${NEXUS_PASSWORD}" \
+          -X GET https://artifacts.alfresco.com/nexus/service/local/staging/profile_repositories \
+          | yq -p=xml e '.stagingRepositories.data.stagingProfileRepository[]| select (.description == env(STAGING_DESCRIPTION)) | .repositoryId')
+
+        if [ -z "$NEXUS_STAGING_REPOSITORY" ];
+        then
+          STAGING_DESCRIPTION_CONTENT=$(envsubst < $GITHUB_ACTION_PATH/staging-repository-payload-template.xml)
+          echo "Creating staging repository on Nexus with the following description: "
+          echo "$STAGING_DESCRIPTION_CONTENT"
+          NEXUS_STAGING_REPOSITORY=$(curl -d "$STAGING_DESCRIPTION_CONTENT" \
+            -u "${NEXUS_USERNAME}":"${NEXUS_PASSWORD}" \
+            -H "Content-Type:application/xml" \
+            "${NEXUS_URL}"/service/local/staging/profiles/"${NEXUS_PROFILE_ID}"/start | \
+            grep stagedRepositoryId | grep -o "$NEXUS_STAGING_PROFILE_PATTERN")
+          echo "Staging repository $NEXUS_STAGING_REPOSITORY"
+        else
+          echo "Reusing exising staging repository $NEXUS_STAGING_REPOSITORY"
+        fi
+
+        echo "::set-output name=staging-repository::$NEXUS_STAGING_REPOSITORY"
