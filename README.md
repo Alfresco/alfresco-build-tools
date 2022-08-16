@@ -337,6 +337,22 @@ Updates `version` attribute inside `Chart.yaml` file:
           chart-dir: charts/common
 ```
 
+### get-branch-name
+
+Loads the name of the branch on which the action was called into `BRANCH_NAME` environment variable
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@ref
+```
+
+### get-commit-message
+
+Loads the content of the last commit message that triggered the action into `COMMIT_MESSAGE` environment variable
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@ref
+```
+
 ## Reusable workflows provided by us
 
 ### helm-publish-new-package-version.yml
