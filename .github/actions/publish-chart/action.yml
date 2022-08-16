@@ -1,5 +1,5 @@
-name: "Verify and test docker compose"
-description: "Setup environment and run docker compose tests"
+name: "Publish helm chart on GitHub "
+description: "Publish new version of helm chart and update repository tags"
 inputs:
   github_token:
     description: "GitHub token"
