@@ -1,0 +1,28 @@
+name: Get latest tag for pattern
+description: Get the latest tag for the given pattern
+inputs:
+  pattern:
+    description: >
+      The pattern used to filter the tags: any expression supported by `git tag --list "expression"`
+    required: false
+    default: *
+  repository-directory:
+    description: "Path to the the directory holding the git repository"
+    required: false
+runs:
+  using: composite
+  steps:
+    - name: get latest tag
+      shell: bash
+      env:
+        PATTERN: ${{ inputs.pattern }}
+        REPO_DIR: ${{ inputs.repository-directory }}
+      run: |
+        if [ -n "$REPO_DIR" ]
+        then
+          cd $REPO_DIR
+        fi
+        git fetch --tags
+        TAG=$(git tag --list "$PATTERN" --sort=-creatordate | head -n 1)
+        echo "Latest tag for the pattern $PATTERN is $TAG"
+        echo "::set-output name=latest-tag::$TAG"
