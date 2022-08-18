@@ -2,8 +2,11 @@ name: "Package helm chart"
 description: "Package helm chart by running `helm dep up` and ` helmp package`"
 inputs:
   chart-dir:
-    description: "Path to the folder holding Chart.yaml"
+    description: "Relative path to the folder holding Chart.yaml"
     required: true
+  chart-repository-dir:
+    description: "The path the git repository holding the chart project"
+    required: false
 outputs:
   package-file:
     description: The name of the generated package file
@@ -15,7 +18,14 @@ runs:
     - name: Package
       id: package
       shell: bash
+      env:
+        CHART_REPO_DIR: ${{inputs.chart-repository-dir }}
       run: |
+        if [ -n "$CHART_REPO_DIR" ]
+        then
+          cd $CHART_REPO_DIR
+        fi
+
         helm dep up ${{ inputs.chart-dir }}
         helm package ${{ inputs.chart-dir }}
         PACKAGE_FILE=$(ls | grep *\.tgz)

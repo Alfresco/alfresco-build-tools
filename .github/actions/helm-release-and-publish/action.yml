@@ -1,0 +1,74 @@
+name: Release and publish helm chart
+description: >
+  Release a new version of a helm chart and publishes it to a helm repository
+inputs:
+  version:
+    description: The version name
+    required: true
+  chart-dir:
+    description: 'Relative path to the folder holding Chart.yaml'
+    required: true
+  chart-repository-dir:
+    description: "The path the git repository holding the chart project"
+    required: false
+  helm-repository:
+    description: 'Charts repository to checkout'
+    required: true
+  helm-repository-branch:
+    description: 'Branch on the charts repository'
+    required: false
+  helm-repository-token:
+    description: 'The Github token to checkout the charts repository'
+    required: true
+  git-username:
+    description: 'The username to commit on the git repositories'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Set version env variable
+      env:
+        VERSION: ${{ inputs.version }}
+      shell: bash
+      run: |
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+    - name: Update chart version
+      uses: Alfresco/alfresco-build-tools/.github/actions/update-chart-version@v1.9.2
+      with:
+        new-version: ${{ env.VERSION }}
+        chart-repository-dir: ${{ inputs.chart-repository-dir }}
+        chart-dir: ${{ inputs.chart-dir }}
+
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.9.2
+      with:
+        username: ${{ inputs.git-username }}
+        add-options: -u
+        commit-message: Release version ${{ env.VERSION }}
+        repository-directory: ${{ inputs.chart-repository-dir }}
+
+    - name: Create local tag
+      shell: bash
+      working-directory: ${{ inputs.chart-repository-dir }}
+      run: git tag -a $VERSION -m "Release version $VERSION"
+
+    - name: Package Helm Chart
+      id: package-helm-chart
+      uses: Alfresco/alfresco-build-tools/.github/actions/package-helm-chart@v1.9.2
+      with:
+        chart-dir: ${{ inputs.chart-dir }}
+        chart-repository-dir: ${{ inputs.chart-repository-dir }}
+
+    - name: Push tag
+      working-directory: ${{ inputs.chart-repository-dir }}
+      shell: bash
+      run: git push origin $VERSION
+
+    - name: Publish Helm chart
+      uses: Alfresco/alfresco-build-tools/.github/actions/publish-helm-chart@v1.9.2
+      with:
+        helm-charts-repo: ${{inputs.helm-repository}}
+        helm-charts-repo-branch: ${{ inputs.helm-repository-branch }}
+        chart-package: ${{ steps.package-helm-chart.outputs.package-file }}
+        token: ${{ inputs.helm-repository-token }}

@@ -5,14 +5,23 @@ inputs:
     description: "The new version of the chart"
     required: true
   chart-dir:
-    description: "The path to the directory holding Chart.yaml"
+    description: "The relative path to the directory holding Chart.yaml"
     required: true
+  chart-repository-dir:
+    description: "The path the git repository holding the chart project"
+    required: false
 runs:
   using: composite
   steps:
     - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@v1.12.0
     - name: Update version
       shell: bash
+      env:
+        CHART_REPO_DIR: ${{inputs.chart-repository-dir }}
       run: |
+        if [ -n "$CHART_REPO_DIR" ]
+        then
+          cd $CHART_REPO_DIR
+        fi
         yq -i e '.version = "${{ inputs.new-version }}"' ${{ inputs.chart-dir }}/Chart.yaml
         helm-docs
