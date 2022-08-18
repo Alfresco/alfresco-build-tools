@@ -1,0 +1,49 @@
+name: Load release information
+description: Load release information from file descriptor
+inputs:
+  release-descriptor:
+    description: Path to the release descriptor
+    required: true
+  pre-release-suffix:
+    description: The suffix used for internal releases. This information will be used to infer the output `tag=pattern`.
+    required: true
+outputs:
+  branch:
+    description: Name of the development branch
+    value: ${{ steps.load-descriptor.outputs.branch}}
+  version:
+    description: Version to be released
+    value: ${{ steps.load-descriptor.outputs.version}}
+  next-version:
+    description: Next version to be used by the development branch
+    value: ${{ steps.load-descriptor.outputs.next-version}}
+  mock:
+    description: Flag to specify whether it's a mock release
+    value: ${{ steps.load-descriptor.outputs.mock}}
+  tag-pattern:
+    description: The inferred tag pattern for internal releases
+    value: ${{ steps.load-descriptor.outputs.tag-pattern}}
+runs:
+  using: composite
+  steps:
+    - name: Load release descriptor
+      id: load-descriptor
+      shell: bash
+      env:
+        RELEASE_DESCRIPTOR: ${{ inputs.release-descriptor }}
+        PRE_RELEASE_SUFFIX: ${{ inputs.pre-release-suffix }}
+      run: |
+        VERSION=$(yq e '.release.version' $RELEASE_DESCRIPTOR)
+        BRANCH=$(yq e '.release.version' $RELEASE_DESCRIPTOR)
+        NEXT_VERSION=$(yq e '.release.nextVersion' $RELEASE_DESCRIPTOR)
+        MOCK=$(yq e '.release.mock' $RELEASE_DESCRIPTOR)
+
+        if [ "$MOCK" == "true" ]; then
+          VERSION=$VERSION-mock
+        fi
+
+        echo "::set-output name=branch::$BRANCH"
+        echo "::set-output name=version::$VERSION"
+        echo "::set-output name=next-version::$NEXT_VERSION"
+        echo "::set-output name=mock::$MOCK"
+        echo "::set-output name=tag-pattern::${VERSION%-mock*}-$PRE_RELEASE_SUFFIX*"
