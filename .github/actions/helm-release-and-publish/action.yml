@@ -35,7 +35,7 @@ runs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
 
     - name: Update chart version
-      uses: Alfresco/alfresco-build-tools/.github/actions/update-chart-version@v1.9.2
+      uses: Alfresco/alfresco-build-tools/.github/actions/update-chart-version@aae-8254-actions-for-activiti-script
       with:
         new-version: ${{ env.VERSION }}
         chart-repository-dir: ${{ inputs.chart-repository-dir }}
@@ -55,7 +55,7 @@ runs:
 
     - name: Package Helm Chart
       id: package-helm-chart
-      uses: Alfresco/alfresco-build-tools/.github/actions/package-helm-chart@v1.9.2
+      uses: Alfresco/alfresco-build-tools/.github/actions/package-helm-chart@aae-8254-actions-for-activiti-script
       with:
         chart-dir: ${{ inputs.chart-dir }}
         chart-repository-dir: ${{ inputs.chart-repository-dir }}
