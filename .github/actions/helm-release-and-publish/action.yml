@@ -34,7 +34,14 @@ runs:
       run: |
         echo "VERSION=$VERSION" >> $GITHUB_ENV
 
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-check-existing-tag@aae-8254-actions-for-activiti-script
+      id: check-tag
+      with:
+        tag: ${{ env.VERSION }}
+        repository-directory: ${{ inputs.chart-repository-dir }}
+
     - name: Update chart version
+      if: steps.check-tag.outputs.exists == 'false'
       uses: Alfresco/alfresco-build-tools/.github/actions/update-chart-version@aae-8254-actions-for-activiti-script
       with:
         new-version: ${{ env.VERSION }}
@@ -42,6 +49,7 @@ runs:
         chart-dir: ${{ inputs.chart-dir }}
 
     - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.9.2
+      if: steps.check-tag.outputs.exists == 'false'
       with:
         username: ${{ inputs.git-username }}
         add-options: -u
@@ -49,11 +57,13 @@ runs:
         repository-directory: ${{ inputs.chart-repository-dir }}
 
     - name: Create local tag
+      if: steps.check-tag.outputs.exists == 'false'
       shell: bash
       working-directory: ${{ inputs.chart-repository-dir }}
       run: git tag -a $VERSION -m "Release version $VERSION"
 
     - name: Package Helm Chart
+      if: steps.check-tag.outputs.exists == 'false'
       id: package-helm-chart
       uses: Alfresco/alfresco-build-tools/.github/actions/package-helm-chart@aae-8254-actions-for-activiti-script
       with:
@@ -61,11 +71,13 @@ runs:
         chart-repository-dir: ${{ inputs.chart-repository-dir }}
 
     - name: Push tag
+      if: steps.check-tag.outputs.exists == 'false'
       working-directory: ${{ inputs.chart-repository-dir }}
       shell: bash
       run: git push origin $VERSION
 
     - name: Publish Helm chart
+      if: steps.check-tag.outputs.exists == 'false'
       uses: Alfresco/alfresco-build-tools/.github/actions/publish-helm-chart@v1.9.2
       with:
         helm-charts-repo: ${{inputs.helm-repository}}
