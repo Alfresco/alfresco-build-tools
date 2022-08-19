@@ -19,9 +19,9 @@ runs:
       with:
         fetch-depth: 0
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@OPSEXP-1545-helm-build-actions
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v1.10.0
     - name: Get commit msg
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@OPSEXP-1545-helm-build-actions
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@v1.10.0
     - name: Publish
       run: ${{ github.action_path }}/publish_chart.sh
       shell: bash

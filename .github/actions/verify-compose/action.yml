@@ -38,9 +38,9 @@ runs:
         username: ${{ inputs.DOCKER_USERNAME }}
         password: ${{ inputs.DOCKER_PASSWORD }}
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@master
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v1.10.0
     - name: Get commit msg
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@master
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@v1.10.0
     - name: Run Docker Compose tests
       if: github.repository_owner == 'Alfresco' || ${{ inputs.acs_version == 'community' }}
       run: ${{ github.action_path }}/docker_compose.sh
