@@ -5,7 +5,7 @@ inputs:
     description: >
       The pattern used to filter the tags: any expression supported by `git tag --list "expression"`
     required: false
-    default: *
+    default: '*'
   repository-directory:
     description: "Path to the the directory holding the git repository"
     required: false
