@@ -70,5 +70,5 @@ runs:
       with:
         helm-charts-repo: ${{inputs.helm-repository}}
         helm-charts-repo-branch: ${{ inputs.helm-repository-branch }}
-        chart-package: ${{ steps.package-helm-chart.outputs.package-file }}
+        chart-package: ${{ github.workspace }}/${{ inputs.chart-repository-dir }}/${{ steps.package-helm-chart.outputs.package-file }}
         token: ${{ inputs.helm-repository-token }}
