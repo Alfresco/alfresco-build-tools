@@ -21,8 +21,8 @@ runs:
       shell: bash
       env:
         TAG: ${{ inputs.tag }}
+        REPO_DIR: ${{inputs.repository-directory}}
       run: |
-        REPO_DIR="${{inputs.repository-directory}}"
         if [ -n "$REPO_DIR" ]
         then
           cd $REPO_DIR
