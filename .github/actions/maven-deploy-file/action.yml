@@ -60,6 +60,6 @@ runs:
           -DrepositoryId=${{ inputs.repository-id }} \
           -Dversion=${{ inputs.version }} \
           -Dfile=${{ inputs.file }} \
-          -Dclassifier=${{ inputs.classifier }}
+          -Dclassifier=${{ inputs.classifier }} \
           -Dfiles=${{ inputs.files }} \
           -Dclassifiers=${{ inputs.classifiers }}
