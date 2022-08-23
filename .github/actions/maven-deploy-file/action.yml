@@ -35,6 +35,9 @@ inputs:
   classifiers:
     description: Comma separated classifiers for additional files that needs to be deployed
     required: false
+  types:
+    description: Comma separated types for additional files that needs to be deployed
+    required: false
 runs:
   using: "composite"
   steps:
@@ -62,4 +65,5 @@ runs:
           -Dfile=${{ inputs.file }} \
           -Dclassifier=${{ inputs.classifier }} \
           -Dfiles=${{ inputs.files }} \
-          -Dclassifiers=${{ inputs.classifiers }}
+          -Dclassifiers=${{ inputs.classifiers }} \
+          -Dtypes=${{ inputs.types }}
