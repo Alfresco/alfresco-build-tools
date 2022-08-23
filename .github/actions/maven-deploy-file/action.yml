@@ -16,6 +16,12 @@ inputs:
   file:
     description: Path to the main file that needs to be deployed
     required: true
+  maven-username:
+    description: Username to authenticate to the maven repository (when not using a custom settings.xml)
+    required: false
+  maven-password:
+    description: Password to authenticate to the maven repository (when not using a custom settings.xml)
+    required: false
   repository-id:
     description: Credentials to use that are defined in settings.xml
     required: false
