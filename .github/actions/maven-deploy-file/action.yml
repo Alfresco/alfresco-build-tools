@@ -40,7 +40,7 @@ runs:
   steps:
     - name: Stub settings.xml if not already existing
       shell: bash
-      run:
+      run: |
         if [ ! -f ~/.m2/settings.xml ]; then
           echo "Using default settings.xml, make sure to provide credentials as maven-username and maven-password inputs"
           mkdir -p ~/.m2/
