@@ -1,0 +1,18 @@
+name: "config-git"
+description: "Configure git"
+inputs:
+  branch-name:
+    description: "Branch name to checkout"
+    required: true
+  user-email:
+    description: "Email to link commits to user"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: git checkout -B ${{ inputs.branch-name }}
+    - shell: bash
+      run: git fetch
+    - shell: bash
+      run: git config user.email ${{ inputs.user-email }}
