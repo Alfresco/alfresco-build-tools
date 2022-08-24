@@ -1,0 +1,78 @@
+name: "maven-deploy-file"
+description: "Deploy one or more binaries to a maven repository"
+inputs:
+  group-id:
+    description: groupId of the artifact(s) to be deployed
+    required: true
+  artifact-id:
+    description: artifactId of the artifact(s) to be deployed
+    required: true
+  repository-url:
+    description: Maven repository URL where artifact(s) will be deployed
+    required: true
+  version:
+    description: version of the artifact(s) to be deployed
+    required: true
+  file:
+    description: Path to the main file that needs to be deployed
+    required: true
+  maven-username:
+    description: Username to authenticate to the maven repository (when not using a custom settings.xml)
+    required: false
+  maven-password:
+    description: Password to authenticate to the maven repository (when not using a custom settings.xml)
+    required: false
+  repository-id:
+    description: Credentials to use as defined in settings.xml
+    required: false
+    default: authenticated-maven-repository
+  classifier:
+    description: Classifier of the main file that needs to be deployed
+    required: false
+  files:
+    description: Comma separated paths to additional files that needs to be deployed
+    required: false
+  classifiers:
+    description: Comma separated classifiers for additional files that needs to be deployed
+    required: false
+  types:
+    description: Comma separated types for additional files that needs to be deployed
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - name: Copy embedded settings.xml if not already existing
+      shell: bash
+      env:
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
+      run: |
+        if [ ! -f ~/.m2/settings.xml ]; then
+          echo "Using embedded settings.xml"
+          if [ -z "$MAVEN_USERNAME" ] || [ -z "$MAVEN_PASSWORD" ]; then
+            echo "::error ::You need to provide credentials as maven-username and maven-password inputs when not providing a custom settings.xml"
+            exit 1
+          fi
+          mkdir -p ~/.m2/
+          cp ${{ github.action_path }}/settings.xml ~/.m2/
+        else
+          echo "Existing settings.xml found"
+          echo "Make sure to provide repository-id as input for choosing the right authentication credentials"
+        fi
+    - shell: bash
+      env:
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
+      run: |
+        mvn deploy:deploy-file -B \
+          -DgroupId=${{ inputs.group-id }} \
+          -DartifactId=${{ inputs.artifact-id }} \
+          -Durl=${{ inputs.repository-url }} \
+          -DrepositoryId=${{ inputs.repository-id }} \
+          -Dversion=${{ inputs.version }} \
+          -Dfile=${{ inputs.file }} \
+          -Dclassifier=${{ inputs.classifier }} \
+          -Dfiles=${{ inputs.files }} \
+          -Dclassifiers=${{ inputs.classifiers }} \
+          -Dtypes=${{ inputs.types }} \
+          -DretryFailedDeploymentCount=5
