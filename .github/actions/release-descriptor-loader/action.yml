@@ -10,19 +10,20 @@ inputs:
 outputs:
   branch:
     description: Name of the development branch
-    value: ${{ steps.load-descriptor.outputs.branch}}
+    value: ${{ steps.load-descriptor.outputs.branch }}
   version:
     description: Version to be released
-    value: ${{ steps.load-descriptor.outputs.version}}
+    value: ${{ steps.load-descriptor.outputs.version }}
   next-version:
     description: Next version to be used by the development branch
-    value: ${{ steps.load-descriptor.outputs.next-version}}
+    value: ${{ steps.load-descriptor.outputs.next-version }}
   mock:
     description: Flag to specify whether it's a mock release
-    value: ${{ steps.load-descriptor.outputs.mock}}
+    value: ${{ steps.load-descriptor.outputs.mock }}
   tag-pattern:
     description: The inferred tag pattern for internal releases
-    value: ${{ steps.load-descriptor.outputs.tag-pattern}}
+    value: ${{ steps.load-descriptor.outputs.tag-pattern }}
+
 runs:
   using: composite
   steps:
