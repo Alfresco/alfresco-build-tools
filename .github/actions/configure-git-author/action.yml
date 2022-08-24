@@ -1,0 +1,16 @@
+name: "configure-git-author"
+description: "Configure the git identity"
+inputs:
+  username:
+    description: "Git username"
+    required: true
+  email:
+    description: "Email"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: git config user.name ${{ inputs.username }}
+    - shell: bash
+      run: git config user.email ${{ inputs.email }}

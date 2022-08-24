@@ -128,7 +128,7 @@ Here follows a table to ease migrating Travis build that were using config offer
 | .travis.terraform_install.yml             | Preinstalled                                                                |
 | .travis.tflint_install.yml                | Not yet determined                                                          |
 | .travis.trigger.yml                       | Not yet determined                                                          |
-| .travis.veracode.yml                      | Not yet determined                                                          |
+| .travis.veracode.yml                      | [veracode](.github/actions/veracode)                                        |
 | .travis.yml                               | Not yet determined                                                          |
 | .travis.yq_install.yml                    | Preinstalled                                                                |
 
@@ -378,6 +378,28 @@ Updates `version` attribute inside `Chart.yaml` file:
 ```
 
 
+
+### configure-git-author
+
+Configures the git username and email to associate commits with the provided identity
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@ref
+        with:
+          username: ${{ secrets.BOT_GITHUB_USERNAME }}
+          email: ${{ secrets.BOT_GITHUB_EMAIL }}
+```
+
+### veracode
+
+Runs Veracode Source Clear Scan
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@ref
+        with:
+          srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
+          veracode-fails-build: "false"
+```
 
 ## Reusable workflows provided by us
 

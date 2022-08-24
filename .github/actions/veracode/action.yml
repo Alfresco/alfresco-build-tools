@@ -1,0 +1,19 @@
+name: "veracode"
+description: "Run Veracode - Source Clear Scan (SCA)"
+inputs:
+  srcclr-api-token:
+    description: "Agent API Token"
+    required: true
+  veracode-fails-build:
+    description: "Determine if the veracode scan result should fail the build"
+    default: "false"
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - name: "Run scanning"
+      run: ${{ github.action_path }}/source_clear.sh
+      shell: bash
+      env:
+        SRCCLR_API_TOKEN: ${{ inputs.srcclr-api-token }}
+        VERACODE_FAILS_BUILD: ${{ inputs.veracode-fails-build }}
