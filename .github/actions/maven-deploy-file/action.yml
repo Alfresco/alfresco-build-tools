@@ -74,4 +74,5 @@ runs:
           -Dclassifier=${{ inputs.classifier }} \
           -Dfiles=${{ inputs.files }} \
           -Dclassifiers=${{ inputs.classifiers }} \
-          -Dtypes=${{ inputs.types }}
+          -Dtypes=${{ inputs.types }} \
+          -DretryFailedDeploymentCount=5
