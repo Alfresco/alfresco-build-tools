@@ -355,7 +355,7 @@ Loads the content of the last commit message that triggered the action into `COM
 
 ### configure-git-author
 
-Configures the git username and email to associate commits with the provided identity 
+Configures the git username and email to associate commits with the provided identity
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@ref
