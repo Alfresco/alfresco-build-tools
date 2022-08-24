@@ -1,5 +1,5 @@
 name: "veracode"
-description: "Veracode - Source Clear Scan (SCA)"
+description: "Run Veracode - Source Clear Scan (SCA)"
 inputs:
   srcclr-api-token:
     description: "Agent API Token"
