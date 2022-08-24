@@ -43,13 +43,21 @@ runs:
   steps:
     - name: Copy embedded settings.xml if not already existing
       shell: bash
+      env:
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
       run: |
         if [ ! -f ~/.m2/settings.xml ]; then
-          echo "Using default settings.xml, make sure to provide credentials as maven-username and maven-password inputs"
+          echo "Using embedded settings.xml"
+          if [ -z "$MAVEN_USERNAME" ] || [ -z "$MAVEN_PASSWORD" ]; then
+            echo "::error ::You need to provide credentials as maven-username and maven-password inputs when not providing a custom settings.xml"
+            exit 1
+          fi
           mkdir -p ~/.m2/
           cp ${{ github.action_path }}/settings.xml ~/.m2/
         else
-          echo "Existing settings.xml found, make sure to specify the correct repository-id for auth to work"
+          echo "Existing settings.xml found"
+          echo "Make sure to provide repository-id as input for choosing the right authentication credentials"
         fi
     - shell: bash
       env:
