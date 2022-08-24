@@ -234,6 +234,22 @@ Run `helm dep up` and `helm lint` on the specified chart
           chart-dir: charts/common
 ```
 
+### get-branch-name
+
+Loads the name of the branch on which the action was called into `BRANCH_NAME` environment variable
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@ref
+```
+
+### get-commit-message
+
+Loads the content of the last commit message that triggered the action into `COMMIT_MESSAGE` environment variable
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@ref
+```
+
 ### git-commit-changes
 
 Commits local changes after configuring git user and showing the status of what is going be committed.
@@ -244,6 +260,30 @@ Commits local changes after configuring git user and showing the status of what 
         username: ${{ secrets.BOT_GITHUB_USERNAME }}
         add-options: -u
         commit-message: "My commit message"
+```
+
+### maven-deploy-file
+
+Upload one or more files to a maven server, without requiring the presence of a
+pom.xml. It provides a settings.xml when can find one already configured. When
+using a custom settings.xml, you probably want to provide also
+```repository-id``` that match the credentials id to be used for deploying.
+
+```yaml
+      - name: Deploy to Nexus
+        uses: Alfresco/alfresco-build-tools/.github/actions/maven-deploy-file@ref
+        with:
+          group-id: org.alfresco
+          artifact-id: custom-alfresco-distribution
+          repository-url: https://nexus.alfresco.com/nexus/content/repositories/a-valid-repo/
+          version: "1.2.3"
+          file: output/build.jar
+          classifier: binary
+          files: output/build-alt.jar,output/build-alt2.jar
+          classifiers: alt,alt2
+          types: jar,jar
+          maven-username: ${{ secrets.NEXUS_USERNAME }}
+          maven-password: ${{ secrets.NEXUS_PASSWORD }}
 ```
 
 ### package-helm-chart
@@ -337,21 +377,7 @@ Updates `version` attribute inside `Chart.yaml` file:
           chart-dir: charts/common
 ```
 
-### get-branch-name
 
-Loads the name of the branch on which the action was called into `BRANCH_NAME` environment variable
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@ref
-```
-
-### get-commit-message
-
-Loads the content of the last commit message that triggered the action into `COMMIT_MESSAGE` environment variable
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@ref
-```
 
 ## Reusable workflows provided by us
 

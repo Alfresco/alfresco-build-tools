@@ -2,16 +2,16 @@ name: "maven-deploy-file"
 description: "Deploy one or more binaries to a maven repository"
 inputs:
   group-id:
-    description: The python version of the local runner
+    description: groupId of the artifact(s) to be deployed
     required: true
   artifact-id:
-    description: The python version of the local runner
+    description: artifactId of the artifact(s) to be deployed
     required: true
   repository-url:
-    description: The python version of the local runner
+    description: Maven repository URL where artifact(s) will be deployed
     required: true
   version:
-    description: The version of the artifact(s)
+    description: version of the artifact(s) to be deployed
     required: true
   file:
     description: Path to the main file that needs to be deployed
@@ -23,7 +23,7 @@ inputs:
     description: Password to authenticate to the maven repository (when not using a custom settings.xml)
     required: false
   repository-id:
-    description: Credentials to use that are defined in settings.xml
+    description: Credentials to use as defined in settings.xml
     required: false
     default: authenticated-maven-repository
   classifier:
@@ -41,7 +41,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Stub settings.xml if not already existing
+    - name: Copy embedded settings.xml if not already existing
       shell: bash
       run: |
         if [ ! -f ~/.m2/settings.xml ]; then
