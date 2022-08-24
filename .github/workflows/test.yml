@@ -22,6 +22,7 @@ jobs:
       - uses: ./.github/actions/setup-jx-release-version
       - uses: ./.github/actions/setup-kubepug
       - uses: ./.github/actions/setup-rancher-cli
+        if: github.actor != 'dependabot[bot]'
         with:
           url: ${{ secrets.RANCHER2_URL }}
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
