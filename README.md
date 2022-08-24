@@ -267,7 +267,7 @@ Commits local changes after configuring git user and showing the status of what 
 Upload one or more files to a maven server, without requiring the presence of a
 pom.xml. It provides a settings.xml when can find one already configured. When
 using a custom settings.xml, you probably want to provide also
-```repository-id``` that match the credentials id to be used for deploying.
+`repository-id` that match the credentials id to be used for deploying.
 
 ```yaml
       - name: Deploy to Nexus
