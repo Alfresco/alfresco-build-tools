@@ -3,7 +3,6 @@
 echo "=========================== Starting SourceClear Script ==========================="
 PS4="\[\e[35m\]+ \[\e[m\]"
 set +e -v -x
-pushd "$(dirname "${BASH_SOURCE[0]}")/../"
 
 mvn -B -q clean install \
     -DskipTests \
@@ -19,7 +18,6 @@ fi
 
 grep -e 'Full Report Details' -e 'Failed' scan.log
 
-popd
 set +vex
 echo "=========================== Finishing SourceClear Script =========================="
 
