@@ -35,7 +35,7 @@ runs:
         PRE_RELEASE_SUFFIX: ${{ inputs.pre-release-suffix }}
       run: |
         VERSION=$(yq e '.release.version' $RELEASE_DESCRIPTOR)
-        BRANCH=$(yq e '.release.version' $RELEASE_DESCRIPTOR)
+        BRANCH=$(yq e '.release.branch' $RELEASE_DESCRIPTOR)
         NEXT_VERSION=$(yq e '.release.nextVersion' $RELEASE_DESCRIPTOR)
         MOCK=$(yq e '.release.mock' $RELEASE_DESCRIPTOR)
 
