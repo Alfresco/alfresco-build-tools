@@ -3,8 +3,6 @@
 echo "=========================== Starting SourceClear Script ==========================="
 PS4="\[\e[35m\]+ \[\e[m\]"
 set +e -v -x
-pwd
-pushd "$(dirname "${BASH_SOURCE[0]}")/../../"
 
 mvn -B -q clean install \
     -DskipTests \
