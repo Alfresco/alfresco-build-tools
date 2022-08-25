@@ -3,7 +3,7 @@
 echo "=========================== Starting SourceClear Script ==========================="
 PS4="\[\e[35m\]+ \[\e[m\]"
 set +e -v -x
-pushd "$(dirname "${BASH_SOURCE[0]}")/../../../"
+pushd "$(dirname "${BASH_SOURCE[0]}")/../../"
 
 mvn -B -q clean install \
     -DskipTests \
@@ -17,7 +17,7 @@ if [ -z "$VERACODE_FAILS_BUILD" ] || [ "$VERACODE_FAILS_BUILD" = false ] ; then
     SUCCESS=0
 fi
 
-grep -e 'Full Report Details' -e 'Failed' scan.log
+grep -e 'Full Report Details' -e 'Failed' -e 'directory' scan.log
 
 popd
 set +vex
