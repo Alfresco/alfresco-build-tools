@@ -16,7 +16,7 @@ if [ -z "$VERACODE_FAILS_BUILD" ] || [ "$VERACODE_FAILS_BUILD" = false ] ; then
     SUCCESS=0
 fi
 
-grep -e 'Full Report Details' -e 'Failed' -e 'directory' scan.log
+grep -e 'Full Report Details' -e 'Failed' scan.log
 
 popd
 set +vex
