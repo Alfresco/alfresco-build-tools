@@ -18,7 +18,6 @@ fi
 
 grep -e 'Full Report Details' -e 'Failed' scan.log
 
-popd
 set +vex
 echo "=========================== Finishing SourceClear Script =========================="
 
