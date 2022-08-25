@@ -150,6 +150,13 @@ Here is a sample configuration:
         args: ["--schemafile", "https://json.schemastore.org/dependabot-2.0.json"]
 ```
 
+### Alternatives to Travis CI default environment variables
+| Travis CI           | GitHub Actions                                                     |
+|---------------------|-------------------------|
+| ${TRAVIS_BRANCH}    | ${{ github.ref_name }}  |
+| ${TRAVIS_BUILD_DIR} | ${{ github.workspace }} |
+| ${TRAVIS_COMMIT}    | ${{ github.sha }}       |
+
 ## Security hardening for GitHub Actions
 
 Before creating / modifying a GitHub Actions workflow make sure you're familiar with [Security hardening for GitHub Actions](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions). Pay special attention to:
