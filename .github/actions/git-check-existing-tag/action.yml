@@ -32,6 +32,6 @@ runs:
           echo "Tag $TAG exists already"
           echo "::set-output name=tag-exists::true"
         else
-          echo "Tag $TAG does not exists"
+          echo "Tag $TAG does not exist"
           echo "::set-output name=tag-exists::false"
         fi
