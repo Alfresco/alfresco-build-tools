@@ -1,0 +1,154 @@
+name: Release maven project
+description: Release Maven project
+
+inputs:
+  repo:
+    description: "Repository to be released"
+    required: true
+  base-tag:
+    description: "The name of the tag from where the release will be created"
+    required: true
+  extra-replacements:
+    description: Extra properties to replace
+    required: false
+  release-version:
+    description: "The name of the version to be released"
+    required: true
+  staging-repository-id:
+    description: "The id of the staging repository where the release artifacts will be stored"
+    required: true
+  github-token:
+    description: "The token to used to clone the repositories"
+    required: true
+  git-username:
+    description: "The username for git commit"
+    required: true
+  gpg-passphrase:
+    description: "GPG passphrase"
+    required: true
+  gpg-secret-keys:
+    description: "GPG secrets key"
+    required: true
+  gpg-owner-trust:
+    description: "GPG Owner trust"
+    required: true
+  nexus-username:
+    description: "Nexus user name"
+    required: true
+  nexus-password:
+    description: "Nexus password"
+    required: true
+  nexus-url:
+    description: "Base URL to nexus server"
+    required: false
+    default: "https://artifacts.alfresco.com/nexus"
+  maven-settings-path:
+    description: "path to the settings.xml to be used for the release"
+    required: false
+    default: ${{ github.workspace }}/maven-config/settings.xml
+
+runs:
+  using: composite
+  steps:
+    - name: set global properties
+      shell: bash
+      env:
+        REPO_DIR: ${{ github.workspace }}/${{ inputs.repo }}
+        RELEASE_VERSION: ${{ inputs.release-version }}
+      run: |
+        echo "REPO_DIR=$REPO_DIR" >> $GITHUB_ENV
+        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
+
+    - name: Checkout ${{ inputs.repo }}
+      uses: actions/checkout@v3
+      with:
+        repository: '${{ inputs.repo }}'
+        ref: ${{ inputs.base-tag }}
+        path: '${{ env.REPO_DIR }}'
+        token: ${{ inputs.github-token }}
+
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-check-existing-tag@aae-8254-actions-for-activiti-script
+      id: check-tag
+      with:
+        tag: ${{ env.RELEASE_VERSION }}
+        repository-directory: ${{ env.REPO_DIR }}
+
+    - name: Set up JDK 11
+      if: steps.check-tag.outputs.exists == 'false'
+      uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: 11
+        cache: 'maven'
+
+    - name: Configure Maven settings
+      if: steps.check-tag.outputs.exists == 'false'
+      shell: bash
+      env:
+        MAVEN_SETTINGS_PATH: ${{inputs.maven-settings-path}}
+      run: |
+        M2_DIR=$HOME/.m2
+        cp $MAVEN_SETTINGS_PATH $M2_DIR
+        cat $M2_DIR/settings.xml
+
+    - name: Configure GPG
+      if: steps.check-tag.outputs.exists == 'false'
+      shell: bash
+      env:
+        GPG_SECRET_KEYS: "${{ inputs.gpg-secret-keys }}"
+        GPG_OWNERTRUST: "${{ inputs.gpg-owner-trust }}"
+      run: |
+        gpg --version
+        echo $GPG_SECRET_KEYS | base64 --decode | gpg --import --no-tty --batch --yes
+        echo $GPG_OWNERTRUST | gpg --import-ownertrust  --no-tty --batch --yes
+
+    - name: update-pom-to-release-version
+      if: steps.check-tag.outputs.exists == 'false'
+      working-directory: ${{ env.REPO_DIR }}
+      shell: bash
+      env:
+        EXTRA_REPLACEMENTS: ${{ inputs.extra-replacements }}
+      run: |
+        ${{ github.action_path }}/update-pom-version.sh "$RELEASE_VERSION" "$EXTRA_REPLACEMENTS"
+
+    - name: maven-build-and-upload
+      if: steps.check-tag.outputs.exists == 'false'
+      working-directory: ${{ env.REPO_DIR }}
+      shell: bash
+      env:
+        GPG_PASSPHRASE: "${{ inputs.gpg-passphrase }}"
+        GPG_SECRET_KEYS: "${{ inputs.gpg-secret-keys }}"
+        GPG_OWNERTRUST: "${{ inputs.gpg-owner-trust }}"
+        NEXUS_USERNAME: "${{ inputs.nexus-username }}"
+        NEXUS_PASSWORD: "${{ inputs.nexus-password }}"
+        NEXUS_URL: "${{ inputs.nexus-url }}"
+        STAGING_REPOSITORY_ID: ${{ inputs.staging-repository-id }}
+      run: |
+        echo "Deploying to repository $STAGING_REPOSITORY_ID"
+        mvn clean deploy \
+          -DperformRelease \
+          -DskipTests \
+          -Dmaven.compiler.release=11 \
+          -Dmaven.artifact.threads=30 \
+          -B \
+          -DaltReleaseDeploymentRepository=nexus-releases-staging-fixed::default::"${NEXUS_URL}"/service/local/staging/deployByRepositoryId/"$STAGING_REPOSITORY_ID " \
+          -Dhttp.keepAlive=false \
+          -Dmaven.wagon.http.pool=false \
+          -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
+
+    - name: Commit changes
+      if: steps.check-tag.outputs.exists == 'false'
+      uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.9.0
+      with:
+        username: ${{ inputs.git-username }}
+        add-options: -u
+        commit-message: "Release version ${{ inputs.release-version}}"
+        repository-directory: ${{ env.REPO_DIR }}
+
+    - name: create tag
+      if: steps.check-tag.outputs.exists == 'false'
+      working-directory: ${{ env.REPO_DIR }}
+      shell: bash
+      run: |
+        git tag -f -a "${RELEASE_VERSION}" -m "Release version ${RELEASE_VERSION}"
+        git push origin "${RELEASE_VERSION}"
