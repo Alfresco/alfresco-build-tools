@@ -22,12 +22,11 @@ runs:
     - name: Check is propagation PR
       id: check
       env:
-        EVENT_NAME: ${{ github.event_name }}
         LABEL: ${{ github.event.label.name }}
         PR_LOGIN: ${{ github.event.pull_request.user.login }}
       shell: bash
       run: |
-        if [[ $EVENT_NAME == 'labeled' && $LABEL == 'updatebot' && $PR_LOGIN == 'alfresco-build' ]]
+        if [[ $LABEL == 'updatebot' && $PR_LOGIN == 'alfresco-build' ]]
         then
             echo "::set-output name=continue::true"
         else
