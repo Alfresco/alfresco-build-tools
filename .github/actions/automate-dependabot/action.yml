@@ -30,14 +30,14 @@ runs:
         fi
 
     - name: Dependabot metadata
-      if: steps.check.continue == 'true'
+      if: steps.check.outputs.continue == 'true'
       id: metadata
       uses: dependabot/fetch-metadata@v1.3.3
       with:
         github-token: "${{ inputs.token }}"
 
     - name: Enable auto-merge for minor and patch Dependabot PRs
-      if: steps.check.continue == 'true' && (steps.metadata.outputs.update-type == 'version-update:semver-minor' || steps.metadata.outputs.update-type == 'version-update:semver-patch')
+      if: steps.check.outputs.continue == 'true' && (steps.metadata.outputs.update-type == 'version-update:semver-minor' || steps.metadata.outputs.update-type == 'version-update:semver-patch')
       env:
         PR_URL: ${{ github.event.pull_request.html_url }}
         GITHUB_TOKEN: ${{ inputs.token }}
@@ -45,7 +45,7 @@ runs:
       run: gh pr merge --auto ${{ inputs.merge-option }} "$PR_URL"
 
     - name: Auto-approve patch Dependabot PRs
-      if: steps.check.continue == 'true' && steps.metadata.outputs.update-type == 'version-update:semver-patch'
+      if: steps.check.outputs.continue == 'true' && steps.metadata.outputs.update-type == 'version-update:semver-patch'
       env:
         PR_URL: ${{ github.event.pull_request.html_url }}
         GITHUB_TOKEN: ${{ inputs.token }}

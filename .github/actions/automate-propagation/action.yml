@@ -34,7 +34,7 @@ runs:
         fi
 
     - name: Enable auto-merge for propagation Pull Request
-      if: steps.check.continue == 'true'
+      if: steps.check.outputs.continue == 'true'
       env:
         PR_URL: ${{ github.event.pull_request.html_url }}
         GITHUB_TOKEN: ${{ inputs.auto-merge-token }}
@@ -42,7 +42,7 @@ runs:
       run: gh pr merge --auto ${{ inputs.merge-option }} "$PR_URL"
 
     - name: Auto-approve propagation Pull Request
-      if: steps.check.continue == 'true'
+      if: steps.check.outputs.continue == 'true'
       env:
         PR_URL: ${{ github.event.pull_request.html_url }}
         GITHUB_TOKEN: ${{ inputs.approval-token }}
