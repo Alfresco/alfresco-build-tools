@@ -9,7 +9,8 @@ inputs:
   approval-token:
     description: >
       Token used to approve.
-      This token CANNOT be the BOT_GITHUB_TOKEN secret, because it's linked to alfresco-build user (who created the PR).
+      This token CANNOT be the `BOT_GITHUB_TOKEN` secret, because it's linked to alfresco-build user (who created the PR).
+      The default `GITHUB_TOKEN` can be used in this case.
     required: true
   merge-option:
     description: 'Merge option'

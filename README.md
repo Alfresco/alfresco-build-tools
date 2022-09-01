@@ -151,6 +151,7 @@ Here is a sample configuration:
 ```
 
 ### Alternatives to Travis CI default environment variables
+
 | Travis CI           | GitHub Actions                                                     |
 |---------------------|-------------------------|
 | ${TRAVIS_BRANCH}    | ${{ github.ref_name }}  |
@@ -230,6 +231,39 @@ on:
 ```
 
 ## GitHub Actions provided by us
+
+### automate-dependabot.yml
+
+Handles automated approval and merge of dependabot PRs, for minor and patch version updates only:
+
+- automated approval on minor and patch versions
+- automated merge on patch versions
+
+This action requires a dedicated secret (named `DEPENDABOT_GITHUB_TOKEN` in the sample) to setup the "auto-merge" behavior: the default `GITHUB_TOKEN` is not used in this case, otherwise a build would not be triggered when the PR is merged, [see reference solution](https://david.gardiner.net.au/2021/07/github-actions-not-running.html).
+
+This secret should be a [dependabot secret](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/managing-encrypted-secrets-for-dependabot), and the token should hold the `repo > repo:status` and `repo > public_repo` scopes for public repositories.
+The whole list of "repo" scopes might be needed for the workflow to run ok on private repositories.
+
+```yaml
+    - uses: Alfresco/alfresco-build-tools/.github/actions/automate-dependabot@ref
+      with:
+        token: ${{ secrets.DEPENDABOT_GITHUB_TOKEN }}
+```
+
+### automate-propagation.yml
+
+Handles automated approval and merge of propagation PRs used to handle alpha releases on builds.
+
+This action requires a dedicated secret (named `BOT_GITHUB_TOKEN` in the sample) to setup the "auto-merge" behavior: the default `GITHUB_TOKEN` is not used in this case, otherwise a build would not be triggered when the PR is merged, [see reference solution](https://david.gardiner.net.au/2021/07/github-actions-not-running.html).
+
+Another token is also needed to handled approval. It can be the default `GITHUB_TOKEN`, but it cannot be the same one that is used for auto-merge behavior as the user might match the creator of the PR (and auto-approval of a PR is not allowed).
+
+```yaml
+    - uses: Alfresco/alfresco-build-tools/.github/actions/automate-propagation@ref
+      with:
+        auto-merge-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+        approval-token: ${{ secrets.GITHUB_TOKEN }}
+```
 
 ### build-helm-chart
 
@@ -384,8 +418,6 @@ Updates `version` attribute inside `Chart.yaml` file:
           chart-dir: charts/common
 ```
 
-
-
 ### configure-git-author
 
 Configures the git username and email to associate commits with the provided identity
@@ -437,33 +469,6 @@ Builds a maven project and generates the new alpha version for it:
 ```yaml
   build:
     uses: Alfresco/alfresco-build-tools/.github/workflows/build-and-tag-maven.yml@ref
-    secrets: inherit
-```
-
-### dependabot-auto-merge.yml
-
-Handles automated approval and merge of dependabot PRs, for minor and patch version updates only.
-
-The workflow requires a [dependabot secret](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/managing-encrypted-secrets-for-dependabot), with the `repo > repo:status` and `repo > public_repo` scopes for public repositories.
-The whole list of "repo" scopes might be needed for the workflow to run ok on private repositories.
-
-```yaml
-  enable-auto-merge:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/dependabot-auto-merge.yml@ref
-    with:
-      token: ${{ secrets.DEPENDABOT_GITHUB_TOKEN }}
-```
-
-### versions-propagation-auto-merge.yml
-
-Handles automated approval and merge of propagation PRs used to handle alpha releases on builds.
-
-The workflow requires a secret named `BOT_GITHUB_TOKEN` to setup the "auto-merge" behaviour: the default `GITHUB_TOKEN`
-is not used, otherwise a build would not be triggered when the PR is merged, [see reference solution](https://david.gardiner.net.au/2021/07/github-actions-not-running.html).
-
-```yaml
-  enable-auto-merge:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/versions-propagation-auto-merge.yml@ref
     secrets: inherit
 ```
 
