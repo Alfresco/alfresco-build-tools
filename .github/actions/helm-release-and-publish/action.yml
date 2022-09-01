@@ -48,7 +48,7 @@ runs:
         chart-repository-dir: ${{ inputs.chart-repository-dir }}
         chart-dir: ${{ inputs.chart-dir }}
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.9.2
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.12.0
       if: steps.check-tag.outputs.exists == 'false'
       with:
         username: ${{ inputs.git-username }}
@@ -78,7 +78,7 @@ runs:
 
     - name: Publish Helm chart
       if: steps.check-tag.outputs.exists == 'false'
-      uses: Alfresco/alfresco-build-tools/.github/actions/publish-helm-chart@v1.9.2
+      uses: Alfresco/alfresco-build-tools/.github/actions/publish-helm-chart@v1.12.0
       with:
         helm-charts-repo: ${{inputs.helm-repository}}
         helm-charts-repo-branch: ${{ inputs.helm-repository-branch }}
