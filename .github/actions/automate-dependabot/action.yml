@@ -1,0 +1,53 @@
+name: Automate dependabot pulls requests management
+description: 'Auto-approve dependabot PRs minor and patch versions, and auto-merge patch versions'
+inputs:
+  token:
+    description: >
+      Token used to enable auto-merge and auto-approve.
+      This token CANNOT be the default `GITHUB_TOKEN` on auto-merge action,
+      otherwise the merge of the PR will not trigger a build.
+    required: true
+  merge-option:
+    description: 'Merge option'
+    required: false
+    default: '--squash'
+
+runs:
+  using: composite
+  steps:
+    - name: Check is dependabot
+      id: check
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        PR_LOGIN: ${{ github.event.pull_request.user.login }}
+      shell: bash
+      run: |
+        if [[ $EVENT_NAME == 'pull_request' && $PR_LOGIN == 'dependabot[bot]' ]]
+        then
+            echo "::set-output name=continue::true"
+        else
+            echo "::set-output name=continue::false"
+        fi
+
+    - name: Dependabot metadata
+      if: steps.check.outputs.continue == 'true'
+      id: metadata
+      uses: dependabot/fetch-metadata@v1.3.3
+      with:
+        github-token: "${{ inputs.token }}"
+
+    - name: Enable auto-merge for minor and patch Dependabot PRs
+      if: steps.check.outputs.continue == 'true' && (steps.metadata.outputs.update-type == 'version-update:semver-minor' || steps.metadata.outputs.update-type == 'version-update:semver-patch')
+      env:
+        PR_URL: ${{ github.event.pull_request.html_url }}
+        GITHUB_TOKEN: ${{ inputs.token }}
+      shell: bash
+      run: gh pr merge --auto ${{ inputs.merge-option }} "$PR_URL"
+
+    - name: Auto-approve patch Dependabot PRs
+      if: steps.check.outputs.continue == 'true' && steps.metadata.outputs.update-type == 'version-update:semver-patch'
+      env:
+        PR_URL: ${{ github.event.pull_request.html_url }}
+        GITHUB_TOKEN: ${{ inputs.token }}
+      shell: bash
+      run: gh pr review --approve "$PR_URL"

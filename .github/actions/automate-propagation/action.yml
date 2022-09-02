@@ -1,0 +1,51 @@
+name: Automate version propagation pulls requests management
+description: 'Auto-approve and auto-merge version propagation PRs.'
+inputs:
+  auto-merge-token:
+    description: >
+      Token used to enable auto-merge.
+      This token CANNOT be the default `GITHUB_TOKEN`, otherwise the merge of the PR will not trigger a build.
+    required: true
+  approval-token:
+    description: >
+      Token used to approve.
+      This token CANNOT be the `BOT_GITHUB_TOKEN` secret, because it's linked to alfresco-build user (who created the PR).
+      The default `GITHUB_TOKEN` can be used in this case.
+    required: true
+  merge-option:
+    description: 'Merge option'
+    required: false
+    default: '--squash'
+
+runs:
+  using: composite
+  steps:
+    - name: Check is propagation PR
+      id: check
+      env:
+        LABEL: ${{ github.event.label.name }}
+        PR_LOGIN: ${{ github.event.pull_request.user.login }}
+      shell: bash
+      run: |
+        if [[ $LABEL == 'updatebot' && $PR_LOGIN == 'alfresco-build' ]]
+        then
+            echo "::set-output name=continue::true"
+        else
+            echo "::set-output name=continue::false"
+        fi
+
+    - name: Enable auto-merge for propagation Pull Request
+      if: steps.check.outputs.continue == 'true'
+      env:
+        PR_URL: ${{ github.event.pull_request.html_url }}
+        GITHUB_TOKEN: ${{ inputs.auto-merge-token }}
+      shell: bash
+      run: gh pr merge --auto ${{ inputs.merge-option }} "$PR_URL"
+
+    - name: Auto-approve propagation Pull Request
+      if: steps.check.outputs.continue == 'true'
+      env:
+        PR_URL: ${{ github.event.pull_request.html_url }}
+        GITHUB_TOKEN: ${{ inputs.approval-token }}
+      shell: bash
+      run: gh pr review --approve "$PR_URL"

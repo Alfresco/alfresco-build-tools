@@ -15,17 +15,10 @@ permissions:
 jobs:
   enable-auto-merge:
     runs-on: ubuntu-latest
-    if: ${{ github.event.pull_request.user.login == 'alfresco-build' && github.event.label.name == 'updatebot' }}
     steps:
-      - name: Enable auto-merge for propagation Pull Request
-        run: gh pr merge --auto ${{ inputs.merge-option }} "$PR_URL"
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          # this token CANNOT be the default `GITHUB_TOKEN`, otherwise the merge of the PR will not trigger a build
-          GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
-      - name: Auto-approve propagation Pull Request
-        run: gh pr review --approve "$PR_URL"
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          # This token CANNOT be BOT_GITHUB_TOKEN, because it's linked to alfresco-build user (the user who created the PR)
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: echo "This reusable workflow is deprecated, use Alfresco/alfresco-build-tools/.github/actions/automate-propagation instead."
+      - uses: Alfresco/alfresco-build-tools/.github/actions/automate-propagation@AAE-10134-change-automated-reusable-workflows-to-actions
+        with:
+          merge-option: ${{ inputs.merge-option }}
+          auto-merge-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          approval-token: ${{ secrets.GITHUB_TOKEN }}
