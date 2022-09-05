@@ -130,7 +130,7 @@ runs:
           -DskipTests \
           -Dmaven.compiler.release=11 \
           -Dmaven.artifact.threads=30 \
-          -B \
+          --batch-mode \
           -DaltReleaseDeploymentRepository=nexus-releases-staging-fixed::default::"${NEXUS_URL}"/service/local/staging/deployByRepositoryId/"$STAGING_REPOSITORY_ID " \
           -Dhttp.keepAlive=false \
           -Dmaven.wagon.http.pool=false \
