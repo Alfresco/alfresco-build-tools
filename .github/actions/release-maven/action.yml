@@ -1,4 +1,4 @@
-name: Release maven project
+name: Release Maven project
 description: Release Maven project
 
 inputs:
@@ -18,7 +18,7 @@ inputs:
     description: "The id of the staging repository where the release artifacts will be stored"
     required: true
   github-token:
-    description: "The token to used to clone the repositories"
+    description: "The token used to clone the repository"
     required: true
   git-username:
     description: "The username for git commit"
@@ -39,18 +39,18 @@ inputs:
     description: "Nexus password"
     required: true
   nexus-url:
-    description: "Base URL to nexus server"
+    description: "Base URL to the Nexus server"
     required: false
     default: "https://artifacts.alfresco.com/nexus"
   maven-settings-path:
-    description: "path to the settings.xml to be used for the release"
+    description: "Path to the settings.xml file to be used for the release"
     required: false
     default: ${{ github.workspace }}/maven-config/settings.xml
 
 runs:
   using: composite
   steps:
-    - name: set global properties
+    - name: Set global properties
       shell: bash
       env:
         REPO_DIR: ${{ github.workspace }}/${{ inputs.repo }}
@@ -145,7 +145,7 @@ runs:
         commit-message: "Release version ${{ inputs.release-version}}"
         repository-directory: ${{ env.REPO_DIR }}
 
-    - name: create tag
+    - name: Create and push tag
       if: steps.check-tag.outputs.exists == 'false'
       working-directory: ${{ env.REPO_DIR }}
       shell: bash

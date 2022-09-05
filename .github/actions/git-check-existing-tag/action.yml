@@ -1,11 +1,11 @@
 name: Check existing tag
-description: Check if a tag with the given name already exists in the remote
+description: Check if a tag with the given name already exists for this remote repository
 inputs:
   tag:
     description: The name of the tag to be checked
     required: true
   repository-directory:
-    description: "Path to the the directory holding the git repository"
+    description: Optional path to the the directory holding the git repository (defaults to current directory)
     required: false
 
 outputs:

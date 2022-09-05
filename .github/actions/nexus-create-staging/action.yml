@@ -1,5 +1,5 @@
-name: Create stating repository
-description: Create a new staging repository on Nexus, unless there is a existing repository with the same description
+name: Create staging repository
+description: Create a new staging repository on Nexus, unless there is an existing repository with the same description
 inputs:
   staging-description:
     description: The description of the staging repository
@@ -8,18 +8,18 @@ inputs:
     description: The id of the staging profile to be used to create the staging repository
     required: true
   nexus-username:
-    description: "Nexus user name"
+    description: Nexus user name
     required: true
   nexus-password:
-    description: "Nexus password"
+    description: Nexus password
     required: true
   nexus-url:
-    description: "Base URL to nexus server"
+    description: Base URL to the Nexus server
     required: false
     default: "https://artifacts.alfresco.com/nexus"
 outputs:
   staging-repository:
-    description: The staging repository created or already existing that matches the provided description
+    description: The id of the staging repository
     value: ${{steps.staging.outputs.staging-repository}}
 
 runs:

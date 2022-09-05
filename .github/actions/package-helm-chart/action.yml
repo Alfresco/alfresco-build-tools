@@ -5,7 +5,7 @@ inputs:
     description: "Relative path to the folder holding Chart.yaml"
     required: true
   chart-repository-dir:
-    description: "The path the git repository holding the chart project"
+    description: Optional path to the git repository holding the chart project (defaults to current directory)
     required: false
 outputs:
   package-file:
