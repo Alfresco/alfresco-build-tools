@@ -9,10 +9,15 @@ inputs:
   repository-directory:
     description: "Path to the the directory holding the git repository"
     required: false
+outputs:
+  tag:
+    description: the latest tag found for the pattern provided as input
+    value: ${{steps.latest-tag.outputs.tag}}
 runs:
   using: composite
   steps:
     - name: get latest tag
+      id: latest-tag
       shell: bash
       env:
         PATTERN: ${{ inputs.pattern }}
@@ -25,4 +30,4 @@ runs:
         git fetch --tags
         TAG=$(git tag --list "$PATTERN" --sort=-creatordate | head -n 1)
         echo "Latest tag for the pattern $PATTERN is $TAG"
-        echo "::set-output name=latest-tag::$TAG"
+        echo "::set-output name=tag::$TAG"
