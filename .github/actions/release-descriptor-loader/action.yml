@@ -45,6 +45,9 @@ runs:
       env:
         RELEASE_DESCRIPTOR: ${{ inputs.release-descriptor }}
       run: |
+        echo "Release descriptor content: "
+        cat $RELEASE_DESCRIPTOR
+        
         VERSION=$(yq e '.release.version' $RELEASE_DESCRIPTOR)
         BRANCH=$(yq e '.release.branch' $RELEASE_DESCRIPTOR)
         NEXT_VERSION=$(yq e '.release.nextVersion' $RELEASE_DESCRIPTOR)
