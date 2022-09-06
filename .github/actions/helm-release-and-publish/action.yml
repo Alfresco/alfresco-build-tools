@@ -76,11 +76,16 @@ runs:
       shell: bash
       run: git push origin $VERSION
 
+    - uses: actions/download-artifact@v3
+      if: steps.check-tag.outputs.exists == 'false'
+      with:
+        name: ${{ steps.package-helm-chart.outputs.package-file }}
+
     - name: Publish Helm chart
       if: steps.check-tag.outputs.exists == 'false'
       uses: Alfresco/alfresco-build-tools/.github/actions/publish-helm-chart@v1.12.0
       with:
         helm-charts-repo: ${{inputs.helm-repository}}
         helm-charts-repo-branch: ${{ inputs.helm-repository-branch }}
-        chart-package: ${{ github.workspace }}/${{ inputs.chart-repository-dir }}/${{ steps.package-helm-chart.outputs.package-file }}
+        chart-package: ${{ steps.package-helm-chart.outputs.package-file }}
         token: ${{ inputs.helm-repository-token }}

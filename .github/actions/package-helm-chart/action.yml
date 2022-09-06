@@ -9,7 +9,7 @@ inputs:
     required: false
 outputs:
   package-file:
-    description: The name of the generated package file
+    description: The name of the generated package file. It's uploaded as an artifact and can be downloaded using actions/download-artifact
     value: ${{ steps.package.outputs.package-file }}
 
 runs:
@@ -29,4 +29,13 @@ runs:
         helm dep up ${{ inputs.chart-dir }}
         helm package ${{ inputs.chart-dir }}
         PACKAGE_FILE=$(ls | grep *\.tgz)
+        PACKAGE_FILE_PATH="$(pwd)/$PACKAGE_FILE"
         echo "::set-output name=package-file::$PACKAGE_FILE"
+        echo "::set-output name=package-file-path::$PACKAGE_FILE_PATH"
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{steps.package.outputs.package-file}}
+        path: ${{steps.package.outputs.package-file-path}}
+        if-no-files-found: error
