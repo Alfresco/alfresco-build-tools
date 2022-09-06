@@ -293,12 +293,12 @@ using a custom settings.xml, you probably want to provide also
           maven-password: ${{ secrets.NEXUS_PASSWORD }}
 ```
 
-### package-helm-chart
+### helm-package-chart
 
 Packages a helm chart into a `.tgz` file and provides the name of the file produced in the output named `package-file`
 
 ```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/package-helm-chart@ref
+    - uses: Alfresco/alfresco-build-tools/.github/actions/helm-package-chart@ref
       id: package-helm-chart
       with:
         chart-dir: charts/common
@@ -373,15 +373,14 @@ referencing as value env vars defined early in the file (like Travis does).
           yml_path: .travis/env.yml
 ```
 
-### update-chart-version
+### helm-update-chart-version
 
 Updates `version` attribute inside `Chart.yaml` file:
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-chart-version@ref
+      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-update-chart-version@ref
         with:
           new-version: 1.0.0
-          chart-dir: charts/common
 ```
 
 
