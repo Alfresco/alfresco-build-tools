@@ -435,12 +435,12 @@ Publishes a new helm chart package (`.tgz`) to a helm chart repository
           token: ${{ secrets.BOT_GITHUB_TOKEN}}
 ```
 
-### release-descriptor-loader
+### load-release-descriptor
 
 Used to release Activiti Projects. Load relase information from release.yaml file.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/release-descriptor-loader@ref
+      - uses: Alfresco/alfresco-build-tools/.github/actions/load-release-descriptor@ref
         id: load-descriptor
         with:
           release-descriptor: release.yaml
