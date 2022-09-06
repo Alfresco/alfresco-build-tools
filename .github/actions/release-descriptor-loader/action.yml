@@ -75,4 +75,3 @@ runs:
         echo "::set-output name=common-chart-tag::$COMMON_CHART_BASE_TAG"
         echo "::set-output name=full-chart-tag::$FULL_CHART_BASE_TAG"
         echo "::set-output name=staging-repository::$STAGING_REPOSITORY"
-
