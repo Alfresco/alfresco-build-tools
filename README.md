@@ -325,7 +325,7 @@ Updates pom files to the provided version
 
 ### maven-release
 
-Used to release Activiti projects. Update versions in POM files, create git tags and publish Maven artifacts to staging repository. 
+Used to release Activiti projects. Update versions in POM files, create git tags and publish Maven artifacts to staging repository.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-release@ref
@@ -345,7 +345,7 @@ Used to release Activiti projects. Update versions in POM files, create git tags
 
 ### nexus-create-staging
 
-Creates a new staging repository on Nexus, unless there is an existing repository with the same description. 
+Creates a new staging repository on Nexus, unless there is an existing repository with the same description.
 The resulting staging repository will be available in the output named `staging-repository`.
 
 ```yaml
@@ -359,7 +359,7 @@ The resulting staging repository will be available in the output named `staging-
 
 ### helm-package-chart
 
-Packages a helm chart into a `.tgz` file and provides the name of the file produced in the output named `package-file`. 
+Packages a helm chart into a `.tgz` file and provides the name of the file produced in the output named `package-file`.
 The packaged file is also updated as an artifact and can be downloaded using `actions/download-artifact`.
 
 ```yaml
