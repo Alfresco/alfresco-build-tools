@@ -34,7 +34,7 @@ runs:
       run: |
         echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/git-check-existing-tag@aae-8254-actions-for-activiti-script
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-check-existing-tag@v1.13.0
       id: check-tag
       with:
         tag: ${{ env.VERSION }}
@@ -42,7 +42,7 @@ runs:
 
     - name: Update chart version
       if: steps.check-tag.outputs.exists == 'false'
-      uses: Alfresco/alfresco-build-tools/.github/actions/helm-update-chart-version@aae-8254-actions-for-activiti-script
+      uses: Alfresco/alfresco-build-tools/.github/actions/helm-update-chart-version@v1.13.0
       with:
         new-version: ${{ env.VERSION }}
         chart-repository-dir: ${{ inputs.chart-repository-dir }}
@@ -65,7 +65,7 @@ runs:
     - name: Package Helm Chart
       if: steps.check-tag.outputs.exists == 'false'
       id: package-helm-chart
-      uses: Alfresco/alfresco-build-tools/.github/actions/helm-package-chart@aae-8254-actions-for-activiti-script
+      uses: Alfresco/alfresco-build-tools/.github/actions/helm-package-chart@v1.13.0
       with:
         chart-dir: ${{ inputs.chart-dir }}
         chart-repository-dir: ${{ inputs.chart-repository-dir }}

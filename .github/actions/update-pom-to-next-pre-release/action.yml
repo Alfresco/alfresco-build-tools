@@ -29,7 +29,7 @@ runs:
         next-version: ${{ steps.parse-next-final-version.outputs.result }}
 
     - name: Update pom files to the new version
-      uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@aae-8254-actions-for-activiti-script
+      uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@v1.13.0
       with:
         version: ${{ steps.next-prerelease-resolver.outputs.next-prerelease }}
         maven-cli-opts: ${{ inputs.maven-cli-opts }}

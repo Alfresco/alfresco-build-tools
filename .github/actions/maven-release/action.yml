@@ -67,7 +67,7 @@ runs:
         path: '${{ env.REPO_DIR }}'
         token: ${{ inputs.github-token }}
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/git-check-existing-tag@aae-8254-actions-for-activiti-script
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-check-existing-tag@v1.13.0
       id: check-tag
       with:
         tag: ${{ env.RELEASE_VERSION }}
