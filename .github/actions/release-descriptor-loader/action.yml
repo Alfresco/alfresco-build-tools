@@ -47,7 +47,7 @@ runs:
       run: |
         echo "Release descriptor content: "
         cat $RELEASE_DESCRIPTOR
-        
+
         VERSION=$(yq e '.release.version' $RELEASE_DESCRIPTOR)
         BRANCH=$(yq e '.release.branch' $RELEASE_DESCRIPTOR)
         NEXT_VERSION=$(yq e '.release.nextVersion' $RELEASE_DESCRIPTOR)
@@ -58,6 +58,8 @@ runs:
         COMMON_CHART_BASE_TAG=$(yq e '.release.baseTag.commonChart' $RELEASE_DESCRIPTOR)
         FULL_CHART_BASE_TAG=$(yq e '.release.baseTag.fullChart' $RELEASE_DESCRIPTOR)
         STAGING_REPOSITORY=$(yq e '.release.stagingRepository' $RELEASE_DESCRIPTOR)
+
+        echo "Staging repository: $STAGING_REPOSITORY"
 
         if [ "$MOCK" == "true" ]; then
           VERSION=$VERSION-mock
@@ -73,3 +75,4 @@ runs:
         echo "::set-output name=common-chart-tag::$COMMON_CHART_BASE_TAG"
         echo "::set-output name=full-chart-tag::$FULL_CHART_BASE_TAG"
         echo "::set-output name=staging-repository::$STAGING_REPOSITORY"
+
