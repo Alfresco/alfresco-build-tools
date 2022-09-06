@@ -5,7 +5,7 @@ inputs:
     description: extra maven properties
     required: false
   property-to-update:
-    description: property to update in additon to the version of the pom file
+    description: property to update in addition to the version of the pom file
     required: false
 outputs:
   next-prerelease:
@@ -29,14 +29,8 @@ runs:
         next-version: ${{ steps.parse-next-final-version.outputs.result }}
 
     - name: Update pom files to the new version
-      shell: bash
-      env:
-        MAVEN_CLI_OPTS: ${{ inputs.maven-cli-opts }}
-        VERSION: ${{ steps.next-prerelease-resolver.outputs.next-prerelease }}
-        PROPERTY_NAME: ${{ inputs.property-to-update }}
-      run: |
-        mvn -B versions:set -DnewVersion=$VERSION -DprocessAllModules=true -DgenerateBackupPoms=false $MAVEN_CLI_OPTS
-        if [ -n "$PROPERTY_NAME" ]
-        then
-          mvn versions:set-property -Dproperty=$PROPERTY_NAME -DnewVersion=$VERSION -DgenerateBackupPoms=false $MAVEN_CLI_OPTS
-        fi
+      uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@aae-8254-actions-for-activiti-script
+      with:
+        version: ${{ steps.next-prerelease-resolver.outputs.next-prerelease }}
+        maven-cli-opts: ${{ inputs.maven-cli-opts }}
+        property-to-update: ${{ inputs.property-to-update }}

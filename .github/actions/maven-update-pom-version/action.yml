@@ -1,0 +1,39 @@
+description: Update pom files to the provided version
+name: Update pom version
+inputs:
+  version:
+    description: the new version to be set in the pom files
+    required: true
+  maven-cli-opts:
+    description: extra maven properties
+    required: false
+  property-to-update:
+    description: property to update in addition to the version of the pom file
+    required: false
+  repository-directory:
+    description: git repository holding the code
+    required: false
+outputs:
+  next-prerelease:
+    description: "Next prerelease"
+    value: ${{ steps.next-prerelease-resolver.outputs.next-prerelease }}
+runs:
+  using: composite
+  steps:
+    - name: Update pom files to the new version
+      shell: bash
+      env:
+        MAVEN_CLI_OPTS: ${{ inputs.maven-cli-opts }}
+        VERSION: ${{ inputs.version }}
+        PROPERTY_NAME: ${{ inputs.property-to-update }}
+        REPO_DIR: ${{ inputs.repository-directory }}
+      run: |
+        if [ -n "$REPO_DIR" ]
+        then
+          cd $REPO_DIR
+        fi
+        mvn -B versions:set -DnewVersion=$VERSION -DprocessAllModules=true -DgenerateBackupPoms=false $MAVEN_CLI_OPTS
+        if [ -n "$PROPERTY_NAME" ]
+        then
+          mvn versions:set-property -Dproperty=$PROPERTY_NAME -DnewVersion=$VERSION -DgenerateBackupPoms=false $MAVEN_CLI_OPTS
+        fi

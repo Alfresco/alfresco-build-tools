@@ -1,0 +1,77 @@
+name: Load release information
+description: Load release information from file descriptor
+inputs:
+  release-descriptor:
+    description: Path to the release descriptor
+    required: true
+outputs:
+  branch:
+    description: Name of the development branch
+    value: ${{ steps.load-descriptor.outputs.branch }}
+  version:
+    description: Version to be released
+    value: ${{ steps.load-descriptor.outputs.version }}
+  next-version:
+    description: Next version to be used by the development branch
+    value: ${{ steps.load-descriptor.outputs.next-version }}
+  mock:
+    description: Flag to specify whether it's a mock release
+    value: ${{ steps.load-descriptor.outputs.mock }}
+  activiti-tag:
+    description: The base tag of Activiti project used for this release
+    value: ${{ steps.load-descriptor.outputs.activiti-tag }}
+  activiti-cloud-tag:
+    description: The base tag of Activiti Cloud project used for this release
+    value: ${{ steps.load-descriptor.outputs.activiti-cloud-tag }}
+  activiti-cloud-application-tag:
+    description: The base tag of Activiti Cloud Application project used for this release
+    value: ${{ steps.load-descriptor.outputs.activiti-cloud-application-tag }}
+  common-chart-tag:
+    description: The base tag of Common Chart project used for this release
+    value: ${{ steps.load-descriptor.outputs.common-chart-tag }}
+  full-chart-tag:
+    description: The base tag of Full Chart project used for this release
+    value: ${{ steps.load-descriptor.outputs.full-chart-tag }}
+  staging-repository:
+    description: The Nexus staging repository where the Maven artifacts will be published
+    value: ${{ steps.load-descriptor.outputs.staging-repository }}
+
+runs:
+  using: composite
+  steps:
+    - name: Load release descriptor
+      id: load-descriptor
+      shell: bash
+      env:
+        RELEASE_DESCRIPTOR: ${{ inputs.release-descriptor }}
+      run: |
+        echo "Release descriptor content: "
+        cat $RELEASE_DESCRIPTOR
+
+        VERSION=$(yq e '.release.version' $RELEASE_DESCRIPTOR)
+        BRANCH=$(yq e '.release.branch' $RELEASE_DESCRIPTOR)
+        NEXT_VERSION=$(yq e '.release.nextVersion' $RELEASE_DESCRIPTOR)
+        MOCK=$(yq e '.release.mock' $RELEASE_DESCRIPTOR)
+        ACTIVITI_BASE_TAG=$(yq e '.release.baseTag.activiti' $RELEASE_DESCRIPTOR)
+        ACTIVITI_CLOUD_BASE_TAG=$(yq e '.release.baseTag.activitiCloud' $RELEASE_DESCRIPTOR)
+        ACTIVITI_CLOUD_APP_BASE_TAG=$(yq e '.release.baseTag.activitiCloudApplication' $RELEASE_DESCRIPTOR)
+        COMMON_CHART_BASE_TAG=$(yq e '.release.baseTag.commonChart' $RELEASE_DESCRIPTOR)
+        FULL_CHART_BASE_TAG=$(yq e '.release.baseTag.fullChart' $RELEASE_DESCRIPTOR)
+        STAGING_REPOSITORY=$(yq e '.release.stagingRepository' $RELEASE_DESCRIPTOR)
+
+        echo "Staging repository: $STAGING_REPOSITORY"
+
+        if [ "$MOCK" == "true" ]; then
+          VERSION=$VERSION-mock
+        fi
+
+        echo "::set-output name=branch::$BRANCH"
+        echo "::set-output name=version::$VERSION"
+        echo "::set-output name=next-version::$NEXT_VERSION"
+        echo "::set-output name=mock::$MOCK"
+        echo "::set-output name=activiti-tag::$ACTIVITI_BASE_TAG"
+        echo "::set-output name=activiti-cloud-tag::$ACTIVITI_CLOUD_BASE_TAG"
+        echo "::set-output name=activiti-cloud-application-tag::$ACTIVITI_CLOUD_APP_BASE_TAG"
+        echo "::set-output name=common-chart-tag::$COMMON_CHART_BASE_TAG"
+        echo "::set-output name=full-chart-tag::$FULL_CHART_BASE_TAG"
+        echo "::set-output name=staging-repository::$STAGING_REPOSITORY"

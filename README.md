@@ -283,6 +283,16 @@ Loads the name of the branch on which the action was called into `BRANCH_NAME` e
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@ref
 ```
 
+### git-check-existing-tag
+
+Checks if a tag with the given name already exists for this remote repository. Returns the output named `exists` with value `'true'` or `'false'`.
+
+```yaml
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-check-existing-tag@ref
+      with:
+        tag: 1.0.0
+```
+
 ### get-commit-message
 
 Loads the content of the last commit message that triggered the action into `COMMIT_MESSAGE` environment variable
@@ -301,6 +311,16 @@ Commits local changes after configuring git user and showing the status of what 
         username: ${{ secrets.BOT_GITHUB_USERNAME }}
         add-options: -u
         commit-message: "My commit message"
+```
+
+### git-latest-tag
+
+Gets the latest tag for the given pattern. The result is returned in the output named `tag`.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-latest-tag@ref
+        with:
+          pattern: 1.0.0-alpha*
 ```
 
 ### maven-deploy-file
@@ -327,15 +347,88 @@ using a custom settings.xml, you probably want to provide also
           maven-password: ${{ secrets.NEXUS_PASSWORD }}
 ```
 
-### package-helm-chart
+### maven-update-pom-version
 
-Packages a helm chart into a `.tgz` file and provides the name of the file produced in the output named `package-file`
+Updates pom files to the provided version
 
 ```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/package-helm-chart@ref
+    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@ref
+      with:
+        version: 1.0.0-alpha.1
+```
+
+### maven-release
+
+Used to release Activiti projects. Update versions in POM files, create git tags and publish Maven artifacts to staging repository.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-release@ref
+        with:
+          repo: Activiti/Activiti
+          base-ref: ${{  needs.load-release-info.outputs.activiti-tag }}
+          release-version: ${{ needs.load-release-info.outputs.version }}
+          staging-repository: ${{ needs.load-release-info.outputs.staging-repository }}
+          git-username: ${{ secrets.GITHUB_USERNAME }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          gpg-passphrase: "${{ secrets.GPG_PASSPHRASE }}"
+          gpg-secret-keys: "${{ secrets.GPG_SECRET_KEYS }}"
+          gpg-owner-trust: "${{ secrets.GPG_OWNERTRUST }}"
+          nexus-username: "${{ secrets.NEXUS_USERNAME }}"
+          nexus-password: "${{ secrets.NEXUS_PASSWORD }}"
+```
+
+### nexus-create-staging
+
+Creates a new staging repository on Nexus, unless there is an existing repository with the same description.
+The resulting staging repository will be available in the output named `staging-repository`.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-create-staging@ref
+        with:
+          staging-description: Activiti staging ${{ steps.load-descriptor.outputs.version }}
+          nexus-profile-id: "${{ secrets.NEXUS_ACTIVITI7_PROFILE_ID }}"
+          nexus-username: "${{ secrets.NEXUS_USERNAME }}"
+          nexus-password: "${{ secrets.NEXUS_PASSWORD }}"
+```
+
+### helm-package-chart
+
+Packages a helm chart into a `.tgz` file and provides the name of the file produced in the output named `package-file`.
+The packaged file is also updated as an artifact and can be downloaded using `actions/download-artifact`.
+
+```yaml
+    - uses: Alfresco/alfresco-build-tools/.github/actions/helm-package-chart@ref
       id: package-helm-chart
       with:
         chart-dir: charts/common
+```
+
+### helm-parse-next-release
+
+Parses the next main release version based on the content of Chart.yaml file. The result will be returned using the output named `next-release`.
+The suffix `-SNAPSHOT` is removed. For instance, if the version attribute in the Chart.yaml file is `1.0.0-SNAPSHOT`, the result will be `1.0.0`
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-parse-next-release@ref
+        id: parse-next-release
+        with:
+          chart-dir: charts/common
+```
+
+### helm-release-and-publish
+
+Releases a new version of a helm chart and publishes it to a helm repository
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-release-and-publish@ref
+        with:
+          version: 1.0.0
+          chart-dir: charts/common
+          chart-repository-dir: ${{ env.COMMON_CHART_DIR }}
+          helm-repository: Activiti/activiti-cloud-helm-charts
+          helm-repository-branch: gh-pages
+          helm-repository-token: ${{ secrets.GITHUB_TOKEN }}
+          git-username:  ${{ secrets.GITHUB_USERNAME }}
 ```
 
 ### pre-commit
@@ -376,6 +469,17 @@ Publishes a new helm chart package (`.tgz`) to a helm chart repository
           token: ${{ secrets.BOT_GITHUB_TOKEN}}
 ```
 
+### load-release-descriptor
+
+Used to release Activiti Projects. Load relase information from release.yaml file.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/load-release-descriptor@ref
+        id: load-descriptor
+        with:
+          release-descriptor: release.yaml
+```
+
 ### send-slack-notification
 
 Sends a slack notification with a pre-defined payload, relying on the [slackapi/slack-github-action](https://github.com/slackapi/slack-github-action) official action.
@@ -407,15 +511,14 @@ referencing as value env vars defined early in the file (like Travis does).
           yml_path: .travis/env.yml
 ```
 
-### update-chart-version
+### helm-update-chart-version
 
 Updates `version` attribute inside `Chart.yaml` file:
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-chart-version@ref
+      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-update-chart-version@ref
         with:
           new-version: 1.0.0
-          chart-dir: charts/common
 ```
 
 ### configure-git-author

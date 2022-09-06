@@ -1,0 +1,37 @@
+name: Check existing tag
+description: Check if a tag with the given name already exists for this remote repository
+inputs:
+  tag:
+    description: The name of the tag to be checked
+    required: true
+  repository-directory:
+    description: Optional path to the the directory holding the git repository (defaults to current directory)
+    required: false
+
+outputs:
+  exists:
+    description: Flag containing the result of the check ("true" if exists; "false" otherwise)
+    value: ${{ steps.check-tag.outputs.tag-exists }}
+
+runs:
+  using: composite
+  steps:
+    - name: Check existing tag
+      id: check-tag
+      shell: bash
+      env:
+        TAG: ${{ inputs.tag }}
+        REPO_DIR: ${{inputs.repository-directory}}
+      run: |
+        if [ -n "$REPO_DIR" ]
+        then
+          cd $REPO_DIR
+        fi
+        if git ls-remote --exit-code --tags origin "$TAG"
+        then
+          echo "Tag $TAG exists already"
+          echo "::set-output name=tag-exists::true"
+        else
+          echo "Tag $TAG does not exist"
+          echo "::set-output name=tag-exists::false"
+        fi

@@ -1,0 +1,32 @@
+name: Parse next release from chart
+description: >
+  Parses the next main release version based on the content of Chart.yaml.
+  The suffix `-SNAPSHOT` is removed.
+inputs:
+  chart-dir:
+    description: "The relative path to the directory holding Chart.yaml"
+    required: true
+  chart-repository-dir:
+    description: "The path the git repository holding the chart project"
+    required: false
+outputs:
+  next-release:
+    description: Next released parsed from the Chart.yaml file
+    value: ${{ steps.parse-next-release.outputs.next-release }}
+runs:
+  using: composite
+  steps:
+    - name: Parse next release
+      id: parse-next-release
+      shell: bash
+      env:
+        CHART_REPO_DIR: ${{ inputs.chart-repository-dir }}
+      run: |
+        if [ -n "$CHART_REPO_DIR" ]
+        then
+          cd $CHART_REPO_DIR
+        fi
+
+        NEXT_VERSION=$(yq e '.version' ${{ inputs.chart-dir }}/Chart.yaml | grep -o "[0-9]*\.[0-9]*.[0-9]*")
+        echo "Next final version: $NEXT_VERSION"
+        echo "::set-output name=next-release::$NEXT_VERSION"

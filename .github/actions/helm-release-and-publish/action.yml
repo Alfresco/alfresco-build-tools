@@ -1,0 +1,91 @@
+name: Release and publish helm chart
+description: >
+  Release a new version of a helm chart and publishes it to a helm repository
+inputs:
+  version:
+    description: The version name
+    required: true
+  chart-dir:
+    description: 'Relative path to the folder holding Chart.yaml'
+    required: true
+  chart-repository-dir:
+    description: "The path the git repository holding the chart project"
+    required: false
+  helm-repository:
+    description: 'Charts repository to checkout'
+    required: true
+  helm-repository-branch:
+    description: 'Branch on the charts repository'
+    required: false
+  helm-repository-token:
+    description: 'The Github token to checkout the charts repository'
+    required: true
+  git-username:
+    description: 'The username to commit on the git repositories'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Set version env variable
+      env:
+        VERSION: ${{ inputs.version }}
+      shell: bash
+      run: |
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-check-existing-tag@aae-8254-actions-for-activiti-script
+      id: check-tag
+      with:
+        tag: ${{ env.VERSION }}
+        repository-directory: ${{ inputs.chart-repository-dir }}
+
+    - name: Update chart version
+      if: steps.check-tag.outputs.exists == 'false'
+      uses: Alfresco/alfresco-build-tools/.github/actions/helm-update-chart-version@aae-8254-actions-for-activiti-script
+      with:
+        new-version: ${{ env.VERSION }}
+        chart-repository-dir: ${{ inputs.chart-repository-dir }}
+        chart-dir: ${{ inputs.chart-dir }}
+
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.12.0
+      if: steps.check-tag.outputs.exists == 'false'
+      with:
+        username: ${{ inputs.git-username }}
+        add-options: -u
+        commit-message: Release version ${{ env.VERSION }}
+        repository-directory: ${{ inputs.chart-repository-dir }}
+
+    - name: Create local tag
+      if: steps.check-tag.outputs.exists == 'false'
+      shell: bash
+      working-directory: ${{ inputs.chart-repository-dir }}
+      run: git tag -a $VERSION -m "Release version $VERSION"
+
+    - name: Package Helm Chart
+      if: steps.check-tag.outputs.exists == 'false'
+      id: package-helm-chart
+      uses: Alfresco/alfresco-build-tools/.github/actions/helm-package-chart@aae-8254-actions-for-activiti-script
+      with:
+        chart-dir: ${{ inputs.chart-dir }}
+        chart-repository-dir: ${{ inputs.chart-repository-dir }}
+
+    - name: Push tag
+      if: steps.check-tag.outputs.exists == 'false'
+      working-directory: ${{ inputs.chart-repository-dir }}
+      shell: bash
+      run: git push origin $VERSION
+
+    - uses: actions/download-artifact@v3
+      if: steps.check-tag.outputs.exists == 'false'
+      with:
+        name: ${{ steps.package-helm-chart.outputs.package-file }}
+
+    - name: Publish Helm chart
+      if: steps.check-tag.outputs.exists == 'false'
+      uses: Alfresco/alfresco-build-tools/.github/actions/publish-helm-chart@v1.12.0
+      with:
+        helm-charts-repo: ${{inputs.helm-repository}}
+        helm-charts-repo-branch: ${{ inputs.helm-repository-branch }}
+        chart-package: ${{ steps.package-helm-chart.outputs.package-file }}
+        token: ${{ inputs.helm-repository-token }}
