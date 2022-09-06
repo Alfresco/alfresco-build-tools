@@ -1,5 +1,5 @@
 import:
-  - source: Alfresco/alfresco-build-tools:.travis.rancher_cli_config.yml@v1.12.0
+  - source: Alfresco/alfresco-build-tools:.travis.rancher_cli_config.yml@v1.13.0
 before_install:
   - |
     mkdir -p $HOME/.kube && rancher cluster kubeconfig $CLUSTER_NAME > $HOME/.kube/config
