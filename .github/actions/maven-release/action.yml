@@ -5,8 +5,8 @@ inputs:
   repo:
     description: "Repository to be released"
     required: true
-  base-tag:
-    description: "The name of the tag from where the release will be created"
+  base-ref:
+    description: "The name of the base ref from where the release will be created. Typically a pre-release tag."
     required: true
   extra-replacements:
     description: Extra properties to replace
@@ -14,7 +14,7 @@ inputs:
   release-version:
     description: "The name of the version to be released"
     required: true
-  staging-repository-id:
+  staging-repository:
     description: "The id of the staging repository where the release artifacts will be stored"
     required: true
   github-token:
@@ -63,7 +63,7 @@ runs:
       uses: actions/checkout@v3
       with:
         repository: '${{ inputs.repo }}'
-        ref: ${{ inputs.base-tag }}
+        ref: ${{ inputs.base-ref }}
         path: '${{ env.REPO_DIR }}'
         token: ${{ inputs.github-token }}
 
@@ -122,7 +122,7 @@ runs:
         NEXUS_USERNAME: "${{ inputs.nexus-username }}"
         NEXUS_PASSWORD: "${{ inputs.nexus-password }}"
         NEXUS_URL: "${{ inputs.nexus-url }}"
-        STAGING_REPOSITORY_ID: ${{ inputs.staging-repository-id }}
+        STAGING_REPOSITORY_ID: ${{ inputs.staging-repository }}
       run: |
         echo "Deploying to repository $STAGING_REPOSITORY_ID"
         mvn clean deploy \
