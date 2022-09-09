@@ -21,6 +21,9 @@ if [[ -z $PROJECT_NAME ]]; then
   PROJECT_NAME="alfresco-content-services"
 fi
 
+echo "inside publish scipt, exiting"
+exit 0
+
 HELM_REPO_BASE_URL="https://kubernetes-charts.alfresco.com"
 HELM_REPO="incubator"
 CHART_VERSION=$(yq eval .version helm/"${PROJECT_NAME}"/Chart.yaml)
