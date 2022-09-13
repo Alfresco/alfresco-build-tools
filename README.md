@@ -10,6 +10,57 @@
 
 Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github.com/en/actions) and [pre-commit](https://pre-commit.com/) configuration files plus misc tools.
 
+- [alfresco-build-tools](#alfresco-build-tools)
+  - [GitHub Actions](#github-actions)
+    - [Java setup](#java-setup)
+      - [Setup JDK](#setup-jdk)
+      - [Setup Maven Credentials](#setup-maven-credentials)
+      - [Setup Maven Build Options](#setup-maven-build-options)
+  - [Migrate from Travis to GitHub Actions](#migrate-from-travis-to-github-actions)
+    - [Workflow schema validation](#workflow-schema-validation)
+    - [Alternatives to Travis CI default environment variables](#alternatives-to-travis-ci-default-environment-variables)
+  - [Security hardening for GitHub Actions](#security-hardening-for-github-actions)
+  - [GitHub Actions provided by community](#github-actions-provided-by-community)
+    - [Docker build and push](#docker-build-and-push)
+    - [Docker login](#docker-login)
+    - [SSH debug](#ssh-debug)
+    - [Retry failing step](#retry-failing-step)
+    - [Auto cancel builds](#auto-cancel-builds)
+    - [Triggering a workflow in another repository](#triggering-a-workflow-in-another-repository)
+  - [GitHub Actions provided by us](#github-actions-provided-by-us)
+    - [automate-dependabot.yml](#automate-dependabotyml)
+    - [automate-propagation.yml](#automate-propagationyml)
+    - [build-helm-chart](#build-helm-chart)
+    - [get-branch-name](#get-branch-name)
+    - [git-check-existing-tag](#git-check-existing-tag)
+    - [get-commit-message](#get-commit-message)
+    - [git-commit-changes](#git-commit-changes)
+    - [git-latest-tag](#git-latest-tag)
+    - [maven-deploy-file](#maven-deploy-file)
+    - [maven-update-pom-version](#maven-update-pom-version)
+    - [maven-release](#maven-release)
+    - [nexus-create-staging](#nexus-create-staging)
+    - [helm-package-chart](#helm-package-chart)
+    - [helm-parse-next-release](#helm-parse-next-release)
+    - [helm-release-and-publish](#helm-release-and-publish)
+    - [pre-commit](#pre-commit)
+    - [publish-helm-chart](#publish-helm-chart)
+    - [load-release-descriptor](#load-release-descriptor)
+    - [send-slack-notification](#send-slack-notification)
+    - [setup-github-release-binary](#setup-github-release-binary)
+    - [travis-env-load](#travis-env-load)
+    - [helm-update-chart-version](#helm-update-chart-version)
+    - [configure-git-author](#configure-git-author)
+    - [veracode](#veracode)
+  - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
+    - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
+    - [build-and-tag-maven.yml](#build-and-tag-mavenyml)
+  - [Cookbook](#cookbook)
+    - [Serialize pull request builds](#serialize-pull-request-builds)
+  - [Known issues](#known-issues)
+    - [realpath not available under macosx](#realpath-not-available-under-macosx)
+  - [Release](#release)
+
 ## GitHub Actions
 
 ### Java setup
@@ -129,7 +180,6 @@ Here follows a table to ease migrating Travis build that were using config offer
 | .travis.tflint_install.yml                | Not yet determined                                                          |
 | .travis.trigger.yml                       | Not yet determined                                                          |
 | .travis.veracode.yml                      | [veracode](.github/actions/veracode)                                        |
-| .travis.yml                               | Not yet determined                                                          |
 | .travis.yq_install.yml                    | Preinstalled                                                                |
 
 ### Workflow schema validation
@@ -168,11 +218,11 @@ Before creating / modifying a GitHub Actions workflow make sure you're familiar 
 
 ## GitHub Actions provided by community
 
-### docker/build-push-action
+### Docker build and push
 
 Consider using this official [Docker action](https://github.com/marketplace/actions/build-and-push-docker-images) for building and pushing containers instead of doing it by hand, for buildx support, caching and more.
 
-### docker/login-action
+### Docker login
 
 Credentials should be already available via organization secrets, otherwise they would need to be
 provided as repository secrets.
@@ -192,11 +242,75 @@ provided as repository secrets.
           password: ${{ secrets.QUAY_PASSWORD }}
 ```
 
-### nick-fields/retry
+### SSH debug
+
+GitHub doesn't provide any native support for SSH debug access to builds like
+Travis.
+
+To debug a build is necessary to add when needed a step like the following in
+the workflow:
+
+```yml
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      with:
+        # provide access to SSH user that triggered the build
+        limit-access-to-actor: true
+```
+
+You can also run the step on-demand with a manually triggered build by adding
+the `workflow_dispatch` event together with a boolean input:
+
+```yaml
+on:
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        description: Enable SSH debug
+        type: boolean
+        required: false
+        default: false
+```
+
+and then invoke the action step conditionally based on this event and input
+value:
+
+```yaml
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup tmate session
+      # run only when explicitly requested
+      if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+      uses: mxschmitt/action-tmate@v3
+      with:
+        # provide access to SSH user that triggered the build
+        limit-access-to-actor: true
+      # automatically terminate after a given timeout
+      timeout-minutes: 30
+```
+
+When executing that step, the job will block. If you want to continue with the
+following steps, just create a file named `continue` in the current workspace
+folder:
+
+```sh
+touch continue
+```
+
+Please be aware that when the last command of the job finish, also the tmate
+session will be terminated automatically, so you may want to add at the end of
+the workflow a step like:
+
+```yaml
+    # wait for 5 minutes before exiting
+    - run: sleep 300
+```
+
+### Retry failing step
 
 [This action](https://github.com/nick-fields/retry) retries an Action step on failure or timeout. Useful for unstable commands or that relies on remote resources that can be flaky sometimes.
 
-### styfle/cancel-workflow-action
+### Auto cancel builds
 
 [This action](https://github.com/styfle/cancel-workflow-action) is a replacement for the Travis settings **Auto cancel branch builds** and **Auto cancel pull request builds**.
 
