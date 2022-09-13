@@ -23,7 +23,7 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
   - [GitHub Actions provided by community](#github-actions-provided-by-community)
     - [docker/build-push-action](#dockerbuild-push-action)
     - [docker/login-action](#dockerlogin-action)
-    - [mxschmitt/action-tmate](#mxschmittaction-tmate)
+    - [SSH debug](#ssh-debug)
     - [nick-fields/retry](#nick-fieldsretry)
     - [styfle/cancel-workflow-action](#styflecancel-workflow-action)
     - [Triggering a workflow in another repository](#triggering-a-workflow-in-another-repository)
@@ -242,7 +242,7 @@ provided as repository secrets.
           password: ${{ secrets.QUAY_PASSWORD }}
 ```
 
-### mxschmitt/action-tmate
+### SSH debug
 
 GitHub doesn't provide any native support for SSH debug access to builds like
 Travis.
