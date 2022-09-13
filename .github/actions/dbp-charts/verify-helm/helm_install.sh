@@ -31,18 +31,22 @@ fi
 
 
 TEST_NEWMAN="true"
-if [[ "${ACS_VERSION}" == "default" ]]; then
-  ACS_VERSION="latest"
-  TEST_NEWMAN="false"
-fi
-
 GIT_DIFF="$(git diff origin/master --name-only .)"
 VALID_VERSION=$(echo "${ACS_VERSION}" | tr -d '.' | awk '{print tolower($0)}')
 namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d [:punct:] | awk '{print tolower($0)}')-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
 release_name_ingress=ing-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
-release_name_acs=acs-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
+release_name=acs-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
 HOST=${namespace}.${DOMAIN}
 PROJECT_NAME=alfresco-content-services
+if [[ "${ACS_VERSION}" == "default" ]]; then
+  ACS_VERSION="latest"
+  TEST_NEWMAN="false"
+  VALID_VERSION=$(echo "${ACS_VERSION}" | tr -d '.' | awk '{print tolower($0)}')
+  namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d [:punct:] | awk '{print tolower($0)}')-"${GITHUB_RUN_NUMBER}"
+  release_name_ingress=ing-"${GITHUB_RUN_NUMBER}"
+  release_name=aps-"${GITHUB_RUN_NUMBER}"
+fi
+
 
 # pod status
 pod_status() {
@@ -95,7 +99,7 @@ pods_ready() {
     echo "Pods did not start - failing build"
     failed_pod_logs
     if [[ "${COMMIT_MESSAGE}" != *"[keep env]"* ]]; then
-      helm delete "${release_name_ingress}" "${release_name_aps}" -n "${namespace}"
+      helm delete "${release_name_ingress}" "${release_name}" -n "${namespace}"
       kubectl delete namespace "${namespace}" --grace-period=1
     fi
     return 1
