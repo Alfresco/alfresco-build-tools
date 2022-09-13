@@ -29,6 +29,13 @@ if [ -z "${BRANCH_NAME}" ]; then
   exit 2
 fi
 
+
+TEST_NEWMAN="true"
+if [[ "${ACS_VERSION}" == "default" ]]; then
+  ACS_VERSION="latest"
+  TEST_NEWMAN="false"
+fi
+
 GIT_DIFF="$(git diff origin/master --name-only .)"
 VALID_VERSION=$(echo "${ACS_VERSION}" | tr -d '.' | awk '{print tolower($0)}')
 namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d [:punct:] | awk '{print tolower($0)}')-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
@@ -242,7 +249,7 @@ done
 
 pods_ready || exit 1
 
-if [[ ${ACS_VERSION} != "default" ]]; then
+if [[ "${TEST_NEWMAN}" == "true" ]]; then
 
   # Delay running the tests to give ingress & SOLR a chance to fully initialise
   echo "Waiting 3 minutes from $(date) before running tests..."
