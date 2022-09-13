@@ -29,22 +29,22 @@ if [ -z "${BRANCH_NAME}" ]; then
   exit 2
 fi
 
-
-TEST_NEWMAN="true"
 GIT_DIFF="$(git diff origin/master --name-only .)"
-VALID_VERSION=$(echo "${ACS_VERSION}" | tr -d '.' | awk '{print tolower($0)}')
-namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d [:punct:] | awk '{print tolower($0)}')-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
-release_name_ingress=ing-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
-release_name=acs-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
+namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d '[:punct:]' | awk '{print tolower($0)}')"-${GITHUB_RUN_NUMBER}"
+release_name_ingress=aps-ing-"${GITHUB_RUN_NUMBER}"
+release_name_aps=aps-"${GITHUB_RUN_NUMBER}"
 HOST=${namespace}.${DOMAIN}
-PROJECT_NAME=alfresco-content-services
-if [[ "${ACS_VERSION}" == "default" ]]; then
-  ACS_VERSION="latest"
-  TEST_NEWMAN="false"
+TEST_NEWMAN="false"
+if [[ "${ACS_VERSION}" != "default" ]]; then
+  echo "version was not default"
+  TEST_NEWMAN="true"
+  GIT_DIFF="$(git diff origin/master --name-only .)"
   VALID_VERSION=$(echo "${ACS_VERSION}" | tr -d '.' | awk '{print tolower($0)}')
-  namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d [:punct:] | awk '{print tolower($0)}')-"${GITHUB_RUN_NUMBER}"
-  release_name_ingress=ing-"${GITHUB_RUN_NUMBER}"
-  release_name=aps-"${GITHUB_RUN_NUMBER}"
+  namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d [:punct:] | awk '{print tolower($0)}')-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
+  release_name_ingress=ing-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
+  release_name=acs-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
+  HOST=${namespace}.${DOMAIN}
+  PROJECT_NAME=alfresco-content-services
 fi
 
 
