@@ -21,11 +21,11 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
     - [Alternatives to Travis CI default environment variables](#alternatives-to-travis-ci-default-environment-variables)
   - [Security hardening for GitHub Actions](#security-hardening-for-github-actions)
   - [GitHub Actions provided by community](#github-actions-provided-by-community)
-    - [docker/build-push-action](#dockerbuild-push-action)
-    - [docker/login-action](#dockerlogin-action)
+    - [Docker build and push](#docker-build-and-push)
+    - [Docker login](#docker-login)
     - [SSH debug](#ssh-debug)
-    - [nick-fields/retry](#nick-fieldsretry)
-    - [styfle/cancel-workflow-action](#styflecancel-workflow-action)
+    - [Retry failing step](#retry-failing-step)
+    - [Auto cancel builds](#auto-cancel-builds)
     - [Triggering a workflow in another repository](#triggering-a-workflow-in-another-repository)
   - [GitHub Actions provided by us](#github-actions-provided-by-us)
     - [automate-dependabot.yml](#automate-dependabotyml)
@@ -218,11 +218,11 @@ Before creating / modifying a GitHub Actions workflow make sure you're familiar 
 
 ## GitHub Actions provided by community
 
-### docker/build-push-action
+### Docker build and push
 
 Consider using this official [Docker action](https://github.com/marketplace/actions/build-and-push-docker-images) for building and pushing containers instead of doing it by hand, for buildx support, caching and more.
 
-### docker/login-action
+### Docker login
 
 Credentials should be already available via organization secrets, otherwise they would need to be
 provided as repository secrets.
@@ -306,11 +306,11 @@ the workflow a step like:
     - run: sleep 300
 ```
 
-### nick-fields/retry
+### Retry failing step
 
 [This action](https://github.com/nick-fields/retry) retries an Action step on failure or timeout. Useful for unstable commands or that relies on remote resources that can be flaky sometimes.
 
-### styfle/cancel-workflow-action
+### Auto cancel builds
 
 [This action](https://github.com/styfle/cancel-workflow-action) is a replacement for the Travis settings **Auto cancel branch builds** and **Auto cancel pull request builds**.
 
