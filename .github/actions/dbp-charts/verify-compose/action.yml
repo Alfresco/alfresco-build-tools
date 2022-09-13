@@ -1,0 +1,49 @@
+name: "Verify and test docker compose"
+description: "Setup environment and run docker compose tests"
+inputs:
+  compose_file_path:
+    description: "full path to docker compose file to test"
+    required: true
+  docker_username:
+    description: "username for Docker Hub"
+    required: true
+  docker_password:
+    description: "password for Docker Hub"
+    required: true
+  quay_username:
+    description: "username for Quay.io"
+    required: false
+  quay_password:
+    description: "password for Quay.io"
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - if: ${{ inputs.acs_version != 'community' }} && ! github.event.pull_request.head.repo.fork
+      name: Login to Quay.io
+      uses: docker/login-action@v1
+      with:
+        registry: quay.io
+        username: ${{ inputs.QUAY_USERNAME }}
+        password: ${{ inputs.QUAY_PASSWORD }}
+    - if: '! github.event.pull_request.head.repo.fork'
+      name: Login to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ inputs.DOCKER_USERNAME }}
+        password: ${{ inputs.DOCKER_PASSWORD }}
+    - name: Get branch name
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v1.12.0
+    - name: Get commit msg
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@v1.12.0
+    - name: Run Docker Compose tests
+      if: ${{ inputs.acs_version == 'community' }} || ! github.event.pull_request.head.repo.fork
+      run: ${{ github.action_path }}/docker_compose.sh
+      shell: bash
+      env:
+        COMPOSE_FILE_PATH: ${{ inputs.compose_file_path }}
