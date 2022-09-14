@@ -33,8 +33,7 @@ COUNTER=0
 TIMEOUT=300
 t0=$(date +%s)
 echo "Waiting for alfresco to start"
-response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/)
-echo "debug"
+response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/) || true
 until [[ "200" -eq "${response}" ]] || [[ "${COUNTER}" -eq "${TIMEOUT}" ]]; do
   printf '.'
   sleep "${WAIT_INTERVAL}"
