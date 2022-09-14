@@ -11,6 +11,7 @@
 Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github.com/en/actions) and [pre-commit](https://pre-commit.com/) configuration files plus misc tools.
 
 - [alfresco-build-tools](#alfresco-build-tools)
+  - [Travis](#travis)
   - [GitHub Actions](#github-actions)
     - [Java setup](#java-setup)
       - [Setup JDK](#setup-jdk)
@@ -60,6 +61,19 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
   - [Known issues](#known-issues)
     - [realpath not available under macosx](#realpath-not-available-under-macosx)
   - [Release](#release)
+
+## Travis
+
+This repository provides a bunch of common configuration that can be imported in
+any travis build by adding:
+
+```yaml
+import:
+  - source: Alfresco/alfresco-build-tools:.travis.<value>.yml@master
+```
+
+Travis snippets should be considered in maintenance mode only since we are actively
+migrating all of our repos to GitHub Actions.
 
 ## GitHub Actions
 
