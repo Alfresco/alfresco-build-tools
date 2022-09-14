@@ -153,6 +153,7 @@ EOF
 
 export values_file=helm/"${PROJECT_NAME}"/values.yaml
 if [[ "${ACS_VERSION}" != "latest"  && "${ACS_VERSION}" != "none" ]]; then
+  echo "using ${ACS_VERSION}_values.yaml values file for deployment"
   values_file="helm/${PROJECT_NAME}/${ACS_VERSION}_values.yaml"
 fi
 
@@ -260,9 +261,9 @@ if [[ "${TEST_NEWMAN}" == "true" ]]; then
       # For checking if persistence failover is correctly working with our deployments
       # in the next phase we delete the acs and postgresql pods,
       # wait for k8s to recreate them, then check if the data created in the first test run is still there
-      kubectl delete pod -l app="${release_name_acs}"-alfresco-cs-repository,component=repository -n "${namespace}"
-      kubectl delete pod -l app=postgresql-acs,release="${release_name_acs}" -n "${namespace}"
-      helm upgrade "${release_name_acs}" helm/"${PROJECT_NAME}" \
+      kubectl delete pod -l app="${release_name}"-alfresco-cs-repository,component=repository -n "${namespace}"
+      kubectl delete pod -l app=postgresql-acs,release="${release_name}" -n "${namespace}"
+      helm upgrade "${release_name}" helm/"${PROJECT_NAME}" \
         --wait \
         --timeout 10m0s \
         --reuse-values \
