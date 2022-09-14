@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 if [ -z "${ACS_VERSION}" ]; then
   echo "ACS_VERSION variable is not set"
@@ -28,6 +28,19 @@ if [ -z "${BRANCH_NAME}" ]; then
   echo "BRANCH_NAME variable is not set"
   exit 2
 fi
+
+if [[ "${COMMIT_MESSAGE}" != *"[keep env]"* ]]; then
+  helm delete "${release_name_ingress}" "${release_name_acs}" -n "${namespace}"
+  kubectl delete namespace "${namespace}" --grace-period=1
+fi
+
+clean_up () {
+  if [[ "${COMMIT_MESSAGE}" != *"[keep env]"* ]]; then
+    helm delete "${release_name_ingress}" "${release_name_acs}" -n "${namespace}"
+    kubectl delete namespace "${namespace}" --grace-period=1
+  fi
+}
+trap clean_up EXIT
 
 GIT_DIFF="$(git diff origin/master --name-only .)"
 namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d '[:punct:]' | awk '{print tolower($0)}')"-${GITHUB_RUN_NUMBER}"
@@ -296,11 +309,6 @@ if [[ "${TEST_NEWMAN}" == "true" ]]; then
       echo "TEST_RESULT=${TEST_RESULT}"
     fi
   fi
-fi
-
-if [[ "${COMMIT_MESSAGE}" != *"[keep env]"* ]]; then
-  helm delete "${release_name_ingress}" "${release_name_acs}" -n "${namespace}"
-  kubectl delete namespace "${namespace}" --grace-period=1
 fi
 
 if [[ "${TEST_RESULT}" == "1" ]]; then
