@@ -1,41 +1,8 @@
 #!/bin/bash -e
 
-if [ -z "${ACS_VERSION}" ]; then
-  echo "ACS_VERSION variable is not set"
-  exit 2
-fi
-if [ -z "${COMMIT_MESSAGE}" ]; then
-  echo "COMMIT_MESSAGE variable is not set"
-  exit 2
-fi
-if [ -z "${ACM_CERTIFICATE}" ]; then
-  echo "ACM_CERTIFICATE variable is not set"
-  exit 2
-fi
-if [ -z "${AWS_SG}" ]; then
-  echo "AWS_SG variable is not set"
-  exit 2
-fi
-if [ -z "${GITHUB_RUN_NUMBER}" ]; then
-  echo "GITHUB_RUN_NUMBER variable is not set"
-  exit 2
-fi
-if [ -z "${DOMAIN}" ]; then
-  echo "DOMAIN variable is not set"
-  exit 2
-fi
-if [ -z "${BRANCH_NAME}" ]; then
-  echo "BRANCH_NAME variable is not set"
-  exit 2
-fi
-
-if [[ "${COMMIT_MESSAGE}" != *"[keep env]"* ]]; then
-  helm delete "${release_name_ingress}" "${release_name_acs}" -n "${namespace}"
-  kubectl delete namespace "${namespace}" --grace-period=1
-fi
-
 clean_up () {
   if [[ "${COMMIT_MESSAGE}" != *"[keep env]"* ]]; then
+    echo "cleaning up..."
     helm delete "${release_name_ingress}" "${release_name_acs}" -n "${namespace}"
     kubectl delete namespace "${namespace}" --grace-period=1
   fi
@@ -43,22 +10,13 @@ clean_up () {
 trap clean_up EXIT
 
 GIT_DIFF="$(git diff origin/master --name-only .)"
-namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d '[:punct:]' | awk '{print tolower($0)}')"-${GITHUB_RUN_NUMBER}"
-release_name_ingress=aps-ing-"${GITHUB_RUN_NUMBER}"
-release_name_aps=aps-"${GITHUB_RUN_NUMBER}"
+VALID_VERSION=$(echo "${ACS_VERSION}" | tr -d '.' | awk '{print tolower($0)}')
+namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d [:punct:] | awk '{print tolower($0)}')-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
+release_name_ingress=ing-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
+release_name_acs=acs-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
 HOST=${namespace}.${DOMAIN}
+PROJECT_NAME=alfresco-content-services
 TEST_NEWMAN="false"
-if [[ "${ACS_VERSION}" != "default" ]]; then
-  echo "version was not default"
-  TEST_NEWMAN="true"
-  GIT_DIFF="$(git diff origin/master --name-only .)"
-  VALID_VERSION=$(echo "${ACS_VERSION}" | tr -d '.' | awk '{print tolower($0)}')
-  namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d [:punct:] | awk '{print tolower($0)}')-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
-  release_name_ingress=ing-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
-  release_name=acs-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
-  HOST=${namespace}.${DOMAIN}
-  PROJECT_NAME=alfresco-content-services
-fi
 
 
 # pod status
