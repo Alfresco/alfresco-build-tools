@@ -2,3 +2,4 @@ before_install:
   - |-
     git config user.name "${GIT_USERNAME:-alfresco-build}"
     git config user.email "${GIT_EMAIL:-alfresco-build@hyland.com}"
+    echo "Git repository author configured as $(git config user.name) <$(git config user.email)>"
