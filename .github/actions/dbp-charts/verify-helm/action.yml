@@ -28,7 +28,7 @@ inputs:
   acs_version:
     description: "version of ACS to verify"
     required: false
-    default: default
+    default: none
   domain:
     description: "domain to access the cluster"
     required: false

@@ -10,13 +10,23 @@ clean_up () {
 trap clean_up EXIT
 
 GIT_DIFF="$(git diff origin/master --name-only .)"
-VALID_VERSION=$(echo "${ACS_VERSION}" | tr -d '.' | awk '{print tolower($0)}')
-namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d [:punct:] | awk '{print tolower($0)}')-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
-release_name_ingress=ing-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
-release_name_acs=acs-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
+if [[ "${ACS_VERSION}" == "none" ]]; then
+  echo "no acs version specified - setting parameters for aps"
+  namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d '[:punct:]' | awk '{print tolower($0)}')"-${GITHUB_RUN_NUMBER}"
+  release_name_ingress=aps-ing-"${GITHUB_RUN_NUMBER}"
+  release_name=aps-"${GITHUB_RUN_NUMBER}"
+  PROJECT_NAME=alfresco-process-services
+  TEST_NEWMAN="false"
+else
+  echo "setting parameters for acs version ${ACS_VERSION}"
+  VALID_VERSION=$(echo "${ACS_VERSION}" | tr -d '.' | awk '{print tolower($0)}')
+  namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d [:punct:] | awk '{print tolower($0)}')-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
+  release_name_ingress=ing-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
+  release_name=acs-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
+  PROJECT_NAME=alfresco-content-services
+  TEST_NEWMAN="true"
+fi
 HOST=${namespace}.${DOMAIN}
-PROJECT_NAME=alfresco-content-services
-TEST_NEWMAN="false"
 
 
 # pod status
@@ -142,7 +152,7 @@ EOF
 }
 
 export values_file=helm/"${PROJECT_NAME}"/values.yaml
-if [[ ${ACS_VERSION} != "latest" ]]; then
+if [[ "${ACS_VERSION}" != "latest"  && "${ACS_VERSION}" != "none" ]]; then
   values_file="helm/${PROJECT_NAME}/${ACS_VERSION}_values.yaml"
 fi
 
@@ -157,6 +167,7 @@ if [[ "${BRANCH_NAME}" == "master" ]] ||
   [[ "${GIT_DIFF}" == *test/postman/helm* ]]; then
   echo "deploying..."
 else
+  echo "skipped deploying"
   exit 0
 fi
 
@@ -186,7 +197,7 @@ helm upgrade --install "${release_name_ingress}" --repo https://kubernetes.githu
 
 # install acs
 helm dep up helm/"${PROJECT_NAME}"
-helm upgrade --install "${release_name_acs}" helm/"${PROJECT_NAME}" \
+helm upgrade --install "${release_name}" helm/"${PROJECT_NAME}" \
   --values="${values_file}" \
   --set global.tracking.sharedsecret="$(openssl rand -hex 24)" \
   --set externalPort="443" \
