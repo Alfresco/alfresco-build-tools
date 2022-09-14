@@ -1,18 +1,5 @@
 #!/bin/bash -e
 
-if [ -z "${COMPOSE_FILE_PATH}" ]; then
-  echo "COMPOSE_FILE_PATH variable is not set"
-  exit 2
-fi
-if [ -z "${COMMIT_MESSAGE}" ]; then
-  echo "COMMIT_MESSAGE variable is not set"
-  exit 2
-fi
-if [ -z "${BRANCH_NAME}" ]; then
-  echo "BRANCH_NAME variable is not set"
-  exit 2
-fi
-
 GIT_DIFF=$(git diff origin/master --name-only .)
 COMPOSE_FILE=$(basename $COMPOSE_FILE_PATH)
 COMPOSE_PATH=$(dirname $COMPOSE_FILE_PATH)
