@@ -12,6 +12,7 @@ if [[ "${BRANCH_NAME}" == "master" ]] ||
   [[ "${GIT_DIFF}" == *test/postman/docker-compose* ]]; then
   echo "deploying..."
 else
+  echo "skipped deploying"
   exit 0
 fi
 
@@ -27,13 +28,13 @@ docker-compose ps
 docker-compose -f "${COMPOSE_FILE}" pull
 export COMPOSE_HTTP_TIMEOUT=120
 docker-compose -f "${COMPOSE_FILE}" up -d
-# docker-compose up
 WAIT_INTERVAL=1
 COUNTER=0
 TIMEOUT=300
 t0=$(date +%s)
 echo "Waiting for alfresco to start"
 response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/)
+echo "debug"
 until [[ "200" -eq "${response}" ]] || [[ "${COUNTER}" -eq "${TIMEOUT}" ]]; do
   printf '.'
   sleep "${WAIT_INTERVAL}"
