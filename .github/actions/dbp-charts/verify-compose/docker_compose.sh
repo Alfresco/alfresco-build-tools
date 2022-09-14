@@ -38,7 +38,7 @@ until [[ "200" -eq "${response}" ]] || [[ "${COUNTER}" -eq "${TIMEOUT}" ]]; do
   printf '.'
   sleep "${WAIT_INTERVAL}"
   COUNTER=$((COUNTER + WAIT_INTERVAL))
-  response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/)
+  response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/) || true
 done
 if (("${COUNTER}" < "${TIMEOUT}")); then
   t1=$(date +%s)
@@ -52,12 +52,12 @@ else
 fi
 COUNTER=0
 echo "Waiting for share to start"
-response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:8080/share/page)
+response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:8080/share/page) || true
 until [[ "200" -eq "${response}" ]] || [[ "${COUNTER}" -eq "${TIMEOUT}" ]]; do
   printf '.'
   sleep "${WAIT_INTERVAL}"
   COUNTER=$((COUNTER + WAIT_INTERVAL))
-  response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:8080/share/page)
+  response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:8080/share/page) || true
 done
 if (("${COUNTER}" < "${TIMEOUT}")); then
   t1=$(date +%s)
@@ -72,12 +72,12 @@ fi
 COUNTER=0
 TIMEOUT=20
 echo "Waiting more time for SOLR"
-response=$(curl --write-out %{http_code} --user admin:admin --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/s/api/solrstats)
+response=$(curl --write-out %{http_code} --user admin:admin --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/s/api/solrstats) || true
 until [[ "200" -eq "${response}" ]] || [[ "${COUNTER}" -eq "${TIMEOUT}" ]]; do
   printf '.'
   sleep "${WAIT_INTERVAL}"
   COUNTER=$((COUNTER + WAIT_INTERVAL))
-  response=$(curl --write-out %{http_code} --user admin:admin --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/s/api/solrstats)
+  response=$(curl --write-out %{http_code} --user admin:admin --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/s/api/solrstats) || true
 done
 
 cd ..
