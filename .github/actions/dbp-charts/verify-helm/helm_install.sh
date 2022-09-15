@@ -144,21 +144,6 @@ if [[ ${ACS_VERSION} && "${ACS_VERSION}" != "latest" ]]; then
   values_file="helm/${PROJECT_NAME}/${ACS_VERSION}_values.yaml"
 fi
 
-if [[ "${BRANCH_NAME}" == "master" ]] ||
-  [[ "${COMMIT_MESSAGE}" == *"[run all tests]"* ]] ||
-  [[ "${COMMIT_MESSAGE}" == *"[release]"* ]] ||
-  [[ "${GIT_DIFF}" == *helm/${PROJECT_NAME}/${ACS_VERSION}_values.yaml* ]] ||
-  [[ "${GIT_DIFF}" == *helm/${PROJECT_NAME}/templates* ]] ||
-  [[ "${GIT_DIFF}" == *helm/${PROJECT_NAME}/charts* ]] ||
-  [[ "${GIT_DIFF}" == *helm/${PROJECT_NAME}/requirements* ]] ||
-  [[ "${GIT_DIFF}" == *helm/${PROJECT_NAME}/values.yaml* ]] ||
-  [[ "${GIT_DIFF}" == *test/postman/helm* ]]; then
-  echo "deploying..."
-else
-  echo "skipped deploying"
-  exit 0
-fi
-
 # Main
 (umask 066 && aws eks update-kubeconfig --name acs-cluster --region=eu-west-1)
 prepare_namespace
