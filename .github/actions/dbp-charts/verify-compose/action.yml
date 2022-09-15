@@ -37,10 +37,6 @@ runs:
       with:
         username: ${{ inputs.DOCKER_USERNAME }}
         password: ${{ inputs.DOCKER_PASSWORD }}
-    - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v1.12.0
-    - name: Get commit msg
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@v1.12.0
     - name: Run Docker Compose tests
       if: ${{ inputs.acs_version == 'community' }} || ! github.event.pull_request.head.repo.fork
       run: ${{ github.action_path }}/docker_compose.sh
