@@ -1,20 +1,8 @@
 #!/bin/bash -e
 
-GIT_DIFF=$(git diff origin/master --name-only .)
 COMPOSE_FILE=$(basename $COMPOSE_FILE_PATH)
 COMPOSE_PATH=$(dirname $COMPOSE_FILE_PATH)
 alf_port=8080
-
-if [[ "${BRANCH_NAME}" == "master" ]] ||
-  [[ "${COMMIT_MESSAGE}" == *"[run all tests]"* ]] ||
-  [[ "${COMMIT_MESSAGE}" == *"[release]"* ]] ||
-  [[ "${GIT_DIFF}" == *$COMPOSE_FILE* ]] ||
-  [[ "${GIT_DIFF}" == *test/postman/docker-compose* ]]; then
-  echo "deploying..."
-else
-  echo "skipped deploying"
-  exit 0
-fi
 
 cd "$COMPOSE_PATH" || {
   echo "Error: docker compose dir not found"
