@@ -4,6 +4,14 @@ inputs:
   next-version:
     description: 'Next version following the pattern MAJOR.MINOR.PATCH'
     required: true
+  prerelease-type:
+    description: The type of the prerelease, i.e. `alpha`, `beta`, `rc`
+    required: false
+    default: alpha
+  repository-directory:
+    description: "Path to the directory holding the git repository"
+    required: false
+
 outputs:
   next-prerelease:
     description: "Next prerelease"
@@ -18,3 +26,5 @@ runs:
       shell: bash
       env:
         NEXT_VERSION: ${{ inputs.next-version }}
+        PRERELEASE_TYPE: ${{ inputs.prerelease-type }}
+        REPO_DIR: ${{inputs.repository-directory}}
