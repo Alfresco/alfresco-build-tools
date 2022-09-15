@@ -10,19 +10,13 @@ clean_up () {
 trap clean_up EXIT
 
 GIT_DIFF="$(git diff origin/master --name-only .)"
-if [[ "${ACS_VERSION}" == "none" ]]; then
-  echo "no acs version specified - setting parameters for aps"
-  namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d '[:punct:]' | awk '{print tolower($0)}')"-${GITHUB_RUN_NUMBER}"
-  release_name_ingress=aps-ing-"${GITHUB_RUN_NUMBER}"
-  release_name=aps-"${GITHUB_RUN_NUMBER}"
+namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d '[:punct:]' | awk '{print tolower($0)}')"-${GITHUB_RUN_NUMBER}"
+release_name_ingress="${RELEASE_PREFIX}"-ing-"${GITHUB_RUN_NUMBER}"
+release_name="${RELEASE_PREFIX}"-"${GITHUB_RUN_NUMBER}"
+if [[ ! ${ACS_VERSION} ]]; then
   PROJECT_NAME=alfresco-process-services
   TEST_NEWMAN="false"
 else
-  echo "setting parameters for acs version ${ACS_VERSION}"
-  VALID_VERSION=$(echo "${ACS_VERSION}" | tr -d '.' | awk '{print tolower($0)}')
-  namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d [:punct:] | awk '{print tolower($0)}')-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
-  release_name_ingress=ing-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
-  release_name=acs-"${GITHUB_RUN_NUMBER}"-"${VALID_VERSION}"
   PROJECT_NAME=alfresco-content-services
   TEST_NEWMAN="true"
 fi
@@ -152,7 +146,7 @@ EOF
 }
 
 export values_file=helm/"${PROJECT_NAME}"/values.yaml
-if [[ "${ACS_VERSION}" != "latest"  && "${ACS_VERSION}" != "none" ]]; then
+if [[ ${ACS_VERSION} && "${ACS_VERSION}" != "latest" ]]; then
   echo "using ${ACS_VERSION}_values.yaml values file for deployment"
   values_file="helm/${PROJECT_NAME}/${ACS_VERSION}_values.yaml"
 fi
