@@ -10,6 +10,7 @@ import:
   - source: .travis.terraform_install.yml
   - source: .travis.docker-buildx_install.yml
   - source: .travis.kcadm_install.yml
+  - source: .travis.git_config.yml
 branches:
   only:
     - master
