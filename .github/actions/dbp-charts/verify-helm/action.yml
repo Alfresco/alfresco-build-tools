@@ -28,6 +28,12 @@ inputs:
   release_prefix:
     description: "prefix used for release and ingress name"
     required: true
+  chart_name:
+    description: "full name of helm chart directory"
+    required: true
+  test_newman:
+    description: "whether to execute tests with newman or not"
+    required: true
   acs_version:
     description: "version of ACS to verify"
     required: false
@@ -86,3 +92,5 @@ runs:
         DOMAIN: ${{ inputs.domain }}
         ACS_VERSION: ${{ inputs.acs_version }}
         RELEASE_PREFIX: ${{ inputs.release_prefix }}
+        PROJECT_NAME: ${{ inputs.chart_name }}
+        TEST_NEWMAN: ${{ inputs.test_newman }}
