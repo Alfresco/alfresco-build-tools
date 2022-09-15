@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -e
 
 HELM_REPO_BASE_URL="https://kubernetes-charts.alfresco.com"
 CHART_VERSION=$(yq eval .version helm/"${PROJECT_NAME}"/Chart.yaml)
