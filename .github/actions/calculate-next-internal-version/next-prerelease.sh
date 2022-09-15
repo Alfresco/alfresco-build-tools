@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
+if [ -n "$REPO_DIR" ]
+then
+  cd "$REPO_DIR"
+fi
+
 echo "Fetching tags ... "
 git fetch --tags
 
