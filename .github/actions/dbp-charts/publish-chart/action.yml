@@ -10,6 +10,19 @@ inputs:
   github_email:
     description: "git config email"
     required: true
+  chart_name:
+    description: "full name of helm chart directory"
+    required: true
+  chart_repo:
+    description: "name of repository to release from"
+    required: true
+  release_type:
+    description: "whether the release should be added to stable or incubator"
+    required: true
+  alpha_suffix:
+    description: "suffix that will added to chart version of this build"
+    required: false
+    default: "SNAPSHOT"
 
 runs:
   using: composite
@@ -19,9 +32,7 @@ runs:
       with:
         fetch-depth: 0
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v1.12.0
-    - name: Get commit msg
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@v1.12.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v1.14.0
     - name: Publish
       run: ${{ github.action_path }}/publish_chart.sh
       shell: bash
@@ -29,3 +40,7 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github_token }}
         GITHUB_USERNAME: ${{ inputs.github_username }}
         GITHUB_EMAIL: ${{ inputs.github_email }}
+        PROJECT_NAME: ${{ inputs.chart_name }}
+        PROJECT_REPO: ${{ inputs.chart_repo }}
+        ALPHA_SUFFIX: ${{ inputs.alpha_suffix }}
+        RELEASE_TYPE: ${{ inputs.release_type }}

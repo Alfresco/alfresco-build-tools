@@ -1,32 +1,8 @@
 #!/bin/bash -e
 
-if [ -z "${COMPOSE_FILE_PATH}" ]; then
-  echo "COMPOSE_FILE_PATH variable is not set"
-  exit 2
-fi
-if [ -z "${COMMIT_MESSAGE}" ]; then
-  echo "COMMIT_MESSAGE variable is not set"
-  exit 2
-fi
-if [ -z "${BRANCH_NAME}" ]; then
-  echo "BRANCH_NAME variable is not set"
-  exit 2
-fi
-
-GIT_DIFF=$(git diff origin/master --name-only .)
 COMPOSE_FILE=$(basename $COMPOSE_FILE_PATH)
 COMPOSE_PATH=$(dirname $COMPOSE_FILE_PATH)
 alf_port=8080
-
-if [[ "${BRANCH_NAME}" == "master" ]] ||
-  [[ "${COMMIT_MESSAGE}" == *"[run all tests]"* ]] ||
-  [[ "${COMMIT_MESSAGE}" == *"[release]"* ]] ||
-  [[ "${GIT_DIFF}" == *$COMPOSE_FILE* ]] ||
-  [[ "${GIT_DIFF}" == *test/postman/docker-compose* ]]; then
-  echo "deploying..."
-else
-  exit 0
-fi
 
 cd "$COMPOSE_PATH" || {
   echo "Error: docker compose dir not found"
@@ -40,18 +16,17 @@ docker-compose ps
 docker-compose -f "${COMPOSE_FILE}" pull
 export COMPOSE_HTTP_TIMEOUT=120
 docker-compose -f "${COMPOSE_FILE}" up -d
-# docker-compose up
 WAIT_INTERVAL=1
 COUNTER=0
 TIMEOUT=300
 t0=$(date +%s)
 echo "Waiting for alfresco to start"
-response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/)
+response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/ || true)
 until [[ "200" -eq "${response}" ]] || [[ "${COUNTER}" -eq "${TIMEOUT}" ]]; do
   printf '.'
   sleep "${WAIT_INTERVAL}"
   COUNTER=$((COUNTER + WAIT_INTERVAL))
-  response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/)
+  response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/ || true)
 done
 if (("${COUNTER}" < "${TIMEOUT}")); then
   t1=$(date +%s)
@@ -65,12 +40,12 @@ else
 fi
 COUNTER=0
 echo "Waiting for share to start"
-response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:8080/share/page)
+response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:8080/share/page || true)
 until [[ "200" -eq "${response}" ]] || [[ "${COUNTER}" -eq "${TIMEOUT}" ]]; do
   printf '.'
   sleep "${WAIT_INTERVAL}"
   COUNTER=$((COUNTER + WAIT_INTERVAL))
-  response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:8080/share/page)
+  response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:8080/share/page || true)
 done
 if (("${COUNTER}" < "${TIMEOUT}")); then
   t1=$(date +%s)
@@ -85,12 +60,12 @@ fi
 COUNTER=0
 TIMEOUT=20
 echo "Waiting more time for SOLR"
-response=$(curl --write-out %{http_code} --user admin:admin --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/s/api/solrstats)
+response=$(curl --write-out %{http_code} --user admin:admin --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/s/api/solrstats || true)
 until [[ "200" -eq "${response}" ]] || [[ "${COUNTER}" -eq "${TIMEOUT}" ]]; do
   printf '.'
   sleep "${WAIT_INTERVAL}"
   COUNTER=$((COUNTER + WAIT_INTERVAL))
-  response=$(curl --write-out %{http_code} --user admin:admin --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/s/api/solrstats)
+  response=$(curl --write-out %{http_code} --user admin:admin --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/s/api/solrstats || true)
 done
 
 cd ..

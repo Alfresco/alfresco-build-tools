@@ -25,10 +25,19 @@ inputs:
   aws_sg:
     description: "AWS Security Group"
     required: true
+  release_prefix:
+    description: "prefix used for release and ingress name"
+    required: true
+  chart_name:
+    description: "full name of helm chart directory"
+    required: true
+  test_newman:
+    description: "whether to execute tests with newman or not"
+    required: true
   acs_version:
     description: "version of ACS to verify"
     required: false
-    default: default
+    default: ""
   domain:
     description: "domain to access the cluster"
     required: false
@@ -41,6 +50,7 @@ inputs:
     description: "version of the kubectl CLI"
     required: false
     default: 'v1.23.6'
+
 
 runs:
   using: composite
@@ -81,3 +91,6 @@ runs:
         AWS_SG: ${{ inputs.aws_sg }}
         DOMAIN: ${{ inputs.domain }}
         ACS_VERSION: ${{ inputs.acs_version }}
+        RELEASE_PREFIX: ${{ inputs.release_prefix }}
+        PROJECT_NAME: ${{ inputs.chart_name }}
+        TEST_NEWMAN: ${{ inputs.test_newman }}

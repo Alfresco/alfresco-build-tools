@@ -1,34 +1,9 @@
-#!/usr/bin/env bash
-
-if [ -z "${COMMIT_MESSAGE}" ]; then
-  echo "COMMIT_MESSAGE variable is not set"
-  exit 2
-fi
-if [ -z "${GITHUB_RUN_NUMBER}" ]; then
-  echo "GITHUB_RUN_NUMBER variable is not set"
-  exit 2
-fi
-if [ -z "${BRANCH_NAME}" ]; then
-  echo "BRANCH_NAME variable is not set"
-  exit 2
-fi
-if [ -z "${GITHUB_TOKEN}" ]; then
-  echo "GITHUB_TOKEN variable is not set"
-  exit 2
-fi
-
-if [[ -z $PROJECT_NAME ]]; then
-  PROJECT_NAME="alfresco-content-services"
-fi
+#!/bin/bash -e
 
 HELM_REPO_BASE_URL="https://kubernetes-charts.alfresco.com"
-HELM_REPO="incubator"
 CHART_VERSION=$(yq eval .version helm/"${PROJECT_NAME}"/Chart.yaml)
-ALPHA_BUILD_VERSION="${CHART_VERSION%-*}-A${GITHUB_RUN_NUMBER}"
-if [[ "${BRANCH_NAME}" != "master" ]]; then
-  echo "Changing Chart version to ${ALPHA_BUILD_VERSION} as this is a feature branch..."
-  sed -i s,"${CHART_VERSION}","${ALPHA_BUILD_VERSION}",g helm/"${PROJECT_NAME}"/Chart.yaml
-elif [[ "${COMMIT_MESSAGE}" == *"[release]"* ]]; then
+
+if [[ "${RELEASE_TYPE}" == "stable" ]]; then
   export HELM_REPO=stable
   git checkout -B "${BRANCH_NAME}"
   git config --global user.name "${GITHUB_USERNAME}"
@@ -42,6 +17,11 @@ elif [[ "${COMMIT_MESSAGE}" == *"[release]"* ]]; then
   for ref in ':refs/tags/latest' 'latest'; do
     git push https://"${GITHUB_TOKEN}"@github.com/${PROJECT_REPO} "${ref}"
   done
+else
+  export HELM_REPO=incubator
+  ALPHA_BUILD_VERSION="${CHART_VERSION%-*}-${ALPHA_SUFFIX}"
+  echo "Changing Chart version to ${ALPHA_BUILD_VERSION} as this is a feature branch..."
+  sed -i s,"${CHART_VERSION}","${ALPHA_BUILD_VERSION}",g helm/"${PROJECT_NAME}"/Chart.yaml
 fi
 
 COMMIT_MESSAGE_FIRST_LINE=$(git log --pretty=format:%s --max-count=1)
