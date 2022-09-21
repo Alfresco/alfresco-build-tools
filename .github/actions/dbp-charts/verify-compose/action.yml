@@ -24,7 +24,11 @@ runs:
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    - if: ${{ inputs.acs_version != 'community' }} && ! github.event.pull_request.head.repo.fork
+    - name: debug
+      run: |
+        echo "${{ github.event.pull_request.head.repo.fork }}"
+      shell: bash
+    - if: '! contains(inputs.compose_file_path, "community") && ! github.event.pull_request.head.repo.fork'
       name: Login to Quay.io
       uses: docker/login-action@v1
       with:
@@ -38,7 +42,7 @@ runs:
         username: ${{ inputs.DOCKER_USERNAME }}
         password: ${{ inputs.DOCKER_PASSWORD }}
     - name: Run Docker Compose tests
-      if: ${{ inputs.acs_version == 'community' }} || ! github.event.pull_request.head.repo.fork
+      if: contains(inputs.compose_file_path, 'community') || ! github.event.pull_request.head.repo.fork
       run: ${{ github.action_path }}/docker_compose.sh
       shell: bash
       env:
