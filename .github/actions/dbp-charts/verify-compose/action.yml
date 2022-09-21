@@ -29,14 +29,14 @@ runs:
       uses: docker/login-action@v1
       with:
         registry: quay.io
-        username: ${{ inputs.QUAY_USERNAME }}
-        password: ${{ inputs.QUAY_PASSWORD }}
+        username: ${{ inputs.quay_username }}
+        password: ${{ inputs.quay_password }}
     - if: ${{ inputs.docker_username != '' && inputs.docker_password != '' }}
       name: Login to Docker Hub
       uses: docker/login-action@v1
       with:
-        username: ${{ inputs.DOCKER_USERNAME }}
-        password: ${{ inputs.DOCKER_PASSWORD }}
+        username: ${{ inputs.docker_username }}
+        password: ${{ inputs.docker_password }}
     - name: Run Docker Compose tests
       run: ${{ github.action_path }}/docker_compose.sh
       shell: bash
