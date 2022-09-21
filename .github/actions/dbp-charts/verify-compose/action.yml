@@ -27,10 +27,6 @@ runs:
     - name: 'debug'
       run: |
         echo "${{ github.event.pull_request.head.repo.fork }}"
-        echo "${{ inputs.quay_username }}: ${{ inputs.quay_username != '' }}"
-        echo "${{ inputs.quay_password }}: ${{ inputs.quay_password != '' }}"
-        echo "${{ inputs.docker_username }}: ${{ inputs.docker_username != '' }}"
-        echo "${{ inputs.docker_password }}: ${{ inputs.docker_password != '' }}"
       shell: bash
     - if: ${{ inputs.quay_username != '' && inputs.quay_password != '' }}
       name: Login to Quay.io
