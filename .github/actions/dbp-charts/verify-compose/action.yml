@@ -24,9 +24,14 @@ runs:
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    - name: debug
+    - if: '! github.event.pull_request.head.repo.fork'
+      name: debug
       run: |
-        echo "${{ github.event.pull_request.head.repo.fork }}"
+        echo "is not from fork"
+      shell: bash
+    - if: github.event.pull_request.head.repo.fork
+      run: |
+        echo "is from fork"
       shell: bash
     - if: ${{ ! contains(inputs.compose_file_path, 'community') }} && ! github.event.pull_request.head.repo.fork
       name: Login to Quay.io
