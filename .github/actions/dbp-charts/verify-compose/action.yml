@@ -24,21 +24,20 @@ runs:
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    - if: ${{ inputs.acs_version != 'community' }} && ! github.event.pull_request.head.repo.fork
+    - if: ${{ inputs.quay_username != '' && inputs.quay_password != '' }}
       name: Login to Quay.io
       uses: docker/login-action@v1
       with:
         registry: quay.io
-        username: ${{ inputs.QUAY_USERNAME }}
-        password: ${{ inputs.QUAY_PASSWORD }}
-    - if: '! github.event.pull_request.head.repo.fork'
+        username: ${{ inputs.quay_username }}
+        password: ${{ inputs.quay_password }}
+    - if: ${{ inputs.docker_username != '' && inputs.docker_password != '' }}
       name: Login to Docker Hub
       uses: docker/login-action@v1
       with:
-        username: ${{ inputs.DOCKER_USERNAME }}
-        password: ${{ inputs.DOCKER_PASSWORD }}
+        username: ${{ inputs.docker_username }}
+        password: ${{ inputs.docker_password }}
     - name: Run Docker Compose tests
-      if: ${{ inputs.acs_version == 'community' }} || ! github.event.pull_request.head.repo.fork
       run: ${{ github.action_path }}/docker_compose.sh
       shell: bash
       env:
