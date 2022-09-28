@@ -28,7 +28,7 @@ runs:
         [ ${{ inputs.pre-commit-all-files }} ] && EXTRA_ARGS='--all-files'
         EXTRA_ARGS="${EXTRA_ARGS} ${{ inputs.pre-commit_args }}"
         echo "EXTRA_ARGS="${EXTRA_ARGS}" >> $GITHUB_ENV"
-    - uses: pre-commit/action@v2.0.3
+    - uses: pre-commit/action@v3.0.0
       with:
         python-version: ${{ inputs.python-version }}
         extra_args: ${{ env.EXTRA_ARGS }}
