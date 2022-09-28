@@ -20,15 +20,16 @@ runs:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ inputs.python-version }}
       uses: actions/setup-python@v3
+      with:
+        python-version: ${{ inputs.python-version }}
     - name: build extra_args
       shell: bash
       env:
         EXTRA_ARGS: ''
       run: |
-        [ ${{ inputs.pre-commit-all-files }} ] && EXTRA_ARGS='--all-files'
-        EXTRA_ARGS="${EXTRA_ARGS} ${{ inputs.pre-commit_args }}"
-        echo "EXTRA_ARGS="${EXTRA_ARGS}" >> $GITHUB_ENV"
+        ${{ inputs.pre-commit-all-files }} && EXTRA_ARGS='--all-files'
+        EXTRA_ARGS="${EXTRA_ARGS} ${{ inputs.pre-commit-args }}"
+        echo EXTRA_ARGS="${EXTRA_ARGS}" >> $GITHUB_ENV
     - uses: pre-commit/action@v3.0.0
       with:
-        python-version: ${{ inputs.python-version }}
         extra_args: ${{ env.EXTRA_ARGS }}
