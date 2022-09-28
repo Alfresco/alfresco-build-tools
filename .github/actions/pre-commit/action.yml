@@ -1,7 +1,7 @@
 name: "Pre-commit run"
 description: "Install and run pre-commit"
 inputs:
-  pre-commit_args:
+  pre-commit-args:
     description: Additionnal parameters to pass to pre-commit
     required: false
   pre-commit-all-files:
