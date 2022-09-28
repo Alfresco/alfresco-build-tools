@@ -1,6 +1,15 @@
 name: "Pre-commit run"
 description: "Install and run pre-commit"
 inputs:
+  pre-commit-args:
+    description: Additionnal parameters to pass to pre-commit
+    required: false
+  pre-commit-all-files:
+    description: >-
+      Wether to run pre-commit checks on commited files only
+      (default is to run on all files)
+    required: false
+    default: "true"
   python-version:
     description: The python version of the local runner
     required: false
@@ -11,7 +20,15 @@ runs:
     - uses: actions/checkout@v3
     - name: Set up Python ${{ inputs.python-version }}
       uses: actions/setup-python@v3
+    - name: build extra_args
+      shell: bash
+      env:
+        EXTRA_ARGS: ''
+      run: |
+        [ ${{ inputs.pre-commit-all-files }} ] && EXTRA_ARGS='--all-files'
+        EXTRA_ARGS="${EXTRA_ARGS} ${{ inputs.pre-commit_args }}"
+        echo "EXTRA_ARGS="${EXTRA_ARGS}" >> $GITHUB_ENV"
+    - uses: pre-commit/action@v3.0.0
       with:
         python-version: ${{ inputs.python-version }}
-
-    - uses: pre-commit/action@v2.0.3
+        extra_args: ${{ env.EXTRA_ARGS }}
