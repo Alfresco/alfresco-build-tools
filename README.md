@@ -599,13 +599,24 @@ Publishes a new helm chart package (`.tgz`) to a helm chart repository
 
 ### load-release-descriptor
 
-Used to release Activiti Projects. Load relase information from release.yaml file.
+Used to release Activiti Projects. Load release information from release.yaml file.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/load-release-descriptor@ref
         id: load-descriptor
         with:
           release-descriptor: release.yaml
+```
+
+### update-project-base-tag
+Used to update a base tag in the release descriptor. It will add or update the entry `release.baseTag.$PROJECT` with the value specified in the input `tag`.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@ref
+        with:
+          release-descriptor: release.yaml
+          project: activiti
+          tag: ${{ env.ALPHA_VERSION }}
 ```
 
 ### send-slack-notification

@@ -1,0 +1,22 @@
+name: Update project base tag
+description: "Update project base tag in the release descriptor file. The entry `release.baseTag.$project` will be set to `$tag"
+inputs:
+  release-descriptor:
+    description: Path to the release descriptor
+    required: true
+  project:
+    description: The name of the project to be updated
+    required: true
+  tag:
+    description: the value to be used as base tag for the project
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Update base tag
+      shell: bash
+      env:
+        RELEASE_DESCRIPTOR: ${{ inputs.release-descriptor }}
+        PROJECT: ${{ inputs.project }}
+        TAG: ${{ inputs.tag }}
+      run: eval "yq -i e '.release.baseTag.$PROJECT = env(TAG)' $RELEASE_DESCRIPTOR"
