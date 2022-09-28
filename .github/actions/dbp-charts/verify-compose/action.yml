@@ -3,13 +3,14 @@ description: "Setup environment and run docker compose tests"
 inputs:
   compose_file_path:
     description: "full path to docker compose file to test"
-    required: true
+    required: false
+    default: "./docker-compose.yml"
   docker_username:
     description: "username for Docker Hub"
-    required: true
+    required: false
   docker_password:
     description: "password for Docker Hub"
-    required: true
+    required: false
   quay_username:
     description: "username for Quay.io"
     required: false
