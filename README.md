@@ -42,6 +42,7 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
     - [maven-release](#maven-release)
     - [nexus-create-staging](#nexus-create-staging)
     - [helm-package-chart](#helm-package-chart)
+    - [helm-unit-test](#helm-unit-test)
     - [helm-parse-next-release](#helm-parse-next-release)
     - [helm-release-and-publish](#helm-release-and-publish)
     - [pre-commit](#pre-commit)
@@ -517,6 +518,18 @@ The resulting staging repository will be available in the output named `staging-
           nexus-profile-id: "${{ secrets.NEXUS_ACTIVITI7_PROFILE_ID }}"
           nexus-username: "${{ secrets.NEXUS_USERNAME }}"
           nexus-password: "${{ secrets.NEXUS_PASSWORD }}"
+```
+
+### helm-unit-test
+
+Looks for Helm unit tests written using [helm3-unittest](https://github.com/vbehar/helm3-unittest/blob/master/DOCUMENT.md).
+
+```yaml
+     - uses: >-
+         Alfresco/alfresco-build-tools/.github/actions/helm-unit-tests@ref
+       with:
+         chart-dir: charts/myapp
+         chart-type: application
 ```
 
 ### helm-package-chart
