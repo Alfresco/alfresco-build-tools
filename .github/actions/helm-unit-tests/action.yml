@@ -26,7 +26,7 @@ runs:
       run: |
         set -e
         if [ -d tests ]; then echo "${{ inputs.chart-dir }}: Unit tests"
-          helm plugin install https://github.com/vbehar/helm3-unittest
+          helm plugin install https://github.com/vbehar/helm3-unittest --version ${{ inputs.plugin_version }}
           helm dep up
           helm unittest --color .
         else
