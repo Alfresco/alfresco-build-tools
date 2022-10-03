@@ -82,5 +82,5 @@ runs:
           -Dfile=${{ inputs.file }} \
           -Dclassifier=${{ inputs.classifier }} \
           -DgeneratePom=${{ inputs.generate-pom }} \
-          $OPTIONAL_ARTGS \
+          $OPTIONAL_ARGS \
           -DretryFailedDeploymentCount=5
