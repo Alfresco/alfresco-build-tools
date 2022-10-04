@@ -462,13 +462,13 @@ Check out, builds a maven project and docker images, generating a new alpha vers
 
 ```yaml
     outputs:
-      version: ${{ steps.build-and-tag.version }}
+      version: ${{ steps.build-and-tag.outputs.version }}
     steps:
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build-and-tag@ref
         id: build-and-tag
         with:
-          nexus-username: ${{ secrets.NEXUS_USERNAME }}
-          nexus-password: ${{ secrets.NEXUS_PASSWORD }}
+          maven-username: ${{ secrets.NEXUS_USERNAME }}
+          maven-password: ${{ secrets.NEXUS_PASSWORD }}
           quay-username: ${{ secrets.QUAY_USERNAME }}
           quay-password: ${{ secrets.QUAY_PASSWORD }}
           docker-username: ${{ secrets.DOCKER_USERNAME }}

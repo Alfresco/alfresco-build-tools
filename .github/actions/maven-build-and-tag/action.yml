@@ -15,10 +15,10 @@ inputs:
   extra-maven-opts:
     description: Extra maven options for the build command line
     required: false
-  nexus-username:
+  maven-username:
     description: Nexus user name
     required: true
-  nexus-password:
+  maven-password:
     description: Nexus password
     required: true
   quay-username:
@@ -62,8 +62,8 @@ runs:
         property-to-update: ${{ inputs.property-to-update }}
         maven-cli-opts: --show-version --no-transfer-progress --settings settings.xml
       env:
-        MAVEN_USERNAME: ${{ inputs.nexus-username }}
-        MAVEN_PASSWORD: ${{ inputs.nexus-password }}
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
 
     - name: Set version env variable
       if: github.event_name == 'push'
@@ -106,8 +106,8 @@ runs:
       run: mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
       env:
         MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
-        MAVEN_USERNAME: ${{ inputs.nexus-username }}
-        MAVEN_PASSWORD: ${{ inputs.nexus-password }}
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
 
     - name: Echo Longest Tests run
       shell: bash
