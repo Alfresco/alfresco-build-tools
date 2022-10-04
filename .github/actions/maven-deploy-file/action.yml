@@ -63,11 +63,16 @@ runs:
           echo "Existing settings.xml found"
           echo "Make sure to provide repository-id as input for choosing the right authentication credentials"
         fi
-    - shell: bash
+    - name: mvn deploy:deploy-file
+      shell: bash
       env:
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
       run: |
+        OPTIONAL_ARGS=""
+        if [[ -n "${{ inputs.files }}" && -n "${{ inputs.classifiers }}" && -n "${{ inputs.types }}" ]]; then
+          OPTIONAL_ARGS='-Dfiles="{{ inputs.files }}" -Dclassifiers="${{ inputs.classifiers }}" -Dtypes="${{ inputs.types }}"'
+        fi
         mvn deploy:deploy-file -B \
           -DgroupId=${{ inputs.group-id }} \
           -DartifactId=${{ inputs.artifact-id }} \
@@ -76,8 +81,6 @@ runs:
           -Dversion=${{ inputs.version }} \
           -Dfile=${{ inputs.file }} \
           -Dclassifier=${{ inputs.classifier }} \
-          -Dfiles=${{ inputs.files }} \
-          -Dclassifiers=${{ inputs.classifiers }} \
-          -Dtypes=${{ inputs.types }} \
           -DgeneratePom=${{ inputs.generate-pom }} \
+          $OPTIONAL_ARGS \
           -DretryFailedDeploymentCount=5
