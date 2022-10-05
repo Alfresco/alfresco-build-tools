@@ -1,0 +1,148 @@
+name: Build and tag Maven project
+description: Build and tag Maven project
+inputs:
+  java-version:
+    description: The Java version to perform the build
+    required: false
+    default: '11'
+  java-distribution:
+    description: The Java distribution to perform the build
+    required: false
+    default: 'temurin'
+  property-to-update:
+    description: Property to update in addition to the version of the pom file
+    required: false
+  extra-maven-opts:
+    description: Extra maven options for the build command line
+    required: false
+  maven-username:
+    description: Nexus user name
+    required: true
+  maven-password:
+    description: Nexus password
+    required: true
+  quay-username:
+    description: Quay.io user name
+    required: true
+  quay-password:
+    description: Quay.io password
+    required: true
+  docker-username:
+    description: Docker.io user name
+    required: true
+  docker-password:
+    description: Docker.io password
+    required: true
+  git-username:
+    description: The username to commit on the git repository
+    required: true
+
+outputs:
+  version:
+    description: "The version of the new tag created by this workflow"
+    value: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up JDK
+      uses: actions/setup-java@a18c333f3f14249953dab3e186e5e21bf3390f1d
+      with:
+        java-version: ${{ inputs.java-version }}
+        distribution: ${{ inputs.java-distribution }}
+        cache: 'maven'
+
+    - name: Update pom files to the new version
+      id: update-pom-to-next-version
+      if: github.event_name == 'push'
+      uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@v1.16.0
+      with:
+        property-to-update: ${{ inputs.property-to-update }}
+        maven-cli-opts: --show-version --no-transfer-progress --settings settings.xml
+      env:
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
+
+    - name: Set version env variable
+      if: github.event_name == 'push'
+      env:
+        VERSION: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
+      shell: bash
+      run: |
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+    - name: Login to DockerHub Registry
+      if: github.event_name == 'push'
+      uses: docker/login-action@v2
+      with:
+        registry: docker.io
+        username: ${{ inputs.docker-username }}
+        password: ${{ inputs.docker-password }}
+
+    - name: Login to Quay.io Docker Registry
+      uses: docker/login-action@v2
+      with:
+        registry: quay.io
+        username: ${{ inputs.quay-username }}
+        password: ${{ inputs.quay-password }}
+
+    - name: Define Maven Command
+      id: define_maven_command
+      shell: bash
+      run: |
+        if [ $DO_PUSH == 'true' ]
+        then
+          echo "::set-output name=command::deploy"
+        else
+          echo "::set-output name=command::verify"
+        fi
+      env:
+        DO_PUSH: ${{ github.event_name == 'push' }}
+
+    - name: Build and Test with Maven (and maybe Deploy)
+      shell: bash
+      run: mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
+      env:
+        MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
+
+    - name: Echo Longest Tests run
+      shell: bash
+      run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
+
+    - name: Define Docker Push
+      id: define_docker_push
+      shell: bash
+      run: |
+        if [ $DO_PUSH == 'true' ]
+        then
+          echo "::set-output name=command::--push"
+        fi
+      env:
+        DO_PUSH: ${{ github.event_name == 'push' }}
+
+    - name: Docker Build (and maybe Push)
+      shell: bash
+      run: |
+        TAG="${TAG:-$(echo ${GITHUB_HEAD_REF:-$GITHUB_REF_NAME} | sed -e 's/[^-_.[:alnum:]]/_/g')}"
+        sh ./build-and-push-docker-images.sh
+      env:
+        PUSH_OPTION: ${{ steps.define_docker_push.outputs.command }}
+        TAG: ${{env.VERSION}}
+
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.16.0
+      if: github.event_name == 'push'
+      with:
+        username: ${{ inputs.git-username }}
+        add-options: -u
+        commit-message: "release $VERSION"
+
+    - name: Create and push tag
+      if: github.event_name == 'push'
+      shell: bash
+      run: |
+        git tag -a $VERSION -m "Release version $VERSION"
+        git push origin $VERSION

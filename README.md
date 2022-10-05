@@ -37,6 +37,7 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
     - [get-commit-message](#get-commit-message)
     - [git-commit-changes](#git-commit-changes)
     - [git-latest-tag](#git-latest-tag)
+    - [maven-build-and-tag](#maven-build-and-tag)
     - [maven-deploy-file](#maven-deploy-file)
     - [maven-update-pom-version](#maven-update-pom-version)
     - [maven-release](#maven-release)
@@ -56,7 +57,6 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
     - [veracode](#veracode)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
-    - [build-and-tag-maven.yml](#build-and-tag-mavenyml)
   - [Cookbook](#cookbook)
     - [Serialize pull request builds](#serialize-pull-request-builds)
   - [Known issues](#known-issues)
@@ -452,6 +452,30 @@ Gets the latest tag for the given pattern. The result is returned in the output 
           pattern: 1.0.0-alpha*
 ```
 
+### maven-build-and-tag
+
+Check out, builds a maven project and docker images, generating a new alpha version for it on push events:
+
+- publish maven artifacts to Nexus
+- push docker images to quay.io
+- create GitHub tag for the new alpha release
+
+```yaml
+    outputs:
+      version: ${{ steps.build-and-tag.outputs.version }}
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build-and-tag@ref
+        id: build-and-tag
+        with:
+          maven-username: ${{ secrets.NEXUS_USERNAME }}
+          maven-password: ${{ secrets.NEXUS_PASSWORD }}
+          quay-username: ${{ secrets.QUAY_USERNAME }}
+          quay-password: ${{ secrets.QUAY_PASSWORD }}
+          docker-username: ${{ secrets.DOCKER_USERNAME }}
+          docker-password: ${{ secrets.DOCKER_PASSWORD }}
+          git-username: ${{ secrets.BOT_GITHUB_USERNAME }}
+```
+
 ### maven-deploy-file
 
 Upload one or more files to a maven server, without requiring the presence of a
@@ -710,20 +734,6 @@ Calculates the new alpha version, creates new git tag and publishes the new pack
       chart-dir: charts/common
       helm-charts-repo: Activiti/activiti-cloud-helm-charts
       helm-charts-repo-branch: gh-pages
-    secrets: inherit
-```
-
-### build-and-tag-maven.yml
-
-Builds a maven project and generates the new alpha version for it:
-
-- publish maven artifacts to Nexus
-- push docker images to quay.io
-- create GitHub tag for the new alpha release
-
-```yaml
-  build:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/build-and-tag-maven.yml@ref
     secrets: inherit
 ```
 
