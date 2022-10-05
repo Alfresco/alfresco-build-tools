@@ -24,7 +24,7 @@ jobs:
       version: ${{ steps.build.outputs.version }}
     steps:
       - run: echo "This reusable workflow is deprecated, use Alfresco/alfresco-build-tools/.github/actions/maven-build-and-tag instead."
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build-and-tag@AAE-10135-change-maven-build-workflow-to-action
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build-and-tag@v1.17.0
         id: build
         with:
           property-to-update: ${{ inputs.property-to-update }}
