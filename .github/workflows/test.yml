@@ -21,17 +21,14 @@ jobs:
       - uses: ./.github/actions/setup-helm-docs
       - uses: ./.github/actions/setup-jx-release-version
       - uses: ./.github/actions/setup-kubepug
-      - uses: ./.github/actions/rancher-interaction
+      - uses: ./.github/actions/rancher
         if: github.actor != 'dependabot[bot]'
         with:
           rancher-url: 'https://rancher2.envalfresco.com'
           rancher-access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
           rancher-secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
           cluster-name: "fake_cluster"
-          option: "detach"
-          aws-access-key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: "us-east-2"
+          action: "detach"
       - uses: ./.github/actions/setup-rancher-cli
         if: github.actor != 'dependabot[bot]'
         with:
