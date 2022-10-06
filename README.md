@@ -55,6 +55,7 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
     - [helm-update-chart-version](#helm-update-chart-version)
     - [configure-git-author](#configure-git-author)
     - [veracode](#veracode)
+    - [rancher](#rancher)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
   - [Cookbook](#cookbook)
@@ -717,6 +718,25 @@ Runs Veracode Source Clear Scan
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
           veracode-fails-build: "false"
+```
+
+### rancher
+
+register or detach an EKS cluster to Rancher.
+AWS credentials are required only when registering the cluster.
+
+```yaml
+      - name: Register Cluster
+        uses: Alfresco/alfresco-build-tools/.github/actions/rancher@ref
+        with:
+          rancher-url: ${{ env.RANCHER2_URL }}
+          rancher-access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
+          rancher-secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
+          cluster-name: ${{ env.CLUSTER_NAME }}
+          action: "register"
+          aws-access-key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: "us-east-2"
 ```
 
 ## Reusable workflows provided by us

@@ -1,0 +1,52 @@
+name: "rancher"
+description: "Action to register cluster to rancher or detach cluster from rancher"
+inputs:
+  rancher-access-key:
+    description: 'Rancher API access key'
+    required: true
+  rancher-secret-key:
+    description: 'Rancher API secret key'
+    required: true
+  rancher-url:
+    description: 'Rancher URL'
+    required: true
+  action:
+    description: register or detach
+    required: true
+  cluster-name:
+    description: Name of cluster
+    required: true
+  aws-access-key:
+    description: aws access key, not needed if detach
+    required: false
+  aws-secret-key:
+    description: aws secret key, not needed if detach
+    required: false
+  aws-region:
+    description: aws region, not needed if detach
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - uses: azure/setup-kubectl@v2.0
+    - name: setup-python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.9"
+        cache: pip
+    - name: install library
+      shell: bash
+      run: pip install -r ${{ github.action_path }}/requirements.txt
+    - name: ${{ inputs.action }} cluster
+      shell: bash
+      run: |
+        if [ "${{ inputs.action }}" = "register" ]; then
+          export AWS_ACCESS_KEY_ID=${{ inputs.aws-access-key }}
+          export AWS_SECRET_ACCESS_KEY=${{ inputs.aws-secret-key }}
+          aws eks --region ${{ inputs.aws-region }} update-kubeconfig --name ${{ inputs.cluster-name }}
+        fi
+        export RANCHER2_URL=${{ inputs.rancher-url }}
+        export RANCHER2_ACCESS_KEY=${{ inputs.rancher-access-key }}
+        export RANCHER2_SECRET_KEY=${{ inputs.rancher-secret-key }}
+        export CLUSTER_NAME=${{ inputs.cluster-name }}
+        python3 ${{ github.action_path }}/rancher_api.py ${{ inputs.action }}
