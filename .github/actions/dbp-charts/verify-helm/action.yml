@@ -50,12 +50,16 @@ inputs:
     description: "version of the kubectl CLI"
     required: false
     default: 'v1.23.6'
-
+  skip_checkout:
+    description: "Do not checkout the branch again"
+    required: false
 
 runs:
   using: composite
   steps:
     - name: Checkout
+      if: |
+        ! inputs.skip_checkout
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
