@@ -42,13 +42,14 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
     - [maven-update-pom-version](#maven-update-pom-version)
     - [maven-release](#maven-release)
     - [nexus-create-staging](#nexus-create-staging)
-    - [helm-package-chart](#helm-package-chart)
     - [helm-unit-test](#helm-unit-test)
+    - [helm-package-chart](#helm-package-chart)
     - [helm-parse-next-release](#helm-parse-next-release)
     - [helm-release-and-publish](#helm-release-and-publish)
     - [pre-commit](#pre-commit)
     - [publish-helm-chart](#publish-helm-chart)
     - [load-release-descriptor](#load-release-descriptor)
+    - [update-project-base-tag](#update-project-base-tag)
     - [send-slack-notification](#send-slack-notification)
     - [setup-github-release-binary](#setup-github-release-binary)
     - [travis-env-load](#travis-env-load)
@@ -60,6 +61,7 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
     - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
   - [Cookbook](#cookbook)
     - [Serialize pull request builds](#serialize-pull-request-builds)
+    - [Conditional job/step depending on PR labels](#conditional-jobstep-depending-on-pr-labels)
   - [Known issues](#known-issues)
     - [realpath not available under macosx](#realpath-not-available-under-macosx)
   - [Release](#release)
@@ -784,10 +786,19 @@ concurrency:
 
 The `github.head_ref` is available when workflow is triggered by pull_request
 event, while `github.ref_name` when pushing branches and tags. The
-`github.run_id` is just a fallback to avoid failure when both variables are both
-empty.
+`github.run_id` is just a fallback to avoid failure when both variables are empty.
 
 More docs on [using concurrency](https://docs.github.com/en/actions/using-jobs/using-concurrency)
+
+### Conditional job/step depending on PR labels
+
+A possible approach to have a dynamic behaviour in `pull_request` triggered
+workflows, is to check the currently assigned labels. Please be aware that labels
+should be already applied before opening/updating a PR in order be effective.
+
+```yml
+    if: contains(github.event.pull_request.labels.*.name, 'label-name')
+```
 
 ## Known issues
 
