@@ -742,7 +742,7 @@ AWS credentials are required only when registering the cluster.
 
 ### jx-updatebot-pr
 
-Create a Pull Request on each downstream repository: https://github.com/jenkins-x-plugins/jx-updatebot
+Create a Pull Request on each downstream repository using https://github.com/jenkins-x-plugins/jx-updatebot.
 
 Given `.jx/updatebot.yaml` spec in the `alfresco-modeling-service` project:
 
