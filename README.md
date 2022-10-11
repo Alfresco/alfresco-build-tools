@@ -765,7 +765,7 @@ spec:
               - pom.xml
 ```
 
-This action will promote alpha version to `alfresco-process-releases` repository via pull request. It will add new commit if there is an existing PR with matching `develop` label. 
+This action will promote alpha version to `alfresco-process-releases` repository via pull request. It will add new commit if there is an existing PR with matching `develop` label.
 
 ```yaml
       - name: Promote version
