@@ -12,15 +12,15 @@ inputs:
     description: should we automatically merge if the PR pipeline is green (default true)
     default: 'true'
   version:
-    required: true
-    description: the version number to promote. If not specified uses $VERSION or the version file
+    required: false
+    description: the version number to promote. If not specified uses $VERSION environment variable or the version file
   version-file:
     required: false
     description: the file to load the version from if not specified directly or via a $VERSION environment variable. Defaults to VERSION in the current dir
     default: 'VERSION'
   dir:
     required: false
-    description: the directory look for the VERSION file (default ".")
+    description: the directory to look for the VERSION file (default ".")
     default: '.'
   pull-request-title:
     required: false
