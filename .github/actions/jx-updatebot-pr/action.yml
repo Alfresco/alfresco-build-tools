@@ -1,0 +1,111 @@
+# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions
+name: 'jx-updatebot-pr'
+description: |
+  Create a Pull Request on each downstream repository
+  See: https://github.com/jenkins-x-plugins/jx-updatebot
+branding:
+  icon: 'git-pull-request'
+  color: 'blue'
+inputs:
+  auto-merge:
+    required: false
+    description: should we automatically merge if the PR pipeline is green (default true)
+    default: 'true'
+  version:
+    required: true
+    description: the version number to promote. If not specified uses $VERSION or the version file
+  version-file:
+    required: false
+    description: the file to load the version from if not specified directly or via a $VERSION environment variable. Defaults to VERSION in the current dir
+    default: 'VERSION'
+  dir:
+    required: false
+    description: the directory look for the VERSION file (default ".")
+    default: '.'
+  pull-request-title:
+    required: false
+    description: the PR title
+    default: ''
+  commit-title:
+    required: false
+    description: the commit title
+    default: ''
+  commit-message:
+    required: false
+    description: the commit message
+    default: ''
+  pull-request-body:
+    required: false
+    description: the PR body
+    default: ''
+  labels:
+    required: false
+    description: a list of labels to apply to the PR separated by comma, i.e l1,l2,l3
+    default: ''
+  base-branch-name:
+    required: false
+    description: the base branch name to use for new pull requests. Defaults to default main branch if not specified.
+    default: ''
+  flags:
+    required: false
+    description: Command options, i.e. --git-credentials
+    default: ''
+  config-file:
+    required: false
+    description: the updatebot config file. If none specified defaults to .jx/updatebot.yaml
+    default: ''
+  git-token:
+    description: the git token used to operate on the git repository. If not specified it's loaded from the git credentials file
+    required: false
+    default: ''
+  git-username:
+    description: the git username used to operate on the git repository. If not specified it's loaded from the git credentials file
+    required: false
+    default: ''
+  git-author-name:
+    description: the user name to git commit
+    required: false
+    default: ''
+  git-author-email:
+    description: the user email to git commit
+    required: false
+    default: ''
+  jx-updatebot-release:
+    description: the version of jx-updatebot release.
+    required: false
+    default: '0.3.3'
+  working-directory:
+    required: false
+    description: project root directory. Defaults to '.'
+    default: '.'
+runs:
+  using: composite
+  steps:
+    - name: Setup jx-updatebot
+      run: |
+        curl -L https://github.com/jenkins-x-plugins/jx-updatebot/releases/download/v${{ inputs.jx-updatebot-release }}/jx-updatebot-linux-amd64.tar.gz | tar xzv
+        sudo mv jx-updatebot /usr/local/bin
+      shell: bash
+      working-directory: /tmp
+    - name: Run jx-updatebot
+      run: >
+        jx-updatebot pr
+        --auto-merge=${{ inputs.auto-merge }}
+        --version='${{ inputs.version }}'
+        --pull-request-title='${{ inputs.pull-request-title }}'
+        --pull-request-body='${{ inputs.pull-request-body }}'
+        --commit-title='${{ inputs.commit-title }}'
+        --commit-message='${{ inputs.commit-message }}'
+        --labels='${{ inputs.labels }}'
+        --base-branch-name='${{ inputs.base-branch-name }}'
+        --config-file='${{ inputs.config-file }}'
+        --version-file='${{ inputs.version-file }}'
+        --dir='${{ inputs.dir }}'
+        ${{ inputs.flags }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        GIT_USERNAME: ${{ inputs.git-username }}
+        GIT_TOKEN: ${{ inputs.git-token }}
+        GIT_AUTHOR_NAME: ${{ inputs.git-author-name }}
+        GIT_AUTHOR_EMAIL: ${{ inputs.git-author-email }}

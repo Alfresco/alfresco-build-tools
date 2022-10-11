@@ -56,6 +56,7 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
     - [configure-git-author](#configure-git-author)
     - [veracode](#veracode)
     - [rancher](#rancher)
+    - [jx-updatebot-pr](#jx-updatebot-pr)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
   - [Cookbook](#cookbook)
@@ -737,6 +738,48 @@ AWS credentials are required only when registering the cluster.
           aws-access-key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: "us-east-2"
+```
+
+### jx-updatebot-pr
+
+Create a Pull Request on each downstream repository: https://github.com/jenkins-x-plugins/jx-updatebot
+
+Given `.jx/updatebot.yaml` spec in the `alfresco-modeling-service` project:
+
+```yaml
+apiVersion: updatebot.jenkins-x.io/v1alpha1
+kind: UpdateConfig
+spec:
+  rules:
+    - urls:
+        - https://github.com/alfresco/alfresco-process-releases
+      reusePullRequest: true
+      changes:
+        - regex:
+            pattern: "version: (.*)"
+            files:
+              - "docker/quay.io/alfresco/alfresco-modeling-service.yml"
+        - regex:
+            pattern: "<alfresco-modeling-service.version>(.*)</alfresco-modeling-service.version>"
+            files:
+              - pom.xml
+```
+
+This action will promote alpha version to `alfresco-process-releases` repository via pull request. It will add new commit if there is an existing PR with matching `develop` label. 
+
+```yaml
+      - name: Promote version
+        uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@ref
+        with:
+          version: ${{ steps.tag.outputs.version }}
+          labels: develop
+          pull-request-title: "promote(dep): update versions into ${{ github.ref_name }}"
+          commit-title: "chore(dep): update ${{ github.repository }} version to ${{ steps.tag.outputs.version }}"
+          base-branch-name: ${{ github.ref_name }}
+          git-username: ${{ secrets.GIT_USERNAME }}
+          git-token: ${{ secrets.GIT_TOKEN }}
+          git-author-name: ${{ secrets.GIT_AUTHOR_NAME }}
+          git-author-email: ${{ secrets.GIT_AUTHOR_EMAIL }}
 ```
 
 ## Reusable workflows provided by us
