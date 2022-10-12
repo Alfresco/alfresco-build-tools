@@ -18,8 +18,9 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
       - [Setup Maven Credentials](#setup-maven-credentials)
       - [Setup Maven Build Options](#setup-maven-build-options)
   - [Migrate from Travis to GitHub Actions](#migrate-from-travis-to-github-actions)
+    - [Default environment variables](#default-environment-variables)
+    - [Make build logs verbose again](#make-build-logs-verbose-again)
     - [Workflow schema validation](#workflow-schema-validation)
-    - [Alternatives to Travis CI default environment variables](#alternatives-to-travis-ci-default-environment-variables)
   - [Security hardening for GitHub Actions](#security-hardening-for-github-actions)
   - [GitHub Actions provided by community](#github-actions-provided-by-community)
     - [Docker build and push](#docker-build-and-push)
@@ -144,7 +145,7 @@ env:
 When migrating from Travis, depending on the previous configuration, docker.skip and docker.tag properties might need
 to be setup on the command line.
 
-Here is a sample way to extract a branch name that would be used for docker images built with the `build-and-push-docker-images.sh` script, although using the [dedicated action](#dockerbuild-push-action) can also be
+Here is a sample way to extract a branch name that would be used for docker images built with the `build-and-push-docker-images.sh` script, although using the [dedicated action](#docker-build-and-push) can also be
 useful.
 
 ```yml
@@ -166,39 +167,59 @@ for details of what is already available when running GitHub Actions.
 
 Here follows a table to ease migrating Travis build that were using config offered by this repo:
 
-| Travis CI config file                     | GitHub Actions replacement                                                  |
-|-------------------------------------------|-----------------------------------------------------------------------------|
-| .travis.aws-iam-authenticator_install.yml | Not yet determined                                                          |
-| .travis.awscli_install.yml                | Preinstalled                                                                |
-| .travis.checkov_install.yml               | [bridgecrewio/checkov-action](https://github.com/bridgecrewio/checkov-action)|
-| .travis.common.yml                        | Outdated: use equivalent steps in the workflow                              |
-| .travis.docker-buildx_install.yml         | [docker/setup-buildx-action](https://github.com/docker/setup-buildx-action) |
-| .travis.docker_hub_login.yml              | [docker/login-action](#dockerlogin-action)                                  |
-| .travis.docker_login.yml                  | [docker/login-action](#dockerlogin-action)                                  |
-| .travis.gh_install.yml                    | Preinstalled                                                                |
-| .travis.helm-docs_install.yml             | [setup-helm-docs](.github/actions/setup-helm-docs/action.yml)               |
-| .travis.helm.yml                          | Not yet determined                                                          |
-| .travis.helm_install.yml                  | Preinstalled                                                                |
-| .travis.home_bin_path.yml                 | Not yet determined                                                          |
-| .travis.java.yml                          | See [Java Setup section](#setup-maven-build-options)                        |
-| .travis.java_config.yml                   | See [Java Setup section](#java-setup)                                       |
-| .travis.java_docker.yml                   | See [Java Setup section](#setup-maven-build-options)                        |
-| .travis.jq_install.yml                    | Preinstalled                                                                |
-| .travis.kcadm_install.yml                 | Not yet determined                                                          |
-| .travis.kubepug_install.yml               | [setup-kubepug](.github/actions/setup-kubepug/action.yml)                   |
-| .travis.kubernetes_install.yml            | Preinstalled                                                                |
-| .travis.maven_config.yml                  | See [Java Setup section](#java-setup)                                       |
-| .travis.pre-commit.yml                    | [pre-commit](.github/actions/pre-commit)                                    |
-| .travis.rancher_cli_config.yml            | [setup-rancher-cli](.github/actions/setup-rancher-cli/action.yml)           |
-| .travis.rancher_cli_install.yml           | [setup-rancher-cli](.github/actions/setup-rancher-cli/action.yml)           |
-| .travis.rancher_cli_kubernetes_config.yml | [setup-rancher-cli](.github/actions/setup-rancher-cli/action.yml)           |
-| .travis.srcclr_install.yml                | Not yet determined                                                          |
-| .travis.terraform-docs_install.yml        | [setup-terraform-docs](.github/actions/setup-terraform-docs/action.yml)     |
-| .travis.terraform_install.yml             | Preinstalled                                                                |
-| .travis.tflint_install.yml                | Not yet determined                                                          |
-| .travis.trigger.yml                       | Not yet determined                                                          |
-| .travis.veracode.yml                      | [veracode](.github/actions/veracode)                                        |
-| .travis.yq_install.yml                    | Preinstalled                                                                |
+| Travis CI config file                     | GitHub Actions replacement                                                    |
+|-------------------------------------------|-------------------------------------------------------------------------------|
+| .travis.aws-iam-authenticator_install.yml | Not yet determined                                                            |
+| .travis.awscli_install.yml                | Preinstalled                                                                  |
+| .travis.checkov_install.yml               | [bridgecrewio/checkov-action](https://github.com/bridgecrewio/checkov-action) |
+| .travis.common.yml                        | Outdated: use equivalent steps in the workflow                                |
+| .travis.docker-buildx_install.yml         | [docker/setup-buildx-action](https://github.com/docker/setup-buildx-action)   |
+| .travis.docker_hub_login.yml              | [docker/login-action](#docker-login)                                          |
+| .travis.docker_login.yml                  | [docker/login-action](#docker-login)                                          |
+| .travis.gh_install.yml                    | Preinstalled                                                                  |
+| .travis.helm-docs_install.yml             | [setup-helm-docs](.github/actions/setup-helm-docs/action.yml)                 |
+| .travis.helm.yml                          | Not yet determined                                                            |
+| .travis.helm_install.yml                  | Preinstalled                                                                  |
+| .travis.home_bin_path.yml                 | Not yet determined                                                            |
+| .travis.java.yml                          | See [Java Setup section](#setup-maven-build-options)                          |
+| .travis.java_config.yml                   | See [Java Setup section](#java-setup)                                         |
+| .travis.java_docker.yml                   | See [Java Setup section](#setup-maven-build-options)                          |
+| .travis.jq_install.yml                    | Preinstalled                                                                  |
+| .travis.kcadm_install.yml                 | Not yet determined                                                            |
+| .travis.kubepug_install.yml               | [setup-kubepug](.github/actions/setup-kubepug/action.yml)                     |
+| .travis.kubernetes_install.yml            | Preinstalled                                                                  |
+| .travis.maven_config.yml                  | See [Java Setup section](#java-setup)                                         |
+| .travis.pre-commit.yml                    | [pre-commit](.github/actions/pre-commit)                                      |
+| .travis.rancher_cli_config.yml            | [setup-rancher-cli](.github/actions/setup-rancher-cli/action.yml)             |
+| .travis.rancher_cli_install.yml           | [setup-rancher-cli](.github/actions/setup-rancher-cli/action.yml)             |
+| .travis.rancher_cli_kubernetes_config.yml | [setup-rancher-cli](.github/actions/setup-rancher-cli/action.yml)             |
+| .travis.srcclr_install.yml                | Not yet determined                                                            |
+| .travis.terraform-docs_install.yml        | [setup-terraform-docs](.github/actions/setup-terraform-docs/action.yml)       |
+| .travis.terraform_install.yml             | Preinstalled                                                                  |
+| .travis.tflint_install.yml                | Not yet determined                                                            |
+| .travis.trigger.yml                       | Not yet determined                                                            |
+| .travis.veracode.yml                      | [veracode](.github/actions/veracode)                                          |
+| .travis.yq_install.yml                    | Preinstalled                                                                  |
+
+### Default environment variables
+
+| Travis CI           | GitHub Actions          |
+|---------------------|-------------------------|
+| ${TRAVIS_BRANCH}    | ${{ github.ref_name }}  |
+| ${TRAVIS_BUILD_DIR} | ${{ github.workspace }} |
+| ${TRAVIS_COMMIT}    | ${{ github.sha }}       |
+
+### Make build logs verbose again
+
+Travis is very strict regarding maximum size of the build logs output and builds
+that exceed 5MB in output will fail with `The job exceeded the maximum log
+length, and has been terminated`. GitHub Actions doesn't have this kind of
+limitation and it's highly recommended to **remove any logs suppression** of the
+build tool.
+
+With Maven this is usually achieved by using the `-q` option, that is usually
+set globally inside the `MAVEN_CLI_OPTS` environment variable. Please remove any
+usage of `-q` when migrating from Travis.
 
 ### Workflow schema validation
 
@@ -217,14 +238,6 @@ Here is a sample configuration:
         files: '.github/dependabot\.yml$'
         args: ["--schemafile", "https://json.schemastore.org/dependabot-2.0.json"]
 ```
-
-### Alternatives to Travis CI default environment variables
-
-| Travis CI           | GitHub Actions                                                     |
-|---------------------|-------------------------|
-| ${TRAVIS_BRANCH}    | ${{ github.ref_name }}  |
-| ${TRAVIS_BUILD_DIR} | ${{ github.workspace }} |
-| ${TRAVIS_COMMIT}    | ${{ github.sha }}       |
 
 ## Security hardening for GitHub Actions
 
