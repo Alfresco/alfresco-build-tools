@@ -22,3 +22,7 @@ repos:
       - id: check-github-actions
       - id: check-github-workflows
       - id: check-travis
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.32.2
+    hooks:
+    - id: markdownlint
