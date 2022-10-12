@@ -209,7 +209,7 @@ Here follows a table to ease migrating Travis build that were using config offer
 | ${TRAVIS_BUILD_DIR} | ${{ github.workspace }} |
 | ${TRAVIS_COMMIT}    | ${{ github.sha }}       |
 
-### Make build logs verbose again
+### Get back maven build output
 
 Travis is very strict regarding maximum size of the build logs output and builds
 that exceed 5MB in output will fail with `The job exceeded the maximum log
