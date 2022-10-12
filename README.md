@@ -23,47 +23,47 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
     - [Workflow schema validation](#workflow-schema-validation)
   - [Security hardening for GitHub Actions](#security-hardening-for-github-actions)
   - [GitHub Actions provided by community](#github-actions-provided-by-community)
+    - [Auto cancel builds](#auto-cancel-builds)
     - [Docker build and push](#docker-build-and-push)
     - [Docker login](#docker-login)
-    - [SSH debug](#ssh-debug)
     - [Retry failing step](#retry-failing-step)
-    - [Auto cancel builds](#auto-cancel-builds)
+    - [SSH debug](#ssh-debug)
     - [Triggering a workflow in another repository](#triggering-a-workflow-in-another-repository)
   - [GitHub Actions provided by us](#github-actions-provided-by-us)
-    - [automate-dependabot.yml](#automate-dependabotyml)
-    - [automate-propagation.yml](#automate-propagationyml)
+    - [automate-dependabot](#automate-dependabot)
+    - [automate-propagation](#automate-propagation)
     - [build-helm-chart](#build-helm-chart)
+    - [configure-git-author](#configure-git-author)
     - [get-branch-name](#get-branch-name)
     - [git-check-existing-tag](#git-check-existing-tag)
     - [get-commit-message](#get-commit-message)
     - [git-commit-changes](#git-commit-changes)
     - [git-latest-tag](#git-latest-tag)
-    - [maven-build-and-tag](#maven-build-and-tag)
-    - [maven-deploy-file](#maven-deploy-file)
-    - [maven-update-pom-version](#maven-update-pom-version)
-    - [maven-release](#maven-release)
-    - [nexus-create-staging](#nexus-create-staging)
-    - [helm-unit-test](#helm-unit-test)
     - [helm-package-chart](#helm-package-chart)
     - [helm-parse-next-release](#helm-parse-next-release)
     - [helm-release-and-publish](#helm-release-and-publish)
+    - [helm-unit-test](#helm-unit-test)
+    - [helm-update-chart-version](#helm-update-chart-version)
+    - [jx-updatebot-pr](#jx-updatebot-pr)
+    - [load-release-descriptor](#load-release-descriptor)
+    - [maven-build-and-tag](#maven-build-and-tag)
+    - [maven-deploy-file](#maven-deploy-file)
+    - [maven-release](#maven-release)
+    - [maven-update-pom-version](#maven-update-pom-version)
+    - [nexus-create-staging](#nexus-create-staging)
     - [pre-commit](#pre-commit)
     - [publish-helm-chart](#publish-helm-chart)
-    - [load-release-descriptor](#load-release-descriptor)
-    - [update-project-base-tag](#update-project-base-tag)
+    - [rancher](#rancher)
     - [send-slack-notification](#send-slack-notification)
     - [setup-github-release-binary](#setup-github-release-binary)
     - [travis-env-load](#travis-env-load)
-    - [helm-update-chart-version](#helm-update-chart-version)
-    - [configure-git-author](#configure-git-author)
+    - [update-project-base-tag](#update-project-base-tag)
     - [veracode](#veracode)
-    - [rancher](#rancher)
-    - [jx-updatebot-pr](#jx-updatebot-pr)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
   - [Cookbook](#cookbook)
-    - [Serialize pull request builds](#serialize-pull-request-builds)
     - [Conditional job/step depending on PR labels](#conditional-jobstep-depending-on-pr-labels)
+    - [Serialize pull request builds](#serialize-pull-request-builds)
   - [Known issues](#known-issues)
     - [realpath not available under macosx](#realpath-not-available-under-macosx)
   - [Release](#release)
@@ -250,6 +250,10 @@ Before creating / modifying a GitHub Actions workflow make sure you're familiar 
 
 ## GitHub Actions provided by community
 
+### Auto cancel builds
+
+[This action](https://github.com/styfle/cancel-workflow-action) is a replacement for the Travis settings **Auto cancel branch builds** and **Auto cancel pull request builds**.
+
 ### Docker build and push
 
 Consider using this official [Docker action](https://github.com/marketplace/actions/build-and-push-docker-images) for building and pushing containers instead of doing it by hand, for buildx support, caching and more.
@@ -273,6 +277,10 @@ provided as repository secrets.
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
 ```
+
+### Retry failing step
+
+[This action](https://github.com/nick-fields/retry) retries an Action step on failure or timeout. Useful for unstable commands or that relies on remote resources that can be flaky sometimes.
 
 ### SSH debug
 
@@ -338,14 +346,6 @@ the workflow a step like:
     - run: sleep 300
 ```
 
-### Retry failing step
-
-[This action](https://github.com/nick-fields/retry) retries an Action step on failure or timeout. Useful for unstable commands or that relies on remote resources that can be flaky sometimes.
-
-### Auto cancel builds
-
-[This action](https://github.com/styfle/cancel-workflow-action) is a replacement for the Travis settings **Auto cancel branch builds** and **Auto cancel pull request builds**.
-
 ### Triggering a workflow in another repository
 
 [actions/github-script](https://github.com/actions/github-script) can be used, here is a sample:
@@ -378,7 +378,7 @@ on:
 
 ## GitHub Actions provided by us
 
-### automate-dependabot.yml
+### automate-dependabot
 
 Handles automated approval and merge of dependabot PRs, for minor and patch version updates only:
 
@@ -396,7 +396,7 @@ The whole list of "repo" scopes might be needed for the workflow to run ok on pr
         token: ${{ secrets.DEPENDABOT_GITHUB_TOKEN }}
 ```
 
-### automate-propagation.yml
+### automate-propagation
 
 Handles automated approval and merge of propagation PRs used to handle alpha releases on builds.
 
@@ -419,6 +419,17 @@ Run `helm dep up` and `helm lint` on the specified chart
       - uses: Alfresco/alfresco-build-tools/.github/actions/build-helm-chart@ref
         with:
           chart-dir: charts/common
+```
+
+### configure-git-author
+
+Configures the git username and email to associate commits with the provided identity
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@ref
+        with:
+          username: ${{ secrets.BOT_GITHUB_USERNAME }}
+          email: ${{ secrets.BOT_GITHUB_EMAIL }}
 ```
 
 ### get-branch-name
@@ -469,6 +480,121 @@ Gets the latest tag for the given pattern. The result is returned in the output 
           pattern: 1.0.0-alpha*
 ```
 
+### helm-package-chart
+
+Packages a helm chart into a `.tgz` file and provides the name of the file produced in the output named `package-file`.
+The packaged file is also updated as an artifact and can be downloaded using `actions/download-artifact`.
+
+```yaml
+    - uses: Alfresco/alfresco-build-tools/.github/actions/helm-package-chart@ref
+      id: package-helm-chart
+      with:
+        chart-dir: charts/common
+```
+
+### helm-parse-next-release
+
+Parses the next main release version based on the content of Chart.yaml file. The result will be returned using the output named `next-release`.
+The suffix `-SNAPSHOT` is removed. For instance, if the version attribute in the Chart.yaml file is `1.0.0-SNAPSHOT`, the result will be `1.0.0`
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-parse-next-release@ref
+        id: parse-next-release
+        with:
+          chart-dir: charts/common
+```
+
+### helm-release-and-publish
+
+Releases a new version of a helm chart and publishes it to a helm repository
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-release-and-publish@ref
+        with:
+          version: 1.0.0
+          chart-dir: charts/common
+          chart-repository-dir: ${{ env.COMMON_CHART_DIR }}
+          helm-repository: Activiti/activiti-cloud-helm-charts
+          helm-repository-branch: gh-pages
+          helm-repository-token: ${{ secrets.GITHUB_TOKEN }}
+          git-username:  ${{ secrets.GITHUB_USERNAME }}
+```
+
+### helm-unit-test
+
+Looks for Helm unit tests written using [helm3-unittest](https://github.com/vbehar/helm3-unittest/blob/master/DOCUMENT.md).
+
+```yaml
+     - uses: >-
+         Alfresco/alfresco-build-tools/.github/actions/helm-unit-tests@ref
+       with:
+         chart-dir: charts/myapp
+         chart-type: application
+```
+
+### helm-update-chart-version
+
+Updates `version` attribute inside `Chart.yaml` file:
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-update-chart-version@ref
+        with:
+          new-version: 1.0.0
+```
+
+### jx-updatebot-pr
+
+Create a Pull Request on each downstream repository using https://github.com/jenkins-x-plugins/jx-updatebot.
+
+Given `.jx/updatebot.yaml` spec in the `alfresco-modeling-service` project:
+
+```yaml
+apiVersion: updatebot.jenkins-x.io/v1alpha1
+kind: UpdateConfig
+spec:
+  rules:
+    - urls:
+        - https://github.com/alfresco/alfresco-process-releases
+      reusePullRequest: true
+      changes:
+        - regex:
+            pattern: "version: (.*)"
+            files:
+              - "docker/quay.io/alfresco/alfresco-modeling-service.yml"
+        - regex:
+            pattern: "<alfresco-modeling-service.version>(.*)</alfresco-modeling-service.version>"
+            files:
+              - pom.xml
+```
+
+This action will promote alpha version to `alfresco-process-releases` repository via pull request. It will add new commit if there is an existing PR with matching `develop` label.
+
+```yaml
+      - name: Promote version
+        uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@ref
+        with:
+          version: ${{ steps.tag.outputs.version }}
+          labels: develop
+          pull-request-title: "promote(dep): update versions into ${{ github.ref_name }}"
+          commit-title: "chore(dep): update ${{ github.repository }} version to ${{ steps.tag.outputs.version }}"
+          base-branch-name: ${{ github.ref_name }}
+          git-username: ${{ secrets.GIT_USERNAME }}
+          git-token: ${{ secrets.GIT_TOKEN }}
+          git-author-name: ${{ secrets.GIT_AUTHOR_NAME }}
+          git-author-email: ${{ secrets.GIT_AUTHOR_EMAIL }}
+```
+
+### load-release-descriptor
+
+Used to release Activiti Projects. Load release information from release.yaml file.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/load-release-descriptor@ref
+        id: load-descriptor
+        with:
+          release-descriptor: release.yaml
+```
+
 ### maven-build-and-tag
 
 Check out, builds a maven project and docker images, generating a new alpha version for it on push events:
@@ -517,16 +643,6 @@ using a custom settings.xml, you probably want to provide also
           maven-password: ${{ secrets.NEXUS_PASSWORD }}
 ```
 
-### maven-update-pom-version
-
-Updates pom files to the provided version
-
-```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@ref
-      with:
-        version: 1.0.0-alpha.1
-```
-
 ### maven-release
 
 Used to release Activiti projects. Update versions in POM files, create git tags and publish Maven artifacts to staging repository.
@@ -547,6 +663,16 @@ Used to release Activiti projects. Update versions in POM files, create git tags
           nexus-password: "${{ secrets.NEXUS_PASSWORD }}"
 ```
 
+### maven-update-pom-version
+
+Updates pom files to the provided version
+
+```yaml
+    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@ref
+      with:
+        version: 1.0.0-alpha.1
+```
+
 ### nexus-create-staging
 
 Creates a new staging repository on Nexus, unless there is an existing repository with the same description.
@@ -559,58 +685,6 @@ The resulting staging repository will be available in the output named `staging-
           nexus-profile-id: "${{ secrets.NEXUS_ACTIVITI7_PROFILE_ID }}"
           nexus-username: "${{ secrets.NEXUS_USERNAME }}"
           nexus-password: "${{ secrets.NEXUS_PASSWORD }}"
-```
-
-### helm-unit-test
-
-Looks for Helm unit tests written using [helm3-unittest](https://github.com/vbehar/helm3-unittest/blob/master/DOCUMENT.md).
-
-```yaml
-     - uses: >-
-         Alfresco/alfresco-build-tools/.github/actions/helm-unit-tests@ref
-       with:
-         chart-dir: charts/myapp
-         chart-type: application
-```
-
-### helm-package-chart
-
-Packages a helm chart into a `.tgz` file and provides the name of the file produced in the output named `package-file`.
-The packaged file is also updated as an artifact and can be downloaded using `actions/download-artifact`.
-
-```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/helm-package-chart@ref
-      id: package-helm-chart
-      with:
-        chart-dir: charts/common
-```
-
-### helm-parse-next-release
-
-Parses the next main release version based on the content of Chart.yaml file. The result will be returned using the output named `next-release`.
-The suffix `-SNAPSHOT` is removed. For instance, if the version attribute in the Chart.yaml file is `1.0.0-SNAPSHOT`, the result will be `1.0.0`
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-parse-next-release@ref
-        id: parse-next-release
-        with:
-          chart-dir: charts/common
-```
-
-### helm-release-and-publish
-
-Releases a new version of a helm chart and publishes it to a helm repository
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-release-and-publish@ref
-        with:
-          version: 1.0.0
-          chart-dir: charts/common
-          chart-repository-dir: ${{ env.COMMON_CHART_DIR }}
-          helm-repository: Activiti/activiti-cloud-helm-charts
-          helm-repository-branch: gh-pages
-          helm-repository-token: ${{ secrets.GITHUB_TOKEN }}
-          git-username:  ${{ secrets.GITHUB_USERNAME }}
 ```
 
 ### pre-commit
@@ -651,26 +725,23 @@ Publishes a new helm chart package (`.tgz`) to a helm chart repository
           token: ${{ secrets.BOT_GITHUB_TOKEN}}
 ```
 
-### load-release-descriptor
+### rancher
 
-Used to release Activiti Projects. Load release information from release.yaml file.
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/load-release-descriptor@ref
-        id: load-descriptor
-        with:
-          release-descriptor: release.yaml
-```
-
-### update-project-base-tag
-Used to update a base tag in the release descriptor. It will add or update the entry `release.baseTag.$PROJECT` with the value specified in the input `tag`.
+register or detach an EKS cluster to Rancher.
+AWS credentials are required only when registering the cluster.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@ref
+      - name: Register Cluster
+        uses: Alfresco/alfresco-build-tools/.github/actions/rancher@ref
         with:
-          release-descriptor: release.yaml
-          project: activiti
-          tag: ${{ env.ALPHA_VERSION }}
+          rancher-url: ${{ env.RANCHER2_URL }}
+          rancher-access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
+          rancher-secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
+          cluster-name: ${{ env.CLUSTER_NAME }}
+          action: "register"
+          aws-access-key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: "us-east-2"
 ```
 
 ### send-slack-notification
@@ -704,25 +775,17 @@ referencing as value env vars defined early in the file (like Travis does).
           yml_path: .travis/env.yml
 ```
 
-### helm-update-chart-version
+### update-project-base-tag
 
-Updates `version` attribute inside `Chart.yaml` file:
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-update-chart-version@ref
-        with:
-          new-version: 1.0.0
-```
-
-### configure-git-author
-
-Configures the git username and email to associate commits with the provided identity
+Used to update a base tag in the release descriptor. It will add or update the
+entry `release.baseTag.$PROJECT` with the value specified in the input `tag`.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@ref
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@ref
         with:
-          username: ${{ secrets.BOT_GITHUB_USERNAME }}
-          email: ${{ secrets.BOT_GITHUB_EMAIL }}
+          release-descriptor: release.yaml
+          project: activiti
+          tag: ${{ env.ALPHA_VERSION }}
 ```
 
 ### veracode
@@ -734,67 +797,6 @@ Runs Veracode Source Clear Scan
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
           veracode-fails-build: "false"
-```
-
-### rancher
-
-register or detach an EKS cluster to Rancher.
-AWS credentials are required only when registering the cluster.
-
-```yaml
-      - name: Register Cluster
-        uses: Alfresco/alfresco-build-tools/.github/actions/rancher@ref
-        with:
-          rancher-url: ${{ env.RANCHER2_URL }}
-          rancher-access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
-          rancher-secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
-          cluster-name: ${{ env.CLUSTER_NAME }}
-          action: "register"
-          aws-access-key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: "us-east-2"
-```
-
-### jx-updatebot-pr
-
-Create a Pull Request on each downstream repository using https://github.com/jenkins-x-plugins/jx-updatebot.
-
-Given `.jx/updatebot.yaml` spec in the `alfresco-modeling-service` project:
-
-```yaml
-apiVersion: updatebot.jenkins-x.io/v1alpha1
-kind: UpdateConfig
-spec:
-  rules:
-    - urls:
-        - https://github.com/alfresco/alfresco-process-releases
-      reusePullRequest: true
-      changes:
-        - regex:
-            pattern: "version: (.*)"
-            files:
-              - "docker/quay.io/alfresco/alfresco-modeling-service.yml"
-        - regex:
-            pattern: "<alfresco-modeling-service.version>(.*)</alfresco-modeling-service.version>"
-            files:
-              - pom.xml
-```
-
-This action will promote alpha version to `alfresco-process-releases` repository via pull request. It will add new commit if there is an existing PR with matching `develop` label.
-
-```yaml
-      - name: Promote version
-        uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@ref
-        with:
-          version: ${{ steps.tag.outputs.version }}
-          labels: develop
-          pull-request-title: "promote(dep): update versions into ${{ github.ref_name }}"
-          commit-title: "chore(dep): update ${{ github.repository }} version to ${{ steps.tag.outputs.version }}"
-          base-branch-name: ${{ github.ref_name }}
-          git-username: ${{ secrets.GIT_USERNAME }}
-          git-token: ${{ secrets.GIT_TOKEN }}
-          git-author-name: ${{ secrets.GIT_AUTHOR_NAME }}
-          git-author-email: ${{ secrets.GIT_AUTHOR_EMAIL }}
 ```
 
 ## Reusable workflows provided by us
@@ -819,6 +821,16 @@ Calculates the new alpha version, creates new git tag and publishes the new pack
 
 This section contains a list of recipes and common patterns organized by desired
 outcome.
+
+### Conditional job/step depending on PR labels
+
+A possible approach to have a dynamic behaviour in `pull_request` triggered
+workflows, is to check the currently assigned labels. Please be aware that labels
+should be already applied before opening/updating a PR in order be effective.
+
+```yml
+    if: contains(github.event.pull_request.labels.*.name, 'label-name')
+```
 
 ### Serialize pull request builds
 
@@ -845,16 +857,6 @@ event, while `github.ref_name` when pushing branches and tags. The
 `github.run_id` is just a fallback to avoid failure when both variables are empty.
 
 More docs on [using concurrency](https://docs.github.com/en/actions/using-jobs/using-concurrency)
-
-### Conditional job/step depending on PR labels
-
-A possible approach to have a dynamic behaviour in `pull_request` triggered
-workflows, is to check the currently assigned labels. Please be aware that labels
-should be already applied before opening/updating a PR in order be effective.
-
-```yml
-    if: contains(github.event.pull_request.labels.*.name, 'label-name')
-```
 
 ## Known issues
 
