@@ -19,7 +19,7 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
       - [Setup Maven Build Options](#setup-maven-build-options)
   - [Migrate from Travis to GitHub Actions](#migrate-from-travis-to-github-actions)
     - [Default environment variables](#default-environment-variables)
-    - [Make build logs verbose again](#make-build-logs-verbose-again)
+    - [Get back maven build output](#get-back-maven-build-output)
     - [Workflow schema validation](#workflow-schema-validation)
   - [Security hardening for GitHub Actions](#security-hardening-for-github-actions)
   - [GitHub Actions provided by community](#github-actions-provided-by-community)
