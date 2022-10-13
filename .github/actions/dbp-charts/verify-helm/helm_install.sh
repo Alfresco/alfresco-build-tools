@@ -11,12 +11,10 @@ clean_up () {
 }
 trap clean_up EXIT
 
-GIT_DIFF="$(git diff origin/master --name-only .)"
-namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d '[:punct:]' | awk '{print tolower($0)}')"-${GITHUB_RUN_NUMBER}"
+namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d '[:punct:]' | awk '{print tolower($0)}')"-${RELEASE_PREFIX}-${GITHUB_RUN_NUMBER}"
 release_name_ingress="${RELEASE_PREFIX}"-ing-"${GITHUB_RUN_NUMBER}"
 release_name="${RELEASE_PREFIX}"-"${GITHUB_RUN_NUMBER}"
 HOST=${namespace}.${DOMAIN}
-
 
 # pod status
 pod_status() {
