@@ -769,7 +769,7 @@ more yaml files containing an `env.global` section of Travis CI. It supports env
 referencing as value env vars defined early in the file (like Travis does).
 
 ```yaml
-      - uses: ./.github/actions/travis-env-load
+      - uses: Alfresco/alfresco-build-tools/.github/actions/travis-env-load@ref
         with:
           ignore_regex: ^BRANCH_NAME=.*
           yml_path: .travis/env.yml
