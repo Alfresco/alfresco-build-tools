@@ -66,10 +66,6 @@ pods_ready() {
     pod_status
     echo "Pods did not start - failing build"
     failed_pod_logs
-    if [[ "${COMMIT_MESSAGE}" != *"[keep env]"* ]]; then
-      helm delete "${release_name_ingress}" "${release_name}" -n "${namespace}"
-      kubectl delete namespace "${namespace}" --grace-period=1
-    fi
     return 1
   fi
 }
