@@ -145,6 +145,8 @@ fi
 prepare_namespace
 kubectl create secret generic quay-registry-secret --from-file=.dockerconfigjson="${HOME}"/.docker/config.json --type=kubernetes.io/dockerconfigjson -n "${namespace}"
 
+echo "Starting helm install of ${release_name_ingress} completed."
+
 # install ingress
 helm upgrade --install "${release_name_ingress}" --repo https://kubernetes.github.io/ingress-nginx ingress-nginx --version=4.0.18 \
   --set controller.scope.enabled=true \
@@ -163,6 +165,8 @@ helm upgrade --install "${release_name_ingress}" --repo https://kubernetes.githu
   --set controller.ingressClassResource.enabled=false \
   --wait \
   --namespace "${namespace}"
+
+echo "Helm install of ${release_name_ingress} completed."
 
 # install acs
 helm dep up helm/"${PROJECT_NAME}"
