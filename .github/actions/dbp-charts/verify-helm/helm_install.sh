@@ -76,7 +76,7 @@ newman() {
   for i in {1..5}; do
     docker run -t -v "${PWD}/test/postman:/etc/newman" postman/newman:5.3 $* && return 0
     echo "newman run failed, trying again ($i run)"
-    sleep 10
+    sleep 120
   done
   return 1
 }
