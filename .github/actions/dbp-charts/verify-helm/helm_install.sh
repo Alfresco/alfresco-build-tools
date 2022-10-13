@@ -209,11 +209,6 @@ done
 pods_ready || exit 1
 
 if [[ "${TEST_NEWMAN}" == "true" ]]; then
-
-  # Delay running the tests to give ingress & SOLR a chance to fully initialise
-  echo "Waiting 3 minutes from $(date) before running tests..."
-  sleep 180
-
   # run acs checks
   wait_for_connection
   newman run helm/acs-test-helm-collection.json --global-var "protocol=https" --global-var "url=${HOST}"
