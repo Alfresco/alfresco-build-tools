@@ -148,7 +148,7 @@ kubectl create secret generic quay-registry-secret --from-file=.dockerconfigjson
 echo "Starting helm install of ${release_name_ingress} completed."
 
 # install ingress
-helm upgrade --install "${release_name_ingress}" --repo https://kubernetes.github.io/ingress-nginx ingress-nginx --version=4.0.18 \
+helm upgrade --install "${release_name_ingress}" --repo https://kubernetes.github.io/ingress-nginx ingress-nginx --version=4.2.5 \
   --set controller.scope.enabled=true \
   --set controller.scope.namespace="${namespace}" \
   --set rbac.create=true \
