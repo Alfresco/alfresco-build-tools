@@ -78,6 +78,14 @@ inputs:
     required: false
     description: project root directory. Defaults to '.'
     default: '.'
+  retries:
+    description: 'How many times to retry on failure'
+    required: false
+    default: 3
+  retries-wait:
+    description: 'How many seconds to wait between retries'
+    required: false
+    default: 5
 runs:
   using: composite
   steps:
@@ -88,24 +96,41 @@ runs:
       shell: bash
       working-directory: /tmp
     - name: Run jx-updatebot
-      run: >
-        jx-updatebot pr
-        --auto-merge=${{ inputs.auto-merge }}
-        --version='${{ inputs.version }}'
-        --pull-request-title='${{ inputs.pull-request-title }}'
-        --pull-request-body='${{ inputs.pull-request-body }}'
-        --commit-title='${{ inputs.commit-title }}'
-        --commit-message='${{ inputs.commit-message }}'
-        --labels='${{ inputs.labels }}'
-        --base-branch-name='${{ inputs.base-branch-name }}'
-        --config-file='${{ inputs.config-file }}'
-        --version-file='${{ inputs.version-file }}'
-        --dir='${{ inputs.dir }}'
-        ${{ inputs.flags }}
+      run: |
+        retry() {
+          for n in $(seq ${RETRIES}); do
+            echo "[${n}/${RETRIES}] ${*}";
+            if eval "${*}"; then
+              echo "[SUCCESS] ${n}/${RETRIES}";
+              return 0;
+            fi;
+            sleep ${RETRIES_WAIT};
+            echo "[FAIL] ${n}/${RETRIES}";
+          done;
+          return 1;
+        }
+
+        pr="jx-updatebot pr
+            --auto-merge=${{ inputs.auto-merge }}
+            --version='${{ inputs.version }}'
+            --pull-request-title='${{ inputs.pull-request-title }}'
+            --pull-request-body='${{ inputs.pull-request-body }}'
+            --commit-title='${{ inputs.commit-title }}'
+            --commit-message='${{ inputs.commit-message }}'
+            --labels='${{ inputs.labels }}'
+            --base-branch-name='${{ inputs.base-branch-name }}'
+            --config-file='${{ inputs.config-file }}'
+            --version-file='${{ inputs.version-file }}'
+            --dir='${{ inputs.dir }}'
+            ${{ inputs.flags }}"
+
+        retry ${pr}
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       env:
         GIT_USERNAME: ${{ inputs.git-username }}
         GIT_TOKEN: ${{ inputs.git-token }}
-        GIT_AUTHOR_NAME: ${{ inputs.git-author-name }}
+        GIT_AUTHOR_NAME: ${{ inputs.git-author-name || inputs.git-username }}
         GIT_AUTHOR_EMAIL: ${{ inputs.git-author-email }}
+        RETRIES: ${{ inputs.retries }}
+        RETRIES_WAIT: ${{ inputs.retries-wait }}
