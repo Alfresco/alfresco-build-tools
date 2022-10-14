@@ -81,11 +81,11 @@ inputs:
   retries:
     description: 'How many times to retry on failure'
     required: false
-    default: 3
+    default: '5'
   retries-wait:
     description: 'How many seconds to wait between retries'
     required: false
-    default: 5
+    default: '10'
 runs:
   using: composite
   steps:
