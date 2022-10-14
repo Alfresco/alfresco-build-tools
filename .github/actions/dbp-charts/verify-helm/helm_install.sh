@@ -11,12 +11,10 @@ clean_up () {
 }
 trap clean_up EXIT
 
-GIT_DIFF="$(git diff origin/master --name-only .)"
-namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d '[:punct:]' | awk '{print tolower($0)}')"-${GITHUB_RUN_NUMBER}"
-release_name_ingress="${RELEASE_PREFIX}"-ing-"${GITHUB_RUN_NUMBER}"
-release_name="${RELEASE_PREFIX}"-"${GITHUB_RUN_NUMBER}"
+namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d '[:punct:]' | awk '{print tolower($0)}')"-${RELEASE_PREFIX}-${GITHUB_RUN_NUMBER}"
+release_name_ingress="ing-${RELEASE_PREFIX}-${GITHUB_RUN_NUMBER}"
+release_name="${RELEASE_PREFIX}-${GITHUB_RUN_NUMBER}"
 HOST=${namespace}.${DOMAIN}
-
 
 # pod status
 pod_status() {
@@ -68,10 +66,6 @@ pods_ready() {
     pod_status
     echo "Pods did not start - failing build"
     failed_pod_logs
-    if [[ "${COMMIT_MESSAGE}" != *"[keep env]"* ]]; then
-      helm delete "${release_name_ingress}" "${release_name}" -n "${namespace}"
-      kubectl delete namespace "${namespace}" --grace-period=1
-    fi
     return 1
   fi
 }
@@ -82,7 +76,7 @@ newman() {
   for i in {1..5}; do
     docker run -t -v "${PWD}/test/postman:/etc/newman" postman/newman:5.3 $* && return 0
     echo "newman run failed, trying again ($i run)"
-    sleep 10
+    sleep 120
   done
   return 1
 }
@@ -151,8 +145,10 @@ fi
 prepare_namespace
 kubectl create secret generic quay-registry-secret --from-file=.dockerconfigjson="${HOME}"/.docker/config.json --type=kubernetes.io/dockerconfigjson -n "${namespace}"
 
+echo "Starting helm install of ${release_name_ingress} completed."
+
 # install ingress
-helm upgrade --install "${release_name_ingress}" --repo https://kubernetes.github.io/ingress-nginx ingress-nginx --version=4.0.18 \
+helm upgrade --install "${release_name_ingress}" --repo https://kubernetes.github.io/ingress-nginx ingress-nginx --version=4.2.5 \
   --set controller.scope.enabled=true \
   --set controller.scope.namespace="${namespace}" \
   --set rbac.create=true \
@@ -169,6 +165,8 @@ helm upgrade --install "${release_name_ingress}" --repo https://kubernetes.githu
   --set controller.ingressClassResource.enabled=false \
   --wait \
   --namespace "${namespace}"
+
+echo "Helm install of ${release_name_ingress} completed."
 
 # install acs
 helm dep up helm/"${PROJECT_NAME}"
@@ -211,11 +209,6 @@ done
 pods_ready || exit 1
 
 if [[ "${TEST_NEWMAN}" == "true" ]]; then
-
-  # Delay running the tests to give ingress & SOLR a chance to fully initialise
-  echo "Waiting 3 minutes from $(date) before running tests..."
-  sleep 180
-
   # run acs checks
   wait_for_connection
   newman run helm/acs-test-helm-collection.json --global-var "protocol=https" --global-var "url=${HOST}"
