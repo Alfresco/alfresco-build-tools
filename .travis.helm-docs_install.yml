@@ -1,5 +1,5 @@
 import:
-  - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.18.0
+  - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.18.1
 env:
   global:
     - HELM_DOCS_VERSION=${HELM_DOCS_VERSION:-1.10.0}
