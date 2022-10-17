@@ -4,6 +4,7 @@ inputs:
   sanitize:
     description: sanitize branch name and avoid anything that isn't letters, numbers, dash
     default: "false"
+    required: false
 runs:
   using: composite
   steps:
