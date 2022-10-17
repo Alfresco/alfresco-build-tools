@@ -15,7 +15,7 @@
   pass_filenames: false
 - id: kubepug-minimum
   name: KubePug - k8s v1.15 minimum
-  entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% bash -c "helm template % --kube-version 1.15 | kubepug --error-on-deprecated --error-on-deleted --k8s-version v1.18.1 --input-file=-"'
+  entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% bash -c "helm template % --kube-version 1.15 | kubepug --error-on-deprecated --error-on-deleted --k8s-version v1.15.0 --input-file=-"'
   language: system
   pass_filenames: false
 - id: kubepug-recommended
