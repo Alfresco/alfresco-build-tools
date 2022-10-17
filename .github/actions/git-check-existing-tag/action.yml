@@ -30,8 +30,8 @@ runs:
         if git ls-remote --exit-code --tags origin "$TAG"
         then
           echo "Tag $TAG exists already"
-          echo "::set-output name=tag-exists::true"
+          echo "tag-exists=true" >> $GITHUB_OUTPUT
         else
           echo "Tag $TAG does not exist"
-          echo "::set-output name=tag-exists::false"
+          echo "tag-exists=false" >> $GITHUB_OUTPUT
         fi

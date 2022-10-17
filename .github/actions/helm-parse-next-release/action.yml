@@ -29,4 +29,4 @@ runs:
 
         NEXT_VERSION=$(yq e '.version' ${{ inputs.chart-dir }}/Chart.yaml | grep -o "[0-9]*\.[0-9]*.[0-9]*")
         echo "Next final version: $NEXT_VERSION"
-        echo "::set-output name=next-release::$NEXT_VERSION"
+        echo "next-release=$NEXT_VERSION" >> $GITHUB_OUTPUT

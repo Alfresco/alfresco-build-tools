@@ -65,13 +65,13 @@ runs:
           VERSION=$VERSION-mock
         fi
 
-        echo "::set-output name=branch::$BRANCH"
-        echo "::set-output name=version::$VERSION"
-        echo "::set-output name=next-version::$NEXT_VERSION"
-        echo "::set-output name=mock::$MOCK"
-        echo "::set-output name=activiti-tag::$ACTIVITI_BASE_TAG"
-        echo "::set-output name=activiti-cloud-tag::$ACTIVITI_CLOUD_BASE_TAG"
-        echo "::set-output name=activiti-cloud-application-tag::$ACTIVITI_CLOUD_APP_BASE_TAG"
-        echo "::set-output name=common-chart-tag::$COMMON_CHART_BASE_TAG"
-        echo "::set-output name=full-chart-tag::$FULL_CHART_BASE_TAG"
-        echo "::set-output name=staging-repository::$STAGING_REPOSITORY"
+        echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "next-version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+        echo "mock=$MOCK" >> $GITHUB_OUTPUT
+        echo "activiti-tag=$ACTIVITI_BASE_TAG" >> $GITHUB_OUTPUT
+        echo "activiti-cloud-tag=$ACTIVITI_CLOUD_BASE_TAG" >> $GITHUB_OUTPUT
+        echo "activiti-cloud-application-tag=$ACTIVITI_CLOUD_APP_BASE_TAG" >> $GITHUB_OUTPUT
+        echo "common-chart-tag=$COMMON_CHART_BASE_TAG" >> $GITHUB_OUTPUT
+        echo "full-chart-tag=$FULL_CHART_BASE_TAG" >> $GITHUB_OUTPUT
+        echo "staging-repository=$STAGING_REPOSITORY" >> $GITHUB_OUTPUT

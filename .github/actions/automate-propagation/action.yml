@@ -29,9 +29,9 @@ runs:
       run: |
         if [[ $LABEL == 'updatebot' && $PR_LOGIN == 'alfresco-build' ]]
         then
-            echo "::set-output name=continue::true"
+            echo "continue=true" >> $GITHUB_OUTPUT
         else
-            echo "::set-output name=continue::false"
+            echo "continue=false" >> $GITHUB_OUTPUT
         fi
 
     - name: Enable auto-merge for propagation Pull Request

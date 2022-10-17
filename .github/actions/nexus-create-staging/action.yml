@@ -55,4 +55,4 @@ runs:
           echo "Reusing existing staging repository $NEXUS_STAGING_REPOSITORY"
         fi
 
-        echo "::set-output name=staging-repository::$NEXUS_STAGING_REPOSITORY"
+        echo "staging-repository=$NEXUS_STAGING_REPOSITORY" >> $GITHUB_OUTPUT
