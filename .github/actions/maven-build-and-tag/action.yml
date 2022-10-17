@@ -47,12 +47,18 @@ runs:
   steps:
     - uses: actions/checkout@v3
 
+    - uses: actions/cache@v3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
     - name: Set up JDK
       uses: actions/setup-java@a18c333f3f14249953dab3e186e5e21bf3390f1d
       with:
         java-version: ${{ inputs.java-version }}
         distribution: ${{ inputs.java-distribution }}
-        cache: 'maven'
 
     - name: Update pom files to the new version
       id: update-pom-to-next-version
