@@ -100,9 +100,9 @@ runs:
       run: |
         if [ $DO_PUSH == 'true' ]
         then
-          echo "::set-output name=command::deploy"
+          echo "command=deploy" >> $GITHUB_OUTPUT
         else
-          echo "::set-output name=command::verify"
+          echo "command=verify" >> $GITHUB_OUTPUT
         fi
       env:
         DO_PUSH: ${{ github.event_name == 'push' }}
@@ -125,7 +125,7 @@ runs:
       run: |
         if [ $DO_PUSH == 'true' ]
         then
-          echo "::set-output name=command::--push"
+          echo "command=--push" >> $GITHUB_OUTPUT
         fi
       env:
         DO_PUSH: ${{ github.event_name == 'push' }}

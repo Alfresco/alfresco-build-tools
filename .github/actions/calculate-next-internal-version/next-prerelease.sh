@@ -21,4 +21,4 @@ else
   NEXT_PRERELEASE="$NEXT_VERSION$FIRST_PRERELEASE_SUFFIX"
 fi
 echo "Next prerelease: $NEXT_PRERELEASE"
-echo "::set-output name=next-prerelease::$NEXT_PRERELEASE"
+echo "next-prerelease=$NEXT_PRERELEASE" >> $GITHUB_OUTPUT

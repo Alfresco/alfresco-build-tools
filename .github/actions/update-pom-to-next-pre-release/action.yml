@@ -20,7 +20,7 @@ runs:
       run: |
         NEXT_VERSION=$(yq -p=xml e '.project.version' pom.xml | grep -o "[0-9]*\.[0-9]*.[0-9]*")
         echo "Next final version: $NEXT_VERSION"
-        echo "::set-output name=result::$NEXT_VERSION"
+        echo "result=$NEXT_VERSION" >> $GITHUB_OUTPUT
 
     - id: next-prerelease-resolver
       name: Calculate next internal release

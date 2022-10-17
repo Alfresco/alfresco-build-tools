@@ -43,7 +43,7 @@ runs:
       run: |
         if [ -n "$CHARTS_REPO_BASE_URL" ]
         then
-            echo "::set-output name=result::--url $CHARTS_REPO_BASE_URL"
+            echo "result=--url $CHARTS_REPO_BASE_URL" >> $GITHUB_OUTPUT
         fi
 
     - name: Build destination path
@@ -54,9 +54,9 @@ runs:
       run: |
         if [ -n "$CHARTS_REPO_SUBFOLDER" ]
         then
-            echo "::set-output name=result::$CHARTS_REPO_SUBFOLDER"
+            echo "result=$CHARTS_REPO_SUBFOLDER" >> $GITHUB_OUTPUT
         else
-            echo "::set-output name=result::."
+            echo "result=." >> $GITHUB_OUTPUT
         fi
 
 

@@ -27,9 +27,9 @@ runs:
       run: |
         if [ -n "$INPUT_COLOR" ]
         then
-          echo "::set-output name=result::$INPUT_COLOR"
+          echo "result=$INPUT_COLOR" >> $GITHUB_OUTPUT
         else
-          echo "::set-output name=result::#A30200"
+          echo "result=#A30200" >> $GITHUB_OUTPUT
         fi
 
     - name: Compute small sha
@@ -39,7 +39,7 @@ runs:
         GITHUB_LONG_SHA: ${{ github.sha }}
       run: |
         SMALL_SHA=${GITHUB_LONG_SHA:0:6}
-        echo "::set-output name=result::$SMALL_SHA"
+        echo "result=$SMALL_SHA" >> $GITHUB_OUTPUT
 
     - name: Compute message
       id: compute-message
@@ -59,7 +59,7 @@ runs:
             BLOCK_MESSAGE=${BLOCK_MESSAGE:-${{ github.event.head_commit.message }}}
             ;;
         esac
-        echo "::set-output name=result::${BLOCK_MESSAGE}"
+        echo "result=${BLOCK_MESSAGE}" >> $GITHUB_OUTPUT
 
     - name: Send slack notification
       id: slack
