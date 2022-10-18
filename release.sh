@@ -14,7 +14,7 @@ if [ -z "$1" ] || [[ ! "$1" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
     exit 1
 fi
 
-echo "Switch to master and reset to origin/master (IT WILL WIPE YOUR CURRENT WORK IN PROGRESS)"
+echo "This script will switch to master and pull origin/master to make sure you are in sync"
 read -p "Are you sure? " -n 1 -r
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -23,19 +23,24 @@ fi
 
 git fetch
 git checkout master
-git reset --hard origin/master
+git pull origin master --no-rebase
 
 CURRENT_VERSION=$(git tag | sort -r --version-sort | head -n1)
 echo "Current version is $CURRENT_VERSION"
 echo "Going to create a PR to release $1"
 
 git checkout -b "$1"
+
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  grep -Rl "$CURRENT_VERSION" | xargs sed -i '' -e "s/$CURRENT_VERSION/$1/g"
+  SED_COMMAND="sed -i ''"
 else
-  grep -Rl "$CURRENT_VERSION" | xargs sed -i -e "s/$CURRENT_VERSION/$1/g"
+  SED_COMMAND="sed -i"
 fi
+
+# shellcheck disable=SC2086
+grep -Rl "Alfresco/alfresco-build-tools.*@$CURRENT_VERSION" | xargs $SED_COMMAND -e "s/\(Alfresco\/alfresco-build-tools.*@\)$CURRENT_VERSION/\1$1/"
 grep -Rl "$1" | xargs git add
+
 git commit -m "Prepare to release $1"
 git push origin "$1"
 
