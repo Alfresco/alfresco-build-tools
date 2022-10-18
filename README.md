@@ -58,6 +58,7 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
     - [setup-github-release-binary](#setup-github-release-binary)
     - [travis-env-load](#travis-env-load)
     - [update-project-base-tag](#update-project-base-tag)
+    - [validate-maven-versions](#validate-maven-versions)
     - [veracode](#veracode)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
@@ -797,6 +798,18 @@ Runs Veracode Source Clear Scan
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
           veracode-fails-build: "false"
+```
+
+### validate-maven-versions
+
+Validates Maven dependency graph versions to ensure all target includes artifacts versions align
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/validate-maven-versions@ref
+        with:
+          maven-username: ${{ secrets.NEXUS_USERNAME }}
+          maven-password: ${{ secrets.NEXUS_PASSWORD }}
+          m2-settings-xml: settings.xml
 ```
 
 ## Reusable workflows provided by us
