@@ -5,8 +5,9 @@ if [ "$SANITIZE" = "true" ]; then
 fi
 if [ "$MAX_LENGTH" -gt "0" ]; then
     BRANCH_NAME="${BRANCH_NAME:0:$MAX_LENGTH}"
+    # shellcheck disable=SC2001
     BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's/-$//')
 fi
 
 echo "Branch name is '$BRANCH_NAME'"
-echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+echo "BRANCH_NAME=$BRANCH_NAME" >> "$GITHUB_ENV"
