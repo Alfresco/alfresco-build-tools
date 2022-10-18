@@ -32,12 +32,13 @@ echo "Going to create a PR to release $1"
 git checkout -b "$1"
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  grep -Rl "Alfresco/alfresco-build-tools.*@$CURRENT_VERSION" | xargs sed -i '' -e "s/\(Alfresco\/alfresco-build-tools.*@\)$CURRENT_VERSION/\1$1/"
+  grep -Rl "Alfresco/alfresco-build-tools.*@$CURRENT_VERSION" | xargs sed -i '' -e "s/\(Alfresco\/alfresco-build-tools.*@\)$CURRENT_VERSION/\1$1/g"
+  sed -i '' -e "s/$CURRENT_VERSION/$1/" .pre-commit-config.yaml
 else
-  grep -Rl "Alfresco/alfresco-build-tools.*@$CURRENT_VERSION" | xargs sed -i -e "s/\(Alfresco\/alfresco-build-tools.*@\)$CURRENT_VERSION/\1$1/"
+  grep -Rl "Alfresco/alfresco-build-tools.*@$CURRENT_VERSION" | xargs sed -i -e "s/\(Alfresco\/alfresco-build-tools.*@\)$CURRENT_VERSION/\1$1/g"
+  sed -i -e "s/$CURRENT_VERSION/$1/" .pre-commit-config.yaml
 fi
 
-# shellcheck disable=SC2086
 grep -Rl "$1" | xargs git add
 
 git commit -m "Prepare to release $1"
