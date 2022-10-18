@@ -1,0 +1,22 @@
+name: CI with BATS 🦇
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - uses: mig4/setup-bats@v1
+        with:
+          bats-version: 1.8.0
+
+      - name: 🦇🦇🦇
+        run: bats -r --print-output-on-failure .
