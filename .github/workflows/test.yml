@@ -53,5 +53,3 @@ jobs:
             echo TRAVIS_BRANCH should not be set!
             exit 1
           fi
-      - name: Test get-branch-name
-        uses: ./.github/actions/get-branch-name
