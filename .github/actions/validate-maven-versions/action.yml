@@ -13,6 +13,7 @@ inputs:
     description: Maven password
   maven-opts:
     required: false
+    description: Maven Jave options
     default: '-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'
   working-directory:
     required: false
@@ -20,6 +21,7 @@ inputs:
     default: .
   m2-settings-xml:
     required: false
+    description: relative path to maven settings.xml
     default: .m2/settings.xml
 runs:
   using: composite
