@@ -5,6 +5,10 @@ inputs:
     required: true
     description: list of target includes artifacts separated by comma
     default: com.alfresco.process:alfresco-process-version:*
+  module:
+    required: false
+    description: The Maven module name to use for validating dependencies. Defaults to '.'
+    default: .
   maven-username:
     required: true
     description: Maven username
@@ -40,6 +44,7 @@ runs:
       run: |
         mvn -B -s $GITHUB_WORKSPACE/${{ inputs.m2-settings-xml }} --no-transfer-progress \
           com.github.ferstl:depgraph-maven-plugin:4.0.2:graph \
+          -pl ${{ inputs.module }} \
           -DgraphFormat=text \
           -DshowVersions \
           -DshowConflicts \
@@ -56,6 +61,6 @@ runs:
       env:
         TERM: xterm-color
       run: |
-        cat target/dependency-graph.txt | grep -z --color "conflict" && echo "Conflicts detected." && exit 1 || echo "Success"
+        cat ${{ inputs.module }}/target/dependency-graph.txt | grep -z --color "conflict" && echo "Conflicts detected." && exit 1 || echo "Success"
       working-directory: ${{ inputs.working-directory }}
       shell: bash
