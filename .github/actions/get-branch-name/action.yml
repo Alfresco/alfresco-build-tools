@@ -1,10 +1,20 @@
 name: "Get branch name"
 description: "Get branch name from GitHub and load it as a variable to the runner env"
+inputs:
+  sanitize:
+    description: sanitize branch name and avoid anything that isn't letters, numbers, dash
+    default: "false"
+    required: false
+  max-length:
+    description: ensure that the final branch name is no longer than specified characters
+    default: "0"
+    required: false
 runs:
   using: composite
   steps:
     - name: Get branch name
-      run: |
-        BRANCH=${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}
-        echo BRANCH_NAME=\"$BRANCH\" >> $GITHUB_ENV
+      run: ${{ github.action_path }}/get-branch-name.sh
+      env:
+        SANITIZE: ${{ inputs.sanitize }}
+        MAX_LENGTH: ${{ inputs.max-length }}
       shell: bash
