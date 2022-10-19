@@ -1,0 +1,66 @@
+name: Validate Maven Versions
+description: Validates Maven dependency graph versions to ensure all target includes artifacts versions align
+inputs:
+  target-includes:
+    required: true
+    description: list of target includes artifacts separated by comma
+    default: com.alfresco.process:alfresco-process-version:*
+  module:
+    required: false
+    description: The Maven module name to use for validating dependencies. Defaults to '.'
+    default: .
+  maven-username:
+    required: true
+    description: Maven username
+  maven-password:
+    required: true
+    description: Maven password
+  maven-opts:
+    required: false
+    description: Maven Java options
+    default: '-Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'
+  working-directory:
+    required: false
+    description: Maven project working directory
+    default: .
+  m2-settings-xml:
+    required: false
+    description: relative path to maven settings.xml
+    default: .m2/settings.xml
+runs:
+  using: composite
+  steps:
+    - name: Resolve dependencies
+      run: |
+        mvn -B -s $GITHUB_WORKSPACE/${{ inputs.m2-settings-xml }} dependency:resolve
+      env:
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
+        MAVEN_OPTS: ${{ inputs.maven-opts }}
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
+
+    - name: Generate dependency graph
+      run: |
+        mvn -B -s $GITHUB_WORKSPACE/${{ inputs.m2-settings-xml }} --no-transfer-progress \
+          com.github.ferstl:depgraph-maven-plugin:4.0.2:graph \
+          -pl ${{ inputs.module }} \
+          -DgraphFormat=text \
+          -DshowVersions \
+          -DshowConflicts \
+          -DshowDuplicates \
+          -DtargetIncludes=${{ inputs.target-includes }}
+      env:
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
+        MAVEN_OPTS: ${{ inputs.maven-opts }}
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
+
+    - name: Validate dependency conflicts
+      env:
+        TERM: xterm-color
+      run: |
+        cat ${{ inputs.module }}/target/dependency-graph.txt | grep -z --color "conflict" && echo "Conflicts detected." && exit 1 || echo "Success"
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
