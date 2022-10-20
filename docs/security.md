@@ -41,6 +41,9 @@ present in the codebase or not:
 * Replying with Skip, will skip to the next secret without marking the current
   secret
 
+> Marking each detection as a secret or not is just to make everyone aware that
+> a secret is meant to be there or if an issue that needs to be solved
+
 At this point you can commit the baseline:
 
 ```sh
@@ -82,7 +85,7 @@ git add .secrets.baseline
 git commit -m 'detect-secrets baseline updated'
 ```
 
-#### Excluding secrets via regex
+#### Excluding multiple secrets via regex
 
 It's possible to provide to `detect-secrets scan` different exclude
 regex patterns if you have a lot of false positive that you don't want to
