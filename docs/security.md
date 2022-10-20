@@ -59,11 +59,13 @@ detected:
 ### Updating new/old secrets to the baseline
 
 To update the current baseline with any new secret or to automatically remove
-the already removed ones:
+the ones not anymore present:
 
 ```sh
 detect-secrets scan --baseline .secrets.baseline
 ```
+
+> if you have recently updated detect-secrets, you may want to opt-in for new plugins with `--force-use-all-plugins`
 
 Run a diff to make sure that everything you expect is there and proceed with auditing and finally committing the update:
 
@@ -76,7 +78,9 @@ git commit -m 'detect-secrets baseline updated'
 
 #### Excluding secrets via regex
 
-It's possible to provide to `detect-secrets scan` different exclude configurations:
+It's possible to provide to `detect-secrets scan` different exclude
+regex patterns if you have a lot of false positive that you don't want to
+handle on an individual basis:
 
 ```sh
   --exclude-lines EXCLUDE_LINES
@@ -87,21 +91,24 @@ It's possible to provide to `detect-secrets scan` different exclude configuratio
                         If secrets match this regex, it will be ignored.
 ```
 
-For example, to exclude all files with yml extension or which path is inside a
+For example, to exclude all files with xyz extension or which path is inside a
 `node_modules` folder:
 
 ```sh
 detect-secrets scan --baseline .secrets.baseline --exclude-files '.*\.yml' --exclude-files 'node_modules'
-git diff
-git add .secrets.baseline
-git commit -m 'Excluding unwanted files in the baseline'
 ```
 
 You can check if exclusion are working as expected by inspecting the resulting
 baseline that should not have anymore references to secrets that are matching
 at least one exclusion regex.
 
+```sh
+git diff
+git add .secrets.baseline
+git commit -m 'Excluding unwanted files in the baseline'
+```
+
 Please also note that when those options are present, they overwrite any
-previously defined exclusion in the baseline, e.g. if you want to add append an
-exclusion pattern you need to manually specify again all of them when running
-`detect-secrets scan`.
+previously defined exclusion of the same type in the baseline, i.e. if you want
+to append an exclusion pattern you need to manually specify again all of them
+when running `detect-secrets scan`.
