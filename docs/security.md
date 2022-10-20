@@ -31,11 +31,15 @@ Then you can start auditing all the detected secrets in your codebase with:
 detect-secrets audit .secrets.baseline
 ```
 
-For each detected secret, it will ask you if that secret is really meant to be present in the codebase or not:
+For each detected secret, it will ask you if that secret is really meant to be
+present in the codebase or not:
 
-* Replying with Yes, will whitelist that entry as a non-secret (`is_secret` field will be `false`)
-* Replying with No, will mark that entry as a secret that is meant to be removed in the future (`is_secret` field will be `true`)
-* Replying with Skip, will skip to the next secret without marking the current secret
+* Replying with Yes, will whitelist that entry as a non-secret (`is_secret`
+  field will be `false`)
+* Replying with No, will mark that entry as a secret that is meant to be removed
+  in the future (`is_secret` field will be `true`)
+* Replying with Skip, will skip to the next secret without marking the current
+  secret
 
 At this point you can commit the baseline:
 
@@ -65,9 +69,11 @@ the ones not anymore present:
 detect-secrets scan --baseline .secrets.baseline
 ```
 
-> if you have recently updated detect-secrets, you may want to opt-in for new plugins with `--force-use-all-plugins`
+> if you have recently updated detect-secrets, you may want to opt-in for new
+> plugins with `--force-use-all-plugins`
 
-Run a diff to make sure that everything you expect is there and proceed with auditing and finally committing the update:
+Run a diff to make sure that everything you expect is there and proceed with
+auditing and finally committing the update:
 
 ```sh
 git diff
