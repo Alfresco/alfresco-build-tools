@@ -71,7 +71,7 @@ inputs:
     required: false
     default: ''
   jx-updatebot-release:
-    description: the version of jx-updatebot release.
+    description: the version of jx-updatebot release binary.
     required: false
     default: '0.3.13'
   working-directory:
