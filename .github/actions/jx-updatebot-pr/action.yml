@@ -73,7 +73,7 @@ inputs:
   jx-updatebot-release:
     description: the version of jx-updatebot release.
     required: false
-    default: '0.3.3'
+    default: '0.3.13'
   working-directory:
     required: false
     description: project root directory. Defaults to '.'
