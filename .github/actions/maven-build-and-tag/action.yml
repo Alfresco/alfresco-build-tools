@@ -63,7 +63,7 @@ runs:
     - name: Update pom files to the new version
       id: update-pom-to-next-version
       if: github.event_name == 'push'
-      uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@v1.19.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@v1.19.1
       with:
         property-to-update: ${{ inputs.property-to-update }}
         maven-cli-opts: --show-version --no-transfer-progress --settings settings.xml
@@ -139,7 +139,7 @@ runs:
         PUSH_OPTION: ${{ steps.define_docker_push.outputs.command }}
         TAG: ${{env.VERSION}}
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.19.0
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.19.1
       if: github.event_name == 'push'
       with:
         username: ${{ inputs.git-username }}
