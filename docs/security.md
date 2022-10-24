@@ -39,10 +39,13 @@ present in the codebase or not:
 * Replying with No, will mark that entry as a secret that is meant to be removed
   in the future (`is_secret` field will be `true`)
 * Replying with Skip, will skip to the next secret without marking the current
-  secret
+  secret (will ask what to do again on the next audit)
 
 > Marking each detection as a secret or not is just to make everyone aware that
-> a secret is meant to be there or if an issue that needs to be solved
+> a secret is meant to be there or if an issue that needs to be solved. If you
+> have many non-secrets that get detected but follows a certain pattern, read
+> the [exclusion via regex section](#excluding-multiple-secrets-via-regex)
+> before proceeding.
 
 At this point you can commit the baseline:
 
@@ -105,6 +108,12 @@ For example, to exclude all files with xyz extension or which path is inside a
 
 ```sh
 detect-secrets scan --baseline .secrets.baseline --exclude-files '.*\.yml' --exclude-files 'node_modules'
+```
+
+For example, to exclude a dummy/default password that is ok to use:
+
+```sh
+detect-secrets scan --baseline .secrets.baseline --exclude-secrets 'MyDefaultPassword'
 ```
 
 You can check if exclusion are working as expected by inspecting the resulting
