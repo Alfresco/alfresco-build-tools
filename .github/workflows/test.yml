@@ -13,17 +13,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/pre-commit
-      - uses: ./.github/actions/send-slack-notification
-        with:
-          channel-id: 'U02SN1QQVCP'
-          token: ${{ secrets.SLACK_BOT_TOKEN }}
-          notification-color: '#A30200'
-          message: |
-            this
-            is
-            a
-            multiline
-            message with spaces
       - uses: ./.github/actions/setup-helm-docs
       - uses: ./.github/actions/setup-jx-release-version
       - uses: ./.github/actions/setup-kubepug
