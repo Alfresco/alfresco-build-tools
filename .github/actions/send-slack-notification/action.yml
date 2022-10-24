@@ -59,7 +59,7 @@ runs:
             BLOCK_MESSAGE="${BLOCK_MESSAGE:-${{ github.event.head_commit.message }}}"
             ;;
         esac
-        echo 'result=<<EOF' >> $GITHUB_OUTPUT
+        echo 'result<<EOF' >> $GITHUB_OUTPUT
         echo $BLOCK_MESSAGE >> $GITHUB_OUTPUT
         echo 'EOF' >> $GITHUB_OUTPUT
 
