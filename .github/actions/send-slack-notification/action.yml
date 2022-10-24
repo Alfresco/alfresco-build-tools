@@ -60,7 +60,7 @@ runs:
             ;;
         esac
         echo 'result<<EOF' >> $GITHUB_OUTPUT
-        echo $BLOCK_MESSAGE | tr '\n' "\\n" >> $GITHUB_OUTPUT
+        echo $BLOCK_MESSAGE >> $GITHUB_OUTPUT
         echo 'EOF' >> $GITHUB_OUTPUT
 
     - name: Send slack notification
