@@ -32,7 +32,7 @@ commit
     run compute-message.sh
 
     [ "$status" -eq 0 ]
-    
+
     expected_output=$(cat << BATS
 result<<EOF
 my custom message
@@ -49,7 +49,7 @@ BATS
     run compute-message.sh
 
     [ "$status" -eq 0 ]
-    
+
     expected_output=$(cat << BATS
 result<<EOF
 fix(jx-updatebot-pr): update release binary version to 0.3.13 #158
@@ -66,7 +66,7 @@ BATS
     run compute-message.sh
 
     [ "$status" -eq 0 ]
-    
+
     expected_output=$(cat << 'BATS'
 result<<EOF
 This PR adds support for retrying `jx-updatebot-pr` action in case there is a race condition on the target pr branch due to a concurrent commit from another project, i.e.\n\n```\n- uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@ref\n  with:\n    retries: '3'\n    retries-wait: '10'\n\n```
@@ -83,7 +83,7 @@ BATS
     run compute-message.sh
 
     [ "$status" -eq 0 ]
-    
+
     expected_output=$(cat << 'BATS'
 result<<EOF
 fix: update retry inputs to use string type\n\n* use strings\n* add tests
