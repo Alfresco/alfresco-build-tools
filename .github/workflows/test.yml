@@ -18,6 +18,11 @@ jobs:
           channel-id: 'U02SN1QQVCP'
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           notification-color: '#A30200'
+          message: |
+            This is a multiline message with `code`
+
+            * another line
+            * one more
       - uses: ./.github/actions/setup-helm-docs
       - uses: ./.github/actions/setup-jx-release-version
       - uses: ./.github/actions/setup-kubepug
