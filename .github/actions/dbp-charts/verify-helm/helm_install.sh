@@ -134,12 +134,6 @@ subjects:
 EOF
 }
 
-export values_file=helm/"${PROJECT_NAME}"/values.yaml
-if [[ ${ACS_VERSION} && "${ACS_VERSION}" != "latest" ]]; then
-  echo "using ${ACS_VERSION}_values.yaml values file for deployment"
-  values_file="helm/${PROJECT_NAME}/${ACS_VERSION}_values.yaml"
-fi
-
 # Main
 (umask 066 && aws eks update-kubeconfig --name acs-cluster --region=eu-west-1)
 prepare_namespace
@@ -167,6 +161,13 @@ helm upgrade --install "${release_name_ingress}" --repo https://kubernetes.githu
   --namespace "${namespace}"
 
 echo "Helm install of ${release_name_ingress} completed."
+
+values_file="helm/${PROJECT_NAME}/values.yaml"
+if [[ -n "${ACS_VERSION}" && "${ACS_VERSION}" != "latest" ]]; then
+  values_file="helm/${PROJECT_NAME}/${ACS_VERSION}_values.yaml"
+fi
+echo "Using values file for deployment: ${values_file}"
+export values_file
 
 # install acs
 helm dep up helm/"${PROJECT_NAME}"
