@@ -39,6 +39,7 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
     - [git-commit-changes](#git-commit-changes)
     - [git-latest-tag](#git-latest-tag)
     - [helm-build-chart](#helm-build-chart)
+    - [helm-dry-run](#helm-dry-run)
     - [helm-package-chart](#helm-package-chart)
     - [helm-parse-next-release](#helm-parse-next-release)
     - [helm-publish-chart](#helm-publish-chart)
@@ -479,6 +480,22 @@ Run `helm dep up` and `helm lint` on the specified chart
       - uses: Alfresco/alfresco-build-tools/.github/actions/helm-build-chart@ref
         with:
           chart-dir: charts/common
+```
+
+### helm-dry-run
+
+Run `helm upgrade --dryn-run` on the specified chart
+
+```yaml
+      - name: Execute dry run
+        uses: Alfresco/alfresco-build-tools/.github/actions/helm-dry-run@ref
+        with:
+          chart-dir: ${{ env.CHART_DIR }}
+          test-rancher-url: ${{ secrets.RANCHER2_URL }}
+          test-rancher-access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
+          test-rancher-secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
+          test-cluster-name: ${{ env.TEST_CLUSTER_NAME }}
+          test-namespace: ${{ env.TEST_NAMESPACE }}
 ```
 
 ### helm-package-chart
