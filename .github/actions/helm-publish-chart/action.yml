@@ -19,18 +19,27 @@ inputs:
   token:
     description: "The github token"
     required: true
+  git-username:
+    description: "The username to use for git commit"
+    required: false
+    default: ""
+  do-push:
+    description: "If 'true', changes will be pushed ('false' can be used for PRs)"
+    default: 'true'
+    required: false
 
 runs:
   using: composite
   steps:
-    - name: Set HELM_REPO_CHECKOUT_DIR
+
+    - name: Generate random path for helm repository checkout
       shell: bash
-      run: echo "HELM_REPO_CHECKOUT_DIR=charts-repo" >> $GITHUB_ENV
+      run: echo "CHECKOUT_PATH=$(uuidgen)" >> $GITHUB_ENV
 
     - name: Checkout charts repository
       uses: actions/checkout@v3
       with:
-        path: ${{ env.HELM_REPO_CHECKOUT_DIR }}
+        path: ${{ env.CHECKOUT_PATH }}
         repository: ${{ inputs.helm-charts-repo }}
         ref: ${{ inputs.helm-charts-repo-branch }}
         token: ${{ inputs.token}}
@@ -59,18 +68,35 @@ runs:
             echo "result=." >> $GITHUB_OUTPUT
         fi
 
+    - name: Generate random path for helm package
+      shell: bash
+      run: echo "RANDOM_PATH=$(uuidgen)" >> $GITHUB_ENV
+
     - name: Add package to Helm repository
       shell: bash
+      env:
+        BASE_URL: ${{ steps.build-base-url-option.outputs.result }}
+        SUB_REPO: ${{ steps.build-destination-path.outputs.result }}
       run: |
-          mkdir ${HELM_REPO_CHECKOUT_DIR}/new-charts
+          mkdir $RANDOM_PATH
           RELEASE_PACKAGE_NAME=${{ inputs.chart-package }}
-          cp "$RELEASE_PACKAGE_NAME" ${HELM_REPO_CHECKOUT_DIR}/new-charts
-          cd $HELM_REPO_CHECKOUT_DIR
-          helm repo index new-charts ${{ steps.build-base-url-option.outputs.result }} --merge ${{ steps.build-destination-path.outputs.result }}/index.yaml
-          cp new-charts/* ${{ steps.build-destination-path.outputs.result }}
-          rm -fr new-charts
-          git add .
-          git status
-          git --no-pager diff --cached
-          git commit -m "Release $RELEASE_PACKAGE_NAME"
-          git push
+          cp "$RELEASE_PACKAGE_NAME" $RANDOM_PATH
+          helm repo index $RANDOM_PATH --url $BASE_URL/$SUB_REPO --merge $CHECKOUT_PATH/$SUB_REPO/index.yaml
+          mv $RANDOM_PATH/* $CHECKOUT_PATH/$SUB_REPO
+          rm -rf $RANDOM_PATH
+
+    - name: Commit changes
+      uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.9.2
+      with:
+        username: ${{ inputs.git-username }}
+        add-options: .
+        commit-message: "Release ${{ inputs.chart-package }}"
+        repository-directory: ${{ env.CHECKOUT_PATH }}
+
+    - name: Push changes
+      if: inputs.do-push == 'true'
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+      working-directory: ${{ env.CHECKOUT_PATH }}
+      shell: bash
+      run: git push origin

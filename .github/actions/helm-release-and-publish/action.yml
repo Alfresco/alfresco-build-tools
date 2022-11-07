@@ -9,7 +9,7 @@ inputs:
     description: 'Relative path to the folder holding Chart.yaml'
     required: true
   chart-repository-dir:
-    description: "The path the git repository holding the chart project"
+    description: 'Path to the git repository holding the chart project'
     required: false
   helm-repository:
     description: 'Charts repository to checkout'
