@@ -83,7 +83,7 @@ runs:
 
     - name: Publish Helm chart
       if: steps.check-tag.outputs.exists == 'false'
-      uses: Alfresco/alfresco-build-tools/.github/actions/publish-helm-chart@v1.19.2
+      uses: Alfresco/alfresco-build-tools/.github/actions/helm-publish-chart@AAE-10136-review-helm-actions
       with:
         helm-charts-repo: ${{inputs.helm-repository}}
         helm-charts-repo-branch: ${{ inputs.helm-repository-branch }}
