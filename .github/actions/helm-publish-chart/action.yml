@@ -48,11 +48,17 @@ runs:
       id: build-base-url-option
       env:
         CHARTS_REPO_BASE_URL: ${{ inputs.helm-charts-repo-base-url }}
+        CHARTS_REPO_SUBFOLDER: ${{ inputs.helm-charts-repo-subfolder }}
       shell: bash
       run: |
         if [ -n "$CHARTS_REPO_BASE_URL" ]
         then
-            echo "result=--url $CHARTS_REPO_BASE_URL" >> $GITHUB_OUTPUT
+          if [ -n "$CHARTS_REPO_SUBFOLDER" ]
+          then
+              echo "result=--url $CHARTS_REPO_BASE_URL/$CHARTS_REPO_SUBFOLDER" >> $GITHUB_OUTPUT
+          else
+              echo "result=--url $CHARTS_REPO_BASE_URL" >> $GITHUB_OUTPUT
+          fi
         fi
 
     - name: Build destination path
@@ -81,7 +87,7 @@ runs:
           mkdir $RANDOM_PATH
           RELEASE_PACKAGE_NAME=${{ inputs.chart-package }}
           cp "$RELEASE_PACKAGE_NAME" $RANDOM_PATH
-          helm repo index $RANDOM_PATH --url $BASE_URL/$SUB_REPO --merge $CHECKOUT_PATH/$SUB_REPO/index.yaml
+          helm repo index $RANDOM_PATH $BASE_URL --merge $CHECKOUT_PATH/$SUB_REPO/index.yaml
           mv $RANDOM_PATH/* $CHECKOUT_PATH/$SUB_REPO
           rm -rf $RANDOM_PATH
 
