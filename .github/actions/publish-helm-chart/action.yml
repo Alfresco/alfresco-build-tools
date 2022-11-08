@@ -25,7 +25,7 @@ runs:
   steps:
     - name: Deprecation Warning
       shell: bash
-      run: echo "This action is deprecated, use Alfresco/alfresco-build-tools/.github/actions/helm-publish-chart instead."
+      run: echo "::warning title=publish-helm-chart/action.yml::This action is deprecated, use Alfresco/alfresco-build-tools/.github/actions/helm-publish-chart instead."
     - uses: Alfresco/alfresco-build-tools/.github/actions/helm-publish-chart@AAE-10136-review-helm-actions
       with:
         chart-package: ${{ inputs.chart-package }}
