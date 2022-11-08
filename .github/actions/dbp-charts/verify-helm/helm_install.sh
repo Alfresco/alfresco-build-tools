@@ -6,8 +6,8 @@ else echo "Could not find a namespace set in the NS env variable"
   exit 3
 fi
 
-release_name_ingress="ing-${GITHUB_RUN_NUMBER}"
-release_name="acs-${GITHUB_RUN_NUMBER}"
+release_name_ingress="ing-${RELEASE_PREFIX}-${GITHUB_RUN_NUMBER}"
+release_name="acs-${RELEASE_PREFIX}-${GITHUB_RUN_NUMBER}"
 HOST=${namespace}.${DOMAIN}
 
 # pod status

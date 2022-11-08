@@ -106,6 +106,7 @@ runs:
         DOMAIN: ${{ inputs.domain }}
         ACS_VERSION: ${{ inputs.acs_version }}
         PROJECT_NAME: ${{ inputs.chart_name }}
+        RELEASE_PREFIX: ${{ inputs.release_prefix }}
         TEST_NEWMAN: ${{ inputs.test_newman }}
     - name: Upload helm deployments logs as artifacts
       uses: >-
@@ -117,4 +118,5 @@ runs:
       run: ${{ github.action_path }}/helm_delete.sh
       shell: bash
       env:
+        RELEASE_PREFIX: ${{ inputs.release_prefix }}
         K8SNS: ${{ steps.k8sns.outputs.namespace }}
