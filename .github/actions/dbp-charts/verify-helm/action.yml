@@ -85,10 +85,10 @@ runs:
         password: ${{ inputs.docker_password }}
     - name: Get branch name
       uses: >-
-        Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v1.20.0
+        Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v1.20.1
     - name: Get commit msg
       uses: >-
-        Alfresco/alfresco-build-tools/.github/actions/get-commit-message@v1.20.0
+        Alfresco/alfresco-build-tools/.github/actions/get-commit-message@v1.20.1
     - name: Run helm chart test script
       run: ${{ github.action_path }}/helm_install.sh
       shell: bash
