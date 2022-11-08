@@ -23,6 +23,15 @@ inputs:
       Name of the namespace in rancher for tests (should be unique in PRs),
       tests are skipped if not filled.
     required: false
+  test-gateway-domain:
+    description: >
+      Value of the `global.gateway.domain` property used for the `helm upgrade` command.
+    required: false
+    default: 'example'
+  test-keycloak-client-secret:
+    description: >
+      Value of the `global.keycloak.clientSecret` property used for the `helm upgrade` command.
+    required: false
 
 runs:
   using: composite
@@ -34,18 +43,32 @@ runs:
         access-key: ${{ inputs.test-rancher-access-key }}
         secret-key: ${{ inputs.test-rancher-secret-key }}
         context: ${{ inputs.test-cluster-name }}
-    - name: Execute helm dry-run
+    - name: Compute Keycloak Client Secret
+      id: compute-keycloak-secret
+      shell: bash
+      env:
+        KEYCLOAK_SECRET: ${{ inputs.test-keycloak-client-secret }}
+      run: |
+        if [ -n "$KEYCLOAK_SECRET" ]
+        then
+          echo "result=$KEYCLOAK_SECRET" >> $GITHUB_OUTPUT
+        else
+          echo "result=$(uuidgen)" >> $GITHUB_OUTPUT
+        fi
+    - name: Execute helm upgrade dry-run
       if: steps.check.test == 'true'
       env:
         CHART_DIR: ${{ inputs.chart-dir }}
         NAMESPACE: ${{ inputs.test-namespace }}
+        DOMAIN: ${{ inputs.test-gateway-domain }}
+        KEYCLOAK_SECRET: ${{ steps.compute-keycloak-secret.outputs.result }}
       shell: bash
       run: |
         NAMESPACE_LOWERCASE=$(echo ${NAMESPACE} | tr "[:upper:]" "[:lower:]")
         helm upgrade $NAMESPACE_LOWERCASE $CHART_DIR \
           --install \
-          --set global.gateway.domain=example \
-          --set global.keycloak.clientSecret=$(uuidgen) \
-          --namespace ${NAMESPACE_LOWERCASE} \
+          --set global.gateway.domain=$DOMAIN \
+          --set global.keycloak.clientSecret=$KEYCLOAK_SECRET \
+          --namespace $NAMESPACE_LOWERCASE \
           --wait \
           --dry-run
