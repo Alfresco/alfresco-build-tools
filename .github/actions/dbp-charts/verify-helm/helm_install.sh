@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
-if [ -n "$NS" ]; then echo "Deploying in namespace $NS"
-  namespace=$NS
+if [ -n "$K8SNS" ]; then echo "Deploying in namespace $K8SNS"
+  namespace=$K8SNS
 else echo "Could not find a namespace set in the NS env variable"
   exit 3
 fi

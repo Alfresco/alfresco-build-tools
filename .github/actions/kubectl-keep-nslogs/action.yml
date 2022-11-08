@@ -21,7 +21,7 @@ runs:
       run: |
         ARTIFACTS_DIR=$(mktemp -d)
         mkdir ${ARTIFACTS_DIR}/{deployments,jobs}
-        echo "ARTIFACTS_DIR=${ARTIFACTS_DIR}" >> $GITUHUB_OUTPUT
+        echo "ARTIFACTS_DIR=${ARTIFACTS_DIR}" >> $GITHUB_OUTPUT
     - name: Fetch logs
       shell: bash
       run: |

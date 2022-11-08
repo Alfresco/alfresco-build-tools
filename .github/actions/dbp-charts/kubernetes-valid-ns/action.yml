@@ -27,4 +27,4 @@ runs:
         BRANCH_NS="${BRANCH_PREFIX//[^[:alnum:]]/-}"
         RELEASE_NS=$"${RELEASE_PREFIX//[^[:alnum:]]/-}"
         NS_SUFFIX=${GITHUB_RUN_NUMBER:-0}
-        echo namespace="${BRANCH_NS,,}"-"${RELEASE_NS,,}"-"${NS_SUFFIX}"
+        echo namespace="${BRANCH_NS,,}"-"${RELEASE_NS,,}"-"${NS_SUFFIX}" >> $GITHUB_OUTPUT

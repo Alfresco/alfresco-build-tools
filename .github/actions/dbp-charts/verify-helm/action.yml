@@ -92,7 +92,7 @@ runs:
     - name: Get a namespace to deploy on
       id: k8sns
       uses: >-
-        Alfresco/alfresco-build-tools/.github/actions/kubernetes-valid-ns@OPSEXP-1776
+        Alfresco/alfresco-build-tools/.github/actions/dbp-charts/kubernetes-valid-ns@OPSEXP-1776
       with:
         branch_name: ${{ env.BRANCH_NAME }}
         release_prefix: ${{ inputs.release_prefix }}
@@ -113,7 +113,7 @@ runs:
       with:
         namespace: ${{ steps.k8sns.outputs.namespace }}
     - name: Uninstall Helm releases
-      if: always() && ! contains(COMMIT_MESSAGE, '[keep env]')
+      if: always() && ! contains(env.COMMIT_MESSAGE, '[keep env]')
       run: ${{ github.action_path }}/helm_delete.sh
       shell: bash
       env:
