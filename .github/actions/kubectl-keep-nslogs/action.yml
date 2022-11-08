@@ -24,12 +24,13 @@ runs:
         echo "ARTIFACTS_DIR=${ARTIFACTS_DIR}" >> $GITHUB_OUTPUT
     - name: Fetch logs
       shell: bash
+      working-directory: ${{ steps.artifactdir.outputs.ARTIFACTS_DIR }}
       run: |
         kubectl config set-context --current --namespace=${{ inputs.namespace }}
         for type in deployments statefulsets jobs; do
           for i in $(kubectl get "$type" -o name); do \
             kubectl logs "$i" --all-containers=true | \
-            gzip > "${ARTIFACTS_DIR}"/"${type}"/"${i}".log.gz
+            gzip > "${type}"/"${i}".log.gz
           done
         done
     - name: upload kubernetes logs as artifact
