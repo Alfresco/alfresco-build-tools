@@ -1,0 +1,108 @@
+name: "Add package to helm repository"
+description: "Add a new package to the helm repository, updates the index file and commit the change"
+inputs:
+  chart-package:
+    description: "The name of the packaged chart been added to the repository. I.e. common-x.y.z.tgz"
+    required: true
+  helm-charts-repo:
+    description: "The name of the repository where the package will be added"
+    required: true
+  helm-charts-repo-branch:
+    description: "The name of the branch where the package will be added"
+    required: true
+  helm-charts-repo-subfolder:
+    description: "The name of the subfolder inside the charts repository where the package should be added"
+    required: false
+  helm-charts-repo-base-url:
+    description: "Helm chart repo base url"
+    required: false
+  token:
+    description: "The github token"
+    required: true
+  git-username:
+    description: "The username to use for git commit"
+    required: false
+    default: ""
+  do-push:
+    description: "If 'true', changes will be pushed ('false' can be used for PRs)"
+    default: 'true'
+    required: false
+
+runs:
+  using: composite
+  steps:
+
+    - name: Generate random path for helm repository checkout
+      shell: bash
+      run: echo "CHECKOUT_PATH=$(uuidgen)" >> $GITHUB_ENV
+
+    - name: Checkout charts repository
+      uses: actions/checkout@v3
+      with:
+        path: ${{ env.CHECKOUT_PATH }}
+        repository: ${{ inputs.helm-charts-repo }}
+        ref: ${{ inputs.helm-charts-repo-branch }}
+        token: ${{ inputs.token}}
+
+    - name: Build base URL option
+      id: build-base-url-option
+      env:
+        CHARTS_REPO_BASE_URL: ${{ inputs.helm-charts-repo-base-url }}
+        CHARTS_REPO_SUBFOLDER: ${{ inputs.helm-charts-repo-subfolder }}
+      shell: bash
+      run: |
+        if [ -n "$CHARTS_REPO_BASE_URL" ]
+        then
+          if [ -n "$CHARTS_REPO_SUBFOLDER" ]
+          then
+              echo "result=--url $CHARTS_REPO_BASE_URL/$CHARTS_REPO_SUBFOLDER" >> $GITHUB_OUTPUT
+          else
+              echo "result=--url $CHARTS_REPO_BASE_URL" >> $GITHUB_OUTPUT
+          fi
+        fi
+
+    - name: Build destination path
+      id: build-destination-path
+      shell: bash
+      env:
+        CHARTS_REPO_SUBFOLDER: ${{ inputs.helm-charts-repo-subfolder }}
+      run: |
+        if [ -n "$CHARTS_REPO_SUBFOLDER" ]
+        then
+            echo "result=$CHARTS_REPO_SUBFOLDER" >> $GITHUB_OUTPUT
+        else
+            echo "result=." >> $GITHUB_OUTPUT
+        fi
+
+    - name: Generate random path for helm package
+      shell: bash
+      run: echo "RANDOM_PATH=$(uuidgen)" >> $GITHUB_ENV
+
+    - name: Add package to Helm repository
+      shell: bash
+      env:
+        BASE_URL: ${{ steps.build-base-url-option.outputs.result }}
+        SUB_REPO: ${{ steps.build-destination-path.outputs.result }}
+      run: |
+          mkdir $RANDOM_PATH
+          RELEASE_PACKAGE_NAME=${{ inputs.chart-package }}
+          cp "$RELEASE_PACKAGE_NAME" $RANDOM_PATH
+          helm repo index $RANDOM_PATH $BASE_URL --merge $CHECKOUT_PATH/$SUB_REPO/index.yaml
+          mv $RANDOM_PATH/* $CHECKOUT_PATH/$SUB_REPO
+          rm -rf $RANDOM_PATH
+
+    - name: Commit changes
+      uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.9.2
+      with:
+        username: ${{ inputs.git-username }}
+        add-options: .
+        commit-message: "Release ${{ inputs.chart-package }}"
+        repository-directory: ${{ env.CHECKOUT_PATH }}
+
+    - name: Push changes
+      if: inputs.do-push == 'true'
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+      working-directory: ${{ env.CHECKOUT_PATH }}
+      shell: bash
+      run: git push origin

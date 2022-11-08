@@ -1,5 +1,5 @@
-name: "Add package to helm repository"
-description: "Add a new package to the helm repository, updates the index file and commit the change"
+name: "Add package to helm repository (deprecated)"
+description: "Add a new package to the helm repository, updates the index file and commit the change (deprecated)"
 inputs:
   chart-package:
     description: "The name of the packaged chart been added to the repository. I.e. common-x.y.z.tgz"
@@ -23,55 +23,14 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Set HELM_REPO_CHECKOUT_DIR
+    - name: Deprecation Warning
       shell: bash
-      run: echo "HELM_REPO_CHECKOUT_DIR=charts-repo" >> $GITHUB_ENV
-
-    - name: Checkout activiti-cloud-helm-charts
-      uses: actions/checkout@v3
+      run: echo "::warning title=publish-helm-chart/action.yml::This action is deprecated, use Alfresco/alfresco-build-tools/.github/actions/helm-publish-chart instead."
+    - uses: Alfresco/alfresco-build-tools/.github/actions/helm-publish-chart@AAE-10136-review-helm-actions
       with:
-        path: ${{ env.HELM_REPO_CHECKOUT_DIR }}
-        repository: ${{ inputs.helm-charts-repo }}
-        ref: ${{ inputs.helm-charts-repo-branch }}
-        token: ${{ inputs.token}}
-
-    - name: Build base URL option
-      id: build-base-url-option
-      env:
-        CHARTS_REPO_BASE_URL: ${{ inputs.helm-charts-repo-base-url }}
-      shell: bash
-      run: |
-        if [ -n "$CHARTS_REPO_BASE_URL" ]
-        then
-            echo "result=--url $CHARTS_REPO_BASE_URL" >> $GITHUB_OUTPUT
-        fi
-
-    - name: Build destination path
-      id: build-destination-path
-      shell: bash
-      env:
-        CHARTS_REPO_SUBFOLDER: ${{ inputs.helm-charts-repo-subfolder }}
-      run: |
-        if [ -n "$CHARTS_REPO_SUBFOLDER" ]
-        then
-            echo "result=$CHARTS_REPO_SUBFOLDER" >> $GITHUB_OUTPUT
-        else
-            echo "result=." >> $GITHUB_OUTPUT
-        fi
-
-
-    - name: Add package to Helm repository
-      shell: bash
-      run: |
-          mkdir ${HELM_REPO_CHECKOUT_DIR}/new-charts
-          RELEASE_PACKAGE_NAME=${{ inputs.chart-package }}
-          cp "$RELEASE_PACKAGE_NAME" ${HELM_REPO_CHECKOUT_DIR}/new-charts
-          cd $HELM_REPO_CHECKOUT_DIR
-          helm repo index new-charts ${{ steps.build-base-url-option.outputs.result }} --merge ${{ steps.build-destination-path.outputs.result }}/index.yaml
-          cp new-charts/* ${{ steps.build-destination-path.outputs.result }}
-          rm -fr new-charts
-          git add .
-          git status
-          git --no-pager diff --cached
-          git commit -m "Release $RELEASE_PACKAGE_NAME"
-          git push
+        chart-package: ${{ inputs.chart-package }}
+        helm-charts-repo: ${{ inputs.helm-charts-repo }}
+        helm-charts-repo-branch: ${{ inputs.helm-charts-repo-branch }}
+        helm-charts-repo-subfolder: ${{ inputs.helm-charts-repo-subfolder }}
+        helm-charts-repo-base-url: ${{ inputs.helm-charts-repo-base-url }}
+        token: ${{ inputs.token }}

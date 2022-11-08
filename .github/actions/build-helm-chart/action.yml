@@ -1,5 +1,5 @@
-name: "Build helm chart"
-description: "Build helm chart by running `helm up` and `helm lint`"
+name: "Build helm chart (deprecated)"
+description: "Build helm chart by running `helm up` and `helm lint` (deprecated)"
 inputs:
   chart-dir:
     description: "Path to the folder holding Chart.yaml"
@@ -8,8 +8,9 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Build and lint
+    - name: Deprecation Warning
       shell: bash
-      run: |
-        helm dep up ${{ inputs.chart-dir }}
-        helm lint ${{ inputs.chart-dir }}
+      run: echo "::warning title=build-helm-chart/action.yml::This action is deprecated, use Alfresco/alfresco-build-tools/.github/actions/helm-build-chart instead."
+    - uses: Alfresco/alfresco-build-tools/.github/actions/helm-build-chart@AAE-10136-review-helm-actions
+      with:
+        chart-dir: ${{ inputs.chart-dir }}
