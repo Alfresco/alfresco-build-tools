@@ -488,7 +488,7 @@ Run `helm upgrade --dryn-run` on the specified chart
 
 ```yaml
       - name: Execute dry run
-        uses: Alfresco/alfresco-build-tools/.github/actions/helm-dry-run@ref
+        uses: Alfresco/alfresco-build-tools/.github/actions/helm-integration-tests@ref
         with:
           chart-dir: ${{ env.CHART_DIR }}
           test-rancher-url: ${{ secrets.RANCHER2_URL }}
