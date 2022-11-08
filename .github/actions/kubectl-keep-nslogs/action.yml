@@ -20,17 +20,19 @@ runs:
       shell: bash
       run: |
         ARTIFACTS_DIR=$(mktemp -d)
-        mkdir ${ARTIFACTS_DIR}/{deployments,jobs}
         echo "ARTIFACTS_DIR=${ARTIFACTS_DIR}" >> $GITHUB_OUTPUT
     - name: Fetch logs
       shell: bash
       working-directory: ${{ steps.artifactdir.outputs.ARTIFACTS_DIR }}
       run: |
+        echo "checking pwd (should be ${{ steps.artifactdir.outputs.ARTIFACTS_DIR }})"
+        pwd
         kubectl config set-context --current --namespace=${{ inputs.namespace }}
-        for type in deployments statefulsets jobs; do
+        for type in deployment.apps statefulset.apps jobs; do
+          [ -d "${type}" ] || mkdir "${type}"
           for i in $(kubectl get "$type" -o name); do \
             kubectl logs "$i" --all-containers=true | \
-            gzip > "${type}"/"${i}".log.gz
+            gzip > "${i}.log.gz"
           done
         done
     - name: upload kubernetes logs as artifact
