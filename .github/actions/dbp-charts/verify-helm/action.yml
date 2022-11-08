@@ -89,14 +89,21 @@ runs:
     - name: Get commit msg
       uses: >-
         Alfresco/alfresco-build-tools/.github/actions/get-commit-message@v1.19.2
+    - name: Get a namespace to deploy on
+      id: k8sns
+      uses: >-
+        Alfresco/alfresco-build-tools/.github/actions/kubernetes-valid-ns@OPSEXP-1776
+      with:
+        branch_name: ${{ env.BRANCH_NAME }}
+        release_prefix: ${{ inputs.release_prefix }}
     - name: Run helm chart test script
       run: ${{ github.action_path }}/helm_install.sh
       shell: bash
       env:
+        K8SNS: ${{ steps.k8sns.outputs.namespace }}
         ACM_CERTIFICATE: ${{ inputs.acm_certificate }}
         AWS_SG: ${{ inputs.aws_sg }}
         DOMAIN: ${{ inputs.domain }}
         ACS_VERSION: ${{ inputs.acs_version }}
-        RELEASE_PREFIX: ${{ inputs.release_prefix }}
         PROJECT_NAME: ${{ inputs.chart_name }}
         TEST_NEWMAN: ${{ inputs.test_newman }}

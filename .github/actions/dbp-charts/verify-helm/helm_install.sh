@@ -11,9 +11,14 @@ clean_up () {
 }
 trap clean_up EXIT
 
-namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d '[:punct:]' | awk '{print tolower($0)}')"-${RELEASE_PREFIX}-${GITHUB_RUN_NUMBER}"
-release_name_ingress="ing-${RELEASE_PREFIX}-${GITHUB_RUN_NUMBER}"
-release_name="${RELEASE_PREFIX}-${GITHUB_RUN_NUMBER}"
+if [ -n "$NS" ]; then echo "Deploying in namespace $NS"
+  namespace=$NS
+else echo "Could not find a namespace set in the NS env variable"
+  exit 3
+fi
+
+release_name_ingress="ing-${GITHUB_RUN_NUMBER}"
+release_name="acs-${GITHUB_RUN_NUMBER}"
 HOST=${namespace}.${DOMAIN}
 
 # pod status
