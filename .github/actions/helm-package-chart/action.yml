@@ -1,8 +1,8 @@
 name: "Package helm chart"
-description: "Package helm chart by running `helm dep up` and ` helmp package`"
+description: "Package helm chart by running `helm dep up` and ` helm package`"
 inputs:
   chart-dir:
-    description: "Relative path to the folder holding Chart.yaml"
+    description: Relative path to the folder holding Chart.yaml
     required: true
   chart-repository-dir:
     description: Optional path to the git repository holding the chart project (defaults to current directory)
@@ -15,7 +15,12 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Package
+
+    - name: Generate random path for helm package
+      shell: bash
+      run: echo "RANDOM_PATH=$(uuidgen)" >> $GITHUB_ENV
+
+    - name: Package chart
       id: package
       shell: bash
       env:
@@ -26,10 +31,10 @@ runs:
           cd $CHART_REPO_DIR
         fi
 
-        helm dep up ${{ inputs.chart-dir }}
-        helm package ${{ inputs.chart-dir }}
-        PACKAGE_FILE=$(ls | grep *\.tgz)
-        PACKAGE_FILE_PATH="$(pwd)/$PACKAGE_FILE"
+        helm package --dependency-update --destination $RANDOM_PATH ${{ inputs.chart-dir }}
+
+        PACKAGE_FILE=$(ls $RANDOM_PATH | grep "**/*\.tgz")
+        PACKAGE_FILE_PATH="$(pwd)/$RANDOM_PATH/$PACKAGE_FILE"
         echo "package-file=$PACKAGE_FILE" >> $GITHUB_OUTPUT
         echo "package-file-path=$PACKAGE_FILE_PATH" >> $GITHUB_OUTPUT
 

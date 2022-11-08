@@ -32,17 +32,19 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
   - [GitHub Actions provided by us](#github-actions-provided-by-us)
     - [automate-dependabot](#automate-dependabot)
     - [automate-propagation](#automate-propagation)
-    - [build-helm-chart](#build-helm-chart)
     - [configure-git-author](#configure-git-author)
     - [get-branch-name](#get-branch-name)
     - [git-check-existing-tag](#git-check-existing-tag)
     - [get-commit-message](#get-commit-message)
     - [git-commit-changes](#git-commit-changes)
     - [git-latest-tag](#git-latest-tag)
+    - [helm-build-chart](#helm-build-chart)
+    - [helm-integration-tests](#helm-integration-tests)
     - [helm-package-chart](#helm-package-chart)
     - [helm-parse-next-release](#helm-parse-next-release)
+    - [helm-publish-chart](#helm-publish-chart)
     - [helm-release-and-publish](#helm-release-and-publish)
-    - [helm-unit-test](#helm-unit-test)
+    - [helm-unit-tests](#helm-unit-tests)
     - [helm-update-chart-version](#helm-update-chart-version)
     - [jx-updatebot-pr](#jx-updatebot-pr)
     - [load-release-descriptor](#load-release-descriptor)
@@ -52,7 +54,6 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
     - [maven-update-pom-version](#maven-update-pom-version)
     - [nexus-create-staging](#nexus-create-staging)
     - [pre-commit](#pre-commit)
-    - [publish-helm-chart](#publish-helm-chart)
     - [rancher](#rancher)
     - [send-slack-notification](#send-slack-notification)
     - [setup-github-release-binary](#setup-github-release-binary)
@@ -412,16 +413,6 @@ Another token is also needed to handled approval. It can be the default `GITHUB_
         approval-token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-### build-helm-chart
-
-Run `helm dep up` and `helm lint` on the specified chart
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/build-helm-chart@ref
-        with:
-          chart-dir: charts/common
-```
-
 ### configure-git-author
 
 Configures the git username and email to associate commits with the provided identity
@@ -481,6 +472,32 @@ Gets the latest tag for the given pattern. The result is returned in the output 
           pattern: 1.0.0-alpha*
 ```
 
+### helm-build-chart
+
+Run `helm dep up` and `helm lint` on the specified chart
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-build-chart@ref
+        with:
+          chart-dir: charts/common
+```
+
+### helm-integration-tests
+
+Run `helm upgrade --dryn-run` on the specified chart
+
+```yaml
+      - name: Execute dry run
+        uses: Alfresco/alfresco-build-tools/.github/actions/helm-integration-tests@ref
+        with:
+          chart-dir: ${{ env.CHART_DIR }}
+          test-rancher-url: ${{ secrets.RANCHER2_URL }}
+          test-rancher-access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
+          test-rancher-secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
+          test-cluster-name: ${{ env.TEST_CLUSTER_NAME }}
+          test-namespace: ${{ env.TEST_NAMESPACE }}
+```
+
 ### helm-package-chart
 
 Packages a helm chart into a `.tgz` file and provides the name of the file produced in the output named `package-file`.
@@ -505,6 +522,19 @@ The suffix `-SNAPSHOT` is removed. For instance, if the version attribute in the
           chart-dir: charts/common
 ```
 
+### helm-publish-chart
+
+Publishes a new helm chart package (`.tgz`) to a helm chart repository
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-publish-chart@ref
+        with:
+          helm-charts-repo: Activiti/activiti-cloud-helm-charts
+          helm-charts-repo-branch: gh-pages
+          chart-package: ${{ steps.package-helm-chart.outputs.package-file }}
+          token: ${{ secrets.BOT_GITHUB_TOKEN}}
+```
+
 ### helm-release-and-publish
 
 Releases a new version of a helm chart and publishes it to a helm repository
@@ -521,7 +551,7 @@ Releases a new version of a helm chart and publishes it to a helm repository
           git-username:  ${{ secrets.GITHUB_USERNAME }}
 ```
 
-### helm-unit-test
+### helm-unit-tests
 
 Looks for Helm unit tests written using [helm3-unittest](https://github.com/vbehar/helm3-unittest/blob/master/DOCUMENT.md).
 
@@ -711,19 +741,6 @@ or into an existing workflow of your choice just declaring the step:
 
 ```yml
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
-```
-
-### publish-helm-chart
-
-Publishes a new helm chart package (`.tgz`) to a helm chart repository
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/publish-helm-chart@ref
-        with:
-          helm-charts-repo: Activiti/activiti-cloud-helm-charts
-          helm-charts-repo-branch: gh-pages
-          chart-package: ${{ steps.package-helm-chart.outputs.package-file }}
-          token: ${{ secrets.BOT_GITHUB_TOKEN}}
 ```
 
 ### rancher
