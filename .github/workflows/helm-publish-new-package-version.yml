@@ -77,7 +77,7 @@ jobs:
         run: git push origin $VERSION
 
       - name: Publish Helm chart
-        uses: Alfresco/alfresco-build-tools/.github/actions/helm-publish-chart@AAE-10136-review-helm-actions
+        uses: Alfresco/alfresco-build-tools/.github/actions/helm-publish-chart@v1.20.0
         with:
             helm-charts-repo: ${{ inputs.helm-charts-repo }}
             helm-charts-repo-branch: ${{ inputs.helm-charts-repo-branch }}
