@@ -107,6 +107,11 @@ runs:
         ACS_VERSION: ${{ inputs.acs_version }}
         PROJECT_NAME: ${{ inputs.chart_name }}
         TEST_NEWMAN: ${{ inputs.test_newman }}
+    - name: Upload helm deployments logs as artifacts
+      uses: >-
+        Alfresco/alfresco-build-tools/.github/actions/kubectl-keep-nslogs@OPSEXP-1776
+      with:
+        namespace: ${{ steps.k8sns.outputs.namespace }}
     - name: Uninstall Helm releases
       if: always() && ! contains(COMMIT_MESSAGE, '[keep env]')
       run: ${{ github.action_path }}/helm_delete.sh
