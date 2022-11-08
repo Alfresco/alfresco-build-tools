@@ -23,6 +23,9 @@ inputs:
     description: "The username to use for git commit"
     required: false
     default: ""
+  git-message:
+    description: "The message to use for git commit"
+    required: false
   do-push:
     description: "If 'true', changes will be pushed ('false' can be used for PRs)"
     default: 'true'
@@ -91,12 +94,26 @@ runs:
           mv $RANDOM_PATH/* $CHECKOUT_PATH/$SUB_REPO
           rm -rf $RANDOM_PATH
 
+    - name: Compute git commit message
+      id: compute-git-commit-message
+      shell: bash
+      env:
+        INPUT_MESSAGE: ${{ inputs.git-message }}
+        RELEASE_PACKAGE_NAME: ${{ inputs.chart-package }}
+      run: |
+        if [ -n "$INPUT_MESSAGE" ]
+        then
+          echo "result=$INPUT_MESSAGE" >> $GITHUB_OUTPUT
+        else
+          echo "result=Release $RELEASE_PACKAGE_NAME" >> $GITHUB_OUTPUT
+        fi
+
     - name: Commit changes
-      uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.9.2
+      uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.20.0
       with:
         username: ${{ inputs.git-username }}
         add-options: .
-        commit-message: "Release ${{ inputs.chart-package }}"
+        commit-message: ${{ steps.compute-git-commit-message.outputs.result }}
         repository-directory: ${{ env.CHECKOUT_PATH }}
 
     - name: Push changes
