@@ -8,7 +8,7 @@ out_of_ns_ingress_cleanup() {
 }
 
 echo "cleaning up releases"
-helm delete "ing-${GITHUB_RUN_NUMBER}" -n "${K8SNS}" || out_of_ns_ingress_cleanup
-helm delete "acs-${RELEASE_PREFIX}-${GITHUB_RUN_NUMBER}" -n "${K8SNS}"
+helm delete "ing-${RELEASE_PREFIX}-${GITHUB_RUN_NUMBER}" -n "${K8SNS}" || out_of_ns_ingress_cleanup
+helm delete "${RELEASE_PREFIX}-${GITHUB_RUN_NUMBER}" -n "${K8SNS}"
 kubectl delete secret quay-registry-secret -n "${K8SNS}"
 kubectl delete namespace "${K8SNS}" --grace-period=1
