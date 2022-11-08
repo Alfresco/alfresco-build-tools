@@ -1,16 +1,5 @@
 #!/bin/bash -e
 
-clean_up () {
-  if [[ "${COMMIT_MESSAGE}" != *"[keep env]"* ]]; then
-    echo "cleaning up..."
-    set +e
-    helm delete "${release_name_ingress}" "${release_name}" -n "${namespace}"
-    kubectl delete secret quay-registry-secret -n "${namespace}"
-    kubectl delete namespace "${namespace}" --grace-period=1
-  fi
-}
-trap clean_up EXIT
-
 if [ -n "$NS" ]; then echo "Deploying in namespace $NS"
   namespace=$NS
 else echo "Could not find a namespace set in the NS env variable"
