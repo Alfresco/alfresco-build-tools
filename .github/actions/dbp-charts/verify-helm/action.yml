@@ -107,3 +107,9 @@ runs:
         ACS_VERSION: ${{ inputs.acs_version }}
         PROJECT_NAME: ${{ inputs.chart_name }}
         TEST_NEWMAN: ${{ inputs.test_newman }}
+    - name: Uninstall Helm releases
+      if: always() && ! contains(COMMIT_MESSAGE, '[keep env]')
+      run: ${{ github.action_path }}/helm_delete.sh
+      shell: bash
+      env:
+        K8SNS: ${{ steps.k8sns.outputs.namespace }}
