@@ -1,6 +1,6 @@
-name: Helm Dry Run
+name: Helm Integration Tests
 description: >
-  Execute helm dry run on given chart
+  Execute helm upgrade with dry run on given chart
 
 inputs:
   chart-dir:

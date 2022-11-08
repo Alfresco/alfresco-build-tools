@@ -39,12 +39,12 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
     - [git-commit-changes](#git-commit-changes)
     - [git-latest-tag](#git-latest-tag)
     - [helm-build-chart](#helm-build-chart)
-    - [helm-dry-run](#helm-dry-run)
+    - [helm-integration-tests](#helm-integration-tests)
     - [helm-package-chart](#helm-package-chart)
     - [helm-parse-next-release](#helm-parse-next-release)
     - [helm-publish-chart](#helm-publish-chart)
     - [helm-release-and-publish](#helm-release-and-publish)
-    - [helm-unit-test](#helm-unit-test)
+    - [helm-unit-tests](#helm-unit-tests)
     - [helm-update-chart-version](#helm-update-chart-version)
     - [jx-updatebot-pr](#jx-updatebot-pr)
     - [load-release-descriptor](#load-release-descriptor)
@@ -482,7 +482,7 @@ Run `helm dep up` and `helm lint` on the specified chart
           chart-dir: charts/common
 ```
 
-### helm-dry-run
+### helm-integration-tests
 
 Run `helm upgrade --dryn-run` on the specified chart
 
@@ -551,7 +551,7 @@ Releases a new version of a helm chart and publishes it to a helm repository
           git-username:  ${{ secrets.GITHUB_USERNAME }}
 ```
 
-### helm-unit-test
+### helm-unit-tests
 
 Looks for Helm unit tests written using [helm3-unittest](https://github.com/vbehar/helm3-unittest/blob/master/DOCUMENT.md).
 
