@@ -109,6 +109,7 @@ runs:
         RELEASE_PREFIX: ${{ inputs.release_prefix }}
         TEST_NEWMAN: ${{ inputs.test_newman }}
     - name: Upload helm deployments logs as artifacts
+      if: always()
       uses: >-
         Alfresco/alfresco-build-tools/.github/actions/kubectl-keep-nslogs@OPSEXP-1776
       with:
