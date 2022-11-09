@@ -501,7 +501,7 @@ Run `helm upgrade --dryn-run` on the specified chart
 ### helm-package-chart
 
 Packages a helm chart into a `.tgz` file and provides the name of the file produced in the output named `package-file`.
-The packaged file is also updated as an artifact and can be downloaded using `actions/download-artifact`.
+The packaged file is also uploaded as an artifact and can be downloaded using `actions/download-artifact`.
 
 ```yaml
     - uses: Alfresco/alfresco-build-tools/.github/actions/helm-package-chart@ref

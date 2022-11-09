@@ -76,6 +76,10 @@ jobs:
       - name: Push tag
         run: git push origin $VERSION
 
+      - uses: actions/download-artifact@v3
+        with:
+          name: ${{ steps.package-helm-chart.outputs.package-file }}
+
       - name: Publish Helm chart
         uses: Alfresco/alfresco-build-tools/.github/actions/helm-publish-chart@v1.20.1
         with:
