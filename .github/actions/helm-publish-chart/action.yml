@@ -88,6 +88,7 @@ runs:
         SUB_REPO: ${{ steps.build-destination-path.outputs.result }}
         RELEASE_PACKAGE_PATH: ${{ inputs.chart-package }}
       run: |
+        mkdir $RANDOM_PATH
         cp "$RELEASE_PACKAGE_PATH" $RANDOM_PATH
         helm repo index $RANDOM_PATH $BASE_URL --merge $CHECKOUT_PATH/$SUB_REPO/index.yaml
         mv $RANDOM_PATH/* $CHECKOUT_PATH/$SUB_REPO
