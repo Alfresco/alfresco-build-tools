@@ -38,6 +38,7 @@ runs:
     - name: upload kubernetes logs as artifact
       uses: actions/upload-artifact@v3.1.1
       with:
-        name: kubernetes_resource_logs.${GITHUB_RUN_ID}.${GITHUB_RUN_ATTEMPT}
+        name: >-
+          k8s_rsc_logs.${{ github.run_number }}.${{ github.run_attempt }}
         retention-days: ${{ inputs.log_retention }}
         path: ${{ steps.artifactdir.outputs.ARTIFACTS_DIR }}
