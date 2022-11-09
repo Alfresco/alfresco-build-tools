@@ -1,5 +1,5 @@
 import:
-  - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.20.1
+  - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.20.2
 env:
   global:
     - RANCHER_CLI_VERSION=${RANCHER_CLI_VERSION:-2.6.0}
