@@ -1,5 +1,4 @@
 #!/bin/bash +e
-#
 
 out_of_ns_ingress_cleanup() {
   echo "Something went wrong uninstalling ingress release... Need to do some cleanup"
