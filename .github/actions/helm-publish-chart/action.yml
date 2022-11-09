@@ -104,7 +104,7 @@ runs:
         then
           echo "result=$INPUT_MESSAGE" >> $GITHUB_OUTPUT
         else
-          RELEASE_PACKAGE_NAME=basename $RELEASE_PACKAGE_PATH
+          RELEASE_PACKAGE_NAME=$(basename $RELEASE_PACKAGE_PATH)
           echo "result=Release $RELEASE_PACKAGE_NAME" >> $GITHUB_OUTPUT
         fi
 
