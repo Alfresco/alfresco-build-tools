@@ -18,10 +18,24 @@ This PR adds support for retrying `jx-updatebot-pr` action in case there is a ra
 body
 )
     export COMMIT_MESSAGE=$(cat << 'commit'
-fix: update retry inputs to use string type
+AAE-10092 review gh actions workflows (#789)
 
-* use strings
-* add tests
+* AAE-10092: review gh workflow triggers
+
+* AAE-10092: use ubuntu-latest
+
+* AAE-10092: setup concurrency and cancel in progress
+
+* AAE-10092: use alfresco-build-tools action for pre-commit
+
+* AAE-10092: upgrade alfresco-build-tools to v1.20.0
+
+* AAE-10092: ignore jenv .java-version
+
+* AAE-10092: update maven build logic
+
+* AAE-10092: add slack notification
+
 commit
 )
 }
@@ -86,7 +100,7 @@ BATS
 
     expected_output=$(cat << 'BATS'
 result<<EOF
-fix: update retry inputs to use string type\n\n* use strings\n* add tests
+AAE-10092 review gh actions workflows (#789)\n\n* AAE-10092: review gh workflow triggers\n\n* AAE-10092: use ubuntu-latest\n\n* AAE-10092: setup concurrency and cancel in progress\n\n* AAE-10092: use alfresco-build-tools action for pre-commit\n\n* AAE-10092: upgrade alfresco-build-tools to v1.20.0\n\n* AAE-10092: ignore jenv .java-version\n\n* AAE-10092: update maven build logic\n\n* AAE-10092: add slack notification
 EOF
 BATS
 )
