@@ -11,6 +11,9 @@ outputs:
   package-file:
     description: The name of the generated package file. It's uploaded as an artifact and can be downloaded using actions/download-artifact
     value: ${{ steps.package.outputs.package-file }}
+  package-file-path:
+    description: The path of the generated package file.
+    value: ${{ steps.package.outputs.package-file-path }}
 
 runs:
   using: composite

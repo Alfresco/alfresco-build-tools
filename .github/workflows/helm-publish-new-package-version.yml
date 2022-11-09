@@ -81,6 +81,6 @@ jobs:
         with:
             helm-charts-repo: ${{ inputs.helm-charts-repo }}
             helm-charts-repo-branch: ${{ inputs.helm-charts-repo-branch }}
-            chart-package: ${{ steps.package-helm-chart.outputs.package-file }}
+            chart-package: ${{ steps.package-helm-chart.outputs.package-file-path }}
             token: ${{ secrets.BOT_GITHUB_TOKEN }}
             git-username: ${{ secrets.BOT_GITHUB_USERNAME }}
