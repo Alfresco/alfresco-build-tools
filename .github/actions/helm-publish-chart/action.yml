@@ -4,6 +4,9 @@ inputs:
   chart-package:
     description: "The name of the packaged chart been added to the repository. I.e. common-x.y.z.tgz"
     required: true
+  chart-package-path:
+    description: "The path of the packaged chart been added to the repository. I.e. common-x.y.z.tgz. Used the package name if not set."
+    required: false
   helm-charts-repo:
     description: "The name of the repository where the package will be added"
     required: true
@@ -86,10 +89,16 @@ runs:
       env:
         BASE_URL: ${{ steps.build-base-url-option.outputs.result }}
         SUB_REPO: ${{ steps.build-destination-path.outputs.result }}
+        RELEASE_PACKAGE_NAME: ${{ inputs.chart-package }}
+        RELEASE_PACKAGE_PATH: ${{ inputs.chart-package-path }}
       run: |
           mkdir $RANDOM_PATH
-          RELEASE_PACKAGE_NAME=${{ inputs.chart-package }}
-          cp "$RELEASE_PACKAGE_NAME" $RANDOM_PATH
+          if [ -n "$RELEASE_PACKAGE_PATH" ]
+          then
+            cp "$RELEASE_PACKAGE_PATH" $RANDOM_PATH
+          else
+            cp "$RELEASE_PACKAGE_NAME" $RANDOM_PATH
+          fi
           helm repo index $RANDOM_PATH $BASE_URL --merge $CHECKOUT_PATH/$SUB_REPO/index.yaml
           mv $RANDOM_PATH/* $CHECKOUT_PATH/$SUB_REPO
           rm -rf $RANDOM_PATH
