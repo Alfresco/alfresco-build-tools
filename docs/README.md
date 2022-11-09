@@ -531,8 +531,7 @@ Publishes a new helm chart package (`.tgz`) to a helm chart repository
         with:
           helm-charts-repo: Activiti/activiti-cloud-helm-charts
           helm-charts-repo-branch: gh-pages
-          chart-package: ${{ steps.package-helm-chart.outputs.package-file }}
-          chart-package-path: ${{ steps.package-helm-chart.outputs.package-file-path }}
+          chart-package: ${{ steps.package-helm-chart.outputs.package-file-path }}
           token: ${{ secrets.BOT_GITHUB_TOKEN}}
 ```
 
