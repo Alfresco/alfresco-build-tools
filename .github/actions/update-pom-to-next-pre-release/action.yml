@@ -1,6 +1,10 @@
 description: Update pom files to the next pre-release
 name: Update pom to next pre-release
 inputs:
+  prerelease-type:
+    description: The type of the prerelease, i.e. `alpha`, `beta`, `rc`
+    required: false
+    default: alpha
   maven-cli-opts:
     description: extra maven properties
     required: false
@@ -27,6 +31,7 @@ runs:
       uses: Alfresco/alfresco-build-tools/.github/actions/calculate-next-internal-version@v1.21.0
       with:
         next-version: ${{ steps.parse-next-final-version.outputs.result }}
+        prerelease-type: ${{ inputs.prerelease-type }}
 
     - name: Update pom files to the new version
       uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@v1.21.0
