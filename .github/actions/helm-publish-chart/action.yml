@@ -2,7 +2,7 @@ name: "Add package to helm repository"
 description: "Add a new package to the helm repository, updates the index file and commit the change"
 inputs:
   chart-package:
-    description: "The name of the packaged chart been added to the repository. I.e. common-x.y.z.tgz"
+    description: "The path to the packaged chart to add to the repository. I.e. path/too/common-x.y.z.tgz"
     required: true
   helm-charts-repo:
     description: "The name of the repository where the package will be added"
@@ -23,6 +23,9 @@ inputs:
     description: "The username to use for git commit"
     required: false
     default: ""
+  git-message:
+    description: "The message to use for git commit"
+    required: false
   do-push:
     description: "If 'true', changes will be pushed ('false' can be used for PRs)"
     default: 'true'
@@ -83,20 +86,35 @@ runs:
       env:
         BASE_URL: ${{ steps.build-base-url-option.outputs.result }}
         SUB_REPO: ${{ steps.build-destination-path.outputs.result }}
+        RELEASE_PACKAGE_PATH: ${{ inputs.chart-package }}
       run: |
-          mkdir $RANDOM_PATH
-          RELEASE_PACKAGE_NAME=${{ inputs.chart-package }}
-          cp "$RELEASE_PACKAGE_NAME" $RANDOM_PATH
-          helm repo index $RANDOM_PATH $BASE_URL --merge $CHECKOUT_PATH/$SUB_REPO/index.yaml
-          mv $RANDOM_PATH/* $CHECKOUT_PATH/$SUB_REPO
-          rm -rf $RANDOM_PATH
+        mkdir $RANDOM_PATH
+        cp "$RELEASE_PACKAGE_PATH" $RANDOM_PATH
+        helm repo index $RANDOM_PATH $BASE_URL --merge $CHECKOUT_PATH/$SUB_REPO/index.yaml
+        mv $RANDOM_PATH/* $CHECKOUT_PATH/$SUB_REPO
+        rm -rf $RANDOM_PATH
+
+    - name: Compute git commit message
+      id: compute-git-commit-message
+      shell: bash
+      env:
+        INPUT_MESSAGE: ${{ inputs.git-message }}
+        RELEASE_PACKAGE_PATH: ${{ inputs.chart-package }}
+      run: |
+        if [ -n "$INPUT_MESSAGE" ]
+        then
+          echo "result=$INPUT_MESSAGE" >> $GITHUB_OUTPUT
+        else
+          RELEASE_PACKAGE_NAME=$(basename $RELEASE_PACKAGE_PATH)
+          echo "result=Release $RELEASE_PACKAGE_NAME" >> $GITHUB_OUTPUT
+        fi
 
     - name: Commit changes
-      uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.9.2
+      uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.20.3
       with:
         username: ${{ inputs.git-username }}
         add-options: .
-        commit-message: "Release ${{ inputs.chart-package }}"
+        commit-message: ${{ steps.compute-git-commit-message.outputs.result }}
         repository-directory: ${{ env.CHECKOUT_PATH }}
 
     - name: Push changes

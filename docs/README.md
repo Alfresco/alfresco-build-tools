@@ -500,8 +500,8 @@ Run `helm upgrade --dryn-run` on the specified chart
 
 ### helm-package-chart
 
-Packages a helm chart into a `.tgz` file and provides the name of the file produced in the output named `package-file`.
-The packaged file is also updated as an artifact and can be downloaded using `actions/download-artifact`.
+Packages a helm chart into a `.tgz` file and provides the name of the file produced in the output named `package-file`, and its path in the output named `package-file-path`.
+The packaged file is also uploaded as an artifact and can be downloaded using `actions/download-artifact`.
 
 ```yaml
     - uses: Alfresco/alfresco-build-tools/.github/actions/helm-package-chart@ref
@@ -531,7 +531,7 @@ Publishes a new helm chart package (`.tgz`) to a helm chart repository
         with:
           helm-charts-repo: Activiti/activiti-cloud-helm-charts
           helm-charts-repo-branch: gh-pages
-          chart-package: ${{ steps.package-helm-chart.outputs.package-file }}
+          chart-package: ${{ steps.package-helm-chart.outputs.package-file-path }}
           token: ${{ secrets.BOT_GITHUB_TOKEN}}
 ```
 
