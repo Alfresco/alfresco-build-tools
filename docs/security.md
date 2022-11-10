@@ -46,11 +46,11 @@ detect-secrets audit .secrets.baseline
 For each detected secret, it will ask you if that secret is really meant to be
 present in the codebase or not:
 
-* Replying with Yes, will whitelist that entry as a non-secret (`is_secret`
+- Replying with Yes, will whitelist that entry as a non-secret (`is_secret`
   field will be `false`)
-* Replying with No, will mark that entry as a secret that is meant to be removed
+- Replying with No, will mark that entry as a secret that is meant to be removed
   in the future (`is_secret` field will be `true`)
-* Replying with Skip, will skip to the next secret without marking the current
+- Replying with Skip, will skip to the next secret without marking the current
   secret (will ask what to do again on the next audit)
 
 > Marking each detection as a secret or not is just to make everyone aware that
