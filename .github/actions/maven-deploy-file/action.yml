@@ -71,7 +71,7 @@ runs:
       run: |
         OPTIONAL_ARGS=""
         if [[ -n "${{ inputs.files }}" && -n "${{ inputs.classifiers }}" && -n "${{ inputs.types }}" ]]; then
-          OPTIONAL_ARGS='-Dfiles="{{ inputs.files }}" -Dclassifiers="${{ inputs.classifiers }}" -Dtypes="${{ inputs.types }}"'
+          OPTIONAL_ARGS='-Dfiles="${{ inputs.files }}" -Dclassifiers="${{ inputs.classifiers }}" -Dtypes="${{ inputs.types }}"'
         fi
         mvn deploy:deploy-file -B \
           -DgroupId=${{ inputs.group-id }} \
