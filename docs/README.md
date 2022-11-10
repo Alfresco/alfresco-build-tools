@@ -60,8 +60,8 @@ Here follows the list of GitHub Actions topics available in the current document
     - [setup-github-release-binary](#setup-github-release-binary)
     - [travis-env-load](#travis-env-load)
     - [update-project-base-tag](#update-project-base-tag)
-    - [veracode](#veracode)
     - [validate-maven-versions](#validate-maven-versions)
+    - [veracode](#veracode)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
   - [Cookbook](#cookbook)
@@ -718,17 +718,6 @@ entry `release.baseTag.$PROJECT` with the value specified in the input `tag`.
           tag: ${{ env.ALPHA_VERSION }}
 ```
 
-### veracode
-
-Runs Veracode Source Clear Scan
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@ref
-        with:
-          srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
-          veracode-fails-build: "false"
-```
-
 ### validate-maven-versions
 
 Validates Maven dependency graph versions to ensure all target includes artifacts versions align
@@ -739,6 +728,17 @@ Validates Maven dependency graph versions to ensure all target includes artifact
           maven-username: ${{ secrets.NEXUS_USERNAME }}
           maven-password: ${{ secrets.NEXUS_PASSWORD }}
           m2-settings-xml: settings.xml
+```
+
+### veracode
+
+Runs Veracode Source Clear Scan
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@ref
+        with:
+          srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
+          veracode-fails-build: "false"
 ```
 
 ## Reusable workflows provided by us
