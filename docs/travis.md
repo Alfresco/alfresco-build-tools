@@ -28,31 +28,31 @@ Here follows a table to ease migrating Travis build that were using config offer
 | .travis.checkov_install.yml               | [bridgecrewio/checkov-action](https://github.com/bridgecrewio/checkov-action) |
 | .travis.common.yml                        | Outdated: use equivalent steps in the workflow                                |
 | .travis.docker-buildx_install.yml         | [docker/setup-buildx-action](https://github.com/docker/setup-buildx-action)   |
-| .travis.docker_hub_login.yml              | [docker/login-action](#docker-login)                                          |
-| .travis.docker_login.yml                  | [docker/login-action](#docker-login)                                          |
+| .travis.docker_hub_login.yml              | [docker/login-action](README.md#docker-login)                                 |
+| .travis.docker_login.yml                  | [docker/login-action](README.md#docker-login)                                 |
 | .travis.gh_install.yml                    | Preinstalled                                                                  |
-| .travis.helm-docs_install.yml             | [setup-helm-docs](.github/actions/setup-helm-docs/action.yml)                 |
+| .travis.helm-docs_install.yml             | [setup-helm-docs](/.github/actions/setup-helm-docs/action.yml)                |
 | .travis.helm.yml                          | Not yet determined                                                            |
 | .travis.helm_install.yml                  | Preinstalled                                                                  |
 | .travis.home_bin_path.yml                 | Not yet determined                                                            |
-| .travis.java.yml                          | See [Java Setup section](#setup-maven-build-options)                          |
-| .travis.java_config.yml                   | See [Java Setup section](#java-setup)                                         |
-| .travis.java_docker.yml                   | See [Java Setup section](#setup-maven-build-options)                          |
+| .travis.java.yml                          | See [Java Setup section](README.md#setup-maven-build-options)                 |
+| .travis.java_config.yml                   | See [Java Setup section](README.md#java-setup)                                |
+| .travis.java_docker.yml                   | See [Java Setup section](README.md#setup-maven-build-options)                 |
 | .travis.jq_install.yml                    | Preinstalled                                                                  |
 | .travis.kcadm_install.yml                 | Not yet determined                                                            |
-| .travis.kubepug_install.yml               | [setup-kubepug](.github/actions/setup-kubepug/action.yml)                     |
+| .travis.kubepug_install.yml               | [setup-kubepug](/.github/actions/setup-kubepug/action.yml)                    |
 | .travis.kubernetes_install.yml            | Preinstalled                                                                  |
-| .travis.maven_config.yml                  | See [Java Setup section](#java-setup)                                         |
-| .travis.pre-commit.yml                    | [pre-commit](.github/actions/pre-commit)                                      |
-| .travis.rancher_cli_config.yml            | [setup-rancher-cli](.github/actions/setup-rancher-cli/action.yml)             |
-| .travis.rancher_cli_install.yml           | [setup-rancher-cli](.github/actions/setup-rancher-cli/action.yml)             |
-| .travis.rancher_cli_kubernetes_config.yml | [setup-rancher-cli](.github/actions/setup-rancher-cli/action.yml)             |
+| .travis.maven_config.yml                  | See [Java Setup section](README.md#java-setup)                                |
+| .travis.pre-commit.yml                    | [pre-commit](/.github/actions/pre-commit)                                     |
+| .travis.rancher_cli_config.yml            | [setup-rancher-cli](/.github/actions/setup-rancher-cli/action.yml)            |
+| .travis.rancher_cli_install.yml           | [setup-rancher-cli](/.github/actions/setup-rancher-cli/action.yml)            |
+| .travis.rancher_cli_kubernetes_config.yml | [setup-rancher-cli](/.github/actions/setup-rancher-cli/action.yml)            |
 | .travis.srcclr_install.yml                | Not yet determined                                                            |
-| .travis.terraform-docs_install.yml        | [setup-terraform-docs](.github/actions/setup-terraform-docs/action.yml)       |
+| .travis.terraform-docs_install.yml        | [setup-terraform-docs](/.github/actions/setup-terraform-docs/action.yml)      |
 | .travis.terraform_install.yml             | Preinstalled                                                                  |
 | .travis.tflint_install.yml                | Not yet determined                                                            |
 | .travis.trigger.yml                       | Not yet determined                                                            |
-| .travis.veracode.yml                      | [veracode](.github/actions/veracode)                                          |
+| .travis.veracode.yml                      | [veracode](/.github/actions/veracode)                                         |
 | .travis.yq_install.yml                    | Preinstalled                                                                  |
 
 ### Default environment variables
