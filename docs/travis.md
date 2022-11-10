@@ -1,7 +1,16 @@
 # Travis
 
-This repository historically provides a bunch of common configuration that can be imported in
-any travis build by adding:
+- [Travis](#travis)
+  - [Travis snippets](#travis-snippets)
+  - [Migrate from Travis to GitHub Actions](#migrate-from-travis-to-github-actions)
+    - [Default environment variables](#default-environment-variables)
+    - [Get back maven build output](#get-back-maven-build-output)
+    - [Workflow schema validation](#workflow-schema-validation)
+
+## Travis snippets
+
+This repository provides in the root directory a bunch of common configuration
+files that can be imported in any travis.yml by adding:
 
 ```yaml
 import:

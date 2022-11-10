@@ -6,6 +6,12 @@ Before creating / modifying any GitHub Actions workflow make sure you're familia
 - [Good practices for mitigating script injection attacks](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#good-practices-for-mitigating-script-injection-attacks)
 - [Using third-party actions](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions)
 
+- [Security best practices](#security-best-practices)
+  - [Secrets detection](#secrets-detection)
+    - [First setup](#first-setup)
+    - [Updating new/old secrets to the baseline](#updating-newold-secrets-to-the-baseline)
+      - [Excluding multiple secrets via regex](#excluding-multiple-secrets-via-regex)
+
 ## Secrets detection
 
 It is far too easy to accidentally leak secrets on public repositories by
