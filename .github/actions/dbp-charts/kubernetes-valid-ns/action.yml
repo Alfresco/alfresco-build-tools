@@ -1,0 +1,30 @@
+name: kubernetes valid namespace
+description: |
+  Generate a sanitized namespace name for kubernetes to use based on the release
+  name, ap version and some other parameters
+inputs:
+  branch_name:
+    description: name of the git branch we're executing from
+    required: true
+  release_prefix:
+    description: a release prefix to differentiate from other releases
+    required: true
+outputs:
+  namespace:
+    description: generated namespace
+    value: ${{ steps.genns.outputs.namespace }}
+runs:
+  using: composite
+  steps:
+    - name: generate namespace
+      id: genns
+      shell: bash
+      env:
+        BRANCH_NAME: ${{ inputs.branch_name }}
+        RELEASE_PREFIX: ${{ inputs.release_prefix }}
+      run: |
+        BRANCH_PREFIX="${BRANCH_NAME:0:28}"
+        BRANCH_NS="${BRANCH_PREFIX//[^[:alnum:]]/-}"
+        RELEASE_NS=$"${RELEASE_PREFIX//[^[:alnum:]]/-}"
+        NS_SUFFIX=${GITHUB_RUN_NUMBER:-0}
+        echo namespace="${BRANCH_NS,,}"-"${RELEASE_NS,,}"-"${NS_SUFFIX}" >> $GITHUB_OUTPUT

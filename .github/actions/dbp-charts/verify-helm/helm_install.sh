@@ -1,17 +1,11 @@
 #!/bin/bash -e
 
-clean_up () {
-  if [[ "${COMMIT_MESSAGE}" != *"[keep env]"* ]]; then
-    echo "cleaning up..."
-    set +e
-    helm delete "${release_name_ingress}" "${release_name}" -n "${namespace}"
-    kubectl delete secret quay-registry-secret -n "${namespace}"
-    kubectl delete namespace "${namespace}" --grace-period=1
-  fi
-}
-trap clean_up EXIT
+if [ -n "$K8SNS" ]; then echo "Deploying in namespace $K8SNS"
+  namespace=$K8SNS
+else echo "Could not find a namespace set in the NS env variable"
+  exit 3
+fi
 
-namespace=$(echo "${BRANCH_NAME}" | cut -c1-28 | tr /_ - | tr -d '[:punct:]' | awk '{print tolower($0)}')"-${RELEASE_PREFIX}-${GITHUB_RUN_NUMBER}"
 release_name_ingress="ing-${RELEASE_PREFIX}-${GITHUB_RUN_NUMBER}"
 release_name="${RELEASE_PREFIX}-${GITHUB_RUN_NUMBER}"
 HOST=${namespace}.${DOMAIN}

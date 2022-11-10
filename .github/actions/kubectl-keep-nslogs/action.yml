@@ -1,0 +1,42 @@
+---
+name: upload k8s logs as artifacts
+description: >
+  Upload Kubernetes logs (jobs and pods) as a github artifact.
+  Special attention must be payed to repo's storage limits.
+inputs:
+  namespace:
+    description: The kubernetes namespace to get logs from
+    required: false
+    default: default
+  log_retention:
+    description: Number of days to keep the logs for
+    required: false
+    default: "10"
+runs:
+  using: composite
+  steps:
+    - id: artifactdir
+      name: Create artifact directory
+      shell: bash
+      run: |
+        ARTIFACTS_DIR=$(mktemp -d)
+        echo "ARTIFACTS_DIR=${ARTIFACTS_DIR}" >> $GITHUB_OUTPUT
+    - name: Fetch logs
+      shell: bash
+      working-directory: ${{ steps.artifactdir.outputs.ARTIFACTS_DIR }}
+      run: |
+        kubectl config set-context --current --namespace=${{ inputs.namespace }}
+        for type in deployment.apps statefulset.apps jobs; do
+          [ -d "${type}" ] || mkdir "${type}"
+          for i in $(kubectl get "$type" -o name); do \
+            kubectl logs "$i" --all-containers=true | \
+            gzip > "${i}.log.gz"
+          done
+        done
+    - name: upload kubernetes logs as artifact
+      uses: actions/upload-artifact@v3.1.1
+      with:
+        name: >-
+          ${{ inputs.namespace }}_logs.${{ github.run_number }}.${{ github.run_attempt }}
+        retention-days: ${{ inputs.log_retention }}
+        path: ${{ steps.artifactdir.outputs.ARTIFACTS_DIR }}

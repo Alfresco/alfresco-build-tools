@@ -47,6 +47,7 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
     - [helm-unit-tests](#helm-unit-tests)
     - [helm-update-chart-version](#helm-update-chart-version)
     - [jx-updatebot-pr](#jx-updatebot-pr)
+    - [kubectl-keep-nslogs](#kubectl-keep-nslogs)
     - [load-release-descriptor](#load-release-descriptor)
     - [maven-build-and-tag](#maven-build-and-tag)
     - [maven-deploy-file](#maven-deploy-file)
@@ -613,6 +614,20 @@ This action will promote alpha version to `alfresco-process-releases` repository
           git-token: ${{ secrets.GIT_TOKEN }}
           git-author-name: ${{ secrets.GIT_AUTHOR_NAME }}
           git-author-email: ${{ secrets.GIT_AUTHOR_EMAIL }}
+```
+
+### kubectl-keep-nslogs
+
+This action allow to collect logs from pods if they are referenced in a deployment, a statefulset or a job.
+
+```yaml
+    - name: Upload pods logs
+      if: always()
+      uses: >-
+        Alfresco/alfresco-build-tools/.github/actions/kubectl-keep-nslogs@ref
+      with:
+        namespace: mynsapp
+        log_retention: 7
 ```
 
 ### load-release-descriptor
