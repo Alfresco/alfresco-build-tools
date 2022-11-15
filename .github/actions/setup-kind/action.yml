@@ -1,0 +1,28 @@
+name: "Setup a KinD cluster"
+description: "Spin a local Kubernetes cluster with Docker"
+inputs:
+  version:
+    description: "Version of Keycloak"
+    required: false
+    default: 17.0.1
+runs:
+  using: "composite"
+  steps:
+    - name: Create cluster
+      uses: helm/kind-action@v1.4.0
+      with:
+        config: ${{ github.action_path }}/config.yml
+    - name: Install ingress
+      shell: bash
+      env:
+        NGINX_MANIFEST: |
+          https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+      run: |
+        kubectl apply -f $NGINX_MANIFEST
+    - name: Wait for ingress ready
+      shell: bash
+      run: |
+        kubectl wait --namespace ingress-nginx \
+          --for=condition=ready pod \
+          --selector=app.kubernetes.io/component=controller \
+          --timeout=90s
