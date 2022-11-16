@@ -37,9 +37,9 @@ runs:
       run: ${{ github.action_path }}/publish_chart.sh
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ inputs.github_token }}
-        GITHUB_USERNAME: ${{ inputs.github_username }}
-        GITHUB_EMAIL: ${{ inputs.github_email }}
+        GH_TOKEN: ${{ inputs.github_token }}
+        GH_USERNAME: ${{ inputs.github_username }}
+        GH_EMAIL: ${{ inputs.github_email }}
         PROJECT_NAME: ${{ inputs.chart_name }}
         PROJECT_REPO: ${{ inputs.chart_repo }}
         ALPHA_SUFFIX: ${{ inputs.alpha_suffix }}

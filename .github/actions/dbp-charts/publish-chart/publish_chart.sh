@@ -5,18 +5,6 @@ CHART_VERSION=$(yq eval .version helm/"${PROJECT_NAME}"/Chart.yaml)
 
 if [[ "${RELEASE_TYPE}" == "stable" ]]; then
   export HELM_REPO=stable
-  git checkout -B "${BRANCH_NAME}"
-  git config --global user.name "${GITHUB_USERNAME}"
-  git config --global user.email "${GITHUB_EMAIL}"
-  echo "Tagging repository with v${CHART_VERSION}..."
-  export GIT_TAG="v${CHART_VERSION}"
-  git tag "${GIT_TAG}" -a -m "Generated tag from github action for build ${GITHUB_RUN_NUMBER}"
-  git push https://"${GITHUB_TOKEN}"@github.com/${PROJECT_REPO} "${GIT_TAG}"
-  git tag -d latest || true
-  git tag -a -m "current latest -> ${GIT_TAG}" -f latest "${GIT_TAG}"^{}
-  for ref in ':refs/tags/latest' 'latest'; do
-    git push https://"${GITHUB_TOKEN}"@github.com/${PROJECT_REPO} "${ref}"
-  done
 else
   export HELM_REPO=incubator
   ALPHA_BUILD_VERSION="${CHART_VERSION%-*}-${ALPHA_SUFFIX}"
@@ -26,9 +14,9 @@ fi
 
 COMMIT_MESSAGE_FIRST_LINE=$(git log --pretty=format:%s --max-count=1)
 echo using COMMIT_MESSAGE_FIRST_LINE="${COMMIT_MESSAGE_FIRST_LINE}"
-git config --global user.email "alfresco-build@alfresco.com"
-git config --global user.name "alfresco-build"
-git clone https://"${GITHUB_TOKEN}"@github.com/Alfresco/charts.git
+git config --global user.name "${GH_USERNAME}"
+git config --global user.email "${GH_EMAIL}"
+git clone https://"${GH_TOKEN}"@github.com/Alfresco/charts.git
 echo using PROJECT_NAME="${PROJECT_NAME}",BRANCH="${BRANCH_NAME}",HELM_REPO="${HELM_REPO}"
 mkdir repo
 helm package --dependency-update --destination repo helm/"${PROJECT_NAME}"
