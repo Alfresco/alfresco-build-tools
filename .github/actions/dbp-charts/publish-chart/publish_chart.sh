@@ -8,6 +8,10 @@ else
   export HELM_REPO=stable
 fi
 
+COMMIT_MESSAGE="Publishing ${PROJECT_NAME} v${CHART_VERSION} on ${HELM_REPO} repo"
+echo "$COMMIT_MESSAGE"
+echo '---'
+
 git config --global user.name "${GH_USERNAME}"
 git config --global user.email "${GH_EMAIL}"
 git clone https://"${GH_TOKEN}"@github.com/Alfresco/charts.git
@@ -18,5 +22,5 @@ helm repo index repo --url "${HELM_REPO_BASE_URL}"/"${HELM_REPO}" --merge charts
 mv repo/* charts/"${HELM_REPO}"
 cd charts
 git add "${HELM_REPO}"
-git commit -m "Publishing ${PROJECT_NAME} v${CHART_VERSION} on ${HELM_REPO} repo"
+git commit -m "$COMMIT_MESSAGE"
 git push --quiet origin master
