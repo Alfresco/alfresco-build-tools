@@ -13,9 +13,6 @@ inputs:
   chart_name:
     description: "full name of helm chart directory"
     required: true
-  chart_repo:
-    description: "name of repository to release from"
-    required: true
   release_type:
     description: "whether the release should be added to stable or incubator"
     required: true
@@ -41,6 +38,5 @@ runs:
         GH_USERNAME: ${{ inputs.github_username }}
         GH_EMAIL: ${{ inputs.github_email }}
         PROJECT_NAME: ${{ inputs.chart_name }}
-        PROJECT_REPO: ${{ inputs.chart_repo }}
         ALPHA_SUFFIX: ${{ inputs.alpha_suffix }}
         RELEASE_TYPE: ${{ inputs.release_type }}
