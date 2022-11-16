@@ -1,5 +1,17 @@
 # Security best practices
 
+Before creating / modifying any GitHub Actions workflow make sure you're familiar with [Security hardening for GitHub Actions](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions). Pay special attention to:
+
+- [Understanding the risk of script injections](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#understanding-the-risk-of-script-injections)
+- [Good practices for mitigating script injection attacks](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#good-practices-for-mitigating-script-injection-attacks)
+- [Using third-party actions](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions)
+
+- [Security best practices](#security-best-practices)
+  - [Secrets detection](#secrets-detection)
+    - [First setup](#first-setup)
+    - [Updating new/old secrets to the baseline](#updating-newold-secrets-to-the-baseline)
+      - [Excluding multiple secrets via regex](#excluding-multiple-secrets-via-regex)
+
 ## Secrets detection
 
 It is far too easy to accidentally leak secrets on public repositories by
@@ -34,11 +46,11 @@ detect-secrets audit .secrets.baseline
 For each detected secret, it will ask you if that secret is really meant to be
 present in the codebase or not:
 
-* Replying with Yes, will whitelist that entry as a non-secret (`is_secret`
+- Replying with Yes, will whitelist that entry as a non-secret (`is_secret`
   field will be `false`)
-* Replying with No, will mark that entry as a secret that is meant to be removed
+- Replying with No, will mark that entry as a secret that is meant to be removed
   in the future (`is_secret` field will be `true`)
-* Replying with Skip, will skip to the next secret without marking the current
+- Replying with Skip, will skip to the next secret without marking the current
   secret (will ask what to do again on the next audit)
 
 > Marking each detection as a secret or not is just to make everyone aware that
