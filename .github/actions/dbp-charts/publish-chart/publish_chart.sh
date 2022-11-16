@@ -17,7 +17,7 @@ echo using COMMIT_MESSAGE_FIRST_LINE="${COMMIT_MESSAGE_FIRST_LINE}"
 git config --global user.name "${GH_USERNAME}"
 git config --global user.email "${GH_EMAIL}"
 git clone https://"${GH_TOKEN}"@github.com/Alfresco/charts.git
-echo using PROJECT_NAME="${PROJECT_NAME}",BRANCH="${BRANCH_NAME}",HELM_REPO="${HELM_REPO}"
+echo using PROJECT_NAME="${PROJECT_NAME}",HELM_REPO="${HELM_REPO}"
 mkdir repo
 helm package --dependency-update --destination repo helm/"${PROJECT_NAME}"
 helm repo index repo --url "${HELM_REPO_BASE_URL}"/"${HELM_REPO}" --merge charts/"${HELM_REPO}"/index.yaml
