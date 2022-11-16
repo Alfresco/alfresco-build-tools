@@ -13,7 +13,10 @@ inputs:
   repository-directory:
     description: "Path to the the directory holding the git repository"
     required: false
-
+  commit-options:
+    description: "Additional Git commit command options"
+    required: false
+    default: ''
 runs:
   using: composite
   steps:
@@ -30,4 +33,4 @@ runs:
         git add "${{ inputs.add-options }}"
         git status
         git --no-pager diff --cached
-        git commit -m "${{ inputs.commit-message }}"
+        git commit -m "${{ inputs.commit-message }}" ${{ inputs.commit-options }}
