@@ -11,7 +11,7 @@ runs:
     - name: Create cluster
       uses: helm/kind-action@v1.4.0
       with:
-        config: ${{ github.action_path }}/config.yml
+        config: ${{ github.action_path }}/kind.yml
     - name: Install ingress
       shell: bash
       env:
