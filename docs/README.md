@@ -58,10 +58,11 @@ Shared [Travis CI](https://travis-ci.com/), [GitHub Actions](https://docs.github
     - [rancher](#rancher)
     - [send-slack-notification](#send-slack-notification)
     - [setup-github-release-binary](#setup-github-release-binary)
+    - [setup-kind](#setup-kind)
     - [travis-env-load](#travis-env-load)
     - [update-project-base-tag](#update-project-base-tag)
-    - [validate-maven-versions](#validate-maven-versions)
     - [veracode](#veracode)
+    - [validate-maven-versions](#validate-maven-versions)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
   - [Cookbook](#cookbook)
@@ -794,6 +795,19 @@ Sends a slack notification with a pre-defined payload, relying on the [slackapi/
 [setup-github-release-binary](.github/actions/setup-github-release-binary/action.yml)
 Allows the installation of a generic binary from GitHub Releases and add it to the PATH.
 See [setup-helm-docs](.github/actions/setup-helm-docs/action.yml) for a usage example.
+
+### setup-kind
+
+Spin up a local kubernetes cluster running in Docker.
+
+```yaml
+      - name: Setup cluster
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-kind@ref
+      - name: Helm deploy
+        run: |
+          helm dep up ./helm/chart
+          helm install acs ./helm/chart
+```
 
 ### travis-env-load
 
