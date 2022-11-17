@@ -1,10 +1,5 @@
 name: "Setup a KinD cluster"
 description: "Spin a local Kubernetes cluster with Docker"
-inputs:
-  version:
-    description: "Version of Keycloak"
-    required: false
-    default: 17.0.1
 runs:
   using: "composite"
   steps:
