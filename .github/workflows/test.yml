@@ -28,7 +28,7 @@ jobs:
       - uses: ./.github/actions/setup-jx-release-version
       - uses: ./.github/actions/setup-kubepug
       - uses: ./.github/actions/rancher
-        if: github.actor != 'dependabot[bot]'
+        if: ${{ ! github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         with:
           rancher-url: 'https://rancher2.envalfresco.com'
           rancher-access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
@@ -36,7 +36,7 @@ jobs:
           cluster-name: "fake_cluster"
           action: "detach"
       - uses: ./.github/actions/setup-rancher-cli
-        if: github.actor != 'dependabot[bot]'
+        if: ${{ ! github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
         with:
           url: ${{ secrets.RANCHER2_URL }}
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
