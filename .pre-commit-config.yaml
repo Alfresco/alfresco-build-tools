@@ -20,11 +20,6 @@ repos:
     rev: 0.15.0
     hooks:
       - id: check-github-actions
-        files: >
-          (?x)^(
-            action.(yml|yaml)|
-            \.github/actions/action.(yml|yaml)
-          )$
       - id: check-github-workflows
       - id: check-travis
   - repo: https://github.com/igorshubovych/markdownlint-cli
