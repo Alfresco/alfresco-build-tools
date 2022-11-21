@@ -1,4 +1,4 @@
-name: "Pre-commit run"
+name: "Pre-commit format"
 description: "Install and run pre-commit"
 inputs:
   pre-commit-args:
@@ -13,6 +13,17 @@ inputs:
     description: The python version of the local runner
     required: false
     default: "3.9"
+  check-format:
+    description: >-
+      Whether to run format pre-commit checks.
+    required: false
+    default: "true"
+  check-github-configuration:
+    description: >-
+      Whether to run github actions, workflows, dependabot pre-commit checks.
+    required: false
+    default: "true"
+
 runs:
   using: "composite"
   steps:
@@ -30,5 +41,10 @@ runs:
         EXTRA_ARGS="${EXTRA_ARGS} ${{ inputs.pre-commit-args }}"
         echo EXTRA_ARGS="${EXTRA_ARGS}" >> $GITHUB_ENV
     - uses: pre-commit/action@v3.0.0
+      if: inputs.check-format == 'true'
       with:
-        extra_args: ${{ env.EXTRA_ARGS }}
+        extra_args: ${{ env.EXTRA_ARGS }} --config ${{ github.action_path }}/format-config.yaml
+    - uses: pre-commit/action@v3.0.0
+      if: inputs.check-github-configuration == 'true'
+      with:
+        extra_args: ${{ env.EXTRA_ARGS }} --config ${{ github.action_path }}/github-config.yaml
