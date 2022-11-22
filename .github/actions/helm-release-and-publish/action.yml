@@ -17,6 +17,12 @@ inputs:
   helm-repository-branch:
     description: 'Branch on the charts repository'
     required: false
+  helm-repository-subfolder:
+    description: 'The name of the subfolder inside the charts repository where the package should be added'
+    required: false
+  helm-repository-base-url:
+    description: 'Helm chart repo base url'
+    required: true
   helm-repository-token:
     description: 'The Github token to checkout the charts repository'
     required: true
@@ -82,5 +88,7 @@ runs:
       with:
         helm-charts-repo: ${{inputs.helm-repository}}
         helm-charts-repo-branch: ${{ inputs.helm-repository-branch }}
+        helm-charts-repo-subfolder: ${{ inputs.helm-repository-subfolder }}
+        helm-charts-repo-base-url: ${{ inputs.helm-repository-base-url }}
         chart-package: ${{ steps.package-helm-chart.outputs.package-file-path }}
         token: ${{ inputs.helm-repository-token }}
