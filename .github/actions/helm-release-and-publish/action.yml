@@ -22,7 +22,7 @@ inputs:
     required: false
   helm-repository-base-url:
     description: 'Helm chart repo base url'
-    required: true
+    required: false
   helm-repository-token:
     description: 'The Github token to checkout the charts repository'
     required: true
