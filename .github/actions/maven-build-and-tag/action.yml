@@ -36,6 +36,10 @@ inputs:
   git-username:
     description: The username to commit on the git repository
     required: true
+  verbose:
+    description: Whether additional logs should be displayed (maven download logs for instance)
+    required: false
+    default: 'false'
 
 outputs:
   version:
@@ -60,13 +64,26 @@ runs:
         java-version: ${{ inputs.java-version }}
         distribution: ${{ inputs.java-distribution }}
 
+    - name: Compute maven options
+      id: compute-maven-options
+      shell: bash
+      env:
+        INPUT_VERBOSE: ${{ inputs.verbose }}
+      run: |
+        NTP=''
+        if [[ '$INPUT_VERBOSE' == 'true' ]]
+        then
+          NTP='--no-transfer-progress'
+        fi
+        echo "result=--show-version --settings settings.xml $NTP" >> $GITHUB_OUTPUT
+
     - name: Update pom files to the new version
       id: update-pom-to-next-version
       if: github.event_name == 'push'
       uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@v1.22.0
       with:
         property-to-update: ${{ inputs.property-to-update }}
-        maven-cli-opts: --show-version --no-transfer-progress --settings settings.xml
+        maven-cli-opts: ${{ steps.compute-maven-options.outputs.result }}
       env:
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
@@ -111,7 +128,7 @@ runs:
       shell: bash
       run: mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
       env:
-        MAVEN_CLI_OPTS: --show-version --no-transfer-progress --settings settings.xml -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
+        MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
 
