@@ -29,6 +29,10 @@ inputs:
   git-username:
     description: 'The username to commit on the git repositories'
     required: true
+  do-push:
+    description: "If 'true', changes will be pushed ('false' can be used for PRs)"
+    default: 'true'
+    required: false
 
 runs:
   using: composite
@@ -77,7 +81,7 @@ runs:
         chart-repository-dir: ${{ inputs.chart-repository-dir }}
 
     - name: Push tag
-      if: steps.check-tag.outputs.exists == 'false'
+      if: ${{ steps.check-tag.outputs.exists == 'false' && inputs.do-push == 'true' }}
       working-directory: ${{ inputs.chart-repository-dir }}
       shell: bash
       run: git push origin $VERSION
@@ -92,3 +96,4 @@ runs:
         helm-charts-repo-base-url: ${{ inputs.helm-repository-base-url }}
         chart-package: ${{ steps.package-helm-chart.outputs.package-file-path }}
         token: ${{ inputs.helm-repository-token }}
+        do-push: ${{ inputs.do-push }}
