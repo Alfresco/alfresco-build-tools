@@ -67,14 +67,9 @@ runs:
     - name: Compute maven options
       id: compute-maven-options
       shell: bash
-      env:
-        INPUT_VERBOSE: ${{ inputs.verbose }}
       run: |
         NTP=''
-        if [[ "$INPUT_VERBOSE" == 'true' ]]
-        then
-          NTP='--no-transfer-progress'
-        fi
+        ${{ inputs.verbose }} && NTP='--no-transfer-progress'
         echo "result=--show-version --settings settings.xml $NTP" >> $GITHUB_OUTPUT
 
     - name: Update pom files to the new version
