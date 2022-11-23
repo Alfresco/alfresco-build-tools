@@ -71,7 +71,7 @@ runs:
         INPUT_VERBOSE: ${{ inputs.verbose }}
       run: |
         NTP=''
-        if [[ '$INPUT_VERBOSE' == 'true' ]]
+        if [[ "$INPUT_VERBOSE" == 'true' ]]
         then
           NTP='--no-transfer-progress'
         fi
