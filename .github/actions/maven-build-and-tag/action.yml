@@ -68,8 +68,8 @@ runs:
       id: compute-maven-options
       shell: bash
       run: |
-        NTP=''
-        ${{ inputs.verbose }} && NTP='--no-transfer-progress'
+        NTP='--no-transfer-progress'
+        ${{ inputs.verbose }} && NTP=''
         echo "result=--show-version --settings settings.xml $NTP" >> $GITHUB_OUTPUT
 
     - name: Update pom files to the new version
