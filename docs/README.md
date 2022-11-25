@@ -696,8 +696,8 @@ Sends a slack notification with a pre-defined payload, relying on the [slackapi/
       - name: Setup build tools
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-build-tools@ref
         with:
-          java-version: 17 # optional
-          java-distribution: temurin # optional
+          java-version: "17" # optional
+          java-distribution: "temurin" # optional
 ```
 
 ### setup-github-release-binary
