@@ -1,4 +1,4 @@
-name: "Setup build tools"
+name: "Setup Java build"
 description: "Performs the setup of required build tools (eg.: Maven, Java)"
 inputs:
   java-version:
