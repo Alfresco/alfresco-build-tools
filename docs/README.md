@@ -57,6 +57,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [pre-commit](#pre-commit)
     - [rancher](#rancher)
     - [send-slack-notification](#send-slack-notification)
+    - [setup-build-tools](#setup-build-tools)
     - [setup-github-release-binary](#setup-github-release-binary)
     - [setup-kind](#setup-kind)
     - [travis-env-load](#travis-env-load)
@@ -687,11 +688,23 @@ Sends a slack notification with a pre-defined payload, relying on the [slackapi/
           notification-color: '#A30200'
 ```
 
+### setup-build-tools
+
+[setup-build-tools](../.github/actions/setup-build-tools/action.yml) performs the setup of required build tools such as Java and Maven.
+
+```yaml
+      - name: Setup build tools
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-build-tools@ref
+        with:
+          java-version: 17 # optional
+          java-distribution: temurin # optional
+```
+
 ### setup-github-release-binary
 
-[setup-github-release-binary](.github/actions/setup-github-release-binary/action.yml)
+[setup-github-release-binary](../.github/actions/setup-github-release-binary/action.yml)
 Allows the installation of a generic binary from GitHub Releases and add it to the PATH.
-See [setup-helm-docs](.github/actions/setup-helm-docs/action.yml) for a usage example.
+See [setup-helm-docs](../.github/actions/setup-helm-docs/action.yml) for a usage example.
 
 ### setup-kind
 
