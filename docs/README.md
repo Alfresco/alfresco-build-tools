@@ -659,7 +659,6 @@ or into an existing workflow of your choice just declaring the step:
 
 Both samples require a configuration file `.pre-commit-config.yaml` to be added to the caller repository.
 
-
 ### pre-commit-default
 
 You can execute pre-commit checks with shared configuration.
