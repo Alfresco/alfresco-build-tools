@@ -13,6 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/pre-commit
+      - uses: ./.github/actions/pre-commit-default
       # - name: Manual test for send slack notification
       #   uses: ./.github/actions/send-slack-notification
       #   with:

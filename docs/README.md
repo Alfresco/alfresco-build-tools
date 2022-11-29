@@ -55,6 +55,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [maven-update-pom-version](#maven-update-pom-version)
     - [nexus-create-staging](#nexus-create-staging)
     - [pre-commit](#pre-commit)
+    - [pre-commit-default](#pre-commit-default)
     - [rancher](#rancher)
     - [send-slack-notification](#send-slack-notification)
     - [setup-github-release-binary](#setup-github-release-binary)
@@ -654,6 +655,46 @@ or into an existing workflow of your choice just declaring the step:
 
 ```yml
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
+```
+
+Both samples require a configuration file `.pre-commit-config.yaml` to be added to the caller repository.
+
+
+### pre-commit-default
+
+You can execute pre-commit checks with shared configuration.
+
+Available inputs that can be used (groupin different sets of configuration):
+
+- `check-format`: handles formatter checks, including java files leveraging [prettier](https://prettier.io/) and [prettier Java plugin](https://github.com/jhipster/prettier-java)
+- `check-github-configuration`: performs json schema checks on GH actions, workflows and dependabot configuration
+
+To replicate locally the same checks, the corresponding configuration files must be used:
+
+- [format-config.yaml](../.github/actions/pre-commit-default/format-config.yaml)
+- [github-config.yaml](../.github/actions/pre-commit-default/github-config.yaml)
+
+Sample command lines:
+
+```bash
+pre-commit run -a --config /path/to/config/format-config.yaml
+pre-commit run -a --config /path/to/config/github-config.yaml
+```
+
+Sample usage:
+
+```yml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit-default@ref
+        with:
+          check-format: 'false'
+```
+
+Or:
+
+```yml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit-default@ref
+        with:
+          check-format: 'false'
 ```
 
 ### rancher
