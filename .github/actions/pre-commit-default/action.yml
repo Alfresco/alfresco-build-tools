@@ -4,11 +4,6 @@ inputs:
   pre-commit-args:
     description: Additionnal parameters to pass to pre-commit
     required: false
-  pre-commit-all-files:
-    description: >-
-      Whether to run pre-commit checks on all files (defaults to "true")
-    required: false
-    default: "true"
   python-version:
     description: The python version of the local runner
     required: false
@@ -43,8 +38,7 @@ runs:
       env:
         EXTRA_ARGS: ''
       run: |
-        ${{ inputs.pre-commit-all-files }} && EXTRA_ARGS='--all-files'
-        EXTRA_ARGS="${EXTRA_ARGS} ${{ inputs.pre-commit-args }}"
+        EXTRA_ARGS="--all-files ${{ inputs.pre-commit-args }}"
         echo EXTRA_ARGS="${EXTRA_ARGS}" >> $GITHUB_ENV
     - uses: pre-commit/action@v3.0.0
       if: inputs.check-format == 'true'
