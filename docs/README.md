@@ -693,7 +693,7 @@ Or:
 ```yml
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit-default@ref
         with:
-          check-format: 'false'
+          check-github-configuration: 'false'
 ```
 
 ### rancher
