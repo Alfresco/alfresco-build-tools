@@ -13,6 +13,11 @@ inputs:
     description: The python version of the local runner
     required: false
     default: "3.9"
+  do-checkout:
+    description: >-
+      Whether to checkout the repository before running pre-commit checks.
+    required: false
+    default: "true"
   check-format:
     description: >-
       Whether to run format pre-commit checks.
@@ -28,6 +33,7 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v3
+      if: inputs.do-checkout == 'true'
     - name: Set up Python ${{ inputs.python-version }}
       uses: actions/setup-python@v3
       with:
