@@ -6,8 +6,7 @@ inputs:
     required: false
   pre-commit-all-files:
     description: >-
-      Wether to run pre-commit checks on commited files only
-      (default is to run on all files)
+      Whether to run pre-commit checks on all files (defaults to "true")
     required: false
     default: "true"
   python-version:

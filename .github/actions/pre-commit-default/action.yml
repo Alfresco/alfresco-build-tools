@@ -1,0 +1,43 @@
+name: "Pre-commit Default Checks"
+description: "Install and run pre-commit with shared configuration"
+inputs:
+  extra-args:
+    description: Additionnal parameters to pass to pre-commit command
+    required: false
+  python-version:
+    description: The python version of the local runner
+    required: false
+    default: "3.9"
+  check-format:
+    description: >-
+      Whether to run format pre-commit checks.
+    required: false
+    default: "true"
+  check-github-configuration:
+    description: >-
+      Whether to run github actions, workflows, dependabot pre-commit checks.
+    required: false
+    default: "true"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python ${{ inputs.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ inputs.python-version }}
+    - name: build extra_args
+      shell: bash
+      env:
+        EXTRA_ARGS: ''
+      run: |
+        EXTRA_ARGS="--all-files ${{ inputs.extra-args }}"
+        echo EXTRA_ARGS="${EXTRA_ARGS}" >> $GITHUB_ENV
+    - uses: pre-commit/action@v3.0.0
+      if: inputs.check-format == 'true'
+      with:
+        extra_args: ${{ env.EXTRA_ARGS }} --config ${{ github.action_path }}/format-config.yaml
+    - uses: pre-commit/action@v3.0.0
+      if: inputs.check-github-configuration == 'true'
+      with:
+        extra_args: ${{ env.EXTRA_ARGS }} --config ${{ github.action_path }}/github-config.yaml
