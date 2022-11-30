@@ -219,7 +219,7 @@ value:
 
 ```yaml
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Setup tmate session
       # run only when explicitly requested
       if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
@@ -680,7 +680,24 @@ pre-commit run -a --config /path/to/config/format-config.yaml
 pre-commit run -a --config /path/to/config/github-config.yaml
 ```
 
+Unlike the [pre-commit](#pre-commit) action, the `actions/checkout` action is not part of this action.
+It allows running pre-commit on the local `.pre-commit-config.yaml` that is part of the caller repository, if there are additional pre-commit configuration that is needed on top of the default ones part of this action.
+
 Sample usage:
+
+```yml
+      - uses: actions/checkout@v3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit-default@ref
+```
+
+Or:
+
+```yml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit-default@ref
+```
+
+Or:
 
 ```yml
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit-default@ref

@@ -1,18 +1,13 @@
-name: "Pre-commit format"
-description: "Install and run pre-commit"
+name: "Pre-commit Default Checks"
+description: "Install and run pre-commit with shared configuration"
 inputs:
-  pre-commit-args:
-    description: Additionnal parameters to pass to pre-commit
+  extra-args:
+    description: Additionnal parameters to pass to pre-commit command
     required: false
   python-version:
     description: The python version of the local runner
     required: false
     default: "3.9"
-  do-checkout:
-    description: >-
-      Whether to checkout the repository before running pre-commit checks.
-    required: false
-    default: "true"
   check-format:
     description: >-
       Whether to run format pre-commit checks.
@@ -27,8 +22,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v3
-      if: inputs.do-checkout == 'true'
     - name: Set up Python ${{ inputs.python-version }}
       uses: actions/setup-python@v3
       with:
@@ -38,7 +31,7 @@ runs:
       env:
         EXTRA_ARGS: ''
       run: |
-        EXTRA_ARGS="--all-files ${{ inputs.pre-commit-args }}"
+        EXTRA_ARGS="--all-files ${{ inputs.extra-args }}"
         echo EXTRA_ARGS="${EXTRA_ARGS}" >> $GITHUB_ENV
     - uses: pre-commit/action@v3.0.0
       if: inputs.check-format == 'true'
