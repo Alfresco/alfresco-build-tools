@@ -634,7 +634,9 @@ The resulting staging repository will be available in the output named `staging-
 
 ### pre-commit
 
-You can execute pre-commit step in a dedicated new workflow:
+Executes a pre-commit step.
+
+This can be done in a dedicated new workflow:
 
 ```yml
 name: pre-commit
@@ -651,7 +653,7 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
 ```
 
-or into an existing workflow of your choice just declaring the step:
+This can also be done into an existing workflow, just declaring the step:
 
 ```yml
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
@@ -659,14 +661,16 @@ or into an existing workflow of your choice just declaring the step:
 
 Both samples require a configuration file `.pre-commit-config.yaml` to be added to the caller repository.
 
+Note that this action calls the `actions/checkout` action.
+
 ### pre-commit-default
 
-You can execute pre-commit checks with shared configuration.
+Executes pre-commit checks using shared configuration.
 
-Available inputs that can be used (groupin different sets of configuration):
+The shared configuration is grouped inside different sets that can be disabled thanks to inputs (both are enabled by default):
 
-- `check-format`: handles formatter checks, including java files leveraging [prettier](https://prettier.io/) and [prettier Java plugin](https://github.com/jhipster/prettier-java)
-- `check-github-configuration`: performs json schema checks on GH actions, workflows and dependabot configuration
+- `check-format`: handles standard formatter checks, including Java files leveraging [prettier](https://prettier.io/) and [prettier Java plugin](https://github.com/jhipster/prettier-java)
+- `check-github-configuration`: performs json schema checks on GH actions, workflows and dependabot configuration, leveraging [jcheck-jsonschema](https://check-jsonschema.readthedocs.io/en/latest/precommit_usage.html)
 
 To replicate locally the same checks, the corresponding configuration files must be used:
 
@@ -680,24 +684,21 @@ pre-commit run -a --config /path/to/config/format-config.yaml
 pre-commit run -a --config /path/to/config/github-config.yaml
 ```
 
-Unlike the [pre-commit](#pre-commit) action, the `actions/checkout` action is not part of this action.
-It allows running pre-commit on the local `.pre-commit-config.yaml` that is part of the caller repository, if there are additional pre-commit configuration that is needed on top of the default ones part of this action.
-
-Sample usage:
+Unlike the [pre-commit](#pre-commit) action, the `actions/checkout` action is not part of this action and should explicitly be added if not already done before in the workflow:
 
 ```yml
       - uses: actions/checkout@v3
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit-default@ref
 ```
 
-Or:
+This action can also be used in combination with the [pre-commit](#pre-commit) action, that will perform a checkout anyway. This allows combining default pre-commit checks with additional local checks configured in the local `.pre-commit-config.yaml` file that is part of the caller repository:
 
 ```yml
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit-default@ref
 ```
 
-Or:
+Sample usage of inputs:
 
 ```yml
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit-default@ref
