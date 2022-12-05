@@ -8,7 +8,7 @@ pre-commit runs locally while performing a commit, but with a small effort, it i
 
 Below are the few Hooks and their description,
 
- 
+
 
 1) Helm-deps (Helm Dependency Update):-
 
@@ -57,10 +57,10 @@ All YAML files (excluding subdirectories) will be verified
 
 The program will exit with an error if deprecated or deleted objects are found.
 
- 
+
 
 Example of Usage in CI with Github Actions
- 
+
 
 
 name: Sample CI Workflow
@@ -97,7 +97,7 @@ add or update a PlantUML file, a PlantUML image will be generated based on the f
 
 delete a PlantUML file, existing PlantUML image will be deleted together in the commit
 
- 
+
 
 Open your pre-commit file and add the following code to run plantuml.pre-commit.sh
 
@@ -113,7 +113,7 @@ Open your pre-commit file and add the following code to run plantuml.pre-commit.
 
 To use Checkov with pre-commit, just add the following to your local repo’s .pre-commit-config.yaml file:
 
- 
+
 
 
 - repo: https://github.com/bridgecrewio/checkov.git
