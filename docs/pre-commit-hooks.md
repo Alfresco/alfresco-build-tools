@@ -35,6 +35,7 @@ The 'repository' URL should point to a Chart Repository. Helm expects that by ap
 ```- name: Lint Charts
   run: helm lint --strict $HELM_WORKING_DIRECTORY
 ```
+
 Helm lint examine a chart for potential issues and verify the chart is well-formed. Use --strict to return an error for the step if a chart isn't formatted properly.
 
 ## Kubepug
@@ -46,6 +47,7 @@ You can verify files with the following:
 
 ```$ kubepug --input-file=./deployment/ --error-on-deleted --error-on-deprecated
 ```
+
 With the command above
 
 The swagger.json from master branch will be used
