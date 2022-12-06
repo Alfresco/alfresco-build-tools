@@ -14,8 +14,7 @@ Below are the few Hooks and their description,
 
 Manage the dependencies of a chart.
 
-```
-# Chart.yaml
+```# Chart.yaml
 dependencies:
 - name: nginx
   version: "1.2.3"
@@ -33,8 +32,7 @@ The 'repository' URL should point to a Chart Repository. Helm expects that by ap
 
 ## Helm Lint
 
-```
-- name: Lint Charts
+```- name: Lint Charts
   run: helm lint --strict $HELM_WORKING_DIRECTORY
 ```
 Helm lint examine a chart for potential issues and verify the chart is well-formed. Use --strict to return an error for the step if a chart isn't formatted properly.
@@ -46,8 +44,7 @@ KubePug is a kubectl plugin checking for deprecated Kubernetes clusters or depre
 Putting Kubepug in your CI / Checking input files
 You can verify files with the following:
 
-```
-$ kubepug --input-file=./deployment/ --error-on-deleted --error-on-deprecated
+```$ kubepug --input-file=./deployment/ --error-on-deleted --error-on-deprecated
 ```
 With the command above
 
@@ -58,8 +55,8 @@ All YAML files (excluding subdirectories) will be verified
 The program will exit with an error if deprecated or deleted objects are found.
 
 Example of Usage in CI with Github Actions
-```
-name: Sample CI Workflow
+
+```name: Sample CI Workflow
 # This workflow is triggered on pushes to the repository.
 on: [push]
 env:
@@ -94,9 +91,7 @@ delete a PlantUML file, existing PlantUML image will be deleted together in the 
 
 Open your pre-commit file and add the following code to run plantuml.pre-commit.sh
 
-```
-#!/bin/bash
-
+```#!/bin/bash
 ...
 
 "$(git rev-parse --git-dir)/hooks/plantuml.pre-commit.sh"
@@ -105,8 +100,8 @@ Open your pre-commit file and add the following code to run plantuml.pre-commit.
 ## Checkov
 
 To use Checkov with pre-commit, just add the following to your local repo’s .pre-commit-config.yaml file:
-```
-- repo: https://github.com/bridgecrewio/checkov.git
+
+```- repo: https://github.com/bridgecrewio/checkov.git
   rev: '' # change to tag or sha
   hooks:
     - id: checkov
