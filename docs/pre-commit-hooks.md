@@ -28,7 +28,6 @@ Validate the liniting of a chart.
 
 Add to your `.pre-commit-config.yaml`:
 
-
 ```  - repo: https://github.com/Alfresco/alfresco-build-tools
     rev: v1.22.0
     hooks:
@@ -48,7 +47,6 @@ KubePug is a kubectl plugin checking for deprecated Kubernetes clusters or depre
 Validate this hook.
 
 Add to your `.pre-commit-config.yaml`:
-
 
 ```  - repo: https://github.com/Alfresco/alfresco-build-tools
     rev: v1.22.0
@@ -85,8 +83,9 @@ jobs:
 
 ## Plantuml
 
-```Add to your `.pre-commit-config.yaml`:
-  - repo: https://github.com/Alfresco/alfresco-build-tools
+Add to your `.pre-commit-config.yaml`:
+
+```  - repo: https://github.com/Alfresco/alfresco-build-tools
     rev: v1.22.0
     hooks:
       - id: plantuml
