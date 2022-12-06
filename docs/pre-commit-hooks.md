@@ -25,29 +25,35 @@ Add to your `.pre-commit-config.yaml`:
 
 ## Helm Lint
 
+Validate the liniting of a chart.
+
+Add to your `.pre-commit-config.yaml`:
+
+
+  - repo: https://github.com/Alfresco/alfresco-build-tools
+    rev: v1.22.0
+    hooks:
+      - id: helm-lint
+
+Helm lint examine a chart for potential issues and verify the chart is well-formed. Use --strict to return an error for the step if a chart isn't formatted properly.
+
 ```- name: Lint Charts
   run: helm lint --strict $HELM_WORKING_DIRECTORY
 ```
-
-Helm lint examine a chart for potential issues and verify the chart is well-formed. Use --strict to return an error for the step if a chart isn't formatted properly.
 
 ## Kubepug
 
 KubePug is a kubectl plugin checking for deprecated Kubernetes clusters or deprecated versions of Kubernetes manifests.
 
-Putting Kubepug in your CI / Checking input files
-You can verify files with the following:
+Validate this hook.
 
-```$ kubepug --input-file=./deployment/ --error-on-deleted --error-on-deprecated
-```
+Add to your `.pre-commit-config.yaml`:
 
-With the command above
 
-The swagger.json from master branch will be used
-
-All YAML files (excluding subdirectories) will be verified
-
-The program will exit with an error if deprecated or deleted objects are found.
+  - repo: https://github.com/Alfresco/alfresco-build-tools
+    rev: v1.22.0
+    hooks:
+      - id: kubepug
 
 Example of Usage in CI with Github Actions
 
@@ -77,6 +83,12 @@ jobs:
 ```
 
 ## Plantuml
+
+Add to your `.pre-commit-config.yaml`:
+  - repo: https://github.com/Alfresco/alfresco-build-tools
+    rev: v1.22.0
+    hooks:
+      - id: plantuml
 
 During the commit of any PlantUML file (file with extension: .puml), if we
 
