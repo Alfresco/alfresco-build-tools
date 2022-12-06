@@ -12,23 +12,16 @@ Below are the few Hooks and their description,
 
 ## Helm-deps (Helm Dependency Update)
 
-Manage the dependencies of a chart.
+Validate the dependencies of a chart.
 
-```# Chart.yaml
-dependencies:
-- name: nginx
-  version: "1.2.3"
-  repository: "https://example.com/charts"
-- name: memcached
-  version: "3.2.1"
-  repository: "https://another.example.com/charts"
-```
+Add to your `.pre-commit-config.yaml`:
 
-The 'name' should be the name of a chart, where that name must match the name in that chart's 'Chart.yaml' file.
 
-The 'version' field should contain a semantic version or version range.
+  - repo: https://github.com/Alfresco/alfresco-build-tools
+    rev: v1.22.0
+    hooks:
+      - id: helm-deps
 
-The 'repository' URL should point to a Chart Repository. Helm expects that by appending '/index.yaml' to the URL, it should be able to retrieve the chart repository's index. Note: 'repository' can be an alias. The alias must start with 'alias:' or '@'.
 
 ## Helm Lint
 
