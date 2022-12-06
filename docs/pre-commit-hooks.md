@@ -16,12 +16,11 @@ Validate the dependencies of a chart.
 
 Add to your `.pre-commit-config.yaml`:
 
-
-  - repo: https://github.com/Alfresco/alfresco-build-tools
+``` - repo: https://github.com/Alfresco/alfresco-build-tools
     rev: v1.22.0
     hooks:
       - id: helm-deps
-
+```
 
 ## Helm Lint
 
@@ -30,10 +29,11 @@ Validate the liniting of a chart.
 Add to your `.pre-commit-config.yaml`:
 
 
-  - repo: https://github.com/Alfresco/alfresco-build-tools
+```  - repo: https://github.com/Alfresco/alfresco-build-tools
     rev: v1.22.0
     hooks:
       - id: helm-lint
+```
 
 Helm lint examine a chart for potential issues and verify the chart is well-formed. Use --strict to return an error for the step if a chart isn't formatted properly.
 
@@ -50,10 +50,11 @@ Validate this hook.
 Add to your `.pre-commit-config.yaml`:
 
 
-  - repo: https://github.com/Alfresco/alfresco-build-tools
+```  - repo: https://github.com/Alfresco/alfresco-build-tools
     rev: v1.22.0
     hooks:
       - id: kubepug
+```
 
 Example of Usage in CI with Github Actions
 
@@ -84,11 +85,12 @@ jobs:
 
 ## Plantuml
 
-Add to your `.pre-commit-config.yaml`:
+```Add to your `.pre-commit-config.yaml`:
   - repo: https://github.com/Alfresco/alfresco-build-tools
     rev: v1.22.0
     hooks:
       - id: plantuml
+```
 
 During the commit of any PlantUML file (file with extension: .puml), if we
 
