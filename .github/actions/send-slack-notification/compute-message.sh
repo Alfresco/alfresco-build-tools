@@ -6,7 +6,7 @@ if [ -n "$BLOCK_MESSAGE" ]; then
 else
     case $EVENT_NAME in
         pull_request)
-        COMPUTED_MESSAGE=$PR_TITLE
+        COMPUTED_MESSAGE="$PR_TITLE"
         ;;
         issues)
         COMPUTED_MESSAGE=$ISSUE_BODY
