@@ -2,7 +2,7 @@
 
 COMPUTED_MESSAGE=""
 if [ -n "$BLOCK_MESSAGE" ]; then
-    COMPUTED_MESSAGE=$BLOCK_MESSAGE
+    COMPUTED_MESSAGE="$BLOCK_MESSAGE"
 else
     case $EVENT_NAME in
         pull_request)
