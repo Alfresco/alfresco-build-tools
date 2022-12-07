@@ -18,7 +18,6 @@ inputs:
 runs:
   using: composite
   steps:
-
     - name: Compute color
       id: compute-color
       shell: bash
@@ -47,7 +46,7 @@ runs:
       env:
         EVENT_NAME: ${{ github.event_name }}
         BLOCK_MESSAGE: ${{ inputs.message }}
-        PR_TITLE:  ${{ github.event.pull_request.title }}
+        PR_TITLE: ${{ github.event.pull_request.title }}
         ISSUE_BODY: ${{ github.event.issue.body }}
         COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
       run: |
@@ -58,28 +57,30 @@ runs:
       uses: slackapi/slack-github-action@v1.23.0
       env:
         SLACK_BOT_TOKEN: ${{ inputs.token }}
-        NOTIFICATION_COLOR: ${{ steps.compute-color.outputs.result }}
-        NOTIFICATION_COMMIT_TITLE: ${{ steps.compute-small-sha.outputs.result }}
-        NOTIFICATION_MESSAGE: ${{ steps.compute-message.outputs.result }}
+        COLOR: ${{ steps.compute-color.outputs.result }}
+        COMMIT_TITLE: ${{ steps.compute-small-sha.outputs.result }}
+        MESSAGE: ${{ steps.compute-message.outputs.result }}
+        ACTOR_URL: ${{ github.server_url }}/${{ github.actor }}
+        REPO_URL: ${{ github.server_url }}/${{ github.repository }}
       with:
-        channel-id: '${{ inputs.channel-id }}'
+        channel-id: "${{ inputs.channel-id }}"
         payload: |
           {
             "attachments": [
               {
-                "color": "${{ env.NOTIFICATION_COLOR }}",
+                "color": "${{ env.COLOR }}",
                 "blocks": [
                   {
                     "type": "context",
                     "elements": [
                       {
                         "type": "image",
-                        "image_url": "${{ github.server_url }}/${{ github.actor }}.png?size=32",
+                        "image_url": "${{ env.ACTOR_URL }}.png?size=32",
                         "alt_text": "${{ github.actor }}"
                       },
                       {
                         "type": "mrkdwn",
-                        "text": "*<${{ github.server_url }}/${{ github.actor }}|${{ github.actor }}>*"
+                        "text": "*<${{ env.ACTOR_URL }}|${{ github.actor }}>*"
                       }
                     ]
                   },
@@ -88,7 +89,7 @@ runs:
                     "fields": [
                       {
                         "type": "mrkdwn",
-                        "text": "*Repository*\n<${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>"
+                        "text": "*Repository*\n<${{ env.REPO_URL }}|${{ github.repository }}>"
                       },
                       {
                         "type": "mrkdwn",
@@ -101,11 +102,11 @@ runs:
                     "fields": [
                       {
                         "type": "mrkdwn",
-                        "text": "*Action*\n<${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}/checks|${{ github.workflow }}>"
+                        "text": "*Action*\n<${{ env.REPO_URL }}/commit/${{ github.sha }}/checks|${{ github.workflow }}>"
                       },
                       {
                         "type": "mrkdwn",
-                        "text": "*Commit*\n<${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ env.NOTIFICATION_COMMIT_TITLE }}>"
+                        "text": "*Commit*\n<${{ env.REPO_URL }}/commit/${{ github.sha }}|${{ env.COMMIT_TITLE }}>"
                       }
                     ]
                   },
