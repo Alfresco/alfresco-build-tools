@@ -12,7 +12,7 @@ else
         COMPUTED_MESSAGE="$ISSUE_BODY"
         ;;
         *)
-        COMPUTED_MESSAGE=$COMMIT_MESSAGE
+        COMPUTED_MESSAGE="$COMMIT_MESSAGE"
         ;;
     esac
 fi
