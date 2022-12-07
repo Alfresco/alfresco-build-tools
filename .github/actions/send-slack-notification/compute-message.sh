@@ -9,7 +9,7 @@ else
         COMPUTED_MESSAGE="$PR_TITLE"
         ;;
         issues)
-        COMPUTED_MESSAGE=$ISSUE_BODY
+        COMPUTED_MESSAGE="$ISSUE_BODY"
         ;;
         *)
         COMPUTED_MESSAGE=$COMMIT_MESSAGE
