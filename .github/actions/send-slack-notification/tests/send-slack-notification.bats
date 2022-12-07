@@ -126,8 +126,8 @@ BATS
     [ "$output" = "$expected_output" ]
 }
 
-@test "message with quotes" {
-    export BLOCK_MESSAGE="\"Message with quotes\""
+@test "message with double quotes" {
+    export BLOCK_MESSAGE="Message with \"double quotes\""
 
     run compute-message.sh
 
@@ -135,7 +135,24 @@ BATS
 
     expected_output=$(cat << BATS
 result<<EOF
-*Message*\n"Message with quotes"
+*Message*\nMessage with \"double quotes\"
+EOF
+BATS
+)
+    echo "$output"
+    [ "$output" = "$expected_output" ]
+}
+
+@test "message with single quotes" {
+    export BLOCK_MESSAGE="Message with 'single quotes'"
+
+    run compute-message.sh
+
+    [ "$status" -eq 0 ]
+
+    expected_output=$(cat << BATS
+result<<EOF
+*Message*\nMessage with 'single quotes'
 EOF
 BATS
 )
