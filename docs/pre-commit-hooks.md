@@ -54,63 +54,24 @@ Add to your `.pre-commit-config.yaml`:
       - id: kubepug
 ```
 
-Example of Usage in CI with Github Actions
+## Plantuml-svg
 
-```name: Sample CI Workflow
-# This workflow is triggered on pushes to the repository.
-on: [push]
-env:
-  HELM_VERSION: "v3.9.0"
-  K8S_TARGET_VERSION: "v1.22.0"
-jobs:
- api-deprecations-test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check-out repo
-        uses: actions/checkout@v2
-
-      - uses: azure/setup-helm@v1
-        with:
-          version: $HELM_VERSION
-        id: install
-
-      - uses: cpanato/kubepug-installer@v1.0.0
-
-      - name: Run Kubepug with your Helm Charts Repository
-        run: |
-          find charts -mindepth 1 -maxdepth 1 -type d | xargs -t -n1 -I% /bin/bash -c 'helm template % --api-versions ${K8S_TARGET_VERSION} | kubepug --error-on-deprecated --error-on-deleted --k8s-version ${K8S_TARGET_VERSION} --input-file /dev/stdin'
-```
-
-## Plantuml
+PlantUML is a component that allows you to quickly write sequence diagrams with scalable vector graphics.
 
 Add to your `.pre-commit-config.yaml`:
 
 ```  - repo: https://github.com/Alfresco/alfresco-build-tools
     rev: v1.22.0
     hooks:
-      - id: plantuml
-```
-
-During the commit of any PlantUML file (file with extension: .puml), if we
-
-add or update a PlantUML file, a PlantUML image will be generated based on the file and commit
-
-delete a PlantUML file, existing PlantUML image will be deleted together in the commit
-
-Open your pre-commit file and add the following code to run plantuml.pre-commit.sh
-
-```#!/bin/bash
-...
-
-"$(git rev-parse --git-dir)/hooks/plantuml.pre-commit.sh"
+      - id: plantuml-svg
 ```
 
 ## Checkov
 
 To use Checkov with pre-commit, just add the following to your local repo’s .pre-commit-config.yaml file:
 
-```- repo: https://github.com/bridgecrewio/checkov.git
-  rev: '' # change to tag or sha
+```- repo: https://github.com/Alfresco/alfresco-build-tools
+  rev: v1.22.0
   hooks:
     - id: checkov
 ```
