@@ -1,22 +1,27 @@
 #!/bin/bash -e
 
-echo 'result<<EOF'
-
+COMPUTED_MESSAGE=""
 if [ -n "$BLOCK_MESSAGE" ]; then
-    echo -n "${BLOCK_MESSAGE}" | sed -z 's/\n/\\n/g'
+    COMPUTED_MESSAGE=$BLOCK_MESSAGE
 else
     case $EVENT_NAME in
         pull_request)
-        echo -n "${PR_TITLE}" | sed -z 's/\n/\\n/g'
+        COMPUTED_MESSAGE=$PR_TITLE
         ;;
         issues)
-        echo -n "${ISSUE_BODY}" | sed -z 's/\n/\\n/g'
+        COMPUTED_MESSAGE=$ISSUE_BODY
         ;;
         *)
-        echo -n "${COMMIT_MESSAGE}" | sed -z 's/\n/\\n/g'
+        COMPUTED_MESSAGE=$COMMIT_MESSAGE
         ;;
     esac
 fi
 
-echo ''
-echo 'EOF'
+if [ -n "$COMPUTED_MESSAGE" ]; then
+    echo 'result<<EOF'
+    echo -n "*Message*\n${COMPUTED_MESSAGE}" | sed -z 's/\n/\\n/g'
+    echo ''
+    echo 'EOF'
+else
+    echo 'result='
+fi

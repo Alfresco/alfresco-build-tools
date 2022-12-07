@@ -12,7 +12,7 @@ inputs:
     description: The slack notification color
     required: false
   message:
-    description: an optional message one can use to override default message
+    description: An optional message that overrides the default one
     required: false
 
 runs:
@@ -52,16 +52,37 @@ runs:
       run: |
         ${{ github.action_path }}/compute-message.sh >> $GITHUB_OUTPUT
 
+    - name: Compute event
+      id: compute-event
+      shell: bash
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        SHA: ${{ github.sha }}
+      run: |
+        RESULT="$EVENT_NAME"
+        if [[ "$EVENT_NAME" == 'pull_request' ]]; then
+          RESULT="<$REPO_URL/pull/$PR_NUMBER|$EVENT_NAME #$PR_NUMBER>"
+        elif [[ "$EVENT_NAME" == 'push' ]]; then
+          RESULT="<$REPO_URL/commit/$SHA/checks|$EVENT_NAME>"
+        fi
+        echo "result=$RESULT" >> $GITHUB_OUTPUT
+
+    - name: Get branch name
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v1.24.0
+
     - name: Send slack notification
       id: slack
       uses: slackapi/slack-github-action@v1.23.0
       env:
         SLACK_BOT_TOKEN: ${{ inputs.token }}
         COLOR: ${{ steps.compute-color.outputs.result }}
-        COMMIT_TITLE: ${{ steps.compute-small-sha.outputs.result }}
-        MESSAGE: ${{ steps.compute-message.outputs.result }}
         ACTOR_URL: ${{ github.server_url }}/${{ github.actor }}
         REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        EVENT_OUTPUT: ${{ steps.compute-event.outputs.result }}
+        SMALL_SHA: ${{ steps.compute-small-sha.outputs.result }}
+        MESSAGE_OUTPUT: ${{ steps.compute-message.outputs.result }}
       with:
         channel-id: "${{ inputs.channel-id }}"
         payload: |
@@ -93,7 +114,7 @@ runs:
                       },
                       {
                         "type": "mrkdwn",
-                        "text": "*Event*\n${{ github.event_name }} on ${{ github.ref_name }}"
+                        "text": "*Event*\n${{ env.EVENT_OUTPUT }} on <${{ env.REPO_URL }}/tree/${{ env.BRANCH_NAME }}|`${{ env.BRANCH_NAME }}`>"
                       }
                     ]
                   },
@@ -102,22 +123,20 @@ runs:
                     "fields": [
                       {
                         "type": "mrkdwn",
-                        "text": "*Action*\n<${{ env.REPO_URL }}/commit/${{ github.sha }}/checks|${{ github.workflow }}>"
+                        "text": "*Action*\n<${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>"
                       },
                       {
                         "type": "mrkdwn",
-                        "text": "*Commit*\n<${{ env.REPO_URL }}/commit/${{ github.sha }}|${{ env.COMMIT_TITLE }}>"
+                        "text": "*Commit*\n<${{ env.REPO_URL }}/commit/${{ github.sha }}|`${{ env.SMALL_SHA }}`>"
                       }
                     ]
                   },
                   {
                     "type": "section",
-                    "fields": [
-                      {
-                        "type": "mrkdwn",
-                        "text": "*Message*\n${{ env.NOTIFICATION_MESSAGE }}"
-                      }
-                    ]
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "${{ env.MESSAGE_OUTPUT }} "
+                    }
                   }
                 ]
               }
