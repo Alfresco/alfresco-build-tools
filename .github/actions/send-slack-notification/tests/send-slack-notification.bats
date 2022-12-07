@@ -39,7 +39,7 @@ result<<EOF
 EOF
 BATS
 )
-    echo "$output"
+
     [ "$output" = "$expected_output" ]
 }
 
@@ -105,7 +105,7 @@ BATS
 result=
 BATS
 )
-    echo "$output"
+
     [ "$output" = "$expected_output" ]
 }
 
@@ -122,7 +122,7 @@ result<<EOF
 EOF
 BATS
 )
-    echo "$output"
+
     [ "$output" = "$expected_output" ]
 }
 
@@ -139,7 +139,7 @@ result<<EOF
 EOF
 BATS
 )
-    echo "$output"
+
     [ "$output" = "$expected_output" ]
 }
 
@@ -156,6 +156,6 @@ result<<EOF
 EOF
 BATS
 )
-    echo "$output"
+
     [ "$output" = "$expected_output" ]
 }
