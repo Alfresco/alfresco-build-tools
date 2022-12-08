@@ -87,6 +87,7 @@ runs:
         channel-id: "${{ inputs.channel-id }}"
         payload: |
           {
+            "text": "Notify on ${{ env.EVENT_OUTPUT }} on branch <${{ env.REPO_URL }}/tree/${{ env.BRANCH_NAME }}|`${{ env.BRANCH_NAME }}`>",
             "attachments": [
               {
                 "color": "${{ env.COLOR }}",
@@ -101,20 +102,7 @@ runs:
                       },
                       {
                         "type": "mrkdwn",
-                        "text": "*<${{ env.ACTOR_URL }}|${{ github.actor }}>*"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "section",
-                    "fields": [
-                      {
-                        "type": "mrkdwn",
-                        "text": "*Repository*\n<${{ env.REPO_URL }}|${{ github.repository }}>"
-                      },
-                      {
-                        "type": "mrkdwn",
-                        "text": "*Event*\n${{ env.EVENT_OUTPUT }} on <${{ env.REPO_URL }}/tree/${{ env.BRANCH_NAME }}|`${{ env.BRANCH_NAME }}`>"
+                        "text": "<${{ env.ACTOR_URL }}|${{ github.actor }}>"
                       }
                     ]
                   },
@@ -137,6 +125,20 @@ runs:
                       "type": "mrkdwn",
                       "text": "${{ env.MESSAGE_OUTPUT }} "
                     }
+                  },
+                  {
+                    "type": "context",
+                    "elements": [
+                      {
+                        "type": "image",
+                        "image_url": "https://slack.github.com/static/img/favicon-neutral.png",
+                        "alt_text": "GitHub"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "<${{ env.REPO_URL }}|${{ github.repository }}>"
+                      }
+                    ]
                   }
                 ]
               }
