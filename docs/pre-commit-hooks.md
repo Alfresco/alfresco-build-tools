@@ -51,8 +51,10 @@ Add to your `.pre-commit-config.yaml`:
 ```  - repo: https://github.com/Alfresco/alfresco-build-tools
     rev: v1.22.0
     hooks:
-      - id: kubepug
+      - id: kubepug-latest
 ```
+
+Note:- Some more kubepug hooks are available like kubepug-minimum, and kubepug-recommend.
 
 ## Plantuml-svg
 
