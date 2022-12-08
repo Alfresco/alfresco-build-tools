@@ -36,7 +36,7 @@ Add to your `.pre-commit-config.yaml`:
       - id: helm-lint
 ```
 
-Helm lint examine a chart for potential issues and verify the chart is well-formed. Use --strict to return an error for the step if a chart isn't formatted properly.
+Helm lint examine a chart for potential issues and verify the chart is well-formed.
 
 ## Kubepug
 
