@@ -38,11 +38,6 @@ Add to your `.pre-commit-config.yaml`:
 
 Helm lint examine a chart for potential issues and verify the chart is well-formed. Use --strict to return an error for the step if a chart isn't formatted properly.
 
-```yaml
-  - name: Lint Charts
-    run: helm lint --strict $HELM_WORKING_DIRECTORY
-```
-
 ## Kubepug
 
 KubePug is a kubectl plugin checking for deprecated Kubernetes clusters or deprecated versions of Kubernetes manifests.
@@ -75,11 +70,26 @@ Add to your `.pre-commit-config.yaml`:
 
 ## Checkov
 
+Checkov scans cloud infrastructure configurations to find misconfigurations before they're deployed.
+
 To use Checkov with pre-commit, just add the following to your local repo’s .pre-commit-config.yaml file:
 
 ```yaml
   - repo: https://github.com/Alfresco/alfresco-build-tools
     rev: v1.22.0
     hooks:
-      - id: checkov
+      - id: checkov-helm
+```
+
+## Drawio
+
+Export all .drawio files in folder to PDF and PNG while preserving history.
+
+Add to your `.pre-commit-config.yaml`:
+
+```yaml
+  - repo: https://github.com/Alfresco/alfresco-build-tools
+    rev: v1.22.0
+    hooks:
+      - id: drawio-export
 ```
