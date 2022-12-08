@@ -16,7 +16,8 @@ Validate the dependencies of a chart.
 
 Add to your `.pre-commit-config.yaml`:
 
-``` - repo: https://github.com/Alfresco/alfresco-build-tools
+```yaml
+  - repo: https://github.com/Alfresco/alfresco-build-tools
     rev: v1.22.0
     hooks:
       - id: helm-deps
@@ -28,7 +29,8 @@ Validate the liniting of a chart.
 
 Add to your `.pre-commit-config.yaml`:
 
-```  - repo: https://github.com/Alfresco/alfresco-build-tools
+```yaml
+  - repo: https://github.com/Alfresco/alfresco-build-tools
     rev: v1.22.0
     hooks:
       - id: helm-lint
@@ -36,8 +38,9 @@ Add to your `.pre-commit-config.yaml`:
 
 Helm lint examine a chart for potential issues and verify the chart is well-formed. Use --strict to return an error for the step if a chart isn't formatted properly.
 
-```- name: Lint Charts
-  run: helm lint --strict $HELM_WORKING_DIRECTORY
+```yaml
+  - name: Lint Charts
+    run: helm lint --strict $HELM_WORKING_DIRECTORY
 ```
 
 ## Kubepug
@@ -48,7 +51,8 @@ Validate this hook.
 
 Add to your `.pre-commit-config.yaml`:
 
-```  - repo: https://github.com/Alfresco/alfresco-build-tools
+```yaml
+  - repo: https://github.com/Alfresco/alfresco-build-tools
     rev: v1.22.0
     hooks:
       - id: kubepug-latest
@@ -62,7 +66,8 @@ PlantUML is a component that allows you to quickly write sequence diagrams with 
 
 Add to your `.pre-commit-config.yaml`:
 
-```  - repo: https://github.com/Alfresco/alfresco-build-tools
+```yaml
+  - repo: https://github.com/Alfresco/alfresco-build-tools
     rev: v1.22.0
     hooks:
       - id: plantuml-svg
@@ -72,8 +77,9 @@ Add to your `.pre-commit-config.yaml`:
 
 To use Checkov with pre-commit, just add the following to your local repo’s .pre-commit-config.yaml file:
 
-```- repo: https://github.com/Alfresco/alfresco-build-tools
-  rev: v1.22.0
-  hooks:
-    - id: checkov
+```yaml
+  - repo: https://github.com/Alfresco/alfresco-build-tools
+    rev: v1.22.0
+    hooks:
+      - id: checkov
 ```
