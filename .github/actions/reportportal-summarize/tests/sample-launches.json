@@ -1,0 +1,71 @@
+{
+  "content": [
+    {
+      "owner": "superadmin",
+      "share": false,
+      "id": 91,
+      "uuid": "6027cfb5-af7c-43e0-a0ee-e4c913366a40",
+      "name": "alfresco-process-identity-adapter-push-15259",
+      "number": 3,
+      "startTime": 1670786668191,
+      "endTime": 1670786726330,
+      "lastModified": 1670786726346,
+      "status": "FAILED",
+      "statistics": {
+        "executions": { "total": 42, "failed": 1, "passed": 41 },
+        "defects": { "to_investigate": { "total": 1, "ti001": 1 } }
+      },
+      "attributes": [],
+      "mode": "DEFAULT",
+      "analysing": [],
+      "approximateDuration": 7.804,
+      "hasRetries": false,
+      "rerun": false
+    },
+    {
+      "owner": "superadmin",
+      "share": false,
+      "id": 90,
+      "uuid": "727fbe2c-78d0-45ac-a960-7ae974e3631d",
+      "name": "alfresco-process-identity-adapter-push-15259",
+      "number": 2,
+      "startTime": 1670786647457,
+      "endTime": 1670786662721,
+      "lastModified": 1670786662739,
+      "status": "WHATEVER_STATUS",
+      "statistics": {
+        "executions": { "total": 10, "failed": 1, "passed": 9 },
+        "defects": { "to_investigate": { "total": 1, "ti001": 1 } }
+      },
+      "attributes": [],
+      "mode": "DEFAULT",
+      "analysing": [],
+      "approximateDuration": 0.344,
+      "hasRetries": false,
+      "rerun": false
+    },
+    {
+      "owner": "superadmin",
+      "share": false,
+      "id": 89,
+      "uuid": "7c0c2b85-9702-432a-b7a2-862befe9a3b8",
+      "name": "alfresco-process-identity-adapter-push-15259",
+      "number": 1,
+      "startTime": 1670786645268,
+      "endTime": 1670786645612,
+      "lastModified": 1670786645646,
+      "status": "PASSED",
+      "statistics": {
+        "executions": { "total": 2, "passed": 2 },
+        "defects": {}
+      },
+      "attributes": [],
+      "mode": "DEFAULT",
+      "analysing": [],
+      "approximateDuration": 0.0,
+      "hasRetries": false,
+      "rerun": false
+    }
+  ],
+  "page": { "number": 1, "size": 20, "totalElements": 3, "totalPages": 1 }
+}

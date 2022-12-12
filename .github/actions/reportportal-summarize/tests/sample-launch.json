@@ -1,0 +1,27 @@
+{
+  "content": [
+    {
+      "owner": "superadmin",
+      "share": false,
+      "id": 88,
+      "uuid": "5bc0b4ff-35ce-49c5-a45f-523aab12f909",
+      "name": "alfresco-process-identity-adapter-push-14720",
+      "number": 1,
+      "startTime": 1670786584337,
+      "endTime": 1670786584753,
+      "lastModified": 1670786584780,
+      "status": "PASSED",
+      "statistics": {
+        "executions": { "total": 2, "passed": 2 },
+        "defects": {}
+      },
+      "attributes": [],
+      "mode": "DEFAULT",
+      "analysing": [],
+      "approximateDuration": 0.0,
+      "hasRetries": false,
+      "rerun": false
+    }
+  ],
+  "page": { "number": 1, "size": 20, "totalElements": 1, "totalPages": 1 }
+}

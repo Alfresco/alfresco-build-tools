@@ -1,0 +1,56 @@
+name: Summarize Report Portal
+description: Computes post-tests summary and slack message
+inputs:
+  tests-outcome:
+    description: Tests outcome ('success', 'failure',...)
+    required: true
+  rp-launch-key:
+    description: The launch key for Report Portal
+    required: false
+  rp-token:
+    description: The token for Report Portal
+    required: false
+  rp-url:
+    description: The URL for Report Portal (should not be a secret)
+    required: false
+    default: "https://reportportal.envalfresco.com"
+  rp-project:
+    description: The project used in Report Portal
+    required: false
+    default: "alfresco-process-acceptance-tests"
+
+outputs:
+  slack-message:
+    description: Outcome message for slack
+    value: ${{ steps.slack-message.outputs.message }}
+
+runs:
+  using: composite
+  steps:
+    - name: Get Report Portal output info
+      id: rp-output
+      shell: bash
+      env:
+        RP_LAUNCH_KEY: ${{ inputs.rp-launch-key }}
+        RP_TOKEN: ${{ inputs.rp-token }}
+        RP_URL: ${{ inputs.rp-url }}
+        RP_PROJECT: ${{ inputs.rp-project }}
+      run: ${{ github.action_path }}/get-rp-output.sh
+
+    - name: Update step summary
+      shell: bash
+      env:
+        OUTCOME: ${{ inputs.tests-outcome }}
+        RP_LAUNCH_KEY: ${{ inputs.rp-launch-key }}
+        RP_CONTENT: ${{ steps.rp-output.outputs.content }}
+        RP_LAUNCH_URL: ${{ steps.rp-output.outputs.url }}
+      run: ${{ github.action_path }}/write-step-summary.sh
+
+    - name: Compute Slack message
+      id: slack-message
+      shell: bash
+      env:
+        RP_LAUNCH_KEY: ${{ inputs.rp-launch-key }}
+        RP_CONTENT: ${{ steps.rp-output.outputs.content }}
+        RP_LAUNCH_URL: ${{ steps.rp-output.outputs.url }}
+      run: ${{ github.action_path }}/get-slack-message.sh

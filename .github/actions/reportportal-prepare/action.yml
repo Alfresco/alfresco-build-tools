@@ -1,0 +1,57 @@
+name: Prepare Report Portal
+description: Prepares Report Portal configuration information
+inputs:
+  rp-launch-prefix:
+    description: The launch key prefix for Report Portal
+    required: false
+  rp-token:
+    description: The token for Report Portal
+    required: false
+  rp-url:
+    description: The URL for Report Portal (should not be a secret)
+    required: false
+    default: "https://reportportal.envalfresco.com"
+  rp-project:
+    description: The project used in Report Portal
+    required: false
+  rp-extra-attributes:
+    description: Extra attributes for Report Portal
+    required: false
+  auto-configure:
+    description: >-
+      Enables automated default configuration (adds default GitHub context
+      information in launch key and attributes)
+    required: false
+    default: "true"
+
+outputs:
+  enabled:
+    description: "'true' if Report Portal is configured"
+    value: ${{ steps.info.outputs.enabled }}
+  key:
+    description: The Report Portal launch key
+    value: ${{ steps.info.outputs.key }}
+  url:
+    description: The Report Portal launch URL
+    value: ${{ steps.info.outputs.url }}
+  mvn-opts:
+    description: The Report Portal maven options
+    value: ${{ steps.info.outputs.mvn-opts }}
+
+runs:
+  using: composite
+  steps:
+    - name: Get branch name
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v1.24.2
+
+    - name: Compute Report Portal input info
+      id: info
+      shell: bash
+      env:
+        RP_LAUNCH_PREFIX: ${{ inputs.rp-launch-prefix }}
+        RP_TOKEN: ${{ inputs.rp-token }}
+        RP_URL: ${{ inputs.rp-url }}
+        RP_PROJECT: ${{ inputs.rp-project }}
+        RP_EXTRA_ATTRIBUTES: ${{ inputs.rp-extra-attributes }}
+        AUTO: ${{ inputs.auto-configure }}
+      run: ${{ github.action_path }}/get-rp-input.sh
