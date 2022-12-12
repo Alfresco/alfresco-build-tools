@@ -17,13 +17,13 @@ if [[ -n "$RP_LAUNCH_PREFIX" && -n "$RP_TOKEN" && -n "$RP_URL" && -n "$RP_PROJEC
   RUN_TITLE="Run on GitHub Actions $GITHUB_RUN_ID"
   RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
 
-  OPTS='"'-Drp.launch=$RP_LAUNCH_KEY'"'
-  OPTS+=' "'-Drp.uuid=$RP_TOKEN'"'
-  OPTS+=' "'-Drp.endpoint=$RP_URL'"'
-  OPTS+=' "'-Drp.project=$RP_PROJECT'"'
+  OPTS='"'-Drp.launch="$RP_LAUNCH_KEY"'"'
+  OPTS+=' "'-Drp.uuid="$RP_TOKEN"'"'
+  OPTS+=' "'-Drp.endpoint="$RP_URL"'"'
+  OPTS+=' "'-Drp.project="$RP_PROJECT"'"'
   if [[ "$AUTO" == "true" ]]; then
-    OPTS+=' "'-Drp.description=[$RUN_TITLE]\($RUN_URL\)'"'
-    OPTS+=' "'-Drp.attributes='branch:'$BRANCH_NAME';event:'$GITHUB_EVENT_NAME';repository:'$GITHUB_REPOSITORY';run:'$RP_LAUNCH_KEY$RP_EXTRA_ATTRIBUTES'"'
+    OPTS+=' "'-Drp.description=["$RUN_TITLE"]\("$RUN_URL"\)'"'
+    OPTS+=' "'-Drp.attributes='branch:'"$BRANCH_NAME"';event:'"$GITHUB_EVENT_NAME"';repository:'"$GITHUB_REPOSITORY"';run:'"$RP_LAUNCH_KEY$RP_EXTRA_ATTRIBUTES"'"'
   fi
 
   echo "mvn-opts=$OPTS" >> $GITHUB_OUTPUT

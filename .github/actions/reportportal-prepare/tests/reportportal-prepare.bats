@@ -121,3 +121,28 @@ BATS
     echo "$output"
     [ "$output" = "$expected_echo" ]
 }
+
+@test "rp enabled weird character in values" {
+
+    export GITHUB_EVENT_NAME="weird event"
+    export RP_LAUNCH_PREFIX="my launch prefix with spaces"
+    export RP_TOKEN="with some more spaces"
+    export RP_URL="https://rpserver:8080 with spaces too"
+    export RP_PROJECT="my project with spaces"
+
+    run get-rp-input.sh
+    [ "$status" -eq 0 ]
+
+    expected=$(cat << BATS
+enabled=true
+key=my launch prefix with spaces-weird event-3665876492
+url=https://rpserver:8080 with spaces too/ui/#my project with spaces/launches/all
+mvn-opts="-Drp.launch=my launch prefix with spaces-weird event-3665876492" "-Drp.uuid=with some more spaces" "-Drp.endpoint=https://rpserver:8080 with spaces too" "-Drp.project=my project with spaces" "-Drp.description=[Run on GitHub Actions 3665876492](https://github.com/mygh/repo/actions/runs/3665876492)" "-Drp.attributes=branch:main;event:weird event;repository:mygh/repo;run:my launch prefix with spaces-weird event-3665876492"
+BATS
+)
+    echo "$(< $GITHUB_OUTPUT)"
+    [ "$(< $GITHUB_OUTPUT)" = "$expected" ]
+    expected_echo="Report Portal key=my launch prefix with spaces-weird event-3665876492, url=https://rpserver:8080 with spaces too/ui/#my project with spaces/launches/all"
+    echo "$output"
+    [ "$output" = "$expected_echo" ]
+}
