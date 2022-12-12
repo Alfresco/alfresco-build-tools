@@ -159,3 +159,61 @@ BATS
 
     [ "$output" = "$expected_output" ]
 }
+
+@test "empty block message append" {
+    export EVENT_NAME=push
+    export BLOCK_MESSAGE=""
+    export APPEND="true"
+
+    run compute-message.sh
+
+    [ "$status" -eq 0 ]
+
+    expected_output=$(cat << BATS
+result<<EOF
+*Message*\nfix: update retry inputs to use string type\n\n* use strings\n* add tests
+EOF
+BATS
+)
+
+    [ "$output" = "$expected_output" ]
+}
+
+@test "block message append" {
+    export EVENT_NAME=push
+    export BLOCK_MESSAGE="bye"
+    export APPEND="true"
+
+    run compute-message.sh
+
+    [ "$status" -eq 0 ]
+
+    expected_output=$(cat << BATS
+result<<EOF
+*Message*\nfix: update retry inputs to use string type\n\n* use strings\n* add tests\nbye
+EOF
+BATS
+)
+
+    [ "$output" = "$expected_output" ]
+}
+
+@test "block message append empty default" {
+    export EVENT_NAME=push
+    export COMMIT_MESSAGE=""
+    export BLOCK_MESSAGE="bye"
+    export APPEND="true"
+
+    run compute-message.sh
+
+    [ "$status" -eq 0 ]
+
+    expected_output=$(cat << BATS
+result<<EOF
+*Message*\nbye
+EOF
+BATS
+)
+
+    [ "$output" = "$expected_output" ]
+}

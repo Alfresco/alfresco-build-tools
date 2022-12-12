@@ -20,6 +20,7 @@ jobs:
       #     channel-id: '' # grab your slack id from your profile -> three dots -> Copy member ID
       #     token: ${{ secrets.SLACK_BOT_TOKEN }}
       #     notification-color: '#A30200'
+      #     append: true
       #     message: |
       #       This is a multiline message with `code`
       #
