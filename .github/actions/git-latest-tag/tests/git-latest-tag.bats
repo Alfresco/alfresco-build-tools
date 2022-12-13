@@ -14,7 +14,7 @@ setup() {
 
 @test "latest tag" {
     latest_tag=$(git tag --sort=-creatordate | head -n 1)
-    tag_sha=$(git rev-list -n 1 $(git tag --sort=-creatordate | head -n 1))
+    tag_sha=$(git rev-list -n 1 $latest_tag)
     run git-latest-tag.sh
 
     [ "$status" -eq 0 ]
