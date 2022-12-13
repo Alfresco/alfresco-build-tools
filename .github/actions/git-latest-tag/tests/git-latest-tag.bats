@@ -5,14 +5,14 @@ setup() {
 
     # Mock GitHub Actions default variables
     export GITHUB_ENV=/dev/null
-    export GITHUB_HEAD_REF="OPSEXP-1234"
+    export GITHUB_HEAD_REF="AAE-11760-get-latest-tag-sha"
 
     # Mock git-latest-tag defaults
     export PATTERN="*"
     export REPO_DIR="$PWD"
 }
 
-@test "latest tag" {
+@test "latest_tag" {
     latest_tag=$(git tag --sort=-creatordate | head -n 1)
     tag_sha=1.24.2
     run git-latest-tag.sh
