@@ -8,7 +8,7 @@ then
   echo "enabled=true" >> $GITHUB_OUTPUT
 
   SEARCH_URL="$RP_URL/api/v1/$RP_PROJECT/launch?filter.cnt.name=$RP_LAUNCH_KEY&page.sort=startTime%2Cnumber%2CDESC"
-  CONTENT=$(curl -s -X GET "$SEARCH_URL" -H  "accept: */*" -H  "Authorization: bearer $RP_TOKEN")
+  CONTENT=$(curl -s -X GET "$SEARCH_URL" -H  "accept: */*" -H  "Authorization: bearer $RP_TOKEN") || CONTENT=''
 
   URL="$RP_URL/ui/#$RP_PROJECT/launches/all"
 else
