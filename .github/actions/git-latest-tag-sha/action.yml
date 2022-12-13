@@ -1,0 +1,24 @@
+name: Get long sha for latest tag
+description: Find the latest tag of a repository, then get the sha of the tag.
+outputs:
+  tag_sha:
+    description: "long sha of the latest tag"
+    value: ${{ steps.sha_out.outputs.tag_sha }}
+runs:
+  using: composite
+  steps:
+    - name: get latest tag
+      id: latest-tag
+      shell: bash
+      env:
+        REPO_DIR: ${{ inputs.repository-directory }}
+      run: |
+        if [ -n "$REPO_DIR" ]
+        then
+          cd $REPO_DIR
+        fi
+        git fetch --tags
+        last_tag=$(git tag --sort=-creatordate | head -n 1)
+        tag_long_sha=$(git rev-list -n 1 $last_tag)
+        echo "Long SHA for tag $last_tag is $tag_long_sha"
+        echo "tag_long_sha=$tag_long_sha" >> $GITHUB_OUTPUT

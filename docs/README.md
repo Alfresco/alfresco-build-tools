@@ -38,6 +38,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [get-commit-message](#get-commit-message)
     - [git-commit-changes](#git-commit-changes)
     - [git-latest-tag](#git-latest-tag)
+    - [git-latest-tag-sha](#git-latest-tag-sha)
     - [helm-build-chart](#helm-build-chart)
     - [helm-integration-tests](#helm-integration-tests)
     - [helm-package-chart](#helm-package-chart)
@@ -370,6 +371,14 @@ Gets the latest tag for the given pattern. The result is returned in the output 
       - uses: Alfresco/alfresco-build-tools/.github/actions/git-latest-tag@ref
         with:
           pattern: 1.0.0-alpha*
+```
+
+### git-latest-tag-sha
+
+Gets the long SHA for the latest tag. The result is returned in the output named `tag_long_sha`.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-latest-tag-sha@ref
 ```
 
 ### helm-build-chart
