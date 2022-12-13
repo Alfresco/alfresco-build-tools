@@ -1,4 +1,6 @@
 setup() {
+    git fetch --tags
+    
     # Runs everywhere
     DIR="$( cd "$( dirname "$BATS_TEST_FILENAME" )" >/dev/null 2>&1 && pwd )"
     PATH="$DIR/..:$PATH"
@@ -13,12 +15,21 @@ setup() {
 }
 
 @test "latest_tag" {
-    git fetch --tags
     latest_tag=$(git tag --sort=-creatordate | head -n 1)
-    echo latest_tag=$latest_tag
     tag_sha=$(git rev-list -n 1 $latest_tag)
     run git-latest-tag.sh
 
     [ "$status" -eq 0 ]
-    [ "$output" = "Latest tag for the pattern $PATTERN is $latest_tag ($tag_sha)" ]
+    [ "$output" = "Tag for the pattern $PATTERN is $latest_tag ($tag_sha)" ]
+}
+
+@test "tag_v1.0.0" {
+    export PATTERN="v1.0.0"
+    export REPO_DIR="$PWD"    
+    tag="v1.0.0"
+    tag_sha="93891a5cfd55868bdfbd145ed8016ea8c63e37be"
+    run git-latest-tag.sh
+
+    [ "$status" -eq 0 ]
+    [ "$output" = "Tag for the pattern $PATTERN is $tag ($tag_sha)" ]
 }
