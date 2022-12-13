@@ -8,8 +8,8 @@ setup() {
     export GITHUB_HEAD_REF="OPSEXP-1234"
 
     # Mock git-latest-tag defaults
-    export PATTERN: *
-    export REPO_DIR: $PWD
+    export PATTERN="*"
+    export REPO_DIR="$PWD"
 }
 
 @test "latest tag" {
