@@ -1,3 +1,5 @@
+#!/bin/bash
+
 if [ -n "$REPO_DIR" ]; then
     cd "$REPO_DIR"
 fi

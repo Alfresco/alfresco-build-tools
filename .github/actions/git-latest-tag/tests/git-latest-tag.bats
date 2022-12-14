@@ -1,5 +1,3 @@
-#!/bin/bash
-
 setup() {
     git fetch --tags
 
