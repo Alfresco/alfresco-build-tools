@@ -38,7 +38,6 @@ Here follows the list of GitHub Actions topics available in the current document
     - [get-commit-message](#get-commit-message)
     - [git-commit-changes](#git-commit-changes)
     - [git-latest-tag](#git-latest-tag)
-    - [git-latest-tag-sha](#git-latest-tag-sha)
     - [helm-build-chart](#helm-build-chart)
     - [helm-integration-tests](#helm-integration-tests)
     - [helm-package-chart](#helm-package-chart)
@@ -372,6 +371,7 @@ Gets the latest tag and commit sha for the given pattern. The result is returned
         with:
           pattern: 1.0.0-alpha*
 ```
+
 ### helm-build-chart
 
 Run `helm dep up` and `helm lint` on the specified chart
