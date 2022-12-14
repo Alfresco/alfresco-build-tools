@@ -25,7 +25,7 @@ setup() {
 
 @test "tag_v1.0.0" {
     export PATTERN="v1.0.0"
-    export REPO_DIR="$PWD"    
+    export REPO_DIR="$PWD"
     tag="v1.0.0"
     tag_sha="93891a5cfd55868bdfbd145ed8016ea8c63e37be"
     run git-latest-tag.sh
