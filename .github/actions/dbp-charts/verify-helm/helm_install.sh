@@ -168,13 +168,12 @@ helm dep up helm/"${PROJECT_NAME}"
 helm upgrade --install "${release_name}" helm/"${PROJECT_NAME}" \
   --values="${values_file}" \
   --set global.tracking.sharedsecret="$(openssl rand -hex 24)" \
+  --set global.alfrescoRegistryPullSecrets=quay-registry-secret \
   --set externalPort="443" \
   --set externalProtocol="https" \
   --set externalHost="${HOST}" \
-  --set persistence.enabled=true \
-  --set persistence.storageClass.enabled=true \
-  --set persistence.storageClass.name="nfs-client" \
-  --set global.alfrescoRegistryPullSecrets=quay-registry-secret \
+  --set repository.persistence.enabled=true \
+  --set repository.persistence.storageClass="nfs-client" \
   --wait \
   --timeout 20m0s \
   --namespace="${namespace}"
