@@ -14,6 +14,10 @@ inputs:
   message:
     description: An optional message that overrides the default one
     required: false
+  append:
+    description: Whether the optional message should be added after the default one
+    required: false
+    default: "false"
 
 runs:
   using: composite
@@ -46,6 +50,7 @@ runs:
       env:
         EVENT_NAME: ${{ github.event_name }}
         BLOCK_MESSAGE: ${{ inputs.message }}
+        APPEND: ${{ inputs.append }}
         PR_TITLE: ${{ github.event.pull_request.title }}
         ISSUE_BODY: ${{ github.event.issue.body }}
         COMMIT_MESSAGE: ${{ github.event.head_commit.message }}

@@ -57,6 +57,8 @@ Here follows the list of GitHub Actions topics available in the current document
     - [pre-commit](#pre-commit)
     - [pre-commit-default](#pre-commit-default)
     - [rancher](#rancher)
+    - [reportportal-prepare](#reportportal-prepare)
+    - [reportportal-summarize](#reportportal-summarize)
     - [send-slack-notification](#send-slack-notification)
     - [setup-java-build](#setup-java-build)
     - [setup-github-release-binary](#setup-github-release-binary)
@@ -734,6 +736,151 @@ AWS credentials are required only when registering the cluster.
           aws-region: "us-east-2"
 ```
 
+### reportportal-prepare
+
+Prepares [Report Portal](https://reportportal.io/) configuration information, and makes it available in outputs to be used by other actions.
+
+This action is usually used in combination with [reportportal-summarize](#reportportal-summarize).
+
+In particular, this prepares maven command line options for Report Portal integration, building the endpoint, authentication, launch key, description.
+Default context information is also added (launch attributes), unless the `auto-configure` input is set to `false`.
+
+Sample options with auto-configuration:
+
+```bash
+"-Drp.launch=short-run-push-3674979523" "-Drp.uuid=***" "-Drp.endpoint=http://localhost:8080" "-Drp.project=my-project" "-Drp.description=[Run on GitHub Actions 3674979523](https://github.com/Alfresco/alfresco-build-tools/actions/runs/3674979523)" "-Drp.attributes=branch:my-branch;event:push;repository:Alfresco/alfresco-build-tools;run:short-run-push-3674979523;myattribute:my-filter"
+```
+
+Sample options without auto-configuration:
+
+```bash
+"-Drp.launch=short-run-push" "-Drp.uuid=***" "-Drp.endpoint=http://localhost:8080" "-Drp.project=my-project"
+```
+
+Sample usage:
+
+```yaml
+
+env:
+  # the github event name and run id will be automatically added to the launch key
+  RP_LAUNCH_PREFIX: my-test-run
+  RP_TOKEN: ${{ secrets.RP_TOKEN }}
+  # should not be a secret to be visible in summary and slack messages
+  RP_URL: http://localhost:8080
+  RP_PROJECT: my-project
+  RP_FILTER: my-filter
+
+[...]
+
+    - name: Prepare Report Portal
+      uses: Alfresco/alfresco-build-tools/.github/actions/reportportal-prepare@ref
+      id: rp-prepare
+      with:
+        rp-launch-prefix: ${{ env.RP_LAUNCH_PREFIX }}
+        rp-token: ${{ env.RP_TOKEN }}
+        rp-url: ${{ env.RP_URL }}
+        rp-project: ${{ env.RP_PROJECT }}
+        rp-extra-attributes: ";myattribute:${{ env.RP_FILTER }}"
+
+    - name: Add GitHub Step Summary
+      shell: bash
+      env:
+        RP_ENABLED: ${{ steps.rp-prepare.outputs.enabled }}
+        RP_KEY: ${{ steps.rp-prepare.outputs.key }}
+        RP_URL: ${{ steps.rp-prepare.outputs.url }}
+      run: |
+        echo "#### ⏱ Before Tests: $(date -u +'%Y-%m-%d %H:%M:%S%:z')" >> $GITHUB_STEP_SUMMARY
+        echo "#### ⚙ Configuration" >> $GITHUB_STEP_SUMMARY
+        if [[ "$RP_ENABLED" == 'true' ]]; then
+          echo "- [Report Portal]($RP_URL) configured with key "'`'$RP_KEY'`' >> $GITHUB_STEP_SUMMARY
+        else
+          echo "- Report Portal not enabled" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "- My filter attribute: "'`'${{ env.RP_FILTER }}'`' >> $GITHUB_STEP_SUMMARY
+
+    - name: Run Tests (continue on error)
+      id: run-tests
+      shell: bash
+      env:
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
+        RP_OPTS: ${{ steps.rp-prepare.outputs.mvn-opts }}
+      run: mvn clean verify ${{ env.RP_OPTS }}
+      continue-on-error: true
+
+    - name: Update GitHub Step Summary
+      shell: bash
+      run: |
+        echo "#### ⏱ After Tests: $(date -u +'%Y-%m-%d %H:%M:%S%:z')" >> $GITHUB_STEP_SUMMARY
+
+    - name: Summarize Report Portal
+      uses: Alfresco/alfresco-build-tools/.github/actions/reportportal-summarize@ref
+      id: rp-summarize
+      with:
+        tests-outcome: ${{ steps.run-tests.outcome }}
+        rp-launch-key: ${{ steps.rp-prepare.outputs.key }}
+        rp-url: ${{ env.RP_URL }}
+        rp-project: ${{ env.RP_PROJECT }}
+
+```
+
+This will create launches on Report Portal that looks like:
+
+![Report Portal Sample](./images/rp-sample.png)
+
+This will give the following sample output on the GH Actions run summary (when used in combination with follow-up action `reportportal-summarize` documented in the next section):
+
+![GH Actions Summary Report Portal](./images/rp-gh-summary.png)
+
+### reportportal-summarize
+
+Used in combination with [reportportal-prepare](#reportportal-prepare).
+
+Adds a message to the steps summary when Report Portal usage is detected.
+Also builds a message to be sent to slack.
+The message contains links to the workflow Report Portal launches.
+
+Sample usage (as follow-up of above sample):
+
+```yaml
+    - name: Summarize Report Portal
+      uses: Alfresco/alfresco-build-tools/.github/actions/reportportal-summarize@ref
+      id: rp-summarize
+      with:
+        tests-outcome: ${{ steps.run-tests.outcome }}
+        rp-launch-key: ${{ steps.rp-prepare.outputs.key }}
+        rp-url: ${{ env.RP_URL }}
+        rp-project: ${{ env.RP_PROJECT }}
+
+    - name: Exit on failure
+      if: steps.run-tests.outcome != 'success'
+      shell: bash
+      run: |
+        echo "::error title=run-tests::Tests failed: re-throwing on error."
+        exit 1
+
+    - name: Notify Slack on failure
+      if: always() && failure()
+      uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@ref
+      with:
+        channel-id: "channel-id"
+        token: ${{ secrets.SLACK_BOT_TOKEN }}
+        message: ${{ steps.rp-summarize.outputs.slack-message }}
+        append: true
+```
+
+This will send a slack notification that looks like:
+
+![Slack Message Report Portal](./images/send-slack-pr.png)
+
+This message handles use cases where there is only one launch, multiple launches, or when no launches have been found:
+
+![Slack Message Report Portal Not Found](./images/send-slack-push.png)
+
+This will give the following sample output on the GH Actions run summary (when used in combination with the sample workflow documented in the previous section):
+
+![GH Actions Summary Report Portal](./images/rp-gh-summary.png)
+
 ### send-slack-notification
 
 Sends a slack notification with a pre-defined payload, relying on the [slackapi/slack-github-action](https://github.com/slackapi/slack-github-action) official action.
@@ -744,6 +891,41 @@ Sends a slack notification with a pre-defined payload, relying on the [slackapi/
           channel-id: 'channel-id'
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           notification-color: '#A30200'
+```
+
+If not set, the default color is red.
+
+Depending on the GitHub event, the slack message can show different kind of information (PR title, last commit message, etc...)
+
+Sample notification on `push` event:
+
+![Slack Message Append](./images/send-slack-push.png)
+
+Sample notification on `pull_request` event:
+
+![Slack Message Append](./images/send-slack-pr.png)
+
+An optional message can be given instead of the default one:
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@ref
+        with:
+          channel-id: 'channel-id'
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          message: "My own content"
+```
+
+![Slack Custom Message](./images/send-slack-custom-message.png)
+
+This message can also be appended to the default message:
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@ref
+        with:
+          channel-id: "channel-id"
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          message: ${{ steps.output.reportportal-summarize.outputs.message }}
+          append: true
 ```
 
 ### setup-github-release-binary
