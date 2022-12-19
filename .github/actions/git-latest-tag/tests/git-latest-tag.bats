@@ -15,12 +15,13 @@ setup() {
 }
 
 @test "latest_tag" {
-    latest_tag=$(git tag --sort=-creatordate | head -n 1)
-    tag_sha=$(git rev-list -n 1 $latest_tag)
+    regex="v[0-9]+\.[0-9]+\.[0-9]+"
     run git-latest-tag.sh
-
     [ "$status" -eq 0 ]
-    [ "$output" = "Tag for the pattern $PATTERN is $latest_tag ($tag_sha)" ]
+    if [[ ! $output =~ $regex ]]; then
+        echo "Output does not match regex: $regex"
+        exit 1
+    fi
 }
 
 @test "tag_v1.0.0" {
