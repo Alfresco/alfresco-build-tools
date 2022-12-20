@@ -74,7 +74,7 @@ runs:
 
     - name: Set preview version
       id: set-preview-version
-      if: github.event_name == 'push' && ${{ contains(github.head_ref, 'preview') }}
+      if: github.event_name == 'push' && ${{ contains(github.event.pull_request.labels.*.name, 'Create preview') }}
       shell: bash
       run: |
         GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
@@ -127,7 +127,8 @@ runs:
           echo "command=verify" >> $GITHUB_OUTPUT
         fi
       env:
-        DO_PUSH: ${{ github.event_name == 'push' }}
+        DO_PUSH: ${{ github.event_name == 'push' || ( github.event_name == 'pull_request' && \
+          contains(github.event.pull_request.labels.*.name, 'Create preview') ) }}
 
     - name: Build and Test with Maven (and maybe Deploy)
       shell: bash
@@ -150,7 +151,8 @@ runs:
           echo "command=--push" >> $GITHUB_OUTPUT
         fi
       env:
-        DO_PUSH: ${{ github.event_name == 'push' }}
+        DO_PUSH: ${{ github.event_name == 'push' || ( github.event_name == 'pull_request' && \
+          contains(github.event.pull_request.labels.*.name, 'Create preview') ) }}
 
     - name: Docker Build (and maybe Push)
       shell: bash
