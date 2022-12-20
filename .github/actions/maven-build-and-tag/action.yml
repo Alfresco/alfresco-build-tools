@@ -74,7 +74,7 @@ runs:
 
     - name: Set preview version
       id: set-preview-version
-      if: github.event_name == 'push' && ${{ contains(github.event.pull_request.labels.*.name, 'Create preview') }}
+      if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'Create preview')
       shell: bash
       run: |
         GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
@@ -82,7 +82,8 @@ runs:
 
     - name: Update pom files to the new version
       id: update-pom-to-next-version
-      if: github.event_name == 'push'
+      if: github.event_name == 'push' || ( github.event_name == 'pull_request' && \
+        contains(github.event.pull_request.labels.*.name, 'Create preview') )
       uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@v1.32.0
       with:
         property-to-update: ${{ inputs.property-to-update }}
@@ -93,7 +94,8 @@ runs:
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
 
     - name: Set version env variable
-      if: github.event_name == 'push'
+      if: github.event_name == 'push' || ( github.event_name == 'pull_request' && \
+        contains(github.event.pull_request.labels.*.name, 'Create preview') )
       env:
         VERSION: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
       shell: bash
@@ -101,7 +103,8 @@ runs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
 
     - name: Login to DockerHub Registry
-      if: github.event_name == 'push' && inputs.docker-username != ''
+      if: inputs.docker-username != '' && (github.event_name == 'push' || \
+        ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'Create preview') ) )
       uses: docker/login-action@v2
       with:
         registry: docker.io
