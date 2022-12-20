@@ -77,7 +77,7 @@ runs:
       if: github.event_name == 'pull_request'
       shell: bash
       run: |
-        LABELS=${{ github.event.pull_request.labels.*.name }}
+        LABELS=${{ join(github.event.pull_request.labels.*.name, ', ') }}
         CONTAINS_LABEL=${{ contains(github.event.pull_request.labels.*.name, 'Create preview') }}
         GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
         echo "preview-version=0.0.1-$GITHUB_PR_NUMBER-$GITHUB_RUN_NUMBER-SNAPSHOT" >> $GITHUB_OUTPUT
