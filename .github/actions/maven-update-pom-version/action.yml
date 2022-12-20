@@ -16,7 +16,7 @@ inputs:
 outputs:
   next-prerelease:
     description: "Next prerelease"
-    value: ${{ steps.next-prerelease-resolver.outputs.next-prerelease }}
+    value: ${{ steps.resolve-version.outputs.version }}
 runs:
   using: composite
   steps:
