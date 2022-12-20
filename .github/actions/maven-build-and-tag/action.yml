@@ -74,7 +74,7 @@ runs:
 
     - name: Set preview version
       id: set-preview-version
-      if: github.event_name == 'pull_request'
+      if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'Create preview')
       shell: bash
       run: |
         LABELS=${{ join(github.event.pull_request.labels.*.name, ', ') }}
