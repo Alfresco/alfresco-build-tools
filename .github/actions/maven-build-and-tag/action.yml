@@ -82,9 +82,15 @@ runs:
         GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
         echo "preview-version=0.0.1-$GITHUB_PR_NUMBER-$GITHUB_RUN_NUMBER-SNAPSHOT" >> $GITHUB_OUTPUT
 
+    - name: Test1
+      id: test1
+      shell: bash
+      run: |
+        echo "test1"
+
     - name: Update pom files to the new version
       id: update-pom-to-next-version
-      if: github.event_name == 'push'
+      if: github.event_name == 'push' || ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'Create preview') )
       uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@AAE-11861-preview-version-dev-jsokolowski
       with:
         property-to-update: ${{ inputs.property-to-update }}
@@ -94,6 +100,12 @@ runs:
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
 
+    - name: Test2
+      id: test2
+      shell: bash
+      run: |
+        echo "test2"
+
     - name: Set version env variable
       if: github.event_name == 'push' || ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'Create preview') )
       env:
@@ -101,6 +113,12 @@ runs:
       shell: bash
       run: |
         echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+    - name: Test3
+      id: test3
+      shell: bash
+      run: |
+        echo "test3"
 
     - name: Login to DockerHub Registry
       if: inputs.docker-username != '' && (github.event_name == 'push' || ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'Create preview') ) )
@@ -110,6 +128,12 @@ runs:
         username: ${{ inputs.docker-username }}
         password: ${{ inputs.docker-password }}
 
+    - name: Test4
+      id: test4
+      shell: bash
+      run: |
+        echo "test4"
+
     - name: Login to Quay.io Docker Registry
       if: inputs.quay-username != ''
       uses: docker/login-action@v2
@@ -117,6 +141,12 @@ runs:
         registry: quay.io
         username: ${{ inputs.quay-username }}
         password: ${{ inputs.quay-password }}
+
+    - name: Test5
+      id: test5
+      shell: bash
+      run: |
+        echo "test5"
 
     - name: Define Maven Command
       id: define_maven_command
@@ -131,6 +161,12 @@ runs:
       env:
         DO_PUSH: ${{ github.event_name == 'push' || ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'Create preview') ) }}
 
+    - name: Test6
+      id: test6
+      shell: bash
+      run: |
+        echo "test6"
+
     - name: Build and Test with Maven (and maybe Deploy)
       shell: bash
       run: mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
@@ -139,9 +175,21 @@ runs:
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
 
+    - name: Test7
+      id: test7
+      shell: bash
+      run: |
+        echo "test7"
+
     - name: Echo Longest Tests run
       shell: bash
       run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
+
+    - name: Test8
+      id: test8
+      shell: bash
+      run: |
+        echo "test8"
 
     - name: Define Docker Push
       id: define_docker_push
@@ -153,6 +201,12 @@ runs:
         fi
       env:
         DO_PUSH: ${{ github.event_name == 'push' || ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'Create preview') ) }}
+
+    - name: Test9
+      id: test9
+      shell: bash
+      run: |
+        echo "test9"
 
     - name: Docker Build (and maybe Push)
       shell: bash
@@ -168,12 +222,24 @@ runs:
         PUSH_OPTION: ${{ steps.define_docker_push.outputs.command }}
         TAG: ${{env.VERSION}}
 
+    - name: Test10
+      id: test10
+      shell: bash
+      run: |
+        echo "test10"
+
     - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.32.0
       if: github.event_name == 'push'
       with:
         username: ${{ inputs.git-username }}
         add-options: -u
         commit-message: "release $VERSION"
+
+    - name: Test11
+      id: test11
+      shell: bash
+      run: |
+        echo "test11"
 
     - name: Create and push tag
       if: github.event_name == 'push'
