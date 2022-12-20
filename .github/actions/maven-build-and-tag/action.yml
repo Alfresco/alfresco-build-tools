@@ -74,6 +74,7 @@ runs:
 
     - name: Set preview version
       id: set-preview-version
+      if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'Create preview')
       shell: bash
       run: |
         GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
