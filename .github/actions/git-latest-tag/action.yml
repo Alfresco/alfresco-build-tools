@@ -22,12 +22,4 @@ runs:
       env:
         PATTERN: ${{ inputs.pattern }}
         REPO_DIR: ${{ inputs.repository-directory }}
-      run: |
-        if [ -n "$REPO_DIR" ]
-        then
-          cd $REPO_DIR
-        fi
-        git fetch --tags
-        TAG=$(git tag --list "$PATTERN" --sort=-creatordate | head -n 1)
-        echo "Latest tag for the pattern $PATTERN is $TAG"
-        echo "tag=$TAG" >> $GITHUB_OUTPUT
+      run: ${{ github.action_path }}/git-latest-tag.sh

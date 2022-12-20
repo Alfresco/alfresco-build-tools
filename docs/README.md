@@ -367,7 +367,7 @@ Commits local changes after configuring git user and showing the status of what 
 
 ### git-latest-tag
 
-Gets the latest tag for the given pattern. The result is returned in the output named `tag`.
+Gets the latest tag and commit sha for the given pattern. The result is returned in the output named `tag` and `tag_long_sha`.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/git-latest-tag@ref
