@@ -38,7 +38,7 @@ runs:
         next-version: ${{ steps.parse-next-final-version.outputs.result }}
         prerelease-type: ${{ inputs.prerelease-type }}
 
-    - id: reolve-version
+    - id: resolve-version
       name: Resolve version
       shell: bash
       run: |
@@ -52,6 +52,6 @@ runs:
     - name: Update pom files to the new version
       uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@v1.32.0
       with:
-        version: ${{ steps.reolve-version.outputs.version }}
+        version: ${{ steps.resolve-version.outputs.version }}
         maven-cli-opts: ${{ inputs.maven-cli-opts }}
         property-to-update: ${{ inputs.property-to-update }}
