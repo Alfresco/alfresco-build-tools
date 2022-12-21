@@ -14,6 +14,9 @@ outputs:
   next-version:
     description: Next version to be used by the development branch
     value: ${{ steps.load-descriptor.outputs.next-version }}
+  notes-start-tag:
+    description: Tag to use as the starting point for generating release notes
+    value: ${{ steps.load-descriptor.outputs.notes-start-tag }}
   mock:
     description: Flag to specify whether it's a mock release
     value: ${{ steps.load-descriptor.outputs.mock }}
@@ -51,6 +54,7 @@ runs:
         VERSION=$(yq e '.release.version' $RELEASE_DESCRIPTOR)
         BRANCH=$(yq e '.release.branch' $RELEASE_DESCRIPTOR)
         NEXT_VERSION=$(yq e '.release.nextVersion' $RELEASE_DESCRIPTOR)
+        NOTES_START_TAG=$(yq e '.release.notesStartTag' $RELEASE_DESCRIPTOR)
         MOCK=$(yq e '.release.mock' $RELEASE_DESCRIPTOR)
         ACTIVITI_BASE_TAG=$(yq e '.release.baseTag.activiti' $RELEASE_DESCRIPTOR)
         ACTIVITI_CLOUD_BASE_TAG=$(yq e '.release.baseTag.activitiCloud' $RELEASE_DESCRIPTOR)
@@ -68,6 +72,7 @@ runs:
         echo "branch=$BRANCH" >> $GITHUB_OUTPUT
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "next-version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+        echo "notes-start-tag=$NOTES_START_TAG" >> $GITHUB_OUTPUT
         echo "mock=$MOCK" >> $GITHUB_OUTPUT
         echo "activiti-tag=$ACTIVITI_BASE_TAG" >> $GITHUB_OUTPUT
         echo "activiti-cloud-tag=$ACTIVITI_CLOUD_BASE_TAG" >> $GITHUB_OUTPUT
