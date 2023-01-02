@@ -325,6 +325,7 @@ Configures the git username and email to associate commits with the provided ide
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           email: ${{ secrets.BOT_GITHUB_EMAIL }}
+          global: true
 ```
 
 ### get-branch-name
