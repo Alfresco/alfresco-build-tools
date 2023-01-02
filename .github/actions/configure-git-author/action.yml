@@ -7,10 +7,18 @@ inputs:
   email:
     description: "Email"
     required: true
+  global:
+    description: "Global scope"
+    required: false
+    default: 'false'
 runs:
   using: "composite"
   steps:
     - shell: bash
-      run: git config user.name ${{ inputs.username }}
-    - shell: bash
-      run: git config user.email ${{ inputs.email }}
+      run: |
+        GIT_GLOBAL_OPTION=''
+        if [ ${{ inputs.global }} = true ] ; then
+           GIT_GLOBAL_OPTION='--global'
+        fi
+        git config $GIT_GLOBAL_OPTION user.name ${{ inputs.username }}
+        git config $GIT_GLOBAL_OPTION user.email ${{ inputs.email }}
