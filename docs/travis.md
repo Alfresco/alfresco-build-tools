@@ -6,6 +6,7 @@
     - [Default environment variables](#default-environment-variables)
     - [Get back maven build output](#get-back-maven-build-output)
     - [Workflow schema validation](#workflow-schema-validation)
+    - [Retrieve secure environment variables in Travis](#retrieve-secure-environment-variables-in-travis)
 
 ## Travis snippets
 
@@ -101,3 +102,10 @@ Here is a sample configuration:
         files: '.github/dependabot\.yml$'
         args: ["--schemafile", "https://json.schemastore.org/dependabot-2.0.json"]
 ```
+
+### Retrieve secure environment variables in Travis
+
+In order to migrate credentials from Travis secure environment variables to GitHub Actions secrets, you may need to retrieve the current values from the existing Travis build if those credentials were not stored elsewhere (e.g. password manager).
+
+- If the repository is private, you can simply run a debug build and retrieve current values just by doing an `echo $SECURE_VAR`.
+- If the repository is public, then debug builds are not available but you can encrypt values with a new secret so you can securely retrieve them from the build logs using the `ccrypt` utility, as described [here](https://stackoverflow.com/a/59165606/547195)
