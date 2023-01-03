@@ -1,0 +1,83 @@
+name: Promote Nexus staging repository
+description: Close and promote a Nexus Staging Repository
+inputs:
+  version:
+    description: Version been released. Used to update the repository description while closing and releasing
+    required: true
+  staging-repository:
+    description: The id of the staging repository to be promoted
+    required: true
+  nexus-username:
+    description: Nexus username
+    required: true
+  nexus-password:
+    description: Nexus password
+    required: true
+  nexus-url:
+    description: Base URL to the Nexus server
+    required: false
+    default: "https://artifacts.alfresco.com/nexus"
+runs:
+  using: composite
+  steps:
+    - name: Close staging repository
+      shell: bash
+      env:
+        NEXUS_USERNAME: ${{ inputs.nexus-username }}
+        NEXUS_PASSWORD: ${{ inputs.nexus-password }}
+        NEXUS_URL: ${{ inputs.nexus-url }}
+        VERSION: ${{ inputs.version }}
+        STAGING_REPOSITORY_ID: ${{ inputs.staging-repository }}
+      run: |
+        CLOSE_STAGING_PAYLOAD_CONTENT=$(envsubst < $GITHUB_ACTION_PATH/close-payload-template.json)
+        curl -u "${NEXUS_USERNAME}":"${NEXUS_PASSWORD}" \
+          -H "Accept: application/json" \
+          -H "Content-Type: application/json" \
+          -d "$CLOSE_STAGING_PAYLOAD_CONTENT" \
+          "${NEXUS_URL}"/service/local/staging/bulk/close
+
+        wait_until_true () {
+            local attempt_counter=0
+            local max_attempts=12
+
+            until "$@"
+            do
+              if [ ${attempt_counter} -eq ${max_attempts} ]
+              then
+                echo "Max attempts reached"
+                exit 1
+              fi
+
+              attempt_counter=$((attempt_counter+1))
+              echo "Condition not reached yet. Attempt $attempt_counter out of $max_attempts. Retrying..."
+              sleep 5
+            done
+        }
+
+        staging_repo_is_closed () {
+          curl -u "${NEXUS_USERNAME}":"${NEXUS_PASSWORD}" \
+            -X GET "${NEXUS_URL}"/service/local/staging/profile_repositories \
+            | yq -p=xml e '.stagingRepositories.data.stagingProfileRepository[]| select (.repositoryId == env(STAGING_REPOSITORY_ID)) | .type ' \
+            | grep open > /dev/null 2>&1
+        }
+
+        # the close operation is asynchronous and before proceeding with the release step, we need to make sure the repository is closed
+        echo "Waiting for staging repository $STAGING_REPOSITORY_ID to get closed..."
+        wait_until_true staging_repo_is_closed
+        echo "Repository $STAGING_REPOSITORY_ID successfully closed!"
+
+    - name: Release staging repository
+      shell: bash
+      env:
+        NEXUS_USERNAME: ${{ inputs.nexus-username }}
+        NEXUS_PASSWORD: ${{ inputs.nexus-password }}
+        NEXUS_URL: ${{ inputs.nexus-url }}
+        VERSION: ${{ inputs.version }}
+        STAGING_REPOSITORY_ID: ${{ inputs.staging-repository }}
+      run: |
+        PROMOTE_PAYLOAD_CONTENT=$(envsubst < $GITHUB_ACTION_PATH/promote-payload-template.json)
+        curl -u "${NEXUS_USERNAME}":"${NEXUS_PASSWORD}" \
+          -H "Accept: application/json" \
+          -H "Content-Type: application/json" \
+          -d "$PROMOTE_PAYLOAD_CONTENT" \
+          "${NEXUS_URL}"/service/local/staging/bulk/promote

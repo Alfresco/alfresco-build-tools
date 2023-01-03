@@ -1,0 +1,8 @@
+{
+  "data": {
+    "description": "Closing $VERSION",
+    "stagedRepositoryIds": [
+      "$STAGING_REPOSITORY_ID"
+    ]
+  }
+}
