@@ -147,7 +147,7 @@ helm upgrade --install "${release_name_ingress}" --repo https://kubernetes.githu
   --set controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-ssl-cert"="${ACM_CERTIFICATE}" \
   --set controller.service.annotations."external-dns\.alpha\.kubernetes\.io/hostname"="${HOST}" \
   --set controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-ssl-negotiation-policy"="ELBSecurityPolicy-TLS-1-2-2017-01" \
-  --set controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-security-groups"="${AWS_SG}" \
+  --set controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-extra-security-groups"="${AWS_SG}" \
   --set controller.publishService.enabled=true \
   --set controller.admissionWebhooks.enabled=false \
   --set controller.ingressClassResource.enabled=false \
