@@ -50,7 +50,7 @@ runs:
         fi
 
     - name: Update pom files to the new version
-      uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@AAE-11861-preview-version-dev-jsokolowski
+      uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@AAE-11861-preview-version-2-dev-jsokolowski
       with:
         version: ${{ steps.resolve-version.outputs.version }}
         maven-cli-opts: ${{ inputs.maven-cli-opts }}
