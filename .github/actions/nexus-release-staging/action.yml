@@ -71,6 +71,8 @@ runs:
 
         if [[ "$WAIT_FOR_COMPLETION" == "true" ]]
         then
+          echo "Waiting for staging repository $STAGING_REPOSITORY_ID to get released.
+              MAX_AWAIT_ATTEMPTS: $MAX_AWAIT_ATTEMPTS, AWAIT_SLEEP_TIME: $AWAIT_SLEEP_TIME ..."
           wait_until_released
           echo "Repository $STAGING_REPOSITORY_ID successfully released!"
         fi
