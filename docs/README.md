@@ -54,6 +54,8 @@ Here follows the list of GitHub Actions topics available in the current document
     - [maven-release](#maven-release)
     - [maven-update-pom-version](#maven-update-pom-version)
     - [nexus-create-staging](#nexus-create-staging)
+    - [nexus-close-staging](#nexus-close-staging)
+    - [nexus-release-staging](#nexus-release-staging)
     - [pre-commit](#pre-commit)
     - [pre-commit-default](#pre-commit-default)
     - [rancher](#rancher)
@@ -634,6 +636,32 @@ The resulting staging repository will be available in the output named `staging-
           nexus-profile-id: "${{ secrets.NEXUS_ACTIVITI7_PROFILE_ID }}"
           nexus-username: "${{ secrets.NEXUS_USERNAME }}"
           nexus-password: "${{ secrets.NEXUS_PASSWORD }}"
+```
+
+### nexus-close-staging
+
+Closes the specified staging repository on Nexus.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-close-staging@ref
+        with:
+          version: ${{ inputs.version }}
+          staging-repository: ${{ inputs.staging-repository}}
+          nexus-username: ${{ secrets.NEXUS_USERNAME }}
+          nexus-password: ${{ secrets.NEXUS_PASSWORD }}
+```
+
+### nexus-release-staging
+
+Releases the specified staging repository on Nexus. The repository should be in the closed status before.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-release-staging@ref
+        with:
+          version: ${{ inputs.version }}
+          staging-repository: ${{ inputs.staging-repository}}
+          nexus-username: ${{ secrets.NEXUS_USERNAME }}
+          nexus-password: ${{ secrets.NEXUS_PASSWORD }}
 ```
 
 ### pre-commit

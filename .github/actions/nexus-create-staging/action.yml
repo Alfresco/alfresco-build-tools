@@ -37,7 +37,7 @@ runs:
       run: |
         echo "Checking repository to be used for $STAGING_DESCRIPTION"
         NEXUS_STAGING_REPOSITORY=$(curl -u "${NEXUS_USERNAME}":"${NEXUS_PASSWORD}" \
-          -X GET https://artifacts.alfresco.com/nexus/service/local/staging/profile_repositories \
+          -X GET "${NEXUS_URL}"/service/local/staging/profile_repositories \
           | yq -p=xml e '.stagingRepositories.data.stagingProfileRepository[]| select (.description == env(STAGING_DESCRIPTION)) | .repositoryId')
 
         if [ -z "$NEXUS_STAGING_REPOSITORY" ];

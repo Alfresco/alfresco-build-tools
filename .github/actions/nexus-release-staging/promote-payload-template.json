@@ -1,0 +1,9 @@
+{
+  "data": {
+    "autoDropAfterRelease": true,
+    "description": "Releasing $VERSION",
+    "stagedRepositoryIds": [
+      "$STAGING_REPOSITORY_ID"
+    ]
+  }
+}
