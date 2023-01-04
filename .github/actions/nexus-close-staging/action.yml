@@ -71,7 +71,7 @@ runs:
           curl -f -u "${NEXUS_USERNAME}":"${NEXUS_PASSWORD}" \
             -X GET "${NEXUS_URL}"/service/local/staging/profile_repositories \
             | yq -p=xml e '.stagingRepositories.data.stagingProfileRepository[]| select (.repositoryId == env(STAGING_REPOSITORY_ID)) | .type ' \
-            | grep open > /dev/null 2>&1
+            | grep closed > /dev/null 2>&1
         }
 
         if [[ "$WAIT_FOR_COMPLETION" == "true" ]]
