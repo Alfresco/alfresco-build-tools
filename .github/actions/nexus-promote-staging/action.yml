@@ -2,19 +2,19 @@ name: Promote Nexus staging repository
 description: Close and promote a Nexus Staging Repository
 inputs:
   version:
-    description: Version been released. Used to update the repository description while closing and releasing
+    description: Version being released. Used to update the repository description while closing and releasing
     required: true
   staging-repository:
     description: The id of the staging repository to be promoted
     required: true
   nexus-username:
-    description: Nexus username
+    description: The Nexus username
     required: true
   nexus-password:
-    description: Nexus password
+    description: The Nexus password
     required: true
   nexus-url:
-    description: Base URL to the Nexus server
+    description: The base URL to the Nexus server
     required: false
     default: "https://artifacts.alfresco.com/nexus"
 runs:
