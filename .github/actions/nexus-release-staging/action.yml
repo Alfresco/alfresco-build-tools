@@ -53,7 +53,7 @@ runs:
 
         wait_until_released () {
             local attempt_counter=0
-            until [ -z "$(curl -u "${NEXUS_USERNAME}":"${NEXUS_PASSWORD}" \
+            until [ -z "$(curl -f -u "${NEXUS_USERNAME}":"${NEXUS_PASSWORD}" \
             -X GET "${NEXUS_URL}"/service/local/staging/profile_repositories \
             | yq -p=xml e '.stagingRepositories.data.stagingProfileRepository[]| select (.repositoryId == env(STAGING_REPOSITORY_ID))')" ]
             do
