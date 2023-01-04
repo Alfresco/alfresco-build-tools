@@ -1,5 +1,5 @@
 import:
-  - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.27.0
+  - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.27.1
 env:
   global:
     - KUBEPUG_VERSION=${KUBEPUG_VERSION:-1.3.2}
