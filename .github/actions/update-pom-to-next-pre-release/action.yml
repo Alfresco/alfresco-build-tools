@@ -23,7 +23,7 @@ runs:
   steps:
     - name: Parse next version from POM
       id: parse-next-final-version
-      if: inputs.version != ''
+      if: inputs.version == ''
       shell: bash
       run: |
         NEXT_VERSION=$(yq -p=xml e '.project.version' pom.xml | grep -o "[0-9]*\.[0-9]*.[0-9]*")
@@ -32,7 +32,7 @@ runs:
 
     - id: next-prerelease-resolver
       name: Calculate next internal release
-      if: inputs.version != ''
+      if: inputs.version == ''
       uses: Alfresco/alfresco-build-tools/.github/actions/calculate-next-internal-version@v1.32.0
       with:
         next-version: ${{ steps.parse-next-final-version.outputs.result }}
