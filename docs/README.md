@@ -34,6 +34,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [automate-propagation](#automate-propagation)
     - [configure-git-author](#configure-git-author)
     - [get-branch-name](#get-branch-name)
+    - [get-build-info](#get-build-info)
     - [git-check-existing-tag](#git-check-existing-tag)
     - [get-commit-message](#get-commit-message)
     - [git-commit-changes](#git-commit-changes)
@@ -336,6 +337,14 @@ Loads the name of the branch on which the action was called into `BRANCH_NAME` e
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@ref
+```
+
+### get-build-info
+
+[get-build-info](../.github/actions/get-build-info/action.yml) loads build-related info into the runner env, in the form of generically named variables that are not necessarily specific to GitHub.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@ref
 ```
 
 ### git-check-existing-tag
