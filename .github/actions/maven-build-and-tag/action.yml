@@ -86,7 +86,7 @@ runs:
 
     - name: Set preview version
       id: set-preview-version
-      if: env.IS_PREVIEW
+      if: env.IS_PREVIEW == 'true'
       shell: bash
       run: |
         GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
@@ -94,7 +94,7 @@ runs:
 
     - name: Update pom files to the new version
       id: update-pom-to-next-version
-      if: github.event_name == 'push' || env.IS_PREVIEW
+      if: github.event_name == 'push' || env.IS_PREVIEW == 'true'
       uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@AAE-11861-preview-version-2-dev-jsokolowski
       with:
         property-to-update: ${{ inputs.property-to-update }}
@@ -105,7 +105,7 @@ runs:
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
 
     - name: Set version env variable
-      if: github.event_name == 'push' || env.IS_PREVIEW
+      if: github.event_name == 'push' || env.IS_PREVIEW == 'true'
       env:
         VERSION: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
       shell: bash
@@ -113,7 +113,7 @@ runs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
 
     - name: Login to DockerHub Registry
-      if: inputs.docker-username != '' && (github.event_name == 'push' || env.IS_PREVIEW)
+      if: inputs.docker-username != '' && (github.event_name == 'push' || env.IS_PREVIEW == 'true')
       uses: docker/login-action@v2
       with:
         registry: docker.io
@@ -139,7 +139,7 @@ runs:
           echo "command=verify" >> $GITHUB_OUTPUT
         fi
       env:
-        DO_PUSH: ${{ github.event_name == 'push' || env.IS_PREVIEW }}
+        DO_PUSH: ${{ github.event_name == 'push' || env.IS_PREVIEW == 'true' }}
 
     - name: Build and Test with Maven (and maybe Deploy)
       shell: bash
@@ -162,7 +162,7 @@ runs:
           echo "command=--push" >> $GITHUB_OUTPUT
         fi
       env:
-        DO_PUSH: ${{ github.event_name == 'push' || env.IS_PREVIEW }}
+        DO_PUSH: ${{ github.event_name == 'push' || env.IS_PREVIEW == 'true' }}
 
     - name: Docker Build (and maybe Push)
       shell: bash
