@@ -326,10 +326,12 @@ Configures the git username and email to associate commits with the provided ide
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@ref
         with:
-          username: ${{ secrets.BOT_GITHUB_USERNAME }}
-          email: ${{ secrets.BOT_GITHUB_EMAIL }}
+          username: ${{ vars.BOT_GITHUB_USERNAME }}
+          email: ${{ vars.BOT_GITHUB_EMAIL }}
           global: true
 ```
+
+The two vars in the previous snippet are [workflow configuration variables](https://github.blog/changelog/2023-01-10-github-actions-support-for-configuration-variables-in-workflows/) that can be created at organization level and shared across different repositories.
 
 ### get-branch-name
 
