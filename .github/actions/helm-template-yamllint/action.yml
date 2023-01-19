@@ -1,7 +1,7 @@
 ---
 name: Helm templates yaml linter
 description: >
-  Render an helm chart templates and pipe into yamllint
+  Render helm chart templates and pipe into yamllint (check for duplicated keys and other inconsistencies that helm itself doesn't care of)
 inputs:
   chart-dir:
     description: Root folder of the chart where to launch helm commands
