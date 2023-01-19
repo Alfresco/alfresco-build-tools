@@ -15,7 +15,7 @@ outputs:
     value: ${{steps.latest-tag.outputs.tag}}
   tag_long_sha:
     description: the latest tag long sha found for the pattern provided as input
-    value: ${{steps.latest-tag.outputs.tag_long_sha}}    
+    value: ${{steps.latest-tag.outputs.tag_long_sha}}
 runs:
   using: composite
   steps:
