@@ -28,5 +28,5 @@ runs:
       run: helm template . --output-dir ${{ inputs.output-dir }} ${{ inputs.helm-options }}
     - name: Lint
       shell: bash
-      working-directory: ${{ inputs.output-dir }}
-      run: yamllint . -c ${{ inputs.yamllint-config-path }}
+      working-directory: ${{ inputs.chart-dir }}
+      run: yamllint ${{ inputs.output-dir }} -c ${{ inputs.yamllint-config-path }}
