@@ -18,15 +18,25 @@ inputs:
   yamllint-config-path:
     description: Path to a custom yamllint config
     required: false
-    default: ${{ github.action_path }}/.yamllint.yml
+    default: ""
 runs:
   using: composite
   steps:
+    - name: Cleanup output dir
+      shell: bash
+      run: rm -fr ${{ inputs.output-dir }}
     - name: Render templates
       shell: bash
       working-directory: ${{ inputs.chart-dir }}
       run: helm template . --output-dir ${{ inputs.output-dir }} ${{ inputs.helm-options }}
+    - name: Evaluate yamllint config to use
+      shell: bash
+      run: |
+        if [ -z "${{ inputs.yamllint-config-path }}" ]; then
+          echo "YAMLLINT_CONFIG_FILE=${{ github.action_path }}/.yamllint.yml" >> $GITHUB_ENV
+        else
+          echo "YAMLLINT_CONFIG_FILE=${{ inputs.yamllint-config-path }}" >> $GITHUB_ENV
+        fi
     - name: Lint
       shell: bash
-      working-directory: ${{ inputs.chart-dir }}
-      run: yamllint ${{ inputs.output-dir }} -c ${{ inputs.yamllint-config-path }}
+      run: yamllint ${{ inputs.output-dir }}
