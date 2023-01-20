@@ -1,0 +1,38 @@
+---
+name: Helm templates yaml linter
+description: >
+  Render helm chart templates and pipe into yamllint (check for duplicated keys and other inconsistencies that helm itself doesn't care of)
+inputs:
+  chart-dir:
+    description: Root folder of the chart where to launch helm commands
+    required: false
+    default: .
+  output-dir:
+    description: Output folder where the yaml files will be persisted
+    required: false
+    default: /tmp/helm-template
+  helm-options:
+    description: Pass arbitrary values to helm command
+    required: false
+    default: ""
+  yamllint-config-path:
+    description: Path to a custom yamllint config
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Cleanup output dir
+      shell: bash
+      run: rm -fr ${{ inputs.output-dir }}
+    - name: Render templates
+      shell: bash
+      working-directory: ${{ inputs.chart-dir }}
+      run: helm template . --output-dir ${{ inputs.output-dir }} ${{ inputs.helm-options }}
+    - name: Lint
+      env:
+        YAMLLINT_CONFIG_FILE: ${{ inputs.yamllint-config-path }}
+      shell: bash
+      run: |
+        YAMLLINT_CONFIG_FILE="${YAMLLINT_CONFIG_FILE:=${{ github.action_path }}/.yamllint.yml}"
+        yamllint ${{ inputs.output-dir }}

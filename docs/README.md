@@ -45,6 +45,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [helm-parse-next-release](#helm-parse-next-release)
     - [helm-publish-chart](#helm-publish-chart)
     - [helm-release-and-publish](#helm-release-and-publish)
+    - [helm-template-yamllint](#helm-template-yamllint)
     - [helm-unit-tests](#helm-unit-tests)
     - [helm-update-chart-version](#helm-update-chart-version)
     - [jx-updatebot-pr](#jx-updatebot-pr)
@@ -63,13 +64,13 @@ Here follows the list of GitHub Actions topics available in the current document
     - [reportportal-prepare](#reportportal-prepare)
     - [reportportal-summarize](#reportportal-summarize)
     - [send-slack-notification](#send-slack-notification)
-    - [setup-java-build](#setup-java-build)
     - [setup-github-release-binary](#setup-github-release-binary)
+    - [setup-java-build](#setup-java-build)
     - [setup-kind](#setup-kind)
     - [travis-env-load](#travis-env-load)
     - [update-project-base-tag](#update-project-base-tag)
-    - [veracode](#veracode)
     - [validate-maven-versions](#validate-maven-versions)
+    - [veracode](#veracode)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
   - [Cookbook](#cookbook)
@@ -466,6 +467,22 @@ Releases a new version of a helm chart and publishes it to a helm repository
           helm-repository-branch: gh-pages
           helm-repository-token: ${{ secrets.GITHUB_TOKEN }}
           git-username:  ${{ secrets.GITHUB_USERNAME }}
+```
+
+### helm-template-yamllint
+
+Render Helm chart templates and pipe into yamllint, that can check for
+duplicated keys and other inconsistencies that helm itself doesn't care of. The
+action embed a
+[yamllint](.github/actions/../../../.github/actions/helm-template-yamllint/.yamllint.yml)
+configuration files that should be suitable for most use cases.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-template-yamllint@ref
+        with:
+          chart-dir: helm/my-chart # defaults to current working directory
+          helm-options: --values tests/values/test_values.yaml --set persistence.enabled=false # to handle mandatory values or test different rendering
+          yamllint-config-path: ./.yamllint.yaml # alternative path to yamllint config to override the default one
 ```
 
 ### helm-unit-tests

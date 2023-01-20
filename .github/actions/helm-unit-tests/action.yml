@@ -25,10 +25,10 @@ runs:
       if: ${{ inputs.chart-type }} != 'library'
       run: |
         set -e
-        if [ -d tests ]; then echo "${{ inputs.chart-dir }}: Unit tests"
-          helm plugin install https://github.com/vbehar/helm3-unittest --version ${{ inputs.plugin_version }}
+        if [ -d tests ]; then echo "${{ inputs.chart-dir }}: Unit tests"
+          helm plugin install https://github.com/vbehar/helm3-unittest --version ${{ inputs.plugin_version }}
           helm dep up
           helm unittest --color .
         else
-          echo "No Unit tests implemented for ${{ inputs.chart-dir }} chart!"
+          echo "No Unit tests implemented for ${{ inputs.chart-dir }} chart!"
         fi
