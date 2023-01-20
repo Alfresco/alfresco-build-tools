@@ -31,7 +31,7 @@ runs:
       run: helm template . --output-dir ${{ inputs.output-dir }} ${{ inputs.helm-options }}
     - name: Lint
       env:
-        YAMLLINT_CONFIG_FILE: ${{ inputs.yamllint-config-path }}        
+        YAMLLINT_CONFIG_FILE: ${{ inputs.yamllint-config-path }}
       shell: bash
       run: |
         YAMLLINT_CONFIG_FILE="${YAMLLINT_CONFIG_FILE:=${{ github.action_path }}/.yamllint.yml}"
