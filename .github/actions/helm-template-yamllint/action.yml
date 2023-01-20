@@ -29,14 +29,10 @@ runs:
       shell: bash
       working-directory: ${{ inputs.chart-dir }}
       run: helm template . --output-dir ${{ inputs.output-dir }} ${{ inputs.helm-options }}
-    - name: Evaluate yamllint config to use
+    - name: Lint
+      env:
+        YAMLLINT_CONFIG_FILE: ${{ inputs.yamllint-config-path }}        
       shell: bash
       run: |
-        if [ -z "${{ inputs.yamllint-config-path }}" ]; then
-          echo "YAMLLINT_CONFIG_FILE=${{ github.action_path }}/.yamllint.yml" >> $GITHUB_ENV
-        else
-          echo "YAMLLINT_CONFIG_FILE=${{ inputs.yamllint-config-path }}" >> $GITHUB_ENV
-        fi
-    - name: Lint
-      shell: bash
-      run: yamllint ${{ inputs.output-dir }}
+        YAMLLINT_CONFIG_FILE="${YAMLLINT_CONFIG_FILE:=${{ github.action_path }}/.yamllint.yml}"
+        yamllint ${{ inputs.output-dir }}
