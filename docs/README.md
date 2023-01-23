@@ -598,6 +598,12 @@ Check out, builds a maven project and docker images, generating a new alpha vers
           git-username: ${{ secrets.BOT_GITHUB_USERNAME }}
 ```
 
+#### Preview option for maven-build-and-tag
+
+There is a possibility to publish snapshot maven artifacts and docker images from an open PR. 
+In order to use it specify `preview-label` input (or use default `preview`). Create a PR with the `preview-label` label.
+The created artifacts will be tagged as `0.0.1-$GITHUB_PR_NUMBER-$GITHUB_RUN_NUMBER-SNAPSHOT`.
+
 ### maven-deploy-file
 
 Upload one or more files to a maven server, without requiring the presence of a
