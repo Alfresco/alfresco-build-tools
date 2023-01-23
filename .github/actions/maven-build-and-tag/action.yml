@@ -90,7 +90,7 @@ runs:
       shell: bash
       run: |
         GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
-        echo "preview-version=0.0.1-$GITHUB_PR_NUMBER-$GITHUB_RUN_NUMBER-SNAPSHOT" >> $GITHUB_OUTPUT
+        echo "preview-version=0.0.1-$GITHUB_PR_NUMBER-SNAPSHOT" >> $GITHUB_OUTPUT
 
     - name: Update pom files to the new version
       id: update-pom-to-next-version

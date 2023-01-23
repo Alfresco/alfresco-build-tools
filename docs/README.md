@@ -602,7 +602,7 @@ Check out, builds a maven project and docker images, generating a new alpha vers
 
 There is a possibility to publish snapshot maven artifacts and docker images from an open PR.
 In order to use it specify `preview-label` input (or use default `preview`). Create a PR with the `preview-label` label.
-The created artifacts will be tagged as `0.0.1-$GITHUB_PR_NUMBER-$GITHUB_RUN_NUMBER-SNAPSHOT`.
+The created maven artifacts and docker images will be tagged as `0.0.1-$GITHUB_PR_NUMBER-SNAPSHOT`.
 
 ### maven-deploy-file
 
