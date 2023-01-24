@@ -6,7 +6,7 @@ inputs:
     required: true
   veracode-fails-build:
     description: "Determine if the veracode scan result should fail the build"
-    default: "false"
+    default: "true"
     required: false
 runs:
   using: "composite"
