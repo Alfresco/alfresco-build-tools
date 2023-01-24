@@ -1060,9 +1060,9 @@ Runs Veracode Source Clear Scan
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@ref
+        #continue-on-error: true # uncomment this line to prevent the Veracode scan step from failing the whole build
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
-          veracode-fails-build: "false"
 ```
 
 ## Reusable workflows provided by us
