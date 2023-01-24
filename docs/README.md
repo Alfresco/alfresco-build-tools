@@ -1062,7 +1062,7 @@ Runs Veracode Source Clear Scan
       - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@ref
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
-          veracode-fails-build: "false"
+          veracode-fails-build: "false" # default is "true"
 ```
 
 ## Reusable workflows provided by us
