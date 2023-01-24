@@ -12,10 +12,6 @@ mvn -B -q clean install \
 
 SUCCESS=$?   # this will read exit code of the previous command
 
-if [ -z "$VERACODE_FAILS_BUILD" ] || [ "$VERACODE_FAILS_BUILD" = false ] ; then
-    SUCCESS=0
-fi
-
 grep -e 'Full Report Details' -e 'Failed' scan.log
 
 set +vex
