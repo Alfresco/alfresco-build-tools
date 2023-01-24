@@ -25,7 +25,7 @@ fi
 
 if [ -n "$COMPUTED_MESSAGE" ]; then
   echo 'result<<EOF'
-  printf "*Message*\n${COMPUTED_MESSAGE}" | sed -z 's/\n/\\n/g' | sed -r 's/"/\\\"/g'
+  printf "*Message*\n${COMPUTED_MESSAGE}" | sed -z 's/\n/\\n/g' | sed -r 's/"/\\\"/g' | sed -e 's/\r//g'
   echo ''
   echo 'EOF'
 else
