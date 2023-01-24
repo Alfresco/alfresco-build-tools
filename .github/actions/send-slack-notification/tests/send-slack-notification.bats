@@ -94,6 +94,24 @@ BATS
     [ "$output" = "$expected_output" ]
 }
 
+@test "multiline commit message using CTRL-M" {
+    export EVENT_NAME=whatever
+    export COMMIT_MESSAGE=$(<$BATS_TEST_DIRNAME/sample-commit-message.txt)
+
+    run compute-message.sh
+
+    [ "$status" -eq 0 ]
+
+    expected_output=$(cat << 'BATS'
+result<<EOF
+*Message*\nAAE-12140 Check and fix inconsistent scenarios in UAT (#734)\n\n* AAE-12140 Add assertion to check for correct application status\n\nCo-authored-by: Elias Ricken de Medeiros <26007058+erdemedeiros@users.noreply.github.com>
+EOF
+BATS
+)
+
+    [ "$output" = "$expected_output" ]
+}
+
 @test "empty slack message" {
     export COMMIT_MESSAGE=""
 
