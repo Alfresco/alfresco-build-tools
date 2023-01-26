@@ -1,0 +1,50 @@
+name: Build and Release Maven project
+
+on:
+  workflow_call:
+    inputs:
+      skip-tests:
+        description: skips the tests during the Build phase if set to 'true'
+        type: boolean
+        required: false
+        default: false
+
+env:
+  GIT_PASSWORD: ${{ secrets.BOT_GITHUB_TOKEN }}
+  MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+  MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+
+jobs:
+  test:
+    name: "Build"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.32.0
+      - name: "Build and Test"
+        if: ${{ !inputs.skip-tests }}
+        run: mvn -B -V install
+      - name: "Build and Test"
+        if: ${{ inputs.skip-tests }}
+        run: mvn -B -V install -DskipTests
+
+  release:
+    name: "Release"
+    runs-on: ubuntu-latest
+    needs: test
+    if: >
+      github.ref_name == 'master' && github.event_name != 'pull_request' &&
+       !contains(github.event.head_commit.message, '[no-release]')
+    steps:
+      - uses: actions/checkout@v3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.32.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v1.32.0
+        with:
+          username: ${{ secrets.BOT_GITHUB_USERNAME }}
+          email: ${{ secrets.BOT_GITHUB_EMAIL }}
+      - name: "Install settings.xml"
+        run: cp .github/.ci.settings.xml $HOME/.m2/settings.xml
+      - name: "Build"
+        run: mvn -B -V install -DskipTests
+      - name: "Release"
+        run: mvn -B -DscmCommentPrefix="[maven-release-plugin][skip ci] " -Dpassword="${GIT_PASSWORD}" -DskipTests -Darguments=-DskipTests release:clean release:prepare release:perform
