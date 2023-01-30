@@ -8,11 +8,18 @@ on:
         type: boolean
         required: false
         default: false
+    secrets:
+        BOT_GITHUB_TOKEN:
+          required: true
+        NEXUS_USERNAME:
+          required: true
+        NEXUS_PASSWORD:
+          required: true
 
 env:
   GIT_PASSWORD: ${{ secrets.BOT_GITHUB_TOKEN }}
-  MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
   MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+  MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
 jobs:
   build:
