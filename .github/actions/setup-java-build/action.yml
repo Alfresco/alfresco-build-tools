@@ -9,6 +9,10 @@ inputs:
     description: the desired Java distribution
     default: "temurin"
     required: false
+  maven-settings:
+    description: the location of the custom Maven settings.xml file to install
+    default: ".ci.settings.xml"
+    required: false
 runs:
   using: composite
   steps:
@@ -19,6 +23,9 @@ runs:
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-maven-
+    - name: "Install ${{ inputs.maven-settings }}"
+      shell: bash
+      run: "cp ${{ inputs.maven-settings }} $HOME/.m2/settings.xml || :"
     - name: "Set up Java"
       uses: actions/setup-java@v3
       with:
