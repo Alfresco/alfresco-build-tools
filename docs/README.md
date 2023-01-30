@@ -1001,6 +1001,7 @@ See [setup-helm-docs](../.github/actions/setup-helm-docs/action.yml) for a usage
         with:
           java-version: "17" # optional
           java-distribution: "temurin" # optional
+          maven-settings: ".ci.settings.xml" # optional
 ```
 
 ### setup-kind
