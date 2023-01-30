@@ -33,3 +33,4 @@ runs:
       with:
         java-version: ${{ inputs.java-version }}
         distribution: ${{ inputs.java-distribution }}
+        overwrite-settings: false
