@@ -25,7 +25,7 @@ runs:
           ${{ runner.os }}-maven-
     - name: "Install ${{ inputs.maven-settings }}"
       shell: bash
-      run: >
+      run: |
         mkdir -p $HOME/.m2
         cp ${{ inputs.maven-settings }} $HOME/.m2/settings.xml || true
     - name: "Set up Java"
