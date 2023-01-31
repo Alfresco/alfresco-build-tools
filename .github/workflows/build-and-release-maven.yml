@@ -59,9 +59,9 @@ jobs:
         run: |
           SHOULD_RELEASE=false
 
-          RELEASE_BRANCHES=${{ inputs.release-branches }}
+          RELEASE_BRANCHES="${{ inputs.release-branches }}"
           if [[ -z "$RELEASE_BRANCHES" ]]; then
-            RELEASE_BRANCHES=${{ github.event.repository.default_branch }}
+            RELEASE_BRANCHES="${{ github.event.repository.default_branch }}"
           fi
 
           if [[ ! "${{ github.event.head_commit.message }}" =~ "\[no-release\]" ]] && [[ "${{ github.ref_name }}" =~ "$RELEASE_BRANCHES" ]]; then
