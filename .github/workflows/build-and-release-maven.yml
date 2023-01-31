@@ -14,10 +14,10 @@ on:
         required: false
         default: true
       release-branches:
-        description: array of branches that are valid for the release process
+        description: regex defining branches that are valid for the release process
         type: string
-        default: >
-          ["${{ github.event.repository.default_branch }}"]
+        required: false
+        default: '' # defaults to github.event.repository.default_branch
     secrets:
         BOT_GITHUB_USERNAME:
           required: true
@@ -49,36 +49,35 @@ jobs:
         if: ${{ !inputs.skip-tests }}
         run: mvn -B -V install
 
-  automatic_release:
-    name: "Release (Automatic)"
+  compute_release_conditions:
+    name: "Compute Release conditions"
     runs-on: ubuntu-latest
     needs: build
-    if: >
-      ${{ inputs.auto-release }} &&
-       contains(fromJSON('${{ inputs.release-branches }}'), github.ref_name) &&
-       github.event_name != 'pull_request' &&
-       !contains(github.event.head_commit.message, '[no-release]')
     steps:
-      - uses: actions/checkout@v3
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.33.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v1.33.0
-        with:
-          username: ${{ secrets.BOT_GITHUB_USERNAME }}
-          email: ${{ secrets.BOT_GITHUB_EMAIL }}
-      - name: "Build"
-        run: mvn -B -V install -DskipTests
-      - name: "Release"
-        run: mvn -B -DscmCommentPrefix="[maven-release-plugin][skip ci] " -Dpassword="${GIT_PASSWORD}" -DskipTests -Darguments=-DskipTests release:clean release:prepare release:perform
+      - name: Compute Release conditions
+        id: compute
+        run: |
+          SHOULD_RELEASE=false
 
-  manual_release:
-    name: "Release (Manual)"
+          RELEASE_BRANCHES=${{ inputs.release-branches }}
+          if [[ -z "$RELEASE_BRANCHES" ]]; then
+            RELEASE_BRANCHES=${{ github.event.repository.default_branch }}
+          fi
+
+          if [[ ! "${{ github.event.head_commit.message }}" =~ "\[no-release\]" ]] && [[ "${{ github.ref_name }}" =~ "$RELEASE_BRANCHES" ]]; then
+            if [[ "${{ inputs.auto-release }}" == "true" ]] || [[  "${{ github.event.head_commit.message }}" =~ "\[release\]" ]]; then
+              SHOULD_RELEASE=true
+            fi
+          fi
+          echo "should_release=${SHOULD_RELEASE}" >> $GITHUB_OUTPUT
+    outputs:
+      should_release: ${{ steps.compute.outputs.should_release }}
+
+  release:
+    name: "Release"
     runs-on: ubuntu-latest
-    needs: build
-    if: >
-      ${{ !inputs.auto-release }} &&
-       contains(fromJSON('${{ inputs.release-branches }}'), github.ref_name) &&
-       github.event_name != 'pull_request' &&
-       contains(github.event.head_commit.message, '[release]')
+    needs: compute_release_conditions
+    if: ${{ needs.compute_release_conditions.outputs.should_release }}
     steps:
       - uses: actions/checkout@v3
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.33.0
@@ -88,5 +87,6 @@ jobs:
           email: ${{ secrets.BOT_GITHUB_EMAIL }}
       - name: "Build"
         run: mvn -B -V install -DskipTests
-      - name: "Release"
-        run: mvn -B -DscmCommentPrefix="[maven-release-plugin][skip ci] " -Dpassword="${GIT_PASSWORD}" -DskipTests -Darguments=-DskipTests release:clean release:prepare release:perform
+      # Temporarily halt release for testing purposes
+      #- name: "Release"
+      #  run: mvn -B -DscmCommentPrefix="[maven-release-plugin][skip ci] " -Dpassword="${GIT_PASSWORD}" -DskipTests -Darguments=-DskipTests release:clean release:prepare release:perform
