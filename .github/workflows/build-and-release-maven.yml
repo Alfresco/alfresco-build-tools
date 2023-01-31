@@ -9,6 +9,10 @@ on:
         required: false
         default: false
     secrets:
+        BOT_GITHUB_USERNAME:
+          required: true
+        BOT_GITHUB_EMAIL:
+          required: true
         BOT_GITHUB_TOKEN:
           required: true
         NEXUS_USERNAME:
@@ -27,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.32.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.33.0
       - name: "Build"
         if: ${{ inputs.skip-tests }}
         run: mvn -B -V install -DskipTests
@@ -44,13 +48,11 @@ jobs:
        !contains(github.event.head_commit.message, '[no-release]')
     steps:
       - uses: actions/checkout@v3
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.32.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v1.32.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v1.33.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           email: ${{ secrets.BOT_GITHUB_EMAIL }}
-      - name: "Install settings.xml"
-        run: cp .github/.ci.settings.xml $HOME/.m2/settings.xml
       - name: "Build"
         run: mvn -B -V install -DskipTests
       - name: "Release"
