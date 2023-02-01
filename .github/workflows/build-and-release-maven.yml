@@ -61,11 +61,11 @@ jobs:
 
           RELEASE_BRANCHES="${{ inputs.release-branches }}"
           if [[ -z "$RELEASE_BRANCHES" ]]; then
-            RELEASE_BRANCHES="${{ github.event.repository.default_branch }}"
+            RELEASE_BRANCHES="^${{ github.event.repository.default_branch }}$"
           fi
 
-          if [[ ! "${{ github.event.head_commit.message }}" =~ "\[no-release\]" ]] && [[ "${{ github.ref_name }}" =~ "$RELEASE_BRANCHES" ]]; then
-            if [[ "${{ inputs.auto-release }}" == "true" ]] || [[  "${{ github.event.head_commit.message }}" =~ "\[release\]" ]]; then
+          if [[ ! "${{ github.event.head_commit.message }}" =~ \[no-release\] ]] && [[ "${{ github.ref_name }}" =~ $RELEASE_BRANCHES ]]; then
+            if [[ "${{ inputs.auto-release }}" == "true" ]] || [[  "${{ github.event.head_commit.message }}" =~ \[release\] ]]; then
               SHOULD_RELEASE=true
             fi
           fi
