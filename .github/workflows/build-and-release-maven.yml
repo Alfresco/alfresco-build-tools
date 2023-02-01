@@ -87,6 +87,5 @@ jobs:
           email: ${{ secrets.BOT_GITHUB_EMAIL }}
       - name: "Build"
         run: mvn -B -V install -DskipTests
-       Temporarily halt release for testing purposes
       - name: "Release"
         run: mvn -B -DscmCommentPrefix="[maven-release-plugin][skip ci] " -Dpassword="${GIT_PASSWORD}" -DskipTests -Darguments=-DskipTests release:clean release:prepare release:perform
