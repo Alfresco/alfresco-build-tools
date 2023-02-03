@@ -93,4 +93,4 @@ jobs:
       - name: "Build"
         run: mvn -B -V install -DskipTests
       - name: "Release"
-        run: mvn -B -DscmCommentPrefix="[maven-release-plugin][skip ci] " -Dpassword="${GIT_PASSWORD}" -DskipTests -Darguments="-DskipTests ${{ inputs.release-arguments }}" release:clean release:prepare release:perform
+        run: mvn -B -DscmCommentPrefix="[maven-release-plugin][skip ci] " -Dpassword="${GIT_PASSWORD}" -DskipTests -Darguments="-DskipTests ${{ inputs.release-args }}" release:clean release:prepare release:perform
