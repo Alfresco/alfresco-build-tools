@@ -18,6 +18,11 @@ on:
         type: string
         required: false
         default: '' # defaults to github.event.repository.default_branch
+      release-args:
+        description: additional Maven release arguments
+        type: string
+        required: false
+        default: ''
     secrets:
         BOT_GITHUB_USERNAME:
           required: true
@@ -88,4 +93,4 @@ jobs:
       - name: "Build"
         run: mvn -B -V install -DskipTests
       - name: "Release"
-        run: mvn -B -DscmCommentPrefix="[maven-release-plugin][skip ci] " -Dpassword="${GIT_PASSWORD}" -DskipTests -Darguments=-DskipTests release:clean release:prepare release:perform
+        run: mvn -B -DscmCommentPrefix="[maven-release-plugin][skip ci] " -Dpassword="${GIT_PASSWORD}" -DskipTests -Darguments="-DskipTests ${{ inputs.release-arguments }}" release:clean release:prepare release:perform
