@@ -8,6 +8,11 @@ on:
         type: boolean
         required: false
         default: false
+      build-args:
+        description: additional Maven build arguments
+        type: string
+        required: false
+        default: ''
       auto-release:
         description: release automatically or only when the [release] commit trigger is present
         type: boolean
@@ -49,10 +54,10 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.33.0
       - name: "Build"
         if: ${{ inputs.skip-tests }}
-        run: mvn -B -V install -DskipTests
+        run: mvn -B -V install -DskipTests ${{ inputs.build-args }}
       - name: "Build and Test"
         if: ${{ !inputs.skip-tests }}
-        run: mvn -B -V install
+        run: mvn -B -V install ${{ inputs.build-args }}
 
   compute_release_conditions:
     name: "Compute Release conditions"
@@ -91,6 +96,6 @@ jobs:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           email: ${{ secrets.BOT_GITHUB_EMAIL }}
       - name: "Build"
-        run: mvn -B -V install -DskipTests
+        run: mvn -B -V install -DskipTests ${{ inputs.build-args }}
       - name: "Release"
         run: mvn -B -DscmCommentPrefix="[maven-release-plugin][skip ci] " -Dpassword="${GIT_PASSWORD}" -DskipTests -Darguments="-DskipTests ${{ inputs.release-args }}" release:clean release:prepare release:perform
