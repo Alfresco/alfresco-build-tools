@@ -1,0 +1,101 @@
+name: Build and Release Maven project
+
+on:
+  workflow_call:
+    inputs:
+      skip-tests:
+        description: skips the tests during the Build phase if set to 'true'
+        type: boolean
+        required: false
+        default: false
+      build-args:
+        description: additional Maven build arguments
+        type: string
+        required: false
+        default: ''
+      auto-release:
+        description: release automatically or only when the [release] commit trigger is present
+        type: boolean
+        required: false
+        default: true
+      release-branches:
+        description: regex defining branches that are valid for the release process
+        type: string
+        required: false
+        default: '' # defaults to github.event.repository.default_branch
+      release-args:
+        description: additional Maven release arguments
+        type: string
+        required: false
+        default: ''
+    secrets:
+        BOT_GITHUB_USERNAME:
+          required: true
+        BOT_GITHUB_EMAIL:
+          required: true
+        BOT_GITHUB_TOKEN:
+          required: true
+        NEXUS_USERNAME:
+          required: true
+        NEXUS_PASSWORD:
+          required: true
+
+env:
+  GIT_PASSWORD: ${{ secrets.BOT_GITHUB_TOKEN }}
+  MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+  MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+
+jobs:
+  build:
+    name: "Build"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.33.0
+      - name: "Build"
+        if: ${{ inputs.skip-tests }}
+        run: mvn -B -V install -DskipTests ${{ inputs.build-args }}
+      - name: "Build and Test"
+        if: ${{ !inputs.skip-tests }}
+        run: mvn -B -V install ${{ inputs.build-args }}
+
+  compute_release_conditions:
+    name: "Compute Release conditions"
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Compute Release conditions
+        id: compute
+        run: |
+          SHOULD_RELEASE=false
+
+          RELEASE_BRANCHES="${{ inputs.release-branches }}"
+          if [[ -z "$RELEASE_BRANCHES" ]]; then
+            RELEASE_BRANCHES="^${{ github.event.repository.default_branch }}$"
+          fi
+
+          if [[ ! "${{ github.event.head_commit.message }}" =~ \[no-release\] ]] && [[ "${{ github.ref_name }}" =~ $RELEASE_BRANCHES ]]; then
+            if [[ "${{ inputs.auto-release }}" == "true" ]] || [[  "${{ github.event.head_commit.message }}" =~ \[release\] ]]; then
+              SHOULD_RELEASE=true
+            fi
+          fi
+          echo "should_release=${SHOULD_RELEASE}" >> $GITHUB_OUTPUT
+    outputs:
+      should_release: ${{ steps.compute.outputs.should_release }}
+
+  release:
+    name: "Release"
+    runs-on: ubuntu-latest
+    needs: compute_release_conditions
+    if: needs.compute_release_conditions.outputs.should_release == 'true'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v1.33.0
+        with:
+          username: ${{ secrets.BOT_GITHUB_USERNAME }}
+          email: ${{ secrets.BOT_GITHUB_EMAIL }}
+      - name: "Build"
+        run: mvn -B -V install -DskipTests ${{ inputs.build-args }}
+      - name: "Release"
+        run: mvn -B -DscmCommentPrefix="[maven-release-plugin][skip ci] " -Dpassword="${GIT_PASSWORD}" -DskipTests -Darguments="-DskipTests ${{ inputs.release-args }}" release:clean release:prepare release:perform
