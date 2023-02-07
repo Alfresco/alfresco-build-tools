@@ -52,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.34.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.34.1
       - name: "Build"
         if: ${{ inputs.skip-tests }}
         run: mvn -B -V install -DskipTests ${{ inputs.build-args }}
@@ -91,8 +91,8 @@ jobs:
     if: needs.compute_release_conditions.outputs.should_release == 'true'
     steps:
       - uses: actions/checkout@v3
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.34.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v1.34.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.34.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v1.34.1
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           email: ${{ secrets.BOT_GITHUB_EMAIL }}
