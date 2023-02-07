@@ -54,10 +54,10 @@ jobs:
       - uses: actions/checkout@v3
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.34.2
       - name: "Build"
-        if: ${{ inputs.skip-tests }}
+        if: ${{ inputs.skip-tests == 'true' }}
         run: mvn -B -V install -DskipTests ${{ inputs.build-args }}
       - name: "Build and Test"
-        if: ${{ !inputs.skip-tests }}
+        if: ${{ inputs.skip-tests == 'false' }}
         run: mvn -B -V install ${{ inputs.build-args }}
 
   compute_release_conditions:
