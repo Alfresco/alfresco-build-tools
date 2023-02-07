@@ -91,6 +91,8 @@ jobs:
     if: needs.compute_release_conditions.outputs.should_release == 'true'
     steps:
       - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.34.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v1.34.1
         with:
