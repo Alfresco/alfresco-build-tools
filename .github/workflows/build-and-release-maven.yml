@@ -53,6 +53,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.34.2
+      - name: "Echo skip-tests"
+        run: echo ${{ input.skip-tests }}
       - name: "Build"
         if: ${{ inputs.skip-tests == 'true' }}
         run: mvn -B -V install -DskipTests ${{ inputs.build-args }}
