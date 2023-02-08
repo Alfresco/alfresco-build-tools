@@ -178,7 +178,7 @@ runs:
         PUSH_OPTION: ${{ steps.define_docker_push.outputs.command }}
         TAG: ${{env.VERSION}}
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.32.0
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.34.2
       if: github.event_name == 'push'
       with:
         username: ${{ inputs.git-username }}
