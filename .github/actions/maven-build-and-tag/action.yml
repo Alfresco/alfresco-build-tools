@@ -95,7 +95,7 @@ runs:
     - name: Update pom files to the new version
       id: update-pom-to-next-version
       if: github.event_name == 'push' || env.IS_PREVIEW == 'true'
-      uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@AAE-11861-preview-version-2-dev-jsokolowski
+      uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@v1.35.0
       with:
         property-to-update: ${{ inputs.property-to-update }}
         maven-cli-opts: ${{ steps.compute-maven-options.outputs.result }}
