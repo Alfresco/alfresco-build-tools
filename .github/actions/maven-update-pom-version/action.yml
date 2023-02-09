@@ -13,10 +13,6 @@ inputs:
   repository-directory:
     description: git repository holding the code
     required: false
-outputs:
-  next-prerelease:
-    description: "Next prerelease"
-    value: ${{ steps.resolve-version.outputs.version }}
 runs:
   using: composite
   steps:
