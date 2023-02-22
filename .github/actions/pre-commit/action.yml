@@ -50,5 +50,5 @@ runs:
 
     - name: rethrow failure when autocommit is disable or no changes has been detected
       if: steps.pre-commit.outcome == 'failure' && (inputs.auto-commit != 'true' || steps.auto-commit-action.outputs.changes_detected == 'false')
-      run: exit 1
+      run: echo "pre-commit failed, auto-commit is disabled or no changes detected for auto-commit" && exit 1
       shell: bash
