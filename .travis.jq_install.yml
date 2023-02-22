@@ -1,5 +1,5 @@
 import:
-  - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.35.0
+  - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.35.1
 before_install:
   - |-
     TOOL_VERSION=${JQ_VERSION:-1.6}
