@@ -30,19 +30,17 @@ on:
         default: ''
     secrets:
         BOT_GITHUB_USERNAME:
-          required: true
+          required: false
         BOT_GITHUB_EMAIL:
-          required: true
+          required: false
         BOT_GITHUB_TOKEN:
-          required: true
+          required: false
         NEXUS_USERNAME:
           required: true
         NEXUS_PASSWORD:
           required: true
 
 env:
-  GIT_USERNAME: ${{ secrets.BOT_GITHUB_USERNAME }}
-  GIT_PASSWORD: ${{ secrets.BOT_GITHUB_TOKEN }}
   MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
   MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 
@@ -101,4 +99,4 @@ jobs:
       - name: "Build"
         run: mvn -B -V install -DskipTests ${{ inputs.build-args }}
       - name: "Release"
-        run: mvn -B -DscmCommentPrefix="[maven-release-plugin][skip ci] " -Dusername="${GIT_USERNAME}" -Dpassword="${GIT_PASSWORD}" -DskipTests -Darguments="-DskipTests ${{ inputs.release-args }}" release:clean release:prepare release:perform
+        run: mvn -B -DscmCommentPrefix="[maven-release-plugin][skip ci] " -Dusername="${{ secrets.BOT_GITHUB_USERNAME }}" -Dpassword="${{ secrets.BOT_GITHUB_TOKEN }}" -DskipTests -Darguments="-DskipTests ${{ inputs.release-args }}" release:clean release:prepare release:perform
