@@ -21,10 +21,14 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.head_ref }}
+
     - name: Set up Python ${{ inputs.python-version }}
       uses: actions/setup-python@v3
       with:
         python-version: ${{ inputs.python-version }}
+
     - name: build extra_args
       shell: bash
       env:
@@ -33,6 +37,7 @@ runs:
         ${{ inputs.pre-commit-all-files }} && EXTRA_ARGS='--all-files'
         EXTRA_ARGS="${EXTRA_ARGS} ${{ inputs.pre-commit-args }}"
         echo EXTRA_ARGS="${EXTRA_ARGS}" >> $GITHUB_ENV
+
     - uses: pre-commit/action@v3.0.0
       id: pre-commit
       continue-on-error: true
