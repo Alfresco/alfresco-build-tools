@@ -27,7 +27,7 @@ runs:
         ref: ${{ github.head_ref }}
 
     - name: Set up Python ${{ inputs.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ inputs.python-version }}
 
@@ -40,7 +40,7 @@ runs:
         EXTRA_ARGS="${EXTRA_ARGS} ${{ inputs.pre-commit-args }}"
         echo EXTRA_ARGS="${EXTRA_ARGS}" >> $GITHUB_ENV
 
-    - uses: pre-commit/action@v3.0.0
+    - uses: pre-commit/action@646c83fcd040023954eafda54b4db0192ce70507 # v3.0.0
       id: pre-commit
       env:
         CONTINUE_ON_ERROR: ${{ inputs.auto-commit == 'true' }}
@@ -48,7 +48,7 @@ runs:
       with:
         extra_args: ${{ env.EXTRA_ARGS }}
 
-    - uses: stefanzweifel/git-auto-commit-action@v4
+    - uses: stefanzweifel/git-auto-commit-action@3ea6ae190baf489ba007f7c92608f33ce20ef04a # v4.16.0
       id: auto-commit-action
       if: inputs.auto-commit == 'true'
 
