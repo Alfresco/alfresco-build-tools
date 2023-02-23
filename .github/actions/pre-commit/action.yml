@@ -42,7 +42,9 @@ runs:
 
     - uses: pre-commit/action@v3.0.0
       id: pre-commit
-      continue-on-error: ${{ inputs.auto-commit == 'true' }}
+      env:
+        CONTINUE_ON_ERROR: ${{ inputs.auto-commit == 'true' }}
+      continue-on-error: ${{ fromJSON(env.CONTINUE_ON_ERROR) }}
       with:
         extra_args: ${{ env.EXTRA_ARGS }}
 
