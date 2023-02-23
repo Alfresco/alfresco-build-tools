@@ -9,16 +9,16 @@ inputs:
       Whether to run pre-commit checks on all files (defaults to "true")
     required: false
     default: "true"
-  python-version:
-    description: The python version of the local runner
-    required: false
-    default: "3.9"
   auto-commit:
     description: >-
       Enables auto-commit of eventual fixups
       (requires `permissions.contents: write` on the calling job)
     required: false
     default: "false"
+  python-version:
+    description: The python version of the local runner
+    required: false
+    default: "3.9"
 runs:
   using: "composite"
   steps:
@@ -54,7 +54,7 @@ runs:
       id: auto-commit-action
       if: inputs.auto-commit == 'true'
 
-    - name: Re-throw potential pre-commit failure with no changes detected for auto-commit
+    - name: Re-throw potential pre-commit failure when no changes detected for auto-commit
       if: steps.pre-commit.outcome == 'failure' && (inputs.auto-commit != 'true' || steps.auto-commit-action.outputs.changes_detected == 'false')
-      run: echo "pre-commit failed with no changes detected for auto-commit" && exit 1
+      run: echo "pre-commit failed and no changes detected for auto-commit" && exit 1
       shell: bash
