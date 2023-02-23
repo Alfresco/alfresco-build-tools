@@ -23,8 +23,10 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v3
+      env:
+        REF_TO_CHECKOUT: ${{ inputs.auto-commit == 'true' && github.head_ref || '' }}
       with:
-        ref: ${{ github.head_ref }}
+        ref: ${{ env.REF_TO_CHECKOUT }}
 
     - name: Set up Python ${{ inputs.python-version }}
       uses: actions/setup-python@v4
