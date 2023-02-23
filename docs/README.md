@@ -52,6 +52,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [kubectl-keep-nslogs](#kubectl-keep-nslogs)
     - [load-release-descriptor](#load-release-descriptor)
     - [maven-build-and-tag](#maven-build-and-tag)
+      - [Preview option for maven-build-and-tag](#preview-option-for-maven-build-and-tag)
     - [maven-deploy-file](#maven-deploy-file)
     - [maven-release](#maven-release)
     - [maven-update-pom-version](#maven-update-pom-version)
@@ -700,9 +701,9 @@ Releases the specified staging repository on Nexus. The repository should be in 
 
 ### pre-commit
 
-Executes a pre-commit step.
+Executes a [pre-commit](https://pre-commit.com/) step.
 
-This can be done in a dedicated new workflow:
+This action is usually added in a dedicated workflow:
 
 ```yml
 name: pre-commit
@@ -711,23 +712,23 @@ on:
   pull_request:
     branches: [ master ]
   push:
+    branches: [ master ]
 
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
+        with:
+          auto-commit: "true" # optionally commit automated fix changes back
 ```
 
-This can also be done into an existing workflow, just declaring the step:
+This action requires a pre-existing `.pre-commit-config.yaml` file that needs to
+be present into the caller repository. You can find more documentation related
+to pre-commit hooks in the [dedicated section](pre-commit-hooks.md).
 
-```yml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
-```
-
-Both samples require a configuration file `.pre-commit-config.yaml` to be added to the caller repository.
-
-Note that this action calls the `actions/checkout` action.
+Note that this action includes an `actions/checkout` step that is mandatory for
+the proper handling of auto-commit feature.
 
 ### pre-commit-default
 

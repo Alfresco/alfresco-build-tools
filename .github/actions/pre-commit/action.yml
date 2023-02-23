@@ -2,13 +2,19 @@ name: "Pre-commit run"
 description: "Install and run pre-commit"
 inputs:
   pre-commit-args:
-    description: Additionnal parameters to pass to pre-commit
+    description: Additional parameters to pass to pre-commit
     required: false
   pre-commit-all-files:
     description: >-
       Whether to run pre-commit checks on all files (defaults to "true")
     required: false
     default: "true"
+  auto-commit:
+    description: >-
+      Enables auto-commit of eventual fixups
+      (requires `permissions.contents: write` on the calling job)
+    required: false
+    default: "false"
   python-version:
     description: The python version of the local runner
     required: false
@@ -17,10 +23,16 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v3
+      env:
+        REF_TO_CHECKOUT: ${{ inputs.auto-commit == 'true' && github.head_ref || '' }}
+      with:
+        ref: ${{ env.REF_TO_CHECKOUT }}
+
     - name: Set up Python ${{ inputs.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ inputs.python-version }}
+
     - name: build extra_args
       shell: bash
       env:
@@ -29,6 +41,20 @@ runs:
         ${{ inputs.pre-commit-all-files }} && EXTRA_ARGS='--all-files'
         EXTRA_ARGS="${EXTRA_ARGS} ${{ inputs.pre-commit-args }}"
         echo EXTRA_ARGS="${EXTRA_ARGS}" >> $GITHUB_ENV
-    - uses: pre-commit/action@v3.0.0
+
+    - uses: pre-commit/action@646c83fcd040023954eafda54b4db0192ce70507 # v3.0.0
+      id: pre-commit
+      env:
+        CONTINUE_ON_ERROR: ${{ inputs.auto-commit == 'true' }}
+      continue-on-error: ${{ fromJSON(env.CONTINUE_ON_ERROR) }}
       with:
         extra_args: ${{ env.EXTRA_ARGS }}
+
+    - uses: stefanzweifel/git-auto-commit-action@3ea6ae190baf489ba007f7c92608f33ce20ef04a # v4.16.0
+      id: auto-commit-action
+      if: inputs.auto-commit == 'true'
+
+    - name: Re-throw potential pre-commit failure when no changes detected for auto-commit
+      if: inputs.auto-commit == 'true' && steps.pre-commit.outcome == 'failure' && steps.auto-commit-action.outputs.changes_detected == 'false'
+      run: echo "pre-commit failed and no changes detected to auto-commit" && exit 1
+      shell: bash
