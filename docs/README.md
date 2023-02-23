@@ -52,6 +52,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [kubectl-keep-nslogs](#kubectl-keep-nslogs)
     - [load-release-descriptor](#load-release-descriptor)
     - [maven-build-and-tag](#maven-build-and-tag)
+      - [Preview option for maven-build-and-tag](#preview-option-for-maven-build-and-tag)
     - [maven-deploy-file](#maven-deploy-file)
     - [maven-release](#maven-release)
     - [maven-update-pom-version](#maven-update-pom-version)
