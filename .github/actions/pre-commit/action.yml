@@ -2,7 +2,7 @@ name: "Pre-commit run"
 description: "Install and run pre-commit"
 inputs:
   pre-commit-args:
-    description: Additionnal parameters to pass to pre-commit
+    description: Additional parameters to pass to pre-commit
     required: false
   pre-commit-all-files:
     description: >-
@@ -52,7 +52,7 @@ runs:
       id: auto-commit-action
       if: inputs.auto-commit == 'true'
 
-    - name: rethrow failure when autocommit is disable or no changes has been detected
+    - name: Re-throw potential pre-commit failure with no changes detected for auto-commit
       if: steps.pre-commit.outcome == 'failure' && (inputs.auto-commit != 'true' || steps.auto-commit-action.outputs.changes_detected == 'false')
-      run: echo "pre-commit failed, auto-commit is disabled or no changes detected for auto-commit" && exit 1
+      run: echo "pre-commit failed with no changes detected for auto-commit" && exit 1
       shell: bash
