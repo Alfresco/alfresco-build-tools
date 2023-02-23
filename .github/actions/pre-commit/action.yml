@@ -55,6 +55,6 @@ runs:
       if: inputs.auto-commit == 'true'
 
     - name: Re-throw potential pre-commit failure when no changes detected for auto-commit
-      if: steps.pre-commit.outcome == 'failure' && (inputs.auto-commit != 'true' || steps.auto-commit-action.outputs.changes_detected == 'false')
-      run: echo "pre-commit failed and no changes detected for auto-commit" && exit 1
+      if: inputs.auto-commit == 'true' && steps.pre-commit.outcome == 'failure' && steps.auto-commit-action.outputs.changes_detected == 'false'
+      run: echo "pre-commit failed and no changes detected to auto-commit" && exit 1
       shell: bash
