@@ -335,12 +335,12 @@ Configures the git username and email to associate commits with the provided ide
 
 The two vars in the previous snippet are [workflow configuration variables](https://github.blog/changelog/2023-01-10-github-actions-support-for-configuration-variables-in-workflows/) that can be created at organization level and shared across different repositories.
 
-### free-runner-disk-space
+### free-hosted-runner-disk-space
 
-Removes unnecessary folders and files from a GHA runner. This action might be useful when we run jobs which require a lot of disk space.
+Removes unnecessary folders and files from a GHA [hosted runner](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners). This action might be useful when we run jobs which require a lot of disk space.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-runner-disk-space@ref
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@ref
 ```
 
 By default it removes following directories:
