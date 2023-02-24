@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/free-runner-disk-space
       - uses: ./.github/actions/pre-commit
       - uses: ./.github/actions/pre-commit-default
       # - name: Manual test for send slack notification
@@ -67,3 +66,8 @@ jobs:
             echo TRAVIS_BRANCH should not be set!
             exit 1
           fi
+      - name: Disk size before cleanup
+        run: df -h
+      - uses: ./.github/actions/free-runner-disk-space
+      - name: Disk size after cleanup
+        run: df -h
