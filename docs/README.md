@@ -340,7 +340,7 @@ The two vars in the previous snippet are [workflow configuration variables](http
 Removes unnecessary folders and files from a GHA runner. This action might be useful when we run jobs which require a lot of disk space.
 
 ```yaml
-      - uses: ./.github/actions/free-runner-disk-space
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-runner-disk-space@ref
 ```
 
 By default it removes following directories:
