@@ -1,0 +1,14 @@
+name: "Free GHA runner disk space"
+description: "Removes unnecessary files from the runner."
+inputs:
+  to-remove:
+    description: Collection of files/folders to be removed
+    default: "/usr/share/dotnet /opt/ghc /usr/local/share/boost $AGENT_TOOLSDIRECTORY"
+    required: false
+runs:
+  using: composite
+  steps:
+    - name: Remove unnecessary files
+      run: |
+        sudo rm -rf ${{ to-remove }}
+
