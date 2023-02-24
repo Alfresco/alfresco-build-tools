@@ -13,3 +13,4 @@ runs:
         sudo rm -rf ${{ inputs.to-remove }}
       shell: bash
 
+
