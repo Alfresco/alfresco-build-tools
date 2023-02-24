@@ -69,5 +69,5 @@ jobs:
       - name: Preserve available disk size before cleanup
         run: echo total_size_before=$(df --total --output=avail | tail -1) >> $GITHUB_ENV
       - uses: ./.github/actions/free-runner-disk-space
-      - name: Test if available disk size decreased
-        run: test ${{ env.total_size_before }} -gt $(df --total --output=avail | tail -1)
+      - name: Test if available disk size increased
+        run: test ${{ env.total_size_before }} -lt $(df --total --output=avail | tail -1)
