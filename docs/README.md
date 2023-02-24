@@ -335,6 +335,23 @@ Configures the git username and email to associate commits with the provided ide
 
 The two vars in the previous snippet are [workflow configuration variables](https://github.blog/changelog/2023-01-10-github-actions-support-for-configuration-variables-in-workflows/) that can be created at organization level and shared across different repositories.
 
+### free-runner-disk-space
+
+Removes unnecessary folders and files from a GHA runner. This action might be useful when we run jobs which require a lot of disk space.
+
+```yaml
+      - uses: ./.github/actions/free-runner-disk-space
+```
+
+By default it removes following directories:
+
+- `/usr/share/dotnet`
+- `/opt/ghc`
+- `/usr/local/share/boost`
+- `$AGENT_TOOLSDIRECTORY`
+
+You can override the default behavior by specifying your own collection of files and directories using `to-remove` input parameter.
+
 ### get-branch-name
 
 Loads the name of the branch on which the action was called into `BRANCH_NAME` environment variable
