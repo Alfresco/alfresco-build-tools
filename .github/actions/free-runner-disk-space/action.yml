@@ -11,4 +11,5 @@ runs:
     - name: Remove unnecessary files
       run: |
         sudo rm -rf ${{ inputs.to-remove }}
+      shell: bash
 
