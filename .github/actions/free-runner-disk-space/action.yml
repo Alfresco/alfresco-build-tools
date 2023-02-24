@@ -10,5 +10,5 @@ runs:
   steps:
     - name: Remove unnecessary files
       run: |
-        sudo rm -rf ${{ to-remove }}
+        sudo rm -rf ${{ inputs.to-remove }}
 
