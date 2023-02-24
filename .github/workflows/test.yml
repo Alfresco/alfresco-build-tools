@@ -66,3 +66,8 @@ jobs:
             echo TRAVIS_BRANCH should not be set!
             exit 1
           fi
+      - name: Preserve available disk size before cleanup
+        run: echo total_size_before=$(df --total --output=avail | tail -1) >> $GITHUB_ENV
+      - uses: ./.github/actions/free-hosted-runner-disk-space
+      - name: Test if available disk size increased
+        run: test ${{ env.total_size_before }} -lt $(df --total --output=avail | tail -1)
