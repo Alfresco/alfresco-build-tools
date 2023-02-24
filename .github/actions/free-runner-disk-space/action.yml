@@ -10,5 +10,9 @@ runs:
   steps:
     - name: Remove unnecessary files
       run: |
+        echo "Before cleanup"
+        df -h
         sudo rm -rf ${{ inputs.to-remove }}
+        echo "After cleanup"
+        df -h
       shell: bash
