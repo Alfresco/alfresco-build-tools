@@ -734,6 +734,8 @@ on:
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # required only when auto-commit is enabled
     steps:
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
         with:
