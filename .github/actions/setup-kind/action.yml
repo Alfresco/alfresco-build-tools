@@ -21,7 +21,7 @@ runs:
           https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
       run: |
         kubectl apply -f $NGINX_MANIFEST
-    
+
     - name: Wait for ingress ready
       shell: bash
       run: |
