@@ -46,6 +46,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [helm-publish-chart](#helm-publish-chart)
     - [helm-release-and-publish](#helm-release-and-publish)
     - [helm-template-yamllint](#helm-template-yamllint)
+    - [helm-plugin](#helm-plugin)
     - [helm-unit-tests](#helm-unit-tests)
     - [helm-update-chart-version](#helm-update-chart-version)
     - [jx-updatebot-pr](#jx-updatebot-pr)
@@ -502,6 +503,20 @@ configuration files that should be suitable for most use cases.
           helm-options: --values tests/values/test_values.yaml --set persistence.enabled=false # to handle mandatory values or test different rendering
           yamllint-config-path: ./.yamllint.yaml # alternative path to yamllint config to override the default one
 ```
+
+### helm-plugin
+
+Install requested Helm plugin
+
+```yaml
+     - uses: >-
+         Alfresco/alfresco-build-tools/.github/actions/helm-plugin@ref
+       with:
+         plugin_url: https://domain/path/to/
+         plugin_version: v1.0.0
+```
+
+`plugin_version` can be skipped so the latest release of the plugin will be installed
 
 ### helm-unit-tests
 
