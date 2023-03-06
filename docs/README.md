@@ -530,6 +530,9 @@ Looks for Helm unit tests written using [helm3-unittest](https://github.com/vbeh
          chart-type: application
 ```
 
+> This plugin is unmaintained and that action will be deprecated. Please use the `helm-plugin` instead
+> together with an additional `run` step to fire up the plugin.
+
 ### helm-update-chart-version
 
 Updates `version` attribute inside `Chart.yaml` file:
