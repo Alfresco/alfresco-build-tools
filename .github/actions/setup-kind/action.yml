@@ -2,7 +2,10 @@ name: "Setup a KinD cluster"
 description: "Spin a local Kubernetes cluster with latest ingress-nginx"
 inputs:
   kind-node-image:
-    description: The slack channel id, channel name, or user id to post to
+    description: |
+      The Kind docker node image to use. Check the Kind version
+      release notes to check the list of suitable images:
+      https://github.com/kubernetes-sigs/kind/releases
     required: true
     default: kindest/node:v1.24.7@sha256:577c630ce8e509131eab1aea12c022190978dd2f745aac5eb1fe65c0807eb315
 runs:
