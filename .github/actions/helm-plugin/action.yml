@@ -1,0 +1,22 @@
+---
+name: Helm Plugin install
+description: >
+  Install an helm plugin from provided url
+inputs:
+  plugin_url:
+    description: URL where to get the plugin from
+    required: true
+  plugin_version:
+    description: version of the helm-unittest plugin to install
+    required: false
+    default: latest
+runs:
+  using: composite
+  steps:
+    - name: Install Helm plugin ${{ inputs.plugin_url }}
+      shell: bash
+      run: |
+        set -e
+        [ ${{ inputs.plugin_version }} != 'latest' ] && \
+        VER="--version ${{ inputs.plugin_version }}"
+        helm plugin install ${{ inputs.plugin_url }} $VER
