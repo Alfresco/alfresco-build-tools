@@ -1,10 +1,14 @@
 # Security best practices
 
-Before creating / modifying any GitHub Actions workflow make sure you're familiar with [Security hardening for GitHub Actions](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions). Pay special attention to:
+Before creating / modifying any GitHub Actions workflow make sure you're familiar with . Pay special attention to:
 
-- [Understanding the risk of script injections](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#understanding-the-risk-of-script-injections)
-- [Good practices for mitigating script injection attacks](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#good-practices-for-mitigating-script-injection-attacks)
-- [Using third-party actions](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions)
+- [Security hardening for GitHub Actions](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions) 
+  - [Script injections](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#understanding-the-risk-of-script-injections)
+  - [third-party/community actions](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions)
+- [Keeping your GitHub Actions and workflows secure](https://securitylab.github.com/research/github-actions-preventing-pwn-requests/)
+  - [Part 2: Untrusted input](https://securitylab.github.com/research/github-actions-untrusted-input/)
+
+In this page we are also providing guidance on how to setup common tooling related to security.
 
 - [Security best practices](#security-best-practices)
   - [Secrets detection](#secrets-detection)
