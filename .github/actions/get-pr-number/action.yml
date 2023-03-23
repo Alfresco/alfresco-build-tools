@@ -4,7 +4,7 @@ inputs:
   branch-name:
     description: name of the branch to get the pr number
     required: true
-    type: string
+
 runs:
   using: composite
   steps:
