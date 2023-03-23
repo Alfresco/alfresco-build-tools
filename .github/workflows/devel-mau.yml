@@ -25,6 +25,7 @@ jobs:
         uses: ./.github/actions/get-pr-number
         with:
           branch-name: $BRANCH_NAME
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: show pr number
         shell: bash

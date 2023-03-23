@@ -4,6 +4,9 @@ inputs:
   branch-name:
     description: name of the branch to get the pr number
     required: true
+  github-token:
+    description: github token
+    required: true
 
 runs:
   using: composite
@@ -15,4 +18,4 @@ runs:
         pull_request_number=$(gh pr view $BRANCH_NAME  --json number -q .number || echo "")
         echo "PR_NUMBER=$pull_request_number" >> $GITHUB_ENV
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
