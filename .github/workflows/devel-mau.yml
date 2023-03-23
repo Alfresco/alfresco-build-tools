@@ -23,6 +23,7 @@ jobs:
 
       - name: Get PR number
         uses: ./.github/actions/get-pr-number
+        id: pr-number
         with:
           branch-name: $BRANCH_NAME
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -30,4 +31,4 @@ jobs:
       - name: show pr number
         shell: bash
         run: |
-          echo "PR: $PR_NUMBER"
+          echo "PR: ${{ steps.pr-number.outputs.number }}

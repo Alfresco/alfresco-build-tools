@@ -7,15 +7,20 @@ inputs:
   github-token:
     description: github token
     required: true
+outputs:
+  number:
+    description: PR number output
+    value: ${{steps.pr-number-step.outputs.pr_number}}
 
 runs:
   using: composite
   steps:
     - name: Get PR number
       shell: bash
+      id: pr-number-step
       run: |
         BRANCH_NAME=${{ inputs.branch-name }}
         pull_request_number=$(gh pr view $BRANCH_NAME  --json number -q .number || echo "")
-        echo "PR_NUMBER=$pull_request_number" >> $GITHUB_ENV
+        echo "pr_number=$pull_request_number" >> $GITHUB_OUTPUT
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
