@@ -31,4 +31,4 @@ jobs:
       - name: show pr number
         shell: bash
         run: |
-          echo "PR: ${{ steps.pr-number.outputs.number }}
+          echo "PR: ${{ steps.pr-number.outputs.number }}"
