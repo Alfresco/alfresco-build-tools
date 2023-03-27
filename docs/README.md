@@ -396,7 +396,7 @@ The result is returned in the output named: `number`.
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-pr-number@ref
         id: action
-        with:          
+        with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         - name: Show the number
           run: echo "PR number is ${{ steps.action.outputs.number }}"
