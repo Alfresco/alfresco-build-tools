@@ -37,6 +37,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [get-build-info](#get-build-info)
     - [git-check-existing-tag](#git-check-existing-tag)
     - [get-commit-message](#get-commit-message)
+    - [get-pr-number](#get-pr-number)
     - [git-commit-changes](#git-commit-changes)
     - [git-latest-tag](#git-latest-tag)
     - [helm-build-chart](#helm-build-chart)
@@ -385,6 +386,20 @@ Loads the content of the last commit message that triggered the action into `COM
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@ref
+```
+
+### get-pr-number
+
+Get the pull request number. The branch name and github_token are mandotory inputs.
+The result is returned in the output named: `number`.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-pr-number@ref
+        id: action
+        with:          
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        - name: Show the number
+          run: echo "PR number is ${{ steps.action.outputs.number }}"
 ```
 
 ### git-commit-changes
