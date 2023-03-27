@@ -1,0 +1,12 @@
+name: 'Get pull request number action'
+description: 'Provide a consistent approach to get number of a pull request'
+inputs:
+  github_token:
+    description: 'Access token of GitHub'
+    required: true
+outputs:
+  number:
+    description: 'Number of pull request'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
