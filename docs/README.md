@@ -390,7 +390,7 @@ Loads the content of the last commit message that triggered the action into `COM
 
 ### get-pr-number
 
-Get the pull request number. The branch name and github_token are mandotory inputs.
+Get the pull request number. The  github_token is mandatory input.
 The result is returned in the output named: `number`.
 
 ```yaml
