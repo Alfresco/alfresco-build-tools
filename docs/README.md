@@ -387,7 +387,7 @@ Loads the content of the last commit message that triggered the action into `COM
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@ref
 ```
 
-To use the action in a proper way, be sure to use a checkout with fetch-depth option as follow: 
+To use the action in a proper way, be sure to use a checkout with fetch-depth option as follow:
 
 ```yaml
       uses: actions/checkout@v3
