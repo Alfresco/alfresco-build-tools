@@ -382,17 +382,14 @@ Checks if a tag with the given name already exists for this remote repository. R
 ### get-commit-message
 
 Loads the content of the last commit message that triggered the action into `COMMIT_MESSAGE` environment variable
+This action requires a checkout with fetch-depth option as follow:
 
 ```yaml
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@ref
-```
-
-To use the action in a proper way, be sure to use a checkout with fetch-depth option as follow:
-
-```yaml
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
 ```
 
 ### git-commit-changes
