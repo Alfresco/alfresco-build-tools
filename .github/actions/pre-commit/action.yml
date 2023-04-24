@@ -15,6 +15,11 @@ inputs:
       (requires `permissions.contents: write` on the calling job)
     required: false
     default: "false"
+  auto-commit-file-pattern:
+    description: >-
+      Glob pattern list of files which should be added to the commit
+    required: false
+    default: "."
   python-version:
     description: The python version of the local runner
     required: false
@@ -53,6 +58,8 @@ runs:
     - uses: stefanzweifel/git-auto-commit-action@3ea6ae190baf489ba007f7c92608f33ce20ef04a # v4.16.0
       id: auto-commit-action
       if: inputs.auto-commit == 'true'
+      with:
+        file_pattern: ${{ inputs.auto-commit-file-pattern }}
 
     - name: Re-throw potential pre-commit failure when no changes detected for auto-commit
       if: inputs.auto-commit == 'true' && steps.pre-commit.outcome == 'failure' && steps.auto-commit-action.outputs.changes_detected == 'false'
