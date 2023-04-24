@@ -1,8 +1,4 @@
 repos:
-  - repo: https://github.com/Alfresco/alfresco-build-tools
-    rev: v1.36.0
-    hooks:
-      - id: travis-yml-lint
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.2.0
     hooks:
