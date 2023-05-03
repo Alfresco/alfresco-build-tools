@@ -119,3 +119,4 @@ jobs:
         run: mvn -B -V install -DskipTests ${{ inputs.build-args }}
       - name: "Release"
         run: mvn -B -DscmCommentPrefix="[maven-release-plugin][skip ci] " -Dusername="${{ secrets.BOT_GITHUB_USERNAME }}" -Dpassword="${{ secrets.BOT_GITHUB_TOKEN }}" -DskipTests -Darguments="-DskipTests ${{ inputs.release-args }}" ${{ inputs.extra-maven-opts }} release:clean release:prepare release:perform
+        
