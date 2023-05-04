@@ -3,6 +3,16 @@ name: Build and Release Maven project
 on:
   workflow_call:
     inputs:
+      java-version:
+        description: the desired Java version
+        type: string
+        required: false
+        default: "17"
+      java-distribution:
+        description: the desired Java distribution
+        type: string
+        required: false
+        default: "temurin"
       skip-tests:
         description: skips the tests during the Build phase if set to 'true'
         type: boolean
@@ -28,6 +38,11 @@ on:
         type: string
         required: false
         default: ''
+      extra-maven-opts:
+        description: additional Maven build options
+        type: string
+        required: false
+
     secrets:
         BOT_GITHUB_USERNAME:
           required: false
@@ -51,6 +66,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.36.0
+        with:
+          java-version: ${{ inputs.java-version }}
+          java-distribution: ${{ inputs.java-distribution }}
       - name: "Build"
         if: ${{ inputs.skip-tests }}
         run: mvn -B -V install -DskipTests ${{ inputs.build-args }}
@@ -67,12 +85,10 @@ jobs:
         id: compute
         run: |
           SHOULD_RELEASE=false
-
           RELEASE_BRANCHES="${{ inputs.release-branches }}"
           if [[ -z "$RELEASE_BRANCHES" ]]; then
             RELEASE_BRANCHES="^${{ github.event.repository.default_branch }}$"
           fi
-
           if [[ ! "${{ github.event.head_commit.message }}" =~ \[no-release\] ]] && [[ "${{ github.ref_name }}" =~ $RELEASE_BRANCHES ]]; then
             if [[ "${{ inputs.auto-release }}" == "true" ]] || [[  "${{ github.event.head_commit.message }}" =~ \[release\] ]]; then
               SHOULD_RELEASE=true
@@ -92,6 +108,9 @@ jobs:
         with:
           persist-credentials: false
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.36.0
+        with:
+          java-version: ${{ inputs.java-version }}
+          java-distribution: ${{ inputs.java-distribution }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v1.36.0
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
@@ -99,4 +118,4 @@ jobs:
       - name: "Build"
         run: mvn -B -V install -DskipTests ${{ inputs.build-args }}
       - name: "Release"
-        run: mvn -B -DscmCommentPrefix="[maven-release-plugin][skip ci] " -Dusername="${{ secrets.BOT_GITHUB_USERNAME }}" -Dpassword="${{ secrets.BOT_GITHUB_TOKEN }}" -DskipTests -Darguments="-DskipTests ${{ inputs.release-args }}" release:clean release:prepare release:perform
+        run: mvn -B -DscmCommentPrefix="[maven-release-plugin][skip ci] " -Dusername="${{ secrets.BOT_GITHUB_USERNAME }}" -Dpassword="${{ secrets.BOT_GITHUB_TOKEN }}" -DskipTests -Darguments="-DskipTests ${{ inputs.release-args }}" ${{ inputs.extra-maven-opts }} release:clean release:prepare release:perform
