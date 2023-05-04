@@ -1,0 +1,77 @@
+description: Sends a teams notification
+name: Send a teams notification
+inputs:
+  webhook-url:
+    description: Microsoft Teams Incoming Webhooks URL
+    type: string
+    required: true
+  needs:
+    description: JSON parsed needs context
+    type: string
+    required: false
+    default: false
+  dry-run:
+    description: Do not actually send the message
+    type: boolean
+    required: false
+    default: false
+  raw:
+    description: JSON object to send to Microsoft Teams
+    type: string
+    required: false
+    default: ""
+  overwrite:
+    description: JSON like object to overwrite default message
+    type: string
+    required: false
+    default: >-
+      {
+          title: `${{github.actor}} initialized ${{ github.event_name}} event on ${{ github.repository }} of branch ${{ github.ref_name}}`,
+          "potentialAction": [
+              {
+                "@type": "OpenUri",
+                "name": "Repository",
+                "targets": [
+                  {
+                    "os": "default",
+                    "uri": "${{ github.server_url }}/${{ github.repository }}"
+                  }
+                ]
+              },
+              {
+                "@type": "OpenUri",
+                "name": "Build URL",
+                "targets": [
+                  {
+                    "os": "default",
+                    "uri": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }
+                ]
+              },
+              {
+                "@type": "OpenUri",
+                "name": "Compare",
+                "targets": [
+                  {
+                    "os": "default",
+                    "uri": "${{ github.event.compare }}"
+                  }
+                ]
+              }
+            ]
+      }
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v3
+    - uses: martialonline/workflow-status@v3
+      id: workflow_status_check
+    - name: Send teams notification
+      uses: skitionek/notify-microsoft-teams@v1.0.4
+      with:
+        webhook_url: ${{ inputs.webhook-url }}
+        job: ${{ toJSON(steps.workflow_status_check.outputs) }}
+        needs: ${{ inputs.needs }}
+        dry_run: ${{ inputs.dry-run }}
+        overwrite: ${{ inputs.overwrite }}
+        raw: ${{ inputs.raw }}
