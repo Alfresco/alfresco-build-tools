@@ -1,5 +1,5 @@
 import:
-  - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.36.0
+  - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.37.0
 env:
   global:
     - TFLINT_VERSION=${TFLINT_VERSION:-0.35.0}
