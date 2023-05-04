@@ -24,7 +24,7 @@ jobs:
       version: ${{ steps.build.outputs.version }}
     steps:
       - run: echo "::warning title=build-and-tag-maven.yml::This reusable workflow is deprecated, use Alfresco/alfresco-build-tools/.github/actions/maven-build-and-tag instead."
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build-and-tag@v1.36.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build-and-tag@v1.37.0
         id: build
         with:
           property-to-update: ${{ inputs.property-to-update }}
