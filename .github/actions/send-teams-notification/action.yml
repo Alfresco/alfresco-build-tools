@@ -64,10 +64,10 @@ runs:
   using: composite
   steps:
     - uses: actions/checkout@v3
-    - uses: martialonline/workflow-status@v3
+    - uses: martialonline/workflow-status@v4
       id: workflow_status_check
     - name: Send teams notification
-      uses: skitionek/notify-microsoft-teams@v1.0.4
+      uses: skitionek/notify-microsoft-teams@v1.0.8
       with:
         webhook_url: ${{ inputs.webhook-url }}
         job: ${{ toJSON(steps.workflow_status_check.outputs) }}
