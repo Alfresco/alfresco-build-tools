@@ -55,13 +55,13 @@
   <servers>
     <server>
       <id>alfresco-internal</id>
-      <username>${{ secrets.NEXUS_USERNAME }}</username>
-      <password>${{ secrets.NEXUS_PASSWORD }}</password>
+      <username>${env.NEXUS_USERNAME}</username>
+      <password>${env.NEXUS_PASSWORD}</password>
     </server>
     <server>
       <id>alfresco-staging</id>
-      <username>${{ secrets.NEXUS_USERNAME }}</username>
-      <password>${{ secrets.NEXUS_PASSWORD }}</password>
+      <username>${env.NEXUS_USERNAME}</username>
+      <password>${env.NEXUS_PASSWORD}</password>
     </server>
   </servers>
 </settings>
