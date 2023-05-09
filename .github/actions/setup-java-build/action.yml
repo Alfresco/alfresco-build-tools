@@ -27,7 +27,13 @@ runs:
       shell: bash
       run: |
         mkdir -p $HOME/.m2
-        cp ${{ inputs.maven-settings }} $HOME/.m2/settings.xml || true
+        if [ -e "${{ inputs.maven-settings }}" ]; then
+          echo Installing Maven settings file: ${{ inputs.maven-settings }}.
+          cp ${{ inputs.maven-settings }} $HOME/.m2/settings.xml
+        else
+          echo Maven settings file: ${{ inputs.maven-settings }} not found. Using default one.
+          cp ${{ github.action_path }}/.ci.settings.xml $HOME/.m2/settings.xml
+        fi
     - name: "Set up Java"
       uses: actions/setup-java@v3
       with:
