@@ -27,7 +27,7 @@ runs:
       shell: bash
       run: |
         mkdir -p $HOME/.m2
-        if [ -e "${{ inputs.maven-settings }}" ]; then
+        if [ -f "${{ inputs.maven-settings }}" ]; then
           echo Installing Maven settings file: ${{ inputs.maven-settings }}.
           cp ${{ inputs.maven-settings }} $HOME/.m2/settings.xml
         else
