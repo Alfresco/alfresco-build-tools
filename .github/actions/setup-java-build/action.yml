@@ -31,7 +31,7 @@ runs:
           echo "Installing Maven settings file found in the repository: ${{ inputs.maven-settings }}"
           cp "${{ inputs.maven-settings }}" $HOME/.m2/settings.xml
         else
-          echo Maven settings file: ${{ inputs.maven-settings }} not found. Using default one.
+          echo "Maven settings file: ${{ inputs.maven-settings }} not found in the repository. Installing the default one"
           cp ${{ github.action_path }}/.ci.settings.xml $HOME/.m2/settings.xml
         fi
     - name: "Set up Java"
