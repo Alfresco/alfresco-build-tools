@@ -1043,6 +1043,8 @@ See [setup-helm-docs](../.github/actions/setup-helm-docs/action.yml) for a usage
 ### setup-java-build
 
 [setup-java-build](../.github/actions/setup-java-build/action.yml) performs the setup of required build tools such as Java and Maven.
+Maven settings file can be placed under repository's root as `.ci.settings.xml` or in different place, which path should be provided in variable `maven-settings`. If settings file will not be provided, 
+then default setting will be installed. Default settings to work properly needs credentials to dependency repository specified in environment variables: `MAVEN_USERNAME` and `MAVEN_PASSWORD`.
 
 ```yaml
       - name: Setup Java build
