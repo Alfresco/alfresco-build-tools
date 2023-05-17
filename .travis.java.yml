@@ -1,7 +1,7 @@
 import:
-  - source: Alfresco/alfresco-build-tools:.travis.maven_config.yml@v1.37.0
-  - source: Alfresco/alfresco-build-tools:.travis.java_config.yml@v1.37.0
-  - source: Alfresco/alfresco-build-tools:.travis.common.yml@v1.37.0
+  - source: Alfresco/alfresco-build-tools:.travis.maven_config.yml@v1.38.0
+  - source: Alfresco/alfresco-build-tools:.travis.java_config.yml@v1.38.0
+  - source: Alfresco/alfresco-build-tools:.travis.common.yml@v1.38.0
 jobs:
   include:
     - name: build application
