@@ -13,6 +13,14 @@ inputs:
     description: the location of the custom Maven settings.xml file to install
     default: ".ci.settings.xml"
     required: false
+  configure-toolchains:
+    description: configure toolchains.xml
+    default: "false"
+    required: false
+  maven-toolchains:
+    description: the location of the custom Maven toolchains.xml file to install
+    default: ".ci.toolchains.xml"
+    required: false
 runs:
   using: composite
   steps:
@@ -40,3 +48,14 @@ runs:
         java-version: ${{ inputs.java-version }}
         distribution: ${{ inputs.java-distribution }}
         overwrite-settings: false
+    - name: "Install ${{ inputs.maven-toolchains }}"
+      if: ${{ inputs.configure-toolchains }}
+      shell: bash
+      run: |
+        if [ -f "${{ inputs.maven-toolchains }}" ]; then
+          echo "Installing Maven toolchains file found in the repository: ${{ inputs.maven-toolchains }}"
+          cp "${{ inputs.maven-toolchains }}" $HOME/.m2/toolchains.xml
+        else
+          echo "Maven toolchains file: ${{ inputs.maven-toolchains }} not found in the repository. Installing the default one"
+          cp ${{ github.action_path }}/toolchains.xml $HOME/.m2/toolchains.xml
+        fi
