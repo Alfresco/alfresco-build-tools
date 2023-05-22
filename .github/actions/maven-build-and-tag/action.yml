@@ -21,12 +21,10 @@ inputs:
   maven-password:
     description: Nexus password
     required: true
-  quay-username:
-    description: Quay.io user name
+  upload-jars:
+    description: whether jar files should be uploaded or not as part of the build
     required: false
-  quay-password:
-    description: Quay.io password
-    required: false
+    default: 'true'
   docker-username:
     description: Docker.io user name
     required: false
@@ -120,14 +118,6 @@ runs:
         username: ${{ inputs.docker-username }}
         password: ${{ inputs.docker-password }}
 
-    - name: Login to Quay.io Docker Registry
-      if: inputs.quay-username != ''
-      uses: docker/login-action@v2
-      with:
-        registry: quay.io
-        username: ${{ inputs.quay-username }}
-        password: ${{ inputs.quay-password }}
-
     - name: Define Maven Command
       id: define_maven_command
       shell: bash
@@ -149,34 +139,17 @@ runs:
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
 
+    - uses: actions/upload-artifact@v3
+      if: inputs.upload-jars == 'true'
+      with:
+        name: build
+        retention-days: 1
+        path: |
+          **/target/*.jar
+
     - name: Echo Longest Tests run
       shell: bash
       run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
-
-    - name: Define Docker Push
-      id: define_docker_push
-      shell: bash
-      run: |
-        if [ $DO_PUSH == 'true' ]
-        then
-          echo "command=--push" >> $GITHUB_OUTPUT
-        fi
-      env:
-        DO_PUSH: ${{ github.event_name == 'push' || env.IS_PREVIEW == 'true' }}
-
-    - name: Docker Build (and maybe Push)
-      shell: bash
-      run: |
-        if [ -f build-and-push-docker-images.sh ]
-        then
-          TAG="${TAG:-$(echo ${GITHUB_HEAD_REF:-$GITHUB_REF_NAME} | sed -e 's/[^-_.[:alnum:]]/_/g')}"
-          sh ./build-and-push-docker-images.sh
-        else
-          echo File build-and-push-docker-images.sh not found. Skipping docker build...
-        fi
-      env:
-        PUSH_OPTION: ${{ steps.define_docker_push.outputs.command }}
-        TAG: ${{env.VERSION}}
 
     - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v1.39.0
       if: github.event_name == 'push'
