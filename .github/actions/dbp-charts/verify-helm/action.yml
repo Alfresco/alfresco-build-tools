@@ -49,11 +49,11 @@ inputs:
   kubectl_version:
     description: "version of the kubectl CLI"
     required: false
-    default: 'v1.23.6'
+    default: "v1.23.6"
   skip_checkout:
     description: "Do not checkout the branch again"
     required: false
-    default: 'false'
+    default: "false"
 
 runs:
   using: composite
@@ -63,12 +63,12 @@ runs:
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    - uses: aws-actions/configure-aws-credentials@v1-node16
+    - uses: aws-actions/configure-aws-credentials@v2
       with:
         aws-region: ${{ inputs.aws_region }}
         aws-access-key-id: ${{ inputs.aws_access_key_id }}
         aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
-    - uses: azure/setup-kubectl@v3.0
+    - uses: azure/setup-kubectl@v3
       with:
         version: ${{ inputs.kubectl_version }}
     - name: Login to Quay.io
@@ -100,7 +100,7 @@ runs:
       run: ${{ github.action_path }}/helm_install.sh
       shell: bash
       env:
-        K8SNS: ${{ steps.k8sns.outputs.namespace }}
+        K8SNS: ${{ steps.k8sns.outputs.namespace }}
         ACM_CERTIFICATE: ${{ inputs.acm_certificate }}
         AWS_SG: ${{ inputs.aws_sg }}
         DOMAIN: ${{ inputs.domain }}
@@ -120,4 +120,4 @@ runs:
       shell: bash
       env:
         RELEASE_PREFIX: ${{ inputs.release_prefix }}
-        K8SNS: ${{ steps.k8sns.outputs.namespace }}
+        K8SNS: ${{ steps.k8sns.outputs.namespace }}
