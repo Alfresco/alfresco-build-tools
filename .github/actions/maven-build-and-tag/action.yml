@@ -24,7 +24,7 @@ inputs:
   upload-jars:
     description: whether jar files should be uploaded or not as part of the build
     required: false
-    default: 'true'
+    default: 'false'
   docker-username:
     description: Docker.io user name
     required: false
