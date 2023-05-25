@@ -1,5 +1,5 @@
 import:
-  - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.38.0
+  - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.39.0
 env:
   global:
     - TERRAFORM_LOCAL_VERSION=$(cat .terraform-version)
