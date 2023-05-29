@@ -1,0 +1,21 @@
+name: "Docker dump containers logs"
+description: "Persists Docker container logs"
+runs:
+  using: composite
+  steps:
+    - name: "Dump containers logs and archive them"
+      shell: bash
+      run: |
+        # Get containers state
+        docker ps -a
+        # Dump all containers logs to files
+        docker ps -a --format '{{.ID}} {{.Names}}' | while read -r id name ; do
+          docker logs "${id}" --tail 5000 > "${name}.log"
+        done
+        # Create archive with log files
+        tar -zcf logs.tar.gz *.log
+    - name: "Upload archive containing all *.log files"
+      uses: actions/upload-artifact@v3
+      with:
+        path: logs.tar.gz
+        name: logs.tar.gz

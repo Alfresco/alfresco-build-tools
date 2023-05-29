@@ -337,6 +337,14 @@ Configures the git username and email to associate commits with the provided ide
 
 The two vars in the previous snippet are [workflow configuration variables](https://github.blog/changelog/2023-01-10-github-actions-support-for-configuration-variables-in-workflows/) that can be created at organization level and shared across different repositories.
 
+### docker-dump-containers-logs
+
+Dumps Docker containers logs. Every container's log will be stored in separate `<container_name>.log` file. All files will be archived under `logs.tar.gz` and available to download from workflow's summary page.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/docker-dump-containers-logs@ref
+```
+
 ### free-hosted-runner-disk-space
 
 Removes unnecessary folders and files from a GHA [hosted runner](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners). This action might be useful when we run jobs which require a lot of disk space.
