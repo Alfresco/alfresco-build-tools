@@ -1047,10 +1047,10 @@ The above webhook URL is a mandatory parameter. Make sure to [Create Incoming We
 
 Sample of a SUCCESS notification on a `push` event.
 
-![](./images/Teams_Success.png)
+![Teams Success](./images/Teams_Success.png)
 Sample of a FAILURE notification on a `push` event.
 
-![](./images/Teams_Failure.png)
+![Teams Failure](./images/Teams_Failure.png)
 
 Below is the detailed description of the above message card.
 
