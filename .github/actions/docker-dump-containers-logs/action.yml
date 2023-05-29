@@ -1,5 +1,5 @@
 name: "Docker dump containers logs"
-description: "Persists Docker container logs"
+description: "Persists Docker containers logs"
 runs:
   using: composite
   steps:
