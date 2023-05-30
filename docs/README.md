@@ -1034,15 +1034,17 @@ This message can also be appended to the default message:
           message: ${{ steps.output.reportportal-summarize.outputs.message }}
           append: true
 ```
+
 ### send-teams-notification
 
-Sends a teams notification with a pre-defined payload. 
+Sends a teams notification with a pre-defined payload.
 
 ```yml
       uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@ref
       with:
         webhook-url: ${{ secrets.MSTEAMS_WEBHOOK }}
 ```
+
 The above webhook URL is a mandatory parameter. Make sure to [Create Incoming Webhooks](https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=dotnet) before using this action. Add the webhook URL as a `secret` at the repo level.
 
 Sample of a SUCCESS notification on a `push` event.
@@ -1057,19 +1059,23 @@ Below is the detailed description of the above message card.
 - The `summary` of the message card tells you the author, event name, and the repo where it was performed.
 - The below `change log` will fetch the commit details.
 - The `build_and_test` and `publish` are the job names added as a `need`. If you want to display needs status, you need to explicitly send the JSON object of the `needs` context as an input.
+
   ```yml
       uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@ref
       with:
         webhook-url: ${{ secrets.MSTEAMS_WEBHOOK }}
         needs: ${{ toJson(needs) }}
   ```
- The `Failure` status with an image reflects the workflow status.
- For the ease of access, these action buttons will perfrom the following:
+  
+  The `Failure` status with an image reflects the workflow status.
+  For the ease of access, these action buttons will perform the following:
+
   - Repository: It will open the Github Repository where the action took place.
   - Build URL: It will redirect you to the workflow run under Github actions tab.
-  - Compare: It will redirect you to the Github GUI to review the changes for these commits. 
+  - Compare: It will redirect you to the Github GUI to review the changes for these commits.
 
   **Note:** You're free to configure any action items based on your workflow need. You just need to send the JSON against the `overwrite` input.
+  
   ```json
     {
        "@type": "OpenUri",
@@ -1082,15 +1088,16 @@ Below is the detailed description of the above message card.
       ]
    }
   ```
+  
   **Details of input parameter of this action:**
 
-  | Input     | Description                                                                      |
-  |----------------------------------------------------------------------------------| ------------| 
-  | webhook-url | URL of the MS Teams incoming webhook                                             |
-  | needs | JSON parsed needs context                                                        |
-  | dry-run | Do not actually send the message card to the teams channel.                      |
-  | raw | The entire JSON object of the Message Card which will be sent to Microsoft Teams |
-  | overwrite | JSON like object to overwrite default message                                    |
+  | Input     | Description                                                                       |
+  |-----------------------------------------------------------------------------------| ------------|
+  | webhook-url | URL of the MS Teams incoming webhook.                                             |
+  | needs | JSON parsed needs context.                                                        |
+  | dry-run | Do not actually send the message card to the teams channel.                       |
+  | raw | The entire JSON object of the Message Card which will be sent to Microsoft Teams. |
+  | overwrite | JSON like object to overwrite default message.                                    |
 
 
 

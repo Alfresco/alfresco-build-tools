@@ -3,26 +3,21 @@ name: Send a teams notification
 inputs:
   webhook-url:
     description: Microsoft Teams Incoming Webhooks URL
-    type: string
     required: true
   needs:
     description: JSON parsed needs context
-    type: string
     required: false
-    default: false
+    default: ""
   dry-run:
     description: Do not actually send the message
-    type: boolean
     required: false
     default: false
   raw:
     description: JSON object to send to Microsoft Teams
-    type: string
     required: false
     default: ""
   overwrite:
     description: JSON like object to overwrite default message
-    type: string
     required: false
     default: >-
       {
