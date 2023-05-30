@@ -33,6 +33,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [automate-dependabot](#automate-dependabot)
     - [automate-propagation](#automate-propagation)
     - [configure-git-author](#configure-git-author)
+    - [docker-dump-containers-logs](#docker-dump-containers-logs)
     - [free-hosted-runner-disk-space](#free-hosted-runner-disk-space)
     - [get-branch-name](#get-branch-name)
     - [get-build-info](#get-build-info)
@@ -339,7 +340,7 @@ The two vars in the previous snippet are [workflow configuration variables](http
 
 ### docker-dump-containers-logs
 
-Dumps Docker containers logs. Every container's log will be stored in separate `<container_name>.log` file. All files will be archived under `logs.tar.gz` and available to download from workflow's summary page.
+Dumps Docker containers logs. Every container's log will be stored in separate `<container_name>.log` file. All files will be archived under `containers-logs.tar.gz` and available to download from workflow's summary page.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/docker-dump-containers-logs@ref
