@@ -18,4 +18,4 @@ runs:
       uses: actions/upload-artifact@v3
       with:
         path: logs.tar.gz
-        name: logs.tar.gz
+        name: containers-logs.tar.gz
