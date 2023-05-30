@@ -1050,6 +1050,7 @@ The above webhook URL is a mandatory parameter. Make sure to [Create Incoming We
 Sample of a SUCCESS notification on a `push` event.
 
 ![Teams Success](./images/teams-success.png)
+
 Sample of a FAILURE notification on a `push` event.
 
 ![Teams Failure](./images/teams-failure.png)
@@ -1066,7 +1067,7 @@ Below is the detailed description of the above message card.
         webhook-url: ${{ secrets.MSTEAMS_WEBHOOK }}
         needs: ${{ toJson(needs) }}
   ```
-  
+
   The `Failure` status with an image reflects the workflow status.
   For the ease of access, these action buttons will perform the following:
 
@@ -1075,7 +1076,7 @@ Below is the detailed description of the above message card.
   - Compare: It will redirect you to the Github GUI to review the changes for these commits.
 
   **Note:** You're free to configure any action items based on your workflow need. You just need to send the JSON against the `overwrite` input.
-  
+
   ```json
     {
        "@type": "OpenUri",
@@ -1088,11 +1089,11 @@ Below is the detailed description of the above message card.
       ]
    }
   ```
-  
+
   **Details of input parameter of this action:**
 
   | Input     | Description                                                                       |
-  |-----------------------------------------------------------------------------------| ------------|
+  |-----------------------------------------------------------------------------------|------------|
   | webhook-url | URL of the MS Teams incoming webhook.                                             |
   | needs | JSON parsed needs context.                                                        |
   | dry-run | Do not actually send the message card to the teams channel.                       |
