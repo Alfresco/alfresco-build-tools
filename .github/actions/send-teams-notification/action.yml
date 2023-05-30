@@ -11,7 +11,7 @@ inputs:
   dry-run:
     description: Do not actually send the message
     required: false
-    default: false
+    default: 'false'
   raw:
     description: JSON object to send to Microsoft Teams
     required: false

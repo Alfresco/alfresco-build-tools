@@ -1099,9 +1099,6 @@ Below is the detailed description of the above message card.
   | raw | The entire JSON object of the Message Card which will be sent to Microsoft Teams. |
   | overwrite | JSON like object to overwrite default message.                                    |
 
-
-
-
 ### setup-github-release-binary
 
 [setup-github-release-binary](../.github/actions/setup-github-release-binary/action.yml)
