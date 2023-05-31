@@ -1058,7 +1058,7 @@ Sample of a FAILURE notification on a `push` event.
 Below is the detailed description of the above message card.
 
 - The `summary` of the message card tells you the author, event name, and the repo where it was performed.
-- The below `change log` will fetch the commit details.
+- The below `Changelog` section will list the commits.
 - The `build_and_test` and `publish` are the job names added as a `need`. If you want to display needs status, you need to explicitly send the JSON object of the `needs` context as an input.
 
   ```yml
