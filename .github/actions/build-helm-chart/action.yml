@@ -11,6 +11,6 @@ runs:
     - name: Deprecation Warning
       shell: bash
       run: echo "::warning title=build-helm-chart/action.yml::This action is deprecated, use Alfresco/alfresco-build-tools/.github/actions/helm-build-chart instead."
-    - uses: Alfresco/alfresco-build-tools/.github/actions/helm-build-chart@v1.40.1
+    - uses: Alfresco/alfresco-build-tools/.github/actions/helm-build-chart@v1.41.0
       with:
         chart-dir: ${{ inputs.chart-dir }}

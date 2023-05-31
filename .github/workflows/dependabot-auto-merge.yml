@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "::warning title=dependabot-auto-merge.yml::This reusable workflow is deprecated, use Alfresco/alfresco-build-tools/.github/actions/automate-dependabot instead."
-      - uses: Alfresco/alfresco-build-tools/.github/actions/automate-dependabot@v1.40.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/automate-dependabot@v1.41.0
         with:
           merge-option: ${{ inputs.merge-option }}
           token: ${{ secrets.token }}
