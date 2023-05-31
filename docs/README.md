@@ -340,8 +340,8 @@ The two vars in the previous snippet are [workflow configuration variables](http
 
 ### docker-dump-containers-logs
 
-Dumps Docker containers logs. Every container's log will be stored in separate `<container_name>.log` file. All files will be archived by default under `containers-logs-<job_id>-<job_retry_number>.tar.gz` and available to download from workflow's summary page.
-It is also possible to specify output archive name in parameter `output-archive-name`.
+Dumps Docker containers logs. Each container's log will be stored in a separate `<container_name>.log` file. All files will be archived by default under `containers-logs-<job_id>-<job_retry_number>.tar.gz` and will be available to download via the workflow's summary page.
+It is also possible to specify the output archive name when providing the `output-archive-name` parameter.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/docker-dump-containers-logs@ref
