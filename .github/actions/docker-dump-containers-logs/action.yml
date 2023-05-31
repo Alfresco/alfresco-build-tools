@@ -20,7 +20,7 @@ runs:
         # Create archive with log files
         tar -zcf logs.tar.gz *.log
         # Specify output artefact name
-        if [ "${{ inputs.output-archive-name }}" -eq "containers-logs.tar.gz" ]; then
+        if [ "${{ inputs.output-archive-name }}" = "containers-logs.tar.gz" ]; then
           echo "artefactName=containers-logs-${{ github.job }}-${{ github.run_attempt }}.tar.gz" >> $GITHUB_ENV
         else
           echo "artefactName=${{ inputs.output-archive-name }}" >> $GITHUB_ENV
