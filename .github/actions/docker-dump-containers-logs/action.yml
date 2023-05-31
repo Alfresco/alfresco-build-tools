@@ -1,5 +1,10 @@
 name: "Docker dump containers logs"
 description: "Persists Docker containers logs"
+inputs:
+  output-archive-name:
+    description: the desired output archive name
+    default: "containers-logs.tar.gz"
+    required: false
 runs:
   using: composite
   steps:
@@ -14,8 +19,14 @@ runs:
         done
         # Create archive with log files
         tar -zcf logs.tar.gz *.log
+        # Specify output artefact name
+        if [ "${{ inputs.output-archive-name }}" -eq "containers-logs.tar.gz" ]; then
+          echo "artefactName=containers-logs-${{ github.job }}-${{ github.run_attempt }}.tar.gz" >> $GITHUB_ENV
+        else
+          echo "artefactName=${{ inputs.output-archive-name }}" >> $GITHUB_ENV
+        fi
     - name: "Upload archive containing all *.log files"
       uses: actions/upload-artifact@v3
       with:
         path: logs.tar.gz
-        name: containers-logs.tar.gz
+        name: ${{ env.artefactName }}
