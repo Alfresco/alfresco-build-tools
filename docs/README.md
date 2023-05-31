@@ -1069,11 +1069,7 @@ Below is the detailed description of the above message card.
   ```
 
   The `Failure` status with an image reflects the workflow status.
-  For the ease of access, these action buttons will perform the following:
-
-  - Repository: It will open the Github Repository where the action took place.
-  - Build URL: It will redirect you to the workflow run under Github actions tab.
-  - Compare: It will redirect you to the Github GUI to review the changes for these commits.
+  For the ease of access, these action buttons will perform the respective actions.
 
   **Note:** You're free to configure any action items based on your workflow need. You just need to send the JSON against the `overwrite` input.
 
