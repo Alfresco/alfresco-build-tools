@@ -1088,13 +1088,13 @@ Below is the detailed description of the above message card.
 
   **Details of input parameter of this action:**
 
-  | Input     | Description                                                                       |
-  |-----------------------------------------------------------------------------------|------------|
+  | Input       | Description                                                                       |
+  |-------------|-----------------------------------------------------------------------------------|
   | webhook-url | URL of the MS Teams incoming webhook.                                             |
-  | needs | JSON parsed needs context.                                                        |
-  | dry-run | Do not actually send the message card to the teams channel.                       |
-  | raw | The entire JSON object of the Message Card which will be sent to Microsoft Teams. |
-  | overwrite | JSON like object to overwrite default message.                                    |
+  | needs       | JSON parsed needs context.                                                        |
+  | dry-run     | Do not actually send the message card to the teams channel.                       |
+  | raw         | The entire JSON object of the Message Card which will be sent to Microsoft Teams. |
+  | overwrite   | JSON like object to overwrite default message.                                    |
 
 ### setup-github-release-binary
 
