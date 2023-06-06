@@ -1140,19 +1140,6 @@ Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
           helm install acs ./helm/chart
 ```
 
-### travis-env-load
-
-To ease the migration to GitHub Actions of repositories that contains one or
-more yaml files containing an `env.global` section of Travis CI. It supports env vars
-referencing as value env vars defined early in the file (like Travis does).
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/travis-env-load@ref
-        with:
-          ignore_regex: ^BRANCH_NAME=.*
-          yml_path: .travis/env.yml
-```
-
 ### update-project-base-tag
 
 Used to update a base tag in the release descriptor. It will add or update the
