@@ -5,12 +5,9 @@
 
 | Build     | Status                                                                                                                                                                      |
 |-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Travis CI | [![Build Status](https://app.travis-ci.com/Alfresco/alfresco-build-tools.svg?branch=master)](https://app.travis-ci.com/Alfresco/alfresco-build-tools)                       |
 | GitHub    | [![CI](https://github.com/Alfresco/alfresco-build-tools/actions/workflows/test.yml/badge.svg)](https://github.com/Alfresco/alfresco-build-tools/actions/workflows/test.yml) |
 
-This repository contains shared/reusable CI configurations for GitHub Actions and Travis mainly to serve the repositories of the Alfresco org but virtually usable by everyone.
-
-Travis should be considered in maintenance mode only since we are actively migrating all of our repos to GitHub Actions. If you are still on Travis or trying to migrate to GitHub Actions, see [Travis section](travis.md).
+This repository contains shared/reusable CI configurations for GitHub Actions to serve the repositories of the Alfresco org but virtually usable by everyone.
 
 For security-related topics of GitHub Actions, see the [Security section](security.md).
 
@@ -72,7 +69,6 @@ Here follows the list of GitHub Actions topics available in the current document
     - [setup-github-release-binary](#setup-github-release-binary)
     - [setup-java-build](#setup-java-build)
     - [setup-kind](#setup-kind)
-    - [travis-env-load](#travis-env-load)
     - [update-project-base-tag](#update-project-base-tag)
     - [validate-maven-versions](#validate-maven-versions)
     - [veracode](#veracode)

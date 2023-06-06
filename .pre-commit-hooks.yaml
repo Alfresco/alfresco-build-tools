@@ -1,8 +1,3 @@
-- id: travis-yml-lint
-  name: Travis Lint
-  entry: bash -c 'for FILE in $@; do docker run --rm -v $(pwd):/project tianon/travis-cli lint /project/$FILE; done'
-  language: system
-  files: \.travis.*\.y(a?)ml$
 - id: helm-deps
   name: Helm Dependency Update
   entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% helm dep up %'
