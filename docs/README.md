@@ -194,8 +194,7 @@ provided as repository secrets.
 
 ### SSH debug
 
-GitHub doesn't provide any native support for SSH debug access to builds like
-Travis.
+GitHub doesn't provide any native support for SSH debug access to builds.
 
 To debug a build is necessary to add when needed a step like the following in
 the workflow:
