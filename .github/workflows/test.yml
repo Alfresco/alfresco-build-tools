@@ -55,6 +55,7 @@ jobs:
       - uses: ./.github/actions/env-load-from-yaml
         with:
           ignore_regex: ^TRAVIS_BRANCH=.*
+          yml_path: ./.github/tests/env-load-from-yaml/env.yml
       - name: Test env-load-from-yaml
         run: |
           if [ -z "$APP_SETTING_ONE" ]; then
