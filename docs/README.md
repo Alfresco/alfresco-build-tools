@@ -343,6 +343,7 @@ It is also possible to specify the output archive name when providing the `outpu
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/docker-dump-containers-logs@ref
 ```
+
 ### env-load-from-yaml
 
 To ease the migration to GitHub Actions of repositories that contains one or
