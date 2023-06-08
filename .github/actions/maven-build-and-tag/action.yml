@@ -160,6 +160,7 @@ runs:
         retention-days: 1
         path: |
           **/target/*.jar
+          **/target/site/jacoco-aggregate/jacoco.xml
 
     - name: Echo Longest Tests run
       shell: bash
