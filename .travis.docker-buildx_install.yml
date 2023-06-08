@@ -1,9 +1,0 @@
-env:
-  global:
-    - DOCKER_BUILDX_VERSION=${DOCKER_BUILDX_VERSION:-0.8.0}
-before_install:
-  - |-
-    mkdir -p ~/.docker/cli-plugins
-    curl -fsSLo ~/.docker/cli-plugins/docker-buildx https://github.com/docker/buildx/releases/download/v${DOCKER_BUILDX_VERSION}/buildx-v${DOCKER_BUILDX_VERSION}.$(uname | tr '[:upper:]' '[:lower:]')-amd64
-    chmod +x ~/.docker/cli-plugins/docker-buildx
-    docker buildx version

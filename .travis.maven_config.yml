@@ -1,8 +1,0 @@
-cache:
-  directories:
-    - $HOME/.m2/repository
-before_install:
-  - |-
-    mkdir -p $HOME/.m2
-    cp settings.xml $HOME/.m2
-    export MAVEN_CLI_OPTS="$MAVEN_CLI_OPTS -B -q -e -fae -V -DinstallAtEnd=true -U"

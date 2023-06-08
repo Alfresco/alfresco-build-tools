@@ -1,7 +1,0 @@
-language: python
-python: 3.9
-env:
-  global:
-    - CHECKOV_VERSION=${CHECKOV_VERSION:-2.0.1095}
-before_install:
-  - pip install checkov==$CHECKOV_VERSION

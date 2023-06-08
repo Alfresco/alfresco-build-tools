@@ -1,5 +1,5 @@
-name: "travis-env-load"
-description: "Mimic loading of a travis yaml with globals to ease migration from Travis CI"
+name: "env-load-from-yaml"
+description: "Mimic loading of a yaml with globals to ease migration from Travis CI"
 inputs:
   ignore_regex:
     description: "Bash regex to ignore certain lines"
@@ -7,8 +7,7 @@ inputs:
     default: ^$
   yml_path:
     description: "Path to the yaml file to parse"
-    required: false
-    default: .travis/env.yml
+    required: true
 runs:
   using: "composite"
   steps:

@@ -1,9 +1,0 @@
-addons:
-  apt:
-    sources:
-      - sourceline: 'deb https://download.sourceclear.com/ubuntu stable/'
-        key_url: 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xdf7dd7a50b746dd4'
-    packages:
-      - srcclr
-before_install:
-  - echo srcclr $(srcclr --version)

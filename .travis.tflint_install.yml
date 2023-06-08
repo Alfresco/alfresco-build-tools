@@ -1,8 +1,0 @@
-import:
-  - source: Alfresco/alfresco-build-tools:.travis.home_bin_path.yml@v1.41.0
-env:
-  global:
-    - TFLINT_VERSION=${TFLINT_VERSION:-0.35.0}
-before_install:
-  - curl -fsSLo tflint.zip https://github.com/terraform-linters/tflint/releases/download/v$TFLINT_VERSION/tflint_$(uname | tr '[:upper:]' '[:lower:]')_amd64.zip &&
-    unzip -o tflint.zip tflint && rm tflint.zip && mv tflint $HOME/bin/ && tflint --version

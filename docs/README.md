@@ -5,12 +5,9 @@
 
 | Build     | Status                                                                                                                                                                      |
 |-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Travis CI | [![Build Status](https://app.travis-ci.com/Alfresco/alfresco-build-tools.svg?branch=master)](https://app.travis-ci.com/Alfresco/alfresco-build-tools)                       |
 | GitHub    | [![CI](https://github.com/Alfresco/alfresco-build-tools/actions/workflows/test.yml/badge.svg)](https://github.com/Alfresco/alfresco-build-tools/actions/workflows/test.yml) |
 
-This repository contains shared/reusable CI configurations for GitHub Actions and Travis mainly to serve the repositories of the Alfresco org but virtually usable by everyone.
-
-Travis should be considered in maintenance mode only since we are actively migrating all of our repos to GitHub Actions. If you are still on Travis or trying to migrate to GitHub Actions, see [Travis section](travis.md).
+This repository contains shared/reusable CI configurations for GitHub Actions to serve the repositories of the Alfresco org but virtually usable by everyone.
 
 For security-related topics of GitHub Actions, see the [Security section](security.md).
 
@@ -34,6 +31,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [automate-propagation](#automate-propagation)
     - [configure-git-author](#configure-git-author)
     - [docker-dump-containers-logs](#docker-dump-containers-logs)
+    - [env-load-from-yaml](#env-load-from-yaml)
     - [free-hosted-runner-disk-space](#free-hosted-runner-disk-space)
     - [get-branch-name](#get-branch-name)
     - [get-build-info](#get-build-info)
@@ -72,7 +70,6 @@ Here follows the list of GitHub Actions topics available in the current document
     - [setup-github-release-binary](#setup-github-release-binary)
     - [setup-java-build](#setup-java-build)
     - [setup-kind](#setup-kind)
-    - [travis-env-load](#travis-env-load)
     - [update-project-base-tag](#update-project-base-tag)
     - [validate-maven-versions](#validate-maven-versions)
     - [veracode](#veracode)
@@ -198,8 +195,7 @@ provided as repository secrets.
 
 ### SSH debug
 
-GitHub doesn't provide any native support for SSH debug access to builds like
-Travis.
+GitHub doesn't provide any native support for SSH debug access to builds.
 
 To debug a build is necessary to add when needed a step like the following in
 the workflow:
@@ -346,6 +342,19 @@ It is also possible to specify the output archive name when providing the `outpu
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/docker-dump-containers-logs@ref
+```
+
+### env-load-from-yaml
+
+To ease the migration to GitHub Actions of repositories that contains one or
+more yaml files containing an `env.global` section of Travis CI. It supports env vars
+referencing as value env vars defined early in the file (like Travis does).
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@ref
+        with:
+          ignore_regex: ^BRANCH_NAME=.*
+          yml_path: .travis/env.yml
 ```
 
 ### free-hosted-runner-disk-space
@@ -1142,19 +1151,6 @@ Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
         run: |
           helm dep up ./helm/chart
           helm install acs ./helm/chart
-```
-
-### travis-env-load
-
-To ease the migration to GitHub Actions of repositories that contains one or
-more yaml files containing an `env.global` section of Travis CI. It supports env vars
-referencing as value env vars defined early in the file (like Travis does).
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/travis-env-load@ref
-        with:
-          ignore_regex: ^BRANCH_NAME=.*
-          yml_path: .travis/env.yml
 ```
 
 ### update-project-base-tag
