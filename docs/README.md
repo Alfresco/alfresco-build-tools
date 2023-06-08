@@ -31,6 +31,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [automate-propagation](#automate-propagation)
     - [configure-git-author](#configure-git-author)
     - [docker-dump-containers-logs](#docker-dump-containers-logs)
+    - [env-load-from-yaml](#env-load-from-yaml)
     - [free-hosted-runner-disk-space](#free-hosted-runner-disk-space)
     - [get-branch-name](#get-branch-name)
     - [get-build-info](#get-build-info)
@@ -341,6 +342,18 @@ It is also possible to specify the output archive name when providing the `outpu
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/docker-dump-containers-logs@ref
+```
+### env-load-from-yaml
+
+To ease the migration to GitHub Actions of repositories that contains one or
+more yaml files containing an `env.global` section of Travis CI. It supports env vars
+referencing as value env vars defined early in the file (like Travis does).
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@ref
+        with:
+          ignore_regex: ^BRANCH_NAME=.*
+          yml_path: .travis/env.yml
 ```
 
 ### free-hosted-runner-disk-space
@@ -1137,19 +1150,6 @@ Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
         run: |
           helm dep up ./helm/chart
           helm install acs ./helm/chart
-```
-
-### env-load-from-yaml
-
-To ease the migration to GitHub Actions of repositories that contains one or
-more yaml files containing an `env.global` section of Travis CI. It supports env vars
-referencing as value env vars defined early in the file (like Travis does).
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@ref
-        with:
-          ignore_regex: ^BRANCH_NAME=.*
-          yml_path: .travis/env.yml
 ```
 
 ### update-project-base-tag
