@@ -173,6 +173,15 @@ runs:
         path: |
           **/target/site/jacoco-aggregate/jacoco.xml
 
+
+    - uses: madrapps/jacoco-report@v1.4
+      if: inputs.upload-coverage == 'true'
+      with:
+        paths: ${{ github.workspace }}/alfresco-deployment-coverage/target/site/jacoco-aggregate/index.html
+        token: ${{ secrets.GITHUB_TOKEN }}
+        min-coverage-overall: 80
+        min-coverage-changed-files: 90
+
     - name: Echo Longest Tests run
       shell: bash
       run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
