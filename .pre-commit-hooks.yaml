@@ -3,6 +3,11 @@
   entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% helm dep up %'
   language: system
   pass_filenames: false
+- id: helm-deps-build
+  name: Helm Dependency Build
+  entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% helm dep build %'
+  language: system
+  pass_filenames: false
 - id: helm-lint
   name: Helm Lint
   entry: bash -c 'find . -name Chart.yaml | xargs -n1 -I% bash -c "dirname %" | xargs -t -n1 -I% helm lint %'
