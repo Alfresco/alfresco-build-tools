@@ -171,7 +171,7 @@ runs:
         name: coverage
         retention-days: 1
         path: |
-          **/target/site/jacoco-aggregate/*
+          **/target/site/jacoco-aggregate/jacoco.xml
 
     - name: Echo Longest Tests run
       shell: bash
