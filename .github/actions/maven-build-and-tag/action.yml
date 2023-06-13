@@ -171,16 +171,7 @@ runs:
         name: coverage
         retention-days: 1
         path: |
-          **/target/site/jacoco-aggregate/jacoco.xml
-
-
-    - uses: madrapps/jacoco-report@v1.4
-      if: inputs.upload-coverage == 'true'
-      with:
-        paths: ${{ github.workspace }}/alfresco-deployment-coverage/target/site/jacoco-aggregate/index.html
-        token: ${{ secrets.GITHUB_TOKEN }}
-        min-coverage-overall: 80
-        min-coverage-changed-files: 90
+          **/target/site/jacoco-aggregate/*
 
     - name: Echo Longest Tests run
       shell: bash
