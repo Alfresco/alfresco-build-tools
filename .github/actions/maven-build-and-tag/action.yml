@@ -48,6 +48,10 @@ inputs:
     description: The label name for creating a preview version
     required: false
     default: 'preview'
+  upload-coverage:
+    description: whether coverage files should be uploaded or not as part of the build
+    required: false
+    default: 'false'
 
 outputs:
   version:
@@ -160,6 +164,14 @@ runs:
         retention-days: 1
         path: |
           **/target/*.jar
+
+    - uses: actions/upload-artifact@v3
+      if: inputs.upload-coverage == 'true'
+      with:
+        name: coverage
+        retention-days: 1
+        path: |
+          **/target/site/jacoco-aggregate/jacoco.xml
 
     - name: Echo Longest Tests run
       shell: bash
