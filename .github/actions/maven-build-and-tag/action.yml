@@ -160,7 +160,74 @@ runs:
 
     - name: Build and Test with Maven (and maybe Deploy)
       shell: bash
-      run: mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
+      run: |
+        echo "Maven Build start"
+        mvn clean ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
+        echo "Maven Build end"
+      env:
+        MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
+
+    - name: Remove running docker containers
+      if: inputs.reuse-testcontainers == 'true'
+      shell: bash
+      run: docker rm -f $(docker ps -a -q)
+
+    - name: Build and Test with Maven (and maybe Deploy)
+      shell: bash
+      run: |
+        echo "Maven Build start"
+        mvn clean ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
+        echo "Maven Build end"
+      env:
+        MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
+
+    - name: Remove running docker containers
+      if: inputs.reuse-testcontainers == 'true'
+      shell: bash
+      run: docker rm -f $(docker ps -a -q)
+
+    - name: Build and Test with Maven (and maybe Deploy)
+      shell: bash
+      run: |
+        echo "Maven Build start"
+        mvn clean ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
+        echo "Maven Build end"
+      env:
+        MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
+
+    - name: Remove running docker containers
+      if: inputs.reuse-testcontainers == 'true'
+      shell: bash
+      run: docker rm -f $(docker ps -a -q)
+
+    - name: Build and Test with Maven (and maybe Deploy)
+      shell: bash
+      run: |
+        echo "Maven Build start"
+        mvn clean ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
+        echo "Maven Build end"
+      env:
+        MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
+
+    - name: Remove running docker containers
+      if: inputs.reuse-testcontainers == 'true'
+      shell: bash
+      run: docker rm -f $(docker ps -a -q)
+
+    - name: Build and Test with Maven (and maybe Deploy)
+      shell: bash
+      run: |
+        echo "Maven Build start"
+        mvn clean ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
+        echo "Maven Build end"
       env:
         MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
         MAVEN_USERNAME: ${{ inputs.maven-username }}
