@@ -62,6 +62,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [nexus-release-staging](#nexus-release-staging)
     - [pre-commit](#pre-commit)
     - [pre-commit-default](#pre-commit-default)
+    - [pipenv](#pipenv)
     - [rancher](#rancher)
     - [reportportal-prepare](#reportportal-prepare)
     - [reportportal-summarize](#reportportal-summarize)
@@ -842,6 +843,14 @@ Or:
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit-default@ref
         with:
           check-github-configuration: 'false'
+```
+
+### pipenv
+
+This action installs Python packages with Pipenv and prepares a virtual environment based on the Pipfile and .python-version files in the repository.
+
+```yml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pipenv@ref
 ```
 
 ### rancher
