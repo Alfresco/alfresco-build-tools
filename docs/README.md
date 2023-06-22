@@ -847,10 +847,17 @@ Or:
 
 ### pipenv
 
-This action installs Python packages with Pipenv and prepares a virtual environment based on the Pipfile and .python-version files in the repository.
+This workflow sets up a Python environment with version 3.9 using the actions/setup-python@v4 action and utilizes the pipenv action to manage Python dependencies based on the specified Python version.
 
 ```yml
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        id: setup-python
+        with:
+          python-version: "3.9"
       - uses: Alfresco/alfresco-build-tools/.github/actions/pipenv@ref
+        with:
+          python-version: ${{ steps.setup-python.outputs.python-version }}
 ```
 
 ### rancher
