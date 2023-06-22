@@ -156,7 +156,7 @@ runs:
     - name: Enable testcontainers reuse option
       if: inputs.reuse-testcontainers == 'true'
       shell: bash
-      run: | 
+      run: |
         echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
         echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
 
