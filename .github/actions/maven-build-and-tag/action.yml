@@ -156,7 +156,9 @@ runs:
     - name: Enable testcontainers reuse option
       if: inputs.reuse-testcontainers == 'true'
       shell: bash
-      run: echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
+      run: | 
+        echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
+        echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
 
     - name: Build and Test with Maven (and maybe Deploy)
       shell: bash
