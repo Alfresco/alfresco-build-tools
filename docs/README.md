@@ -847,7 +847,7 @@ Or:
 
 ### pipenv
 
-This workflow sets up a Python environment with version 3.9 using the actions/setup-python@v4 action and utilizes the pipenv action to manage Python dependencies based on the specified Python version.
+This workflow sets up a Python environment using the standard setup-python action and utilizes the pipenv action to manage Python dependencies declared in the Pipfile and based on the specified Python version
 
 ```yml
       - uses: actions/checkout@v3
