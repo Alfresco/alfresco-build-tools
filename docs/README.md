@@ -62,6 +62,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [nexus-release-staging](#nexus-release-staging)
     - [pre-commit](#pre-commit)
     - [pre-commit-default](#pre-commit-default)
+    - [pipenv](#pipenv)
     - [rancher](#rancher)
     - [reportportal-prepare](#reportportal-prepare)
     - [reportportal-summarize](#reportportal-summarize)
@@ -842,6 +843,21 @@ Or:
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit-default@ref
         with:
           check-github-configuration: 'false'
+```
+
+### pipenv
+
+This workflow sets up a Python environment using the standard setup-python action and utilizes the pipenv action to manage Python dependencies declared in the Pipfile and based on the specified Python version
+
+```yml
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        id: setup-python
+        with:
+          python-version: "3.9"
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pipenv@ref
+        with:
+          python-version: ${{ steps.setup-python.outputs.python-version }}
 ```
 
 ### rancher

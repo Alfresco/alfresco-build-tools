@@ -1,0 +1,17 @@
+name: pipenv
+description: 'Install python packages with pipenv'
+inputs:
+  python-version:
+    description: The python version
+    required: false
+    default: "3.9"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install pipenv dependency
+      shell: bash
+      run: pip install -r ${{ github.action_path }}/requirements.txt
+    - name: Prepare pipenv virtualenv
+      shell: bash
+      run: pipenv install --deploy --dev --python ${{ inputs.python-version }}
