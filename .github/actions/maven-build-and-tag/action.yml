@@ -172,6 +172,7 @@ runs:
       if: inputs.reuse-testcontainers == 'true'
       shell: bash
       run: docker rm -f $(docker ps -a -q)
+      continue-on-error: true
 
     - uses: actions/upload-artifact@v3
       if: inputs.upload-jars == 'true'
