@@ -1,0 +1,46 @@
+name: "PMD"
+description: "Run PMD against changes in a pull request"
+inputs:
+  pmd-version:
+    description: The version of PMD to use
+    required: false
+    default: "6.55.0"
+  create-github-annotations:
+    description: |
+      Whether to create inline comments on the PR using GH Advanced Security. This is free for open source projects but
+      requires a license for private repos.
+    required: false
+    default: true
+  fail-on-new-issues:
+    description: |
+      When set to true this fails the build if the PR introduces more issues than it resolves.
+    required: false
+    default: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+      env:
+        REF_TO_CHECKOUT: ${{ inputs.auto-commit == 'true' && github.head_ref || '' }}
+      with:
+        ref: ${{ env.REF_TO_CHECKOUT }}
+
+    - name: Download ruleset
+      run: curl https://raw.githubusercontent.com/AlfrescoLabs/pmd-ruleset/master/pmd-ruleset.xml -o ${{ github.action_path }}/pmd-ruleset.xml
+      shell: bash
+
+    - name: Install PMD
+      uses: pmd/pmd-github-action@d57c0463ebba262a33d1983a5c6ac6031bfde43b # v1.4.1
+      id: pmd
+      with:
+        version: ${{ inputs.pmd-version }}
+        rulesets: 'pmd-ruleset.xml'
+        createGitHubAnnotations: ${{ inputs.create-github-annotations }}
+
+    - name: Run PMD scan against changes
+      run: ${{ github.action_path }}/delta-scan.sh "origin/${{ github.base_ref }}" "${{ github.sha }}" "${{ inputs.fail-on-new-issues }}"
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        PMD_VERSION: ${{ inputs.pmd-version }}
