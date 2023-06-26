@@ -10,12 +10,12 @@ inputs:
       Whether to create inline comments on the PR using GH Advanced Security. This is free for open source projects but
       requires a license for private repos.
     required: false
-    default: true
+    default: "true"
   fail-on-new-issues:
     description: |
       When set to true this fails the build if the PR introduces more issues than it resolves.
     required: false
-    default: true
+    default: "true"
 
 runs:
   using: "composite"
