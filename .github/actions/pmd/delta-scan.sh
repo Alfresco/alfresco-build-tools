@@ -21,27 +21,33 @@ git diff --name-only ${baseline_ref} ${head_ref} > ${tmp_dir}/file-list.txt
 
 # Run PMD against the baseline commit.
 git checkout ${baseline_ref}
+old_file_count=0
 for file in $(cat ${tmp_dir}/file-list.txt)
 do
     if [[ -f ${file} ]]
     then
         echo ${file} > ${tmp_dir}/old-files.txt
+        old_file_count=$((old_file_count+1))
     fi
 done
 ${run_pmd} pmd --cache ${tmp_dir}/pmd.cache --file-list ${tmp_dir}/old-files.txt -R ${ACTION_PATH}/pmd-ruleset.xml -r ${tmp_dir}/old_report.txt --fail-on-violation false
 old_issue_count=$(cat ${tmp_dir}/old_report.txt | wc -l)
+echo "${old_issue_count} issues found in ${old_file_count} old files on ${baseline_ref}"
 
 # Rerun PMD against the PR head commit.
 git checkout ${head_ref}
+new_file_count=0
 for file in $(cat ${tmp_dir}/file-list.txt)
 do
     if [[ -f ${file} ]]
     then
         echo ${file} > ${tmp_dir}/new-files.txt
+        new_file_count=$((new_file_count+1))
     fi
 done
 ${run_pmd} pmd --cache ${tmp_dir}/pmd.cache --file-list ${tmp_dir}/new-files.txt -R ${ACTION_PATH}/pmd-ruleset.xml -r ${tmp_dir}/new_report.txt --fail-on-violation false
 new_issue_count=$(cat ${tmp_dir}/new_report.txt | wc -l)
+echo "${new_issue_count} issues found in ${new_file_count} updated files on ${head_ref}"
 
 # Display the differences between the two files in the log.
 diff ${tmp_dir}/old_report.txt ${tmp_dir}/new_report.txt | true
