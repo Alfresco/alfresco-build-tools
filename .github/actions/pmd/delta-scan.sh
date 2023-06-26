@@ -2,12 +2,14 @@
 echo "=========================== Starting PMD Script ==========================="
 set -e
 
+# The location of the PMD ruleset.
+ruleset_location=$1
 # The git reference for the branch to merge the PR into.
-target_ref=$1
+target_ref=$2
 # The git reference for the branch containing the PR changes.
-head_ref=$2
+head_ref=$3
 # Set to "true" if an increase in PMD violations should cause the build to fail.
-fail_on_new_issues=$3
+fail_on_new_issues=$4
 
 # Requires pmd/pmd-github-action to have been executed already, as this will download PMD to this location.
 run_pmd="/opt/hostedtoolcache/pmd/${PMD_VERSION}/x64/pmd-bin-${PMD_VERSION}/bin/run.sh"
@@ -30,9 +32,9 @@ do
         old_file_count=$((old_file_count+1))
     fi
 done
-${run_pmd} pmd --cache ${tmp_dir}/pmd.cache --file-list ${tmp_dir}/old-files.txt -R ${ACTION_PATH}/pmd-ruleset.xml -r ${tmp_dir}/old_report.txt --fail-on-violation false
+${run_pmd} pmd --cache ${tmp_dir}/pmd.cache --file-list ${tmp_dir}/old-files.txt -R ${ruleset_location} -r ${tmp_dir}/old_report.txt --fail-on-violation false
 old_issue_count=$(cat ${tmp_dir}/old_report.txt | wc -l)
-echo "${old_issue_count} issues found in ${old_file_count} old files on ${baseline_ref}"
+echo "${old_issue_count} issue(s) found in ${old_file_count} old file(s) on ${baseline_ref}"
 
 # Rerun PMD against the PR head commit.
 git checkout ${head_ref}
@@ -45,9 +47,9 @@ do
         new_file_count=$((new_file_count+1))
     fi
 done
-${run_pmd} pmd --cache ${tmp_dir}/pmd.cache --file-list ${tmp_dir}/new-files.txt -R ${ACTION_PATH}/pmd-ruleset.xml -r ${tmp_dir}/new_report.txt --fail-on-violation false
+${run_pmd} pmd --cache ${tmp_dir}/pmd.cache --file-list ${tmp_dir}/new-files.txt -R ${ruleset_location} -r ${tmp_dir}/new_report.txt --fail-on-violation false
 new_issue_count=$(cat ${tmp_dir}/new_report.txt | wc -l)
-echo "${new_issue_count} issues found in ${new_file_count} updated files on ${head_ref}"
+echo "${new_issue_count} issue(s) found in ${new_file_count} updated file(s) on ${head_ref}"
 
 # Display the differences between the two files in the log.
 diff ${tmp_dir}/old_report.txt ${tmp_dir}/new_report.txt || true

@@ -34,12 +34,11 @@ runs:
       id: pmd
       with:
         version: ${{ inputs.pmd-version }}
-        rulesets: 'pmd-ruleset.xml'
+        rulesets: ${{ github.action_path }}/pmd-ruleset.xml
         createGitHubAnnotations: ${{ inputs.create-github-annotations }}
 
     - name: Run PMD scan against changes
-      run: ${{ github.action_path }}/delta-scan.sh "origin/${{ github.base_ref }}" "origin/${{ github.head_ref }}" "${{ inputs.fail-on-new-issues }}"
+      run: ${{ github.action_path }}/delta-scan.sh "${{ github.action_path }}/pmd-ruleset.xml" "origin/${{ github.base_ref }}" "origin/${{ github.head_ref }}" "${{ inputs.fail-on-new-issues }}"
       shell: bash
       env:
-        ACTION_PATH: ${{ github.action_path }}
         PMD_VERSION: ${{ inputs.pmd-version }}
