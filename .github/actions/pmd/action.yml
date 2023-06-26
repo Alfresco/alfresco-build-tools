@@ -38,7 +38,7 @@ runs:
         createGitHubAnnotations: ${{ inputs.create-github-annotations }}
 
     - name: Run PMD scan against changes
-      run: ${{ github.action_path }}/delta-scan.sh "origin/${{ github.base_ref }}" "${{ github.sha }}" "${{ inputs.fail-on-new-issues }}"
+      run: ${{ github.action_path }}/delta-scan.sh "origin/${{ github.base_ref }}" "${{ github.head_ref }}" "${{ inputs.fail-on-new-issues }}"
       shell: bash
       env:
         ACTION_PATH: ${{ github.action_path }}
