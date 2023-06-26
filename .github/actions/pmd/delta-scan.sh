@@ -50,7 +50,7 @@ new_issue_count=$(cat ${tmp_dir}/new_report.txt | wc -l)
 echo "${new_issue_count} issues found in ${new_file_count} updated files on ${head_ref}"
 
 # Display the differences between the two files in the log.
-diff ${tmp_dir}/old_report.txt ${tmp_dir}/new_report.txt | true
+diff ${tmp_dir}/old_report.txt ${tmp_dir}/new_report.txt || true
 
 # Tidy up.
 rm -rf ${tmp_dir}
