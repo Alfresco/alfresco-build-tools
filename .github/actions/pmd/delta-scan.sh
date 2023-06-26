@@ -28,7 +28,7 @@ for file in $(cat ${tmp_dir}/file-list.txt)
 do
     if [[ -f ${file} ]]
     then
-        echo ${file} > ${tmp_dir}/old-files.txt
+        echo ${file} >> ${tmp_dir}/old-files.txt
         old_file_count=$((old_file_count+1))
     fi
 done
@@ -43,7 +43,7 @@ for file in $(cat ${tmp_dir}/file-list.txt)
 do
     if [[ -f ${file} ]]
     then
-        echo ${file} > ${tmp_dir}/new-files.txt
+        echo ${file} >> ${tmp_dir}/new-files.txt
         new_file_count=$((new_file_count+1))
     fi
 done
