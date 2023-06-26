@@ -20,11 +20,10 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v3
-      env:
-        REF_TO_CHECKOUT: ${{ inputs.auto-commit == 'true' && github.head_ref || '' }}
+    - name: Clone the full history
+      uses: actions/checkout@v3
       with:
-        ref: ${{ env.REF_TO_CHECKOUT }}
+        fetch-depth: 0
 
     - name: Download ruleset
       run: curl https://raw.githubusercontent.com/AlfrescoLabs/pmd-ruleset/master/pmd-ruleset.xml -o ${{ github.action_path }}/pmd-ruleset.xml
