@@ -761,6 +761,27 @@ Releases the specified staging repository on Nexus. The repository should be in 
           nexus-password: ${{ secrets.NEXUS_PASSWORD }}
 ```
 
+### pmd
+
+Runs the [PMD](https://pmd.github.io/) static analysis tool to check for common programming flaws.
+
+The action looks for issues in files modified by PRs and should only be run against the pull-request target:
+
+```yml
+name: "PMD Scan"
+runs-on: ubuntu-latest
+if: >
+  github.event_name == 'pull_request'
+steps:
+  - uses: Alfresco/alfresco-build-tools/.github/actions/pmd@ref
+    with:
+      pmd-version: "6.55.0" # The version of PMD to use
+      create-github-annotations: "true" # Whether to create annotations using the GitHub Advanced Security (nb. this is not free for private repositories)
+      fail-on-new-issues: "true" # Whether the introduction of new issues should cause the build to fail.
+```
+
+All parameters have default values and can be skipped.
+
 ### pre-commit
 
 Executes a [pre-commit](https://pre-commit.com/) step.
