@@ -16,6 +16,11 @@ inputs:
       When set to true this fails the build if the PR introduces more issues than it resolves.
     required: false
     default: "true"
+  pmd-ruleset-ref:
+    description: |
+      The git reference (e.g. branch name or commit id) for the Alfresco/pmd-ruleset project.
+    required: false
+    default: "master"
 
 runs:
   using: "composite"
@@ -26,19 +31,22 @@ runs:
         fetch-depth: 0
 
     - name: Download ruleset
-      run: curl https://raw.githubusercontent.com/AlfrescoLabs/pmd-ruleset/master/pmd-ruleset.xml -o ${{ github.action_path }}/pmd-ruleset.xml
-      shell: bash
+      uses: actions/checkout@v3
+      with:
+        repository: AlfrescoLabs/pmd-ruleset
+        ref: ${{ inputs.pmd-ruleset-ref }}
+        path: ${{ github.action_path }}/pmd-ruleset
 
     - name: Install PMD
       uses: pmd/pmd-github-action@d57c0463ebba262a33d1983a5c6ac6031bfde43b # v1.4.1
       id: pmd
       with:
         version: ${{ inputs.pmd-version }}
-        rulesets: ${{ github.action_path }}/pmd-ruleset.xml
+        rulesets: ${{ github.action_path }}/pmd-ruleset/pmd-ruleset.xml
         createGitHubAnnotations: ${{ inputs.create-github-annotations }}
 
     - name: Run PMD scan against changes
-      run: ${{ github.action_path }}/delta-scan.sh "${{ github.action_path }}/pmd-ruleset.xml" "origin/${{ github.base_ref }}" "origin/${{ github.head_ref }}" "${{ inputs.fail-on-new-issues }}"
+      run: ${{ github.action_path }}/delta-scan.sh "${{ github.action_path }}/pmd-ruleset/pmd-ruleset.xml" "origin/${{ github.base_ref }}" "origin/${{ github.head_ref }}" "${{ inputs.fail-on-new-issues }}"
       shell: bash
       env:
         PMD_VERSION: ${{ inputs.pmd-version }}
