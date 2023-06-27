@@ -47,6 +47,7 @@ runs:
 
     - name: Run PMD scan against changes
       run: ${{ github.action_path }}/delta-scan.sh "${{ github.action_path }}/pmd-ruleset/pmd-ruleset.xml" "origin/${{ github.base_ref }}" "origin/${{ github.head_ref }}" "${{ inputs.fail-on-new-issues }}"
+      if: ${{ github.event_name == 'pull_request' }}
       shell: bash
       env:
         PMD_VERSION: ${{ inputs.pmd-version }}
