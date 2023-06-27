@@ -60,6 +60,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [nexus-create-staging](#nexus-create-staging)
     - [nexus-close-staging](#nexus-close-staging)
     - [nexus-release-staging](#nexus-release-staging)
+    - [pmd](#pmd)
     - [pre-commit](#pre-commit)
     - [pre-commit-default](#pre-commit-default)
     - [pipenv](#pipenv)
