@@ -64,6 +64,8 @@ then
     if [[ ${fail_on_new_issues} == "true" ]]
     then
         exit 1
+    else
+        echo "Increase in errors ignored as fail_on_new_issues set to ${fail_on_new_issues}"
     fi
 else
     echo "Number of PMD issues in edited files went from ${old_issue_count} to ${new_issue_count}"
