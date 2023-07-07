@@ -27,12 +27,6 @@ inputs:
   quay-password:
     description: Quay.io password
     required: false
-  ghcr-username:
-    description: ghcr.io user name
-    required: false
-  ghcr-password:
-    description: ghcr.io password
-    required: false
   upload-jars:
     description: whether jar files should be uploaded or not as part of the build
     required: false
@@ -145,14 +139,6 @@ runs:
         registry: quay.io
         username: ${{ inputs.quay-username }}
         password: ${{ inputs.quay-password }}
-
-    - name: Login to ghcr.io Docker Registry
-      if: inputs.ghcr-username != ''
-      uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: ${{ inputs.ghcr-username }}
-        password: ${{ inputs.ghcr-password }}
 
     - name: Define Maven Command
       id: define_maven_command
