@@ -174,7 +174,7 @@ runs:
     - name: Enable testcontainers substitutor
       if: inputs.testcontainers-substitutor != ''
       shell: bash
-      run: echo "image.substitutor=${{ inputs.testcontainers-substitutor }}" > ~/.testcontainers.properties
+      run: echo "TESTCONTAINERS_IMAGE_SUBSTITUTOR=${{ inputs.testcontainers-substitutor }}" >> $GITHUB_ENV
 
     - name: Build and Test with Maven (and maybe Deploy)
       shell: bash
