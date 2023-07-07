@@ -27,6 +27,12 @@ inputs:
   quay-password:
     description: Quay.io password
     required: false
+  ghcr-username:
+    description: ghcr.io user name
+    required: false
+  ghcr-password:
+    description: ghcr.io password
+    required: false
   upload-jars:
     description: whether jar files should be uploaded or not as part of the build
     required: false
@@ -56,9 +62,6 @@ inputs:
     description: Whether testcontainers should be reused
     required: false
     default: 'false'
-  testcontainers-substitutor:
-    description: Full path to a class that can substitute testcontainers images
-    required: false
 
 outputs:
   version:
@@ -170,11 +173,6 @@ runs:
       run: |
         echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
         echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
-
-    - name: Enable testcontainers substitutor
-      if: inputs.testcontainers-substitutor != ''
-      shell: bash
-      run: echo "image.substitutor=${{ inputs.testcontainers-substitutor }}" > ~/.testcontainers.properties
 
     - name: Build and Test with Maven (and maybe Deploy)
       shell: bash
