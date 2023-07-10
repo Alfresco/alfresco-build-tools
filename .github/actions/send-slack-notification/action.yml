@@ -92,7 +92,7 @@ runs:
         channel-id: "${{ inputs.channel-id }}"
         payload: |
           {
-            "text": "Notify on ${{ env.EVENT_OUTPUT }} on branch <${{ env.REPO_URL }}/tree/${{ env.BRANCH_NAME }}|`${{ env.BRANCH_NAME }}`>",
+            "text": "Notification on ${{ env.EVENT_OUTPUT }} on branch <${{ env.REPO_URL }}/tree/${{ env.BRANCH_NAME }}|`${{ env.BRANCH_NAME }}`>",
             "attachments": [
               {
                 "color": "${{ env.COLOR }}",
