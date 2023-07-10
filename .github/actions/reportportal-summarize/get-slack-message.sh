@@ -8,7 +8,9 @@ if [[ -n "$RP_LAUNCH_KEY" ]]; then
     MSG+="\nSee <$RP_LAUNCH_URL|latest reports>."
   elif [ "$NB" == "1" ]; then
     RP_LAUNCH_ID=$(echo "$RP_CONTENT" | jq -r '.content[0].id // empty')
-    MSG+="See <$RP_LAUNCH_URL/$RP_LAUNCH_ID|report>"
+    STATUS=$(echo "$RP_CONTENT" | jq -r '.content[0].status // empty')
+    [[ "$STATUS" == 'PASSED' ]] && ICON="✅" || ICON="❌"
+    MSG+="See <$RP_LAUNCH_URL/$RP_LAUNCH_ID|report> $ICON"
   else
     MSG+="$NB reports found for key "'`'"$RP_LAUNCH_KEY"'`'"."
     while read -r id ; do

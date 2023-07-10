@@ -15,7 +15,7 @@ setup() {
 
     export NO_MESSAGE="message="
     export KEY_NO_REPORT="message=No report found for key \`my-tests-push-3665876492\`.\nSee <https://rpserver:8080/ui/#my-project/launches/all|latest reports>."
-    export SINGLE_REPORT="message=See <https://rpserver:8080/ui/#my-project/launches/all/88|report>"
+    export SINGLE_REPORT="message=See <https://rpserver:8080/ui/#my-project/launches/all/88|report> ✅"
     export MULTIPLE_REPORTS=$(cat << BATS
 message=3 reports found for key \`my-tests-push-3665876492\`.\n<https://rpserver:8080/ui/#my-project/launches/all/91|Report #3> ❌\n<https://rpserver:8080/ui/#my-project/launches/all/90|Report #2> WHATEVER_STATUS\n<https://rpserver:8080/ui/#my-project/launches/all/89|Report #1> ✅
 BATS
