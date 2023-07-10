@@ -56,10 +56,6 @@ inputs:
     description: Whether testcontainers should be reused
     required: false
     default: 'false'
-  testcontainers-substitutor:
-    description: Whether testcontainers image names should be substituted by image substitutor
-    required: false
-    default: 'false'
 
 outputs:
   version:
@@ -163,12 +159,6 @@ runs:
       run: |
         echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
         echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
-
-    - name: Enable testcontainers substitutor
-      if: inputs.testcontainers-substitutor == 'true'
-      shell: bash
-      run: |
-        echo "ENABLE_TESTCONTAINERS_SUBSTITUTOR=true" >> $GITHUB_ENV
 
     - name: Build and Test with Maven (and maybe Deploy)
       shell: bash
