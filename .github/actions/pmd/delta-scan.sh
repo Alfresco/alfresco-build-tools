@@ -73,7 +73,7 @@ fi
 echo "OLD_REPORT_FILE=${tmp_dir}/old_report.txt" >> "$GITHUB_ENV"
 echo "NEW_REPORT_FILE=${tmp_dir}/new_report.txt" >> "$GITHUB_ENV"
 echo "FULL_DIFF_FILE=${tmp_dir}/full-diff.txt" >> "$GITHUB_ENV"
-echo "HEAD_REF=${head_ref}" >> "$GITHUB_ENV"
+echo "HEAD_REF=$(git rev-parse ${head_ref})" >> "$GITHUB_ENV"
 echo "BASELINE_REF=${baseline_ref}" >> "$GITHUB_ENV"
 
 set +e

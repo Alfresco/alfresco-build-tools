@@ -104,7 +104,7 @@ with open(pmd_summary_path, 'w') as pmd_summary_file:
             log(f'\n*** {resolved_count} violations of {rule} have been resolved ***\n', pmd_summary_file)
 
     # Append full list of issues in the latest scan.
-    pmd_summary_file.write('\n\n=== Full list of issues found in the latest code ===\n\n''')
+    pmd_summary_file.write('\n\n=== Full list of issues found in the latest code (including existing issues) ===\n\n''')
     with open(args.new) as new_report_details:
         pmd_summary_file.write(new_report_details.read())
 
