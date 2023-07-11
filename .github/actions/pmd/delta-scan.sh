@@ -55,9 +55,6 @@ echo "${new_issue_count} issue(s) found in ${new_file_count} updated file(s) on 
 # Display the differences between the two files in the log.
 diff ${tmp_dir}/old_report.txt ${tmp_dir}/new_report.txt || true
 
-# Tidy up.
-rm -rf ${tmp_dir}
-
 # Fail the build if there are more issues now than before.
 if [[ ${new_issue_count} > ${old_issue_count} ]]
 then
