@@ -784,6 +784,8 @@ steps:
 
 All parameters have default values and can be skipped.
 
+A summary of the report is created as an artifact called `pmd-summary`.
+
 ### pre-commit
 
 Executes a [pre-commit](https://pre-commit.com/) step.
