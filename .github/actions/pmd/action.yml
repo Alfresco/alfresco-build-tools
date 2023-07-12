@@ -51,3 +51,15 @@ runs:
       shell: bash
       env:
         PMD_VERSION: ${{ inputs.pmd-version }}
+
+    - name: Create a summary of PMD findings
+      run: python ${{ github.action_path }}/create-summary.py -o "${{ env.OLD_REPORT_FILE }}" -n "${{ env.NEW_REPORT_FILE }}" -d "${{ env.FULL_DIFF_FILE }}" -t "PMD differences between ${{ env.BASELINE_REF }} and ${{ env.HEAD_REF }}"
+      if: ${{ github.event_name == 'pull_request' }}
+      shell: bash
+
+    - name: Archive PMD summary
+      uses: actions/upload-artifact@v3
+      if: ${{ github.event_name == 'pull_request' }}
+      with:
+        name: PMD Summary (Human Readable)
+        path: ${{ env.PMD_SUMMARY_FILE }}
