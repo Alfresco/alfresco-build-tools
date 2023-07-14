@@ -23,6 +23,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [Auto cancel builds](#auto-cancel-builds)
     - [Docker build and push](#docker-build-and-push)
     - [Docker login](#docker-login)
+    - [pmd](#pmd)
     - [Retry failing step](#retry-failing-step)
     - [SSH debug](#ssh-debug)
     - [Triggering a workflow in another repository](#triggering-a-workflow-in-another-repository)
@@ -60,7 +61,6 @@ Here follows the list of GitHub Actions topics available in the current document
     - [nexus-create-staging](#nexus-create-staging)
     - [nexus-close-staging](#nexus-close-staging)
     - [nexus-release-staging](#nexus-release-staging)
-    - [pmd](#pmd)
     - [pre-commit](#pre-commit)
     - [pre-commit-default](#pre-commit-default)
     - [pipenv](#pipenv)
@@ -190,6 +190,12 @@ provided as repository secrets.
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
 ```
+
+### pmd
+
+[Yet Another PMD Scan](https://github.com/Alfresco/ya-pmd-scan) is a GitHub Action primarily for Alfresco repositories. It is a bit more involved than most of the actions in this repository and so has been split out into a repository of its own.
+
+The action runs the [PMD](https://pmd.github.io/) static analysis tool to look for common programming flaws in files modified by PRs.
 
 ### Retry failing step
 
@@ -761,30 +767,6 @@ Releases the specified staging repository on Nexus. The repository should be in 
           nexus-username: ${{ secrets.NEXUS_USERNAME }}
           nexus-password: ${{ secrets.NEXUS_PASSWORD }}
 ```
-
-### pmd
-
-Runs the [PMD](https://pmd.github.io/) static analysis tool to check for common programming flaws.
-
-The action looks for issues in files modified by PRs and should only be run against the pull-request target:
-
-```yml
-name: "PMD Scan"
-runs-on: ubuntu-latest
-if: >
-  github.event_name == 'pull_request'
-steps:
-  - uses: Alfresco/alfresco-build-tools/.github/actions/pmd@ref
-    with:
-      pmd-version: "6.55.0" # The version of PMD to use
-      create-github-annotations: "true" # Whether to create annotations using the GitHub Advanced Security (nb. this is not free for private repositories)
-      fail-on-new-issues: "true" # Whether the introduction of new issues should cause the build to fail.
-      pmd-ruleset-ref: "master" # The git reference (e.g. branch name or commit id) for the [pmd-ruleset](https://github.com/AlfrescoLabs/pmd-ruleset/) project.
-```
-
-All parameters have default values and can be skipped.
-
-The PMD [SARIF](https://sarifweb.azurewebsites.net/) report is created as an artifact called `PMD Report` and a human readable summary of the report is created as an artifact called `PMD Summary (Human Readable)`.
 
 ### pre-commit
 
