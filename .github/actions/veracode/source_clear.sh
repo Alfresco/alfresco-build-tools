@@ -8,7 +8,8 @@ mvn -B -q clean install \
     -DskipTests \
     -Dmaven.javadoc.skip=true \
     com.srcclr:srcclr-maven-plugin:scan \
-    -Dcom.srcclr.apiToken=${SRCCLR_API_TOKEN} > scan.log
+    -Dcom.srcclr.apiToken=${SRCCLR_API_TOKEN} > scan.log \
+    $ADDITIONAL_SETTINGS
 
 SUCCESS=$?   # this will read exit code of the previous command
 
