@@ -8,3 +8,7 @@
   - [ ] Minor (new feature)
   - [ ] Major (drop/rename actions)
 - External PR link where changes has been tested:
+
+### Description
+
+<!-- Explain your changes -->
