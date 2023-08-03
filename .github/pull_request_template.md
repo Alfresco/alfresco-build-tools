@@ -6,7 +6,7 @@
 - Proposed version increment for [release](/docs/README.md#release):
   - [ ] Patch (bugfix)
   - [ ] Minor (new feature)
-  - [ ] Major (drop/rename actions)
+  - [ ] Major (breaking changes)
 - External PR link where changes has been tested:
 
 ### Description
