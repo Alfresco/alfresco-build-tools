@@ -1307,8 +1307,4 @@ brew install coreutils
 
 ## Release
 
-Run the release script to release a new version from this repository:
-
-```sh
-./release.sh v1.2.3
-```
+Bump version defined in [version.txt](/version.txt) during a PR, release workflow is triggered automatically.
