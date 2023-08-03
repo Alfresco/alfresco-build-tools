@@ -37,6 +37,14 @@ inputs:
     description: whether jar files should be uploaded or not as part of the build
     required: false
     default: 'false'
+  upload-jars-artifact:
+    description: name of the artifact where jar files should be uploaded
+    required: false
+    default: 'build'
+  upload-jars-path:
+    description: path expression to select the jar files to upload
+    required: false
+    default: '**/target/*.jar'
   docker-username:
     description: Docker.io user name
     required: false
@@ -191,10 +199,10 @@ runs:
     - uses: actions/upload-artifact@v3
       if: inputs.upload-jars == 'true'
       with:
-        name: build
+        name: ${{ inputs.upload-jars-name }}
         retention-days: 1
         path: |
-          **/target/*.jar
+          ${{ inputs.upload-jars-path }}
 
     - uses: actions/upload-artifact@v3
       if: inputs.upload-coverage == 'true'
