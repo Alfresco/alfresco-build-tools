@@ -28,27 +28,3 @@
   entry: bash -c 'find . -name Chart.yaml | xargs -I% bash -c "dirname %" | xargs -t -I% bash -c "helm template % | kubepug --error-on-deprecated --error-on-deleted --input-file=-"'
   language: system
   pass_filenames: false
-- id: plantuml-svg
-  name: PlantUML SVG converter
-  entry: bash -c 'for FILE in $@; do cat $FILE | docker run --rm -i think/plantuml > ${FILE%.*}.svg; done'
-  language: system
-  types: [file]
-  files: \.puml$
-- id: plantuml-png
-  name: PlantUML PNG converter
-  entry: bash -c 'for FILE in $@; do cat $FILE | docker run --rm -i think/plantuml -tpng > ${FILE%.*}.png; done'
-  language: system
-  types: [file]
-  files: \.puml$
-- id: drawio-export
-  name: DrawIO PNG converter
-  entry: docker run --rm -it -v $(pwd):/data rlespinasse/drawio-export --fileext svg --on-changes --remove-page-suffix
-  language: system
-  types: [file]
-  files: \.drawio$
-  pass_filenames: false
-- id: checkov-helm
-  name: Checkov - Helm check
-  entry: bash -c 'find . -name Chart.yaml | xargs -I% bash -c "dirname %" | xargs -t -I% bash -c "helm template % > %.yaml && checkov -f %.yaml --framework kubernetes"'
-  language: system
-  pass_filenames: false
