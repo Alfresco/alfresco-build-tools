@@ -1210,6 +1210,7 @@ Runs Veracode Source Clear Scan
         #continue-on-error: true # uncomment this line to prevent the Veracode scan step from failing the whole build
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
+          srcclr-install-options: '-DskipTestModules' # optional, additional maven options
 ```
 
 ## Reusable workflows provided by us
