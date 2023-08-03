@@ -19,5 +19,5 @@ runs:
       shell: bash
       env:
         SRCCLR_API_TOKEN: ${{ inputs.srcclr-api-token }}
-        SRCCLR_INSTALL_DEFAULT_OPTIONS: ${{ srcclr-install-default-options }}
+        SRCCLR_INSTALL_DEFAULT_OPTIONS: ${{ inputs.srcclr-install-default-options }}
         SRCCLR_INSTALL_OPTIONS: ${{ inputs.srcclr-install-options }}
