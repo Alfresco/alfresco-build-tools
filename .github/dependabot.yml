@@ -10,4 +10,4 @@ updates:
   - package-ecosystem: "pip"
     directory: "/.github/actions/pipenv"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
