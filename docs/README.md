@@ -1203,13 +1203,14 @@ Validates Maven dependency graph versions to ensure all target includes artifact
 
 ### veracode
 
-Runs Veracode Source Clear Scan
+Runs Veracode Source Clear Scan, allows for adding additional maven options to 
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@ref
         #continue-on-error: true # uncomment this line to prevent the Veracode scan step from failing the whole build
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
+          srcclr-install-options: '-DskipTestModules' # optional, additional maven options
 ```
 
 ## Reusable workflows provided by us
