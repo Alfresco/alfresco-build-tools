@@ -1,5 +1,5 @@
-name: 'JaCoCo Coverage Report'
-description: 'Publishes the JaCoCo coverage report as a comment in the Pull Request'
+name: 'Process Coverage Report'
+description: 'Process the generated coverage for further reporting, uses JaCoCo-report plugin'
 inputs:
   paths:
     description: 'Comma separated paths of the generated JaCoCo xml files (supports wildcard glob pattern)'
