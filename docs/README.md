@@ -48,7 +48,6 @@ Here follows the list of GitHub Actions topics available in the current document
     - [helm-release-and-publish](#helm-release-and-publish)
     - [helm-template-yamllint](#helm-template-yamllint)
     - [helm-plugin](#helm-plugin)
-    - [helm-unit-tests](#helm-unit-tests)
     - [helm-update-chart-version](#helm-update-chart-version)
     - [jx-updatebot-pr](#jx-updatebot-pr)
     - [kubectl-keep-nslogs](#kubectl-keep-nslogs)
@@ -552,21 +551,6 @@ Install requested Helm plugin
 ```
 
 `plugin_version` can be skipped so the latest release of the plugin will be installed
-
-### helm-unit-tests
-
-Looks for Helm unit tests written using [helm3-unittest](https://github.com/vbehar/helm3-unittest/blob/master/DOCUMENT.md).
-
-```yaml
-     - uses: >-
-         Alfresco/alfresco-build-tools/.github/actions/helm-unit-tests@ref
-       with:
-         chart-dir: charts/myapp
-         chart-type: application
-```
-
-> This plugin is unmaintained and that action will be deprecated. Please use the `helm-plugin` instead
-> together with an additional `run` step to fire up the plugin.
 
 ### helm-update-chart-version
 
