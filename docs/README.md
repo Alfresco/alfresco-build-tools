@@ -63,6 +63,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [nexus-release-staging](#nexus-release-staging)
     - [pre-commit](#pre-commit)
     - [pre-commit-default](#pre-commit-default)
+    - [process-coverage-report](#process-coverage-report)
     - [pipenv](#pipenv)
     - [rancher](#rancher)
     - [reportportal-prepare](#reportportal-prepare)
@@ -852,6 +853,22 @@ Or:
           check-github-configuration: 'false'
 ```
 
+### process-coverage-report
+
+This workflow processes the coverage report to add the total coverage percentage as a comment on a PR
+
+```yml
+        id: process-coverage-report
+        uses: Alfresco/alfresco-build-tools/.github/actions/process-coverage-report@ref
+        with:
+          paths: |
+            ${{ github.workspace }}/**/build/reports/jacoco/prodNormalDebugCoverage/prodNormalDebugCoverage.xml,
+            ${{ github.workspace }}/**/build/reports/jacoco/**/debugCoverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 80
+          min-coverage-changed-files: 90
+```
+
 ### pipenv
 
 This workflow sets up a Python environment using the standard setup-python action and utilizes the pipenv action to manage Python dependencies declared in the Pipfile and based on the specified Python version
@@ -1210,6 +1227,7 @@ Runs Veracode Source Clear Scan
         #continue-on-error: true # uncomment this line to prevent the Veracode scan step from failing the whole build
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
+          srcclr-install-options: '-DskipTestModules' # optional, additional maven options
 ```
 
 ## Reusable workflows provided by us
@@ -1289,8 +1307,15 @@ brew install coreutils
 
 ## Release
 
-Run the release script to release a new version from this repository:
+Bump version defined in [version.txt](/version.txt) during a PR, release
+workflow is triggered automatically on PR close.
 
-```sh
-./release.sh v1.2.3
-```
+New versions should follow [Semantic versioning](https://semver.org/), so:
+
+- A bump in the third number will be required if you are bug fixing an existing
+  action.
+- A bump in the second number will be required if you introduced a new action or
+  improved an existing action, ensuring backward compatibility.
+- A bump in the first number will be required if there are major changes in the
+  repository layout, or if users are required to change their workflow config
+  when upgrading to the new version of an existing action.
