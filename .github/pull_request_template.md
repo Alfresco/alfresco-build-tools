@@ -2,7 +2,7 @@
 ### Checklist
 
 - [ ] [README](/docs/README.md) updated after adding/changing behaviour of an action
-
-### PR where you tested this change
-
-link
+- Proposed version increment for [release](/docs/README.md#release):
+  - [ ] Minor (new feature)
+  - [ ] Patch (bugfix)
+- [ ] PR where change has been tested:
