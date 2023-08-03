@@ -1314,5 +1314,6 @@ New versions should follow [Semantic versioning](https://semver.org/), so:
 
 - if you are bugfixing an existing action, bump the third number
 - if you introduced a new action or improved an existing action ensuring backward compatibility, bump the second number
-- ```
-- only major changes in the repository layout, or changes preventing consumer from using the new version of an existing action with his/her existing job config will require a bump in the first number
+- only major changes in the repository layout, or changes preventing users
+  from using the new version of an existing action without changing their existing job
+  config, will require a bump in the first number
