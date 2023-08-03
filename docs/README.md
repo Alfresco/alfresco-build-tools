@@ -63,6 +63,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [nexus-release-staging](#nexus-release-staging)
     - [pre-commit](#pre-commit)
     - [pre-commit-default](#pre-commit-default)
+    - [process-coverage-report](#process-coverage-report)
     - [pipenv](#pipenv)
     - [rancher](#rancher)
     - [reportportal-prepare](#reportportal-prepare)
@@ -850,6 +851,22 @@ Or:
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit-default@ref
         with:
           check-github-configuration: 'false'
+```
+
+### process-coverage-report
+
+This workflow processes the coverage report to add the total coverage percentage as a comment on a PR
+
+```yml
+        id: process-coverage-report
+        uses: Alfresco/alfresco-build-tools/.github/actions/process-coverage-report@ref
+        with:
+          paths: |
+            ${{ github.workspace }}/**/build/reports/jacoco/prodNormalDebugCoverage/prodNormalDebugCoverage.xml,
+            ${{ github.workspace }}/**/build/reports/jacoco/**/debugCoverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 80
+          min-coverage-changed-files: 90
 ```
 
 ### pipenv
