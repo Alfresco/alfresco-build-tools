@@ -7,4 +7,4 @@
   - [ ] Patch (bugfix)
   - [ ] Minor (new feature)
   - [ ] Major (drop/rename actions)
-- PR where change has been tested:
+- External PR link where changes has been tested:
