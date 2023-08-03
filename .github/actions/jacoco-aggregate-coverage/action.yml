@@ -1,0 +1,72 @@
+name: 'JaCoCo Coverage Report'
+description: 'Publishes the JaCoCo coverage report as a comment in the Pull Request'
+inputs:
+  paths:
+    description: 'Comma separated paths of the generated JaCoCo xml files (supports wildcard glob pattern)'
+    required: true
+  token:
+    description: 'Github personal token to add commits to Pull Request'
+    required: true
+  min-coverage-overall:
+    description: 'The minimum code coverage that is required to pass for overall project'
+    required: false
+    default: '80'
+  min-coverage-changed-files:
+    description: 'The minimum code coverage that is required to pass for changed files'
+    required: false
+    default: '80'
+  title:
+    description: 'Optional title for the Pull Request comment'
+    required: false
+  update-comment:
+    description: 'Update the coverage report comment instead of creating new ones. Requires title to works properly.'
+    required: false
+    default: 'false'
+  skip-if-no-changes:
+    description: "Comment won't be added if there is no coverage information present for the files changed"
+    required: false
+    default: 'false'
+  pass-emoji:
+    description: 'Github emoji to use for pass status shown when coverage greater than min coverage (should be a Github supported emoji)'
+    required: false
+    default: ':green_apple:'
+  fail-emoji:
+    description: 'Github emoji to use for fail status shown when coverage lesser than min coverage (should be a Github supported emoji)'
+    required: false
+    default: ':x:'
+  continue-on-error:
+    description: 'When there is an error do not fail the action, but log a warning'
+    required: false
+    default: 'true'
+  debug-mode:
+    description: 'Run the action in debug mode and get debug logs printed in console'
+    required: false
+    default: 'false'
+
+outputs:
+  coverage-overall:
+    description: 'The overall coverage of the project'
+    value: ${{ steps.jacoco-aggregate.outputs.coverage-overall }}
+  coverage-changed-files:
+    description: 'The total coverage of all changed files'
+    value: ${{ steps.jacoco-aggregate.outputs.coverage-changed-files }}
+
+runs:
+  using: composite
+  steps:
+    - uses: madrapps/jacoco-report@v1.6.1
+      id: jacoco-aggregate
+      with:
+        paths:  ${{ inputs.paths }}
+        token:  ${{ inputs.token }}
+        min-coverage-overall:  ${{ inputs.min-coverage-overall }}
+        min-coverage-changed-files:  ${{ inputs.min-coverage-changed-files }}
+        title:  ${{ inputs.title }}
+        update-comment:  ${{ inputs.update-comment }}
+        skip-if-no-changes:  ${{ inputs.skip-if-no-changes }}
+        pass-emoji:  ${{ inputs.pass-emoji }}
+        fail-emoji:  ${{ inputs.fail-emoji }}
+        continue-on-error:  ${{ inputs.continue-on-error }}
+        debug-mode:  ${{ inputs.debug-mode }}
+        coverage-overall:  ${{ inputs.coverage-overall }}
+        coverage-changed-files:  ${{ inputs.coverage-changed-files }}
