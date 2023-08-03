@@ -1203,7 +1203,7 @@ Validates Maven dependency graph versions to ensure all target includes artifact
 
 ### veracode
 
-Runs Veracode Source Clear Scan, allows for adding additional maven options to 
+Runs Veracode Source Clear Scan
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@ref
