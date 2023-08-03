@@ -75,7 +75,7 @@ runs:
         echo "result=$RESULT" >> $GITHUB_OUTPUT
 
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v2.9.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v3.0.0
 
     - name: Send slack notification
       id: slack
