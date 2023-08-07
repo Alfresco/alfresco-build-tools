@@ -39,6 +39,8 @@ jobs:
               branch: master
               skip_checkout: true
               commit_message: Release ${{ env.VERSION }}
+              commit_user_name: ${{ vars.BOT_GITHUB_USERNAME }}
+              commit_user_email: ${{ vars.BOT_GITHUB_EMAIL }}
 
           - name: Generate release notes
             if: steps.release_guard.outputs.do_release == 'true'
