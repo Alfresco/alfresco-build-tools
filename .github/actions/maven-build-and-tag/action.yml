@@ -37,7 +37,7 @@ inputs:
     description: whether jar files should be uploaded or not as part of the build
     required: false
     default: 'false'
-  upload-jars-artifact:
+  upload-jars-name:
     description: name of the artifact where jar files should be uploaded
     required: false
     default: 'build'
