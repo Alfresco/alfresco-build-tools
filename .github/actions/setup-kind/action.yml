@@ -8,6 +8,10 @@ inputs:
       https://github.com/kubernetes-sigs/kind/releases
     required: true
     default: kindest/node:v1.24.7@sha256:577c630ce8e509131eab1aea12c022190978dd2f745aac5eb1fe65c0807eb315
+  nginx-manifest:
+    description: The nginx manifest to apply.
+    required: true
+    default: https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 runs:
   using: "composite"
   steps:
@@ -19,11 +23,8 @@ runs:
 
     - name: Install ingress-nginx
       shell: bash
-      env:
-        NGINX_MANIFEST: |
-          https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
       run: |
-        kubectl apply -f $NGINX_MANIFEST
+        kubectl apply -f ${{ inputs.nginx-manifest }}
 
     - name: Wait for ingress ready
       shell: bash
