@@ -56,7 +56,6 @@ runs:
           echo "result=$(uuidgen)" >> $GITHUB_OUTPUT
         fi
     - name: Execute helm upgrade dry-run
-      if: steps.check.test == 'true'
       env:
         CHART_DIR: ${{ inputs.chart-dir }}
         NAMESPACE: ${{ inputs.test-namespace }}
