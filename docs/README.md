@@ -783,8 +783,15 @@ This action requires a pre-existing `.pre-commit-config.yaml` file that needs to
 be present into the caller repository. You can find more documentation related
 to pre-commit hooks in the [dedicated section](pre-commit-hooks.md).
 
-Note that this action includes an `actions/checkout` step that is mandatory for
-the proper handling of auto-commit feature.
+Note that this action includes an `actions/checkout` as a first step that
+usually helps when running this step as the first step in a job and is mandatory
+for the proper handling of auto-commit feature, unless you specify:
+
+```yml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
+        with:
+          no_checkout: "true"
+```
 
 ### pre-commit-default
 

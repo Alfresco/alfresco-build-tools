@@ -19,10 +19,15 @@ inputs:
     description: The python version of the local runner
     required: false
     default: "3.9"
+  skip_checkout:
+    description: If the internal checkout action should be skipped or not
+    required: false
+    default: "false"
 runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v3
+      if: inputs.skip_checkout == "false"
       env:
         REF_TO_CHECKOUT: ${{ inputs.auto-commit == 'true' && github.head_ref || '' }}
       with:
