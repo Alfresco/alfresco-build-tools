@@ -27,7 +27,7 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v3
-      if: inputs.skip_checkout == "false"
+      if: inputs.skip_checkout == 'false'
       env:
         REF_TO_CHECKOUT: ${{ inputs.auto-commit == 'true' && github.head_ref || '' }}
       with:
