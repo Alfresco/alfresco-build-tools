@@ -790,7 +790,7 @@ for the proper handling of auto-commit feature, unless you specify:
 ```yml
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
         with:
-          no_checkout: "true"
+          skip_checkout: "true"
 ```
 
 ### pre-commit-default
