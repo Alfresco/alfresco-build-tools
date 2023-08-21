@@ -37,7 +37,7 @@ runs:
   using: composite
   steps:
     - name: Setup rancher
-      uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v3.0.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v3.0.2
       with:
         url: ${{ inputs.test-rancher-url }}
         access-key: ${{ inputs.test-rancher-access-key }}
@@ -56,7 +56,6 @@ runs:
           echo "result=$(uuidgen)" >> $GITHUB_OUTPUT
         fi
     - name: Execute helm upgrade dry-run
-      if: steps.check.test == 'true'
       env:
         CHART_DIR: ${{ inputs.chart-dir }}
         NAMESPACE: ${{ inputs.test-namespace }}
