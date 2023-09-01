@@ -17,6 +17,10 @@ inputs:
     description: "Additional Git commit command options"
     required: false
     default: ''
+  skip-if-no-changes:
+    description: "Skips the actual commit when no changes are staged"
+    required: false
+    default: 'false'
 runs:
   using: composite
   steps:
@@ -33,4 +37,9 @@ runs:
         git add ${{ inputs.add-options }}
         git status
         git --no-pager diff --cached
-        git commit -m "${{ inputs.commit-message }}" ${{ inputs.commit-options }}
+        if ${{ inputs.skip-if-no-changes == 'true' }} ;
+        then
+          git diff-index --quiet HEAD || git commit -m "${{ inputs.commit-message }}" ${{ inputs.commit-options }}
+        else
+          git commit -m "${{ inputs.commit-message }}" ${{ inputs.commit-options }}
+        fi

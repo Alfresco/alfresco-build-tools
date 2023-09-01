@@ -424,6 +424,7 @@ This action requires a checkout with fetch-depth option as follow:
 ### git-commit-changes
 
 Commits local changes after configuring git user and showing the status of what is going be committed.
+If `skip-if-no-changes` input is set to `true` then an empty commit will not be committed at all.
 
 ```yaml
     - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@ref
