@@ -29,7 +29,11 @@ runs:
       shell: bash
       working-directory: ${{ matrix.repository }}
       run: |
-        ANY_FILES_TO_COMMIT=`[[ -n $(git status --untracked-files=no --porcelain) ]] && echo true`
+        if [[ -n $(git status --untracked-files=no --porcelain) ]]; then
+          ANY_FILES_TO_COMMIT='true'
+        else
+          ANY_FILES_TO_COMMIT='false'
+        fi
         echo result="${ANY_FILES_TO_COMMIT}" >> $GITHUB_OUTPUT
 
     - name: Commit stagged changes
