@@ -24,6 +24,12 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Configure git user
+      shell: bash
+      run: |
+        git config --global user.name ${{ inputs.username }}
+        git config --global user.email ${{ inputs.username }}@users.noreply.github.com
+
     - name: Check for files to Commit
       id: any-files-to-commit
       shell: bash
@@ -36,7 +42,7 @@ runs:
         fi
         echo result="${ANY_FILES_TO_COMMIT}" >> $GITHUB_OUTPUT
 
-    - name: Commit stagged changes
+    - name: Commit staged changes
       if: inputs.ignore-empty == 'false' || steps.any-files-to-commit.outputs.result == 'true'
       shell: bash
       run: |
@@ -45,8 +51,6 @@ runs:
         then
           cd $REPO_DIR
         fi
-        git config --global user.name ${{ inputs.username }}
-        git config --global user.email ${{ inputs.username }}@users.noreply.github.com
         git add ${{ inputs.add-options }}
         git status
         git --no-pager diff --cached
