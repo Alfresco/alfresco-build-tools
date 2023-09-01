@@ -37,9 +37,9 @@ runs:
         git add ${{ inputs.add-options }}
         git status
         git --no-pager diff --cached
-        if ${{ inputs.skip-if-no-changes == 'true' }} 
+        if ${{ inputs.skip-if-no-changes == 'true' }} ;
         then
           git diff-index --quiet HEAD || git commit -m "${{ inputs.commit-message }}" ${{ inputs.commit-options }}
-        elif
+        else
           git commit -m "${{ inputs.commit-message }}" ${{ inputs.commit-options }}
         fi
