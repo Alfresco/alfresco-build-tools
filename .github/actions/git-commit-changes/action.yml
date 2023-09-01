@@ -17,10 +17,23 @@ inputs:
     description: "Additional Git commit command options"
     required: false
     default: ''
+  ignore-empty:
+    description: "Ignore empty commits"
+    required: false
+    default: 'false'
 runs:
   using: composite
   steps:
+    - name: Check for files to Commit
+      id: any-files-to-commit
+      shell: bash
+      working-directory: ${{ matrix.repository }}
+      run: |
+        ANY_FILES_TO_COMMIT=`[[ -n $(git status --untracked-files=no --porcelain) ]] && echo true`
+        echo result="${ANY_FILES_TO_COMMIT}" >> $GITHUB_OUTPUT
+
     - name: Commit stagged changes
+      if: inputs.ignore-empty == 'false' || steps.any-files-to-commit.outputs.result == 'true'
       shell: bash
       run: |
         REPO_DIR="${{inputs.repository-directory}}"
