@@ -4,6 +4,7 @@ import yaml
 
 DEFAULT_SRC_PATH = 'charts'
 DEFAULT_YAML_PATH = 'charts.yaml'
+DEFAULT_ROOT_KEY = 'charts'
 
 def list_subfolders(folder_path):
     """
@@ -34,25 +35,28 @@ def write_yaml_file(data, file_path):
 
 
 def main():
-    # Create argument parser
+    """
+    Enumerate subfolders in a given folder, update a dictionary where each key
+    is the name of a subfolder in a given yaml file
+    """
     parser = argparse.ArgumentParser(
         description='Create or update a YAML file with subfolder names.')
 
-    # Add command-line arguments for folder path and YAML file path
     parser.add_argument('--src', default=DEFAULT_SRC_PATH,
                         help='Path to the folder containing subfolders.')
     parser.add_argument('--yaml', default=DEFAULT_YAML_PATH,
                         help='Path to the YAML file to write.')
+    parser.add_argument('--root-name', default=DEFAULT_ROOT_KEY,
+                        help='The root key inside the YAML file')
 
-    # Parse the command-line arguments
     args = parser.parse_args()
 
     subfolders = list_subfolders(args.src)
-    data = {"charts": subfolders}
+    data = {args.root_name: subfolders}
 
     existing_data = load_existing_yaml(args.yaml)
-    for entry in data['charts']:
-        existing_data['charts'].setdefault(entry)
+    for entry in data[args.root_name]:
+        existing_data[args.root_name].setdefault(entry)
 
     write_yaml_file(existing_data, args.yaml)
 
