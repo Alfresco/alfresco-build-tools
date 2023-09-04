@@ -7,7 +7,7 @@ on:
     tags:
       - 'v*'
     paths:
-      - 'scripts/gen-charts-yml/**'
+      - 'scripts/gen-index-yml/**'
 
 env:
   REGISTRY: ghcr.io
@@ -27,7 +27,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/alfresco/build-tools-gen-charts-yml
+          images: ${{ env.REGISTRY }}/alfresco/build-tools-gen-index-yml
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
@@ -49,7 +49,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: ./scripts/gen-charts-yml
+          context: ./scripts/gen-index-yml
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}

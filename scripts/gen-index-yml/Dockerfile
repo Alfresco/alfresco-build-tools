@@ -4,6 +4,6 @@ WORKDIR /root
 ADD requirements.txt .
 RUN pip install -r requirements.txt
 
-ADD gen_charts_yml.py /usr/bin/
+ADD gen_index_yml.py /usr/bin/
 
-ENTRYPOINT ["python", "/usr/bin/gen_charts_yml.py"]
+ENTRYPOINT ["python", "/usr/bin/gen_index_yml.py"]
