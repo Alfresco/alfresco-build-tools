@@ -38,7 +38,7 @@ jobs:
     outputs:
       version: ${{ steps.next-release.outputs.next-prerelease }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - id: next-release
         name: Calculate next internal release
