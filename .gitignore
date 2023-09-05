@@ -53,3 +53,6 @@ hs_err_pid*
 
 # Node packages and dependencies
 node_modules
+
+# vscode settings
+.vscode
