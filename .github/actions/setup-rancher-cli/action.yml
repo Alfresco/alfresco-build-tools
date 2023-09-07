@@ -31,6 +31,18 @@ runs:
         sudo mv $TOOL_NAME /usr/local/bin/
         echo $($TOOL_NAME --version)
       shell: bash
+    - name: set env vars
+      shell: bash
+      run: |
+        RANCHER2_BEARER_TOKEN=${{ inputs.access-key }}:${{ inputs.secret-key }}
+        RANCHER2_URL=${{ inputs.url }}
+        echo RANCHER2_BEARER_TOKEN="${RANCHER2_BEARER_TOKEN}" >> $GITHUB_ENV
+        echo RANCHER2_URL="${RANCHER2_URL}" >> $GITHUB_ENV
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      with:
+        # provide access to SSH user that triggered the build
+        limit-access-to-actor: true
     - run: |
         RANCHER2_BEARER_TOKEN=${{ inputs.access-key }}:${{ inputs.secret-key }}
         RANCHER2_URL=${{ inputs.url }}
