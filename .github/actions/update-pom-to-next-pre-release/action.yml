@@ -4,7 +4,7 @@ inputs:
   prerelease-type:
     description: The type of the prerelease, i.e. `alpha`, `beta`, `rc`
     required: false
-    default: alpha
+    default: temp
   maven-cli-opts:
     description: extra maven properties
     required: false
