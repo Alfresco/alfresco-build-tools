@@ -196,22 +196,6 @@ runs:
       run: docker rm -f $(docker ps -a -q)
       continue-on-error: true
 
-    - uses: actions/upload-artifact@v3
-      if: inputs.upload-jars == 'true'
-      with:
-        name: ${{ inputs.upload-jars-name }}
-        retention-days: 1
-        path: |
-          ${{ inputs.upload-jars-path }}
-
-    - uses: actions/upload-artifact@v3
-      if: inputs.upload-coverage == 'true'
-      with:
-        name: coverage
-        retention-days: 1
-        path: |
-          **/target/site/jacoco-aggregate/jacoco.xml
-
     - name: Echo Longest Tests run
       shell: bash
       run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
