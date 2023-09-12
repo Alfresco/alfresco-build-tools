@@ -206,10 +206,3 @@ runs:
         username: ${{ inputs.git-username }}
         add-options: -u
         commit-message: "release $VERSION"
-
-    - name: Create and push tag
-      if: github.event_name == 'push'
-      shell: bash
-      run: |
-        git tag -a $VERSION -m "Release version $VERSION"
-        git push origin $VERSION
