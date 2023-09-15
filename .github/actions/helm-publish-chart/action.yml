@@ -117,6 +117,14 @@ runs:
         commit-message: ${{ steps.compute-git-commit-message.outputs.result }}
         repository-directory: ${{ env.CHECKOUT_PATH }}
 
+    - name: Update remote branch
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+      working-directory: ${{ env.CHECKOUT_PATH }}
+      shell: bash
+      run: |
+        git pull --rebase
+
     - name: Push changes
       if: inputs.do-push == 'true'
       env:
