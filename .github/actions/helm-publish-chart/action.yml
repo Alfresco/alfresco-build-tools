@@ -124,6 +124,7 @@ runs:
       shell: bash
       run: |
         git pull --rebase
+        git push --dry-run origin
 
     - name: Push changes
       if: inputs.do-push == 'true'
