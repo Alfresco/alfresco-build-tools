@@ -8,7 +8,7 @@ inputs:
       https://github.com/kubernetes-sigs/kind/releases
     required: true
     default: kindest/node:v1.24.7@sha256:577c630ce8e509131eab1aea12c022190978dd2f745aac5eb1fe65c0807eb315
-  nginx-ingress-ref:
+  ingress-nginx-ref:
     description: |
       the Nginx ingress ref to get the ingress congtroller deployment manifest from
       (https://github.com/kubernetes/ingress-nginx). Consider main (the default) a floating tag which can result in
@@ -28,7 +28,7 @@ runs:
       shell: bash
       env:
         NGINX_MANIFEST_URL: >-
-          https://raw.githubusercontent.com/kubernetes/ingress-nginx/${{ inputs.nginx-ingress-ref }}/deploy/static/provider/kind/deploy.yaml
+          https://raw.githubusercontent.com/kubernetes/ingress-nginx/${{ inputs.ingress-nginx-ref }}/deploy/static/provider/kind/deploy.yaml
       run: |
         kubectl apply -f "${NGINX_MANIFEST_URL}"
 
