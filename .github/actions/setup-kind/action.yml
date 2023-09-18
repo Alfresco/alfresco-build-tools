@@ -8,6 +8,13 @@ inputs:
       https://github.com/kubernetes-sigs/kind/releases
     required: true
     default: kindest/node:v1.24.7@sha256:577c630ce8e509131eab1aea12c022190978dd2f745aac5eb1fe65c0807eb315
+  ingress-nginx-ref:
+    description: |
+      the Nginx ingress ref to get the ingress congtroller deployment manifest from
+      (https://github.com/kubernetes/ingress-nginx). Consider main (the default) a floating tag which can result in
+      deploying any version (including betas) and non repeatable builds.
+    required: false
+    default: main
 runs:
   using: "composite"
   steps:
@@ -20,10 +27,10 @@ runs:
     - name: Install ingress-nginx
       shell: bash
       env:
-        NGINX_MANIFEST: |
-          https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+        NGINX_MANIFEST_URL: >-
+          https://raw.githubusercontent.com/kubernetes/ingress-nginx/${{ inputs.ingress-nginx-ref }}/deploy/static/provider/kind/deploy.yaml
       run: |
-        kubectl apply -f $NGINX_MANIFEST
+        kubectl apply -f "${NGINX_MANIFEST_URL}"
 
     - name: Wait for ingress ready
       shell: bash
