@@ -46,6 +46,14 @@ inputs:
     description: "Path to the settings.xml file to be used for the release"
     required: false
     default: ${{ github.workspace }}/maven-config/settings.xml
+  java-version:
+    description: the desired Java version
+    required: false
+    default: "11"
+  java-distribution:
+    description: the desired Java distribution
+    required: false
+    default: "temurin"
 
 runs:
   using: composite
@@ -73,12 +81,12 @@ runs:
         tag: ${{ env.RELEASE_VERSION }}
         repository-directory: ${{ env.REPO_DIR }}
 
-    - name: Set up JDK 11
+    - name: Set up JDK
       if: steps.check-tag.outputs.exists == 'false'
       uses: actions/setup-java@v3
       with:
-        distribution: temurin
-        java-version: 11
+        java-version: ${{ inputs.java-version }}
+        distribution: ${{ inputs.java-distribution }}
         cache: 'maven'
 
     - name: Configure Maven settings
