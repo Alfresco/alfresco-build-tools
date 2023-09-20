@@ -131,12 +131,13 @@ runs:
         NEXUS_PASSWORD: "${{ inputs.nexus-password }}"
         NEXUS_URL: "${{ inputs.nexus-url }}"
         STAGING_REPOSITORY_ID: ${{ inputs.staging-repository }}
+        JAVA_VERSION: "${{ inputs.java-version }}"
       run: |
         echo "Deploying to repository $STAGING_REPOSITORY_ID"
         mvn clean deploy \
           -DperformRelease \
           -DskipTests \
-          -Dmaven.compiler.release=11 \
+          -Dmaven.compiler.release="${JAVA_VERSION}" \
           -Dmaven.artifact.threads=30 \
           --batch-mode \
           -DaltReleaseDeploymentRepository=nexus-releases-staging-fixed::default::"${NEXUS_URL}"/service/local/staging/deployByRepositoryId/"$STAGING_REPOSITORY_ID " \
