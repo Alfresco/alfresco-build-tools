@@ -1042,7 +1042,7 @@ This will give the following sample output on the GH Actions run summary (when u
 
 ### send-slack-notification-slow-job
 
-Sends a slack notification when current run took more time than specified (in input 'max-build-time')
+Sends a slack notification when current run took more time than specified via `max-build-time-seconds` input.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification-slow-job@ref
