@@ -1,0 +1,9 @@
+name: notification when run took too much time
+description: 'something'
+
+runs:
+  using: "composite"
+  steps:
+    - name: print
+      run: |
+        echo "something"
