@@ -1040,6 +1040,19 @@ This will give the following sample output on the GH Actions run summary (when u
 
 ![GH Actions Summary Report Portal](./images/rp-gh-summary.png)
 
+### send-slack-notification-slow-job
+
+Sends a slack notification when current run took more time than specified (in input 'max-build-time')
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification-slow-job@ref
+        with:
+          channel-id: 'channel-id'
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          notification-color: '#A30200'
+          max-build-time: '10'
+```
+
 ### send-slack-notification
 
 Sends a slack notification with a pre-defined payload, relying on the [slackapi/slack-github-action](https://github.com/slackapi/slack-github-action) official action.
