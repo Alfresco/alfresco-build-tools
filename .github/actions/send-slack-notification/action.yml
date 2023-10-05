@@ -86,6 +86,7 @@ runs:
 
     - name: Send slack notification
       id: slack
+      if: ${{ inputs.token != '' }}
       uses: slackapi/slack-github-action@v1.23.0
       env:
         SLACK_BOT_TOKEN: ${{ inputs.token }}
