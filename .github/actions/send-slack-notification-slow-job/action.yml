@@ -17,8 +17,6 @@ runs:
   steps:
     - name: Fetch billable time from gh API
       id: fetch_time
-      env:
-        GH_TOKEN: ${{ github.token }}
       shell: bash
       run: |
         total_time=$(gh api /repos/${{github.repository}}/actions/runs/${{github.run_id}}/timing | jq ' .billable.UBUNTU.total_ms /1000')
@@ -27,7 +25,7 @@ runs:
 
     - name: Slack Notification
       if: steps.fetch_time.outputs.total_time > inputs.max-build-time
-      uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v2.3.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v3.4.0
       with:
         channel-id: ${{ inputs.slack-channel }}
         message: 'build time took ${{ steps.fetch_time.outputs.total_time }} seconds when expected ${{ inputs.max-build-time }} seconds'
