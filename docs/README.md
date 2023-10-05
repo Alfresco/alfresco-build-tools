@@ -1050,7 +1050,7 @@ Sends a slack notification when current run took more time than specified (in in
           channel-id: 'channel-id'
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           notification-color: '#A30200'
-          max-build-time: '10'
+          max-build-time-seconds: '10'
 ```
 
 ### send-slack-notification
