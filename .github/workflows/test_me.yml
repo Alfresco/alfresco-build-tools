@@ -1,5 +1,5 @@
 #Deploy SNAPSHOTS artifacts once a day to Nexus, so they can be consumed by Veracode
-name:
+name: test workflow
 
 on:
   workflow_dispatch:
