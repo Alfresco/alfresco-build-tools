@@ -1,15 +1,15 @@
-name: send a exceeded build time notification
-description: Sends slack notification if build took more than planned
+name: Send a notification for exceeded build time
+description: Send a slack notification if build took more than planned
 
 inputs:
   max-build-time:
-    description: "Maximum acceptable build time in seconds"
+    description: Maximum acceptable build time in seconds
     required: true
   slack-token:
-    description: The slack bot token
+    description: The slack token
     required: true
   slack-channel:
-    description: The slack channel
+    description: The slack channel id, channel name, or user id to post to
     required: true
 
 runs:
