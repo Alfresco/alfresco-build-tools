@@ -1050,7 +1050,6 @@ This action should be added at the end to correctly measure the time.
         with:
           channel-id: 'channel-id'
           token: ${{ secrets.SLACK_BOT_TOKEN }}
-          notification-color: '#A30200'
           max-build-time-seconds: '10'
 ```
 
