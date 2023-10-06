@@ -22,8 +22,8 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: validate token
-      if: ${{ inputs.token == '' }}
+    - name: Validate token
+      if: inputs.token == ''
       uses: actions/github-script@v3
       with:
         script: |
