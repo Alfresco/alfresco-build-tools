@@ -24,7 +24,7 @@ runs:
         echo "total_time=${total_time}" >> $GITHUB_OUTPUT
 
     - name: Slack Notification
-      if: steps.fetch_time.outputs.total_time > inputs.max-build-time-seconds
+      if: fromJSON(steps.fetch_time.outputs.total_time) > fromJSON(inputs.max-build-time-seconds)
       uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v3.4.0
       with:
         channel-id: ${{ inputs.slack-channel }}
