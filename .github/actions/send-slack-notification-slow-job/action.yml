@@ -1,0 +1,32 @@
+name: Send a notification for exceeded build time
+description: Send a slack notification if build took more than planned
+
+inputs:
+  max-build-time-seconds:
+    description: Maximum acceptable build time in seconds
+    required: true
+  slack-token:
+    description: The slack token
+    required: true
+  slack-channel:
+    description: The slack channel id, channel name, or user id to post to
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Fetch billable time from gh API
+      id: fetch_time
+      shell: bash
+      run: |
+        total_time=$(gh api /repos/${{github.repository}}/actions/runs/${{github.run_id}}/timing | jq ' .billable.UBUNTU.total_ms /1000')
+        echo "total_time in seconds: ${total_time}"
+        echo "total_time=${total_time}" >> $GITHUB_OUTPUT
+
+    - name: Slack Notification
+      if: fromJSON(steps.fetch_time.outputs.total_time) > fromJSON(inputs.max-build-time-seconds)
+      uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v3.4.0
+      with:
+        channel-id: ${{ inputs.slack-channel }}
+        message: 'Max build time exceeded: took ${{ steps.fetch_time.outputs.total_time }} seconds (expected max: ${{ inputs.max-build-time-seconds }} seconds)'
+        token: ${{ inputs.slack-token }}
