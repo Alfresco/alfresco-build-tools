@@ -28,5 +28,5 @@ runs:
       uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v3.4.0
       with:
         channel-id: ${{ inputs.slack-channel }}
-        message: 'Max build time exceeded: took ${{steps.fetch_time.outputs.total_time}} seconds (expected max: ${{inputs.max-build-time}} seconds)'
+        message: 'Max build time exceeded: took ${{ steps.fetch_time.outputs.total_time }} seconds (expected max: ${{ inputs.max-build-time-seconds }} seconds)'
         token: ${{ inputs.slack-token }}
