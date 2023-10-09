@@ -34,7 +34,7 @@ jobs:
             run: |
               ./release.sh $VERSION
 
-          - uses: stefanzweifel/git-auto-commit-action@v4
+          - uses: stefanzweifel/git-auto-commit-action@v5
             with:
               branch: master
               skip_checkout: true
