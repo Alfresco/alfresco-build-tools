@@ -52,3 +52,9 @@ runs:
           mkdir -p $HOME/.kube && rancher cluster kubeconfig ${{ inputs.context }} > $HOME/.kube/config
         fi
       shell: bash
+
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      with:
+        # provide access to SSH user that triggered the build
+        limit-access-to-actor: true
