@@ -67,6 +67,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [rancher](#rancher)
     - [reportportal-prepare](#reportportal-prepare)
     - [reportportal-summarize](#reportportal-summarize)
+    - [send-slack-notification-slow-job](#send-slack-notification-slow-job)
     - [send-slack-notification](#send-slack-notification)
     - [send-teams-notification](#send-teams-notification)
     - [setup-github-release-binary](#setup-github-release-binary)
@@ -1274,9 +1275,9 @@ should be already applied before opening/updating a PR in order be effective.
 
 ### Serialize pull request builds
 
-When a workflow requires to access an external shared resource, it may be
-desirable to prevent concurrent builds of the same pull request using
-`concurrency` as a top-level keyword:
+When a workflow requires access an external shared resource, or it takes a non
+trivial amount of time to run, it may be desirable to prevent concurrent builds
+of the same pr/branch by using `concurrency` as a top-level keyword:
 
 ```yml
 name: my-workflow
@@ -1288,13 +1289,17 @@ on:
     branches:
       - develop
 concurrency:
-  group: ${{ github.head_ref || github.ref_name || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name || github.run_id }}
   cancel-in-progress: false
 ```
 
-The `github.head_ref` is available when workflow is triggered by pull_request
-event, while `github.ref_name` when pushing branches and tags. The
-`github.run_id` is just a fallback to avoid failure when both variables are empty.
+The `github.workflow` is a reference to the workflow id, so that different
+workflows are part of different groups and doesn't cancel each other.
+
+The `github.head_ref` is available only when workflow is triggered by
+`pull_request` event, while `github.ref_name` when pushing branches and tags.
+The `github.run_id` is just a fallback to not queue the workflow run when both
+variables are empty (when event is not related to a specific ref).
 
 More docs on [using concurrency](https://docs.github.com/en/actions/using-jobs/using-concurrency)
 
