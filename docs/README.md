@@ -348,9 +348,50 @@ The two vars in the previous snippet are [workflow configuration variables](http
 
 ### docker-build-image
 
+Build docker image based on supplied jar files. It replaces `image-dir` and `image-tag` in the
+docker file and build it. After the build if `grype-scan-enabled` is `true` it scans the image using grype and upload the result in GitHub security.
+Finally, it push the created image into:
+- RedHat quay.io
+- GitHub ghcr
+- AWS ECR
+
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/docker-build-image@ref
+        with:
+          image-tag: ${{ needs.build.outputs.version }}
+          image-dir: ${{ matrix.image-dir }}
+          docker-username: ${{ secrets.DOCKER_USERNAME }}
+          docker-password: ${{ secrets.DOCKER_PASSWORD }}
+          quay-username: ${{ secrets.QUAY_USERNAME }}
+          quay-password: ${{ secrets.QUAY_PASSWORD }}
+          ghcr-token: ${{ secrets.GITHUB_TOKEN }}
+          aws-access-key-id: ${{ secrets.HXPS_DEV_SVC_ECR_WRITE_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.HXPS_DEV_SVC_ECR_WRITE_AWS_SECRET_ACCESS_KEY }}
+          aws-account-id: ${{ vars.ACCOUNT_ID }}
+          # aws-region: ${{ vars.AWS_REGION }} # optional
+          # aws-role-name: ${{ vars.AWS_ROLE_NAME }} # optional
+          # grype-scan-enabled: true # optional
+          # preview-label: ${{ vars.PREVIEW_LABEL }} # optional
+
 ```
+| Input                 | Required | Description                                                          |
+|-----------------------|----------|----------------------------------------------------------------------|
+| base-directory        | false    | base working directory directory                                     |
+| image-tag             | true     | tag to be created                                                    |
+| image-dir             | true     | Directory holding the Dockerfile. Relative path from base-directory. |
+| docker-username       | true     | Docker.io user name                                                  |
+| docker-password       | true     | Docker.io password                                                   |
+| quay-username         | true     | Quay.io user name                                                    |
+| quay-password         | true     | Quay.io password                                                     |
+| ghcr-username         | false    | User name to connect to GHCR                                         |
+| ghcr-token            | true     | Github token to connect to GHCR                                      |
+| aws-access-key-id     | false    | AWS access key id to connect to ECR                                  |
+| aws-secret-access-key | false    | AWS secret access key to connect to ECR                              |
+| aws-account-id        | true     | AWS account id to connect to ECR                                     |
+| aws-region            | false    | AWS region to use while pushing to ECR                               |
+| aws-role-name         | false    | AWS role name                                                        |
+| grype-scan-enabled    | false    | Define whether a Grype scan should be executed or not                |
+| preview-label         | false    | The label name for creating a preview version                        |
 
 ### docker-dump-containers-logs
 
