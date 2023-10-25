@@ -351,6 +351,7 @@ The two vars in the previous snippet are [workflow configuration variables](http
 Build docker image based on supplied jar files. It replaces `image-dir` and `image-tag` in the
 docker file and build it. After the build if `grype-scan-enabled` is `true` it scans the image using grype and upload the result in GitHub security.
 Finally, it push the created image into:
+
 - RedHat quay.io
 - GitHub ghcr
 - AWS ECR
@@ -374,6 +375,7 @@ Finally, it push the created image into:
           # preview-label: ${{ vars.PREVIEW_LABEL }} # optional
 
 ```
+
 | Input                 | Required | Description                                                          |
 |-----------------------|----------|----------------------------------------------------------------------|
 | base-directory        | false    | base working directory directory                                     |
@@ -403,6 +405,8 @@ It is also possible to specify the output archive name when providing the `outpu
 ```
 
 ### docker-scan-image-dirs
+
+Scan the directories were the Dockerfiles are to feed the scanner.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/docker-scan-image-dirs@ref
