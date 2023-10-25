@@ -31,7 +31,9 @@ Here follows the list of GitHub Actions topics available in the current document
     - [automate-dependabot](#automate-dependabot)
     - [automate-propagation](#automate-propagation)
     - [configure-git-author](#configure-git-author)
+    - [docker-build-image](#docker-build-image)
     - [docker-dump-containers-logs](#docker-dump-containers-logs)
+    - [docker-scan-image-dirs](#docker-scan-image-dirs)
     - [env-load-from-yaml](#env-load-from-yaml)
     - [free-hosted-runner-disk-space](#free-hosted-runner-disk-space)
     - [get-branch-name](#get-branch-name)
@@ -344,6 +346,12 @@ Configures the git username and email to associate commits with the provided ide
 
 The two vars in the previous snippet are [workflow configuration variables](https://github.blog/changelog/2023-01-10-github-actions-support-for-configuration-variables-in-workflows/) that can be created at organization level and shared across different repositories.
 
+### docker-build-image
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/docker-build-image@ref
+```
+
 ### docker-dump-containers-logs
 
 Dumps Docker containers logs. Each container's log will be stored in a separate `<container_name>.log` file. All files will be archived by default under `containers-logs-<job_id>-<job_retry_number>-<timestamp>.tar.gz` and will be available to download via the workflow's summary page.
@@ -351,6 +359,12 @@ It is also possible to specify the output archive name when providing the `outpu
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/docker-dump-containers-logs@ref
+```
+
+### docker-scan-image-dirs
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/docker-scan-image-dirs@ref
 ```
 
 ### env-load-from-yaml
