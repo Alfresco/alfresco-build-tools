@@ -349,8 +349,11 @@ The two vars in the previous snippet are [workflow configuration variables](http
 ### docker-build-image
 
 Build docker image based on supplied jar files. It replaces `image-dir` and `image-tag` in the
-docker file and build it. After the build if `grype-scan-enabled` is `true` it scans the image using grype and upload the result in GitHub security.
-Finally, it push the created image into:
+docker file and builds it.
+
+After the build, if `grype-scan-enabled` is `true`, it scans the image using grype and uploads the result in GitHub security.
+
+Finally, it pushes the created image into:
 
 - RedHat quay.io
 - GitHub ghcr
