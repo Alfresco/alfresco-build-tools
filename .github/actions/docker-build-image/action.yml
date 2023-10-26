@@ -1,0 +1,209 @@
+name: Build docker image
+description: Build docker image based on supplied jar files
+inputs:
+  base-directory:
+    description: Base working directory
+    required: false
+    default: .
+  image-tag:
+    description: tag to be created
+    required: true
+  image-dir:
+    description: Directory holding the Dockerfile. Relative path from base-directory.
+    required: true
+  docker-username:
+    description: Docker.io user name
+    required: true
+  docker-password:
+    description: Docker.io password
+    required: true
+  quay-username:
+    description: Quay.io user name
+    required: true
+  quay-password:
+    description: Quay.io password
+    required: true
+  ghcr-username:
+    description: User name to connect to GHCR
+    required: false
+    default: ${{ github.actor }}
+  ghcr-token:
+    description: Github token to connect to GHCR
+    required: true
+  aws-access-key-id:
+    description: AWS access key id to connect to ECR
+    required: false
+  aws-secret-access-key:
+    description: AWS secret access key to connect to ECR
+    required: false
+  aws-account-id:
+    description: AWS account id to connect to ECR
+    required: true
+  aws-region:
+    description: AWS region to use while pushing to ECR
+    required: false
+    default: us-east-1
+  aws-role-name:
+    required: false
+    description: AWS role name
+    default: ECR_Write
+  grype-scan-enabled:
+    description: Defines whether a Grype scan should be executed or not
+    required: false
+    default: 'true'
+  grype-fail-build:
+    description: Defines whether a Grype scan failure would fail the build
+    required: false
+    default: 'true'
+  preview-label:
+    description: The label name for creating a preview version
+    required: false
+    default: 'preview'
+
+runs:
+  using: composite
+  steps:
+    - name: Set is_preview env variable
+      env:
+        IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, inputs.preview-label) }}
+      shell: bash
+      run: |
+        echo "IS_PREVIEW=$IS_PREVIEW" >> $GITHUB_ENV
+
+    - name: set is PUSH_IMAGE env variable
+      env:
+        PUSH_IMAGE: ${{ github.event_name == 'push' || env.IS_PREVIEW == 'true' }}
+      shell: bash
+      run: echo "PUSH_IMAGE=$PUSH_IMAGE" >> $GITHUB_ENV
+
+    - name: Set IMAGE_NAME
+      shell: bash
+      run: |
+        REPOSITORY=${DIR##*/}
+        TAG="${TAG:-$(echo ${GITHUB_HEAD_REF:-$GITHUB_REF_NAME} | sed -e 's/[^-_.[:alnum:]]/_/g')}"
+        echo "IMAGE_REPOSITORY=$REPOSITORY" >> $GITHUB_ENV
+        echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
+        echo "IMAGE_NAME=$REPOSITORY:$TAG" >> $GITHUB_ENV
+      env:
+        DIR: ${{ inputs.image-dir }}
+        TAG: ${{ inputs.image-tag }}
+
+    - name: Replace base image
+      shell: bash
+      working-directory: ${{ inputs.base-directory }}
+      run: |
+        cp ./Dockerfile $DIR/Dockerfile.new
+        cp ./entrypoint.sh ./$DIR
+        tail -n +2 $DIR/Dockerfile >> $DIR/Dockerfile.new
+        mv $DIR/Dockerfile{.new,}
+      env:
+        DIR: ${{ inputs.image-dir }}
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@2b82ce82d56a2a04d2637cd93a637ae1b359c0a7 # v2.2.0
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@885d1462b80bc1c1c7f0b00334ad271f09369c55 # v2.10.0
+      with:
+        version: v0.11.0
+        # apply fix from https://github.com/moby/buildkit/issues/3969
+        driver-opts: |
+          image=moby/buildkit:v0.11.6
+          network=host
+
+    - name: Login to docker.io
+      uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2.2.0
+      with:
+        username: ${{ inputs.docker-username }}
+        password: ${{ inputs.docker-password }}
+
+    - name: Build image ${{ env.IMAGE_NAME }}
+      uses: docker/build-push-action@0a97817b6ade9f46837855d676c4cca3a2471fc9 # v4.2.1
+      with:
+        context: ${{ inputs.base-directory }}/${{ inputs.image-dir }}
+        tags: ghcr.io/alfresco/${{ env.IMAGE_NAME }}
+        load: true
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        provenance: false
+
+    - name: Anchore Scan API Image
+      uses: anchore/scan-action@24fd7c9060f3c96848dd1929fac8d796fb5ae4b4 # v3.3.6
+      id: scan
+      with:
+        # for now fail-build parameter is set to false as there are many more problems reported by grype than prisma.
+        # we should set it to true after those issues are fixed.
+        # See See https://alfresco.atlassian.net/browse/HXCS-2474 for more details.
+        fail-build: ${{ inputs.grype-fail-build }}
+        grype-version: v0.72.0
+        image: ghcr.io/alfresco/${{ env.IMAGE_NAME }}
+        output-format: sarif
+        severity-cutoff: critical
+
+    - name: Echo sarif
+      shell: bash
+      run: echo "$(<results.sarif )"
+
+    - name: Upload SARIF Files
+      if: ${{ always() && inputs.grype-scan-enabled == 'true' }}
+      uses: github/codeql-action/upload-sarif@49abf0ba24d0b7953cb586944e918a0b92074c80 # v2.22.4
+      continue-on-error: true # do not fail if GHAS is not enabled
+      with:
+        sarif_file: ${{ steps.scan.outputs.sarif }}
+
+    - name: Extract metadata for Docker
+      if: env.PUSH_IMAGE == 'true'
+      id: meta
+      uses: docker/metadata-action@818d4b7b91585d195f67373fd9cb0332e31a7175 # v4.6.0
+      with:
+        images: ${{ env.IMAGE_NAME }}
+
+    - name: Login to quay.io
+      if: env.PUSH_IMAGE == 'true'
+      uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2.2.0
+      with:
+        registry: quay.io
+        username: ${{ inputs.quay-username }}
+        password: ${{ inputs.quay-password }}
+
+    - name: Login to ghcr.io
+      if: env.PUSH_IMAGE == 'true'
+      uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2.2.0
+      with:
+        registry: ghcr.io
+        username: ${{ inputs.ghcr-username }}
+        password: ${{ inputs.ghcr-token }}
+
+    - name: Configure AWS credentials
+      if: env.PUSH_IMAGE == 'true'
+      uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2.2.0
+      with:
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+        aws-region: ${{ inputs.aws-region }}
+        role-to-assume: arn:aws:iam::${{ inputs.aws-account-id }}:role/${{ inputs.aws-role-name }}
+        role-session-name: gh-${{ env.IMAGE_REPOSITORY }}
+        role-duration-seconds: 900
+
+    - name: Login to Amazon ECR
+      if: env.PUSH_IMAGE == 'true'
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@2fc7aceee09e9e4a7105c0d060c656fad0b4f63d # v1.7.0
+      with:
+        mask-password: true
+
+    - name: Build and Push image ${{ env.IMAGE_NAME }}
+      if: env.PUSH_IMAGE == 'true'
+      uses: docker/build-push-action@0a97817b6ade9f46837855d676c4cca3a2471fc9 # v4.2.1
+      with:
+        context: ${{ inputs.base-directory }}/${{ inputs.image-dir }}
+        platforms: linux/amd64,linux/arm64/v8
+        tags: |
+          quay.io/alfresco/${{ env.IMAGE_NAME }}
+          ghcr.io/alfresco/${{ env.IMAGE_NAME }}
+          ${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}
+        labels: ${{ steps.meta.outputs.labels }}
+        push: true
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        provenance: false
