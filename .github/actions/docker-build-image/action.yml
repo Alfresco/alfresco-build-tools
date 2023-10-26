@@ -48,7 +48,7 @@ inputs:
     description: AWS role name
     default: ECR_Write
   grype-scan-enabled:
-    description: Define whether a Grype scan should be executed or not
+    description: Defines whether a Grype scan should be executed or not
     required: false
     default: 'true'
   preview-label:
