@@ -381,25 +381,6 @@ When using OIDC on AWS, inputs `aws-access-key-id` and `aws-secret-access-key` c
           # preview-label: ${{ vars.PREVIEW_LABEL }} # optional
 ```
 
-| Input                 | Required | Description                                                          |
-|-----------------------|----------|----------------------------------------------------------------------|
-| base-directory        | false    | base working directory directory                                     |
-| image-tag             | true     | tag to be created                                                    |
-| image-dir             | true     | Directory holding the Dockerfile. Relative path from base-directory. |
-| docker-username       | true     | Docker.io user name                                                  |
-| docker-password       | true     | Docker.io password                                                   |
-| quay-username         | true     | Quay.io user name                                                    |
-| quay-password         | true     | Quay.io password                                                     |
-| ghcr-username         | false    | User name to connect to GHCR                                         |
-| ghcr-token            | true     | Github token to connect to GHCR                                      |
-| aws-access-key-id     | false    | AWS access key id to connect to ECR                                  |
-| aws-secret-access-key | false    | AWS secret access key to connect to ECR                              |
-| aws-account-id        | true     | AWS account id to connect to ECR                                     |
-| aws-region            | false    | AWS region to use while pushing to ECR                               |
-| aws-role-name         | false    | AWS role name                                                        |
-| grype-scan-enabled    | false    | Define whether a Grype scan should be executed or not                |
-| preview-label         | false    | The label name for creating a preview version                        |
-
 ### docker-dump-containers-logs
 
 Dumps Docker containers logs. Each container's log will be stored in a separate `<container_name>.log` file. All files will be archived by default under `containers-logs-<job_id>-<job_retry_number>-<timestamp>.tar.gz` and will be available to download via the workflow's summary page.

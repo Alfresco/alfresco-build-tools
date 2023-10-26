@@ -135,7 +135,7 @@ runs:
         # we should set it to true after those issues are fixed.
         # See See https://alfresco.atlassian.net/browse/HXCS-2474 for more details.
         fail-build: ${{ inputs.grype-fail-build }}
-        grype-version: v0.71.0
+        grype-version: v0.72.0
         image: ghcr.io/alfresco/${{ env.IMAGE_NAME }}
         output-format: sarif
         severity-cutoff: critical
