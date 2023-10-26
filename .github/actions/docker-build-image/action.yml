@@ -51,10 +51,6 @@ inputs:
     description: Define whether a Grype scan should be executed or not
     required: false
     default: 'true'
-  jars-artifact-name:
-    description: Name of the the artifact holding the jar files used to build the docker image
-    required: false
-    default: 'build'
   preview-label:
     description: The label name for creating a preview version
     required: false
@@ -75,10 +71,6 @@ runs:
         PUSH_IMAGE: ${{ github.event_name == 'push' || env.IS_PREVIEW == 'true' }}
       shell: bash
       run: echo "PUSH_IMAGE=$PUSH_IMAGE" >> $GITHUB_ENV
-
-    - uses: actions/download-artifact@v3
-      with:
-        name: ${{ inputs.jars-artifact-name }}
 
     - name: Set IMAGE_NAME
       shell: bash
@@ -104,10 +96,10 @@ runs:
         DIR: ${{ inputs.image-dir }}
 
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
+      uses: docker/setup-qemu-action@2b82ce82d56a2a04d2637cd93a637ae1b359c0a7 # v2.2.0
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      uses: docker/setup-buildx-action@885d1462b80bc1c1c7f0b00334ad271f09369c55 # v2.10.0
       with:
         version: v0.11.0
         # apply fix from https://github.com/moby/buildkit/issues/3969
@@ -116,13 +108,13 @@ runs:
           network=host
 
     - name: Login to docker.io
-      uses: docker/login-action@v2
+      uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2.2.0
       with:
         username: ${{ inputs.docker-username }}
         password: ${{ inputs.docker-password }}
 
     - name: Build image ${{ env.IMAGE_NAME }}
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@0a97817b6ade9f46837855d676c4cca3a2471fc9 # v4.2.1
       with:
         context: ${{ inputs.base-directory }}/${{ inputs.image-dir }}
         tags: ghcr.io/alfresco/${{ env.IMAGE_NAME }}
@@ -132,14 +124,14 @@ runs:
         provenance: false
 
     - name: Anchore Scan API Image
-      uses: anchore/scan-action@v3
+      uses: anchore/scan-action@24fd7c9060f3c96848dd1929fac8d796fb5ae4b4 # v3.3.6
       id: scan
       with:
         # for now fail-build parameter is set to false as there are many more problems reported by grype than prisma.
         # we should set it to true after those issues are fixed.
-        # See https://alfresco.atlassian.net/browse/HXCS-2474 for more details.
+        # See See https://alfresco.atlassian.net/browse/HXCS-2474 for more details.
         fail-build: false
-        grype-version: v0.72.0
+        grype-version: v0.71.0
         image: ghcr.io/alfresco/${{ env.IMAGE_NAME }}
         output-format: sarif
         severity-cutoff: critical
@@ -150,7 +142,7 @@ runs:
 
     - name: Upload SARIF Files
       if: ${{ always() && inputs.grype-scan-enabled == 'true' }}
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@49abf0ba24d0b7953cb586944e918a0b92074c80 # v2.22.4
       continue-on-error: true # do not fail if GHAS is not enabled
       with:
         sarif_file: ${{ steps.scan.outputs.sarif }}
@@ -158,13 +150,13 @@ runs:
     - name: Extract metadata for Docker
       if: env.PUSH_IMAGE == 'true'
       id: meta
-      uses: docker/metadata-action@v4
+      uses: docker/metadata-action@818d4b7b91585d195f67373fd9cb0332e31a7175 # v4.6.0
       with:
         images: ${{ env.IMAGE_NAME }}
 
     - name: Login to quay.io
       if: env.PUSH_IMAGE == 'true'
-      uses: docker/login-action@v2
+      uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2.2.0
       with:
         registry: quay.io
         username: ${{ inputs.quay-username }}
@@ -172,7 +164,7 @@ runs:
 
     - name: Login to ghcr.io
       if: env.PUSH_IMAGE == 'true'
-      uses: docker/login-action@v2
+      uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2.2.0
       with:
         registry: ghcr.io
         username: ${{ inputs.ghcr-username }}
@@ -180,7 +172,7 @@ runs:
 
     - name: Configure AWS credentials
       if: env.PUSH_IMAGE == 'true'
-      uses: aws-actions/configure-aws-credentials@v2
+      uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2.2.0
       with:
         aws-access-key-id: ${{ inputs.aws-access-key-id }}
         aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
@@ -192,13 +184,13 @@ runs:
     - name: Login to Amazon ECR
       if: env.PUSH_IMAGE == 'true'
       id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+      uses: aws-actions/amazon-ecr-login@2fc7aceee09e9e4a7105c0d060c656fad0b4f63d # v1.7.0
       with:
         mask-password: true
 
     - name: Build and Push image ${{ env.IMAGE_NAME }}
       if: env.PUSH_IMAGE == 'true'
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@0a97817b6ade9f46837855d676c4cca3a2471fc9 # v4.2.1
       with:
         context: ${{ inputs.base-directory }}/${{ inputs.image-dir }}
         platforms: linux/amd64,linux/arm64/v8
