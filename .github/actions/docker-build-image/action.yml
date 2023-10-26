@@ -2,7 +2,7 @@ name: Build docker image
 description: Build docker image based on supplied jar files
 inputs:
   base-directory:
-    description: base working directory directory
+    description: Base working directory
     required: false
     default: .
   image-tag:
