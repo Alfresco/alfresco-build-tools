@@ -51,7 +51,7 @@ inputs:
     description: Defines whether a Grype scan should be executed or not
     required: false
     default: 'true'
-grype-fail-build:
+  grype-fail-build:
     description: Defines whether a Grype scan failure would fail the build
     required: false
     default: 'true'
