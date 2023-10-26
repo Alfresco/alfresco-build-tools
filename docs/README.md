@@ -376,6 +376,7 @@ When using OIDC on AWS, inputs `aws-access-key-id` and `aws-secret-access-key` c
           # aws-region: ${{ vars.AWS_REGION }} # optional
           # aws-role-name: ${{ vars.AWS_ROLE_NAME }} # optional
           # grype-scan-enabled: true # optional
+          # grype-fail-build: false # optional          
           # preview-label: ${{ vars.PREVIEW_LABEL }} # optional
 ```
 
