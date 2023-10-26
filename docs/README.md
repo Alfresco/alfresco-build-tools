@@ -359,6 +359,7 @@ Finally, it pushes the created image into:
 - GitHub ghcr
 - AWS ECR
 
+When using OIDC on AWS, inputs `aws-access-key-id` and `aws-secret-access-key` can be omitted: the `aws-role-name` input should be used instead.
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/docker-build-image@ref
         with:
