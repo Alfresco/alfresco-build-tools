@@ -83,14 +83,8 @@
         <runAlways>
             <plugins>
                 <plugin artifactId="maven-failsafe-plugin"/>
+                <plugin artifactId="maven-surefire-plugin"/>
             </plugins>
-            <executions>
-                <execution artifactId="maven-deploy-plugin">
-                    <execIds>
-                        <execId>my-execution-id</execId>
-                    </execIds>
-                </execution>
-            </executions>
             <goalsLists>
                 <goalsList artifactId="maven-install-plugin">
                     <goals>
@@ -100,11 +94,6 @@
                 <goalsList artifactId="maven-deploy-plugin">
                     <goals>
                         <goal>deploy</goal>
-                    </goals>
-                </goalsList>
-                <goalsList artifactId="bb-sdk-codegen">
-                    <goals>
-                        <goal>deploy-local</goal>
                     </goals>
                 </goalsList>
             </goalsLists>
