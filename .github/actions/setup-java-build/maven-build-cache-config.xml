@@ -81,10 +81,6 @@
     </input>
     <executionControl>
         <runAlways>
-            <plugins>
-                <plugin artifactId="maven-failsafe-plugin"/>
-                <plugin artifactId="maven-surefire-plugin"/>
-            </plugins>
             <goalsLists>
                 <goalsList artifactId="maven-install-plugin">
                     <goals>
@@ -100,6 +96,22 @@
         </runAlways>
         <reconcile logAllProperties="true">
             <plugins>
+                <plugin artifactId="maven-surefire-plugin" goal="test">
+                    <reconciles>
+                        <reconcile propertyName="skip" skipValue="true"/>
+                        <reconcile propertyName="skipExec" skipValue="true"/>
+                        <reconcile propertyName="skipTests" skipValue="true"/>
+                        <reconcile propertyName="testFailureIgnore" skipValue="true"/>
+                    </reconciles>
+                </plugin>
+                <plugin artifactId="maven-failsafe-plugin" goal="test">
+                    <reconciles>
+                        <reconcile propertyName="skip" skipValue="true"/>
+                        <reconcile propertyName="skipExec" skipValue="true"/>
+                        <reconcile propertyName="skipTests" skipValue="true"/>
+                        <reconcile propertyName="testFailureIgnore" skipValue="true"/>
+                    </reconciles>
+                </plugin>
                 <plugin artifactId="maven-compiler-plugin" goal="compile">
                     <reconciles>
                         <reconcile propertyName="source"/>
