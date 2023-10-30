@@ -47,10 +47,9 @@ runs:
       uses: actions/cache@v3
       with:
         path: ~/.m2/build-cache
-        key: ${{ runner.os }}-buildcache-${{ hashFiles('.mvn/*.xml') }}-${{ github.job }}-${{ github.ref_name }}-${{ github.run_id }}
+        key: ${{ runner.os }}-buildcache-${{ hashFiles('.mvn/*.xml') }}-${{ github.job }}${{ strategy.job-index }}-${{ github.run_id }}
         restore-keys: |
-          ${{ runner.os }}-buildcache-${{ hashFiles('.mvn/*.xml') }}-${{ github.job }}-${{ github.ref_name }}-
-          ${{ runner.os }}-buildcache-${{ hashFiles('.mvn/*.xml') }}-${{ github.job }}-
+          ${{ runner.os }}-buildcache-${{ hashFiles('.mvn/*.xml') }}-${{ github.job }}${{ strategy.job-index }}-
           ${{ runner.os }}-buildcache-${{ hashFiles('.mvn/*.xml') }}-
           ${{ runner.os }}-buildcache-
 
