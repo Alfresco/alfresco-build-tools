@@ -131,9 +131,6 @@ runs:
       uses: anchore/scan-action@24fd7c9060f3c96848dd1929fac8d796fb5ae4b4 # v3.3.6
       id: scan
       with:
-        # for now fail-build parameter is set to false as there are many more problems reported by grype than prisma.
-        # we should set it to true after those issues are fixed.
-        # See See https://alfresco.atlassian.net/browse/HXCS-2474 for more details.
         fail-build: ${{ inputs.grype-fail-build }}
         grype-version: v0.72.0
         image: ghcr.io/alfresco/${{ env.IMAGE_NAME }}
