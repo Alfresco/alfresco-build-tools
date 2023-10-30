@@ -47,8 +47,9 @@ runs:
       uses: actions/cache@v3
       with:
         path: ~/.m2/build-cache
-        key: ${{ runner.os }}-buildcache-${{ github.run_id }}
+        key: ${{ runner.os }}-buildcache-${{ github.ref_name }}-${{ github.run_id }}
         restore-keys: |
+          ${{ runner.os }}-buildcache-${{ github.ref_name }}-
           ${{ runner.os }}-buildcache-
 
     - name: Install latest mvnd
