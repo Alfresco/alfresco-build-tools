@@ -48,34 +48,20 @@
             </excludes>
         </global>
         <plugins>
-            <plugin artifactId="codegen">
+            <plugin artifactId="license-maven-plugin">
                 <effectivePom>
                     <excludeProperties>
-                        <excludeProperty>111</excludeProperty>
+                        <excludeProperty>excludedLicenses</excludeProperty>
+                        <excludeProperty>includedLicenses</excludeProperty>
                     </excludeProperties>
                 </effectivePom>
-                <dirScan mode="auto">
-                    <excludes>
-                        <exclude tagName="outputDirectory"/>
-                        <exclude tagName="directory"/>
-                    </excludes>
-                    <tagScanConfigs>
-                        <tagScanConfig tagName="someProperty" glob="*.java" recursive="false"/>
-                    </tagScanConfigs>
-                </dirScan>
-                <executions>
-                    <execution>
-                        <execIds>
-                            <execId>1</execId>
-                            <execId>2</execId>
-                        </execIds>
-                        <dirScan mode="auto">
-                            <includes>
-                                <include tagName="protolocation" recursive="false" glob="*.proto"/>
-                            </includes>
-                        </dirScan>
-                    </execution>
-                </executions>
+            </plugin>
+            <plugin artifactId="maven-jar-plugin">
+                <effectivePom>
+                    <excludeProperties>
+                        <excludeProperty>archive</excludeProperty>
+                    </excludeProperties>
+                </effectivePom>
             </plugin>
         </plugins>
     </input>
