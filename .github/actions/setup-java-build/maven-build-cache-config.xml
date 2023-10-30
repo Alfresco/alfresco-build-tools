@@ -63,6 +63,13 @@
                     </excludeProperties>
                 </effectivePom>
             </plugin>
+            <plugin artifactId="alfresco-maven-plugin">
+                <effectivePom>
+                    <excludeProperties>
+                        <excludeProperty>archive</excludeProperty>
+                    </excludeProperties>
+                </effectivePom>
+            </plugin>
         </plugins>
     </input>
     <executionControl>
