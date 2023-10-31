@@ -59,8 +59,6 @@ runs:
         key: ${{ runner.os }}-buildcache-${{ hashFiles('.mvn/*.xml') }}-${{ github.job }}${{ strategy.job-index }}-${{ github.run_id }}
         restore-keys: |
           ${{ runner.os }}-buildcache-${{ hashFiles('.mvn/*.xml') }}-${{ github.job }}${{ strategy.job-index }}-
-          ${{ runner.os }}-buildcache-${{ hashFiles('.mvn/*.xml') }}-
-          ${{ runner.os }}-buildcache-
 
     - name: Install maven ${{ inputs.maven-version || '(latest)'}}
       if: inputs.build-cache != 'false' || inputs.maven-version != ''
