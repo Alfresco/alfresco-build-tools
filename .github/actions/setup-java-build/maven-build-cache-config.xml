@@ -149,6 +149,20 @@
                         <log propertyName="argLine"/>
                     </logs>
                 </plugin>
+                <plugin artifactId="maven-compiler-plugin" goal="testCompile">
+                    <reconciles>
+                        <reconcile propertyName="source"/>
+                        <reconcile propertyName="target"/>
+                        <reconcile propertyName="debug"/>
+                        <reconcile propertyName="debuglevel"/>
+                    </reconciles>
+                    <!-- whitelist of logged properties-->
+                    <logs>
+                        <log propertyName="includes"/>
+                        <log propertyName="excludes"/>
+                        <log propertyName="argLine"/>
+                    </logs>
+                </plugin>
                 <plugin artifactId="duplicate-finder-maven-plugin" goal="check">
                     <reconciles>
                         <reconcile propertyName="skip" skipValue="true"/>
