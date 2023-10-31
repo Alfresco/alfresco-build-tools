@@ -13,6 +13,13 @@ inputs:
     description: the location of the custom Maven settings.xml file to install
     default: ".ci.settings.xml"
     required: false
+  maven-version:
+    description: "Install a custom maven version via sdkman"
+    required: false
+  build-cache:
+    description: Enable the maven build cache extension
+    default: "false"
+    required: false
 runs:
   using: composite
   steps:
@@ -37,6 +44,7 @@ runs:
         fi
 
     - name: Enable maven build cache
+      if: inputs.build-cache != 'false'
       shell: bash
       run: |
         mkdir -p .mvn
@@ -44,6 +52,7 @@ runs:
         cp ${{ github.action_path }}/maven-build-cache-config.xml .mvn/maven-build-cache-config.xml
 
     - name: "Build cache"
+      if: inputs.build-cache != 'false'
       uses: actions/cache@v3
       with:
         path: ~/.m2/build-cache
@@ -53,15 +62,12 @@ runs:
           ${{ runner.os }}-buildcache-${{ hashFiles('.mvn/*.xml') }}-
           ${{ runner.os }}-buildcache-
 
-    - name: Install latest mvnd
-      uses: sdkman/sdkman-action@b1f9b696c79148b66d3d3a06f7ea801820318d0f
-      with:
-        candidate: mvnd
-
-    - name: Install latest maven
+    - name: Install maven ${{ inputs.maven-version || '(latest)'}}
+      if: inputs.build-cache != 'false' || inputs.maven-version != ''
       uses: sdkman/sdkman-action@b1f9b696c79148b66d3d3a06f7ea801820318d0f
       with:
         candidate: maven
+        version: ${{ inputs.maven-version }}
 
     - name: "Set up Java"
       uses: actions/setup-java@v3
