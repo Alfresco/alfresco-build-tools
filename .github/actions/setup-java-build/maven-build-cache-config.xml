@@ -92,6 +92,13 @@
                         <goal>deploy</goal>
                     </goals>
                 </goalsList>
+                <goalsList artifactId="docker-maven-plugin">
+                    <goals>
+                        <goal>build</goal>
+                        <goal>start</goal>
+                        <goal>stop</goal>
+                    </goals>
+                </goalsList>
             </goalsLists>
         </runAlways>
         <reconcile logAllProperties="true">
