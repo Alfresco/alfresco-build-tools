@@ -196,7 +196,7 @@ runs:
       if: steps.define_maven_command.outputs.command == 'deploy'
       shell: bash
       run: |
-        mvn validate jar:jar deploy:deploy ${{ env.MAVEN_CLI_OPTS}} -DskipTests
+        mvn deploy:deploy ${{ env.MAVEN_CLI_OPTS}} -DskipTests
       env:
         MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
         MAVEN_USERNAME: ${{ inputs.maven-username }}
