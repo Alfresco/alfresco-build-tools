@@ -182,21 +182,11 @@ runs:
         echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
         echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
 
-    - name: Build and Test with Maven
+    - name: Build and Test with Maven (and maybe Deploy)
       shell: bash
       run: |
-        mvn -T1C de.qaware.maven:go-offline-maven-plugin:resolve-dependencies ${{ env.MAVEN_CLI_OPTS}}
-        mvn install ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
-      env:
-        MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
-        MAVEN_USERNAME: ${{ inputs.maven-username }}
-        MAVEN_PASSWORD: ${{ inputs.maven-password }}
-
-    - name: Maybe Deploy Maven Artifacts
-      if: steps.define_maven_command.outputs.command == 'deploy'
-      shell: bash
-      run: |
-        mvn deploy:deploy ${{ env.MAVEN_CLI_OPTS}} -DskipTests
+        mvn -T1C de.qaware.maven:go-offline-maven-plugin:resolve-dependencies ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
+        mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
       env:
         MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
         MAVEN_USERNAME: ${{ inputs.maven-username }}
