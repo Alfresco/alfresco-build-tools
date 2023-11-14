@@ -235,27 +235,3 @@ updates:
     directory: "/.github/actions/setup-terraform-docs"
     schedule:
       interval: "weekly"
-  - package-ecosystem: "github-actions"
-    directory: "/.github/actions/setup-updatebot"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "github-actions"
-    directory: "/.github/actions/update-deployment-runtime-versions"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "github-actions"
-    directory: "/.github/actions/update-pom-to-next-pre-release"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "github-actions"
-    directory: "/.github/actions/update-project-base-tag"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "github-actions"
-    directory: "/.github/actions/validate-maven-versions"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "github-actions"
-    directory: "/.github/actions/veracode"
-    schedule:
-      interval: "weekly"
