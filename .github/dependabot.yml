@@ -1,11 +1,16 @@
 # Documentation for all configuration options:
 # https://help.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+# Edit should be made in the dependabot.template.yml
 version: 2
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+  - package-ecosystem: "pip"
+    directory: "/.github/actions/pipenv"
+    schedule:
+      interval: "monthly"
   - package-ecosystem: "github-actions"
     directory: "/.github/actions/automate-dependabot"
     schedule:
@@ -254,8 +259,3 @@ updates:
     directory: "/.github/actions/veracode"
     schedule:
       interval: "weekly"
-
-  - package-ecosystem: "pip"
-    directory: "/.github/actions/pipenv"
-    schedule:
-      interval: "monthly"
