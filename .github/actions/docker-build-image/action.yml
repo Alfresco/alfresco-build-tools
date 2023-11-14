@@ -118,7 +118,7 @@ runs:
         password: ${{ inputs.docker-password }}
 
     - name: Build image ${{ env.IMAGE_NAME }}
-      uses: docker/build-push-action@0a97817b6ade9f46837855d676c4cca3a2471fc9 # v4.2.1
+      uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
       with:
         context: ${{ inputs.base-directory }}/${{ inputs.image-dir }}
         tags: ghcr.io/alfresco/${{ env.IMAGE_NAME }}
@@ -193,7 +193,7 @@ runs:
 
     - name: Build and Push image ${{ env.IMAGE_NAME }}
       if: env.PUSH_IMAGE == 'true'
-      uses: docker/build-push-action@0a97817b6ade9f46837855d676c4cca3a2471fc9 # v4.2.1
+      uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
       with:
         context: ${{ inputs.base-directory }}/${{ inputs.image-dir }}
         platforms: linux/amd64,linux/arm64/v8
