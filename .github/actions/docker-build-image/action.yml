@@ -112,7 +112,7 @@ runs:
           network=host
 
     - name: Login to docker.io
-      uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2.2.0
+      uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
       with:
         username: ${{ inputs.docker-username }}
         password: ${{ inputs.docker-password }}
@@ -159,7 +159,7 @@ runs:
 
     - name: Login to quay.io
       if: env.PUSH_IMAGE == 'true'
-      uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2.2.0
+      uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
       with:
         registry: quay.io
         username: ${{ inputs.quay-username }}
@@ -167,7 +167,7 @@ runs:
 
     - name: Login to ghcr.io
       if: env.PUSH_IMAGE == 'true'
-      uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2.2.0
+      uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
       with:
         registry: ghcr.io
         username: ${{ inputs.ghcr-username }}
