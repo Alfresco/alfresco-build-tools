@@ -60,7 +60,7 @@ runs:
   steps:
     - name: Checkout
       if: inputs.skip_checkout == 'false'
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - uses: aws-actions/configure-aws-credentials@v2
