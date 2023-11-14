@@ -23,3 +23,10 @@ repos:
     rev: v0.32.2
     hooks:
     - id: markdownlint
+  - repo: local
+    hooks:
+      - id: generate-dependabot
+        name: Generate dependabot config for actions
+        language: system
+        entry: ./update-dependabot.sh
+        pass_filenames: false
