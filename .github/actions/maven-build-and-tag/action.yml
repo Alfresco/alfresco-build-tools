@@ -89,7 +89,7 @@ runs:
           ${{ runner.os }}-maven-
 
     - name: Set up JDK
-      uses: actions/setup-java@a18c333f3f14249953dab3e186e5e21bf3390f1d
+      uses: actions/setup-java@0ab4596768b603586c0de567f2430c30f5b0d2b0
       with:
         java-version: ${{ inputs.java-version }}
         distribution: ${{ inputs.java-distribution }}
