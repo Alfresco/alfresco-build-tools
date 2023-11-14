@@ -32,7 +32,8 @@ echo "version: 2" > "$temp_config"
 echo "updates:" >> "$temp_config"
 
 # Loop through composite actions and append to temp config
-for action_dir in $(find "$actions_dir" -mindepth 1 -maxdepth 1 -type d | sort -n); do
+for action_filename in $(find "$actions_dir" -mindepth 2 -type f -name action.yml | sort -n); do
+    action_dir=$(dirname $action_filename)
     generate_dependabot_section "$action_dir" >> "$temp_config"
 done
 

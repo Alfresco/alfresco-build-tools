@@ -28,7 +28,19 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "github-actions"
-    directory: "/.github/actions/dbp-charts"
+    directory: "/.github/actions/dbp-charts/kubernetes-valid-ns"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/dbp-charts/publish-chart"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/dbp-charts/verify-compose"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/dbp-charts/verify-helm"
     schedule:
       interval: "weekly"
   - package-ecosystem: "github-actions"
@@ -156,11 +168,11 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "github-actions"
-    directory: "/.github/actions/pre-commit"
+    directory: "/.github/actions/pre-commit-default"
     schedule:
       interval: "weekly"
   - package-ecosystem: "github-actions"
-    directory: "/.github/actions/pre-commit-default"
+    directory: "/.github/actions/pre-commit"
     schedule:
       interval: "weekly"
   - package-ecosystem: "github-actions"
@@ -184,11 +196,11 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "github-actions"
-    directory: "/.github/actions/send-slack-notification"
+    directory: "/.github/actions/send-slack-notification-slow-job"
     schedule:
       interval: "weekly"
   - package-ecosystem: "github-actions"
-    directory: "/.github/actions/send-slack-notification-slow-job"
+    directory: "/.github/actions/send-slack-notification"
     schedule:
       interval: "weekly"
   - package-ecosystem: "github-actions"
