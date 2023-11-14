@@ -40,7 +40,7 @@ runs:
       run: echo "CHECKOUT_PATH=$(uuidgen)" >> $GITHUB_ENV
 
     - name: Checkout charts repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         path: ${{ env.CHECKOUT_PATH }}
         repository: ${{ inputs.helm-charts-repo }}
