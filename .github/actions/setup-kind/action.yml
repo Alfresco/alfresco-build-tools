@@ -1,10 +1,14 @@
 name: "Setup a KinD cluster"
 description: "Spin a local Kubernetes cluster with ingress-nginx"
 inputs:
+  kind-version:
+    description: |
+      The kind version to use. Versions available at:
+      https://github.com/kubernetes-sigs/kind/releases
+    default: v0.20.0
   kind-node-image:
     description: |
-      The Kind docker node image to use. Check the Kind version
-      release notes to check the list of suitable images:
+      The Kind docker node image to use. Should match the same kind version at:
       https://github.com/kubernetes-sigs/kind/releases
     default: kindest/node:v1.27.3@sha256:3966ac761ae0136263ffdb6cfd4db23ef8a83cba8a463690e98317add2c9ba72
   kind-wait:
@@ -23,6 +27,7 @@ runs:
       uses: helm/kind-action@v1.8.0 # https://github.com/helm/kind-action/releases/tag/v1.8.0
       with:
         config: ${{ github.action_path }}/kind.yml
+        version: ${{ inputs.kind-version }}
         node_image: ${{ inputs.kind-node-image }}
         wait: ${{ inputs.kind-wait }}
 
