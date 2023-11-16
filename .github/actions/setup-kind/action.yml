@@ -6,14 +6,15 @@ inputs:
       The Kind docker node image to use. Check the Kind version
       release notes to check the list of suitable images:
       https://github.com/kubernetes-sigs/kind/releases
-    required: true
     default: kindest/node:v1.27.3@sha256:3966ac761ae0136263ffdb6cfd4db23ef8a83cba8a463690e98317add2c9ba72
+  kind-wait:
+    description: The duration to wait for the control plane to become ready
+    default: 60s
   ingress-nginx-ref:
     description: |
-      the Nginx ingress ref to get the ingress congtroller deployment manifest from
+      the Nginx ingress ref to get the ingress controller deployment manifest from
       (https://github.com/kubernetes/ingress-nginx). Consider main (the default) a floating tag which can result in
       deploying any version (including betas) and non repeatable builds.
-    required: false
     default: main
 runs:
   using: "composite"
@@ -23,6 +24,7 @@ runs:
       with:
         config: ${{ github.action_path }}/kind.yml
         node_image: ${{ inputs.kind-node-image }}
+        wait: ${{ inputs.kind-wait }}
 
     - name: Install ingress-nginx
       shell: bash
