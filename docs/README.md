@@ -1236,17 +1236,18 @@ Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
       - name: Setup cluster
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-kind@ref
         with:
-          # See the available refs in the kind release notes at https://github.com/kubernetes-sigs/kind/releases
-          # Make sure to use a node image built for the same KinD version
-          # kind-node-image: kindest/node:v1.24.7@sha256:577c630ce8e509131eab1aea12c022190978dd2f745aac5eb1fe65c0807eb315
-          ingress-nginx-ref: controller-v1.8.2
+          # Specify kind and k8s version to use.
+          # see https://github.com/kubernetes-sigs/kind/releases
+          # kind-version: v0.20.0
+          # kind-node-image: kindest/node:v1.27.3@sha256:3966ac761ae0136263ffdb6cfd4db23ef8a83cba8a463690e98317add2c9ba72
+          # Optional but ensure repeatable builds (defaults to latest nginx ingress version otherwise).
+          # see https://github.com/kubernetes/ingress-nginx
+          # ingress-nginx-ref: controller-v1.8.2
       - name: Helm deploy
         run: |
           helm dep up ./helm/chart
           helm install acs ./helm/chart
 ```
-
-> Although not required we recommend setting the `ingress-nginx-ref``to ensure repeatable builds
 
 ### update-project-base-tag
 
