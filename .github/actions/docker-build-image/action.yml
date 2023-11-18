@@ -139,12 +139,12 @@ runs:
         severity-cutoff: critical
 
     - name: Echo sarif
-      if: inputs.grype-scan-enabled == 'true'
+      if: always() && inputs.grype-scan-enabled == 'true'
       shell: bash
       run: echo "$(<results.sarif )"
 
     - name: Upload SARIF Files
-      if: always() && inputs.grype-scan-enabled == 'true'
+      if: always() && inputs.grype-scan-enabled == 'true' && github.event_name == 'push'
       uses: github/codeql-action/upload-sarif@66b90a5db151a8042fa97405c6cf843bbe433f7b # v2.22.7
       continue-on-error: true # do not fail if GHAS is not enabled
       with:
