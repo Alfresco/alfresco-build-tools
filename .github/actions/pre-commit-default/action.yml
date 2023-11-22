@@ -23,7 +23,7 @@ runs:
   using: "composite"
   steps:
     - name: Set up Python ${{ inputs.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
       with:
         python-version: ${{ inputs.python-version }}
     - name: build extra_args
@@ -33,11 +33,11 @@ runs:
       run: |
         EXTRA_ARGS="--all-files ${{ inputs.extra-args }}"
         echo EXTRA_ARGS="${EXTRA_ARGS}" >> $GITHUB_ENV
-    - uses: pre-commit/action@v3.0.0
+    - uses: pre-commit/action@646c83fcd040023954eafda54b4db0192ce70507 # v3.0.0
       if: inputs.check-format == 'true'
       with:
         extra_args: ${{ env.EXTRA_ARGS }} --config ${{ github.action_path }}/format-config.yaml
-    - uses: pre-commit/action@v3.0.0
+    - uses: pre-commit/action@646c83fcd040023954eafda54b4db0192ce70507 # v3.0.0
       if: inputs.check-github-configuration == 'true'
       with:
         extra_args: ${{ env.EXTRA_ARGS }} --config ${{ github.action_path }}/github-config.yaml
