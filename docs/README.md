@@ -1286,6 +1286,26 @@ Runs Veracode Source Clear Scan
           srcclr-install-options: '-DskipTestModules' # optional, additional maven options
 ```
 
+### github cache cleanup
+
+Performs the cleanup of cache entries related with already closed PR
+
+```yaml
+name: Cleanup caches for work branch
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/gh-cache-cleanup-on-merge@ref
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+```
+
 ## Reusable workflows provided by us
 
 ### helm-publish-new-package-version.yml

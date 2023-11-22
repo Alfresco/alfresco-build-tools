@@ -76,6 +76,10 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "github-actions"
+    directory: "/.github/actions/gh-cache-cleanup-on-merge"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
     directory: "/.github/actions/git-check-existing-tag"
     schedule:
       interval: "weekly"
