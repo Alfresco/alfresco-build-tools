@@ -17,6 +17,11 @@ inputs:
   rp-extra-attributes:
     description: Extra attributes for Report Portal
     required: false
+  rp-static-name:
+    description: >-
+      If set, it uses RP_LAUNCH_PREFIX as RP_LAUNCH_KEY.
+    required: false
+    default: "false"
   auto-configure:
     description: >-
       Enables automated default configuration (adds default GitHub context
@@ -54,4 +59,5 @@ runs:
         RP_PROJECT: ${{ inputs.rp-project }}
         RP_EXTRA_ATTRIBUTES: ${{ inputs.rp-extra-attributes }}
         AUTO: ${{ inputs.auto-configure }}
+        STATIC: ${{ inputs.rp-static-name }}
       run: ${{ github.action_path }}/get-rp-input.sh
