@@ -18,8 +18,7 @@ inputs:
     description: Extra attributes for Report Portal
     required: false
   rp-static-launch-name:
-    description: >-
-      If set, it uses RP_LAUNCH_PREFIX as RP_LAUNCH_KEY.
+    description: If set, the rp-launch-prefix will be used as the full launch name in Report Portal
     required: false
     default: "false"
   auto-configure:
