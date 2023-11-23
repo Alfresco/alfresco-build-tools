@@ -17,7 +17,7 @@ inputs:
   rp-extra-attributes:
     description: Extra attributes for Report Portal
     required: false
-  rp-static-launch-name:
+  rp-use-static-launch-name:
     description: If set, the rp-launch-prefix will be used as the full launch name in Report Portal
     required: false
     default: "false"
