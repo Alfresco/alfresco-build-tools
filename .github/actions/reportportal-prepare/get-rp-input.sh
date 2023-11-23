@@ -4,7 +4,7 @@ if [[ -n "$RP_LAUNCH_PREFIX" && -n "$RP_TOKEN" && -n "$RP_URL" && -n "$RP_PROJEC
   echo "enabled=true" >> $GITHUB_OUTPUT
 
   RP_LAUNCH_KEY="$RP_LAUNCH_PREFIX"
-  if [[ "$AUTO" == "true" && "$STATIC" == "false" ]]; then
+  if [[ "$AUTO" == "true" && "$STATIC_LAUNCH_NAME" == "false" ]]; then
     RP_LAUNCH_KEY="$RP_LAUNCH_PREFIX-$GITHUB_EVENT_NAME-$GITHUB_RUN_ID"
   fi
   echo "key=$RP_LAUNCH_KEY" >> $GITHUB_OUTPUT
