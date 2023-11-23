@@ -11,6 +11,7 @@ setup() {
     export RP_URL=https://rpserver:8080
     export RP_PROJECT=my-project
     export AUTO=true
+    export USE_STATIC_LAUNCH_NAME=false
 
     export BRANCH_NAME=main
     export GITHUB_SERVER_URL=https://github.com
@@ -67,7 +68,6 @@ teardown() {
 }
 
 @test "rp enabled basic" {
-    EXPORT USE_STATIC_LAUNCH_NAME="false"
     run get-rp-input.sh
     [ "$status" -eq 0 ]
 
