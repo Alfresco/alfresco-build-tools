@@ -17,7 +17,7 @@ inputs:
   rp-extra-attributes:
     description: Extra attributes for Report Portal
     required: false
-  rp-static-name:
+  rp-static-launch-name:
     description: >-
       If set, it uses RP_LAUNCH_PREFIX as RP_LAUNCH_KEY.
     required: false
