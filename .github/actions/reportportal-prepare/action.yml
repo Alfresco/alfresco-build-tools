@@ -58,5 +58,5 @@ runs:
         RP_PROJECT: ${{ inputs.rp-project }}
         RP_EXTRA_ATTRIBUTES: ${{ inputs.rp-extra-attributes }}
         AUTO: ${{ inputs.auto-configure }}
-        STATIC_LAUNCH_NAME: ${{ inputs.rp-static-launch-name }}
+        USE_STATIC_LAUNCH_NAME: ${{ inputs.rp-use-static-launch-name }}
       run: ${{ github.action_path }}/get-rp-input.sh
