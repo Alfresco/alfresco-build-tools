@@ -951,18 +951,18 @@ In particular, this prepares maven command line options for Report Portal integr
 Default context information is also added (launch attributes), unless the `auto-configure` input is set to `false`.
 
 By using the `rp-use-static-launch-name` flag, you can determine whether the launch name in Report Portal should be static or unique for each execution. By default, it is set to `false`.
-Setting it to `true` means that the value from 'rp-launch-prefix' will be used as the full launch name. However, this configuration won't work with [reportportal-summarize](#reportportal-summarize).
+Setting it to `true` means that the value from 'rp-launch-prefix' will be used as the full launch name.
 
 Sample options with auto-configuration:
 
 ```bash
-"-Drp.launch=short-run-push-3674979523" "-Drp.uuid=***" "-Drp.endpoint=http://localhost:8080" "-Drp.project=my-project" "-Drp.description=[Run on GitHub Actions 3674979523](https://github.com/Alfresco/alfresco-build-tools/actions/runs/3674979523)" "-Drp.attributes=branch:my-branch;event:push;repository:Alfresco/alfresco-build-tools;run:short-run-push-3674979523;myattribute:my-filter"
+"-Drp.launch=short-run-push-3674979523" "-Drp.uuid=***" "-Drp.endpoint=http://localhost:8080" "-Drp.project=my-project" "-Drp.description=[Run on GitHub Actions 3674979523](https://github.com/Alfresco/alfresco-build-tools/actions/runs/3674979523)" "-Drp.attributes=branch:my-branch;event:push;repository:Alfresco/alfresco-build-tools;ghrun:3674979523;run:short-run-push-3674979523;myattribute:my-filter"
 ```
 
 Sample options without auto-configuration:
 
 ```bash
-"-Drp.launch=short-run-push" "-Drp.uuid=***" "-Drp.endpoint=http://localhost:8080" "-Drp.project=my-project"
+"-Drp.launch=short-run-push" "-Drp.uuid=***" "-Drp.endpoint=http://localhost:8080" "-Drp.project=my-project" "-Drp.attributes=ghrun:3674979523"
 ```
 
 Sample usage:
