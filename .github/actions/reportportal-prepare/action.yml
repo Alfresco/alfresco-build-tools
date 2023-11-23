@@ -17,7 +17,7 @@ inputs:
   rp-extra-attributes:
     description: Extra attributes for Report Portal
     required: false
-  rp-static-launch-name:
+  rp-use-static-launch-name:
     description: If set, the rp-launch-prefix will be used as the full launch name in Report Portal
     required: false
     default: "false"
@@ -58,5 +58,5 @@ runs:
         RP_PROJECT: ${{ inputs.rp-project }}
         RP_EXTRA_ATTRIBUTES: ${{ inputs.rp-extra-attributes }}
         AUTO: ${{ inputs.auto-configure }}
-        STATIC_LAUNCH_NAME: ${{ inputs.rp-static-launch-name }}
+        USE_STATIC_LAUNCH_NAME: ${{ inputs.rp-use-static-launch-name }}
       run: ${{ github.action_path }}/get-rp-input.sh

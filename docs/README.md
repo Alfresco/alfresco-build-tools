@@ -950,8 +950,8 @@ This action is usually used in combination with [reportportal-summarize](#report
 In particular, this prepares maven command line options for Report Portal integration, building the endpoint, authentication, launch key, description.
 Default context information is also added (launch attributes), unless the `auto-configure` input is set to `false`.
 
-By using the `rp-static-launch-name` flag, you can determine whether the launch name in Report Portal should be static or unique for each execution. By default, it is set to `false`.
-Setting it to `true` means that the value from 'RP_LAUNCH_KEY' will be used as 'LAUNCH_NAME.' However, this configuration won't work with [reportportal-summarize](#reportportal-summarize).
+By using the `rp-use-static-launch-name` flag, you can determine whether the launch name in Report Portal should be static or unique for each execution. By default, it is set to `false`.
+Setting it to `true` means that the value from 'rp-launch-prefix' will be used as the full launch name. However, this configuration won't work with [reportportal-summarize](#reportportal-summarize).
 
 Sample options with auto-configuration:
 
