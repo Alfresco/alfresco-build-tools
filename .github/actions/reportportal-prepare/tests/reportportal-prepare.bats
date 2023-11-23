@@ -67,6 +67,7 @@ teardown() {
 }
 
 @test "rp enabled basic" {
+    EXPORT STATIC_LAUNCH_NAME="false"
     run get-rp-input.sh
     [ "$status" -eq 0 ]
 
