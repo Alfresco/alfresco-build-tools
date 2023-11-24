@@ -81,7 +81,14 @@ runs:
   steps:
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
+    - uses: actions/cache/restore@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
+      if: github.event_name == 'push'
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+
     - uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
+      if: github.event_name == 'pull_request'
       with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -229,3 +236,16 @@ runs:
       run: |
         git tag -a $VERSION -m "Release version $VERSION"
         git push origin $VERSION
+
+    - name: Clean m2 cache
+      if: github.event_name == 'push'
+      shell: bash
+      run: |
+        rm -fr ~/.m2/repository/org/activiti
+        rm -fr ~/.m2/repository/com/alfresco
+
+    - uses: actions/cache/save@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
+      if: github.event_name == 'pull_request'
+      with:
+        path: ${{ github.workspace }}/**/target/*.jar
+        key: mvn-target-cache-${{ github.run_id }}
