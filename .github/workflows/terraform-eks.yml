@@ -1,0 +1,128 @@
+name: "Terraform"
+
+on:
+  workflow_call:
+    inputs:
+      terraform_root_path:
+        description: the path to the root module to apply
+        type: string
+        required: false
+        default: .
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      BOT_GITHUB_TOKEN:
+        required: false
+      DOCKER_USERNAME:
+        required: false
+      DOCKER_PASSWORD:
+        required: false
+      RANCHER2_ACCESS_KEY:
+        required: false
+      RANCHER2_SECRET_KEY:
+        required: false
+
+jobs:
+  compute_basic_vars:
+    name: compute basic variables
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate branch name
+        id: basic_vars
+        run: |
+          BRANCH_NAME=${{ github.base_ref || github.ref_name }}
+          BRANCH_LOWER=${BRANCH_NAME,,}
+          if [ "$BRANCH_LOWER" == "main" ]; then
+            environment="production"
+          elif [ "$BRANCH_LOWER" == "develop" ]; then
+            environment="develop"
+          else
+            echo "$BRANCH_LOWER doesn't have a matching environment"
+            exit 1
+          fi
+          echo "environment_name=${environment}" >> $GITHUB_OUTPUT
+    outputs:
+      environment_name: ${{ steps.basic_vars.outputs.environment_name }}
+
+  terraform:
+    runs-on: ubuntu-latest
+    needs:
+      - compute_basic_vars
+    environment: ${{ needs.compute_basic_vars.outputs.environment_name }}
+    concurrency:
+      group: ${{ needs.compute_basic_vars.outputs.environment_name }}
+      cancel-in-progress: false
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ vars.AWS_DEFAULT_REGION }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      RANCHER2_ACCESS_KEY: ${{ secrets.RANCHER2_ACCESS_KEY }}
+      RANCHER2_SECRET_KEY: ${{ secrets.RANCHER2_SECRET_KEY }}
+      RANCHER2_URL: ${{ vars.RANCHER2_URL }}
+      RESOURCE_NAME: ${{ vars.RESOURCE_NAME }}
+      TERRAFORM_HTTP_CREDENTIALS: |
+        github.com/Alfresco=alfresco-build:${{ secrets.BOT_GITHUB_TOKEN }}
+      TERRAFORM_PRE_RUN: |
+        if [ ! -x ./aws/install ]; then
+          curl -sSf https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip
+          unzip -q awscliv2.zip
+        fi
+        ./aws/install
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Load environment variables from yml
+        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v3.2.0
+        with:
+          yml_path: ${{ inputs.terraform_root_path }}/tfenv.yml
+
+      - name: Check vars requirements
+        run: |
+          if [ -z "${{ vars.RESOURCE_NAME }}" ]; then
+            echo "RESOURCE_NAME must be set in the vars context to provide a unique identifier"
+            exit 1
+          fi
+          if [ -z "${{ vars.TERRAFORM_STATE_BUCKET }}" ]; then
+            echo "TERRAFORM_STATE_BUCKET must be set in the vars context"
+            exit 1
+          fi
+
+      - name: Terraform validate
+        uses: dflook/terraform-validate@433dd249ad921c19245cf361c67a57f485e2ae0b # v1.36.2
+        with:
+          path: ${{ inputs.terraform_root_path }}
+          backend_config: |
+            bucket=${{ vars.TERRAFORM_STATE_BUCKET }}
+            key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
+
+      - name: Terraform plan
+        uses: dflook/terraform-plan@e047f3fa83b945d582e0b468f4ef3c22c03e070d # v1.36.2
+        if: github.event_name == 'pull_request'
+        with:
+          label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
+          path: ${{ inputs.terraform_root_path }}
+          var_file: |
+            ${{ inputs.terraform_root_path }}/common.tfvars
+            ${{ inputs.terraform_root_path }}/${{ needs.compute_basic_vars.outputs.environment_name }}.tfvars
+          backend_config: |
+            bucket=${{ vars.TERRAFORM_STATE_BUCKET }}
+            key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
+
+      - name: Terraform apply
+        uses: dflook/terraform-apply@7a56cfb68f437341062f41afca87c71fc5b4bd5f # v1.36.2
+        if: github.event_name == 'push'
+        with:
+          label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
+          path: ${{ inputs.terraform_root_path }}
+          var_file: |
+            ${{ inputs.terraform_root_path }}/common.tfvars
+            ${{ inputs.terraform_root_path }}/${{ needs.compute_basic_vars.outputs.environment_name }}.tfvars
+          backend_config: |
+            bucket=${{ vars.TERRAFORM_STATE_BUCKET }}
+            key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
