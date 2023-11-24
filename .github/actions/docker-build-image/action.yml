@@ -30,12 +30,6 @@ inputs:
   ghcr-token:
     description: Github token to connect to GHCR
     required: true
-  aws-access-key-id:
-    description: AWS access key id to connect to ECR
-    required: false
-  aws-secret-access-key:
-    description: AWS secret access key to connect to ECR
-    required: false
   aws-account-id:
     description: AWS account id to connect to ECR
     required: true
@@ -176,8 +170,6 @@ runs:
       if: env.PUSH_IMAGE == 'true'
       uses: aws-actions/configure-aws-credentials@010d0da01d0b5a38af31e9c3470dbfdabdecca3a # v4.0.1
       with:
-        aws-access-key-id: ${{ inputs.aws-access-key-id }}
-        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
         aws-region: ${{ inputs.aws-region }}
         role-to-assume: arn:aws:iam::${{ inputs.aws-account-id }}:role/${{ inputs.aws-role-name }}
         role-session-name: gh-${{ env.IMAGE_REPOSITORY }}
