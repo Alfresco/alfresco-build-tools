@@ -231,7 +231,7 @@ runs:
         git push origin $VERSION
 
     - name: Clean m2 cache
-      if: github.event_name == 'push'
+      if: github.event_name == 'push' && github.event.repository.default_branch == github.ref_name
       shell: bash
       run: |
         rm -fr ~/.m2/repository/org/activiti
