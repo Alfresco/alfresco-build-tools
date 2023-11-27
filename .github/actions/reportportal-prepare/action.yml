@@ -42,7 +42,7 @@ runs:
   using: composite
   steps:
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@92947f8dee1180182ac6cf516edce1d4eb7d9b38 # v3.9.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@54f23a67b733f4b39cc644064ecb794944116846 # v5.0.0
 
     - name: Compute Report Portal input info
       id: info
