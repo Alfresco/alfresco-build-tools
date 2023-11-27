@@ -1327,12 +1327,12 @@ Calculates the new alpha version, creates new git tag and publishes the new pack
 
 ### terraform-eks
 
-Reusable workflow which implement an opinionated workflow to manage EKS clusters
+Reusable workflow which implements an opinionated workflow to manage EKS clusters
 reusing [dflook/terraform-github-actions](https://github.com/dflook/terraform-github-actions),
 optionally allowing a multi-state approach for managing resources.
 
 Assume having a GitHub environment named `production` when executing on the
-`main` branch, and a `develop` GitHub environment named `develop` when executing
+`main` branch, and a `develop` GitHub environment when executing
 on the `develop` branch.
 
 GitHub environments must be configured with the following variables:
