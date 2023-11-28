@@ -17,6 +17,10 @@ inputs:
   rp-extra-attributes:
     description: Extra attributes for Report Portal
     required: false
+  rp-use-static-launch-name:
+    description: If set, the rp-launch-prefix will be used as the full launch name in Report Portal
+    required: false
+    default: "false"
   auto-configure:
     description: >-
       Enables automated default configuration (adds default GitHub context
@@ -42,7 +46,7 @@ runs:
   using: composite
   steps:
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v5.0.1
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v5.3.0
 
     - name: Compute Report Portal input info
       id: info
@@ -54,4 +58,5 @@ runs:
         RP_PROJECT: ${{ inputs.rp-project }}
         RP_EXTRA_ATTRIBUTES: ${{ inputs.rp-extra-attributes }}
         AUTO: ${{ inputs.auto-configure }}
+        USE_STATIC_LAUNCH_NAME: ${{ inputs.rp-use-static-launch-name }}
       run: ${{ github.action_path }}/get-rp-input.sh

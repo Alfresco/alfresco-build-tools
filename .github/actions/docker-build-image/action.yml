@@ -138,7 +138,7 @@ runs:
 
     - name: Upload SARIF Files
       if: always() && inputs.grype-scan-enabled == 'true' && github.event_name == 'push'
-      uses: github/codeql-action/upload-sarif@66b90a5db151a8042fa97405c6cf843bbe433f7b # v2.22.7
+      uses: github/codeql-action/upload-sarif@407ffafae6a767df3e0230c3df91b6443ae8df75 # v2.22.8
       continue-on-error: true # do not fail if GHAS is not enabled
       with:
         sarif_file: ${{ steps.scan.outputs.sarif }}
@@ -181,6 +181,13 @@ runs:
       uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # v2.0.1
       with:
         mask-password: true
+
+    - name: Create ECR repository if needed
+      if: env.PUSH_IMAGE == 'true'
+      shell: bash
+      run: |
+        aws ecr describe-repositories --repository-names ${IMAGE_REPOSITORY} \
+          || aws ecr create-repository --repository-name ${IMAGE_REPOSITORY}
 
     - name: Build and Push image ${{ env.IMAGE_NAME }}
       if: env.PUSH_IMAGE == 'true'

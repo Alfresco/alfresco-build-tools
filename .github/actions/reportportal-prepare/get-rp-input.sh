@@ -4,7 +4,7 @@ if [[ -n "$RP_LAUNCH_PREFIX" && -n "$RP_TOKEN" && -n "$RP_URL" && -n "$RP_PROJEC
   echo "enabled=true" >> $GITHUB_OUTPUT
 
   RP_LAUNCH_KEY="$RP_LAUNCH_PREFIX"
-  if [[ "$AUTO" == "true" ]]; then
+  if [[ "$AUTO" == "true" && "$USE_STATIC_LAUNCH_NAME" == "false" ]]; then
     RP_LAUNCH_KEY="$RP_LAUNCH_PREFIX-$GITHUB_EVENT_NAME-$GITHUB_RUN_ID"
   fi
   echo "key=$RP_LAUNCH_KEY" >> $GITHUB_OUTPUT
@@ -23,7 +23,9 @@ if [[ -n "$RP_LAUNCH_PREFIX" && -n "$RP_TOKEN" && -n "$RP_URL" && -n "$RP_PROJEC
   OPTS+=' "'-Drp.project="$RP_PROJECT"'"'
   if [[ "$AUTO" == "true" ]]; then
     OPTS+=' "'-Drp.description=["$RUN_TITLE"]\("$RUN_URL"\)'"'
-    OPTS+=' "'-Drp.attributes='branch:'"$BRANCH_NAME"';event:'"$GITHUB_EVENT_NAME"';repository:'"$GITHUB_REPOSITORY"';run:'"$RP_LAUNCH_KEY$RP_EXTRA_ATTRIBUTES"'"'
+    OPTS+=' "'-Drp.attributes='branch:'"$BRANCH_NAME"';event:'"$GITHUB_EVENT_NAME"';repository:'"$GITHUB_REPOSITORY"';ghrun:'"$GITHUB_RUN_ID"';run:'"$RP_LAUNCH_KEY$RP_EXTRA_ATTRIBUTES"'"'
+  else
+    OPTS+=' "'-Drp.attributes='ghrun:'"$GITHUB_RUN_ID$RP_EXTRA_ATTRIBUTES"'"'
   fi
 
   echo "mvn-opts=$OPTS" >> $GITHUB_OUTPUT
