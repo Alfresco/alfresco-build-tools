@@ -182,6 +182,13 @@ runs:
       with:
         mask-password: true
 
+    - name: Create ECR repository if needed
+      if: env.PUSH_IMAGE == 'true'
+      shell: bash
+      run: |
+        aws ecr describe-repositories --repository-names ${IMAGE_REPOSITORY} \
+          || aws ecr create-repository --repository-name ${IMAGE_REPOSITORY}
+
     - name: Build and Push image ${{ env.IMAGE_NAME }}
       if: env.PUSH_IMAGE == 'true'
       uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
