@@ -77,8 +77,10 @@ Here follows the list of GitHub Actions topics available in the current document
     - [update-project-base-tag](#update-project-base-tag)
     - [validate-maven-versions](#validate-maven-versions)
     - [veracode](#veracode)
+    - [github cache cleanup](#github-cache-cleanup)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
+    - [terraform-eks](#terraform-eks)
   - [Cookbook](#cookbook)
     - [Conditional job/step depending on PR labels](#conditional-jobstep-depending-on-pr-labels)
     - [Serialize pull request builds](#serialize-pull-request-builds)
@@ -1323,6 +1325,61 @@ Calculates the new alpha version, creates new git tag and publishes the new pack
       chart-dir: charts/common
       helm-charts-repo: Activiti/activiti-cloud-helm-charts
       helm-charts-repo-branch: gh-pages
+    secrets: inherit
+```
+
+### terraform-eks
+
+Reusable workflow which implements an opinionated workflow to manage EKS clusters
+reusing [dflook/terraform-github-actions](https://github.com/dflook/terraform-github-actions),
+optionally allowing a multi-state approach for managing resources.
+
+Assume having a GitHub environment named `production` when executing on the
+`main` branch, and a `develop` GitHub environment when executing
+on the `develop` branch.
+
+GitHub environments must be configured with the following variables:
+
+- AWS_DEFAULT_REGION: where the aws resources will be created
+- RANCHER2_URL (optional): automatically register cluster on this rancher instance
+- RESOURCE_NAME: used to namespace every resource created, e.g. the cluster name
+- TERRAFORM_STATE_BUCKET: the name of the S3 bucket where to store the terraform state
+
+and the following secrets:
+
+- AWS_ACCESS_KEY_ID: AWS credentials
+- AWS_SECRET_ACCESS_KEY: AWS credentials
+- BOT_GITHUB_TOKEN (to access private terraform module of the Alfresco org)
+- DOCKER_USERNAME (optional): Docker Hub credentials
+- DOCKER_PASSWORD (optional): Docker Hub credentials
+- RANCHER2_ACCESS_KEY (optional): automatically register cluster on your rancher instance
+- RANCHER2_SECRET_KEY (optional): automatically register cluster on your rancher instance
+
+```yaml
+name: "terraform"
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+jobs:
+  invoke-terraform-infra:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-eks.yml@ref
+    with:
+      terraform_root_path: infra
+    secrets: inherit
+  invoke-terraform-k8s:
+    needs: invoke-terraform-infra
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-eks.yml@ref
+    with:
+      terraform_root_path: k8s
     secrets: inherit
 ```
 
