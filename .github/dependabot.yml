@@ -7,6 +7,12 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      # https://github.com/dflook/terraform-github-actions
+      # multiple action always released together
+      dflook:
+        patterns:
+          - "dflook/*"
   - package-ecosystem: "pip"
     directory: "/.github/actions/pipenv"
     schedule:
