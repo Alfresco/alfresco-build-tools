@@ -94,7 +94,7 @@ jobs:
           fi
 
       - name: Terraform validate
-        uses: dflook/terraform-validate@433dd249ad921c19245cf361c67a57f485e2ae0b # v1.36.2
+        uses: dflook/terraform-validate@ecef4162713a545487d10ba7e46a042229322911 # v1.37.0
         with:
           path: ${{ inputs.terraform_root_path }}
           backend_config: |
