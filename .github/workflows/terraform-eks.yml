@@ -102,7 +102,7 @@ jobs:
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform plan
-        uses: dflook/terraform-plan@e047f3fa83b945d582e0b468f4ef3c22c03e070d # v1.36.2
+        uses: dflook/terraform-plan@565c93ef17640e3cee13fb9148793db3697dd412 # v1.37.0
         if: github.event_name == 'pull_request'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
