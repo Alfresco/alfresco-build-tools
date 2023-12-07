@@ -33,6 +33,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [docker-build-image](#docker-build-image)
     - [docker-dump-containers-logs](#docker-dump-containers-logs)
     - [docker-scan-image-dirs](#docker-scan-image-dirs)
+    - [download-baseline-file](#download-baseline-file)
     - [env-load-from-yaml](#env-load-from-yaml)
     - [free-hosted-runner-disk-space](#free-hosted-runner-disk-space)
     - [get-branch-name](#get-branch-name)
@@ -397,6 +398,18 @@ Scan the directories were the Dockerfiles are to feed the scanner.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/docker-scan-image-dirs@ref
+```
+
+### download-baseline-file
+
+Download baseline file for Veracode Pipeline SAST scan from internal repository.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/download-baseline-file@ref
+        with:
+          auth-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          repo-name: "repository-name"
+          file-name: "baseline-file-name.json"
 ```
 
 ### env-load-from-yaml
