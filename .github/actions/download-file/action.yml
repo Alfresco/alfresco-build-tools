@@ -10,6 +10,9 @@ inputs:
   file-path:
     description: "Path to the file you want to download"
     required: true
+  target:
+    description: "Where and with what name to save the file"
+    required: true
 runs:
   using: "composite"
   steps:
@@ -19,4 +22,4 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
         export API_URL=https://api.github.com/repos/Alfresco/${{ inputs.repository }}/contents/${{ inputs.file-path }}
-        gh api $API_URL -H "Accept: application/vnd.github.raw" >> baseline.json
+        gh api $API_URL -H "Accept: application/vnd.github.raw" >> ${{ inputs.target }}

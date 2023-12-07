@@ -410,6 +410,7 @@ Download a file from another Alfresco repository.
           github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           repository: "repository-name"
           file-path: "subdirectory/file-name.json"
+          target: "downloaded-file.json"
 ```
 
 ### env-load-from-yaml
