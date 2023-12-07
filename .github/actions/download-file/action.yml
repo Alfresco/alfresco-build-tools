@@ -1,0 +1,22 @@
+name: "Download File"
+description: "Download a file from another Alfresco repository"
+inputs:
+  github-token:
+    description: "GitHub Access Token"
+    required: true
+  repository:
+    description: "Name of the repository from which the file should be downloaded"
+    required: true
+  file-path:
+    description: "Path to the file you want to download"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: "Download file"
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: |
+        export API_URL=https://api.github.com/repos/Alfresco/${{ inputs.repository }}/contents/${{ inputs.file-path }}
+        gh api $API_URL -H "Accept: application/vnd.github.raw" >> baseline.json
