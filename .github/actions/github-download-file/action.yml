@@ -1,11 +1,11 @@
-name: "Download File"
-description: "Download a file from another Alfresco repository"
+name: "Github Download File"
+description: "Download a file from another repository"
 inputs:
-  github-token:
+  token:
     description: "GitHub Access Token"
     required: true
   repository:
-    description: "Name of the repository from which the file should be downloaded"
+    description: "The owner and repository name from which the file should be downloaded. For example, octocat/Hello-World."
     required: true
   file-path:
     description: "Path to the file you want to download"
@@ -19,7 +19,7 @@ runs:
     - name: "Download file"
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ inputs.github-token }}
+        GITHUB_TOKEN: ${{ inputs.token }}
       run: |
-        export API_URL=https://api.github.com/repos/Alfresco/${{ inputs.repository }}/contents/${{ inputs.file-path }}
+        export API_URL=https://api.github.com/repos/${{ inputs.repository }}/contents/${{ inputs.file-path }}
         gh api $API_URL -H "Accept: application/vnd.github.raw" >> ${{ inputs.target }}
