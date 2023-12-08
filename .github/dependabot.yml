@@ -98,6 +98,10 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "github-actions"
+    directory: "/.github/actions/github-download-file"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
     directory: "/.github/actions/helm-build-chart"
     schedule:
       interval: "weekly"

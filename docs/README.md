@@ -41,6 +41,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [get-commit-message](#get-commit-message)
     - [git-commit-changes](#git-commit-changes)
     - [git-latest-tag](#git-latest-tag)
+    - [github-download-file](#github-download-file)
     - [helm-build-chart](#helm-build-chart)
     - [helm-integration-tests](#helm-integration-tests)
     - [helm-package-chart](#helm-package-chart)
@@ -489,6 +490,19 @@ Gets the latest tag and commit sha for the given pattern. The result is returned
       - uses: Alfresco/alfresco-build-tools/.github/actions/git-latest-tag@ref
         with:
           pattern: 1.0.0-alpha*
+```
+
+### github-download-file
+
+Download a file from another repository.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/download-file@ref
+        with:
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          repository: "owner/repository"
+          file-path: "subdirectory/file-name.json"
+          target: "downloaded-file.json"
 ```
 
 ### helm-build-chart
