@@ -373,8 +373,6 @@ When using OIDC on AWS, inputs `aws-access-key-id` and `aws-secret-access-key` c
           quay-username: ${{ secrets.QUAY_USERNAME }}
           quay-password: ${{ secrets.QUAY_PASSWORD }}
           ghcr-token: ${{ secrets.GITHUB_TOKEN }}
-          aws-access-key-id: ${{ secrets.HXPS_DEV_SVC_ECR_WRITE_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.HXPS_DEV_SVC_ECR_WRITE_AWS_SECRET_ACCESS_KEY }}
           aws-account-id: ${{ vars.ACCOUNT_ID }}
           # aws-region: ${{ vars.AWS_REGION }} # optional
           # aws-role-name: ${{ vars.AWS_ROLE_NAME }} # optional
