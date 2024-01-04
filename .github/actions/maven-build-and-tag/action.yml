@@ -137,6 +137,7 @@ runs:
       shell: bash
       run: |
         echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "## 📋 Built version: $VERSION" >> $GITHUB_STEP_SUMMARY
 
     - name: Login to DockerHub Registry
       if: inputs.docker-username != '' && (github.event_name == 'push' || env.IS_PREVIEW == 'true')
