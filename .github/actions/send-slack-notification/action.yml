@@ -110,7 +110,7 @@ runs:
       env:
         SLACK_BOT_TOKEN: ${{ inputs.token }}
         COLOR: ${{ steps.compute-color.outputs.result }}
-        ACTOR_URL: ${{ github.server_url }}/${{ github.actor }}
+        ACTOR_URL: ${{ github.server_url }}/${{ github.triggering_actor }}
         REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         EVENT_OUTPUT: ${{ steps.compute-event.outputs.result }}
         SMALL_SHA: ${{ steps.compute-small-sha.outputs.result }}
@@ -132,11 +132,11 @@ runs:
                       {
                         "type": "image",
                         "image_url": "${{ env.ACTOR_URL }}.png?size=32",
-                        "alt_text": "${{ github.actor }}"
+                        "alt_text": "${{ github.triggering_actor }}"
                       },
                       {
                         "type": "mrkdwn",
-                        "text": "<${{ env.ACTOR_URL }}|${{ github.actor }}>"
+                        "text": "<${{ env.ACTOR_URL }}|${{ github.triggering_actor }}>"
                       }
                     ]
                   },
