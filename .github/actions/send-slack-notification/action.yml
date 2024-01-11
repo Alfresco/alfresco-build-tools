@@ -97,7 +97,7 @@ runs:
       run: |
         RESULT="$GITHUB_WORKFLOW"
         if [[ "$GITHUB_RUN_ATTEMPT" != '1' ]]; then
-          RESULT=+" (attempt #$GITHUB_RUN_ATTEMPT)"
+          RESULT+=" (attempt #$GITHUB_RUN_ATTEMPT)"
         fi
         echo "result=$RESULT" >> $GITHUB_OUTPUT
 
