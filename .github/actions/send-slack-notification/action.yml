@@ -81,6 +81,26 @@ runs:
         fi
         echo "result=$RESULT" >> $GITHUB_OUTPUT
 
+    - name: Compute run link
+      id: compute-run-link
+      shell: bash
+      env:
+        REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        WORKFLOW: ${{ github.workflow }}
+      run: |
+        RESULT="$REPO_URL/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT"
+        echo "result=$RESULT" >> $GITHUB_OUTPUT
+
+    - name: Compute workflow title
+      id: compute-workflow-title
+      shell: bash
+      run: |
+        RESULT="$GITHUB_WORKFLOW"
+        if [[ "$GITHUB_RUN_ATTEMPT" != '1' ]]; then
+          RESULT+=" (attempt #$GITHUB_RUN_ATTEMPT)"
+        fi
+        echo "result=$RESULT" >> $GITHUB_OUTPUT
+
     - name: Get branch name
       uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v5.10.0
 
@@ -95,6 +115,8 @@ runs:
         EVENT_OUTPUT: ${{ steps.compute-event.outputs.result }}
         SMALL_SHA: ${{ steps.compute-small-sha.outputs.result }}
         MESSAGE_OUTPUT: ${{ steps.compute-message.outputs.result }}
+        RUN_LINK: ${{ steps.compute-run-link.outputs.result }}
+        WORKFLOW_TITLE: ${{ steps.compute-workflow-title.outputs.result }}
       with:
         channel-id: "${{ inputs.channel-id }}"
         payload: |
@@ -123,7 +145,7 @@ runs:
                     "fields": [
                       {
                         "type": "mrkdwn",
-                        "text": "*Action*\n<${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>"
+                        "text": "*Action*\n<${{ env.RUN_LINK }}|${{ env.WORKFLOW_TITLE }}>"
                       },
                       {
                         "type": "mrkdwn",
