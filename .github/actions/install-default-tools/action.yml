@@ -2,12 +2,13 @@ name: "Install default tools"
 description: "Performs the install of required tools (eg.: docker, git, zip)"
 inputs:
   package-names-list:
-    description: the list of package names to be installed
+    description: "The list of package names to be installed separated by a whitespace"
     required: false
 runs:
   using: composite
   steps:
     - name: "Install required tools"
+      shell: bash
       run: |
         # Install Docker as per https://docs.docker.com/engine/install/ubuntu/
         apt-get update
