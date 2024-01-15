@@ -630,7 +630,7 @@ Updates `version` attribute inside `Chart.yaml` file:
 
 ### install-ubuntu-default-tools
 
-Install required Ubuntu tools such as docker, git, zip, unzip, python3. 
+Install required Ubuntu tools such as docker, git, zip, unzip, python3.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/install-ubuntu-default-tools@ref
