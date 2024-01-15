@@ -52,6 +52,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [helm-template-yamllint](#helm-template-yamllint)
     - [helm-plugin](#helm-plugin)
     - [helm-update-chart-version](#helm-update-chart-version)
+    - [install-ubuntu-default-tools](#install-ubuntu-default-tools)
     - [jx-updatebot-pr](#jx-updatebot-pr)
     - [kubectl-keep-nslogs](#kubectl-keep-nslogs)
     - [load-release-descriptor](#load-release-descriptor)
@@ -625,6 +626,16 @@ Updates `version` attribute inside `Chart.yaml` file:
       - uses: Alfresco/alfresco-build-tools/.github/actions/helm-update-chart-version@ref
         with:
           new-version: 1.0.0
+```
+
+### install-ubuntu-default-tools
+
+Install required Ubuntu tools such as docker, git, zip, unzip, python3. 
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/install-ubuntu-default-tools@ref
+        with:
+          package-names-list: "postgresql-client"
 ```
 
 ### jx-updatebot-pr
