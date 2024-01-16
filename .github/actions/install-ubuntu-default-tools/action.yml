@@ -1,5 +1,5 @@
 name: "Install Ubuntu default tools"
-description: "Performs the install of required tools (eg.: docker, git, zip)"
+description: "Install common Ubuntu tools (e.g.: docker, git, zip, unzip, python3)"
 inputs:
   package-names-list:
     description: "The list of package names to be installed separated by a whitespace"
