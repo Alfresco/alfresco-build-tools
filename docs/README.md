@@ -24,6 +24,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [Docker login](#docker-login)
     - [pmd](#pmd)
     - [Retry failing step](#retry-failing-step)
+    - [EC2 GitHub runner](#ec2-github-runner)
     - [SSH debug](#ssh-debug)
     - [Triggering a workflow in another repository](#triggering-a-workflow-in-another-repository)
   - [GitHub Actions provided by us](#github-actions-provided-by-us)
@@ -205,6 +206,9 @@ The action runs the [PMD](https://pmd.github.io/) static analysis tool to look f
 ### Retry failing step
 
 [This action](https://github.com/nick-fields/retry) retries an Action step on failure or timeout. Useful for unstable commands or that relies on remote resources that can be flaky sometimes.
+
+### EC2 GitHub runner
+[machulav/ec2-github-runner](https://github.com/machulav/ec2-github-runner) can be used to start EC2 [self-hosted runner](https://docs.github.com/en/actions/hosting-your-own-runners). An on-demand EC2 runner can be created, set-up, used to run a required process and finally destroyed - on the fly. 
 
 ### SSH debug
 
