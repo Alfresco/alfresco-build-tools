@@ -235,3 +235,22 @@ BATS
 
     [ "$output" = "$expected_output" ]
 }
+
+@test "long message" {
+    export COMMIT_MESSAGE=$(<$BATS_TEST_DIRNAME/sample-long-message.txt)
+    export CUT_MESSAGE=$(<$BATS_TEST_DIRNAME/sample-long-message-cut.txt)
+
+    run compute-message.sh
+
+    [ "$status" -eq 0 ]
+
+    expected_output=$(cat << BATS
+result<<EOF
+*Message*\n${CUT_MESSAGE}
+EOF
+BATS
+)
+
+    [ "$output" = "$expected_output" ]
+
+}

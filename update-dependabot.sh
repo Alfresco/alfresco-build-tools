@@ -15,10 +15,16 @@ temp_config='temp_dependabot.yml'
 # Function to generate Dependabot config section for a composite action
 generate_dependabot_section() {
     local action_dir=$1
-    echo "  - package-ecosystem: \"github-actions\""
-    echo "    directory: \"/${action_dir}\""
-    echo "    schedule:"
-    echo "      interval: \"weekly\""
+    cat <<END
+- package-ecosystem: "github-actions"
+  directory: "/${action_dir}"
+  schedule:
+    interval: "weekly"
+  groups:
+    catch-all:
+      patterns:
+        - "*"
+END
 }
 
 # Check if Dependabot config exists
