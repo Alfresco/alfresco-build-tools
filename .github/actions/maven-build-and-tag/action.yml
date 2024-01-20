@@ -123,8 +123,7 @@ runs:
         for child_dir in $(find "$SDKMAN_DIR/candidates" -mindepth 1 -maxdepth 1 -type d); do
           echo "$child_dir/current/bin" >> $GITHUB_PATH
         done
-        sdk env
-
+        cat $GITHUB_PATH
 
     - name: Compute maven options
       id: compute-maven-options
@@ -217,7 +216,11 @@ runs:
 
     - name: Build and Test with Maven (and maybe Deploy)
       shell: bash
-      run: mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
+      run: |
+        if [[ -f '.sdkmanrc ]]; then
+          sdk env
+        fi
+        mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
       env:
         MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
         MAVEN_USERNAME: ${{ inputs.maven-username }}
