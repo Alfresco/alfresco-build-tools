@@ -217,7 +217,7 @@ runs:
     - name: Build and Test with Maven (and maybe Deploy)
       shell: bash
       run: |
-        if [[ -f '.sdkmanrc ]]; then
+        if [[ -f '.sdkmanrc' ]]; then
           sdk env
         fi
         mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
