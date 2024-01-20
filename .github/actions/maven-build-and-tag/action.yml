@@ -9,10 +9,6 @@ inputs:
     description: The Java distribution to perform the build
     required: false
     default: 'temurin'
-  use-sdkman:
-    description: Use SDKMAN! to setup CI environment.
-    required: false
-    default: 'false'
   build-cache-key:
     description: The build cache key to use
     required: false
@@ -103,27 +99,10 @@ runs:
         key: ${{ runner.os }}-build-cache-${{ inputs.build-cache-key }}
 
     - name: Set up JDK
-      if: inputs.use-sdkman == 'false'
       uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4.0.0
       with:
         java-version: ${{ inputs.java-version }}
         distribution: ${{ inputs.java-distribution }}
-
-    - name: Set up SDKMAN!
-      if: inputs.use-sdkman == 'true'
-      id: sdkman
-      shell: bash
-      run: |
-        if ! [[ -f '.sdkmanrc' ]]; then
-          echo ".sdkmanrc is required for SDKMAN! setup."
-          exit 1
-        fi
-        export SDKMAN_DIR="$HOME/.sdkman" && curl -s "https://get.sdkman.io?rcupdate=false" | bash
-        source $HOME/.sdkman/bin/sdkman-init.sh && sdk env install
-        for child_dir in $(find "$SDKMAN_DIR/candidates" -mindepth 1 -maxdepth 1 -type d); do
-          echo "$child_dir/current/bin" >> $GITHUB_PATH
-        done
-        cat $GITHUB_PATH
 
     - name: Compute maven options
       id: compute-maven-options
@@ -218,6 +197,12 @@ runs:
       shell: bash
       run: |
         if [[ -f '.sdkmanrc' ]]; then
+          export SDKMAN_DIR="$HOME/.sdkman"
+          curl -s "https://get.sdkman.io?rcupdate=false" | bash
+          source $SDKMAN_DIR/bin/sdkman-init.sh && sdk env install
+          for candidate in $(find "$SDKMAN_DIR/candidates" -mindepth 1 -maxdepth 1 -type d); do
+            echo "$candidate/current/bin" >> $GITHUB_PATH
+          done
           sdk env
         fi
         mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
