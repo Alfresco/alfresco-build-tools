@@ -193,27 +193,13 @@ runs:
         echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
         echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
 
-    - name: Set up SDKMAN!
-      shell: bash
-      run: |
-        if [[ -f '.sdkmanrc' ]]; then
-          export SDKMAN_DIR="$HOME/.sdkman"
-          curl -s "https://get.sdkman.io?rcupdate=false" | bash
-          source $SDKMAN_DIR/bin/sdkman-init.sh && sdk env install
-          CANDIDATES=$(find $SDKMAN_DIR/candidates -mindepth 1 -maxdepth 1 -type d)
-          echo $PATH
-          for candidate in $CANDIDATES; do
-            echo "$candidate/current/bin" >> $GITHUB_PATH
-            PATH=$candidate/current/bin:$PATH
-          done
-          echo PATH=$PATH >> $GITHUB_ENV
-        fi
-
     - name: Build and Test with Maven (and maybe Deploy)
       shell: bash
       run: |
         if [[ -f '.sdkmanrc' ]]; then
-          source $SDKMAN_DIR/bin/sdkman-init.sh && sdk env
+          curl -s "https://get.sdkman.io?rcupdate=false" | bash
+          source $HOME/.sdkman/bin/sdkman-init.sh
+          sdk env install
         fi
         mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
       env:
