@@ -106,6 +106,25 @@ runs:
         java-version: ${{ inputs.java-version }}
         distribution: ${{ inputs.java-distribution }}
 
+    - name: Set up SDKMAN!
+      shell: bash
+      run: |
+        if [[ -f '.sdkmanrc' ]]; then
+          curl -s "https://get.sdkman.io?rcupdate=false" | bash
+          source $HOME/.sdkman/bin/sdkman-init.sh
+          sdk env install
+          CANDIDATES=$(find $HOME/.sdkman/candidates -mindepth 1 -maxdepth 1 -type d)
+          for candidate in $CANDIDATES; do
+            echo "$candidate/current/bin" >> $GITHUB_PATH
+            PATH=$candidate/current/bin:$PATH
+            if [[ $candidate == 'java' ]]; then
+              JAVA_HOME=$HOME/.sdkman/candidates/java/current
+            fi
+          done
+          echo JAVA_HOME=$JAVA_HOME >> $GITHUB_ENV
+          echo PATH=$PATH >> $GITHUB_ENV
+        fi
+
     - name: Compute maven options
       id: compute-maven-options
       shell: bash
@@ -194,23 +213,6 @@ runs:
       run: |
         echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
         echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
-
-    - name: Set up SDKMAN!
-      shell: bash
-      run: |
-        if [[ -f '.sdkmanrc' ]]; then
-          curl -s "https://get.sdkman.io?rcupdate=false" | bash
-          source $HOME/.sdkman/bin/sdkman-init.sh
-          sdk env install
-          JAVA_HOME=$HOME/.sdkman/candidates/java/current
-          CANDIDATES=$(find $HOME/.sdkman/candidates -mindepth 1 -maxdepth 1 -type d)
-          for candidate in $CANDIDATES; do
-            echo "$candidate/current/bin" >> $GITHUB_PATH
-            PATH=$candidate/current/bin:$PATH
-          done
-          echo JAVA_HOME=$JAVA_HOME >> $GITHUB_ENV
-          echo PATH=$PATH >> $GITHUB_ENV
-        fi
 
     - name: Build and Test with Maven (and maybe Deploy)
       shell: bash
