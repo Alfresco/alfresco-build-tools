@@ -286,7 +286,7 @@ runs:
 
     - name: Save maven build cache
       uses: actions/cache/save@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
-      if: (success() || failure()) && inputs.build-cache-key != '' && (github.event_name == 'push' || env.IS_PREVIEW == 'true' )
+      if: inputs.build-cache-key != '' && (github.event_name == 'push' || env.IS_PREVIEW == 'true' )
       with:
         path: ~/.m2/build-cache
         key: ${{ runner.os }}-build-cache-${{ inputs.build-cache-key }}-${{ github.run_id }}
