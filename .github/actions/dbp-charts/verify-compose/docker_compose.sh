@@ -13,20 +13,21 @@ docker-compose --version
 docker-compose -f "${COMPOSE_FILE}" config
 echo "Starting Alfresco in docker compose"
 docker-compose ps
-docker-compose -f "${COMPOSE_FILE}" pull
+docker-compose -f "${COMPOSE_FILE}" pull --quiet
 export COMPOSE_HTTP_TIMEOUT=120
-docker-compose -f "${COMPOSE_FILE}" up -d
+docker-compose -f "${COMPOSE_FILE}" up -d --quiet-pull
+
 WAIT_INTERVAL=1
 COUNTER=0
 TIMEOUT=300
 t0=$(date +%s)
 echo "Waiting for alfresco to start"
-response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/ || true)
+response=$(curl --write-out '%{http_code}' --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/ || true)
 until [[ "200" -eq "${response}" ]] || [[ "${COUNTER}" -eq "${TIMEOUT}" ]]; do
   printf '.'
   sleep "${WAIT_INTERVAL}"
   COUNTER=$((COUNTER + WAIT_INTERVAL))
-  response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/ || true)
+  response=$(curl --write-out '%{http_code}' --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/ || true)
 done
 if (("${COUNTER}" < "${TIMEOUT}")); then
   t1=$(date +%s)
@@ -38,14 +39,15 @@ else
   echo "The last response code from /alfresco/ was ${response}"
   exit 1
 fi
+
 COUNTER=0
 echo "Waiting for share to start"
-response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:8080/share/page || true)
+response=$(curl --write-out '%{http_code}' --output /dev/null --silent http://localhost:8080/share/page || true)
 until [[ "200" -eq "${response}" ]] || [[ "${COUNTER}" -eq "${TIMEOUT}" ]]; do
   printf '.'
   sleep "${WAIT_INTERVAL}"
   COUNTER=$((COUNTER + WAIT_INTERVAL))
-  response=$(curl --write-out %{http_code} --output /dev/null --silent http://localhost:8080/share/page || true)
+  response=$(curl --write-out '%{http_code}' --output /dev/null --silent http://localhost:8080/share/page || true)
 done
 if (("${COUNTER}" < "${TIMEOUT}")); then
   t1=$(date +%s)
@@ -57,15 +59,16 @@ else
   echo "The last response code from /share/ was ${response}"
   exit 1
 fi
+
 COUNTER=0
 TIMEOUT=20
 echo "Waiting more time for SOLR"
-response=$(curl --write-out %{http_code} --user admin:admin --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/s/api/solrstats || true)
+response=$(curl --write-out '%{http_code}' --user admin:admin --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/s/api/solrstats || true)
 until [[ "200" -eq "${response}" ]] || [[ "${COUNTER}" -eq "${TIMEOUT}" ]]; do
   printf '.'
   sleep "${WAIT_INTERVAL}"
   COUNTER=$((COUNTER + WAIT_INTERVAL))
-  response=$(curl --write-out %{http_code} --user admin:admin --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/s/api/solrstats || true)
+  response=$(curl --write-out '%{http_code}' --user admin:admin --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/s/api/solrstats || true)
 done
 
 cd ..
