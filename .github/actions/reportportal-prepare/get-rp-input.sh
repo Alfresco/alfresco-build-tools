@@ -15,7 +15,10 @@ if [[ -n "$RP_LAUNCH_PREFIX" && -n "$RP_TOKEN" && -n "$RP_URL" && -n "$RP_PROJEC
   echo "Report Portal key=$RP_LAUNCH_KEY, url=$URL"
 
   RUN_TITLE="Run on GitHub Actions $GITHUB_RUN_ID"
-  RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+  if [[ "$GITHUB_RUN_ATTEMPT" != '1' ]]; then
+    RUN_TITLE+=" (attempt #$GITHUB_RUN_ATTEMPT)"
+  fi
+  RUN_URL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT"
 
   OPTS='"'-Drp.launch="$RP_LAUNCH_KEY"'"'
   OPTS+=' "'-Drp.uuid="$RP_TOKEN"'"'
