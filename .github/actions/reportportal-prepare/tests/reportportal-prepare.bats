@@ -17,6 +17,7 @@ setup() {
     export GITHUB_SERVER_URL=https://github.com
     export GITHUB_REPOSITORY=mygh/repo
     export GITHUB_RUN_ID=3665876492
+    export GITHUB_RUN_ATTEMPT=1
     export GITHUB_EVENT_NAME=push
 
     export ECHO_ENABLED="Report Portal key=my-tests-push-3665876492, url=https://rpserver:8080/ui/#my-project/launches/all"
@@ -75,7 +76,25 @@ teardown() {
 enabled=true
 key=my-tests-push-3665876492
 url=https://rpserver:8080/ui/#my-project/launches/all
-mvn-opts="-Drp.launch=my-tests-push-3665876492" "-Drp.uuid=tok" "-Drp.endpoint=https://rpserver:8080" "-Drp.project=my-project" "-Drp.description=[Run on GitHub Actions 3665876492](https://github.com/mygh/repo/actions/runs/3665876492)" "-Drp.attributes=branch:main;event:push;repository:mygh/repo;ghrun:3665876492;run:my-tests-push-3665876492"
+mvn-opts="-Drp.launch=my-tests-push-3665876492" "-Drp.uuid=tok" "-Drp.endpoint=https://rpserver:8080" "-Drp.project=my-project" "-Drp.description=[Run on GitHub Actions 3665876492](https://github.com/mygh/repo/actions/runs/3665876492/attempts/1)" "-Drp.attributes=branch:main;event:push;repository:mygh/repo;ghrun:3665876492;run:my-tests-push-3665876492"
+BATS
+)
+    echo "$(< $GITHUB_OUTPUT)"
+    [ "$(< $GITHUB_OUTPUT)" = "$expected" ]
+    [ "$output" = "$ECHO_ENABLED" ]
+}
+
+@test "rp enabled basic attempt 2" {
+    export GITHUB_RUN_ATTEMPT=2
+
+    run get-rp-input.sh
+    [ "$status" -eq 0 ]
+
+    expected=$(cat << BATS
+enabled=true
+key=my-tests-push-3665876492
+url=https://rpserver:8080/ui/#my-project/launches/all
+mvn-opts="-Drp.launch=my-tests-push-3665876492" "-Drp.uuid=tok" "-Drp.endpoint=https://rpserver:8080" "-Drp.project=my-project" "-Drp.description=[Run on GitHub Actions 3665876492 (attempt #2)](https://github.com/mygh/repo/actions/runs/3665876492/attempts/2)" "-Drp.attributes=branch:main;event:push;repository:mygh/repo;ghrun:3665876492;run:my-tests-push-3665876492"
 BATS
 )
     echo "$(< $GITHUB_OUTPUT)"
@@ -93,7 +112,7 @@ BATS
 enabled=true
 key=my-tests
 url=https://rpserver:8080/ui/#my-project/launches/all
-mvn-opts="-Drp.launch=my-tests" "-Drp.uuid=tok" "-Drp.endpoint=https://rpserver:8080" "-Drp.project=my-project" "-Drp.description=[Run on GitHub Actions 3665876492](https://github.com/mygh/repo/actions/runs/3665876492)" "-Drp.attributes=branch:main;event:push;repository:mygh/repo;ghrun:3665876492;run:my-tests"
+mvn-opts="-Drp.launch=my-tests" "-Drp.uuid=tok" "-Drp.endpoint=https://rpserver:8080" "-Drp.project=my-project" "-Drp.description=[Run on GitHub Actions 3665876492](https://github.com/mygh/repo/actions/runs/3665876492/attempts/1)" "-Drp.attributes=branch:main;event:push;repository:mygh/repo;ghrun:3665876492;run:my-tests"
 BATS
 )
     echo "$(< $GITHUB_OUTPUT)"
@@ -113,7 +132,7 @@ BATS
 enabled=true
 key=my-tests-push-3665876492
 url=https://rpserver:8080/ui/#my-project/launches/all
-mvn-opts="-Drp.launch=my-tests-push-3665876492" "-Drp.uuid=tok" "-Drp.endpoint=https://rpserver:8080" "-Drp.project=my-project" "-Drp.description=[Run on GitHub Actions 3665876492](https://github.com/mygh/repo/actions/runs/3665876492)" "-Drp.attributes=branch:main;event:push;repository:mygh/repo;ghrun:3665876492;run:my-tests-push-3665876492;metafilter:+smoke"
+mvn-opts="-Drp.launch=my-tests-push-3665876492" "-Drp.uuid=tok" "-Drp.endpoint=https://rpserver:8080" "-Drp.project=my-project" "-Drp.description=[Run on GitHub Actions 3665876492](https://github.com/mygh/repo/actions/runs/3665876492/attempts/1)" "-Drp.attributes=branch:main;event:push;repository:mygh/repo;ghrun:3665876492;run:my-tests-push-3665876492;metafilter:+smoke"
 BATS
 )
     echo "$(< $GITHUB_OUTPUT)"
@@ -158,7 +177,7 @@ BATS
 enabled=true
 key=my launch prefix with spaces-weird event-3665876492
 url=https://rpserver:8080 with spaces too/ui/#my project with spaces/launches/all
-mvn-opts="-Drp.launch=my launch prefix with spaces-weird event-3665876492" "-Drp.uuid=with some more spaces" "-Drp.endpoint=https://rpserver:8080 with spaces too" "-Drp.project=my project with spaces" "-Drp.description=[Run on GitHub Actions 3665876492](https://github.com/mygh/repo/actions/runs/3665876492)" "-Drp.attributes=branch:main;event:weird event;repository:mygh/repo;ghrun:3665876492;run:my launch prefix with spaces-weird event-3665876492"
+mvn-opts="-Drp.launch=my launch prefix with spaces-weird event-3665876492" "-Drp.uuid=with some more spaces" "-Drp.endpoint=https://rpserver:8080 with spaces too" "-Drp.project=my project with spaces" "-Drp.description=[Run on GitHub Actions 3665876492](https://github.com/mygh/repo/actions/runs/3665876492/attempts/1)" "-Drp.attributes=branch:main;event:weird event;repository:mygh/repo;ghrun:3665876492;run:my launch prefix with spaces-weird event-3665876492"
 BATS
 )
     echo "$(< $GITHUB_OUTPUT)"
