@@ -123,7 +123,7 @@ runs:
 
     - name: Anchore Scan API Image
       if: inputs.grype-scan-enabled == 'true'
-      uses: anchore/scan-action@0550541809b9c6abbf7cbc43d12400db47056507 # v3.6.0
+      uses: anchore/scan-action@c35e932c2a7c572bfdb1c3dbcdadb2d4fc62418d # v3.6.1
       id: scan
       with:
         fail-build: ${{ inputs.grype-fail-build }}
@@ -138,7 +138,7 @@ runs:
 
     - name: Upload SARIF Files
       if: always() && inputs.grype-scan-enabled == 'true' && github.event_name == 'push'
-      uses: github/codeql-action/upload-sarif@0b21cf2492b6b02c465a3e5d7c473717ad7721ba # v3.23.1
+      uses: github/codeql-action/upload-sarif@b7bf0a3ed3ecfa44160715d7c442788f65f0f923 # v3.23.2
       continue-on-error: true # do not fail if GHAS is not enabled
       with:
         sarif_file: ${{ steps.scan.outputs.sarif }}
