@@ -31,6 +31,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [automate-dependabot](#automate-dependabot)
     - [automate-propagation](#automate-propagation)
     - [configure-git-author](#configure-git-author)
+    - [conventional-checks](#conventional-checks)
     - [docker-build-image](#docker-build-image)
     - [docker-dump-containers-logs](#docker-dump-containers-logs)
     - [docker-scan-image-dirs](#docker-scan-image-dirs)
@@ -353,6 +354,28 @@ Configures the git username and email to associate commits with the provided ide
 ```
 
 The two vars in the previous snippet are [workflow configuration variables](https://github.blog/changelog/2023-01-10-github-actions-support-for-configuration-variables-in-workflows/) that can be created at organization level and shared across different repositories.
+
+### conventional-checks
+
+Check if the branch name and pull request title follow conventional checks.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/conventional-checks@ref
+```
+
+Branch Names follows the pattern:
+
+`"^(improvement|bug|feature|test|tmp)\/AAE-[0-9]+-[A-Za-z0-9._-]+$"`
+> **Examples:**  
+✅ improvement/AAE-12345-the-topic-of-the-branch  
+❌ dev-uname-aae-12345
+
+PR Titles / Merge Commit follows the pattern:
+`"^AAE-[0-9]+ .+$"`
+> **Examples:**  
+✅ AAE-12345 The title of the Merge Commit  
+❌ AAE-12345 - The title of the Merge Commit
+
 
 ### docker-build-image
 
