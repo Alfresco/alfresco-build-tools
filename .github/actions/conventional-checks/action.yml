@@ -1,0 +1,49 @@
+name: Conventional Checks
+
+description: Check if the branch name and pull request title follow conventional checks.
+
+runs:
+  using: composite
+  steps:
+    - name: Get branch name (merge)
+      if: github.event_name != 'pull_request'
+      shell: bash
+      run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+
+    - name: Get branch name (pull request)
+      if: github.event_name == 'pull_request'
+      shell: bash
+      run: echo "BRANCH_NAME=$(echo ${GITHUB_HEAD_REF})" >> $GITHUB_ENV
+
+    - name: Check branch name
+      shell: bash
+      run: |
+        local_branch="${{ env.BRANCH_NAME }}"
+
+        valid_branch_regex="^(improvement|bug|feature|test|tmp)\/AAE-[0-9]+-[A-Za-z0-9._-]+$"
+
+        message="Branch name $local_branch must adhere to this contract: $valid_branch_regex."
+        message="$message Your commit will be rejected. You should rename your branch to a valid name like "
+        message="$message (improvement|bug|feature|test|tmp)/AAE-(XXXX)-(small-description-with-dashes) and try again."
+
+        if [[ ${#local_branch} != 0 && ! $local_branch =~ $valid_branch_regex ]]; then
+          echo "$message"
+          exit 1
+        fi
+        exit 0
+
+    - name : Check Title of Pull Request
+      shell: bash
+      run: |
+        PR_TITLE="${{ github.event.pull_request.title }}"
+
+        VALID_PULL_REQUEST_TITLE_REGEX="^AAE-[0-9]+ .+$"
+
+        message="PR title '$PR_TITLE' must adhere to this contract: $VALID_PULL_REQUEST_TITLE_REGEX. You should provide valid PR"
+        message="$message title like AAE-123 Small description."
+
+        if [[ ! $PR_TITLE =~ $VALID_PULL_REQUEST_TITLE_REGEX ]]; then
+          echo "$message"
+          exit 1
+        fi
+        exit 0
