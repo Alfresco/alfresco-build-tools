@@ -363,19 +363,23 @@ Check if the branch name and pull request title follow conventional checks.
       - uses: Alfresco/alfresco-build-tools/.github/actions/conventional-checks@ref
 ```
 
-Branch Names follows the pattern:
-
+**Branch Names follows the pattern:**
 `"^(improvement|bug|feature|test|tmp)\/AAE-[0-9]+-[A-Za-z0-9._-]+$"`
-> **Examples:**  
-✅ improvement/AAE-12345-the-topic-of-the-branch  
+
+**Examples:**
+
+✅ improvement/AAE-12345-the-topic-of-the-branch
+
 ❌ dev-uname-aae-12345
 
-PR Titles / Merge Commit follows the pattern:
+**PR Titles / Merge Commit follows the pattern:**
 `"^AAE-[0-9]+ .+$"`
-> **Examples:**  
-✅ AAE-12345 The title of the Merge Commit  
-❌ AAE-12345 - The title of the Merge Commit
 
+**Examples:**
+
+✅ AAE-12345 The title of the Merge Commit
+
+❌ AAE-12345 - The title of the Merge Commit
 
 ### docker-build-image
 
