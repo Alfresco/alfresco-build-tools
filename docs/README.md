@@ -371,7 +371,7 @@ Default regex for `valid-branch-regex` and `valid-pr-title-regex` are generated 
           jira-project-name: AAE # optional
           valid-branch-regex: "^(feature|test|tmp)\/AAE-[0-9]+-[A-Za-z0-9._-]+$" # optional
           valid-pr-title-regex: "^AAE-[0-9]+ .+$" # optional
-```     
+```
 
 **Branch Names follows the pattern:**
 `"^(improvement|bug|feature|test|tmp)\/AAE-[0-9]+-[A-Za-z0-9._-]+$"`
