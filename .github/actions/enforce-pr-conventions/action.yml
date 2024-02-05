@@ -45,7 +45,7 @@ runs:
         branch_regex="${{ steps.generate-regex.outputs.valid-branch-regex }}"
 
         message="::error::The branch name doesn't follow the expected conventions: "
-        message+="rename your branch following the regexp $branch_regex, "
+        message+="please rename your branch following the regexp $branch_regex, "
         message+="close this pull request, and open a new one."
 
         if [[ ${#local_branch} != 0 && ! $local_branch =~ $branch_regex ]]; then
@@ -62,7 +62,7 @@ runs:
         pr_regex="${{ steps.generate-regex.outputs.valid-pr-title-regex }}"
 
         message="::error::The PR title '$pr_title' doesn't follow the expected conventions: "
-        message+="edit it following the regexp '$pr_regex small description'."
+        message+="please edit it following the regexp '$pr_regex small description'."
 
         if [[ ! $pr_title =~ $pr_regex ]]; then
           echo "$message"
