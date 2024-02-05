@@ -50,14 +50,6 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
-    directory: "/.github/actions/conventional-checks"
-    schedule:
-      interval: "weekly"
-    groups:
-      catch-all:
-        patterns:
-          - "*"
-  - package-ecosystem: "github-actions"
     directory: "/.github/actions/dbp-charts/kubernetes-valid-ns"
     schedule:
       interval: "weekly"
@@ -107,6 +99,14 @@ updates:
           - "*"
   - package-ecosystem: "github-actions"
     directory: "/.github/actions/docker-scan-image-dirs"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/enforce-pr-conventions"
     schedule:
       interval: "weekly"
     groups:
