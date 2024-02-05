@@ -25,6 +25,13 @@ runs:
       if: github.event_name == 'pull_request'
       id: generate-regex
       run: |
+        if [[ -z "${{ inputs.jira-project-name }}" ]]; then
+          if [[ -z "${{ inputs.valid-branch-regex }}" || -z "${{ inputs.valid-pr-title-regex }}" ]]; then
+            echo "::error::Please provide the JIRA project name or both the branch regex and pr title regex to check the branch name and the pull request title."
+            exit 1
+          fi
+        fi
+
         if [[ -z "${{ inputs.valid-branch-regex }}" ]]; then
           echo "valid-branch-regex=^(improvement|bug|feature|test|tmp)/${{ inputs.jira-project-name }}-[0-9]+-[A-Za-z0-9._-]+$" >> $GITHUB_OUTPUT
         else
