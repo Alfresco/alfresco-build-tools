@@ -355,43 +355,6 @@ Configures the git username and email to associate commits with the provided ide
 
 The two vars in the previous snippet are [workflow configuration variables](https://github.blog/changelog/2023-01-10-github-actions-support-for-configuration-variables-in-workflows/) that can be created at organization level and shared across different repositories.
 
-### enforce-pr-conventions
-
-Check if the branch name and pull request title follow conventional checks.
-`jira-project-name`, `valid-branch-regex` and `valid-pr-title-regex` are optional.
-If `valid-branch-regex` and `valid-pr-title-regex` are not provided, the action will consume `jira-project-name` to generate the default regex.
-
-Default regex for `valid-branch-regex` and `valid-pr-title-regex` are generated as follows:
-
-- `valid-branch-regex` = `^(improvement|bug|feature|test|tmp)/<jira-project-name>-[0-9]+-[A-Za-z0-9._-]+$`
-- `valid-pr-title-regex` = `^<jira-project-name>-[0-9]+ .+$`
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/enforce-pr-conventions@ref
-        with:
-          jira-project-name: AAE # optional
-          valid-branch-regex: "^(feature|test|tmp)\/AAE-[0-9]+-[A-Za-z0-9._-]+$" # optional
-          valid-pr-title-regex: "^AAE-[0-9]+ .+$" # optional
-```
-
-**Branch Names follows the pattern:**
-`"^(improvement|bug|feature|test|tmp)\/AAE-[0-9]+-[A-Za-z0-9._-]+$"`
-
-**Examples:**
-
-✅ improvement/AAE-12345-the-topic-of-the-branch
-
-❌ dev-uname-aae-12345
-
-**PR Titles / Merge Commit follows the pattern:**
-`"^AAE-[0-9]+ .+$"`
-
-**Examples:**
-
-✅ AAE-12345 The title of the Merge Commit
-
-❌ AAE-12345 - The title of the Merge Commit
-
 ### docker-build-image
 
 Build docker image based on supplied jar files. It replaces `image-dir` and `image-tag` in the
@@ -441,6 +404,39 @@ Scan the directories were the Dockerfiles are to feed the scanner.
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/docker-scan-image-dirs@ref
 ```
+
+### enforce-pr-conventions
+
+Check if the branch name and pull request title follow conventional checks.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/enforce-pr-conventions@ref
+        with:
+          jira-project-name: AAE # optional
+          valid-branch-regex: "^(feature|test|tmp)\/AAE-[0-9]+-[A-Za-z0-9._-]+$" # optional
+          valid-pr-title-regex: "^AAE-[0-9]+ .+$" # optional
+```
+
+`jira-project-name`, `valid-branch-regex` and `valid-pr-title-regex` are optional.
+If `valid-branch-regex` and `valid-pr-title-regex` are not provided, the action will consume `jira-project-name` to generate the default regex.
+
+**Default regex for Branch name:**
+`"^(improvement|bug|feature|test|tmp)/<jira-project-name>-[0-9]+-[A-Za-z0-9._-]+$"`
+
+**Examples:**
+
+✅ improvement/AAE-12345-the-topic-of-the-branch
+
+❌ dev-uname-aae-12345
+
+**Default regex for PR title:**
+`"^<jira-project-name>-[0-9]+ .+$"`
+
+**Examples:**
+
+✅ AAE-12345 The title of the Merge Commit
+
+❌ AAE-12345 - The title of the Merge Commit
 
 ### env-load-from-yaml
 
