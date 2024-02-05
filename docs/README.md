@@ -362,6 +362,7 @@ Check if the branch name and pull request title follow conventional checks.
 If `valid-branch-regex` and `valid-pr-title-regex` are not provided, the action will consume `jira-project-name` to generate the default regex.
 
 Default regex for `valid-branch-regex` and `valid-pr-title-regex` are generated as follows:
+
 - `valid-branch-regex` = `^(improvement|bug|feature|test|tmp)/<jira-project-name>-[0-9]+-[A-Za-z0-9._-]+$`
 - `valid-pr-title-regex` = `^<jira-project-name>-[0-9]+ .+$`
 
