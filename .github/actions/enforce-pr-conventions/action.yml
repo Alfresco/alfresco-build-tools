@@ -29,7 +29,7 @@ runs:
       run: |
         if [[ -z "$JIRA_KEY" ]]; then
           if [[ -z "$BRANCH_REGEX" || -z "$PR_REGEX" ]]; then
-             echo "::error::Please provide the Jira project key, or both regular expressions to check the branch name and the the pull request title."
+            echo "::error::Please provide the Jira project key, or both regular expressions to check the branch name and the pull request title."
             exit 1
           fi
         fi
