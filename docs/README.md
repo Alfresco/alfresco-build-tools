@@ -407,21 +407,21 @@ Scan the directories were the Dockerfiles are to feed the scanner.
 
 ### enforce-pr-conventions
 
-Check if the branch name and pull request title follow conventional checks.
+Checks if the branch name and pull request title follow conventions.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/enforce-pr-conventions@ref
         with:
-          jira-project-name: AAE # optional
+          jira-project-key: AAE|HXCS # optional
           valid-branch-regex: "^(feature|test|tmp)\/AAE-[0-9]+-[A-Za-z0-9._-]+$" # optional
           valid-pr-title-regex: "^AAE-[0-9]+ .+$" # optional
 ```
 
-`jira-project-name`, `valid-branch-regex` and `valid-pr-title-regex` are optional.
-If `valid-branch-regex` and `valid-pr-title-regex` are not provided, the action will consume `jira-project-name` to generate the default regex.
+`jira-project-key`, `valid-branch-regex` and `valid-pr-title-regex` are optional.
+If `valid-branch-regex` and `valid-pr-title-regex` are not provided, the action will consume `jira-project-key` to generate the default regex.
 
 **Default regex for Branch name:**
-`"^(improvement|bug|feature|test|tmp)/<jira-project-name>-[0-9]+-[A-Za-z0-9._-]+$"`
+`"^(improvement|bug|feature|test|tmp)/(<jira-project-key>)-[0-9]+-[A-Za-z0-9._-]+$"`
 
 **Examples:**
 
@@ -430,7 +430,7 @@ If `valid-branch-regex` and `valid-pr-title-regex` are not provided, the action 
 ❌ dev-uname-aae-12345
 
 **Default regex for PR title:**
-`"^<jira-project-name>-[0-9]+ .+$"`
+`"^(<jira-project-key>)-[0-9]+ .+$"`
 
 **Examples:**
 

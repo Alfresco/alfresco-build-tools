@@ -1,77 +1,74 @@
 name: enforce-pr-conventions
 
-description: Check if the branch name and pull request title follow conventional checks.
+description: Check if the branch name and pull request title follow conventions.
 
 inputs:
-  jira-project-name:
-    description: 'The JIRA project name.'
+  jira-project-key:
+    description: The Jira project key
     required: false
   valid-branch-regex:
-    description: 'The regular expression to check the branch name.'
+    description: The regular expression to check the branch name
     required: false
   valid-pr-title-regex:
-    description: 'The regular expression to check the pull request title.'
+    description: The regular expression to check the pull request title
     required: false
 
 runs:
   using: composite
   steps:
     - name: Get branch name
-      if: github.event_name == 'pull_request'
       uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v5.13.1
 
     - name: Generate regex
       shell: bash
-      if: github.event_name == 'pull_request'
       id: generate-regex
+      env:
+        JIRA_KEY: ${{ inputs.jira-project-key }}
+        BRANCH_REGEX: ${{ inputs.valid-branch-regex }}
+        PR_REGEX: ${{ inputs.valid-pr-title-regex }}
       run: |
-        if [[ -z "${{ inputs.jira-project-name }}" ]]; then
-          if [[ -z "${{ inputs.valid-branch-regex }}" || -z "${{ inputs.valid-pr-title-regex }}" ]]; then
-            echo "::error::Please provide the JIRA project name or both the branch regex and pr title regex to check the branch name and the pull request title."
+        if [[ -z "$JIRA_KEY" ]]; then
+          if [[ -z "$BRANCH_REGEX" || -z "$PR_REGEX" ]]; then
+             echo "::error::Please provide the Jira project key, or both regular expressions to check the branch name and the the pull request title."
             exit 1
           fi
         fi
 
-        if [[ -z "${{ inputs.valid-branch-regex }}" ]]; then
-          echo "valid-branch-regex=^(improvement|bug|feature|test|tmp)/${{ inputs.jira-project-name }}-[0-9]+-[A-Za-z0-9._-]+$" >> $GITHUB_OUTPUT
+        if [[ -z "$BRANCH_REGEX" ]]; then
+          echo "valid-branch-regex=^(improvement|bug|feature|test|tmp)/($JIRA_KEY)-[0-9]+-[A-Za-z0-9._-]+$" >> $GITHUB_OUTPUT
         else
-          echo "valid-branch-regex=${{ inputs.valid-branch-regex }}" >> $GITHUB_OUTPUT
+          echo "valid-branch-regex=$BRANCH_REGEX" >> $GITHUB_OUTPUT
         fi
 
-        if [[ -z "${{ inputs.valid-pr-title-regex }}" ]]; then
-          echo "valid-pr-title-regex=^${{ inputs.jira-project-name }}-[0-9]+ .+$" >> $GITHUB_OUTPUT
+        if [[ -z "$PR_REGEX" ]]; then
+          echo "valid-pr-title-regex=^($JIRA_KEY)-[0-9]+ .+$" >> $GITHUB_OUTPUT
         else
-          echo "valid-pr-title-regex=${{ inputs.valid-pr-title-regex }}" >> $GITHUB_OUTPUT
+          echo "valid-pr-title-regex=$PR_REGEX" >> $GITHUB_OUTPUT
         fi
 
     - name: Check branch name
-      if: github.event_name == 'pull_request'
       shell: bash
+      env:
+        LOCAL_BRANCH: ${{ env.BRANCH_NAME }}
+        BRANCH_REGEX: ${{ steps.generate-regex.outputs.valid-branch-regex }}
       run: |
-        local_branch="${{ env.BRANCH_NAME }}"
-        branch_regex="${{ steps.generate-regex.outputs.valid-branch-regex }}"
-
-        message="::error::The branch name doesn't follow the expected conventions: "
-        message+="please rename your branch following the regexp $branch_regex, "
-        message+="close this pull request, and open a new one."
-
-        if [[ ${#local_branch} != 0 && ! $local_branch =~ $branch_regex ]]; then
+        if [[ ${#LOCAL_BRANCH} != 0 && ! $LOCAL_BRANCH =~ $BRANCH_REGEX ]]; then
+          message="::error::The branch name doesn't follow the expected conventions: "
+          message+="please rename your branch following the regex '$BRANCH_REGEX', "
+          message+="close this pull request, and open a new one."
           echo "$message"
           exit 1
         fi
 
     - name : Check Title of Pull Request
-      if: github.event_name == 'pull_request'
       shell: bash
+      env:
+        PR_TITLE: ${{ github.event.pull_request.title }}
+        PR_REGEX: ${{ steps.generate-regex.outputs.valid-pr-title-regex }}
       run: |
-        pr_title="AAE-123 convetional commits"
-
-        pr_regex="${{ steps.generate-regex.outputs.valid-pr-title-regex }}"
-
-        message="::error::The PR title '$pr_title' doesn't follow the expected conventions: "
-        message+="please edit it following the regexp '$pr_regex small description'."
-
-        if [[ ! $pr_title =~ $pr_regex ]]; then
+        if [[ ! $PR_TITLE =~ $PR_REGEX ]]; then
+          message="::error::The PR title '$PR_TITLE' doesn't follow the expected conventions: "
+          message+="please edit it following the regex '$PR_REGEX'."
           echo "$message"
           exit 1
         fi
