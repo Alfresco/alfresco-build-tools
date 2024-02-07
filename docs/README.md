@@ -408,49 +408,46 @@ Scan the directories were the Dockerfiles are to feed the scanner.
 ### enforce-pr-conventions
 
 Checks if the branch name and pull request title follow conventions.
+
 This action is only valid for workflows triggered by the `pull_request` event.
 
-There are two possible use-cases.
-
-First use case :
-Only the jira-project-key can be defined. The jira-project-key can contain multiple project names separated by "|".
+Enforce PR conventions with a Jira ticket reference, assuming the Jira project key is `JKEY`:
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/enforce-pr-conventions@ref
         with:
-          jira-project-key: AAE|HXCS # optional
+          jira-project-key: JKEY
 ```
 
-Second use case:
-Only regex inputs can be defined. In this case both the regular expressions can be defined.
+In this case, the default regular expressions will be applied.
+Multiple project keys can be defined, separated by "|".
+
+If default regular expressions do not match the need, they can also be defined:
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/enforce-pr-conventions@ref
         with:
-          valid-branch-regex: "^(feature|test|tmp)\/AAE-[0-9]+-[A-Za-z0-9._-]+$"
-          valid-pr-title-regex: "^AAE-[0-9]+ [A-Za-z0-9 ]+$"
+          valid-branch-regex: "^(feature|test|tmp)\/JKEY-[0-9]+-[A-Za-z0-9._-]+$"
+          valid-pr-title-regex: "^JKEY-[0-9]+ [A-Za-z0-9 ]+$"
 ```
 
-`jira-project-key`, `valid-branch-regex` and `valid-pr-title-regex` are optional.
-If `valid-branch-regex` and `valid-pr-title-regex` are not provided, the action will consume `jira-project-key` to generate the default regex.
+The inputs `jira-project-key`, `valid-branch-regex` and `valid-pr-title-regex` are optional: if `valid-branch-regex` or `valid-pr-title-regex` are not provided, the action will consume `jira-project-key` to generate the default regex.
 
-**Default regex for Branch name:**
-`"^(improvement|bug|feature|test|tmp)/(<jira-project-key>)-[0-9]+-[A-Za-z0-9._-]+$"`
+**Default regex for Branch name**: `"^(improvement|bug|feature|test|tmp)/(<jira-project-key>)-[0-9]+-[A-Za-z0-9._-]+$"`
 
-**Examples:**
+Examples:
 
-✅ improvement/AAE-12345-the-topic-of-the-branch
+✅ improvement/JKEY-12345-the-topic-of-the-branch
 
-❌ dev-uname-aae-12345
+❌ dev-uname-jkey-12345
 
-**Default regex for PR title:**
-`"^(<jira-project-key>)-[0-9]+ [A-Za-z0-9 ]+$"`
+**Default regex for PR title:**: `"^(<jira-project-key>)-[0-9]+ [A-Za-z0-9 ]+$"`
 
-**Examples:**
+Examples:
 
-✅ AAE-12345 The title of the Merge Commit
+✅ JKEY-12345 The title of the Merge Commit
 
-❌ AAE-12345 - The title of the Merge Commit
+❌ [JKEY-12345] - The title of the Merge Commit
 
 ### env-load-from-yaml
 
