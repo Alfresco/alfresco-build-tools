@@ -428,7 +428,7 @@ If default regular expressions do not match the need, they can also be defined:
       - uses: Alfresco/alfresco-build-tools/.github/actions/enforce-pr-conventions@ref
         with:
           valid-branch-regex: "^(feature|test|tmp)\/JKEY-[0-9]+-[A-Za-z0-9._-]+$"
-          valid-pr-title-regex: "^JKEY-[0-9]+ [A-Za-z0-9 ]+$"
+          valid-pr-title-regex: "^JKEY-[0-9]+ [A-Za-z]{1}.*$"
 ```
 
 The inputs `jira-project-key`, `valid-branch-regex` and `valid-pr-title-regex` are optional: if `valid-branch-regex` or `valid-pr-title-regex` are not provided, the action will consume `jira-project-key` to generate the default regex.
@@ -441,7 +441,7 @@ Examples:
 
 ❌ dev-uname-jkey-12345
 
-**Default regex for PR title:**: `"^(<jira-project-key>)-[0-9]+ [A-Za-z0-9 ]+$"`
+**Default regex for PR title:**: `"^(<jira-project-key>)-[0-9]+ [A-Za-z]{1}.*$"`
 
 Examples:
 
