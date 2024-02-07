@@ -130,10 +130,10 @@ runs:
       with:
         repository: igdianov/maven-build-cache-extension
         ref: master
-        path: maven-build-cache-extension
+        path: ~/maven-build-cache-extension
 
     - name: Install Maven Build Cache Extension locally
-      working-directory: ./maven-build-cache-extension
+      working-directory: ~/maven-build-cache-extension
       shell: bash
       run: mvn -B -ntp install -DskipTests
 
