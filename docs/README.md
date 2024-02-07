@@ -426,7 +426,7 @@ Only regex inputs can be defined. In this case both the regular expressions can 
       - uses: Alfresco/alfresco-build-tools/.github/actions/enforce-pr-conventions@ref
         with:
           valid-branch-regex: "^(feature|test|tmp)\/AAE-[0-9]+-[A-Za-z0-9._-]+$"
-          valid-pr-title-regex: "^AAE-[0-9]+ [A-Za-z0-9 ]+$" 
+          valid-pr-title-regex: "^AAE-[0-9]+ [A-Za-z0-9 ]+$"
 ```
 
 `jira-project-key`, `valid-branch-regex` and `valid-pr-title-regex` are optional.
