@@ -414,6 +414,7 @@ There are two possible use-cases.
 
 First use case :
 Only the jira-project-key can be defined. The jira-project-key can contain multiple project names separated by "|".
+
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/enforce-pr-conventions@ref
         with:
@@ -422,6 +423,7 @@ Only the jira-project-key can be defined. The jira-project-key can contain multi
 
 Second use case:
 Only regex inputs can be defined. In this case both the regular expressions can be defined.
+
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/enforce-pr-conventions@ref
         with:
