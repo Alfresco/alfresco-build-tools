@@ -34,6 +34,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [docker-build-image](#docker-build-image)
     - [docker-dump-containers-logs](#docker-dump-containers-logs)
     - [docker-scan-image-dirs](#docker-scan-image-dirs)
+    - [enforce-pr-conventions](#enforce-pr-conventions)
     - [env-load-from-yaml](#env-load-from-yaml)
     - [free-hosted-runner-disk-space](#free-hosted-runner-disk-space)
     - [get-branch-name](#get-branch-name)
@@ -403,6 +404,50 @@ Scan the directories were the Dockerfiles are to feed the scanner.
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/docker-scan-image-dirs@ref
 ```
+
+### enforce-pr-conventions
+
+Checks if the branch name and pull request title follow conventions.
+
+This action is only valid for workflows triggered by the `pull_request` event.
+
+Enforce PR conventions with a Jira ticket reference, assuming the Jira project key is `JKEY`:
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/enforce-pr-conventions@ref
+        with:
+          jira-project-key: JKEY
+```
+
+In this case, the default regular expressions will be applied.
+Multiple project keys can be defined, separated by "|".
+
+If default regular expressions do not match the need, they can also be defined:
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/enforce-pr-conventions@ref
+        with:
+          valid-branch-regex: "^(feature|test|tmp)\/JKEY-[0-9]+-[A-Za-z0-9._-]+$"
+          valid-pr-title-regex: "^JKEY-[0-9]+ [A-Za-z]{1}.*$"
+```
+
+The inputs `jira-project-key`, `valid-branch-regex` and `valid-pr-title-regex` are optional: if `valid-branch-regex` or `valid-pr-title-regex` are not provided, the action will consume `jira-project-key` to generate the default regex.
+
+**Default regex for Branch name**: `"^(improvement|bug|feature|test|tmp)/(<jira-project-key>)-[0-9]+-[A-Za-z0-9._-]+$"`
+
+Examples:
+
+✅ improvement/JKEY-12345-the-topic-of-the-branch
+
+❌ dev-uname-jkey-12345
+
+**Default regex for PR title:**: `"^(<jira-project-key>)-[0-9]+ [A-Za-z]{1}.*$"`
+
+Examples:
+
+✅ JKEY-12345 The title of the Merge Commit
+
+❌ [JKEY-12345] - The title of the Merge Commit
 
 ### env-load-from-yaml
 
