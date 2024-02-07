@@ -100,6 +100,18 @@ runs:
         restore-keys: |
           ${{ runner.os }}-build-cache-${{ inputs.build-cache-key }}-
 
+    # Let's use preview build for Maven Build Cache Extension
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      with:
+        repository: igdianov/maven-build-cache-extension
+        ref: master
+        path: maven-build-cache-extension
+
+    - name: Install Maven Build Cache Extension locally
+      working-directory: ./maven-build-cache-extension
+      shell: bash
+      run: mvn -B -ntp install -DskipTests
+
     - name: Set up JDK
       uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4.0.0
       with:
