@@ -17,7 +17,7 @@ runs:
   using: composite
   steps:
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v5.13.1
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v5.14.0
 
     - name: Generate regex
       shell: bash
