@@ -16,10 +16,24 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Check is Dependabot or Propagation PR
+      id: check
+      env:
+        PR_USER: ${{ github.event.pull_request.user.login }}
+      shell: bash
+      run: |
+          if [[ $PR_USER != 'dependabot[bot]' && $PR_USER != 'alfresco-build' ]]; then
+            echo "continue=true" >> $GITHUB_OUTPUT
+          else
+            echo "continue=false" >> $GITHUB_OUTPUT
+          fi
+
     - name: Get branch name
+      if: steps.check.outputs.continue == 'true'
       uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v5.14.0
 
     - name: Generate regex
+      if: steps.check.outputs.continue == 'true'
       shell: bash
       id: generate-regex
       env:
@@ -47,6 +61,7 @@ runs:
         fi
 
     - name: Check branch name
+      if: steps.check.outputs.continue == 'true'
       shell: bash
       env:
         LOCAL_BRANCH: ${{ env.BRANCH_NAME }}
@@ -61,6 +76,7 @@ runs:
         fi
 
     - name : Check Title of Pull Request
+      if: steps.check.outputs.continue == 'true'
       shell: bash
       env:
         PR_TITLE: ${{ github.event.pull_request.title }}
