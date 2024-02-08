@@ -121,7 +121,7 @@ runs:
     - name: Update pom files to the new version
       id: update-pom-to-next-version
       if: github.event_name == 'push' || env.IS_PREVIEW == 'true'
-      uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@v5.14.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@v5.14.1
       with:
         property-to-update: ${{ inputs.property-to-update }}
         maven-cli-opts: ${{ steps.compute-maven-options.outputs.result }}
@@ -217,7 +217,7 @@ runs:
       shell: bash
       run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v5.14.0
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v5.14.1
       if: github.event_name == 'push'
       with:
         username: ${{ inputs.git-username }}
