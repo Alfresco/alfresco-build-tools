@@ -431,6 +431,17 @@ If default regular expressions do not match the need, they can also be defined:
           valid-pr-title-regex: "^JKEY-[0-9]+ [A-Za-z]{1}.*$"
 ```
 
+To exempt specific branch names from the branch name checks, the optional input parameter called `whitelist-branches` can be utilized. If there are multiple branches to be excluded, they can be written as one branch name per line.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/enforce-pr-conventions@ref
+        with:
+          jira-project-key: JKEY
+          whitelist-branches: |-
+            ABC-1234-branch
+            XYZ-5678-branch
+```
+
 The inputs `jira-project-key`, `valid-branch-regex` and `valid-pr-title-regex` are optional: if `valid-branch-regex` or `valid-pr-title-regex` are not provided, the action will consume `jira-project-key` to generate the default regex.
 
 **Default regex for Branch name**: `"^(improvement|bug|feature|test|tmp)/(<jira-project-key>)-[0-9]+-[A-Za-z0-9._-]+$"`
