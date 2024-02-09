@@ -12,6 +12,9 @@ inputs:
   valid-pr-title-regex:
     description: The regular expression to check the pull request title
     required: false
+  whitelist-branches:
+    description: The list of branches that are allowed to bypass the branch check
+    required: false
 
 runs:
   using: composite
@@ -61,7 +64,7 @@ runs:
         fi
 
     - name: Check branch name
-      if: steps.check.outputs.continue == 'true'
+      if: steps.check.outputs.continue == 'true' && !contains(inputs.whitelist-branches, env.BRANCH_NAME)
       shell: bash
       env:
         LOCAL_BRANCH: ${{ env.BRANCH_NAME }}
