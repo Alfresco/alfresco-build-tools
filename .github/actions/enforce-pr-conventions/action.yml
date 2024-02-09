@@ -33,7 +33,7 @@ runs:
 
     - name: Get branch name
       if: steps.check.outputs.continue == 'true'
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v5.14.1
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v5.14.2
 
     - name: Generate regex
       if: steps.check.outputs.continue == 'true'
