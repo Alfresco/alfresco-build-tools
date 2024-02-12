@@ -33,11 +33,11 @@ runs:
       run: |
         EXTRA_ARGS="--all-files ${{ inputs.extra-args }}"
         echo EXTRA_ARGS="${EXTRA_ARGS}" >> $GITHUB_ENV
-    - uses: pre-commit/action@646c83fcd040023954eafda54b4db0192ce70507 # v3.0.0
+    - uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
       if: inputs.check-format == 'true'
       with:
         extra_args: ${{ env.EXTRA_ARGS }} --config ${{ github.action_path }}/format-config.yaml
-    - uses: pre-commit/action@646c83fcd040023954eafda54b4db0192ce70507 # v3.0.0
+    - uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
       if: inputs.check-github-configuration == 'true'
       with:
         extra_args: ${{ env.EXTRA_ARGS }} --config ${{ github.action_path }}/github-config.yaml
