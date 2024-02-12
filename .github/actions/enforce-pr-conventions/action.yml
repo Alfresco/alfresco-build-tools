@@ -20,7 +20,6 @@ runs:
   using: composite
   steps:
     - name: Get branch name
-      if: steps.check.outputs.continue == 'true'
       uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v5.14.2
 
     - name: Check is Dependabot or Propagation PR
