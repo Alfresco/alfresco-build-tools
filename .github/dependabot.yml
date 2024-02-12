@@ -362,14 +362,6 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
-    directory: "/.github/actions/pre-commit-default"
-    schedule:
-      interval: "weekly"
-    groups:
-      catch-all:
-        patterns:
-          - "*"
-  - package-ecosystem: "github-actions"
     directory: "/.github/actions/pre-commit"
     schedule:
       interval: "weekly"
