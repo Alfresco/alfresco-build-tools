@@ -66,7 +66,6 @@ Here follows the list of GitHub Actions topics available in the current document
     - [nexus-close-staging](#nexus-close-staging)
     - [nexus-release-staging](#nexus-release-staging)
     - [pre-commit](#pre-commit)
-    - [pre-commit-default](#pre-commit-default)
     - [process-coverage-report](#process-coverage-report)
     - [pipenv](#pipenv)
     - [rancher](#rancher)
@@ -923,57 +922,6 @@ for the proper handling of auto-commit feature, unless you specify:
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
         with:
           skip_checkout: "true"
-```
-
-### pre-commit-default
-
-Executes pre-commit checks using shared configuration.
-
-The shared configuration is grouped inside different sets that can be disabled thanks to inputs (both are enabled by default):
-
-- `check-format`: handles standard formatter checks, including Java files leveraging [prettier](https://prettier.io/) and [prettier Java plugin](https://github.com/jhipster/prettier-java)
-- `check-github-configuration`: performs json schema checks on GH actions, workflows and dependabot configuration, leveraging [jcheck-jsonschema](https://check-jsonschema.readthedocs.io/en/latest/precommit_usage.html)
-
-To replicate locally the same checks, the corresponding configuration files must be used:
-
-- [format-config.yaml](../.github/actions/pre-commit-default/format-config.yaml)
-- [github-config.yaml](../.github/actions/pre-commit-default/github-config.yaml)
-
-Sample command lines:
-
-```bash
-pre-commit run -a --config /path/to/config/format-config.yaml
-pre-commit run -a --config /path/to/config/github-config.yaml
-```
-
-Unlike the [pre-commit](#pre-commit) action, the `actions/checkout` action is not part of this action and should explicitly be added if not already done before in the workflow:
-
-```yml
-      - uses: actions/checkout@v3
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit-default@ref
-```
-
-This action can also be used in combination with the [pre-commit](#pre-commit) action, that will perform a checkout anyway. This allows combining default pre-commit checks with additional local checks configured in the local `.pre-commit-config.yaml` file that is part of the caller repository:
-
-```yml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit-default@ref
-```
-
-Sample usage of inputs:
-
-```yml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit-default@ref
-        with:
-          check-format: 'false'
-```
-
-Or:
-
-```yml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit-default@ref
-        with:
-          check-github-configuration: 'false'
 ```
 
 ### process-coverage-report
