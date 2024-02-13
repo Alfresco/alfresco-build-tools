@@ -549,6 +549,9 @@ If `skip-if-no-changes` input is set to `true` then an empty commit will not be 
         commit-message: "My commit message"
 ```
 
+> Consider using [git-commit-and-push](#git-commit-and-push) instead which
+> provide additional features.
+
 ### git-latest-tag
 
 Gets the latest tag and commit sha for the given pattern. The result is returned in the output named `tag` and `tag_long_sha`.
