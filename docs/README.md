@@ -206,7 +206,7 @@ provided as repository secrets.
 ### Git commit and push
 
 [stefanzweifel/git-auto-commit-action](https://github.com/stefanzweifel/git-auto-commit-action)
-is for automatically commit and push changed files back to GitHub.
+can be used to automatically commit and push changed files back to GitHub.
 
 We are also using it inside the [pre-commit](#pre-commit) action for the auto-commit feature.
 
@@ -550,7 +550,7 @@ If `skip-if-no-changes` input is set to `true` then an empty commit will not be 
 ```
 
 > Consider using [git-commit-and-push](#git-commit-and-push) instead which
-> provide additional features.
+> provides additional features.
 
 ### git-latest-tag
 
