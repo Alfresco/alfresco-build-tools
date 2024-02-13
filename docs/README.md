@@ -22,9 +22,10 @@ Here follows the list of GitHub Actions topics available in the current document
     - [Auto cancel builds](#auto-cancel-builds)
     - [Docker build and push](#docker-build-and-push)
     - [Docker login](#docker-login)
+    - [EC2 GitHub runner](#ec2-github-runner)
+    - [Git commit and push](#git-commit-and-push)
     - [pmd](#pmd)
     - [Retry failing step](#retry-failing-step)
-    - [EC2 GitHub runner](#ec2-github-runner)
     - [SSH debug](#ssh-debug)
     - [Triggering a workflow in another repository](#triggering-a-workflow-in-another-repository)
   - [GitHub Actions provided by us](#github-actions-provided-by-us)
@@ -198,6 +199,17 @@ provided as repository secrets.
           password: ${{ secrets.QUAY_PASSWORD }}
 ```
 
+### EC2 GitHub runner
+
+[machulav/ec2-github-runner](https://github.com/machulav/ec2-github-runner) can be used to start EC2 [self-hosted runners](https://docs.github.com/en/actions/hosting-your-own-runners). An on-demand EC2 runner can be created, set-up, used to run a required process and finally destroyed - on the fly.
+
+### Git commit and push
+
+[stefanzweifel/git-auto-commit-action](https://github.com/stefanzweifel/git-auto-commit-action)
+can be used to automatically commit and push changed files back to GitHub.
+
+We are also using it inside the [pre-commit](#pre-commit) action for the auto-commit feature.
+
 ### pmd
 
 [Yet Another PMD Scan](https://github.com/Alfresco/ya-pmd-scan) is a GitHub Action primarily for Alfresco repositories. It is a bit more involved than most of the actions in this repository and so has been split out into a repository of its own.
@@ -207,10 +219,6 @@ The action runs the [PMD](https://pmd.github.io/) static analysis tool to look f
 ### Retry failing step
 
 [This action](https://github.com/nick-fields/retry) retries an Action step on failure or timeout. Useful for unstable commands or that relies on remote resources that can be flaky sometimes.
-
-### EC2 GitHub runner
-
-[machulav/ec2-github-runner](https://github.com/machulav/ec2-github-runner) can be used to start EC2 [self-hosted runners](https://docs.github.com/en/actions/hosting-your-own-runners). An on-demand EC2 runner can be created, set-up, used to run a required process and finally destroyed - on the fly.
 
 ### SSH debug
 
@@ -540,6 +548,9 @@ If `skip-if-no-changes` input is set to `true` then an empty commit will not be 
         add-options: -u
         commit-message: "My commit message"
 ```
+
+> Consider using [git-commit-and-push](#git-commit-and-push) instead which
+> provides additional features.
 
 ### git-latest-tag
 
