@@ -105,7 +105,7 @@ runs:
     - name: Set is_preview env variable
       id: set-is-preview-env-variable
       env:
-        IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, inputs.preview-label) }}
+        IS_PREVIEW: ${{ github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, inputs.preview-label) || contains(github.event.pull_request.labels.*.name, inputs.preview-label.default) )}}
       shell: bash
       run: |
         echo "IS_PREVIEW=$IS_PREVIEW" >> $GITHUB_ENV
