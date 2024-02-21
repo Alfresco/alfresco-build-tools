@@ -452,21 +452,33 @@ To exempt specific branch names from the branch name checks, the optional input 
 
 The inputs `jira-project-key`, `valid-branch-regex` and `valid-pr-title-regex` are optional: if `valid-branch-regex` or `valid-pr-title-regex` are not provided, the action will consume `jira-project-key` to generate the default regex.
 
-**Default regex for Branch name**: `"^(improvement|bug|feature|test|tmp)/(<jira-project-key>)-[0-9]+-[A-Za-z0-9._-]+$"`
+**Default regex for Branch name**: `"^(revert-[0-9]+-)?(improvement|fix|feature|test|tmp)\/($JIRA_KEY)-[0-9]+[_-]{1}[A-Za-z0-9._-]+$"`
+
+`(revert-[0-9]+-)` is optional and is used to match revert branches name.
 
 Examples:
 
 ✅ improvement/JKEY-12345-the-topic-of-the-branch
 
+✅ revert-123-improvement/JKEY-12345-the-topic-of-the-branch
+
 ❌ dev-uname-jkey-12345
 
-**Default regex for PR title:**: `"^(<jira-project-key>)-[0-9]+ [A-Za-z]{1}.*$"`
+**Default regex for PR title:**: `"^(Revert .*)|^($JIRA_KEY)-[0-9]+ [A-Z]{1}.*$"`
+
+If the PR title starts with "Revert ", it will be considered valid.
+
+If the PR title does not start with "Revert ", it will be checked against `^($JIRA_KEY)-[0-9]+ [A-Z]{1}[A-Za-z].*$` regex.
 
 Examples:
 
 ✅ JKEY-12345 The title of the Merge Commit
 
+✅ Revert "JKEY-12345 The title of the Merge Commit"
+
 ❌ [JKEY-12345] - The title of the Merge Commit
+
+❌ JKEY-12345 the title of the Merge Commit
 
 ### env-load-from-yaml
 
