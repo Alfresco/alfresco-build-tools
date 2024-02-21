@@ -44,6 +44,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [get-commit-message](#get-commit-message)
     - [git-commit-changes](#git-commit-changes)
     - [git-latest-tag](#git-latest-tag)
+    - [github-check-upcoming-runs](#github-check-upcoming-runs)
     - [github-download-file](#github-download-file)
     - [helm-build-chart](#helm-build-chart)
     - [helm-integration-tests](#helm-integration-tests)
@@ -560,6 +561,27 @@ Gets the latest tag and commit sha for the given pattern. The result is returned
       - uses: Alfresco/alfresco-build-tools/.github/actions/git-latest-tag@ref
         with:
           pattern: 1.0.0-alpha*
+```
+
+### github-check-upcoming-runs
+
+This action fails the current run if it detects that another run if upcoming on the same branch.
+If the upcoming run is cancelled, its re-run is triggered.
+
+This is useful when several events might trigger the same long workflow execution that cannot be cancelled (typically for some system tests, where PR check is triggered on PR `opened` or `labeled`, which can create multiple events in a short time on automated PR creation with labels).
+
+Checking upcoming runs before running them, eventually favoring the latest run to retain the status on PR check, is then helpful, because, as [stated in the GitHub documentation](https://docs.github.com/en/actions/using-jobs/using-concurrency#using-concurrency-in-different-scenarios):
+
+> Ordering is not guaranteed for jobs or workflow runs using concurrency groups. Jobs or workflow runs in the same
+> concurrency group are handled in an arbitrary order.
+
+With proper concurrency logic in place, the latest run might have been cancelled: this action also triggers a rerun before exiting in failure. The outcome `exit` can help determining if exit on error was thrown.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-check-upcoming-runs@ref
+        with:
+          github-token: ${{ secrets.MY_GITHUB_TOKEN }}
+          workflow: my-workflow.yml
 ```
 
 ### github-download-file
