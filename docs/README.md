@@ -464,7 +464,7 @@ Examples:
 
 ❌ dev-uname-jkey-12345
 
-**Default regex for PR title:**: `"^(Revert .*)|^($JIRA_KEY)-[0-9]+ [A-Z]{1}[A-Za-z].*$"`
+**Default regex for PR title:**: `"^(Revert .*)|^($JIRA_KEY)-[0-9]+ [A-Z]{1}.*$"`
 
 If the PR title starts with "Revert ", it will be considered valid.
 
@@ -477,6 +477,8 @@ Examples:
 ✅ Revert "JKEY-12345 The title of the Merge Commit"
 
 ❌ [JKEY-12345] - The title of the Merge Commit
+
+❌ JKEY-12345 the title of the Merge Commit
 
 ### env-load-from-yaml
 
