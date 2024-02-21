@@ -7,6 +7,9 @@ inputs:
   workflow:
     description: The workflow file name eg workflow.yml
     required: true
+  event:
+    description: The event to filter runs on
+    default: pull_request
 
 outputs:
   exit:
@@ -24,11 +27,12 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.github-token }}
         WORKFLOW: ${{ inputs.workflow }}
+        EVENT: ${{ inputs.event }}
       shell: bash
       run: |
         URL="/repos/$GITHUB_REPOSITORY/actions/workflows/$WORKFLOW/runs"
         echo "Checking runs at $URL for $BRANCH_NAME"
-        RUNS=$(gh api -X GET $URL -F branch=$BRANCH_NAME -F event=pull_request)
+        RUNS=$(gh api -X GET $URL -F branch=$BRANCH_NAME -F event=$EVENT)
 
         RUN=$(echo $RUNS | jq --argjson id $GITHUB_RUN_ID 'first(.workflow_runs[] | select(.id > $id) | {"id":.id, "status":.status, "conclusion":.conclusion})')
         if [ ! -z "$RUN" ]; then
