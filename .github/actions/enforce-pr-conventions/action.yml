@@ -51,13 +51,13 @@ runs:
         fi
 
         if [[ -z "$BRANCH_REGEX" ]]; then
-          echo "valid-branch-regex=^(improvement|bug|feature|test|tmp)/($JIRA_KEY)-[0-9]+-[A-Za-z0-9._-]+$" >> $GITHUB_OUTPUT
+          echo "valid-branch-regex=^(revert-[0-9]+-)?(improvement|fix|feature|test|tmp)\/($JIRA_KEY)-[0-9]+[_-]{1}[A-Za-z0-9._-]+$" >> $GITHUB_OUTPUT
         else
           echo "valid-branch-regex=$BRANCH_REGEX" >> $GITHUB_OUTPUT
         fi
 
         if [[ -z "$PR_REGEX" ]]; then
-          echo "valid-pr-title-regex=^($JIRA_KEY)-[0-9]+ [A-Za-z]{1}.*$" >> $GITHUB_OUTPUT
+          echo "valid-pr-title-regex=^(Revert .*)|^($JIRA_KEY)-[0-9]+ [A-Z]{1}[A-Za-z].*$" >> $GITHUB_OUTPUT
         else
           echo "valid-pr-title-regex=$PR_REGEX" >> $GITHUB_OUTPUT
         fi
@@ -76,8 +76,19 @@ runs:
         done
         echo "continue=true" >> $GITHUB_OUTPUT
 
+    - name: Check revert branch
+      if: steps.check.outputs.continue == 'true'
+      id: check-revert-branch
+      shell: bash
+      run: |
+        if [[ $BRANCH_NAME == revert-* ]]; then
+          echo "revert-branch=true" >> $GITHUB_OUTPUT
+        else
+          echo "revert-branch=false" >> $GITHUB_OUTPUT
+        fi
+
     - name: Check branch name
-      if: steps.check.outputs.continue == 'true' && steps.check-whitelist-branches.outputs.continue == 'true'
+      if: steps.check.outputs.continue == 'true' && steps.check-whitelist-branches.outputs.continue == 'true' && steps.check-revert-branch.outputs.revert-branch == 'false'
       shell: bash
       env:
         LOCAL_BRANCH: ${{ env.BRANCH_NAME }}
