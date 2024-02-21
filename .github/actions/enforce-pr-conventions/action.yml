@@ -76,19 +76,8 @@ runs:
         done
         echo "continue=true" >> $GITHUB_OUTPUT
 
-    - name: Check revert branch
-      if: steps.check.outputs.continue == 'true'
-      id: check-revert-branch
-      shell: bash
-      run: |
-        if [[ $BRANCH_NAME == revert-* ]]; then
-          echo "revert-branch=true" >> $GITHUB_OUTPUT
-        else
-          echo "revert-branch=false" >> $GITHUB_OUTPUT
-        fi
-
     - name: Check branch name
-      if: steps.check.outputs.continue == 'true' && steps.check-whitelist-branches.outputs.continue == 'true' && steps.check-revert-branch.outputs.revert-branch == 'false'
+      if: steps.check.outputs.continue == 'true' && steps.check-whitelist-branches.outputs.continue == 'true'
       shell: bash
       env:
         LOCAL_BRANCH: ${{ env.BRANCH_NAME }}
