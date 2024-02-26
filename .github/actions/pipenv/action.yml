@@ -21,6 +21,6 @@ runs:
     - name: Prepare pipenv virtualenv
       id: pipenv
       shell: bash
-      run: >-
-        pipenv install --deploy --dev --python ${{ inputs.python-version }} &&
+      run: |
+        pipenv install --deploy --dev --python ${{ inputs.python-version }}
         echo "pipenv-root=$(pwd)" >> $GITHUB_OUTPUT
