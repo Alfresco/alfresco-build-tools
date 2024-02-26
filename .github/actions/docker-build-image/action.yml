@@ -138,7 +138,7 @@ runs:
 
     - name: Upload SARIF Files
       if: always() && inputs.grype-scan-enabled == 'true' && github.event_name == 'push'
-      uses: github/codeql-action/upload-sarif@379614612a29c9e28f31f39a59013eb8012a51f0 # v3.24.3
+      uses: github/codeql-action/upload-sarif@47b3d888fe66b639e431abf22ebca059152f1eea # v3.24.5
       continue-on-error: true # do not fail if GHAS is not enabled
       with:
         sarif_file: ${{ steps.scan.outputs.sarif }}
