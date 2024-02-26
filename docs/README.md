@@ -1000,6 +1000,8 @@ This workflow sets up a Python environment using the standard setup-python actio
           python-version: ${{ steps.setup-python.outputs.python-version }}
 ```
 
+> This action returns the root directory where pipenv was installed from (so it can be used to build the PIPENV_PIPFILE env var)
+
 ### rancher
 
 register or detach an EKS cluster to Rancher.
