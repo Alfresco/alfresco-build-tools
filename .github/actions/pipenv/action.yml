@@ -5,6 +5,12 @@ inputs:
     description: The python version
     required: false
     default: "3.9"
+outputs:
+  pipenv-root:
+    description: >-
+      Root directory where the virtual environment has been created (where the
+      Pipfile sits)
+    value: ${{ steps.pipenv.outputs.pipenv-root }}
 
 runs:
   using: "composite"
@@ -13,5 +19,8 @@ runs:
       shell: bash
       run: pip install -r ${{ github.action_path }}/requirements.txt
     - name: Prepare pipenv virtualenv
+      id: pipenv
       shell: bash
-      run: pipenv install --deploy --dev --python ${{ inputs.python-version }}
+      run: |
+        pipenv install --deploy --dev --python ${{ inputs.python-version }}
+        echo "pipenv-root=$(pwd)" >> $GITHUB_OUTPUT
