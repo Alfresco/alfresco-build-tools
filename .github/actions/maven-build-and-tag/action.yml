@@ -21,6 +21,13 @@ inputs:
   maven-password:
     description: Nexus password
     required: true
+  ghpkg-username:
+    description: gh-packages user name
+    required: false
+    default: ${{ github.actor }}
+  ghpkg-password:
+    description: gh-packages password
+    required: false
   quay-username:
     description: Quay.io user name
     required: false
@@ -190,6 +197,8 @@ runs:
         MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
+        GHPKG_USERNAME: ${{ inputs.ghpkg-username }}
+        GHPKG_PASSWORD: ${{ inputs.ghpkg-password }}
 
     - name: Remove running docker containers
       if: inputs.reuse-testcontainers == 'true'
