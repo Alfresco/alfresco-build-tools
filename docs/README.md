@@ -1229,6 +1229,29 @@ This message can also be appended to the default message:
           append: true
 ```
 
+The action also outputs the id of the Slack thread (`thread-id`) that is being created or replied to when sending the message:
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@ref
+        id: slack
+        with:
+          channel-id: 'channel-id'
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+      - run: |
+          echo ${{ steps.slack.outputs.thread-id }}
+```
+
+If you want the message to be posted as a reply to an existing thread rather than starting its own, make sure to specify the optional `thread-id` input:
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@ref
+        id: slack
+        with:
+          channel-id: 'channel-id'
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          thread-id: 'thread-id'
+```
+
 ### send-teams-notification
 
 Sends a teams notification with a pre-defined payload.
