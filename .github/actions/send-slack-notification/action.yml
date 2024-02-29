@@ -23,7 +23,7 @@ inputs:
     required: false
 outputs:
   thread-id:
-    description: The slack Thread id that has been started or replied to
+    description: The slack thread id that has been started or replied to
     value: ${{ steps.slack.outputs.thread_ts }}
 
 runs:
