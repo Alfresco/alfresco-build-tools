@@ -129,7 +129,7 @@ runs:
 
     - name: Restore /var/lib/docker/
       if: ${{ inputs.only-remove-files == 'false' }}
-      run: sudo sh -c "mv ${GITHUB_WORKSPACE}/docker/* /var/lib/docker"
+      run: sudo mv "${GITHUB_WORKSPACE}/docker" /var/lib/docker
       shell: bash
 
     - name: Disk space report after modification
