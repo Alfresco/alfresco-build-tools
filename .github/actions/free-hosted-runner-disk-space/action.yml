@@ -8,7 +8,7 @@ inputs:
   root-reserve-mb:
     description: 'Space to be left free on the root filesystem, in Megabytes.'
     required: false
-    default: '15360'
+    default: '10240'
   temp-reserve-mb:
     description: 'Space to be left free on the temp filesystem (/mnt), in Megabytes.'
     required: false
@@ -56,11 +56,11 @@ inputs:
     required: false
     default: 'false'
   remove-boost:
-    description: 'Removes Boost C++ libraries. (frees ~ GB)'
+    description: 'Removes Boost C++ libraries. (frees ~1 GB)'
     required: false
     default: 'true'
   remove-tools-cache:
-    description: 'Removes tools and dependencies cached. (frees ~ GB)'
+    description: 'Removes tools and dependencies cached. (frees ~3 GB)'
     required: false
     default: 'true'
   remove-docker-images:
