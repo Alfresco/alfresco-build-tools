@@ -28,6 +28,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [Retry failing step](#retry-failing-step)
     - [SSH debug](#ssh-debug)
     - [Triggering a workflow in another repository](#triggering-a-workflow-in-another-repository)
+    - [Generate Dependabot Glob Action](#generate-dependabot-glob-action)
   - [GitHub Actions provided by us](#github-actions-provided-by-us)
     - [automate-dependabot](#automate-dependabot)
     - [automate-propagation](#automate-propagation)
@@ -312,6 +313,32 @@ on the default branch):
 on:
   # allows triggering workflow manually or from other jobs
   workflow_dispatch:
+```
+
+### Generate Dependabot Glob Action
+
+[generate-dependabot-glob-action](https://github.com/Makeshift/generate-dependabot-glob-action) creates a dependabot.yml file from a user-provided template by replacing instances of directory globs with an array of objects matching that glob, with all the other keys copied.
+For example, the following template:
+```
+  - package-ecosystem: 'docker'
+    directory: '/test/docker/*/Dockerfile*'
+    schedule:
+      interval: 'daily'
+```
+Will result in:
+```
+  - package-ecosystem: 'docker'
+    directory: '/test/docker/container_1/'
+    schedule:
+      interval: 'daily'
+  - package-ecosystem: 'docker'
+    directory: '/test/docker/container_2/'
+    schedule:
+      interval: 'daily'
+  - package-ecosystem: 'docker'
+    directory: '/test/docker/weird_dockerfile/'
+    schedule:
+      interval: 'daily'
 ```
 
 ## GitHub Actions provided by us
