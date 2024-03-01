@@ -3,11 +3,12 @@ description: "Removes unnecessary files from the runner."
 inputs:
   only-remove-files:
     description: 'Only remove files and folders, do not manipulate the runner memory'
+    required: false
     default: 'true'
   root-reserve-mb:
     description: 'Space to be left free on the root filesystem, in Megabytes.'
     required: false
-    default: '8192'
+    default: '15360'
   temp-reserve-mb:
     description: 'Space to be left free on the temp filesystem (/mnt), in Megabytes.'
     required: false
@@ -41,7 +42,7 @@ inputs:
   remove-dotnet:
     description: 'Removes .NET runtime and libraries. (frees ~17 GB)'
     required: false
-    default: 'false'
+    default: 'true'
   remove-android:
     description: 'Removes Android SDKs and Tools. (frees ~11 GB)'
     required: false
@@ -49,7 +50,7 @@ inputs:
   remove-haskell:
     description: 'Removes GHC (Haskell) artifacts. (frees ~2.7 GB)'
     required: false
-    default: 'false'
+    default: 'true'
   remove-codeql:
     description: 'Removes CodeQL Action Bundles. (frees ~5.4 GB)'
     required: false
@@ -57,11 +58,11 @@ inputs:
   remove-boost:
     description: 'Removes Boost C++ libraries. (frees ~ GB)'
     required: false
-    default: 'false'
+    default: 'true'
   remove-tools-cache:
     description: 'Removes tools and dependencies cached. (frees ~ GB)'
     required: false
-    default: 'false'
+    default: 'true'
   remove-docker-images:
     description: 'Removes cached Docker images. (frees ~3 GB)'
     required: false
@@ -94,7 +95,29 @@ runs:
 
     - name: Remove unnecessary files
       run: |
-        sudo rm -rf ${{ inputs.to-remove }}
+        echo "Removing unwanted software... "
+        if [[ ${{ inputs.remove-dotnet }} == 'true' ]]; then
+          sudo rm -rf /usr/share/dotnet
+        fi
+        if [[ ${{ inputs.remove-android }} == 'true' ]]; then
+          sudo rm -rf /usr/local/lib/android
+        fi
+        if [[ ${{ inputs.remove-haskell }} == 'true' ]]; then
+          sudo rm -rf /opt/ghc
+        fi
+        if [[ ${{ inputs.remove-codeql }} == 'true' ]]; then
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+        fi
+        if [[ ${{ inputs.remove-docker-images }} == 'true' ]]; then
+          sudo docker image prune --all --force
+        fi
+        if [[ ${{ inputs.remove-boost }} == 'true' ]]; then
+          sudo rm -rf /usr/local/share/boost
+        fi
+        if [[ ${{ inputs.remove-tools-cache }} == 'true' ]]; then
+          sudo rm -rf $AGENT_TOOLSDIRECTORY
+        fi
+        echo "... done"
       shell: bash
 
     - name: Maximize build space
@@ -106,11 +129,10 @@ runs:
 
     - name: Restore /var/lib/docker/
       if: ${{ inputs.only-remove-files == 'false' }}
-      run: sudo sh -c "mv ${GITHUB_WORKSPACE}/docker/* /var/lib/docker"
+      run: sudo mv ${GITHUB_WORKSPACE}/docker/* /var/lib/docker
       shell: bash
 
     - name: Disk space report after modification
-      if: ${{ inputs.only-remove-files == 'false' }}
       run: |
         echo "Memory and swap:"
         sudo free
