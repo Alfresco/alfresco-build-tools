@@ -68,8 +68,8 @@ inputs:
     required: false
     default: 'false'
   to-remove:
-    description: 'Collection of files/folders to be removed'
-    default: "/usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost $AGENT_TOOLSDIRECTORY"
+    description: 'Additional collection of files/folders to be removed'
+    default: ""
     required: false
 
 runs:
@@ -117,6 +117,9 @@ runs:
         if [[ ${{ inputs.remove-tools-cache }} == 'true' ]]; then
           sudo rm -rf $AGENT_TOOLSDIRECTORY
         fi
+        if [[ ${{ inputs.remove-tools-cache }} != '' ]]; then
+          sudo rm -rf ${{ inputs.remove-tools-cache }}
+        fi
         echo "... done"
       shell: bash
 
@@ -124,12 +127,12 @@ runs:
       if: ${{ inputs.only-remove-files == 'false' }}
       uses: easimon/maximize-build-space@master
       with:
-        root-reserve-mb: 8192
+        root-reserve-mb: ${{ inputs.root-reserve-mb }}
         build-mount-path: '/var/lib/docker/'
 
     - name: Restore /var/lib/docker/
       if: ${{ inputs.only-remove-files == 'false' }}
-      run: sudo mv "${GITHUB_WORKSPACE}/docker" /var/lib/docker
+      run: sudo sh -c "mv ${GITHUB_WORKSPACE}/docker/* /var/lib/docker"
       shell: bash
 
     - name: Disk space report after modification
