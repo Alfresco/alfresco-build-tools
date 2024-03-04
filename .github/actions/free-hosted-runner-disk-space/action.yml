@@ -70,7 +70,7 @@ inputs:
     default: 'false'
   to-remove:
     description: 'Additional collection of files/folders to be removed'
-    default: ""
+    default: ''
     required: false
 
 runs:
@@ -97,6 +97,7 @@ runs:
     - name: Remove unnecessary files
       run: |
         echo "Removing unwanted software... "
+        to_remove="${{ inputs.to-remove }}"
         if [[ ${{ inputs.remove-dotnet }} == 'true' ]]; then
           sudo rm -rf /usr/share/dotnet
         fi
@@ -118,8 +119,8 @@ runs:
         if [[ ${{ inputs.remove-tools-cache }} == 'true' ]]; then
           sudo rm -rf $AGENT_TOOLSDIRECTORY
         fi
-        if [[ ${{ inputs.to-remove }} != '' ]]; then
-          sudo rm -rf ${{ inputs.to-remove }}
+        if [[ -n "$to_remove" ]]; then
+          sudo rm -rf $to_remove
         fi
         echo "... done"
       shell: bash
