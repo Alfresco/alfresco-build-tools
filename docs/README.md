@@ -23,6 +23,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [Docker build and push](#docker-build-and-push)
     - [Docker login](#docker-login)
     - [EC2 GitHub runner](#ec2-github-runner)
+    - [Generate Dependabot Glob Action](#generate-dependabot-glob-action)
     - [Git commit and push](#git-commit-and-push)
     - [pmd](#pmd)
     - [Retry failing step](#retry-failing-step)
@@ -203,6 +204,35 @@ provided as repository secrets.
 ### EC2 GitHub runner
 
 [machulav/ec2-github-runner](https://github.com/machulav/ec2-github-runner) can be used to start EC2 [self-hosted runners](https://docs.github.com/en/actions/hosting-your-own-runners). An on-demand EC2 runner can be created, set-up, used to run a required process and finally destroyed - on the fly.
+
+### Generate Dependabot Glob Action
+
+[generate-dependabot-glob-action](https://github.com/Makeshift/generate-dependabot-glob-action) creates a dependabot.yml file from a user-provided template by replacing instances of directory globs with an array of objects matching that glob, with all the other keys copied.
+For example, the following template:
+
+```yml
+  - package-ecosystem: 'docker'
+    directory: '/test/docker/*/Dockerfile*'
+    schedule:
+      interval: 'daily'
+```
+
+Will result in:
+
+```yml
+  - package-ecosystem: 'docker'
+    directory: '/test/docker/container_1/'
+    schedule:
+      interval: 'daily'
+  - package-ecosystem: 'docker'
+    directory: '/test/docker/container_2/'
+    schedule:
+      interval: 'daily'
+  - package-ecosystem: 'docker'
+    directory: '/test/docker/weird_dockerfile/'
+    schedule:
+      interval: 'daily'
+```
 
 ### Git commit and push
 
