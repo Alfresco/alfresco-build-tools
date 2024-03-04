@@ -93,9 +93,9 @@ runs:
         --auto-merge=${{ inputs.auto-merge }}
         --version='${{ inputs.version }}'
         --pull-request-title='${{ inputs.pull-request-title }}'
-        --pull-request-body='${{ inputs.pull-request-body }}'
+        --pull-request-body="${{ inputs.pull-request-body }}"
         --commit-title='${{ inputs.commit-title }}'
-        --commit-message='${{ inputs.commit-message }}'
+        --commit-message="${{ inputs.commit-message }}"
         --labels='${{ inputs.labels }}'
         --base-branch-name='${{ inputs.base-branch-name }}'
         --config-file='${{ inputs.config-file }}'
