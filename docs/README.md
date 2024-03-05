@@ -495,7 +495,7 @@ referencing as value env vars defined early in the file (like Travis does).
 
 ### free-hosted-runner-disk-space
 
-Removes unnecessary folders and files from a GHA [hosted runner](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners). This action might be useful when we run jobs which require a lot of disk space.
+Removes unnecessary folders and files from a GHA [hosted runner](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners), and if that is not enough, allows to manipulate and utilize unused memory partitions. This action might be useful when we run jobs which require a lot of disk space.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@ref
@@ -508,7 +508,8 @@ By default it removes following directories:
 - `/usr/local/share/boost`
 - `$AGENT_TOOLSDIRECTORY`
 
-You can override the default behavior by specifying your own collection of files and directories using `to-remove` input parameter.
+You can override the default behavior by specifying your own collection of files and directories using `to-remove` input parameter, or by setting `remove-android` and `remove-codeql` to true.
+By default, this action only deletes folders and files, but if you want to use the action to utilize the unused memory, you need to set `only-remove-files` to false.
 
 ### get-branch-name
 
