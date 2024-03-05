@@ -852,8 +852,8 @@ Check out, builds a maven project and docker images, generating a new alpha vers
         with:
           maven-username: ${{ secrets.NEXUS_USERNAME }}
           maven-password: ${{ secrets.NEXUS_PASSWORD }}
-          ghpgk-username: ${{ github.actor }}
-          ghpgk-password: ${{ secrets.HYLAND_GH_PACKAGES_READ_ONLY_TOKEN }}
+          ghcr-username: ${{ github.actor }}
+          ghcr-password: ${{ secrets.GHCR_PASSWORD }}
           quay-username: ${{ secrets.QUAY_USERNAME }}
           quay-password: ${{ secrets.QUAY_PASSWORD }}
           docker-username: ${{ secrets.DOCKER_USERNAME }}
