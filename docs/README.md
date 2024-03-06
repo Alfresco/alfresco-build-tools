@@ -501,7 +501,7 @@ Removes unnecessary folders and files from a GHA [hosted runner](https://docs.gi
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@ref
 ```
 
-By default it removes following directories:
+By default, it removes following directories:
 
 - `/usr/share/dotnet`
 - `/opt/ghc`
@@ -509,7 +509,7 @@ By default it removes following directories:
 - `$AGENT_TOOLSDIRECTORY`
 
 You can override the default behavior by specifying your own collection of files and directories using `to-remove` input parameter, or by setting `remove-android` and `remove-codeql` to true.
-By default, this action only deletes folders and files, but if you want to use the action to utilize the unused memory, you need to set `only-remove-files` to false.
+By default, this action only deletes folders and files, but if you want to use the action to utilize the unused memory, you need to set `merge-disk-volumes` to true.
 
 ### get-branch-name
 

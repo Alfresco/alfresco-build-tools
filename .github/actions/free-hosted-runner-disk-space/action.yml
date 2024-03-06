@@ -1,20 +1,20 @@
 name: "Free GHA runner disk space"
 description: "Removes unnecessary files from the runner."
 inputs:
-  only-remove-files:
-    description: 'Only remove files and folders, do not manipulate the runner memory'
+  merge-disk-volumes:
+    description: 'Triggers usage of maximize-build-space action to take advantage of unused disk space. Disabled by default due to long duration.'
     required: false
-    default: 'true'
+    default: 'false'
   root-reserve-mb:
-    description: 'Space to be left free on the root filesystem, in Megabytes.'
+    description: 'Space to be left free on the root filesystem, in Megabytes. Only applicable if merge-disk-volumes is set to true.'
     required: false
     default: '12288'
   temp-reserve-mb:
-    description: 'Space to be left free on the temp filesystem (/mnt), in Megabytes.'
+    description: 'Space to be left free on the temp filesystem (/mnt), in Megabytes. Only applicable if merge-disk-volumes is set to true.'
     required: false
     default: '100'
   swap-size-mb:
-    description: 'Swap space to create, in Megabytes.'
+    description: 'Swap space to create, in Megabytes. Only applicable if merge-disk-volumes is set to true.'
     required: false
     default: '1024'
   overprovision-lvm:
@@ -25,19 +25,19 @@ inputs:
     required: false
     default: 'false'
   build-mount-path:
-    description: 'Absolute path to the mount point where the build space will be available, defaults to /var/lib/docker/ if unset.'
+    description: 'Absolute path to the mount point where the build space will be available, defaults to /var/lib/docker/ if unset. Only applicable if merge-disk-volumes is set to true.'
     required: false
     default: '/var/lib/docker/'
   build-mount-path-ownership:
-    description: 'Ownership of the mount point path, defaults to standard "runner" user and group.'
+    description: 'Ownership of the mount point path, defaults to standard "runner" user and group. Only applicable if merge-disk-volumes is set to true.'
     required: false
     default: 'runner:runner'
   pv-loop-path:
-    description: 'Absolute file path for the LVM image created on the root filesystem, the default is usually fine.'
+    description: 'Absolute file path for the LVM image created on the root filesystem, the default is usually fine. Only applicable if merge-disk-volumes is set to true.'
     required: false
     default: '/pv.img'
   tmp-pv-loop-path:
-    description: 'Absolute file path for the LVM image created on the temp filesystem, the default is usually fine. Must reside on /mnt'
+    description: 'Absolute file path for the LVM image created on the temp filesystem, the default is usually fine. Must reside on /mnt . Only applicable if merge-disk-volumes is set to true.'
     required: false
     default: '/mnt/tmp-pv.img'
   remove-dotnet:
@@ -90,7 +90,7 @@ runs:
         echo
 
     - name: Move /var/lib/docker/
-      if: ${{ inputs.only-remove-files == 'false' }}
+      if: ${{ inputs.merge-disk-volumes == 'true' }}
       run: sudo mv /var/lib/docker/ "${GITHUB_WORKSPACE}/docker"
       shell: bash
 
@@ -126,8 +126,8 @@ runs:
       shell: bash
 
     - name: Maximize build space
-      if: ${{ inputs.only-remove-files == 'false' }}
-      uses: easimon/maximize-build-space@v10
+      if: ${{ inputs.merge-disk-volumes == 'true' }}
+      uses: easimon/maximize-build-space@fc881a613ad2a34aca9c9624518214ebc21dfc0c # v10
       with:
         root-reserve-mb: ${{ inputs.root-reserve-mb }}
         temp-reserve-mb: ${{ inputs.temp-reserve-mb }}
@@ -139,7 +139,7 @@ runs:
         tmp-pv-loop-path: ${{ inputs.tmp-pv-loop-path }}
 
     - name: Restore /var/lib/docker/
-      if: ${{ inputs.only-remove-files == 'false' }}
+      if: ${{ inputs.merge-disk-volumess == 'true' }}
       run: sudo sh -c "mv ${GITHUB_WORKSPACE}/docker/* /var/lib/docker"
       shell: bash
 
