@@ -28,8 +28,5 @@ runs:
         then
           cd $REPO_DIR
         fi
-        mvn -B versions:set -DnewVersion=$VERSION -DprocessAllModules=true -DgenerateBackupPoms=false $MAVEN_CLI_OPTS
-        if [ -n "$PROPERTY_NAME" ]
-        then
-          mvn versions:set-property -Dproperty=$PROPERTY_NAME -DnewVersion=$VERSION -DgenerateBackupPoms=false $MAVEN_CLI_OPTS
-        fi
+        [[ -n "$PROPERTY_NAME" ]] && SET_PROPERTY="versions:set-property -Dproperty=$PROPERTY_NAME" || SET_PROPERTY=""
+        mvn -B versions:set $SET_PROPERTY -DnewVersion=$VERSION -DprocessAllModules=true -DgenerateBackupPoms=false $MAVEN_CLI_OPTS
