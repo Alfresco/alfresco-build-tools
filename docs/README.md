@@ -538,7 +538,7 @@ By default, it removes following directories:
 - `/usr/local/share/boost`
 - `$AGENT_TOOLSDIRECTORY`
 
-You can override the default behavior by specifying your own collection of files and directories using `to-remove` input parameter, or by setting `remove-android` and `remove-codeql` to true. 
+You can override the default behavior by specifying your own collection of files and directories using `to-remove` input parameter, or by setting `remove-android` and `remove-codeql` to true.
 
 By default, this action only deletes folders and files, but if you want to use the action to utilize the unused memory, you need to set `merge-disk-volumes` to true. By doing this, a community action [maximize-build-space](https://github.com/easimon/maximize-build-space) will be called.
 This will allow to determine how much memory to allocate to filesystems, and where to mount the build volume, as shown in the example below.
@@ -547,13 +547,13 @@ This will allow to determine how much memory to allocate to filesystems, and whe
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@ref
         with:
           merge-disk-volumes: true
-          root-reserve-mb: 12288
-          temp-reserve-mb: 100
-          swap-size-mb: 1024
-          build-mount-path: '/var/lib/docker/'
+          root-reserve-mb: 12288  # optional
+          temp-reserve-mb: 100  # optional
+          swap-size-mb: 1024  # optional
+          build-mount-path: '/var/lib/docker/'  # optional
 ```
 
-NOTE: When enabling [maximize-build-space](https://github.com/easimon/maximize-build-space) by setting `merge-disk-volumes` to `true`, this action should be used as the FIRST step, even before `actions/checkout`.
+> **NOTE:** when enabling [maximize-build-space](https://github.com/easimon/maximize-build-space) by setting `merge-disk-volumes` to `true`, this action should be used as the FIRST step, even before `actions/checkout`.
 
 ### get-branch-name
 

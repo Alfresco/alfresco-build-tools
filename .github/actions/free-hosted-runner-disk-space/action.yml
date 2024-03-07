@@ -90,7 +90,7 @@ runs:
         echo
 
     - name: Move /var/lib/docker/
-      if: ${{ inputs.merge-disk-volumes == 'true' }}
+      if: inputs.merge-disk-volumes == 'true'
       run: sudo mv /var/lib/docker/ "${GITHUB_WORKSPACE}/docker"
       shell: bash
 
@@ -126,7 +126,7 @@ runs:
       shell: bash
 
     - name: Maximize build space
-      if: ${{ inputs.merge-disk-volumes == 'true' }}
+      if: inputs.merge-disk-volumes == 'true'
       uses: easimon/maximize-build-space@fc881a613ad2a34aca9c9624518214ebc21dfc0c # v10
       with:
         root-reserve-mb: ${{ inputs.root-reserve-mb }}
@@ -139,7 +139,7 @@ runs:
         tmp-pv-loop-path: ${{ inputs.tmp-pv-loop-path }}
 
     - name: Restore /var/lib/docker/
-      if: ${{ inputs.merge-disk-volumess == 'true' }}
+      if: inputs.merge-disk-volumes == 'true'
       run: sudo sh -c "mv ${GITHUB_WORKSPACE}/docker/* /var/lib/docker"
       shell: bash
 
