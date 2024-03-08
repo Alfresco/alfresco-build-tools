@@ -29,9 +29,7 @@ runs:
         LOG_URL="$REPO_URL/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT"
 
         if [ -z "$STATE" ]; then
-          echo $FAILURE
-          STATE='success'
-          STATE='failure'
+          [[ "$FAILURE" == "true" ]] && STATE='failure' || STATE='success'
         fi
 
         echo "Updating deployment $DEPLOYMENT_ID with state $STATE"
