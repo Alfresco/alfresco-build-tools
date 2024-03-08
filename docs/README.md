@@ -46,6 +46,8 @@ Here follows the list of GitHub Actions topics available in the current document
     - [git-commit-changes](#git-commit-changes)
     - [git-latest-tag](#git-latest-tag)
     - [github-check-upcoming-runs](#github-check-upcoming-runs)
+    - [github-deployment-create](#github-deployment-create-and-github-deployment-status-update)
+    - [github-deployment-status-update](#github-deployment-create-and-github-deployment-status-update)
     - [github-download-file](#github-download-file)
     - [helm-build-chart](#helm-build-chart)
     - [helm-integration-tests](#helm-integration-tests)
@@ -639,6 +641,51 @@ With proper concurrency logic in place, the latest run might have been cancelled
         with:
           github-token: ${{ secrets.MY_GITHUB_TOKEN }}
           workflow: my-workflow.yml
+```
+
+### github-deployment-create and github-deployment-status-update
+
+These actions create a [GitHub deployment](https://docs.github.com/en/rest/deployments/deployments) and allow updating its status. That can be useful to track progression on a workflow pipeline.
+
+Sample usage:
+
+```yaml
+permissions:
+  deployments: write # This is required for deployment statuses management
+
+jobs:
+  job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Deployment
+        id: create-deployment
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-deployment-create@ref
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          environment: my_gh_environment
+
+      - name: Update Deployment State to in_progress
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-deployment-status-update@ref
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deployment-id: ${{ steps.create-deployment.outputs.id }}
+          state: in_progress
+
+      - name: Other Steps
+
+      - name: Update Deployment State to failure
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-deployment-status-update@ref
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deployment-id: ${{ steps.create-deployment.outputs.id }}
+          state: failure
+
+      - name: Update Deployment State to success
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-deployment-status-update@ref
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deployment-id: ${{ steps.create-deployment.outputs.id }}
+          state: success
 ```
 
 ### github-download-file
