@@ -12,7 +12,6 @@ inputs:
       The Deployment State to be set (error, failure, inactive, in_progress, queued, pending, success)
       If empty, failure is used if failure is detected within the same job, success otherwise.
 
-
 runs:
   using: "composite"
   steps:
@@ -23,7 +22,8 @@ runs:
         DEPLOYMENT_ID: ${{ inputs.deployment-id }}
         STATE: ${{ inputs.state }}
         REPO_URL: ${{ github.server_url }}/${{ github.repository }}
-        FAILURE: ${{ failure() }}
+        FAILURE: ${{ contains(steps.*.outcome, 'failure') }}
+        JSTEPS: ${{ fromJson(steps) }}
       shell: bash
       run: |
         URL="/repos/$GITHUB_REPOSITORY/deployments/$DEPLOYMENT_ID/statuses"
