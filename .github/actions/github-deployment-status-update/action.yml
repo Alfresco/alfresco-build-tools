@@ -36,10 +36,10 @@ runs:
         fi
 
         echo "Updating deployment $DEPLOYMENT_ID with state $STATE"
-        UPDATED=$(gh api -X POST $URL -F state=$STATE -F log_url=$LOG_URL)
+        UPDATED="$(gh api -X POST $URL -F state=$STATE -F log_url=$LOG_URL)"
         echo $UPDATED
 
-        DEPLOYMENT_URL=$(echo $UPDATED | jq -r ".url")
-        ENVIRONMENT=$(echo $UPDATED | jq -r ".environment")
+        DEPLOYMENT_URL="$(echo $UPDATED | jq -r ".url")"
+        ENVIRONMENT="$(echo $UPDATED | jq -r ".environment")"
 
         echo "Updated deployment status for [$ENVIRONMENT]($REPO_URL/deployments/$ENVIRONMENT) to: $STATE" >> $GITHUB_STEP_SUMMARY
