@@ -40,7 +40,7 @@ runs:
 
     - name: Update Deployment State
       if: ${{ inputs.state != '' }}
-      uses: Alfresco/alfresco-build-tools/.github/actions/git-deployment-status-update@improvement/AAE-20957-refine-deployment-statuses
+      uses: Alfresco/alfresco-build-tools/.github/actions/git-deployment-status-update@improvement/AAE-20957-deployment-status
       with:
         github-token: ${{ inputs.github-token }}
         deployment-id: ${{ steps.create.outputs.id }}
