@@ -673,6 +673,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           deployment-id: ${{ steps.create-deployment.outputs.id }}
+          failure-if: ${{ contains(steps.*.outcome, 'failure') }}
 ```
 
 Finer control over state can also be achieved:
