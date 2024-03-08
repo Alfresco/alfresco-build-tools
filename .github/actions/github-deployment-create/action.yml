@@ -30,7 +30,7 @@ runs:
 
         echo "Creating deployment at $URL for sha $GITHUB_SHA and env $TARGET_ENV"
         # use a json object to be able to empty the required_contexts array
-        CREATED="$(jq -n --arg ref "$GITHUB_SHA" --arg environment "$TARGET_ENV" '{ref: $ref, environment: $environment, "auto-merge": false, "required_contexts": []}' | gh api -X POST $URL --input -)"
+        CREATED=$(jq -n --arg ref "$GITHUB_SHA" --arg environment "$TARGET_ENV" '{ref: $ref, environment: $environment, "auto-merge": false, "required_contexts": []}' | gh api -X POST $URL --input -)
         echo $CREATED
 
         DEPLOYMENT_ID="$(echo $CREATED | jq -r ".id")"
