@@ -663,6 +663,27 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           environment: my_gh_environment
+          state: in_progress
+
+      - name: Other Steps
+
+      - name: Update Deployment State
+        if: always() && steps.create-deployment.outcome == 'success'
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-deployment-status-update@ref
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deployment-id: ${{ steps.create-deployment.outputs.id }}
+```
+
+Finer control over state can also be achieved:
+
+```yaml
+      - name: Create Deployment
+        id: create-deployment
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-deployment-create@ref
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          environment: my_gh_environment
 
       - name: Update Deployment State to in_progress
         uses: Alfresco/alfresco-build-tools/.github/actions/github-deployment-status-update@ref
@@ -674,6 +695,7 @@ jobs:
       - name: Other Steps
 
       - name: Update Deployment State to failure
+        if: always() && failure() && steps.create-deployment.outcome == 'success'
         uses: Alfresco/alfresco-build-tools/.github/actions/github-deployment-status-update@ref
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
