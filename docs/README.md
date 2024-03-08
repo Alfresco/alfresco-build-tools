@@ -668,7 +668,7 @@ jobs:
       - name: Other Steps
 
       - name: Update Deployment State to failure
-        if: always() && failure() && steps.create-deployment.outcome == 'success'
+        if: failure() && steps.create-deployment.outcome == 'success'
         uses: Alfresco/alfresco-build-tools/.github/actions/github-deployment-status-update@ref
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
