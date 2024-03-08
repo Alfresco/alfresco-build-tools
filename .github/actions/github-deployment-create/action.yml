@@ -39,7 +39,7 @@ runs:
         echo "id=$DEPLOYMENT_ID" >> $GITHUB_OUTPUT
 
     - name: Update Deployment State
-      if: ${{ inputs.state != "" }}
+      if: ${{ inputs.state != '' }}
       uses: Alfresco/alfresco-build-tools/.github/actions/git-deployment-status-update@improvement/AAE-20957-refine-deployment-statuses
       with:
         github-token: ${{ inputs.github-token }}
