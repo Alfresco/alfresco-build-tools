@@ -25,6 +25,10 @@ inputs:
   maven-password:
     description: Nexus password
     required: true
+  maven-version:
+    description: Maven version
+    required: false
+    default: ''
   quay-username:
     description: Quay.io user name
     required: false
@@ -106,30 +110,17 @@ runs:
         java-version: ${{ inputs.java-version }}
         distribution: ${{ inputs.java-distribution }}
 
-    - name: Set up SDKMAN!
-      shell: bash
-      run: |
-        if [[ -f '.sdkmanrc' ]]; then
-          curl -s "https://get.sdkman.io?rcupdate=false" | bash
-          source $HOME/.sdkman/bin/sdkman-init.sh
-          sdk env install
-          CANDIDATES=$(find $HOME/.sdkman/candidates -mindepth 1 -maxdepth 1 -type d)
-          for candidate in $CANDIDATES; do
-            echo "$candidate/current/bin" >> $GITHUB_PATH
-            PATH=$candidate/current/bin:$PATH
-            if [[ $candidate == 'java' ]]; then
-              JAVA_HOME=$HOME/.sdkman/candidates/java/current
-            fi
-          done
-          echo JAVA_HOME=$JAVA_HOME >> $GITHUB_ENV
-          echo PATH=$PATH >> $GITHUB_ENV
-        fi
-
+    - name: Set up Maven 
+      if: inputs.maven-version != ''
+      uses: stCarolas/setup-maven@d6af6ab # v5 
+      with: 
+        maven-version: ${{ inputs.maven-version }}
+ 
     # Let's use preview build for Maven Build Cache Extension
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       with:
-        repository: igdianov/maven-build-cache-extension
-        ref: master
+        repository: apache/maven-build-cache-extension
+        ref: e335d54b9c0ae44b2c7f0cbfdad50c72828086d1 # master 1.2.0-SNAPSHOT
         path: maven-build-cache-extension
 
     - shell: bash
