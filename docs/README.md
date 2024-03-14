@@ -1481,7 +1481,7 @@ Runs Veracode Source Clear Scan
 
 ### github cache cleanup
 
-Performs the cleanup of cache entries related with already closed PR
+Performs the cleanup of all cache entries related with already closed PR
 
 ```yaml
 name: Cleanup caches for work branch
