@@ -10,6 +10,7 @@ runs:
     - name: Cache cleanup
       shell: bash
       run: |
+        gh extension install actions/gh-actions-cache
         echo "Fetching and deleting all cache keys..."
 
         while :
