@@ -20,6 +20,9 @@ inputs:
       (https://github.com/kubernetes/ingress-nginx). Consider main (the default) a floating tag which can result in
       deploying any version (including betas) and non repeatable builds.
     default: main
+  with-metrics:
+    description: Wether Metrics sevre should be installed with KinD
+    default: "false"
 runs:
   using: "composite"
   steps:
@@ -30,6 +33,15 @@ runs:
         version: ${{ inputs.kind-version }}
         node_image: ${{ inputs.kind-node-image }}
         wait: ${{ inputs.kind-wait }}
+
+    - name: Install Metrics Server
+      shell: bash
+      if: inputs.with-metrics == 'true'
+      run: >-
+        helm install --repo https://kubernetes-sigs.github.io/metrics-server/
+        --set args={--kubelet-insecure-tls}
+        metrics-server metrics-server
+        --namespace kube-system
 
     - name: Install ingress-nginx
       shell: bash
