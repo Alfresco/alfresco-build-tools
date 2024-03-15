@@ -100,7 +100,7 @@ runs:
       if: inputs.build-cache-key != ''
       with:
         path: ~/.m2/build-cache
-        key: ${{ runner.os }}-build-cache-${{ inputs.build-cache-key }}-${{ github.run_id }}
+        key: ${{ runner.os }}-build-cache-${{ inputs.build-cache-key }}-${{ github.run_id }}-${{ github.run_attempt }}
         restore-keys: |
           ${{ runner.os }}-build-cache-${{ inputs.build-cache-key }}-
 
@@ -110,12 +110,12 @@ runs:
         java-version: ${{ inputs.java-version }}
         distribution: ${{ inputs.java-distribution }}
 
-    - name: Set up Maven 
+    - name: Set up Maven
       if: inputs.maven-version != ''
-      uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5 
-      with: 
+      uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
+      with:
         maven-version: ${{ inputs.maven-version }}
- 
+
     # Let's use preview build for Maven Build Cache Extension
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       with:
@@ -295,4 +295,4 @@ runs:
       if: inputs.build-cache-key != ''
       with:
         path: ~/.m2/build-cache
-        key: ${{ runner.os }}-build-cache-${{ inputs.build-cache-key }}-${{ github.run_id }}
+        key: ${{ runner.os }}-build-cache-${{ inputs.build-cache-key }}-${{ github.run_id }}-${{ github.run_attempt }}
