@@ -21,7 +21,7 @@ inputs:
       deploying any version (including betas) and non repeatable builds.
     default: main
   metrics:
-    description: Wether Metrics sevre should be installed with KinD
+    description: Whether Metrics Server should be installed upon cluster creation
     default: "false"
 runs:
   using: "composite"
