@@ -20,7 +20,7 @@ inputs:
       (https://github.com/kubernetes/ingress-nginx). Consider main (the default) a floating tag which can result in
       deploying any version (including betas) and non repeatable builds.
     default: main
-  with-metrics:
+  metrics:
     description: Wether Metrics sevre should be installed with KinD
     default: "false"
 runs:
@@ -36,7 +36,7 @@ runs:
 
     - name: Install Metrics Server
       shell: bash
-      if: inputs.with-metrics == 'true'
+      if: inputs.metrics == 'true'
       run: >-
         helm install --repo https://kubernetes-sigs.github.io/metrics-server/
         --set args={--kubelet-insecure-tls}
