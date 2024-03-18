@@ -1436,6 +1436,8 @@ Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
           # Optional but ensure repeatable builds (defaults to latest nginx ingress version otherwise).
           # see https://github.com/kubernetes/ingress-nginx
           # ingress-nginx-ref: controller-v1.8.2
+          # Enable deploying Metrics server with KinD
+          # metrics: true
       - name: Helm deploy
         run: |
           helm dep up ./helm/chart
