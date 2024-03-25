@@ -64,7 +64,7 @@ jobs:
     name: "Build"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.20.0
         with:
           java-version: ${{ inputs.java-version }}
@@ -104,7 +104,7 @@ jobs:
     needs: compute_release_conditions
     if: needs.compute_release_conditions.outputs.should_release == 'true'
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
         with:
           persist-credentials: false
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.20.0
