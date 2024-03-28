@@ -1630,7 +1630,7 @@ With quay.io, this can be easily achieved by setting the following label on the 
 quay.expires-after=2w
 ```
 
-An example workflow could be:
+An example step which compute the label could be:
 
 ```yml
 - id: vars
@@ -1643,6 +1643,11 @@ An example workflow could be:
       echo "image_tag=${GITHUB_REF_NAME//\//-}" >> $GITHUB_OUTPUT
       echo "image_labels=quay.expires-after=2w" >> $GITHUB_OUTPUT
     fi
+```
+
+Then if you are using the `docker/build-push-action` action:
+
+```yml
 - name: Build and push
   uses: docker/build-push-action@v5
   with:
@@ -1652,6 +1657,16 @@ An example workflow could be:
     platforms: linux/amd64,linux/arm64/v8
     labels: ${{ steps.vars.outputs.image_labels }}
     provenance: false # required due to https://issues.redhat.com/browse/PROJQUAY-5013
+```
+
+Alternatively, if you are building Docker images as part of a Maven lifecycle
+using the [docker-maven-plugin](https://dmp.fabric8.io):
+
+```yml
+- name: "Build"
+  env:
+    MAVEN_OPTS: "-Ddocker.labels.${{ steps.vars.outputs.image_labels }}"
+  run: mvn -B -V package -DskipTests
 ```
 
 ## Known issues
