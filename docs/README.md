@@ -1624,11 +1624,15 @@ More docs on [using concurrency](https://docs.github.com/en/actions/using-jobs/u
 It may be desirable to push docker images from branches to test them before
 merge but we should avoid polluting the image registry with these tags.
 
-With quay.io, this can be easily achieved by setting the following label on the docker image:
+With quay.io, this can be easily achieved by setting the following label on the
+docker image like:
 
 ```properties
 quay.expires-after=2w
 ```
+
+For the supported time formats, please check the [RedHat official
+documentation](https://access.redhat.com/documentation/it-it/red_hat_quay/3.2/html/use_red_hat_quay/working_with_tags#tag-expiration).
 
 An example step which compute the label could be:
 
