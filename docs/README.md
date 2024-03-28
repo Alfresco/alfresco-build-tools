@@ -1622,9 +1622,9 @@ More docs on [using concurrency](https://docs.github.com/en/actions/using-jobs/u
 ### Expiring tags for quay.io images
 
 It may be desirable to push docker images from branches to test them before
-merge but we should avoid to pollute image registry with tags.
+merge but we should avoid polluting the image registry with these tags.
 
-With quay.io it can be easily achievable by setting on the docker image the label:
+With quay.io, this can be easily achieved by setting the following label on the docker image:
 
 ```properties
 quay.expires-after=2w
