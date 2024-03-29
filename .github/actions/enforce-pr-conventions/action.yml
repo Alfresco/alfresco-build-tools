@@ -51,13 +51,13 @@ runs:
         fi
 
         if [[ -z "$BRANCH_REGEX" ]]; then
-          echo "valid-branch-regex=^(revert-[0-9]+-)?(improvement|fix|feature|test|tmp)\/($JIRA_KEY)-[0-9]+[_-]{1}[A-Za-z0-9._-]+$" >> $GITHUB_OUTPUT
+          echo "valid-branch-regex=^(revert-)|(improvement|fix|feature|test|tmp)\/($JIRA_KEY)-[0-9]+[_-]{1}[A-Za-z0-9._-]+$" >> $GITHUB_OUTPUT
         else
           echo "valid-branch-regex=$BRANCH_REGEX" >> $GITHUB_OUTPUT
         fi
 
         if [[ -z "$PR_REGEX" ]]; then
-          echo "valid-pr-title-regex=^(Revert .*)|^($JIRA_KEY)-[0-9]+ [A-Z]{1}.*$" >> $GITHUB_OUTPUT
+          echo "valid-pr-title-regex=^(Revert*)|^($JIRA_KEY)-[0-9]+ [A-Z]{1}.*$" >> $GITHUB_OUTPUT
         else
           echo "valid-pr-title-regex=$PR_REGEX" >> $GITHUB_OUTPUT
         fi
