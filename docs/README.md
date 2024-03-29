@@ -484,9 +484,9 @@ To exempt specific branch names from the branch name checks, the optional input 
 
 The inputs `jira-project-key`, `valid-branch-regex` and `valid-pr-title-regex` are optional: if `valid-branch-regex` or `valid-pr-title-regex` are not provided, the action will consume `jira-project-key` to generate the default regex.
 
-**Default regex for Branch name**: `"^(revert-[0-9]+-)?(improvement|fix|feature|test|tmp)\/($JIRA_KEY)-[0-9]+[_-]{1}[A-Za-z0-9._-]+$"`
+**Default regex for Branch name**: `"^(revert-)|(improvement|fix|feature|test|tmp)\/($JIRA_KEY)-[0-9]+[_-]{1}[A-Za-z0-9._-]+$"`
 
-`(revert-[0-9]+-)` is optional and is used to match revert branches name.
+If the branch name starts with `(revert-)` it will be considered valid.
 
 Examples:
 
