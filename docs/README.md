@@ -496,11 +496,11 @@ Examples:
 
 ❌ dev-uname-jkey-12345
 
-**Default regex for PR title:**: `"^(Revert .*)|^($JIRA_KEY)-[0-9]+ [A-Z]{1}.*$"`
+**Default regex for PR title:**: `"^(Revert*)|^($JIRA_KEY)-[0-9]+ [A-Z]{1}.*$"`
 
-If the PR title starts with "Revert ", it will be considered valid.
+If the PR title starts with "Revert", it will be considered valid.
 
-If the PR title does not start with "Revert ", it will be checked against `^($JIRA_KEY)-[0-9]+ [A-Z]{1}[A-Za-z].*$` regex.
+If the PR title does not start with "Revert", it will be checked against `^($JIRA_KEY)-[0-9]+ [A-Z]{1}[A-Za-z].*$` regex.
 
 Examples:
 
