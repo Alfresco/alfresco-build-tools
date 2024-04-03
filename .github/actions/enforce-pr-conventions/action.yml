@@ -28,7 +28,7 @@ runs:
         PR_USER: ${{ github.event.pull_request.user.login }}
       shell: bash
       run: |
-          if [[ $PR_USER != 'dependabot[bot]' && $BRANCH_NAME != pr-* ]]; then
+          if [[ $PR_USER != 'dependabot[bot]' && $BRANCH_NAME != pr-* && $PR_USER != 'alfresco-build']]; then
             echo "continue=true" >> $GITHUB_OUTPUT
           else
             echo "continue=false" >> $GITHUB_OUTPUT
