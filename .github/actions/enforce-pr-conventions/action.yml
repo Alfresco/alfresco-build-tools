@@ -22,7 +22,7 @@ runs:
     - name: Get branch name
       uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v5.22.1
 
-    - name: Check is Dependabot or Propagation PR or Upstream branch
+    - name: Check is Dependabot PR or Propagation PR or Upstream PR
       id: check
       env:
         PR_USER: ${{ github.event.pull_request.user.login }}
