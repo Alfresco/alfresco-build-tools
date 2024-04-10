@@ -22,13 +22,13 @@ runs:
     - name: Get branch name
       uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v5.22.3
 
-    - name: Check is Dependabot PR or Propagation PR or Upstream PR or Release PR
+    - name: Check is Dependabot PR or Propagation PR
       id: check
       env:
         PR_USER: ${{ github.event.pull_request.user.login }}
       shell: bash
       run: |
-          if [[ $PR_USER != 'dependabot[bot]' && $BRANCH_NAME != pr-* && $BRANCH_NAME != upstream-* && $BRANCH_NAME != release-* ]]; then
+          if [[ $PR_USER != 'dependabot[bot]' && $BRANCH_NAME != pr-* ]]; then
             echo "continue=true" >> $GITHUB_OUTPUT
           else
             echo "continue=false" >> $GITHUB_OUTPUT
@@ -69,7 +69,7 @@ runs:
       run: |
         readarray -t branches <<< "${{ inputs.whitelist-branches }}"
         for branch in "${branches[@]}"; do
-            if [[ $branch == $BRANCH_NAME ]]; then
+            if [[ $branch == $BRANCH_NAME* ]]; then
                 echo "continue=false" >> $GITHUB_OUTPUT
                 exit 0
             fi
