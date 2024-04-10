@@ -69,7 +69,7 @@ runs:
       run: |
         readarray -t branches <<< "${{ inputs.whitelist-branches }}"
         for branch in "${branches[@]}"; do
-            if [[ $branch =~ $BRANCH_NAME* ]]; then
+            if [[ $branch =~ ^$BRANCH_NAME ]]; then
                 echo "continue=false" >> $GITHUB_OUTPUT
                 exit 0
             fi
