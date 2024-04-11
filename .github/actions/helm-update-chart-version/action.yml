@@ -13,7 +13,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@v5.22.3
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@v5.22.4
     - name: Update version
       shell: bash
       env:
