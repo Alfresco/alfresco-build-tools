@@ -10,9 +10,9 @@ on:
         default: .
     secrets:
       AWS_ACCESS_KEY_ID:
-        required: true
+        required: false
       AWS_SECRET_ACCESS_KEY:
-        required: true
+        required: false
       BOT_GITHUB_TOKEN:
         required: false
       DOCKER_USERNAME:
@@ -76,6 +76,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
+
+      - name: Assume AWS Role if AWS_ROLE_ARN var is set
+        uses: aws-actions/configure-aws-credentials@v4
+        if: vars.AWS_ROLE_ARN != ''
+        with:
+          aws-region: ${{ env.AWS_DEFAULT_REGION}}
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          role-session-name: TerraformWorkflow
 
       - name: Load environment variables from yml
         uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v5.24.0
