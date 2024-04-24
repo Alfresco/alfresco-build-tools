@@ -1525,9 +1525,9 @@ Reusable workflow which implements an opinionated workflow to manage terraform
 repositories leveraging [dflook/terraform-github-actions](https://github.com/dflook/terraform-github-actions),
 optionally allowing a multi-state approach for managing resources.
 
-This workflow assume having a GitHub environment named `production` when
-executing on the `main` branch, and a `develop` GitHub environment when
-executing on the `develop` branch.
+This workflow assumes a GitHub environment named `production` to be present when
+run against the `main` branch, and a `develop` GitHub environment to be present when
+run against the `develop` branch.
 
 GitHub environments must be configured with the following variables:
 
