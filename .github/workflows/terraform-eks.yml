@@ -78,7 +78,7 @@ jobs:
         uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4.1.3
 
       - name: Load environment variables from yml
-        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v5.23.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v5.24.0
         with:
           yml_path: ${{ inputs.terraform_root_path }}/tfenv.yml
 
