@@ -32,7 +32,7 @@ runs:
     - name: Dependabot metadata
       if: steps.check.outputs.continue == 'true'
       id: metadata
-      uses: dependabot/fetch-metadata@0fb21704c18a42ce5aa8d720ea4b912f5e6babef # v2.0.0
+      uses: dependabot/fetch-metadata@5e5f99653a5b510e8555840e80cbf1514ad4af38 # v2.1.0
       with:
         github-token: "${{ inputs.token }}"
 
