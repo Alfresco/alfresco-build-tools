@@ -96,7 +96,7 @@ runs:
         restore-keys: |
           ${{ runner.os }}-maven-
 
-    - uses: actions/cache/restore@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
+    - uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
       if: inputs.build-cache-key != ''
       with:
         path: ~/.m2/build-cache
@@ -115,21 +115,6 @@ runs:
       uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
       with:
         maven-version: ${{ inputs.maven-version }}
-
-    # Let's use preview build for Maven Build Cache Extension
-    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      with:
-        repository: apache/maven-build-cache-extension
-        ref: e335d54b9c0ae44b2c7f0cbfdad50c72828086d1 # master 1.2.0-SNAPSHOT
-        path: maven-build-cache-extension
-
-    - shell: bash
-      run: mv ./maven-build-cache-extension ../maven-build-cache-extension
-
-    - name: Install Maven Build Cache Extension locally
-      working-directory: ../maven-build-cache-extension
-      shell: bash
-      run: mvn -B -ntp install -DskipTests
 
     - name: Compute maven options
       id: compute-maven-options
@@ -291,7 +276,7 @@ runs:
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
 
     - name: Save maven build cache
-      uses: actions/cache/save@704facf57e6136b1bc63b828d79edcd491f0ee84 # v3.3.2
+      uses: actions/cache/save@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
       if: inputs.build-cache-key != ''
       with:
         path: ~/.m2/build-cache
