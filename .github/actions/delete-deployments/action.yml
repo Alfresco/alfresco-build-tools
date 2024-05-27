@@ -1,0 +1,61 @@
+name: delete-deployments
+
+description: Deletes the deployments created by a workflow run in the scope of the PR.
+
+inputs:
+  owner:
+    description: The owner of the repository
+    required: true
+  repo:
+    description: The name of the repository
+    required: true
+  branch-name:
+    description: The name of the branch associated with pull request.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: delete-deployments
+      shell: bash
+      uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+      env:
+        OWNER: ${{ inputs.owner }}
+        REPO: ${{ inputs.repo }}
+        BRANCH_NAME: ${{inputs.branch-name }}
+      with:
+        script: |
+          const perPage = 100;
+          let page = 1;
+          let allDeployments = [];
+          while(true){
+          const deployments = await github.rest.repos.listDeployments({
+            owner:env.OWNER,
+            repo:env.REPO,
+            ref: env.BRANCH_NAME,
+            per_page: perPage,
+            page: page
+          });
+
+          allDeployments = [...allDeployments, ...deployments.data];
+          if (!deployments.data.length) {
+          break;
+          }
+          page++;
+          }
+
+          await Promise.all(
+            deployments.data.map(async (deployment) => {
+              await github.rest.repos.createDeploymentStatus({
+                owner: env.OWNER,
+                repo: env.repo,
+                deployment_id: deployment.id,
+                state: 'inactive'
+              });
+              return github.rest.repos.deleteDeployment({
+                owner: env.OWNER
+                repo: env.REPO,
+                deployment_id: deployment.id
+              });
+            })
+            );
