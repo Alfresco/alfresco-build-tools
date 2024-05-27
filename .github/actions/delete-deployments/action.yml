@@ -42,14 +42,14 @@ runs:
           await Promise.all(
             allDeployments.map(async (deployment) => {
               await github.rest.repos.createDeploymentStatus({
-                owner: env.OWNER,
-                repo: env.REPO,
+                owner: ${{ inputs.owner }},
+                repo: ${{ inputs.repo }},
                 deployment_id: deployment.id,
                 state: 'inactive'
               });
               return github.rest.repos.deleteDeployment({
-                owner: env.OWNER,
-                repo: env.REPO,
+                owner: ${{ inputs.owner }},
+                repo: ${{ inputs.repo }},
                 deployment_id: deployment.id
               });
             })
