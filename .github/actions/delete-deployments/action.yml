@@ -47,12 +47,12 @@ runs:
             allDeployments.map(async (deployment) => {
               await github.rest.repos.createDeploymentStatus({
                 owner: env.OWNER,
-                repo: env.repo,
+                repo: env.REPO,
                 deployment_id: deployment.id,
                 state: 'inactive'
               });
               return github.rest.repos.deleteDeployment({
-                owner: env.OWNER
+                owner: env.OWNER,
                 repo: env.REPO,
                 deployment_id: deployment.id
               });
