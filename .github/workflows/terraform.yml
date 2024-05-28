@@ -141,7 +141,7 @@ jobs:
 
       - name: Terraform destroy
         uses: dflook/terraform-destroy@7f500c95250b8744af0b6c632d54b38d91056062 # v1.42.0
-        if: github.event_name == 'pull_request' || github.event.inputs.terrafom_operation == 'destroy'
+        if: github.event.inputs.terrafom_operation == 'destroy'
         with:
           path: ${{ inputs.terraform_root_path }}
           var_file: |
