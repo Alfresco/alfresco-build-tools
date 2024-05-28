@@ -25,9 +25,9 @@ runs:
           let allDeployments = [];
           while(true){
           const deployments = await github.rest.repos.listDeployments({
-            owner: ${{ inputs.owner }},
-            repo: ${{ inputs.repo }},
-            ref: ${{inputs.branch-name }},
+            owner: "${{ inputs.owner }}",
+            repo: "${{ inputs.repo }}",
+            ref: "${{ inputs.branch-name }}",
             per_page: perPage,
             page: page
           });
@@ -42,14 +42,14 @@ runs:
           await Promise.all(
             allDeployments.map(async (deployment) => {
               await github.rest.repos.createDeploymentStatus({
-                owner: ${{ inputs.owner }},
-                repo: ${{ inputs.repo }},
+                owner: "${{ inputs.owner }}",
+                repo: "${{ inputs.repo }}",
                 deployment_id: deployment.id,
                 state: 'inactive'
               });
               return github.rest.repos.deleteDeployment({
-                owner: ${{ inputs.owner }},
-                repo: ${{ inputs.repo }},
+                owner: "${{ inputs.owner }}",
+                repo: "${{ inputs.repo }}",
                 deployment_id: deployment.id
               });
             })
