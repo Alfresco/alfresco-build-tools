@@ -4,12 +4,6 @@ description: Delete gitHub deployments.Used as workaround to delete the flood of
   In this case a new comment is added in PR for every entry of the matrix.
 
 inputs:
-  owner:
-    description: The owner of the repository
-    required: true
-  repo:
-    description: The name of the repository
-    required: true
   branch-name:
     description: The name of the branch associated with pull request.
     required: true
@@ -29,13 +23,12 @@ runs:
           let allDeployments = [];
           while(true){
           const deployments = await github.rest.repos.listDeployments({
-            owner: "${{ inputs.owner }}",
-            repo: "${{ inputs.repo }}",
+            owner: context.repo.owner,
+            repo: context.repo.repo,
             ref: "${{ inputs.branch-name }}",
             per_page: perPage,
             page: page,
-           // Include environment if provided
-              ${ inputs.environment ? `environment: "${ inputs.environment }",` : '' }
+            ${ inputs.environment ? `environment: "${ inputs.environment }",` : '' }
           });
 
           allDeployments = [...allDeployments, ...deployments.data];
@@ -48,14 +41,14 @@ runs:
           await Promise.all(
             allDeployments.map(async (deployment) => {
               await github.rest.repos.createDeploymentStatus({
-                owner: "${{ inputs.owner }}",
-                repo: "${{ inputs.repo }}",
+                owner: context.repo.owner,
+                repo: context.repo.repo,
                 deployment_id: deployment.id,
                 state: 'inactive'
               });
               return github.rest.repos.deleteDeployment({
-                owner: "${{ inputs.owner }}",
-                repo: "${{ inputs.repo }}",
+                owner: context.repo.owner,
+                repo: context.repo.repo,
                 deployment_id: deployment.id
               });
             })
