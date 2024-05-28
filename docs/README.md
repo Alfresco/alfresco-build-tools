@@ -1563,7 +1563,7 @@ on:
       - develop
   workflow_dispatch:
     inputs:
-      terraform_option:
+      terraform_operation:
         description: 'Terraform option to perform apply or destroy operation.'
         type: choice
         required: true
@@ -1577,12 +1577,14 @@ jobs:
     uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@ref
     with:
       terraform_root_path: infra
+      terraform_operation: ${{ inputs.terraform_operation }}
     secrets: inherit
   invoke-terraform-k8s:
     needs: invoke-terraform-infra
     uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@ref
     with:
       terraform_root_path: k8s
+      terraform_operation: ${{ inputs.terraform_operation }}
     secrets: inherit
 ```
 
