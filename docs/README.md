@@ -1562,6 +1562,15 @@ on:
       - main
       - develop
   workflow_dispatch:
+    inputs:
+      terraform_option:
+        description: 'Terraform option to perform apply or destroy operation.'
+        type: choice
+        required: true
+        options:
+          - apply
+          - destroy
+        default: apply
 
 jobs:
   invoke-terraform-infra:
