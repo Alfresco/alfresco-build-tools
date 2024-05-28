@@ -115,7 +115,7 @@ jobs:
 
       - name: Terraform plan
         uses: dflook/terraform-plan@0f4a5046f18698eee737a52d4cb11f56f2377a32 # v1.42.0
-        if: github.event_name == 'pull_request' || inputs.terraform_operation == 'apply'
+        if: github.event_name == 'pull_request'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
           path: ${{ inputs.terraform_root_path }}
@@ -132,6 +132,7 @@ jobs:
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
           path: ${{ inputs.terraform_root_path }}
+          auto_approve: ${{ github.event_name == 'workflow_dispatch' }}
           var_file: |
             ${{ inputs.terraform_root_path }}/common.tfvars
             ${{ inputs.terraform_root_path }}/${{ needs.compute_basic_vars.outputs.environment_name }}.tfvars
