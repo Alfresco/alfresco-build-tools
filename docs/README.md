@@ -686,20 +686,19 @@ jobs:
 
 ### github-deployments-delete
 
-Delete gitHub deployments.Used as workaround to delete the flood of messages added to PRs when we run a workflow with a matrix that have the field environment set in the job.
-In this case a new comment is added in PR for every entry of the matrix.
+Deletes all GitHub deployments on a given branch.
+Used as workaround to delete the flood of messages visible on some PRs where environments are leveraged but deployments are not.
 
 Sample usage:
 
 ```yaml
-   permissions:
-    deployments: write # This is required for deployment statuses management
+    permissions:
+      deployments: write # This is required for deployment statuses management
 
     steps:
       - uses: Alfresco/alfresco-build-tools/.github/actions/github-deployments-delete@ref
         with:
           branch-name: ${{ github.head_ref }}
-
 ```
 
 ### github-download-file
