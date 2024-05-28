@@ -698,8 +698,6 @@ Sample usage:
     steps:
       - uses: Alfresco/alfresco-build-tools/.github/actions/github-deployments-delete@ref
         with:
-          owner: ${{ github.repository_owner }}
-          repo:  ${{ github.event.repository.name }}
           branch-name: ${{ github.head_ref }}
 
 ```
