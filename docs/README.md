@@ -33,7 +33,6 @@ Here follows the list of GitHub Actions topics available in the current document
     - [automate-dependabot](#automate-dependabot)
     - [automate-propagation](#automate-propagation)
     - [configure-git-author](#configure-git-author)
-    - [delete-deployments](#delete-deployments)
     - [docker-build-image](#docker-build-image)
     - [docker-dump-containers-logs](#docker-dump-containers-logs)
     - [docker-scan-image-dirs](#docker-scan-image-dirs)
@@ -48,6 +47,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [git-latest-tag](#git-latest-tag)
     - [github-check-upcoming-runs](#github-check-upcoming-runs)
     - [github-deployment-create and github-deployment-status-update](#github-deployment-create-and-github-deployment-status-update)
+    - [github-deployments-delete](#github-deployments-delete)
     - [github-download-file](#github-download-file)
     - [helm-build-chart](#helm-build-chart)
     - [helm-integration-tests](#helm-integration-tests)
@@ -396,22 +396,6 @@ Configures the git username and email to associate commits with the provided ide
 
 The two vars in the previous snippet are [workflow configuration variables](https://github.blog/changelog/2023-01-10-github-actions-support-for-configuration-variables-in-workflows/) that can be created at organization level and shared across different repositories.
 
-### delete-deployments
-
-Deletes the deployments created by a workflow run in the scope of the PR.
-
-```yaml
-  permissions:
-    deployments: write # This is required for deployment statuses management
-      - uses: Alfresco/alfresco-build-tools/.github/actions/delete-deployments@ref
-        with:
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          ref: ${{ github.head_ref}}
-```
-
-The inputs required are the owner of the repo, repo name and the name of the branch associated with the PR.
-
 ### docker-build-image
 
 Build docker image based on supplied jar files. It replaces `image-dir` and `image-tag` in the
@@ -698,6 +682,26 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           deployment-id: ${{ steps.create-deployment.outputs.id }}
           state: success
+```
+
+### github-deployments-delete
+
+Delete gitHub deployments.Used as workaround to delete the flood of messages added to PRs when we run a workflow with a matrix that have the field environment set in the job.
+In this case a new comment is added in PR for every entry of the matrix.
+
+Sample usage:
+
+```yaml
+   permissions:
+    deployments: write # This is required for deployment statuses management
+
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-deployments-delete@ref
+        with:
+          owner: ${{ github.repository_owner }}
+          repo:  ${{ github.event.repository.name }}
+          branch-name: ${{ github.head_ref }}
+
 ```
 
 ### github-download-file

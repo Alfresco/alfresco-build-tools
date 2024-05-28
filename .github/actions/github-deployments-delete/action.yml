@@ -1,6 +1,7 @@
-name: delete-deployments
+name: Delete Github Deployments
 
-description: Deletes the deployments created by a workflow run in the scope of the PR.
+description: Delete gitHub deployments.Used as workaround to delete the flood of messages added to PRs when we run a workflow with a matrix that have the field environment set in the job.
+  In this case a new comment is added in PR for every entry of the matrix.
 
 inputs:
   owner:
@@ -12,6 +13,9 @@ inputs:
   branch-name:
     description: The name of the branch associated with pull request.
     required: true
+  environment:
+    description: The environment to delete deployments from
+    required: false
 
 runs:
   using: composite
@@ -29,7 +33,9 @@ runs:
             repo: "${{ inputs.repo }}",
             ref: "${{ inputs.branch-name }}",
             per_page: perPage,
-            page: page
+            page: page,
+           // Include environment if provided
+              ${ inputs.environment ? `environment: "${ inputs.environment }",` : '' }
           });
 
           allDeployments = [...allDeployments, ...deployments.data];
