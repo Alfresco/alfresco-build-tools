@@ -8,6 +8,10 @@ on:
         type: string
         required: false
         default: .
+      terrafom_operation:
+        description: the terraform operation to perform (apply or destroy)
+        type: string
+        required: false
     secrets:
       AWS_ACCESS_KEY_ID:
         required: false
@@ -111,7 +115,7 @@ jobs:
 
       - name: Terraform plan
         uses: dflook/terraform-plan@0f4a5046f18698eee737a52d4cb11f56f2377a32 # v1.42.0
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' || github.event.inputs.terrafom_operation == 'apply'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
           path: ${{ inputs.terraform_root_path }}
@@ -124,9 +128,21 @@ jobs:
 
       - name: Terraform apply
         uses: dflook/terraform-apply@8a1bf89017460503cf302632cb15e8583afa7ac4 # v1.42.0
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' || github.event.inputs.terrafom_operation == 'apply'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
+          path: ${{ inputs.terraform_root_path }}
+          var_file: |
+            ${{ inputs.terraform_root_path }}/common.tfvars
+            ${{ inputs.terraform_root_path }}/${{ needs.compute_basic_vars.outputs.environment_name }}.tfvars
+          backend_config: |
+            bucket=${{ vars.TERRAFORM_STATE_BUCKET }}
+            key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
+
+      - name: Terraform destroy
+        uses: dflook/terraform-destroy@7f500c95250b8744af0b6c632d54b38d91056062 # v1.42.0
+        if: github.event_name == 'pull_request' || github.event.inputs.terrafom_operation == 'destroy'
+        with:
           path: ${{ inputs.terraform_root_path }}
           var_file: |
             ${{ inputs.terraform_root_path }}/common.tfvars
