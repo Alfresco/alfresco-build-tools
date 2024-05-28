@@ -1564,7 +1564,7 @@ on:
   workflow_dispatch:
     inputs:
       terraform_operation:
-        description: 'Terraform option to perform apply or destroy operation.'
+        description: 'Perform the requested operation on terraform'
         type: choice
         required: true
         options:
