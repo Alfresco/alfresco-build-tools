@@ -15,7 +15,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
     - name: delete-deployments
       uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
       with:
