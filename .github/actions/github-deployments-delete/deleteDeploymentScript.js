@@ -19,19 +19,19 @@ module.exports = async ({github, context,ref,environment}) => {
     page++;
   }
 
-    await Promise.all(
-        allDeployments.map(async (deployment) => {
-          await github.rest.repos.createDeploymentStatus({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            deployment_id: deployment.id,
-            state: 'inactive'
-          });
-          return github.rest.repos.deleteDeployment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            deployment_id: deployment.id
-          });
-        })
-      );
+  await Promise.all(
+    allDeployments.map(async (deployment) => {
+      await github.rest.repos.createDeploymentStatus({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        deployment_id: deployment.id,
+        state: 'inactive'
+      });
+      return github.rest.repos.deleteDeployment({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        deployment_id: deployment.id
+      });
+    })
+  );
 }
