@@ -19,7 +19,6 @@ module.exports = async ({github, context,ref,environment}) => {
     page++;
   }
 
-
     await Promise.all(
         allDeployments.map(async (deployment) => {
           await github.rest.repos.createDeploymentStatus({
