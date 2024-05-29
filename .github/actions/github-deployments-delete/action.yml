@@ -27,4 +27,3 @@ runs:
             ref:${{ inputs.branch-name }},
             environment:${{ inputs.environment }}
           );
-
