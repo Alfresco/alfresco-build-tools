@@ -1,8 +1,8 @@
-module.exports = async ({github, context,ref,environment})=>{
+module.exports = async ({github, context,ref,environment}) => {
   const perPage = 100;
   let page = 1;
   let allDeployments = [];
-  while(true){
+  while(true) {
     const deployments = await github.rest.repos.listDeployments({
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -16,23 +16,23 @@ module.exports = async ({github, context,ref,environment})=>{
     if (!deployments.data.length) {
       break;
     }
-      page++;
-    }
+    page++;
+  }
 
 
     await Promise.all(
-      allDeployments.map(async (deployment) => {
-        await github.rest.repos.createDeploymentStatus({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          deployment_id: deployment.id,
-          state: 'inactive'
-        });
-        return github.rest.repos.deleteDeployment({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          deployment_id: deployment.id
-        });
-      })
-    );
+        allDeployments.map(async (deployment) => {
+          await github.rest.repos.createDeploymentStatus({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            deployment_id: deployment.id,
+            state: 'inactive'
+          });
+          return github.rest.repos.deleteDeployment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            deployment_id: deployment.id
+          });
+        })
+      );
 }
