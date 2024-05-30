@@ -38,6 +38,6 @@ module.exports = async ({github, context, options}) => {
         repo: context.repo.repo,
         deployment_id: deployment.id
       });
-    });
+    })
   );
 }
