@@ -17,10 +17,12 @@ runs:
   steps:
     - name: delete-deployments
       uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+      env:
+        GITHUB_ACTION_PATH=${{ github.action_path }}
       with:
         script: |
-          const github_action_path=${{ github.action_path }};
-          const script = require(github_action_path+'/deleteDeploymentScript.js');
+          const github_action_path=process.env.GITHUB_ACTION_PATH;
+          const script = require(`${githubActionPath}/deleteDeploymentScript.js`);
           await script(
             github,
             context,
