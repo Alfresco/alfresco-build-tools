@@ -1,4 +1,4 @@
-module.exports = async ({github, context,options}) => {
+module.exports = async ({github, context, ref, environment}) => {
   const perPage = 100;
   let page = 1;
   let allDeployments = [];
