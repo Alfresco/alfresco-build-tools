@@ -18,7 +18,7 @@ runs:
     - name: delete-deployments
       uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
       env:
-        GITHUB_ACTION_PATH=${{ github.action_path }}
+        GITHUB_ACTION_PATH: ${{ github.action_path }}
       with:
         script: |
           const githubActionPath=process.env.GITHUB_ACTION_PATH;
