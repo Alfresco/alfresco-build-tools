@@ -21,12 +21,9 @@ runs:
         script: |
           const github_action_path=${{ github.action_path }};
           const script = require(github_action_path+'/deleteDeploymentScript.js');
-          const options = {
-            ref: '${{ inputs.branch-name }}',
-            environment: '${{ inputs.environment }}'
-          };
           await script(
             github,
             context,
-            options
+            ref:'${{ inputs.branch-name }}',
+            environment:'${{ inputs.environment }}'
           );
