@@ -1,7 +1,8 @@
-module.exports = async ({github, context, ref, environment}) => {
+module.exports = async ({github, context, options}) => {
   const perPage = 100;
   let page = 1;
   let allDeployments = [];
+  const {ref,environment} = options;
 
  console.log("Owner: ",context.repo.owner);
  console.log("Repo: ",  context.repo.repo);
@@ -37,6 +38,6 @@ module.exports = async ({github, context, ref, environment}) => {
         repo: context.repo.repo,
         deployment_id: deployment.id
       });
-    })
+    });
   );
 }

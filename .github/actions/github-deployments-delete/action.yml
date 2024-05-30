@@ -21,11 +21,13 @@ runs:
         GITHUB_ACTION_PATH: ${{ github.action_path }}
       with:
         script: |
+          const options={
+          ref:'${{ inputs.branch-name }}',
+          environment:'${{ inputs.environment }}'
+          };
           const githubActionPath=process.env.GITHUB_ACTION_PATH;
           const script = require(`${githubActionPath}/deleteDeploymentScript.js`);
           await script(
             github,
             context,
-            ref:'${{ inputs.branch-name }}',
-            environment:'${{ inputs.environment }}'
-          );
+            options);
