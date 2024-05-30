@@ -19,7 +19,8 @@ runs:
       uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
       with:
         script: |
-          const script = require('.github/actions/github-deployments-delete/deleteDeploymentScript.js');
+          const github_action_path=${{ github.action_path }};
+          const script = require(github_action_path+'/deleteDeploymentScript.js');
           const options = {
             ref: '${{ inputs.branch-name }}',
             environment: '${{ inputs.environment }}'
