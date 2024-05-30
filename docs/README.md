@@ -47,6 +47,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [git-latest-tag](#git-latest-tag)
     - [github-check-upcoming-runs](#github-check-upcoming-runs)
     - [github-deployment-create and github-deployment-status-update](#github-deployment-create-and-github-deployment-status-update)
+    - [github-deployments-delete](#github-deployments-delete)
     - [github-download-file](#github-download-file)
     - [helm-build-chart](#helm-build-chart)
     - [helm-integration-tests](#helm-integration-tests)
@@ -681,6 +682,23 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           deployment-id: ${{ steps.create-deployment.outputs.id }}
           state: success
+```
+
+### github-deployments-delete
+
+Deletes all GitHub deployments on a given branch.
+Used as workaround to delete the flood of messages visible on some PRs where environments are leveraged but deployments are not.
+
+Sample usage:
+
+```yaml
+    permissions:
+      deployments: write # This is required for deployment statuses management
+
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-deployments-delete@ref
+        with:
+          branch-name: ${{ github.head_ref }}
 ```
 
 ### github-download-file

@@ -1,0 +1,30 @@
+name: Delete Github Deployments
+
+description:
+  Deletes all GitHub deployments on a given branch.
+  Used as workaround to delete the flood of messages visible on some PRs where environments are leveraged but deployments are not.
+
+inputs:
+  branch-name:
+    description: The name of the branch for the deployments
+    required: true
+  environment:
+    description: The optional environment for the deployments
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: delete-deployments
+      uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+      env:
+        GITHUB_ACTION_PATH: ${{ github.action_path }}
+      with:
+        script: |
+          const options={
+            ref:'${{ inputs.branch-name }}',
+            environment:'${{ inputs.environment }}'
+          };
+          const githubActionPath = process.env.GITHUB_ACTION_PATH;
+          const script = require(`${githubActionPath}/deleteDeploymentScript.js`);
+          await script({github, context, options});
