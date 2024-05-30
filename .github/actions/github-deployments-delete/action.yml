@@ -21,7 +21,7 @@ runs:
         GITHUB_ACTION_PATH=${{ github.action_path }}
       with:
         script: |
-          const github_action_path=process.env.GITHUB_ACTION_PATH;
+          const githubActionPath=process.env.GITHUB_ACTION_PATH;
           const script = require(`${githubActionPath}/deleteDeploymentScript.js`);
           await script(
             github,
