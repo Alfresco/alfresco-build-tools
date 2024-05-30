@@ -27,7 +27,7 @@ runs:
           };
           const githubActionPath=process.env.GITHUB_ACTION_PATH;
           const script = require(`${githubActionPath}/deleteDeploymentScript.js`);
-          await script(
+          await script({
             github,
             context,
-            options);
+            options});
