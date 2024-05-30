@@ -2,6 +2,11 @@ module.exports = async ({github, context, ref, environment}) => {
   const perPage = 100;
   let page = 1;
   let allDeployments = [];
+
+ console.log("Owner: ",context.repo.owner);
+ console.log("Repo: ",  context.repo.repo);
+ console.log("ref: ", ref);
+ console.log("environment: ", environment);
   while(true) {
     const deployments = await github.rest.repos.listDeployments({
         owner: context.repo.owner,
