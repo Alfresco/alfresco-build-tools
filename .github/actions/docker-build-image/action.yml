@@ -111,14 +111,13 @@ runs:
         username: ${{ inputs.docker-username }}
         password: ${{ inputs.docker-password }}
 
-    - name: Build image ${{ env.IMAGE_NAME }}
+    - name: Build image ${{ env.IMAGE_NAME }} and export to docker
+      if: inputs.grype-scan-enabled == 'true'
       uses: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0 # v5.3.0
       with:
         context: ${{ inputs.base-directory }}/${{ inputs.image-dir }}
-        tags: ghcr.io/alfresco/${{ env.IMAGE_NAME }}
+        tags: test-${{ env.IMAGE_NAME }}
         load: true
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
         provenance: false
 
     - name: Anchore Scan API Image
@@ -127,7 +126,7 @@ runs:
       id: scan
       with:
         fail-build: ${{ inputs.grype-fail-build }}
-        image: ghcr.io/alfresco/${{ env.IMAGE_NAME }}
+        image: test-${{ env.IMAGE_NAME }}
         output-format: sarif
         severity-cutoff: critical
 
@@ -149,6 +148,8 @@ runs:
       uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 # v5.5.1
       with:
         images: ${{ env.IMAGE_NAME }}
+        labels: |
+          org.opencontainers.image.version=${{ env.IMAGE_TAG }}
 
     - name: Login to quay.io
       if: env.PUSH_IMAGE == 'true'
@@ -189,6 +190,8 @@ runs:
         aws ecr describe-repositories --repository-names ${IMAGE_REPOSITORY} \
           || aws ecr create-repository --repository-name ${IMAGE_REPOSITORY}
 
+    # the build is done again only for new arch platforms
+    # see https://docs.docker.com/build/ci/github-actions/test-before-push/
     - name: Build and Push image ${{ env.IMAGE_NAME }}
       if: env.PUSH_IMAGE == 'true'
       uses: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0 # v5.3.0
@@ -201,6 +204,4 @@ runs:
           ${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}
         labels: ${{ steps.meta.outputs.labels }}
         push: true
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
         provenance: false
