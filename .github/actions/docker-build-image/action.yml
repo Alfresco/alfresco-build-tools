@@ -74,8 +74,11 @@ runs:
       shell: bash
       run: |
         REPOSITORY=${DIR##*/}
-        TAG="${TAG:-$(echo ${GITHUB_HEAD_REF:-$GITHUB_REF_NAME} | sed -e 's/[^-_.[:alnum:]]/_/g')}"
-        TAG="${TAG:0:128}"
+        # Get the branch or tag name
+        REF_NAME="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
+        # Limit the reference name to 128 characters to avoid issues with Docker tags
+        TRUNC_REF_NAME="${REF_NAME:0:128}"
+        TAG="${TAG:-$(echo $TRUNC_REF_NAME | sed -e 's/[^-_.[:alnum:]]/_/g')}"
         echo "IMAGE_REPOSITORY=$REPOSITORY" >> $GITHUB_ENV
         echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
         echo "IMAGE_NAME=$REPOSITORY:$TAG" >> $GITHUB_ENV
