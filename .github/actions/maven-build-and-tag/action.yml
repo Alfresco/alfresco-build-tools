@@ -100,7 +100,7 @@ runs:
       if: inputs.build-cache-key != ''
       with:
         path: ~/.m2/build-cache
-        key: ${{ runner.os }}-build-cache-${{ inputs.build-cache-key }}-${{ github.run_id }}-${{ github.run_attempt }}
+        key: ${{ runner.os }}-build-cache-${{ inputs.build-cache-key }}-${{ github.base_ref || github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
         restore-keys: |
           ${{ runner.os }}-build-cache-${{ inputs.build-cache-key }}-pr-${{ github.event.pull_request.number }}-
           ${{ runner.os }}-build-cache-${{ inputs.build-cache-key }}-${{ github.base_ref || github.ref_name }}-
