@@ -10,11 +10,11 @@ inputs:
     required: false
     default: 'temurin'
   maven-build-cache-key:
-    description: The build cache key to use
+    description: The build cache key to use for restoring and saving Maven build cache in Github
     required: false
     default: ''
   maven-build-cache-skip-label:
-    description: The name of the label to skip maven build cache
+    description: The name of the label to skip maven build cache if needed
     required: false
     default: 'maven-build-cache-skip'
   property-to-update:
@@ -30,7 +30,7 @@ inputs:
     description: Nexus password
     required: true
   maven-version:
-    description: Maven version
+    description: Maven version to setup, i.e. 3.9+ for Maven Build Cache extension
     required: false
     default: ''
   quay-username:
@@ -148,6 +148,7 @@ runs:
         echo "MAVEN_BUILD_CACHE_KEY=$MAVEN_BUILD_CACHE_KEY" >> $GITHUB_ENV
 
     - uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+      name: Restore Maven Build Cache before build
       if: env.MAVEN_BUILD_CACHE_ENABLED == 'true'
       with:
         path: ~/.m2/build-cache
