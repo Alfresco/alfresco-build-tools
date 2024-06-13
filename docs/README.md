@@ -159,9 +159,6 @@ env:
         run: mvn deploy ${{ env.MAVEN_CLI_OPTS }} -DskipTests
 ```
 
-When migrating from Travis, depending on the previous configuration, docker.skip and docker.tag properties might need
-to be setup on the command line.
-
 Here is a sample way to extract a branch name that would be used for docker images built with the `build-and-push-docker-images.sh` script, although using the [dedicated action](#docker-build-and-push) can also be
 useful.
 
@@ -175,10 +172,6 @@ useful.
 ```
 
 ## GitHub Actions provided by community
-
-### Auto cancel builds
-
-[This action](https://github.com/styfle/cancel-workflow-action) is a replacement for the Travis settings **Auto cancel branch builds** and **Auto cancel pull request builds**.
 
 ### Docker build and push
 
@@ -512,19 +505,6 @@ Examples:
 ❌ [JKEY-12345] - The title of the Merge Commit
 
 ❌ JKEY-12345 the title of the Merge Commit
-
-### env-load-from-yaml
-
-To ease the migration to GitHub Actions of repositories that contains one or
-more yaml files containing an `env.global` section of Travis CI. It supports env vars
-referencing as value env vars defined early in the file (like Travis does).
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@ref
-        with:
-          ignore_regex: ^BRANCH_NAME=.*
-          yml_path: .travis/env.yml
-```
 
 ### free-hosted-runner-disk-space
 
