@@ -244,3 +244,11 @@ runs:
       with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+
+    - name: Submit Dependency Graph
+      if: github.event_name == 'push'
+      uses: advanced-security/maven-dependency-submission-action@5d0f9011b55d6268922128af45275986303459c3 # v4.0.3
+      env:
+        MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
