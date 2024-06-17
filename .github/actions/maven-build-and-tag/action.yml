@@ -9,6 +9,14 @@ inputs:
     description: The Java distribution to perform the build
     required: false
     default: 'temurin'
+  maven-build-cache-key:
+    description: The build cache key to use for restoring and saving Maven build cache in Github
+    required: false
+    default: ''
+  maven-build-cache-skip-label:
+    description: The name of the label to skip maven build cache if needed
+    required: false
+    default: 'maven-build-cache-skip'
   property-to-update:
     description: Property to update in addition to the version of the pom file
     required: false
@@ -21,6 +29,10 @@ inputs:
   maven-password:
     description: Nexus password
     required: true
+  maven-version:
+    description: Maven version to setup, i.e. 3.9+ for Maven Build Cache extension
+    required: false
+    default: ''
   quay-username:
     description: Quay.io user name
     required: false
@@ -94,6 +106,12 @@ runs:
         java-version: ${{ inputs.java-version }}
         distribution: ${{ inputs.java-distribution }}
 
+    - name: Set up Maven
+      if: inputs.maven-version != ''
+      uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
+      with:
+        maven-version: ${{ inputs.maven-version }}
+
     - name: Compute maven options
       id: compute-maven-options
       shell: bash
@@ -117,6 +135,27 @@ runs:
       run: |
         GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
         echo "preview-version=0.0.1-$GITHUB_PR_NUMBER-SNAPSHOT" >> $GITHUB_OUTPUT
+        echo "GITHUB_PR_NUMBER=$GITHUB_PR_NUMBER" >> $GITHUB_ENV
+
+    - name: Set MAVEN_BUILD_CACHE_ENABLED env variable
+      id: set-use-maven_build-cache-env-variable
+      env:
+        MAVEN_BUILD_CACHE_ENABLED: ${{ inputs.maven-build-cache-key != '' && !contains(github.event.pull_request.labels.*.name, inputs.maven-build-cache-skip-label) }}
+        MAVEN_BUILD_CACHE_KEY: ${{ runner.os }}-build-cache-${{ inputs.maven-build-cache-key }}-${{ env.GITHUB_PR_NUMBER || github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
+      shell: bash
+      run: |
+        echo "MAVEN_BUILD_CACHE_ENABLED=$MAVEN_BUILD_CACHE_ENABLED" >> $GITHUB_ENV
+        echo "MAVEN_BUILD_CACHE_KEY=$MAVEN_BUILD_CACHE_KEY" >> $GITHUB_ENV
+
+    - uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+      name: Restore Maven Build Cache before build
+      if: env.MAVEN_BUILD_CACHE_ENABLED == 'true'
+      with:
+        path: ~/.m2/build-cache
+        key: ${{ env.MAVEN_BUILD_CACHE_KEY }}
+        restore-keys: |
+          ${{ runner.os }}-build-cache-${{ inputs.maven-build-cache-key }}-PR-${{ github.event.pull_request.number }}-
+          ${{ runner.os }}-build-cache-${{ inputs.maven-build-cache-key }}-${{ github.base_ref || github.ref_name }}-
 
     - name: Update pom files to the new version
       id: update-pom-to-next-version
@@ -187,7 +226,7 @@ runs:
       shell: bash
       run: mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
       env:
-        MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
+        MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip -Dmaven.build.cache.enabled=${{ env.MAVEN_BUILD_CACHE_ENABLED }}
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
 
@@ -248,7 +287,14 @@ runs:
 
     - name: Save maven cache
       uses: actions/cache/save@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
-      if: github.event_name == 'push'
+      if: github.event_name == 'push' || env.IS_PREVIEW == 'true'
       with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+
+    - name: Save maven build cache on push
+      uses: actions/cache/save@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
+      if: env.MAVEN_BUILD_CACHE_ENABLED == 'true'
+      with:
+        path: ~/.m2/build-cache
+        key: ${{ env.MAVEN_BUILD_CACHE_KEY }}
