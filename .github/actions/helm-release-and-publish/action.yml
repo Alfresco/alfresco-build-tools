@@ -33,6 +33,10 @@ inputs:
     description: "If 'true', changes will be pushed ('false' can be used for PRs)"
     default: 'true'
     required: false
+  helm-docs-version:
+    description: 'Version of helm-docs'
+    required: false
+    default: 1.13.0
 
 runs:
   using: composite
@@ -57,6 +61,7 @@ runs:
         new-version: ${{ env.VERSION }}
         chart-repository-dir: ${{ inputs.chart-repository-dir }}
         chart-dir: ${{ inputs.chart-dir }}
+        helm-docs-version: ${{ inputs.helm-docs-version }}
 
     - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v5.28.3
       if: steps.check-tag.outputs.exists == 'false'
