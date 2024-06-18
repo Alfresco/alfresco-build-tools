@@ -29,8 +29,9 @@ on:
         required: false
       helm-docs-version:
         description: 'Version of helm-docs'
+        type: string
         required: false
-        default: 1.13.0
+        default: ''
     outputs:
       version:
         description: "The version of the new published package"

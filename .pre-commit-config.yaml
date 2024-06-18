@@ -4,6 +4,7 @@ repos:
     hooks:
       - id: check-yaml
         args: [--allow-multiple-documents]
+        exclude: '.updatecli/templates'
       - id: check-json
       - id: check-xml
       - id: check-merge-conflict
