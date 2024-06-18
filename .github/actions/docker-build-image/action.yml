@@ -218,7 +218,7 @@ runs:
           echo "### :rocket: Docker image tags"
           echo "| Arg                 | Value |"
           echo "| ------------------- | ----- |"
-          echo "| Quay                | ```` quay.io/alfresco/${{ env.IMAGE_NAME }} ```` |"
-          echo "| GHCR                | ```` ghcr.io/alfresco/${{ env.IMAGE_NAME }} ```` |"
-          echo "| AWS ECR             | ```` ${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }} ```` |"
+          echo "| Quay                | [quay.io/alfresco/${{ env.IMAGE_NAME }}](quay.io/alfresco/${{ env.IMAGE_NAME }}) |"
+          echo "| GHCR                | [ghcr.io/alfresco/${{ env.IMAGE_NAME }}](ghcr.io/alfresco/${{ env.IMAGE_NAME }}) |"
+          echo "| AWS ECR             | [${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}](${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}) |"
         } >> $GITHUB_STEP_SUMMARY
