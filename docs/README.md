@@ -36,6 +36,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [docker-dump-containers-logs](#docker-dump-containers-logs)
     - [docker-scan-image-dirs](#docker-scan-image-dirs)
     - [enforce-pr-conventions](#enforce-pr-conventions)
+    - [env-load-from-yaml](#env-load-from-yaml)
     - [free-hosted-runner-disk-space](#free-hosted-runner-disk-space)
     - [get-branch-name](#get-branch-name)
     - [get-build-info](#get-build-info)
@@ -503,6 +504,17 @@ Examples:
 ❌ [JKEY-12345] - The title of the Merge Commit
 
 ❌ JKEY-12345 the title of the Merge Commit
+
+### env-load-from-yaml
+
+Load environment variables from a yaml file
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@ref
+        with:
+          ignore_regex: ^BRANCH_NAME=.*
+          yml_path: .travis/env.yml
+```
 
 ### free-hosted-runner-disk-space
 

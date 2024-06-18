@@ -1,0 +1,24 @@
+name: "env-load-from-yaml"
+description: "Load environment variables from a yaml file"
+inputs:
+  ignore_regex:
+    description: "Bash regex to ignore certain lines"
+    required: false
+    default: ^$
+  yml_path:
+    description: "Path to the yaml file to parse"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Parse env global
+      run: |
+        while read ENVVAR; do
+          if [[ "$ENVVAR" =~ ${{ inputs.ignore_regex }} ]]; then
+            echo "Skipping unwanted $ENVVAR"
+            continue
+          fi
+          eval $ENVVAR
+          echo "$(eval echo $ENVVAR)" >> $GITHUB_ENV
+        done < <(yq '.env.global[]' ${{ inputs.yml_path }})
+      shell: bash
