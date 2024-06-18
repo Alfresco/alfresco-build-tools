@@ -209,3 +209,10 @@ runs:
         labels: ${{ steps.meta.outputs.labels }}
         push: true
         provenance: false
+
+    - name: Print tags
+      if: env.PUSH_IMAGE == 'true'
+      run: |
+        echo quay.io/alfresco/${{ env.IMAGE_NAME }}
+        echo ghcr.io/alfresco/${{ env.IMAGE_NAME }}
+        echo ${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}
