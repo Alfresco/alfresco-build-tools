@@ -36,7 +36,6 @@ inputs:
   helm-docs-version:
     description: 'Version of helm-docs'
     required: false
-    default: ''
 
 runs:
   using: composite

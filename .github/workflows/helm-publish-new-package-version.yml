@@ -31,7 +31,6 @@ on:
         description: 'Version of helm-docs'
         type: string
         required: false
-        default: ''
     outputs:
       version:
         description: "The version of the new published package"
