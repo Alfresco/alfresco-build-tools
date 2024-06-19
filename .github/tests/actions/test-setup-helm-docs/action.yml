@@ -12,3 +12,5 @@ runs:
     - uses: ./.github/actions/setup-helm-docs
       with:
         version: ${{ inputs.helm-docs-version }}
+    - name: Check Helm-docs version
+       run: [ $(helm-docs -v | awk '{print $NF}') = ${{ inputs.helm-docs-version }} ]
