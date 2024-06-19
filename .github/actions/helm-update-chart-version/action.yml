@@ -10,14 +10,19 @@ inputs:
   chart-repository-dir:
     description: "The path the git repository holding the chart project"
     required: false
+  helm-docs-version:
+    description: 'Version of helm-docs'
+    required: false
 runs:
   using: composite
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@v5.28.3
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@v5.29.0
+      with:
+        version: ${{ inputs.helm-docs-version }}
     - name: Update version
       shell: bash
       env:
-        CHART_REPO_DIR: ${{inputs.chart-repository-dir }}
+        CHART_REPO_DIR: ${{ inputs.chart-repository-dir }}
       run: |
         if [ -n "$CHART_REPO_DIR" ]
         then
