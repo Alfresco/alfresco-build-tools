@@ -8,4 +8,5 @@ github_release:
 
 target:
   file: '.github/actions/setup-helm-docs/action.yml'
-  key: '$.inputs.version.default'
+  key: '$.runs.steps[0].env.DEFAULT_HELM_DOCS_VERSION'
+  trimprefix: 'v'
