@@ -215,10 +215,11 @@ runs:
       shell: bash
       run: |
         {
-          echo "### :rocket: Docker image built: \'${{ env.IMAGE_NAME }}\'"
-          echo "| Registry            | Image URL |"
-          echo "| ------------------- | ----- |"
-          echo "| Quay                | [quay.io/alfresco/${{ env.IMAGE_NAME }}](quay.io/alfresco/${{ env.IMAGE_NAME }}) |"
-          echo "| GHCR                | [ghcr.io/alfresco/${{ env.IMAGE_NAME }}](ghcr.io/alfresco/${{ env.IMAGE_NAME }}) |"
-          echo "| AWS ECR             | [${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}](${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}) |"
+          echo "### :rocket: Docker image built"
+          echo "Quay:"
+          echo "\`\`\`\nquay.io/alfresco/${{ env.IMAGE_NAME }}\n\`\`\`"
+          echo "GHCR:"
+          echo "\`\`\`\ghcr.io/alfresco/${{ env.IMAGE_NAME }}\n\`\`\`"
+          echo "AWS ECR:"
+          echo "\`\`\`\n${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}\n\`\`\`"
         } >> $GITHUB_STEP_SUMMARY
