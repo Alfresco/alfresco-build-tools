@@ -35,6 +35,7 @@ jobs:
       #       * another line
       #       * one more
       - uses: ./.github/actions/setup-helm-docs
+      - uses: ./.github/tests/actions/test-setup-helm-docs
       - uses: ./.github/actions/setup-jx-release-version
       - uses: ./.github/actions/setup-kubepug
       - uses: ./.github/actions/rancher

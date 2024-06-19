@@ -1,0 +1,14 @@
+name: Test setup-helm-docs
+description: >
+  Just a test for setup-helm-docs
+inputs:
+  helm-docs-version:
+    description: 'Version of helm-docs'
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/actions/setup-helm-docs
+      with:
+        version: ${{ inputs.helm-docs-version }}

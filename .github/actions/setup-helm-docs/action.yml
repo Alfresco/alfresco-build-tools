@@ -4,11 +4,13 @@ inputs:
   version:
     description: 'Version of helm-docs'
     required: false
-    default: 1.13.1
 runs:
   using: "composite"
   steps:
+    - shell: bash
+      run: |
+        echo "helm-docs-version=_${{ inputs.version }}_"
     - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v5.29.0
       with:
         repo: norwoodj/helm-docs
-        version: ${{ inputs.version }}
+        version: ${{ inputs.version != '' && inputs.version || '1.13.1' }}
