@@ -10,4 +10,6 @@ runs:
     - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v5.29.0
       with:
         repo: norwoodj/helm-docs
-        version: ${{ inputs.version != '' && inputs.version || '1.13.1' }}
+        version: ${{ inputs.version != '' && inputs.version || env.DEFAULT_HELM_DOCS_VERSION }}
+      env:
+          DEFAULT_HELM_DOCS_VERSION: '1.13.1'
