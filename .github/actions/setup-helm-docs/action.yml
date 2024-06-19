@@ -7,9 +7,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - shell: bash
-      run: |
-        echo "helm-docs-version=_${{ inputs.version }}_"
     - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v5.29.0
       with:
         repo: norwoodj/helm-docs
