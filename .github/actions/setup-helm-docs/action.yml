@@ -4,6 +4,7 @@ inputs:
   version:
     description: 'Version of helm-docs'
     required: false
+    default: '1.13.0'
 runs:
   using: "composite"
   steps:
