@@ -49,3 +49,5 @@ targets:
     spec:
       file: '{{ .target.file }}'
       key: '{{ .target.key }}'
+    transformers:
+      - trimprefix: '{{ .target.trimprefix | default "" }}'
