@@ -5,6 +5,7 @@ github:
 github_release:
   owner: 'norwoodj'
   repo: 'helm-docs'
+  trimprefix: 'v'
 
 target:
   file: '.github/actions/setup-helm-docs/action.yml'

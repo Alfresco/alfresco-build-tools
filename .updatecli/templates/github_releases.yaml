@@ -40,6 +40,8 @@ sources:
         kind: semver
         strict: {{ .github_release.versionfilter.strict | default false }}
         pattern: '{{ .github_release.versionfilter.pattern | default "*" }}'
+      transformers:
+        - trimprefix: '{{ .github_release.trimprefix | default "" }}'
 
 targets:
   update-file:
