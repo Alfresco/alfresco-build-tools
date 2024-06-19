@@ -40,14 +40,14 @@ sources:
         kind: semver
         strict: {{ .github_release.versionfilter.strict | default false }}
         pattern: '{{ .github_release.versionfilter.pattern | default "*" }}'
-      transformers:
-        - trimprefix: '{{ .github_release.trimprefix | default "" }}'
 
 targets:
   update-file:
     name: 'Update version'
-    scmid: 'github'
+#    scmid: 'github'
     kind: yaml
     spec:
       file: '{{ .target.file }}'
       key: '{{ .target.key }}'
+    transformers:
+      - trimprefix: '{{ .target.trimprefix | default "" }}'
