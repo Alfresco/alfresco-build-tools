@@ -44,7 +44,7 @@ sources:
 targets:
   update-file:
     name: 'Update version'
-#    scmid: 'github'
+    scmid: 'github'
     kind: yaml
     spec:
       file: '{{ .target.file }}'
