@@ -18,65 +18,8 @@ jobs:
         with:
           allowlist: |
             Alfresco/alfresco-build-tools/
-  test:
+  test-setup-helm-docs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-      # - name: Manual test for send slack notification
-      #   uses: ./.github/actions/send-slack-notification
-      #   with:
-      #     channel-id: '' # grab your slack id from your profile -> three dots -> Copy member ID
-      #     token: ${{ secrets.SLACK_BOT_TOKEN }}
-      #     notification-color: '#A30200'
-      #     append: true
-      #     message: |
-      #       This is a multiline message with `code`
-      #
-      #       * another line
-      #       * one more
-      - uses: ./.github/actions/setup-helm-docs
       - uses: ./.github/tests/actions/test-setup-helm-docs
-      - uses: ./.github/actions/setup-jx-release-version
-      - uses: ./.github/actions/setup-kubepug
-      - uses: ./.github/actions/rancher
-        if: ${{ ! github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
-        with:
-          rancher-url: 'https://rancher2.envalfresco.com'
-          rancher-access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
-          rancher-secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
-          cluster-name: "fake_cluster"
-          action: "detach"
-      - uses: ./.github/actions/setup-rancher-cli
-        if: ${{ ! github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
-        with:
-          url: ${{ secrets.RANCHER2_URL }}
-          access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
-          secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
-          context: local
-      - uses: ./.github/actions/setup-updatebot
-      - uses: ./.github/actions/setup-pysemver
-      - uses: ./.github/actions/calculate-next-internal-version
-        with:
-          next-version: 7.3.0
-      - uses: ./.github/actions/resolve-preview-name
-      - uses: ./.github/actions/setup-terraform-docs
-      - uses: ./.github/actions/setup-kcadm
-      - uses: ./.github/actions/env-load-from-yaml
-        with:
-          ignore_regex: ^TRAVIS_BRANCH=.*
-          yml_path: ./.github/tests/env-load-from-yaml/env.yml
-      - name: Test env-load-from-yaml
-        run: |
-          if [ -z "$APP_SETTING_ONE" ]; then
-            echo APP_SETTING_ONE should be set!
-            exit 1
-          fi
-          if [ -n "$TRAVIS_BRANCH" ]; then
-            echo TRAVIS_BRANCH should not be set!
-            exit 1
-          fi
-      - name: Preserve available disk size before cleanup
-        run: echo total_size_before=$(df --total --output=avail | tail -1) >> $GITHUB_ENV
-      - uses: ./.github/actions/free-hosted-runner-disk-space
-      - name: Test if available disk size increased
-        run: test ${{ env.total_size_before }} -lt $(df --total --output=avail | tail -1)

@@ -15,4 +15,4 @@ runs:
     - name: Check Helm-docs version
       shell: bash
       run: |
-        [ $(helm-docs -v | awk '{print $NF}') = ${{ inputs.helm-docs-version || '1.13.1' }} ]
+        [ "$(helm-docs -v | awk '{print $NF}')" = "${{ inputs.helm-docs-version || '1.13.1' }}" ]
