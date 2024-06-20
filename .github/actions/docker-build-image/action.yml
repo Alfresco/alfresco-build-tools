@@ -215,7 +215,7 @@ runs:
       id: get_digest
       shell: bash
       run: |
-        echo "IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }})" >> $GITHUB_ENV
+        echo "IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ghcr.io/alfresco/${{ env.IMAGE_NAME }})" >> $GITHUB_ENV
 
     - name: Print tags
       if: env.PUSH_IMAGE == 'true'
