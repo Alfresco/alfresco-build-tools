@@ -210,6 +210,13 @@ runs:
         push: true
         provenance: false
 
+    - name: Get the image digest
+      if: env.PUSH_IMAGE == 'true'
+      id: get_digest
+      shell: bash
+      run: |
+        echo "IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }})" >> $GITHUB_ENV
+
     - name: Print tags
       if: env.PUSH_IMAGE == 'true'
       shell: bash
@@ -218,14 +225,14 @@ runs:
           echo "### :rocket: Docker image built"
           echo "Quay:"
           echo "\`\`\`\`"
-          echo "quay.io/alfresco/${{ env.IMAGE_NAME }}"
+          echo "quay.io/alfresco/${{ env.IMAGE_NAME }}@sha256:${{ env.IMAGE_DIGEST }}"
           echo " \`\`\`\`"
           echo "GHCR:"
           echo "\`\`\`\`"
-          echo "ghcr.io/alfresco/${{ env.IMAGE_NAME }}"
+          echo "ghcr.io/alfresco/${{ env.IMAGE_NAME }}@sha256:${{ env.IMAGE_DIGEST }}"
           echo "\`\`\`\`"
           echo "AWS ECR:"
           echo "\`\`\`\`"
-          echo "${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}"
+          echo "${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}@sha256:${{ env.IMAGE_DIGEST }}"
           echo "\`\`\`\`"
         } >> $GITHUB_STEP_SUMMARY
