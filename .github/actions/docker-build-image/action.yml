@@ -197,6 +197,7 @@ runs:
     # the build is done again only for new arch platforms
     # see https://docs.docker.com/build/ci/github-actions/test-before-push/
     - name: Build and Push image ${{ env.IMAGE_NAME }}
+      id: build-and-push
       if: env.PUSH_IMAGE == 'true'
       uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5.4.0
       with:
@@ -210,13 +211,6 @@ runs:
         push: true
         provenance: false
 
-    - name: Get the image digest
-      if: env.PUSH_IMAGE == 'true'
-      id: get_digest
-      shell: bash
-      run: |
-        echo "IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ghcr.io/alfresco/${{ env.IMAGE_NAME }})" >> $GITHUB_ENV
-
     - name: Print tags
       if: env.PUSH_IMAGE == 'true'
       shell: bash
@@ -225,14 +219,14 @@ runs:
           echo "### :rocket: Docker image built"
           echo "Quay:"
           echo "\`\`\`\`"
-          echo "quay.io/alfresco/${{ env.IMAGE_NAME }}@sha256:${{ env.IMAGE_DIGEST }}"
+          echo "quay.io/alfresco/${{ env.IMAGE_NAME }}@sha256:${{ steps.build-and-push.outputs.digest }}""
           echo " \`\`\`\`"
           echo "GHCR:"
           echo "\`\`\`\`"
-          echo "ghcr.io/alfresco/${{ env.IMAGE_NAME }}@sha256:${{ env.IMAGE_DIGEST }}"
+          echo "ghcr.io/alfresco/${{ env.IMAGE_NAME }}@sha256:${{ steps.build-and-push.outputs.digest }}"
           echo "\`\`\`\`"
           echo "AWS ECR:"
           echo "\`\`\`\`"
-          echo "${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}@sha256:${{ env.IMAGE_DIGEST }}"
+          echo "${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}@sha256:${{ steps.build-and-push.outputs.digest }}"
           echo "\`\`\`\`"
         } >> $GITHUB_STEP_SUMMARY
