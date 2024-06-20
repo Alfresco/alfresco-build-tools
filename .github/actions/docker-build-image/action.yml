@@ -219,7 +219,7 @@ runs:
           echo "### :rocket: Docker image built"
           echo "Quay:"
           echo "\`\`\`\`"
-          echo "quay.io/alfresco/${{ env.IMAGE_NAME }}@sha256:${{ steps.build-and-push.outputs.digest }}""
+          echo "quay.io/alfresco/${{ env.IMAGE_NAME }}@sha256:${{ steps.build-and-push.outputs.digest }}"
           echo " \`\`\`\`"
           echo "GHCR:"
           echo "\`\`\`\`"
