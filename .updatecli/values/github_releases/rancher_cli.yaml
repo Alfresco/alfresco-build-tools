@@ -1,0 +1,12 @@
+github:
+  prefix: 'build(deps)'
+  message: 'bump rancher-cli to {{ source "lastRelease" }}'
+
+github_release:
+  owner: 'rancher'
+  repo: 'cli'
+
+target:
+  file: '.github/actions/setup-rancher-cli/action.yml'
+  key: '$.runs.steps[0].env.DEFAULT_RANCHER_CLI_VERSION'
+  trimprefix: 'v'
