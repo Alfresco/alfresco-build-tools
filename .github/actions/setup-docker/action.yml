@@ -14,8 +14,3 @@ runs:
         sudo apt-get update
         sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
         sudo chmod 666 /var/run/docker.sock
-
-    - name: Allow using deprecated docker-compose in bash scripts
-      shell: bash
-      run: |
-        sudo ln -f -s /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
