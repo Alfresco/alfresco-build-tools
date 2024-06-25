@@ -1417,6 +1417,11 @@ action](../.github/actions/setup-docker/action.yml) to install and configure
 Docker Engine for the current runner. Required for the ARM64 GitHub Action
 Hosted runners.
 
+```yaml
+      - name: Setup Docker Engine
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-docker@ref
+```
+
 ### setup-github-release-binary
 
 [setup-github-release-binary](../.github/actions/setup-github-release-binary/action.yml)

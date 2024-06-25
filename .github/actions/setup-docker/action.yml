@@ -18,4 +18,4 @@ runs:
     - name: Allow using deprecated docker-compose in bash scripts
       shell: bash
       run: |
-        ln -f -s /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
+        sudo ln -f -s /usr/libexec/docker/cli-plugins/docker-compose /usr/local/bin/docker-compose
