@@ -38,7 +38,7 @@ jobs:
       - uses: updatecli/updatecli-action@eb158f6fd9e425b940a6750d6318f98e050ac390 # v2.61.0
 
       - name: Run Updatecli
-        run: "updatecli apply --config .updatecli/templates/github_releases.yaml --values .updatecli/values/github_releases/${{ matrix.file }}"
+        run: "updatecli apply -c .updatecli/templates/github_releases.yaml -v .updatecli/values/github_releases/${{ matrix.file }}"
         env:
           UPDATECLI_GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           USERNAME: ${{ github.actor }}
