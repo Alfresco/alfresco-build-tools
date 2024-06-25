@@ -45,6 +45,20 @@ runs:
         STAGING_REPOSITORY_ID: ${{ inputs.staging-repository }}
       run: |
         CLOSE_STAGING_PAYLOAD_CONTENT=$(envsubst < $GITHUB_ACTION_PATH/close-payload-template.json)
+
+        staging_repo_is_closed () {
+          curl -f -u "${NEXUS_USERNAME}":"${NEXUS_PASSWORD}" \
+            -X GET "${NEXUS_URL}"/service/local/staging/profile_repositories \
+            | yq -p=xml e '.stagingRepositories.data.stagingProfileRepository[]| select (.repositoryId == env(STAGING_REPOSITORY_ID)) | .type ' \
+            | grep closed > /dev/null 2>&1
+        }
+
+        if staging_repo_is_closed
+        then
+          echo "Repository $STAGING_REPOSITORY_ID is already closed. Skipping the close operation."
+          exit 0
+        fi
+
         curl -f -u "${NEXUS_USERNAME}":"${NEXUS_PASSWORD}" \
           -H "Accept: application/json" \
           -H "Content-Type: application/json" \
@@ -65,13 +79,6 @@ runs:
               echo "Condition not reached yet. Attempt $attempt_counter out of $MAX_AWAIT_ATTEMPTS. Retrying..."
               sleep $AWAIT_SLEEP_TIME
             done
-        }
-
-        staging_repo_is_closed () {
-          curl -f -u "${NEXUS_USERNAME}":"${NEXUS_PASSWORD}" \
-            -X GET "${NEXUS_URL}"/service/local/staging/profile_repositories \
-            | yq -p=xml e '.stagingRepositories.data.stagingProfileRepository[]| select (.repositoryId == env(STAGING_REPOSITORY_ID)) | .type ' \
-            | grep closed > /dev/null 2>&1
         }
 
         if [[ "$WAIT_FOR_COMPLETION" == "true" ]]
