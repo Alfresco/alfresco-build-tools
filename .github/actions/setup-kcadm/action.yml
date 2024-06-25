@@ -15,4 +15,4 @@ runs:
         kcadm.sh help
       env:
         KEYCLOAK_VERSION: ${{ inputs.version != '' && inputs.version || env.DEFAULT_RANCHER_CLI_VERSION }}
-        DEFAULT_KEYCLOAK_VERSION: '24.0.5'
+        DEFAULT_KEYCLOAK_VERSION: 24.0.5
