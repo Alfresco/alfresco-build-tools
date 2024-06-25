@@ -4,7 +4,6 @@ inputs:
   version:
     description: 'Version of Keycloak'
     required: false
-    default: 17.0.1
 runs:
   using: "composite"
   steps:
@@ -15,4 +14,5 @@ runs:
         ln -s keycloak-$KEYCLOAK_VERSION keycloak && ln -s ${PWD}/keycloak/bin/kcadm.sh /usr/local/bin
         kcadm.sh help
       env:
-        KEYCLOAK_VERSION: ${{ inputs.version }}
+        KEYCLOAK_VERSION: ${{ inputs.version != '' && inputs.version || env.DEFAULT_RANCHER_CLI_VERSION }}
+        DEFAULT_KEYCLOAK_VERSION: '24.0.5'
