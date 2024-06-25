@@ -35,7 +35,7 @@ jobs:
         file: ${{fromJson(needs.build-matrix-github-releases.outputs.matrix)}}
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-      - uses: updatecli/updatecli-action@4922d58d06f0d096428933f153275e15a3eb49de # v2.59.0
+      - uses: updatecli/updatecli-action@eb158f6fd9e425b940a6750d6318f98e050ac390 # v2.61.0
 
       - name: Run Updatecli
         run: "updatecli apply --config .updatecli/templates/github_releases.yaml --values .updatecli/values/github_releases/${{ matrix.file }}"
