@@ -4,6 +4,10 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 6 * * 1'
+  push:
+    paths:
+      - '.updatecli/**'
+      - .github/workflows/updatecli.yml
 
 permissions:
     contents: write
