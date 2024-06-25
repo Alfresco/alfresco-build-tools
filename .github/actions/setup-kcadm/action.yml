@@ -10,9 +10,9 @@ runs:
     - name: Setup kcadm
       shell: bash
       run: |
-        KEYCLOAK_VERSION=${{ inputs.version != '' && inputs.version || env.DEFAULT_RANCHER_CLI_VERSION }}
         curl -fsSL https://github.com/keycloak/keycloak/releases/download/${KEYCLOAK_VERSION}/keycloak-${KEYCLOAK_VERSION}.tar.gz | tar xz
         ln -s keycloak-$KEYCLOAK_VERSION keycloak && ln -s ${PWD}/keycloak/bin/kcadm.sh /usr/local/bin
         kcadm.sh help
       env:
         DEFAULT_KEYCLOAK_VERSION: 24.0.5
+        KEYCLOAK_VERSION: ${{ inputs.version != '' && inputs.version || env.DEFAULT_KEYCLOAK_VERSION }}
