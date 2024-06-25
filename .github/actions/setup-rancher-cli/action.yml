@@ -4,7 +4,6 @@ inputs:
   version:
     description: 'Version of Rancher CLI'
     required: false
-    default: 2.6.0
   access-key:
     description: 'Rancher API access key'
     required: false
@@ -22,8 +21,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: |
-        TOOL_VERSION=${{ inputs.version }}
+    - shell: bash
+      run: |
+        TOOL_VERSION=${{ inputs.version != '' && inputs.version || env.DEFAULT_RANCHER_CLI_VERSION }}
         TOOL_NAME=rancher
         TOOL_REPO=rancher/cli
         TOOL_OS=$(uname | tr '[:upper:]' '[:lower:]')
@@ -32,8 +32,11 @@ runs:
           | tar xz --strip=2 ./$TOOL_NAME-v$TOOL_VERSION/$TOOL_NAME
         sudo mv $TOOL_NAME /usr/local/bin/
         echo $($TOOL_NAME --version)
-      shell: bash
-    - run: |
+      env:
+        DEFAULT_RANCHER_CLI_VERSION: 2.8.4
+
+    - shell: bash
+      run: |
         RANCHER2_BEARER_TOKEN=${{ inputs.access-key }}:${{ inputs.secret-key }}
         RANCHER2_URL=${{ inputs.url }}
         if [[ -n "$RANCHER2_BEARER_TOKEN" ]]
@@ -41,14 +44,13 @@ runs:
           RANCHER_SYSTEM_CONTEXT_INDEX=$(echo 1 | rancher login $RANCHER2_URL -t $RANCHER2_BEARER_TOKEN | grep "$KUBECONTEXT" | grep System | cut -d ' ' -f1)
           echo $RANCHER_SYSTEM_CONTEXT_INDEX | rancher login $RANCHER2_URL -t $RANCHER2_BEARER_TOKEN > /dev/null
         fi
-      shell: bash
       env:
         KUBECONTEXT: ${{ inputs.context }}
 
-    - run: |
+    - shell: bash
+      run: |
         KUBECONTEXT="${{ inputs.context }}"
         if [[ -n "$KUBECONTEXT" ]]
         then
           mkdir -p $HOME/.kube && rancher cluster kubeconfig ${{ inputs.context }} > $HOME/.kube/config
         fi
-      shell: bash
