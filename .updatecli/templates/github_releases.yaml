@@ -6,11 +6,11 @@ scms:
   github:
     kind: 'github'
     spec:
-      username: '{{ requiredEnv "USERNAME" }}'
+      username: '{{ requiredEnv "UPDATECLI_USERNAME" }}'
       token: '{{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}'
-      owner: '{{ requiredEnv "OWNER" }}'
-      repository: '{{ requiredEnv "REPOSITORY" }}'
-      branch: 'main'
+      owner: '{{ requiredEnv "UPDATECLI_REPO_OWNER" }}'
+      repository: '{{ requiredEnv "UPDATECLI_REPO_NAME" }}'
+      branch: '{{ requiredEnv "UPDATECLI_REPO_BRANCH" }}'
       commitmessage:
         type: '{{ .github.prefix }}'
         message: '{{ .github.message }}'
