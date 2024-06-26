@@ -78,6 +78,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [send-slack-notification-slow-job](#send-slack-notification-slow-job)
     - [send-slack-notification](#send-slack-notification)
     - [send-teams-notification](#send-teams-notification)
+    - [setup-docker](#setup-docker)
     - [setup-github-release-binary](#setup-github-release-binary)
     - [setup-java-build](#setup-java-build)
     - [setup-kind](#setup-kind)
@@ -1407,6 +1408,19 @@ Below is the detailed description of the above message card.
   | dry-run     | Do not actually send the message card to the teams channel.                       |
   | raw         | The entire JSON object of the Message Card which will be sent to Microsoft Teams. |
   | overwrite   | JSON like object to overwrite default message.                                    |
+
+### setup-docker
+
+When using a runner which is not a default hosted runner, all the default
+tooling may not be available, including Docker. Use [setup-docker
+action](../.github/actions/setup-docker/action.yml) to install and configure
+Docker Engine for the current runner. Required for the ARM64 GitHub Action
+Hosted runners.
+
+```yaml
+      - name: Setup Docker Engine
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-docker@ref
+```
 
 ### setup-github-release-binary
 
