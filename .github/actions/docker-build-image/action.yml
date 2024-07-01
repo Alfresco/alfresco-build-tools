@@ -117,7 +117,7 @@ runs:
 
     - name: Build image ${{ env.IMAGE_NAME }} and export to docker
       if: inputs.grype-scan-enabled == 'true'
-      uses: docker/build-push-action@31159d49c0d4756269a0940a750801a1ea5d7003 # v6.1.0
+      uses: docker/build-push-action@15560696de535e4014efeff63c48f16952e52dd1 # v6.2.0
       with:
         context: ${{ inputs.base-directory }}/${{ inputs.image-dir }}
         tags: test-${{ env.IMAGE_NAME }}
@@ -141,7 +141,7 @@ runs:
 
     - name: Upload SARIF Files
       if: always() && inputs.grype-scan-enabled == 'true' && github.event_name == 'push'
-      uses: github/codeql-action/upload-sarif@23acc5c183826b7a8a97bce3cecc52db901f8251 # v3.25.10
+      uses: github/codeql-action/upload-sarif@b611370bb5703a7efb587f9d136a52ea24c5c38c # v3.25.11
       continue-on-error: true # do not fail if GHAS is not enabled
       with:
         sarif_file: ${{ steps.scan.outputs.sarif }}
@@ -199,7 +199,7 @@ runs:
     - name: Build and Push image ${{ env.IMAGE_NAME }}
       id: build-and-push
       if: env.PUSH_IMAGE == 'true'
-      uses: docker/build-push-action@31159d49c0d4756269a0940a750801a1ea5d7003 # v6.1.0
+      uses: docker/build-push-action@15560696de535e4014efeff63c48f16952e52dd1 # v6.2.0
       with:
         context: ${{ inputs.base-directory }}/${{ inputs.image-dir }}
         platforms: linux/amd64,linux/arm64/v8
