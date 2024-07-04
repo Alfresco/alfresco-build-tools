@@ -57,6 +57,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [helm-template-yamllint](#helm-template-yamllint)
     - [helm-plugin](#helm-plugin)
     - [helm-update-chart-version](#helm-update-chart-version)
+    - [install-galaxy-deps](#install-galaxy-deps)
     - [install-ubuntu-default-tools](#install-ubuntu-default-tools)
     - [jx-updatebot-pr](#jx-updatebot-pr)
     - [kubectl-keep-nslogs](#kubectl-keep-nslogs)
@@ -86,7 +87,6 @@ Here follows the list of GitHub Actions topics available in the current document
     - [validate-maven-versions](#validate-maven-versions)
     - [veracode](#veracode)
     - [github cache cleanup](#github-cache-cleanup)
-    - [galaxy](#galaxy)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
     - [terraform](#terraform)
@@ -825,6 +825,17 @@ Updates `version` attribute inside `Chart.yaml` file:
           new-version: 1.0.0
 ```
 
+### install-galaxy-deps
+
+Installs and cache ansible galaxy dependencies
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/install-galaxy-deps@ref
+        with:
+          cache-name: cache-name-default
+          cache-version: 1
+```
+
 ### install-ubuntu-default-tools
 
 Install common Ubuntu tools such as docker, git, zip, unzip, python3. Meant to be used on top of self-hosted runners with vanilla ubuntu images.
@@ -1522,22 +1533,6 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/gh-cache-cleanup-on-merge@ref
         with:
           token: ${{ secrets.GH_TOKEN }}
-```
-
-### galaxy
-
-Installs and cache ansible galaxy dependencies
-
-```yaml
-on:
-  pull_request:
-    branches: [master]
-
-jobs:
-  cleanup:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/galaxy@ref
 ```
 
 ## Reusable workflows provided by us
