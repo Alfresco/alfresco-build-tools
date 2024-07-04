@@ -1,0 +1,27 @@
+name: 'Galaxy dependencies'
+description: 'Install and cache ansible galaxy dependencies'
+inputs:
+  cache-name:
+    description: 'A keyword to compose the cache final name'
+    required: true
+    default: 'default'
+  cache-version:
+    description: 'Increase to force recreating the cache'
+    required: true
+    default: "1"
+runs:
+  using: "composite"
+  steps:
+    - name: Cache Ansible collections and roles
+      id: collections-cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.ansible/collections
+          ~/.ansible/roles
+        key: ansible-galaxy-v${{ inputs.cache-version }}-${{ inputs.cache-name }}-${{ hashFiles('requirements.yml') }}
+
+    - name: Fetch dependencies from Ansible Galaxy
+      run: ansible-galaxy install -r requirements.yml --force
+      if: steps.collections-cache.outputs.cache-hit != 'true'
+      shell: bash
