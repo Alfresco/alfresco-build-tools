@@ -298,6 +298,14 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
+    directory: "/.github/actions/install-galaxy-deps"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
     directory: "/.github/actions/install-ubuntu-default-tools"
     schedule:
       interval: "weekly"

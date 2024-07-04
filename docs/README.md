@@ -57,6 +57,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [helm-template-yamllint](#helm-template-yamllint)
     - [helm-plugin](#helm-plugin)
     - [helm-update-chart-version](#helm-update-chart-version)
+    - [install-galaxy-deps](#install-galaxy-deps)
     - [install-ubuntu-default-tools](#install-ubuntu-default-tools)
     - [jx-updatebot-pr](#jx-updatebot-pr)
     - [kubectl-keep-nslogs](#kubectl-keep-nslogs)
@@ -822,6 +823,17 @@ Updates `version` attribute inside `Chart.yaml` file:
       - uses: Alfresco/alfresco-build-tools/.github/actions/helm-update-chart-version@ref
         with:
           new-version: 1.0.0
+```
+
+### install-galaxy-deps
+
+Installs and cache ansible galaxy dependencies
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/install-galaxy-deps@ref
+        with:
+          cache-name: cache-name-default
+          cache-version: 1
 ```
 
 ### install-ubuntu-default-tools
