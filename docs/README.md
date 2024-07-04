@@ -86,6 +86,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [validate-maven-versions](#validate-maven-versions)
     - [veracode](#veracode)
     - [github cache cleanup](#github-cache-cleanup)
+    - [galaxy](#galaxy)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
     - [terraform](#terraform)
@@ -1521,6 +1522,22 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/gh-cache-cleanup-on-merge@ref
         with:
           token: ${{ secrets.GH_TOKEN }}
+```
+
+### galaxy
+
+Installs and cache ansible galaxy dependencies
+
+```yaml
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/galaxy@ref
 ```
 
 ## Reusable workflows provided by us
