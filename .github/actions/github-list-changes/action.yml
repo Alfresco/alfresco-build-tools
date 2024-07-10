@@ -1,0 +1,35 @@
+name: "Github List Changes"
+description: "List all changed files in a pushed set of commits or a pull request"
+inputs:
+  write-list-to-env:
+    description: "If set to true then write the list of changed files to the environment variable GITHUB_MODIFIED_FILES"
+    default: false
+outputs:
+  all_changed_files:
+    description: The list of changed files (one per line)
+    value: ${{ steps.list-changes.outputs.all-changed-files }}
+runs:
+  using: "composite"
+  steps:
+    - name: "List changed files"
+      id: list-changes
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+      run: |
+        if [[ $GITHUB_EVENT_NAME == "pull_request" ]]; then
+          # Get the list of changed files from the pull request
+          git diff --name-only $GITHUB_HEAD_REF $GITHUB_REF > all-changed-files.txt
+        elif [[ $GITHUB_EVENT_NAME == "push" ]]; then
+          # Get the list of changed files from the pushed commits
+          git diff --name-only ${{ github.event.before }} ${{ github.event.after }}
+        else
+          echo "Unsupported event type: $GITHUB_EVENT_NAME" > all-changed-files.txt
+          exit 1
+        fi
+        # Write the list to the GitHub step output.
+        echo "all-changed-files=$( cat all-changed-files.txt )" >> $GITHUB_OUTPUT
+        # Write the list to the environment variable if requested
+        if [[ "${{ inputs.write-list-to-env }}" == "true" ]]; then
+          echo "GITHUB_MODIFIED_FILES=$( cat all-changed-files.txt )" >> $GITHUB_ENV
+        fi

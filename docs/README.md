@@ -46,6 +46,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [git-latest-tag](#git-latest-tag)
     - [github-check-upcoming-runs](#github-check-upcoming-runs)
     - [github-download-file](#github-download-file)
+    - [github-list-changes](#github-list-changes)
     - [helm-build-chart](#helm-build-chart)
     - [helm-integration-tests](#helm-integration-tests)
     - [helm-package-chart](#helm-package-chart)
@@ -608,6 +609,18 @@ Download a file from another repository.
           file-path: "subdirectory/file-name.json"
           target: "downloaded-file.json"
 ```
+
+### github-list-changes
+
+List the changes in a pull request (`pull-request` event) or that were pushed to a branch (`push` event).
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@ref
+        with:
+          write-list-to-env: true # default false
+```
+
+The action outputs the list of changed files (one path per line) using the output `all_changed_files` and optionally to the env variable `GITHUB_MODIFIED_FILES`.
 
 ### helm-build-chart
 
