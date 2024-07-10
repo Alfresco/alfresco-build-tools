@@ -474,6 +474,14 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
+    directory: "/.github/actions/set-github-https-auth"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
     directory: "/.github/actions/setup-docker"
     schedule:
       interval: "weekly"

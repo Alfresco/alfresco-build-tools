@@ -1,0 +1,15 @@
+name: 'Configure git to use bot credentials'
+description: 'Configure git to use bot credentials for private repositories using git config'
+inputs:
+  bot-username:
+    description: 'The username of the bot account'
+    required: true
+  bot-token:
+    description: 'The token of the bot account'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Configure git to use bot credentials
+      run: git config --global url."https://${{ inputs.bot-username }}:${{ inputs.bot-token }}@github.com".insteadOf "https://github.com"
+      shell: bash

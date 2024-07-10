@@ -79,6 +79,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [send-slack-notification-slow-job](#send-slack-notification-slow-job)
     - [send-slack-notification](#send-slack-notification)
     - [send-teams-notification](#send-teams-notification)
+    - [set-github-https-auth](#set-github-https-auth)
     - [setup-docker](#setup-docker)
     - [setup-github-release-binary](#setup-github-release-binary)
     - [setup-java-build](#setup-java-build)
@@ -1420,6 +1421,18 @@ Below is the detailed description of the above message card.
   | dry-run     | Do not actually send the message card to the teams channel.                       |
   | raw         | The entire JSON object of the Message Card which will be sent to Microsoft Teams. |
   | overwrite   | JSON like object to overwrite default message.                                    |
+
+### set-github-https-auth
+
+Use this action when running a workflow which includes downloading or cloning
+private Alfresco repo.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/set-github-https-auth@ref
+        with:
+          bot-username: ${{ vars.BOT_GITHUB_USERNAME }}
+          bot-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+```
 
 ### setup-docker
 
