@@ -11,11 +11,16 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: "Checkout"
+      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      with:
+        fetch-depth: 0
     - name: "List changed files"
       id: list-changes
       shell: bash
       env:
         BEFORE_COMMIT: ${{ github.event.before }}
         AFTER_COMMIT: ${{ github.event.after }}
+        PULL_REQUEST_NUMBER: ${{ github.event.number }}
         WRITE_LIST_TO_ENV: ${{ inputs.write-list-to-env }}
       run: ${{ github.action_path }}/github-list-changes.sh
