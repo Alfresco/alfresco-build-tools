@@ -17,6 +17,9 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
       run: |
+        echo $GITHUB_WORKSPACE
+        cd $GITHUB_WORKSPACE
+        ls -al
         if [[ $GITHUB_EVENT_NAME == "pull_request" ]]; then
           # Get the list of changed files from the pull request
           git diff --name-only $GITHUB_HEAD_REF $GITHUB_REF > all-changed-files.txt
