@@ -23,7 +23,7 @@ runs:
 
     - name: Fetch dependencies from Ansible Galaxy
       run: |
-        if [ -f Pipfile ]; then
+        if [ -d ~/.cache/pipenv ]; then
           pipenv run ansible-galaxy install -r requirements.yml --force
         else
           ansible-galaxy install -r requirements.yml --force
