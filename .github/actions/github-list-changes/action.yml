@@ -15,30 +15,7 @@ runs:
       id: list-changes
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ inputs.token }}
-      run: |
-        echo $GITHUB_WORKSPACE
-        cd $GITHUB_WORKSPACE
-        ls -al
-        if [[ $GITHUB_EVENT_NAME == "pull_request" ]]; then
-          # Get the list of changed files from the pull request
-          git diff --name-only origin/$GITHUB_HEAD_REF origin/$GITHUB_REF > all-changed-files.txt
-        elif [[ $GITHUB_EVENT_NAME == "push" ]]; then
-          # Check if github.event.before exists (it might not for force pushes).
-          old_commit=${{ github.event.before }}
-          git rev-parse --verify $old_commit > /dev/null 2>&1
-          if [[ $? -ne 0 ]]; then
-            # If it doesn't exist, then run against the (single) latest commit.
-            old_commit="${{ github.event.after }}~"
-          # Get the list of changed files from the pushed commits
-          git diff --name-only $old_commit ${{ github.event.after }}
-        else
-          echo "Unsupported event type: $GITHUB_EVENT_NAME" > all-changed-files.txt
-          exit 1
-        fi
-        # Write the list to the GitHub step output.
-        echo "all-changed-files=$( cat all-changed-files.txt )" >> $GITHUB_OUTPUT
-        # Write the list to the environment variable if requested
-        if [[ "${{ inputs.write-list-to-env }}" == "true" ]]; then
-          echo "GITHUB_MODIFIED_FILES=$( cat all-changed-files.txt )" >> $GITHUB_ENV
-        fi
+        BEFORE_COMMIT: ${{ github.event.before }}
+        AFTER_COMMIT: ${{ github.event.after }}
+        WRITE_LIST_TO_ENV: ${{ inputs.write-list-to-env }}
+      run: ${{ github.action_path }}/github-list-changes.sh
