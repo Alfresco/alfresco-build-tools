@@ -1,0 +1,12 @@
+github:
+  prefix: 'build(deps)'
+  message: 'bump helm-docs to {{ source "lastRelease" }}'
+
+github_release:
+  owner: 'norwoodj'
+  repo: 'helm-docs'
+
+target:
+  file: '.github/actions/setup-helm-docs/action.yml'
+  key: '$.runs.steps[0].env.DEFAULT_HELM_DOCS_VERSION'
+  trimprefix: 'v'

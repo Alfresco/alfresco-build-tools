@@ -74,7 +74,11 @@ runs:
       shell: bash
       run: |
         REPOSITORY=${DIR##*/}
-        TAG="${TAG:-$(echo ${GITHUB_HEAD_REF:-$GITHUB_REF_NAME} | sed -e 's/[^-_.[:alnum:]]/_/g')}"
+        # Get the branch or tag name
+        REF_NAME="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
+        # Limit the reference name to 128 characters to avoid issues with Docker tags
+        TRUNC_REF_NAME="${REF_NAME:0:128}"
+        TAG="${TAG:-$(echo $TRUNC_REF_NAME | sed -e 's/[^-_.[:alnum:]]/_/g')}"
         echo "IMAGE_REPOSITORY=$REPOSITORY" >> $GITHUB_ENV
         echo "IMAGE_TAG=$TAG" >> $GITHUB_ENV
         echo "IMAGE_NAME=$REPOSITORY:$TAG" >> $GITHUB_ENV
@@ -94,10 +98,10 @@ runs:
         DIR: ${{ inputs.image-dir }}
 
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v3.0.0
+      uses: docker/setup-qemu-action@5927c834f5b4fdf503fca6f4c7eccda82949e1ee # v3.1.0
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
+      uses: docker/setup-buildx-action@4fd812986e6c8c2a69e18311145f9371337f27d4 # v3.4.0
       with:
         version: v0.11.0
         # apply fix from https://github.com/moby/buildkit/issues/3969
@@ -106,19 +110,18 @@ runs:
           network=host
 
     - name: Login to docker.io
-      uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+      uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
       with:
         username: ${{ inputs.docker-username }}
         password: ${{ inputs.docker-password }}
 
-    - name: Build image ${{ env.IMAGE_NAME }}
-      uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
+    - name: Build image ${{ env.IMAGE_NAME }} and export to docker
+      if: inputs.grype-scan-enabled == 'true'
+      uses: docker/build-push-action@1a162644f9a7e87d8f4b053101d1d9a712edc18c # v6.3.0
       with:
         context: ${{ inputs.base-directory }}/${{ inputs.image-dir }}
-        tags: ghcr.io/alfresco/${{ env.IMAGE_NAME }}
+        tags: test-${{ env.IMAGE_NAME }}
         load: true
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
         provenance: false
 
     - name: Anchore Scan API Image
@@ -127,7 +130,7 @@ runs:
       id: scan
       with:
         fail-build: ${{ inputs.grype-fail-build }}
-        image: ghcr.io/alfresco/${{ env.IMAGE_NAME }}
+        image: test-${{ env.IMAGE_NAME }}
         output-format: sarif
         severity-cutoff: critical
 
@@ -138,7 +141,7 @@ runs:
 
     - name: Upload SARIF Files
       if: always() && inputs.grype-scan-enabled == 'true' && github.event_name == 'push'
-      uses: github/codeql-action/upload-sarif@379614612a29c9e28f31f39a59013eb8012a51f0 # v3.24.3
+      uses: github/codeql-action/upload-sarif@b611370bb5703a7efb587f9d136a52ea24c5c38c # v3.25.11
       continue-on-error: true # do not fail if GHAS is not enabled
       with:
         sarif_file: ${{ steps.scan.outputs.sarif }}
@@ -149,10 +152,12 @@ runs:
       uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 # v5.5.1
       with:
         images: ${{ env.IMAGE_NAME }}
+        labels: |
+          org.opencontainers.image.version=${{ env.IMAGE_TAG }}
 
     - name: Login to quay.io
       if: env.PUSH_IMAGE == 'true'
-      uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+      uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
       with:
         registry: quay.io
         username: ${{ inputs.quay-username }}
@@ -160,7 +165,7 @@ runs:
 
     - name: Login to ghcr.io
       if: env.PUSH_IMAGE == 'true'
-      uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+      uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
       with:
         registry: ghcr.io
         username: ${{ inputs.ghcr-username }}
@@ -189,9 +194,12 @@ runs:
         aws ecr describe-repositories --repository-names ${IMAGE_REPOSITORY} \
           || aws ecr create-repository --repository-name ${IMAGE_REPOSITORY}
 
+    # the build is done again only for new arch platforms
+    # see https://docs.docker.com/build/ci/github-actions/test-before-push/
     - name: Build and Push image ${{ env.IMAGE_NAME }}
+      id: build-and-push
       if: env.PUSH_IMAGE == 'true'
-      uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5.1.0
+      uses: docker/build-push-action@1a162644f9a7e87d8f4b053101d1d9a712edc18c # v6.3.0
       with:
         context: ${{ inputs.base-directory }}/${{ inputs.image-dir }}
         platforms: linux/amd64,linux/arm64/v8
@@ -201,6 +209,24 @@ runs:
           ${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}
         labels: ${{ steps.meta.outputs.labels }}
         push: true
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
         provenance: false
+
+    - name: Print tags
+      if: env.PUSH_IMAGE == 'true'
+      shell: bash
+      run: |
+        {
+          echo "### :rocket: Docker image built"
+          echo "Quay:"
+          echo "\`\`\`\`"
+          echo "quay.io/alfresco/${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}"
+          echo " \`\`\`\`"
+          echo "GHCR:"
+          echo "\`\`\`\`"
+          echo "ghcr.io/alfresco/${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}"
+          echo "\`\`\`\`"
+          echo "AWS ECR:"
+          echo "\`\`\`\`"
+          echo "${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}"
+          echo "\`\`\`\`"
+        } >> $GITHUB_STEP_SUMMARY

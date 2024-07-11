@@ -18,6 +18,13 @@ inputs:
     description: Whether the optional message should be added after the default one
     required: false
     default: "false"
+  thread-id:
+    description: The slack thread id to reply to
+    required: false
+outputs:
+  thread-id:
+    description: The slack thread id that has been started or replied to
+    value: ${{ steps.slack.outputs.thread_ts }}
 
 runs:
   using: composite
@@ -102,11 +109,11 @@ runs:
         echo "result=$RESULT" >> $GITHUB_OUTPUT
 
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v5.16.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v5.32.0
 
     - name: Send slack notification
       id: slack
-      uses: slackapi/slack-github-action@6c661ce58804a1a20f6dc5fbee7f0381b469e001 # v1.25.0
+      uses: slackapi/slack-github-action@70cd7be8e40a46e8b0eced40b0de447bdb42f68e # v1.26.0
       env:
         SLACK_BOT_TOKEN: ${{ inputs.token }}
         COLOR: ${{ steps.compute-color.outputs.result }}
@@ -122,6 +129,7 @@ runs:
         payload: |
           {
             "text": "Notification on ${{ env.EVENT_OUTPUT }} on branch <${{ env.REPO_URL }}/tree/${{ env.BRANCH_NAME }}|`${{ env.BRANCH_NAME }}`>",
+            "thread_ts": "${{ inputs.thread-id }}",
             "attachments": [
               {
                 "color": "${{ env.COLOR }}",

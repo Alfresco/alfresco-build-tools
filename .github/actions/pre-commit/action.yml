@@ -26,7 +26,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       if: inputs.skip_checkout == 'false'
       env:
         REF_TO_CHECKOUT: ${{ inputs.auto-commit == 'true' && github.head_ref || '' }}
@@ -34,7 +34,7 @@ runs:
         ref: ${{ env.REF_TO_CHECKOUT }}
 
     - name: Set up Python ${{ inputs.python-version }}
-      uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+      uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
       with:
         python-version: ${{ inputs.python-version }}
 
@@ -55,7 +55,7 @@ runs:
       with:
         extra_args: ${{ env.EXTRA_ARGS }}
 
-    - uses: stefanzweifel/git-auto-commit-action@8756aa072ef5b4a080af5dc8fef36c5d586e521d # v5.0.0
+    - uses: stefanzweifel/git-auto-commit-action@8621497c8c39c72f3e2a999a26b4ca1b5058a842 # v5.0.1
       id: auto-commit-action
       if: inputs.auto-commit == 'true'
 

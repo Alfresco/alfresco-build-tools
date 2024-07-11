@@ -5,12 +5,12 @@ inputs:
     description: |
       The kind version to use. Versions available at:
       https://github.com/kubernetes-sigs/kind/releases
-    default: v0.20.0
+    default: v0.22.0
   kind-node-image:
     description: |
       The Kind docker node image to use. Should match the same kind version at:
       https://github.com/kubernetes-sigs/kind/releases
-    default: kindest/node:v1.27.3@sha256:3966ac761ae0136263ffdb6cfd4db23ef8a83cba8a463690e98317add2c9ba72
+    default: kindest/node:v1.29.2@sha256:51a1434a5397193442f0be2a297b488b6c919ce8a3931be0ce822606ea5ca245
   kind-wait:
     description: The duration to wait for the control plane to become ready
     default: 60s
@@ -20,16 +20,28 @@ inputs:
       (https://github.com/kubernetes/ingress-nginx). Consider main (the default) a floating tag which can result in
       deploying any version (including betas) and non repeatable builds.
     default: main
+  metrics:
+    description: Whether Metrics Server should be installed upon cluster creation
+    default: "false"
 runs:
   using: "composite"
   steps:
     - name: Create cluster
-      uses: helm/kind-action@99576bfa6ddf9a8e612d83b513da5a75875caced # v1.9.0
+      uses: helm/kind-action@0025e74a8c7512023d06dc019c617aa3cf561fde # v1.10.0
       with:
         config: ${{ github.action_path }}/kind.yml
         version: ${{ inputs.kind-version }}
         node_image: ${{ inputs.kind-node-image }}
         wait: ${{ inputs.kind-wait }}
+
+    - name: Install Metrics Server
+      shell: bash
+      if: inputs.metrics == 'true'
+      run: >-
+        helm install --repo https://kubernetes-sigs.github.io/metrics-server/
+        --set args={--kubelet-insecure-tls}
+        metrics-server metrics-server
+        --namespace kube-system
 
     - name: Install ingress-nginx
       shell: bash

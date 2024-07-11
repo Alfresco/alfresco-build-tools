@@ -20,9 +20,9 @@ runs:
   using: composite
   steps:
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v5.16.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v5.32.0
 
-    - name: Check is Dependabot or Propagation PR
+    - name: Check is Dependabot PR or Propagation PR
       id: check
       env:
         PR_USER: ${{ github.event.pull_request.user.login }}
@@ -51,13 +51,13 @@ runs:
         fi
 
         if [[ -z "$BRANCH_REGEX" ]]; then
-          echo "valid-branch-regex=^(revert-[0-9]+-)?(improvement|fix|feature|test|tmp)\/($JIRA_KEY)-[0-9]+[_-]{1}[A-Za-z0-9._-]+$" >> $GITHUB_OUTPUT
+          echo "valid-branch-regex=^(revert-)|(improvement|fix|feature|test|tmp)\/($JIRA_KEY)-[0-9]+[_-]{1}[A-Za-z0-9._-]+$" >> $GITHUB_OUTPUT
         else
           echo "valid-branch-regex=$BRANCH_REGEX" >> $GITHUB_OUTPUT
         fi
 
         if [[ -z "$PR_REGEX" ]]; then
-          echo "valid-pr-title-regex=^(Revert .*)|^($JIRA_KEY)-[0-9]+ [A-Z]{1}.*$" >> $GITHUB_OUTPUT
+          echo "valid-pr-title-regex=^(Revert*)|^($JIRA_KEY)-[0-9]+ [A-Z]{1}.*$" >> $GITHUB_OUTPUT
         else
           echo "valid-pr-title-regex=$PR_REGEX" >> $GITHUB_OUTPUT
         fi
@@ -69,7 +69,7 @@ runs:
       run: |
         readarray -t branches <<< "${{ inputs.whitelist-branches }}"
         for branch in "${branches[@]}"; do
-            if [[ $branch == $BRANCH_NAME ]]; then
+            if [[ $BRANCH_NAME == $branch ]]; then
                 echo "continue=false" >> $GITHUB_OUTPUT
                 exit 0
             fi
@@ -92,7 +92,7 @@ runs:
         fi
 
     - name : Check Title of Pull Request
-      if: steps.check.outputs.continue == 'true'
+      if: steps.check.outputs.continue == 'true' && steps.check-whitelist-branches.outputs.continue == 'true'
       shell: bash
       env:
         PR_TITLE: ${{ github.event.pull_request.title }}

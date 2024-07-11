@@ -1,5 +1,5 @@
 name: "env-load-from-yaml"
-description: "Mimic loading of a yaml with globals to ease migration from Travis CI"
+description: "Load environment variables from a yaml file"
 inputs:
   ignore_regex:
     description: "Bash regex to ignore certain lines"

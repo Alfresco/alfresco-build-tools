@@ -1,0 +1,11 @@
+github:
+  prefix: 'build(deps)'
+  message: 'bump kcadm to {{ source "lastRelease" }}'
+
+github_release:
+  owner: 'keycloak'
+  repo: 'keycloak'
+
+target:
+  file: '.github/actions/setup-kcadm/action.yml'
+  key: '$.runs.steps[0].env.DEFAULT_KEYCLOAK_VERSION'

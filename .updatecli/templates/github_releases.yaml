@@ -1,0 +1,53 @@
+name: GitHub Releases Update
+
+pipelineid: '{{ .github_release.repo }}'
+
+scms:
+  github:
+    kind: 'github'
+    spec:
+      username: '{{ requiredEnv "UPDATECLI_USERNAME" }}'
+      token: '{{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}'
+      owner: '{{ requiredEnv "UPDATECLI_REPO_OWNER" }}'
+      repository: '{{ requiredEnv "UPDATECLI_REPO_NAME" }}'
+      branch: '{{ requiredEnv "UPDATECLI_REPO_BRANCH" }}'
+      commitmessage:
+        type: '{{ .github.prefix }}'
+        message: '{{ .github.message }}'
+
+actions:
+  open-pull-request:
+    kind: 'github/pullrequest'
+    scmid: 'github'
+    spec:
+      automerge: false
+      mergemethod: squash
+      draft: false
+      title: '{{ .github.prefix }}: {{ .github.message }}'
+      description: '{{ .github.message }}'
+      labels:
+        - dependencies
+        - github_releases
+
+sources:
+  lastRelease:
+    kind: githubrelease
+    spec:
+      owner: '{{ .github_release.owner }}'
+      repository: '{{ .github_release.repo }}'
+      token: '{{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}'
+      versionfilter:
+        kind: semver
+        strict: {{ .github_release.versionfilter.strict | default false }}
+        pattern: '{{ .github_release.versionfilter.pattern | default "*" }}'
+
+targets:
+  update-file:
+    name: 'Update version'
+    scmid: 'github'
+    kind: yaml
+    spec:
+      file: '{{ .target.file }}'
+      key: '{{ .target.key }}'
+    transformers:
+      - trimprefix: '{{ .target.trimprefix | default "" }}'

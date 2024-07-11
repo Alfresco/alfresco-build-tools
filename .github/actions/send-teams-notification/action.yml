@@ -58,7 +58,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
     - name: Check workflow status
       uses: martialonline/workflow-status@fe13c6a4716673e224038aa1b02387352fb35e13 # v4
       id: workflow_status_check

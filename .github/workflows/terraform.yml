@@ -8,11 +8,15 @@ on:
         type: string
         required: false
         default: .
+      terraform_operation:
+        description: the terraform operation to perform (apply or destroy)
+        type: string
+        required: false
     secrets:
       AWS_ACCESS_KEY_ID:
-        required: true
+        required: false
       AWS_SECRET_ACCESS_KEY:
-        required: true
+        required: false
       BOT_GITHUB_TOKEN:
         required: false
       DOCKER_USERNAME:
@@ -75,10 +79,18 @@ jobs:
         ./aws/install
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Assume AWS Role if AWS_ROLE_ARN var is set
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
+        if: vars.AWS_ROLE_ARN != ''
+        with:
+          aws-region: ${{ env.AWS_DEFAULT_REGION}}
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          role-session-name: TerraformWorkflow
 
       - name: Load environment variables from yml
-        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v5.16.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v5.32.0
         with:
           yml_path: ${{ inputs.terraform_root_path }}/tfenv.yml
 
@@ -94,7 +106,7 @@ jobs:
           fi
 
       - name: Terraform validate
-        uses: dflook/terraform-validate@e2284154ed07e6475663c831546c8e09453d5893 # v1.41.2
+        uses: dflook/terraform-validate@9cfdf207ffbd0ec5d171403a24feb222591ffdc7 # v1.43.0
         with:
           path: ${{ inputs.terraform_root_path }}
           backend_config: |
@@ -102,7 +114,7 @@ jobs:
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform plan
-        uses: dflook/terraform-plan@fd5954b6a12bb016f349d5161b9ba151b7df9893 # v1.41.2
+        uses: dflook/terraform-plan@d9df4f6c2484e709ba7ffaa16c98a6906f4760cd # v1.43.0
         if: github.event_name == 'pull_request'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
@@ -115,10 +127,23 @@ jobs:
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform apply
-        uses: dflook/terraform-apply@3c29dfe31c578ddccc424ad008320614ea36f0f2 # v1.41.2
-        if: github.event_name == 'push'
+        uses: dflook/terraform-apply@dcda97d729f1843ede471d2fac989cb946f5622a # v1.43.0
+        if: github.event_name == 'push' || inputs.terraform_operation == 'apply'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
+          path: ${{ inputs.terraform_root_path }}
+          auto_approve: ${{ inputs.terraform_operation == 'apply' }}
+          var_file: |
+            ${{ inputs.terraform_root_path }}/common.tfvars
+            ${{ inputs.terraform_root_path }}/${{ needs.compute_basic_vars.outputs.environment_name }}.tfvars
+          backend_config: |
+            bucket=${{ vars.TERRAFORM_STATE_BUCKET }}
+            key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
+
+      - name: Terraform destroy
+        uses: dflook/terraform-destroy@65f689138f6e3549c0aa2fd92153fce0bead4ed7 # v1.43.0
+        if: inputs.terraform_operation == 'destroy'
+        with:
           path: ${{ inputs.terraform_root_path }}
           var_file: |
             ${{ inputs.terraform_root_path }}/common.tfvars

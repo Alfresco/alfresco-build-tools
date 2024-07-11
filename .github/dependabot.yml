@@ -194,7 +194,39 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
+    directory: "/.github/actions/github-deployment-create"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/github-deployment-status-update"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/github-deployments-delete"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
     directory: "/.github/actions/github-download-file"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/github-https-auth"
     schedule:
       interval: "weekly"
     groups:
@@ -267,6 +299,14 @@ updates:
           - "*"
   - package-ecosystem: "github-actions"
     directory: "/.github/actions/helm-update-chart-version"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/install-galaxy-deps"
     schedule:
       interval: "weekly"
     groups:
@@ -435,6 +475,14 @@ updates:
           - "*"
   - package-ecosystem: "github-actions"
     directory: "/.github/actions/send-teams-notification"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/setup-docker"
     schedule:
       interval: "weekly"
     groups:

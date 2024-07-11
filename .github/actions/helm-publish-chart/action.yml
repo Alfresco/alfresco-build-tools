@@ -40,7 +40,7 @@ runs:
       run: echo "CHECKOUT_PATH=$(uuidgen)" >> $GITHUB_ENV
 
     - name: Checkout charts repository
-      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       with:
         path: ${{ env.CHECKOUT_PATH }}
         repository: ${{ inputs.helm-charts-repo }}
@@ -110,7 +110,7 @@ runs:
         fi
 
     - name: Commit changes
-      uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v5.16.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v5.32.0
       with:
         username: ${{ inputs.git-username }}
         add-options: .

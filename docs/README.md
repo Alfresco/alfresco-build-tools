@@ -19,10 +19,10 @@ Here follows the list of GitHub Actions topics available in the current document
       - [Setup Maven Credentials](#setup-maven-credentials)
       - [Setup Maven Build Options](#setup-maven-build-options)
   - [GitHub Actions provided by community](#github-actions-provided-by-community)
-    - [Auto cancel builds](#auto-cancel-builds)
     - [Docker build and push](#docker-build-and-push)
     - [Docker login](#docker-login)
     - [EC2 GitHub runner](#ec2-github-runner)
+    - [Generate Dependabot Glob Action](#generate-dependabot-glob-action)
     - [Git commit and push](#git-commit-and-push)
     - [pmd](#pmd)
     - [Retry failing step](#retry-failing-step)
@@ -45,7 +45,10 @@ Here follows the list of GitHub Actions topics available in the current document
     - [git-commit-changes](#git-commit-changes)
     - [git-latest-tag](#git-latest-tag)
     - [github-check-upcoming-runs](#github-check-upcoming-runs)
+    - [github-deployment-create and github-deployment-status-update](#github-deployment-create-and-github-deployment-status-update)
+    - [github-deployments-delete](#github-deployments-delete)
     - [github-download-file](#github-download-file)
+    - [github-https-auth](#github-https-auth)
     - [github-list-changes](#github-list-changes)
     - [helm-build-chart](#helm-build-chart)
     - [helm-integration-tests](#helm-integration-tests)
@@ -56,6 +59,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [helm-template-yamllint](#helm-template-yamllint)
     - [helm-plugin](#helm-plugin)
     - [helm-update-chart-version](#helm-update-chart-version)
+    - [install-galaxy-deps](#install-galaxy-deps)
     - [install-ubuntu-default-tools](#install-ubuntu-default-tools)
     - [jx-updatebot-pr](#jx-updatebot-pr)
     - [kubectl-keep-nslogs](#kubectl-keep-nslogs)
@@ -77,6 +81,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [send-slack-notification-slow-job](#send-slack-notification-slow-job)
     - [send-slack-notification](#send-slack-notification)
     - [send-teams-notification](#send-teams-notification)
+    - [setup-docker](#setup-docker)
     - [setup-github-release-binary](#setup-github-release-binary)
     - [setup-java-build](#setup-java-build)
     - [setup-kind](#setup-kind)
@@ -86,10 +91,11 @@ Here follows the list of GitHub Actions topics available in the current document
     - [github cache cleanup](#github-cache-cleanup)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
-    - [terraform-eks](#terraform-eks)
+    - [terraform](#terraform)
   - [Cookbook](#cookbook)
     - [Conditional job/step depending on PR labels](#conditional-jobstep-depending-on-pr-labels)
     - [Serialize pull request builds](#serialize-pull-request-builds)
+    - [Expiring tags for quay.io images](#expiring-tags-for-quayio-images)
   - [Known issues](#known-issues)
     - [realpath not available under macosx](#realpath-not-available-under-macosx)
   - [Release](#release)
@@ -156,9 +162,6 @@ env:
         run: mvn deploy ${{ env.MAVEN_CLI_OPTS }} -DskipTests
 ```
 
-When migrating from Travis, depending on the previous configuration, docker.skip and docker.tag properties might need
-to be setup on the command line.
-
 Here is a sample way to extract a branch name that would be used for docker images built with the `build-and-push-docker-images.sh` script, although using the [dedicated action](#docker-build-and-push) can also be
 useful.
 
@@ -172,10 +175,6 @@ useful.
 ```
 
 ## GitHub Actions provided by community
-
-### Auto cancel builds
-
-[This action](https://github.com/styfle/cancel-workflow-action) is a replacement for the Travis settings **Auto cancel branch builds** and **Auto cancel pull request builds**.
 
 ### Docker build and push
 
@@ -204,6 +203,35 @@ provided as repository secrets.
 ### EC2 GitHub runner
 
 [machulav/ec2-github-runner](https://github.com/machulav/ec2-github-runner) can be used to start EC2 [self-hosted runners](https://docs.github.com/en/actions/hosting-your-own-runners). An on-demand EC2 runner can be created, set-up, used to run a required process and finally destroyed - on the fly.
+
+### Generate Dependabot Glob Action
+
+[generate-dependabot-glob-action](https://github.com/Makeshift/generate-dependabot-glob-action) creates a dependabot.yml file from a user-provided template by replacing instances of directory globs with an array of objects matching that glob, with all the other keys copied.
+For example, the following template:
+
+```yml
+  - package-ecosystem: 'docker'
+    directory: '/test/docker/*/Dockerfile*'
+    schedule:
+      interval: 'daily'
+```
+
+Will result in:
+
+```yml
+  - package-ecosystem: 'docker'
+    directory: '/test/docker/container_1/'
+    schedule:
+      interval: 'daily'
+  - package-ecosystem: 'docker'
+    directory: '/test/docker/container_2/'
+    schedule:
+      interval: 'daily'
+  - package-ecosystem: 'docker'
+    directory: '/test/docker/weird_dockerfile/'
+    schedule:
+      interval: 'daily'
+```
 
 ### Git commit and push
 
@@ -440,7 +468,7 @@ If default regular expressions do not match the need, they can also be defined:
           valid-pr-title-regex: "^JKEY-[0-9]+ [A-Za-z]{1}.*$"
 ```
 
-To exempt specific branch names from the branch name checks, the optional input parameter called `whitelist-branches` can be utilized. If there are multiple branches to be excluded, they can be written as one branch name per line.
+To exempt specific branch names from *both* checks, the optional input parameter called `whitelist-branches` can be utilized. If there are multiple branches to be excluded, they can be written as one branch name per line.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/enforce-pr-conventions@ref
@@ -453,9 +481,9 @@ To exempt specific branch names from the branch name checks, the optional input 
 
 The inputs `jira-project-key`, `valid-branch-regex` and `valid-pr-title-regex` are optional: if `valid-branch-regex` or `valid-pr-title-regex` are not provided, the action will consume `jira-project-key` to generate the default regex.
 
-**Default regex for Branch name**: `"^(revert-[0-9]+-)?(improvement|fix|feature|test|tmp)\/($JIRA_KEY)-[0-9]+[_-]{1}[A-Za-z0-9._-]+$"`
+**Default regex for Branch name**: `"^(revert-)|(improvement|fix|feature|test|tmp)\/($JIRA_KEY)-[0-9]+[_-]{1}[A-Za-z0-9._-]+$"`
 
-`(revert-[0-9]+-)` is optional and is used to match revert branches name.
+If the branch name starts with `(revert-)` it will be considered valid.
 
 Examples:
 
@@ -465,11 +493,11 @@ Examples:
 
 ❌ dev-uname-jkey-12345
 
-**Default regex for PR title:**: `"^(Revert .*)|^($JIRA_KEY)-[0-9]+ [A-Z]{1}.*$"`
+**Default regex for PR title:**: `"^(Revert*)|^($JIRA_KEY)-[0-9]+ [A-Z]{1}.*$"`
 
-If the PR title starts with "Revert ", it will be considered valid.
+If the PR title starts with "Revert", it will be considered valid.
 
-If the PR title does not start with "Revert ", it will be checked against `^($JIRA_KEY)-[0-9]+ [A-Z]{1}[A-Za-z].*$` regex.
+If the PR title does not start with "Revert", it will be checked against `^($JIRA_KEY)-[0-9]+ [A-Z]{1}[A-Za-z].*$` regex.
 
 Examples:
 
@@ -483,9 +511,7 @@ Examples:
 
 ### env-load-from-yaml
 
-To ease the migration to GitHub Actions of repositories that contains one or
-more yaml files containing an `env.global` section of Travis CI. It supports env vars
-referencing as value env vars defined early in the file (like Travis does).
+Load environment variables from a yaml file
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@ref
@@ -496,20 +522,35 @@ referencing as value env vars defined early in the file (like Travis does).
 
 ### free-hosted-runner-disk-space
 
-Removes unnecessary folders and files from a GHA [hosted runner](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners). This action might be useful when we run jobs which require a lot of disk space.
+Removes unnecessary folders and files from a GHA [hosted runner](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners), and if that is not enough, allows to manipulate and utilize unused memory partitions. This action might be useful when we run jobs which require a lot of disk space.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@ref
 ```
 
-By default it removes following directories:
+By default, it removes following directories:
 
 - `/usr/share/dotnet`
 - `/opt/ghc`
 - `/usr/local/share/boost`
 - `$AGENT_TOOLSDIRECTORY`
 
-You can override the default behavior by specifying your own collection of files and directories using `to-remove` input parameter.
+You can override the default behavior by specifying your own collection of files and directories using `to-remove` input parameter, or by setting `remove-android` and `remove-codeql` to true.
+
+By default, this action only deletes folders and files, but if you want to use the action to utilize the unused memory, you need to set `merge-disk-volumes` to true. By doing this, a community action [maximize-build-space](https://github.com/easimon/maximize-build-space) will be called.
+This will allow to determine how much memory to allocate to filesystems, and where to mount the build volume, as shown in the example below.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@ref
+        with:
+          merge-disk-volumes: true
+          root-reserve-mb: 12288  # optional
+          temp-reserve-mb: 100  # optional
+          swap-size-mb: 1024  # optional
+          build-mount-path: '/var/lib/docker/'  # optional
+```
+
+> **NOTE:** when enabling [maximize-build-space](https://github.com/easimon/maximize-build-space) by setting `merge-disk-volumes` to `true`, this action should be used as the FIRST step, even before `actions/checkout`.
 
 ### get-branch-name
 
@@ -597,6 +638,63 @@ With proper concurrency logic in place, the latest run might have been cancelled
           workflow: my-workflow.yml
 ```
 
+### github-deployment-create and github-deployment-status-update
+
+These actions create a [GitHub deployment](https://docs.github.com/en/rest/deployments/deployments) and allow updating its status. That can be useful to track progression on a workflow pipeline.
+
+Sample usage:
+
+```yaml
+permissions:
+  deployments: write # This is required for deployment statuses management
+
+jobs:
+  job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Deployment
+        id: create-deployment
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-deployment-create@ref
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          environment: my_gh_environment
+          state: in_progress
+
+      - name: Other Steps
+
+      - name: Update Deployment State to failure
+        if: failure() && steps.create-deployment.outcome == 'success'
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-deployment-status-update@ref
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deployment-id: ${{ steps.create-deployment.outputs.id }}
+          state: failure
+
+      - name: Update Deployment State to success
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-deployment-status-update@ref
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deployment-id: ${{ steps.create-deployment.outputs.id }}
+          state: success
+```
+
+### github-deployments-delete
+
+Deletes all GitHub deployments on a given branch.
+Used as workaround to delete the flood of messages visible on some PRs where environments are leveraged but deployments are not.
+
+Sample usage:
+
+```yaml
+    permissions:
+      deployments: write # This is required for deployment statuses management
+
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-deployments-delete@ref
+        with:
+          branch-name: ${{ github.head_ref }}
+```
+
 ### github-download-file
 
 Download a file from another repository.
@@ -608,6 +706,17 @@ Download a file from another repository.
           repository: "owner/repository"
           file-path: "subdirectory/file-name.json"
           target: "downloaded-file.json"
+```
+
+### github-https-auth
+
+Use this action when running a workflow which clone a private repository over https.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-https-auth@ref
+        with:
+          username: ${{ vars.BOT_GITHUB_USERNAME }}
+          pat: ${{ secrets.BOT_GITHUB_TOKEN }}
 ```
 
 ### github-list-changes
@@ -739,6 +848,17 @@ Updates `version` attribute inside `Chart.yaml` file:
       - uses: Alfresco/alfresco-build-tools/.github/actions/helm-update-chart-version@ref
         with:
           new-version: 1.0.0
+```
+
+### install-galaxy-deps
+
+Installs and cache ansible galaxy dependencies. When `pipenv` binary exists, installation command is prefixed with `pipenv run`.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/install-galaxy-deps@ref
+        with:
+          cache-name: cache-name-default
+          cache-version: 1
 ```
 
 ### install-ubuntu-default-tools
@@ -1242,6 +1362,29 @@ This message can also be appended to the default message:
           append: true
 ```
 
+The action also outputs the id of the Slack thread (`thread-id`) that is being created or replied to when sending the message:
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@ref
+        id: slack
+        with:
+          channel-id: 'channel-id'
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+      - run: |
+          echo ${{ steps.slack.outputs.thread-id }}
+```
+
+If you want the message to be posted as a reply to an existing thread rather than starting its own, make sure to specify the optional `thread-id` input:
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@ref
+        id: slack
+        with:
+          channel-id: 'channel-id'
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          thread-id: 'thread-id'
+```
+
 ### send-teams-notification
 
 Sends a teams notification with a pre-defined payload.
@@ -1303,6 +1446,19 @@ Below is the detailed description of the above message card.
   | raw         | The entire JSON object of the Message Card which will be sent to Microsoft Teams. |
   | overwrite   | JSON like object to overwrite default message.                                    |
 
+### setup-docker
+
+When using a runner which is not a default hosted runner, all the default
+tooling may not be available, including Docker. Use [setup-docker
+action](../.github/actions/setup-docker/action.yml) to install and configure
+Docker Engine for the current runner. Required for the ARM64 GitHub Action
+Hosted runners.
+
+```yaml
+      - name: Setup Docker Engine
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-docker@ref
+```
+
 ### setup-github-release-binary
 
 [setup-github-release-binary](../.github/actions/setup-github-release-binary/action.yml)
@@ -1339,6 +1495,8 @@ Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
           # Optional but ensure repeatable builds (defaults to latest nginx ingress version otherwise).
           # see https://github.com/kubernetes/ingress-nginx
           # ingress-nginx-ref: controller-v1.8.2
+          # Enable deploying Metrics server with KinD
+          # metrics: true
       - name: Helm deploy
         run: |
           helm dep up ./helm/chart
@@ -1384,7 +1542,7 @@ Runs Veracode Source Clear Scan
 
 ### github cache cleanup
 
-Performs the cleanup of cache entries related with already closed PR
+Performs the cleanup of all cache entries related with already closed PR
 
 ```yaml
 name: Cleanup caches for work branch
@@ -1420,32 +1578,35 @@ Calculates the new alpha version, creates new git tag and publishes the new pack
     secrets: inherit
 ```
 
-### terraform-eks
+### terraform
 
-Reusable workflow which implements an opinionated workflow to manage EKS clusters
-reusing [dflook/terraform-github-actions](https://github.com/dflook/terraform-github-actions),
+Reusable workflow which implements an opinionated workflow to manage terraform
+repositories leveraging [dflook/terraform-github-actions](https://github.com/dflook/terraform-github-actions),
 optionally allowing a multi-state approach for managing resources.
 
-Assume having a GitHub environment named `production` when executing on the
-`main` branch, and a `develop` GitHub environment when executing
-on the `develop` branch.
+This workflow assumes a GitHub environment named `production` to be present when
+run against the `main` branch, and a `develop` GitHub environment to be present when
+run against the `develop` branch.
 
 GitHub environments must be configured with the following variables:
 
 - AWS_DEFAULT_REGION: where the aws resources will be created
+- AWS_ROLE_ARN: the ARN of the role to assume in case OIDC authentication is available
 - RANCHER2_URL (optional): automatically register cluster on this rancher instance
 - RESOURCE_NAME: used to namespace every resource created, e.g. the cluster name
 - TERRAFORM_STATE_BUCKET: the name of the S3 bucket where to store the terraform state
 
-and the following secrets:
+and the following (optional) secrets:
 
-- AWS_ACCESS_KEY_ID: AWS credentials
-- AWS_SECRET_ACCESS_KEY: AWS credentials
+- AWS_ACCESS_KEY_ID: access key to use the AWS terraform provider
+- AWS_SECRET_ACCESS_KEY: secret key to use the AWS terraform provider
 - BOT_GITHUB_TOKEN (to access private terraform module of the Alfresco org)
 - DOCKER_USERNAME (optional): Docker Hub credentials
 - DOCKER_PASSWORD (optional): Docker Hub credentials
-- RANCHER2_ACCESS_KEY (optional): automatically register cluster on your rancher instance
-- RANCHER2_SECRET_KEY (optional): automatically register cluster on your rancher instance
+- RANCHER2_ACCESS_KEY (optional): access key to use the rancher terraform
+  provider
+- RANCHER2_SECRET_KEY (optional): secret key to use the rancher terraform
+  provider
 
 ```yaml
 name: "terraform"
@@ -1460,18 +1621,29 @@ on:
       - main
       - develop
   workflow_dispatch:
+    inputs:
+      terraform_operation:
+        description: 'Perform the requested operation on terraform'
+        type: choice
+        required: true
+        options:
+          - apply
+          - destroy
+        default: apply
 
 jobs:
   invoke-terraform-infra:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-eks.yml@ref
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@ref
     with:
       terraform_root_path: infra
+      terraform_operation: ${{ inputs.terraform_operation }}
     secrets: inherit
   invoke-terraform-k8s:
     needs: invoke-terraform-infra
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-eks.yml@ref
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@ref
     with:
       terraform_root_path: k8s
+      terraform_operation: ${{ inputs.terraform_operation }}
     secrets: inherit
 ```
 
@@ -1519,6 +1691,60 @@ The `github.run_id` is just a fallback to not queue the workflow run when both
 variables are empty (when event is not related to a specific ref).
 
 More docs on [using concurrency](https://docs.github.com/en/actions/using-jobs/using-concurrency)
+
+### Expiring tags for quay.io images
+
+It may be desirable to push docker images from branches to test them before
+merge but we should avoid polluting the image registry with these tags.
+
+With quay.io, this can be easily achieved by setting the following label on the
+docker image like:
+
+```properties
+quay.expires-after=2w
+```
+
+For the supported time formats, please check the [RedHat official
+documentation](https://access.redhat.com/documentation/it-it/red_hat_quay/3.2/html/use_red_hat_quay/working_with_tags#tag-expiration).
+
+An example step which computes the label could be:
+
+```yml
+- id: vars
+  name: Compute Docker vars
+  run: |
+    if [[ "${{ github.ref_name }}" == "main" ]]; then
+      echo "image_tag=latest" >> $GITHUB_OUTPUT
+      echo "image_labels=" >> $GITHUB_OUTPUT
+    else
+      echo "image_tag=${GITHUB_REF_NAME//\//-}" >> $GITHUB_OUTPUT
+      echo "image_labels=quay.expires-after=2w" >> $GITHUB_OUTPUT
+    fi
+```
+
+Then, if you are using the `docker/build-push-action` action:
+
+```yml
+- name: Build and push
+  uses: docker/build-push-action@v5
+  with:
+    push: ${{ github.actor != 'dependabot[bot]' }} # avoid pushing on dependabot pr
+    tags: |
+      quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}
+    platforms: linux/amd64,linux/arm64/v8
+    labels: ${{ steps.vars.outputs.image_labels }}
+    provenance: false # required due to https://issues.redhat.com/browse/PROJQUAY-5013
+```
+
+Alternatively, if you are building Docker images as part of a Maven lifecycle
+using the [docker-maven-plugin](https://dmp.fabric8.io):
+
+```yml
+- name: "Build"
+  env:
+    MAVEN_OPTS: "-Ddocker.labels.${{ steps.vars.outputs.image_labels }}"
+  run: mvn -B -V package -DskipTests
+```
 
 ## Known issues
 
