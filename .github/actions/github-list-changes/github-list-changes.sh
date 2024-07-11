@@ -31,7 +31,7 @@ echo "$EOF" >> $GITHUB_OUTPUT
 
 # Write the list to the environment variable if requested.
 if [[ "$WRITE_LIST_TO_ENV" == "true" ]]; then
-    echo "GITHUB_MODIFIED_FILES<<$EOF" >> $GITHUB_ENV    
+    echo "GITHUB_MODIFIED_FILES<<$EOF" >> $GITHUB_ENV
     echo "$( cat all-changed-files.txt )" >> $GITHUB_ENV
     echo "$EOF" >> $GITHUB_ENV
 fi
