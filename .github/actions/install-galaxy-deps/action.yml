@@ -22,6 +22,11 @@ runs:
         key: ansible-galaxy-v${{ inputs.cache-version }}-${{ inputs.cache-name }}-${{ hashFiles('requirements.yml') }}
 
     - name: Fetch dependencies from Ansible Galaxy
-      run: ansible-galaxy install -r requirements.yml --force
+      run: |
+        CMD_PREFIX=""
+        if command -v pipenv >/dev/null 2>&1; then
+          CMD_PREFIX="pipenv run"
+        fi
+        $CMD_PREFIX ansible-galaxy install -r requirements.yml --force
       if: steps.collections-cache.outputs.cache-hit != 'true'
       shell: bash

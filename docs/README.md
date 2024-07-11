@@ -827,7 +827,7 @@ Updates `version` attribute inside `Chart.yaml` file:
 
 ### install-galaxy-deps
 
-Installs and cache ansible galaxy dependencies
+Installs and cache ansible galaxy dependencies. When `pipenv` binary exists, installation command is prefixed with `pipenv run`.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/install-galaxy-deps@ref
