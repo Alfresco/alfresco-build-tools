@@ -723,10 +723,9 @@ Use this action when running a workflow which clone a private repository over ht
 
 List the changes in a pull request (`pull-request` event) or that were pushed to a branch (`push` event).
 
-This action requires a checkout with fetch-depth option as follow:
+This action requires a checkout with `fetch-depth: 0` option as follow:
 
 ```yaml
-
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0

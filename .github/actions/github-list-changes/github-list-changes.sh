@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 if [[ $GITHUB_EVENT_NAME == "pull_request" ]]; then
     # Get the list of changed files from the pull request.
