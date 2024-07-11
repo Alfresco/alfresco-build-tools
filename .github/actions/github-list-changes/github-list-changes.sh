@@ -6,11 +6,8 @@ if [[ $GITHUB_EVENT_NAME == "pull_request" ]]; then
 elif [[ $GITHUB_EVENT_NAME == "push" ]]; then
     # Check if the old commit exists (it might not for force pushes).
     old_commit=$BEFORE_COMMIT
-    git log -1 $old_commit > /dev/null 2>&1
-    if [[ $? != 0 ]]; then
-        # If it doesn't exist, then run against the (single) latest commit.
-        old_commit="$AFTER_COMMIT~"
-    fi
+    # If it doesn't exist, then run against the (single) latest commit.
+    git log -1 $old_commit > /dev/null 2>&1 || old_commit="$AFTER_COMMIT~"
     # Get the list of changed files from the pushed commits.
     git diff --name-only $old_commit $AFTER_COMMIT > all-changed-files.txt
 else
