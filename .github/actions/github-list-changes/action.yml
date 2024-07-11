@@ -3,7 +3,7 @@ description: "List all changed files in a pushed set of commits or a pull reques
 inputs:
   write-list-to-env:
     description: "If set to true then write the list of changed files to the environment variable GITHUB_MODIFIED_FILES"
-    default: false
+    default: "false"
 outputs:
   all_changed_files:
     description: The list of changed files (one per line)
