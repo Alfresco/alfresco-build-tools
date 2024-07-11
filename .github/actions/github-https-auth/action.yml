@@ -2,10 +2,10 @@ name: 'Github https authentication'
 description: 'Configure git to use http credentials for accessing private repositories'
 inputs:
   username:
-    description: 'The username of the bot account'
+    description: 'The username of the account'
     required: true
   pat:
-    description: 'The token of the bot account'
+    description: 'The token of the account'
     required: true
 runs:
   using: "composite"
