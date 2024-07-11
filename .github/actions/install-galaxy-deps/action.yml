@@ -24,7 +24,7 @@ runs:
     - name: Fetch dependencies from Ansible Galaxy
       run: |
         CMD_PREFIX=""
-        if [ -d "~/.cache/pipenv" ]; then
+        if command -v pipenv >/dev/null 2>&1; then
           CMD_PREFIX="pipenv run"
         fi
         $CMD_PREFIX ansible-galaxy install -r requirements.yml --force
