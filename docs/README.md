@@ -48,6 +48,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [github-deployment-create and github-deployment-status-update](#github-deployment-create-and-github-deployment-status-update)
     - [github-deployments-delete](#github-deployments-delete)
     - [github-download-file](#github-download-file)
+    - [github-https-auth](#github-https-auth)
     - [helm-build-chart](#helm-build-chart)
     - [helm-integration-tests](#helm-integration-tests)
     - [helm-package-chart](#helm-package-chart)
@@ -704,6 +705,17 @@ Download a file from another repository.
           repository: "owner/repository"
           file-path: "subdirectory/file-name.json"
           target: "downloaded-file.json"
+```
+
+### github-https-auth
+
+Use this action when running a workflow which clone a private repository over https.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-https-auth@ref
+        with:
+          username: ${{ vars.BOT_GITHUB_USERNAME }}
+          pat: ${{ secrets.BOT_GITHUB_TOKEN }}
 ```
 
 ### helm-build-chart
