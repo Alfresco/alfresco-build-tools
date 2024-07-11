@@ -1,5 +1,5 @@
 name: 'Configure git to use bot credentials'
-description: 'Configure git to use bot credentials for private repositories using git config'
+description: 'Configure git to use http credentials for accessing private repositories'
 inputs:
   bot-username:
     description: 'The username of the bot account'

@@ -1424,8 +1424,7 @@ Below is the detailed description of the above message card.
 
 ### set-github-https-auth
 
-Use this action when running a workflow which includes downloading or cloning
-private Alfresco repo.
+Use this action when running a workflow which clone a private repository over https.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/set-github-https-auth@ref
