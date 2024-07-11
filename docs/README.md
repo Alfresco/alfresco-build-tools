@@ -723,10 +723,16 @@ Use this action when running a workflow which clone a private repository over ht
 
 List the changes in a pull request (`pull-request` event) or that were pushed to a branch (`push` event).
 
+This action requires a checkout with fetch-depth option as follow:
+
 ```yaml
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@ref
         with:
-          write-list-to-env: true # default false
+          write-list-to-env: "true" # default "false"
 ```
 
 The action outputs the list of changed files (one path per line) using the output `all_changed_files` and optionally to the env variable `GITHUB_MODIFIED_FILES`.
