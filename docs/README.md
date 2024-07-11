@@ -48,6 +48,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [github-deployment-create and github-deployment-status-update](#github-deployment-create-and-github-deployment-status-update)
     - [github-deployments-delete](#github-deployments-delete)
     - [github-download-file](#github-download-file)
+    - [github-https-auth](#github-https-auth)
     - [helm-build-chart](#helm-build-chart)
     - [helm-integration-tests](#helm-integration-tests)
     - [helm-package-chart](#helm-package-chart)
@@ -79,7 +80,6 @@ Here follows the list of GitHub Actions topics available in the current document
     - [send-slack-notification-slow-job](#send-slack-notification-slow-job)
     - [send-slack-notification](#send-slack-notification)
     - [send-teams-notification](#send-teams-notification)
-    - [set-github-https-auth](#set-github-https-auth)
     - [setup-docker](#setup-docker)
     - [setup-github-release-binary](#setup-github-release-binary)
     - [setup-java-build](#setup-java-build)
@@ -705,6 +705,17 @@ Download a file from another repository.
           repository: "owner/repository"
           file-path: "subdirectory/file-name.json"
           target: "downloaded-file.json"
+```
+
+### github-https-auth
+
+Use this action when running a workflow which clone a private repository over https.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-https-auth@ref
+        with:
+          username: ${{ vars.BOT_GITHUB_USERNAME }}
+          pat: ${{ secrets.BOT_GITHUB_TOKEN }}
 ```
 
 ### helm-build-chart
@@ -1421,17 +1432,6 @@ Below is the detailed description of the above message card.
   | dry-run     | Do not actually send the message card to the teams channel.                       |
   | raw         | The entire JSON object of the Message Card which will be sent to Microsoft Teams. |
   | overwrite   | JSON like object to overwrite default message.                                    |
-
-### set-github-https-auth
-
-Use this action when running a workflow which clone a private repository over https.
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/set-github-https-auth@ref
-        with:
-          bot-username: ${{ vars.BOT_GITHUB_USERNAME }}
-          bot-token: ${{ secrets.BOT_GITHUB_TOKEN }}
-```
 
 ### setup-docker
 
