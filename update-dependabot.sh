@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 # Directory containing composite actions
 actions_dir='.github/actions'
@@ -30,6 +30,12 @@ END
 # Check if Dependabot config exists
 if [ ! -f "$master_config" ]; then
     echo "$master_config config not found."
+    exit 1
+fi
+
+# Ensure yq is installed
+if ! command -v yq &> /dev/null; then
+    echo "yq is not installed. Please install it to continue."
     exit 1
 fi
 
