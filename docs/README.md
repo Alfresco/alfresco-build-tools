@@ -49,6 +49,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [github-deployments-delete](#github-deployments-delete)
     - [github-download-file](#github-download-file)
     - [github-https-auth](#github-https-auth)
+    - [github-list-changes](#github-list-changes)
     - [helm-build-chart](#helm-build-chart)
     - [helm-integration-tests](#helm-integration-tests)
     - [helm-package-chart](#helm-package-chart)
@@ -717,6 +718,23 @@ Use this action when running a workflow which clone a private repository over ht
           username: ${{ vars.BOT_GITHUB_USERNAME }}
           pat: ${{ secrets.BOT_GITHUB_TOKEN }}
 ```
+
+### github-list-changes
+
+List the changes in a pull request (`pull-request` event) or that were pushed to a branch (`push` event).
+
+This action requires a checkout with `fetch-depth: 0` option as follow:
+
+```yaml
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@ref
+        with:
+          write-list-to-env: "true" # default "false"
+```
+
+The action outputs the list of changed files (one path per line) using the output `all_changed_files` and optionally to the env variable `GITHUB_MODIFIED_FILES`.
 
 ### helm-build-chart
 
