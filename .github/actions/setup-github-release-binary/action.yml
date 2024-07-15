@@ -26,5 +26,6 @@ runs:
         URL=https://github.com/$REPO/releases/download/$(eval echo $URL_TEMPLATE)
         echo "Downloading $URL ..."
         curl -fsSL $URL | tar xz $NAME
+        chmod +x $NAME
         sudo mv $NAME /usr/local/bin/$NAME
         echo $($NAME --version)
