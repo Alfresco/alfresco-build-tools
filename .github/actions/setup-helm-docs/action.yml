@@ -4,6 +4,10 @@ inputs:
   version:
     description: 'Version of helm-docs'
     required: false
+outputs:
+  version:
+    description: 'Version of helm-docs that was installed'
+    value: ${{ steps.version-detect.outputs.version }}
 runs:
   using: "composite"
   steps:
@@ -13,3 +17,7 @@ runs:
         version: ${{ inputs.version != '' && inputs.version || env.DEFAULT_HELM_DOCS_VERSION }}
       env:
         DEFAULT_HELM_DOCS_VERSION: 1.14.2
+    - name: Set version as output
+      shell: bash
+      id: version-detect
+      run: echo "version=$(helm-docs -v | awk '{print $NF}')" >> $GITHUB_OUTPUT

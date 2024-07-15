@@ -34,11 +34,22 @@ jobs:
       #
       #       * another line
       #       * one more
+
+      #region Test setup-helm-docs
       - uses: ./.github/actions/setup-helm-docs
-      - uses: ./.github/tests/actions/test-setup-helm-docs
+        id: setup-helm-docs-latest
       - uses: ./.github/tests/actions/test-setup-helm-docs
         with:
+          expected-version: ${{ steps.setup-helm-docs-latest.outputs.version }}
+      - uses: ./.github/actions/setup-helm-docs
+        id: setup-helm-docs-fixed-version
+        with:
           version: 1.13.1
+      - uses: ./.github/tests/actions/test-setup-helm-docs
+        with:
+          expected-version: ${{ steps.setup-helm-docs-fixed-version.outputs.version }}
+      #endregion
+
       - uses: ./.github/actions/setup-jx-release-version
       - uses: ./.github/actions/setup-kubepug
       - uses: ./.github/actions/rancher
