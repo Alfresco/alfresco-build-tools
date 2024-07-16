@@ -13,7 +13,9 @@ docker-compose --version
 docker-compose -f "${COMPOSE_FILE}" config
 echo "Starting Alfresco in docker compose"
 docker-compose ps
-docker-compose -f "${COMPOSE_FILE}" pull --quiet
+if [ "$COMPOSE_PULL" = "true" ]; then
+  docker-compose -f "${COMPOSE_FILE}" pull --quiet
+fi
 export COMPOSE_HTTP_TIMEOUT=120
 docker-compose -f "${COMPOSE_FILE}" up -d --quiet-pull
 

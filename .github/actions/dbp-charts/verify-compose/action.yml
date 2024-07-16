@@ -5,6 +5,10 @@ inputs:
     description: "full path to docker compose file to test"
     required: false
     default: "./docker-compose.yml"
+  compose_pull:
+    description: "run docker-compose pull before tests"
+    required: false
+    default: "true"
   docker_username:
     description: "username for Docker Hub"
     required: false
@@ -43,3 +47,4 @@ runs:
       shell: bash
       env:
         COMPOSE_FILE_PATH: ${{ inputs.compose_file_path }}
+        COMPOSE_PULL: ${{ inputs.compose_pull }}
