@@ -14,6 +14,8 @@ runs:
       shell: bash
       run: |
         # Install srcclr CLI tool (Veracode) as per https://docs.veracode.com/r/t_sc_cli_agent
+        curl -sSL 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xdf7dd7a50b746dd4' | sudo gpg --dearmor -o /usr/share/keyrings/veracode-sca-archive.gpg
+        echo 'deb [signed-by=/usr/share/keyrings/veracode-sca-archive.gpg] https://download.sourceclear.com/ubuntu stable/' | sudo tee /etc/apt/sources.list.d/veracode-sca.list
         sudo apt-get update
         sudo apt-get install srcclr
     - name: "Add Veracode project name extension"
