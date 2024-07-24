@@ -1537,7 +1537,7 @@ Validates Maven dependency graph versions to ensure all target includes artifact
 
 Runs Veracode Source Clear Scan
 
-To add custom maven execution instructions, for skipping test modules etc., use https://docs.veracode.com/r/Java_Scan_Directives#custom_maven_exec 
+To add custom maven execution instructions, for skipping test modules etc., use [custom_maven_command](https://docs.veracode.com/r/Java_Scan_Directives#custom_maven_command)
 scan directive in srcclr.yml file of the scanned repository.
 
 ```yaml
