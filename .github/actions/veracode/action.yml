@@ -7,15 +7,6 @@ inputs:
   srcclr-project-ext:
     description: "Veracode project name extension"
     required: false
-  # TODO: Add default options + custom options for Source Clear scan, need feedback from Veracode
-  # Below inputs are broken for now
-  srcclr-install-default-options:
-    description: Default options for Source Clear scan
-    required: false
-    default: '-DskipTests -Dmaven.javadoc.skip=true'
-  srcclr-install-options:
-    description: Additional options for Source Clear scan
-    required: false
 runs:
   using: "composite"
   steps:
@@ -35,3 +26,4 @@ runs:
       shell: bash
       env:
         SRCCLR_API_TOKEN: ${{ inputs.srcclr-api-token }}
+        SRCCLR_INSTALL_OPTIONS: ${{ inputs.srcclr-install-options }}

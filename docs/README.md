@@ -1537,13 +1537,15 @@ Validates Maven dependency graph versions to ensure all target includes artifact
 
 Runs Veracode Source Clear Scan
 
+To add custom maven execution instructions, for skipping test modules etc., use https://docs.veracode.com/r/Java_Scan_Directives#custom_maven_exec 
+scan directive in srcclr.yml file of the scanned repository.
+
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@ref
         #continue-on-error: true # uncomment this line to prevent the Veracode scan step from failing the whole build
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
           srcclr-project-ext: '' # optional, sets Veracode project extension
-          srcclr-install-options: '-DskipTestModules' # optional, additional maven options
 ```
 
 ### github cache cleanup
