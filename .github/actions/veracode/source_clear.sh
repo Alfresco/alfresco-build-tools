@@ -4,7 +4,7 @@ echo "=========================== Starting SourceClear Script ==================
 PS4="\[\e[35m\]+ \[\e[m\]"
 set +e -v -x
 
-srcclr scan > scan.log
+srcclr scan --loud > scan.log
 
 SUCCESS=$?   # this will read exit code of the previous command
 
