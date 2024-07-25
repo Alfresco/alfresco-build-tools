@@ -1541,9 +1541,9 @@ To add custom maven execution instructions, for skipping test modules etc., use 
 scan directive in srcclr.yml file of the scanned repository.
 
 When monitoring multiple versions of the same project in Veracode, optional input srcclr-project-ext can be used to direct scan results to a specific Veracode project instead of the default one.
-For example: ACS_EXT_MASTER has a project named alfresco_enterprise_repo linked to itself, in order to include recent agent-based scan results in the promoted scan.
-When supporting an older version of ACS_EXT_MASTER like ACS_EXT_MASTER_7_4, we can set this input value to '7.4.N' on branch "release/7.4.N", to direct scan results to the project named alfresco_enterprise_repo_7.4.N instead.
-If that project didn't exist, it will be created automatically. You can set the default branch for the project (release/7.4.N) and link it to an application (ACS_EXT_MASTER_7_4) in Veracode.
+For example: ACS_EXT_MASTER Veracode application has an alfresco-enterprise-repo agent-based scans linked to itself through a project named alfresco_enterprise_repo, in order to include recent agent-based scan results in the promoted scan.
+When supporting an older version of ACS_EXT_MASTER like ACS_EXT_MASTER_7_4, we can set this input value to '7.4.N' on branch "release/7.4.N" of alfresco-enterprise-repo, to direct this branches agent-based scan results to a project named alfresco_enterprise_repo_7.4.N instead.
+If that project doesn't exist, it will be created automatically. You can then set the default branch for the created project (release/7.4.N) and link it to an application (ACS_EXT_MASTER_7_4) in Veracode.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@ref
