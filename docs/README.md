@@ -1543,7 +1543,7 @@ scan directive in srcclr.yml file of the scanned repository.
 When monitoring multiple versions of the same project in Veracode, optional input srcclr-project-ext can be used to direct scan results to a specific Veracode project instead of the default one.
 For example: ACS_EXT_MASTER Veracode application has an Alfresco/alfresco-enterprise-repo agent-based scans linked to itself through a Veracode project named Alfresco/alfresco-enterprise-repo, in order to include recent agent-based scan results in the promoted scan.
 When supporting an older version of ACS_EXT_MASTER like ACS_EXT_MASTER_7_4, we can set this input value to '7.4.N' on branch "release/7.4.N" of Alfresco/alfresco-enterprise-repo, to direct this branch's agent-based scan results to a project named Alfresco/alfresco-enterprise-repo/7.4.N instead.
-If that project doesn't exist, it will be created automatically. You can then set the default branch for the created project (release/7.4.N) and link it to an application (ACS_EXT_MASTER_7_4) in Veracode. 
+If that project doesn't exist, it will be created automatically. You can then set the default branch for the created project (release/7.4.N) and link it to an application (ACS_EXT_MASTER_7_4) in Veracode.
 This way, the agent-based scan results will be added in the latest promoted scan of ACS_EXT_MASTER_7_4 Veracode application.
 
 ```yaml
