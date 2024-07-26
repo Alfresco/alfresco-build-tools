@@ -5,7 +5,7 @@ inputs:
     description: "Agent API Token"
     required: true
   srcclr-project-ext:
-    description: "Direct scan results to Veracode project named: <default project name>_<srcclr-project-ext>"
+    description: "Direct scan results to Veracode project named: <default project name>/<srcclr-project-ext>"
     required: false
 runs:
   using: "composite"
@@ -18,13 +18,21 @@ runs:
         echo 'deb [signed-by=/usr/share/keyrings/veracode-sca-archive.gpg] https://download.sourceclear.com/ubuntu stable/' | sudo tee /etc/apt/sources.list.d/veracode-sca.list
         sudo apt-get update
         sudo apt-get install srcclr
-    - name: "Direct scan results to Veracode project named: <default project name>_${{ inputs.srcclr-project-ext }}"
+    - name: "Set target project URI, with extension if provided"
       shell: bash
-      if: srcclr-project-ext != ''
       run: |
-        echo "SRCCLR_SCM_URI=${{ github.server_url }}/${{ github.repository }}/${{ inputs.srcclr-project-ext }}" >> $GITHUB_ENV
+        SRCCLR_SCM_URI="${{ github.server_url }}/${{ github.repository }}"
+
+        if [ -n "${{ inputs.srcclr-project-ext }}" ]; then
+          SRCCLR_SCM_URI="$SRCCLR_SCM_URI/${{ inputs.srcclr-project-ext }}"
+        fi
+
+        echo "SRCCLR_SCM_URI=$SRCCLR_SCM_URI" >> $GITHUB_ENV
     - name: "Run scanning"
       run: ${{ github.action_path }}/source_clear.sh
       shell: bash
       env:
         SRCCLR_API_TOKEN: ${{ inputs.srcclr-api-token }}
+        SRCCLR_SCM_REF: ${{ github.event_name == 'pull_request' && github.ref || github.ref_name }}
+        SRCCLR_SCM_REF_TYPE: ${{ github.event_name == 'pull_request' && 'tag' || 'branch' }}
+        SRCCLR_SCM_REV: ${{ github.sha }}
