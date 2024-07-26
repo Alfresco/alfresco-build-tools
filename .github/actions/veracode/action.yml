@@ -24,7 +24,7 @@ runs:
       run: |
         echo "SRCCLR_SCM_URI=${{ github.server_url }}/${{ github.repository }}/${{ inputs.srcclr-project-ext }}" >> $GITHUB_ENV
     - name: "Run scanning"
-      run: srcclr scan
+      run: ${{ github.action_path }}/source_clear.sh
       shell: bash
       env:
         SRCCLR_API_TOKEN: ${{ inputs.srcclr-api-token }}
