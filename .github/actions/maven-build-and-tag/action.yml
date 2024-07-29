@@ -180,7 +180,7 @@ runs:
 
     - name: Login to DockerHub Registry
       if: inputs.docker-username != '' && (github.event_name == 'push' || env.IS_PREVIEW == 'true')
-      uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
+      uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
       with:
         registry: docker.io
         username: ${{ inputs.docker-username }}
@@ -188,7 +188,7 @@ runs:
 
     - name: Login to Quay.io Docker Registry
       if: inputs.quay-username != ''
-      uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
+      uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
       with:
         registry: quay.io
         username: ${{ inputs.quay-username }}
@@ -196,7 +196,7 @@ runs:
 
     - name: Login to ghcr.io Docker Registry
       if: inputs.ghcr-username != ''
-      uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
+      uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
       with:
         registry: ghcr.io
         username: ${{ inputs.ghcr-username }}
