@@ -98,10 +98,10 @@ runs:
         DIR: ${{ inputs.image-dir }}
 
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@5927c834f5b4fdf503fca6f4c7eccda82949e1ee # v3.1.0
+      uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3.2.0
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@4fd812986e6c8c2a69e18311145f9371337f27d4 # v3.4.0
+      uses: docker/setup-buildx-action@aa33708b10e362ff993539393ff100fa93ed6a27 # v3.5.0
       with:
         version: v0.11.0
         # apply fix from https://github.com/moby/buildkit/issues/3969
@@ -110,14 +110,14 @@ runs:
           network=host
 
     - name: Login to docker.io
-      uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
+      uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
       with:
         username: ${{ inputs.docker-username }}
         password: ${{ inputs.docker-password }}
 
     - name: Build image ${{ env.IMAGE_NAME }} and export to docker
       if: inputs.grype-scan-enabled == 'true'
-      uses: docker/build-push-action@1ca370b3a9802c92e886402e0dd88098a2533b12 # v6.4.1
+      uses: docker/build-push-action@5176d81f87c23d6fc96624dfdbcd9f3830bbe445 # v6.5.0
       with:
         context: ${{ inputs.base-directory }}/${{ inputs.image-dir }}
         tags: test-${{ env.IMAGE_NAME }}
@@ -141,7 +141,7 @@ runs:
 
     - name: Upload SARIF Files
       if: always() && inputs.grype-scan-enabled == 'true' && github.event_name == 'push'
-      uses: github/codeql-action/upload-sarif@2d790406f505036ef40ecba973cc774a50395aac # v3.25.13
+      uses: github/codeql-action/upload-sarif@afb54ba388a7dca6ecae48f608c4ff05ff4cc77a # v3.25.15
       continue-on-error: true # do not fail if GHAS is not enabled
       with:
         sarif_file: ${{ steps.scan.outputs.sarif }}
@@ -157,7 +157,7 @@ runs:
 
     - name: Login to quay.io
       if: env.PUSH_IMAGE == 'true'
-      uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
+      uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
       with:
         registry: quay.io
         username: ${{ inputs.quay-username }}
@@ -165,7 +165,7 @@ runs:
 
     - name: Login to ghcr.io
       if: env.PUSH_IMAGE == 'true'
-      uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
+      uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
       with:
         registry: ghcr.io
         username: ${{ inputs.ghcr-username }}
@@ -199,7 +199,7 @@ runs:
     - name: Build and Push image ${{ env.IMAGE_NAME }}
       id: build-and-push
       if: env.PUSH_IMAGE == 'true'
-      uses: docker/build-push-action@1ca370b3a9802c92e886402e0dd88098a2533b12 # v6.4.1
+      uses: docker/build-push-action@5176d81f87c23d6fc96624dfdbcd9f3830bbe445 # v6.5.0
       with:
         context: ${{ inputs.base-directory }}/${{ inputs.image-dir }}
         platforms: linux/amd64,linux/arm64/v8
