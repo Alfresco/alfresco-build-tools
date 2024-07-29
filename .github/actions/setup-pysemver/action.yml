@@ -8,13 +8,10 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Workaround for pypa/setuptools#4519
-      shell: bash
-      run: |
-        pip3 install -I --force-reinstall setuptools==71.0.0
     - name: Install pysemver via pip
       env:
         TOOL_VERSION: ${{ inputs.version }}
+        PIP_CONSTRAINT: 'setuptools<72.0' # pypa/setuptools#4519
       run: |
         pip3 install git+https://github.com/python-semver/python-semver.git@$TOOL_VERSION
         pysemver --version
