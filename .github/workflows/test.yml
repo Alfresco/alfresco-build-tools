@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: ./.github/actions/setup-pysemver
       # - name: Manual test for send slack notification
       #   uses: ./.github/actions/send-slack-notification
       #   with:
@@ -68,7 +69,6 @@ jobs:
           secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
           context: local
       - uses: ./.github/actions/setup-updatebot
-      - uses: ./.github/actions/setup-pysemver
       - uses: ./.github/actions/calculate-next-internal-version
         with:
           next-version: 7.3.0
