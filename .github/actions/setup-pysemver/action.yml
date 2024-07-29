@@ -8,8 +8,10 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: |
-        TOOL_VERSION=${{ inputs.version }}
+    - name: Install pysemver via pip
+      env:
+        TOOL_VERSION: ${{ inputs.version }}
+      run: |
         pip3 install git+https://github.com/python-semver/python-semver.git@$TOOL_VERSION
         pysemver --version
       shell: bash
