@@ -8,15 +8,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Apply workaround for pypa/setuptools#4519
-      shell: bash
-      run: |
-        echo "setuptools<72" > ${{ runner.temp }}/python-constraints.txt
-
     - name: Install pysemver via pip
       env:
         TOOL_VERSION: ${{ inputs.version }}
-        PIP_CONSTRAINT: ${{ runner.temp }}/python-constraints.txt
       run: |
         pip3 install git+https://github.com/python-semver/python-semver.git@$TOOL_VERSION
         pysemver --version
