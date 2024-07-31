@@ -4,20 +4,35 @@ inputs:
   srcclr-api-token:
     description: "Agent API Token"
     required: true
-  srcclr-install-default-options:
-    description: Default options for Source Clear scan
-    required: false
-    default: '-DskipTests -Dmaven.javadoc.skip=true'
-  srcclr-install-options:
-    description: Additional options for Source Clear scan
+  srcclr-project-ext:
+    description: "Direct scan results to Veracode project named: <default project name>/<srcclr-project-ext>"
     required: false
 runs:
   using: "composite"
   steps:
+    - name: "Install srcclr CLI tool"
+      shell: bash
+      run: |
+        # Install srcclr CLI tool (Veracode) as per https://docs.veracode.com/r/t_sc_cli_agent
+        curl -sSL 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xdf7dd7a50b746dd4' | sudo gpg --dearmor -o /usr/share/keyrings/veracode-sca-archive.gpg
+        echo 'deb [signed-by=/usr/share/keyrings/veracode-sca-archive.gpg] https://download.sourceclear.com/ubuntu stable/' | sudo tee /etc/apt/sources.list.d/veracode-sca.list
+        sudo apt-get update
+        sudo apt-get install srcclr
+    - name: "Set target project URI, with extension if provided"
+      shell: bash
+      run: |
+        SRCCLR_SCM_URI="${{ github.server_url }}/${{ github.repository }}"
+
+        if [ -n "${{ inputs.srcclr-project-ext }}" ]; then
+          SRCCLR_SCM_URI="$SRCCLR_SCM_URI/${{ inputs.srcclr-project-ext }}"
+        fi
+
+        echo "SRCCLR_SCM_URI=$SRCCLR_SCM_URI" >> $GITHUB_ENV
     - name: "Run scanning"
       run: ${{ github.action_path }}/source_clear.sh
       shell: bash
       env:
         SRCCLR_API_TOKEN: ${{ inputs.srcclr-api-token }}
-        SRCCLR_INSTALL_DEFAULT_OPTIONS: ${{ inputs.srcclr-install-default-options }}
-        SRCCLR_INSTALL_OPTIONS: ${{ inputs.srcclr-install-options }}
+        SRCCLR_SCM_REF: ${{ github.event_name == 'pull_request' && github.ref || github.ref_name }}
+        SRCCLR_SCM_REF_TYPE: ${{ github.event_name == 'pull_request' && 'tag' || 'branch' }}
+        SRCCLR_SCM_REV: ${{ github.sha }}

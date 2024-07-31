@@ -4,14 +4,15 @@ echo "=========================== Starting SourceClear Script ==================
 PS4="\[\e[35m\]+ \[\e[m\]"
 set +e -v -x
 
-mvn -B -q clean install \
-    ${SRCCLR_INSTALL_DEFAULT_OPTIONS} ${SRCCLR_INSTALL_OPTIONS} \
-    com.srcclr:srcclr-maven-plugin:scan \
-    -Dcom.srcclr.apiToken=${SRCCLR_API_TOKEN} > scan.log
+srcclr scan \
+  --scm-uri="$SRCCLR_SCM_URI" \
+  --scm-ref="$SRCCLR_SCM_REF" \
+  --scm-ref-type="$SRCCLR_SCM_REF_TYPE" \
+  --scm-rev="$SRCCLR_SCM_REV" > scan.log
 
 SUCCESS=$?   # this will read exit code of the previous command
 
-grep -e 'Full Report Details' -e 'Failed' scan.log
+grep -e 'Full Report Details' scan.log
 
 set +vex
 echo "=========================== Finishing SourceClear Script =========================="
