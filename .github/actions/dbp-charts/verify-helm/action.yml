@@ -72,27 +72,27 @@ runs:
       with:
         version: ${{ inputs.kubectl_version }}
     - name: Login to Quay.io
-      uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
+      uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
       with:
         registry: quay.io
         username: ${{ inputs.quay_username }}
         password: ${{ inputs.quay_password }}
       if: ${{ inputs.acs_version != 'community' }}
     - name: Login to Docker Hub
-      uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3.2.0
+      uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
       with:
         username: ${{ inputs.docker_username}}
         password: ${{ inputs.docker_password }}
     - name: Get branch name
       uses: >-
-        Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v5.34.0
+        Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v5.35.0
     - name: Get commit msg
       uses: >-
-        Alfresco/alfresco-build-tools/.github/actions/get-commit-message@v5.34.0
+        Alfresco/alfresco-build-tools/.github/actions/get-commit-message@v5.35.0
     - name: Get a namespace to deploy on
       id: k8sns
       uses: >-
-        Alfresco/alfresco-build-tools/.github/actions/dbp-charts/kubernetes-valid-ns@v5.34.0
+        Alfresco/alfresco-build-tools/.github/actions/dbp-charts/kubernetes-valid-ns@v5.35.0
       with:
         branch_name: ${{ env.BRANCH_NAME }}
         release_prefix: ${{ inputs.release_prefix }}
@@ -111,7 +111,7 @@ runs:
     - name: Upload helm deployments logs as artifacts
       if: always()
       uses: >-
-        Alfresco/alfresco-build-tools/.github/actions/kubectl-keep-nslogs@v5.34.0
+        Alfresco/alfresco-build-tools/.github/actions/kubectl-keep-nslogs@v5.35.0
       with:
         namespace: ${{ steps.k8sns.outputs.namespace }}
     - name: Uninstall Helm releases
