@@ -2,6 +2,7 @@
 
 COMPOSE_FILE=$(basename $COMPOSE_FILE_PATH)
 COMPOSE_PATH=$(dirname $COMPOSE_FILE_PATH)
+COMPOSE_BIN="docker compose"
 alf_port=8080
 
 cd "$COMPOSE_PATH" || {
@@ -9,15 +10,15 @@ cd "$COMPOSE_PATH" || {
   exit 1
 }
 docker info
-docker-compose --version
-docker-compose -f "${COMPOSE_FILE}" config
+$COMPOSE_BIN --version
+$COMPOSE_BIN -f "${COMPOSE_FILE}" config
 echo "Starting Alfresco in docker compose"
-docker-compose ps
+$COMPOSE_BIN ps
 if [ "$COMPOSE_PULL" = "true" ]; then
-  docker-compose -f "${COMPOSE_FILE}" pull --quiet
+  $COMPOSE_BIN -f "${COMPOSE_FILE}" pull --quiet
 fi
 export COMPOSE_HTTP_TIMEOUT=120
-docker-compose -f "${COMPOSE_FILE}" up -d --quiet-pull
+$COMPOSE_BIN -f "${COMPOSE_FILE}" up -d --quiet-pull
 
 WAIT_INTERVAL=1
 COUNTER=0
@@ -78,6 +79,6 @@ docker run -a STDOUT --volume "${PWD}"/test/postman/docker-compose:/etc/newman -
 retVal=$?
 if [ "${retVal}" -ne 0 ]; then
   # show logs
-  docker-compose logs --no-color
+  $COMPOSE_BIN logs --no-color
   exit 1
 fi
