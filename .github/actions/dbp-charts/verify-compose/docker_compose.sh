@@ -10,7 +10,7 @@ cd "$COMPOSE_PATH" || {
   exit 1
 }
 docker info
-$COMPOSE_BIN --version
+$COMPOSE_BIN version
 $COMPOSE_BIN -f "${COMPOSE_FILE}" config
 echo "Starting Alfresco in docker compose"
 $COMPOSE_BIN ps
