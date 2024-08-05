@@ -106,7 +106,7 @@ jobs:
           fi
 
       - name: Terraform validate
-        uses: dflook/terraform-validate@9cfdf207ffbd0ec5d171403a24feb222591ffdc7 # v1.43.0
+        uses: dflook/terraform-validate@93108d6d37b2fd79d527ec77c190105de1429bb5 # v1.44.0
         with:
           path: ${{ inputs.terraform_root_path }}
           backend_config: |
@@ -114,7 +114,7 @@ jobs:
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform plan
-        uses: dflook/terraform-plan@d9df4f6c2484e709ba7ffaa16c98a6906f4760cd # v1.43.0
+        uses: dflook/terraform-plan@b0877a1bf56160160ab482f4aff8a12fff35fe06 # v1.44.0
         if: github.event_name == 'pull_request'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
@@ -127,7 +127,7 @@ jobs:
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform apply
-        uses: dflook/terraform-apply@dcda97d729f1843ede471d2fac989cb946f5622a # v1.43.0
+        uses: dflook/terraform-apply@7d435d4d115a11e5db1e710ac969f5382f0f6f9f # v1.44.0
         if: github.event_name == 'push' || inputs.terraform_operation == 'apply'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
@@ -141,7 +141,7 @@ jobs:
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform destroy
-        uses: dflook/terraform-destroy@65f689138f6e3549c0aa2fd92153fce0bead4ed7 # v1.43.0
+        uses: dflook/terraform-destroy@2e74fdc282c2980b12503986b2d8483d7cbfa14a # v1.44.0
         if: inputs.terraform_operation == 'destroy'
         with:
           path: ${{ inputs.terraform_root_path }}
