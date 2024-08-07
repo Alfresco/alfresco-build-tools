@@ -96,6 +96,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [Conditional job/step depending on PR labels](#conditional-jobstep-depending-on-pr-labels)
     - [Serialize pull request builds](#serialize-pull-request-builds)
     - [Expiring tags for quay.io images](#expiring-tags-for-quayio-images)
+    - [Running a dependabot PR workflow only when pull request is approved](#running-a-dependabot-pr-workflow-only-when-pull-request-is-approved)
   - [Known issues](#known-issues)
     - [realpath not available under macosx](#realpath-not-available-under-macosx)
   - [Release](#release)
@@ -1758,6 +1759,40 @@ using the [docker-maven-plugin](https://dmp.fabric8.io):
   env:
     MAVEN_OPTS: "-Ddocker.labels.${{ steps.vars.outputs.image_labels }}"
   run: mvn -B -V package -DskipTests
+```
+
+### Running a dependabot PR workflow only when pull request is approved
+
+When a workflow requires secrets to function properly, you either need to
+provide dependabot-specific secrets (doubling the effort to maintain these
+secrets) or gracefully downgrade the workflow to allow it to complete
+successfully even when secrets are not available.
+
+An alternative approach could be to trigger the workflow for dependabot PRs only
+after a contributor approves the PR.
+
+> Maintainers still have to carefully review updates to prevent exposing secrets
+> to potentially malicious updates.
+
+Here is an example workflow with a job condition to achieve this:
+
+```yml
+on:
+  pull_request:
+    branches:
+      - main
+  pull_request_review:
+    types: [submitted]
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    # Trigger a run when approving a dependabot PR or as usual
+    if: >-
+      (github.event.review.state == 'approved' && github.event.pull_request.user.login == 'dependabot[bot]') ||
+      (github.actor != 'dependabot[bot]' && github.event_name != 'pull_request_review')
 ```
 
 ## Known issues
