@@ -1763,18 +1763,18 @@ using the [docker-maven-plugin](https://dmp.fabric8.io):
 
 ### Running a dependabot PR workflow only when pull request is approved
 
-When a workflow requires secrets to work properly, you either need to provide
-dependabot-specific secrets (doubling the effort to maintain secrets) or
-gracefully downgrade the workflow to allow workflow to complete successfully
-even when secrets are not available.
+When a workflow requires secrets to function properly, you either need to
+provide dependabot-specific secrets (doubling the effort to maintain these
+secrets) or gracefully downgrade the workflow to allow it to complete
+successfully even when secrets are not available.
 
 An alternative approach could be to trigger the workflow for dependabot PRs only
-after a contributor approve the PR.
+after a contributor approves the PR.
 
 > Maintainers still have to carefully review updates to prevent exposing secrets
 > to potentially malicious updates.
 
-Here an example workflow with a job condition to achieve this:
+Here is an example workflow with a job condition to achieve this:
 
 ```yml
 on:
