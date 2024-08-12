@@ -101,7 +101,7 @@ runs:
           ${{ runner.os }}-maven-
 
     - name: Set up JDK
-      uses: actions/setup-java@99b8673ff64fbf99d8d325f52d9a5bdedb8483e9 # v4.2.1
+      uses: actions/setup-java@6a0805fcefea3d4657a47ac4c165951e33482018 # v4.2.2
       with:
         java-version: ${{ inputs.java-version }}
         distribution: ${{ inputs.java-distribution }}
@@ -236,7 +236,7 @@ runs:
       run: docker rm -f $(docker ps -a -q)
       continue-on-error: true
 
-    - uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029 # v4.3.5
+    - uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
       if: inputs.upload-jars == 'true'
       with:
         name: ${{ inputs.upload-jars-name }}
@@ -244,7 +244,7 @@ runs:
         path: |
           ${{ inputs.upload-jars-path }}
 
-    - uses: actions/upload-artifact@89ef406dd8d7e03cfd12d9e0a4a378f454709029 # v4.3.5
+    - uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
       if: inputs.upload-coverage == 'true'
       with:
         name: coverage
@@ -272,7 +272,7 @@ runs:
 
     - name: Submit Dependency Graph
       if: github.event_name == 'push'
-      uses: advanced-security/maven-dependency-submission-action@bb3f7338b5bd0e3b225d8082e26b7b6289e17ef3 # v4.1.0
+      uses: advanced-security/maven-dependency-submission-action@4f64ddab9d742a4806eeb588d238e4c311a8397d # v4.1.1
       env:
         MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
         MAVEN_USERNAME: ${{ inputs.maven-username }}
