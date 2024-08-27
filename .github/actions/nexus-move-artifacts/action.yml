@@ -1,0 +1,38 @@
+name: Move artifacts to staging repository
+description: Move artifacts to staging repository in Nexus
+inputs:
+  tag-name:
+    description: The name of the tag
+    required: true
+  nexus-username:
+    description: Nexus user name
+    required: true
+  nexus-password:
+    description: Nexus password
+    required: true
+  nexus-url:
+    description: Base URL to the Nexus server
+    required: false
+    default: "https://artifacts.alfresco.com/nexus"
+  staging-repository:
+    description: The destination staging repository
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: move artifacts
+      id: move artifacts
+      shell: bash
+      env:
+        TAG_NAME: ${{ inputs.tag-name }}
+        NEXUS_USERNAME: ${{ inputs.nexus-username }}
+        NEXUS_PASSWORD: ${{ inputs.nexus-password }}
+        NEXUS_URL: ${{ inputs.nexus-url }}
+        STAGING_REPOSITORY: ${{ inputs.staging-repository }}
+      run: |
+        echo "Move artifacts with tag $TAG_NAME to staging repository $STAGING_REPOSITORY"
+        curl -u "${NEXUS_USERNAME}:${NEXUS_PASSWORD}" \
+          -X POST "${NEXUS_URL}/service/rest/v1/tags/move/{STAGING_REPOSITORY}?tag=${TAG_NAME}" \
+          -H 'accept: application/json' \
+          -d '{}'

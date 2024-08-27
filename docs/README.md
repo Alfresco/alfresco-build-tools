@@ -70,6 +70,9 @@ Here follows the list of GitHub Actions topics available in the current document
     - [maven-release](#maven-release)
     - [maven-update-pom-version](#maven-update-pom-version)
     - [nexus-create-staging](#nexus-create-staging)
+    - [nexus-create-tag](#nexus-create-tag)
+    - [nexus-associate-tag](#nexus-associate-tag)
+    - [nexus-move-artifacts](#nexus-move-artifacts)
     - [nexus-close-staging](#nexus-close-staging)
     - [nexus-release-staging](#nexus-release-staging)
     - [pre-commit](#pre-commit)
@@ -1040,6 +1043,45 @@ The resulting staging repository will be available in the output named `staging-
           nexus-profile-id: "${{ secrets.NEXUS_ACTIVITI7_PROFILE_ID }}"
           nexus-username: "${{ secrets.NEXUS_USERNAME }}"
           nexus-password: "${{ secrets.NEXUS_PASSWORD }}"
+```
+
+### nexus-create-tag
+
+Creates a tag on Nexus with a specific name. The resulting tag will be available in the output named `tag-name`.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-create-tag@ref
+        with:
+          tag-name:  ${{ needs.load-release-info.outputs.version }}
+          nexus-username: ${{ secrets.NEXUS_USERNAME }}
+          nexus-password: ${{ secrets.NEXUS_PASSWORD }}
+```
+
+### nexus-associate-tag
+
+Associates tag to artifacts on Nexus. The artifacts are filtered by provided maven group-id and version and then associated with the provided tag.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-associate-tags@ref
+        with:
+          tag-name: ${{needs.load-release-info.outputs.version }}
+          nexus-username: ${{ secrets.NEXUS_USERNAME }}
+          nexus-password: ${{ secrets.NEXUS_PASSWORD }}
+          group-id: maven-group-id
+          version: ${{ steps.load-descriptor.outputs.version }}
+```
+
+### nexus-move-artifacts
+
+Moves artifacts from one repository to another on Nexus. The action moves the artifacts associated with a particular tag to the staging repository.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-move-artifacts@ref
+        with:
+          tag-name: ${{ needs.load-release-info.outputs.version }}
+          staging-repository: staging-repository
+          nexus-username: ${{ secrets.NEXUS_USERNAME }}
+          nexus-password: ${{ secrets.NEXUS_PASSWORD }}
 ```
 
 ### nexus-close-staging
