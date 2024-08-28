@@ -1,24 +1,23 @@
 name: Associate tag with artifacts
 description: Associate tag with artifacts in Nexus
 inputs:
-  tag-name:
+  tag:
     description: The name of the tag
     required: true
   nexus-username:
-    description: Nexus user name
+    description: Nexus username
     required: true
   nexus-password:
     description: Nexus password
     required: true
   nexus-url:
     description: Base URL to the Nexus server
-    required: false
-    default: "https://artifacts.alfresco.com/nexus"
-  group-id:
-    description: The maven group-id of the component
+    required: true
+  group:
+    description: The maven group-id of the components
     required: true
   version:
-    description: The version of the component
+    description: The version of the components
     required: true
 
 runs:
@@ -28,15 +27,16 @@ runs:
       id: associate-tag
       shell: bash
       env:
-        TAG_NAME: ${{ inputs.tag-name }}
+        TAG: ${{ inputs.tag }}
         NEXUS_USERNAME: ${{ inputs.nexus-username }}
         NEXUS_PASSWORD: ${{ inputs.nexus-password }}
         NEXUS_URL: ${{ inputs.nexus-url }}
-        GROUP-ID: ${{ inputs.group }}
+        GROUP: ${{ inputs.group }}
         VERSION: ${{ inputs.version }}
+
       run: |
-          echo "Associating tag $TAG_NAME with component $GROUP:$VERSION"
-            curl -u "${NEXUS_USERNAME}":"${NEXUS_PASSWORD}" \
-                -X POST "${NEXUS_URL}/service/rest/v1/tags/associate/${TAG_NAME}&group=${GROUP-ID}&version=${VERSION}" \
-                -H "Content-Type:application/json" \
-                -d '{}'
+          echo "Associating tag $TAG with components from group $GROUP and version $VERSION"
+          curl -sSf -u "${NEXUS_USERNAME}":"${NEXUS_PASSWORD}" \
+              -X POST "${NEXUS_URL}/service/rest/v1/tags/associate/${TAG}?group=${GROUP}&version=${VERSION}" \
+              -H "Content-Type:application/json" \
+              -d '{}'
