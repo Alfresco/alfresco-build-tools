@@ -1,5 +1,5 @@
-name: Move artifacts to staging repository
-description: Move artifacts to staging repository in Nexus
+name: Move artifacts to destination repository
+description: Move artifacts to destination repository in Nexus
 inputs:
   tag-name:
     description: The name of the tag
