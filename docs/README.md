@@ -1070,6 +1070,7 @@ Associates tag to artifacts on Nexus. The artifacts are filtered by provided mav
           group-id: maven-group-id
           version: ${{ steps.load-descriptor.outputs.version }}
 ```
+
 Assuming `maven-group-id` is the group id of the artifacts to be associated with the tag.
 
 ### nexus-move-artifacts
@@ -1084,6 +1085,7 @@ Moves artifacts from one repository to another on Nexus. The action moves the ar
           nexus-username: ${{ secrets.NEXUS_USERNAME }}
           nexus-password: ${{ secrets.NEXUS_PASSWORD }}
 ```
+
 Assuming `destination-repository` is the repository where the artifacts will be moved.
 
 ### nexus-close-staging
