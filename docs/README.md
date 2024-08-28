@@ -1030,7 +1030,7 @@ Updates pom files to the provided version
 
 ### nexus-create-tag
 
-Creates a tag on Nexus with a specific name. 
+Creates a tag on Nexus with a specific name.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-create-tag@ref
