@@ -42,5 +42,6 @@ runs:
         echo "Moving artifacts to destination repository ${DESTINATION_REPOSITORY} from source repository ${SOURCE_REPOSITORY} in Nexus"
         curl -sSf -u "${NEXUS_USERNAME}:${NEXUS_PASSWORD}" \
           -X POST "${NEXUS_URL}/service/rest/v1/staging/move/${DESTINATION_REPOSITORY}?repository=${SOURCE_REPOSITORY}&group=${GROUP}&version=${VERSION}" \
+          -H 'Content-Type: application/json' \
           -H 'accept: application/json' \
           -d '{}'
