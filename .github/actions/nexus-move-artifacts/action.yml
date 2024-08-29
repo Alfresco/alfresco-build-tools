@@ -26,8 +26,8 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: move artifacts
-      id: move artifacts
+    - name: move-artifacts
+      id: move-artifacts
       shell: bash
       env:
         NEXUS_USERNAME: ${{ inputs.nexus-username }}
