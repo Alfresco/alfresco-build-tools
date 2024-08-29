@@ -1030,7 +1030,7 @@ Updates pom files to the provided version
 
 ### nexus-create-tag
 
-Creates a tag on Nexus with a specific name.
+Creates a tag on Nexus 3 with the given name.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-create-tag@ref
@@ -1043,7 +1043,7 @@ Creates a tag on Nexus with a specific name.
 
 ### nexus-associate-tag
 
-Associates tag to artifacts on Nexus. The artifacts are filtered by provided maven group-id and version and then associated with the provided tag.
+Associates a tag with artifacts on Nexus 3. The artifacts are filtered by the provided Maven group-id and version, and then associated with the given tag.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-associate-tags@ref
@@ -1058,7 +1058,7 @@ Associates tag to artifacts on Nexus. The artifacts are filtered by provided mav
 
 ### nexus-move-artifacts
 
-Moves artifacts from one repository to another on Nexus. The action moves the artifacts associated with a particular tag to the destination repository.
+Moves artifacts from one repository to another on Nexus 3, identified by a particular group and version.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-move-artifacts@ref
