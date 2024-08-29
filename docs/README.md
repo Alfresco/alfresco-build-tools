@@ -1063,12 +1063,13 @@ Moves artifacts from one repository to another on Nexus. The action moves the ar
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-move-artifacts@ref
         with:
-          tag: 1.0.0
           destination-repository: destination-repository
           source-repository: source-repository
           nexus-username: ${{ secrets.NEXUS_USERNAME }}
           nexus-password: ${{ secrets.NEXUS_PASSWORD }}
           nexus-url: ${{ vars.NEXUS_URL }}
+          group: com.company
+          version: 1.0.0
 ```
 
 ### pre-commit

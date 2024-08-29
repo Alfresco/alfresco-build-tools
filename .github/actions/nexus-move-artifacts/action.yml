@@ -1,9 +1,6 @@
 name: Move artifacts to destination repository
 description: Move artifacts to destination repository in Nexus
 inputs:
-  tag:
-    description: The name of the tag
-    required: true
   nexus-username:
     description: Nexus username
     required: true
@@ -19,6 +16,12 @@ inputs:
   source-repository:
     description: The source repository
     required: true
+  group:
+    description: The maven group-id of the components to be moved
+    required: true
+  version:
+    description: The version of the components to be moved
+    required: true
 
 runs:
   using: composite
@@ -27,16 +30,17 @@ runs:
       id: move artifacts
       shell: bash
       env:
-        TAG: ${{ inputs.tag }}
         NEXUS_USERNAME: ${{ inputs.nexus-username }}
         NEXUS_PASSWORD: ${{ inputs.nexus-password }}
         NEXUS_URL: ${{ inputs.nexus-url }}
         DESTINATION_REPOSITORY: ${{ inputs.destination-repository }}
         SOURCE_REPOSITORY: ${{ inputs.source-repository }}
+        GROUP: ${{ inputs.group }}
+        VERSION: ${{ inputs.version }}
 
       run: |
-        echo "Moving artifacts with tag $TAG to destination repository ${DESTINATION_REPOSITORY} from source repository ${SOURCE_REPOSITORY} in Nexus"
+        echo "Moving artifacts to destination repository ${DESTINATION_REPOSITORY} from source repository ${SOURCE_REPOSITORY} in Nexus"
         curl -sSf -u "${NEXUS_USERNAME}:${NEXUS_PASSWORD}" \
-          -X POST "${NEXUS_URL}/service/rest/v1/staging/move/${DESTINATION_REPOSITORY}?tag=${TAG}&repository=${SOURCE_REPOSITORY}" \
+          -X POST "${NEXUS_URL}/service/rest/v1/staging/move/$destination_repository?repository=${SOURCE_REPOSITORY}&group=${GROUP}&version=${VERSION}" \
           -H 'accept: application/json' \
           -d '{}'
