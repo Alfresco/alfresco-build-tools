@@ -69,8 +69,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [maven-deploy-file](#maven-deploy-file)
     - [maven-release](#maven-release)
     - [maven-update-pom-version](#maven-update-pom-version)
-    - [nexus-create-tag](#nexus-create-tag)
-    - [nexus-associate-tag](#nexus-associate-tag)
+    - [nexus-count-artifacts](#nexus-count-artifacts)
     - [nexus-move-artifacts](#nexus-move-artifacts)
     - [pre-commit](#pre-commit)
     - [process-coverage-report](#process-coverage-report)
@@ -1027,28 +1026,18 @@ Updates pom files to the provided version
       with:
         version: 1.0.0-alpha.1
 ```
+### nexus-count-artifacts
 
-### nexus-create-tag
-
-Creates a tag on Nexus 3 with the given name.
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-create-tag@ref
-        with:
-          tag:  1.0.0
-          nexus-username: ${{ secrets.NEXUS_USERNAME }}
-          nexus-password: ${{ secrets.NEXUS_PASSWORD }}
-          nexus-url: ${{ vars.NEXUS_URL }}
-```
-
-### nexus-associate-tag
-
-Associates a tag with artifacts on Nexus 3. The artifacts are filtered by the provided Maven group-id and version, and then associated with the given tag.
+Count artifacts in a Nexus 3 repository, identified by a particular group and version.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-associate-tags@ref
+      outputs:
+        artifact_count: ${{ steps.count-artifacts.outputs.artifact_count }}
+      steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-count-artifacts@ref
+        id: count-artifacts
         with:
-          tag: 1.0.0
+          repository: repository
           nexus-username: ${{ secrets.NEXUS_USERNAME }}
           nexus-password: ${{ secrets.NEXUS_PASSWORD }}
           nexus-url: ${{ vars.NEXUS_URL }}

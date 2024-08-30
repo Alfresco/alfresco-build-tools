@@ -386,23 +386,7 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
-    directory: "/.github/actions/nexus-associate-tag"
-    schedule:
-      interval: "weekly"
-    groups:
-      catch-all:
-        patterns:
-          - "*"
-  - package-ecosystem: "github-actions"
     directory: "/.github/actions/nexus-count-artifacts"
-    schedule:
-      interval: "weekly"
-    groups:
-      catch-all:
-        patterns:
-          - "*"
-  - package-ecosystem: "github-actions"
-    directory: "/.github/actions/nexus-create-tag"
     schedule:
       interval: "weekly"
     groups:
