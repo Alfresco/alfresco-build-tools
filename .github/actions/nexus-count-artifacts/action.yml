@@ -22,12 +22,13 @@ inputs:
 outputs:
   artifact_count:
     description: The number of artifacts in the repository
+    value: ${{ steps.count-artifacts.outputs.artifact_count }}
 
 runs:
   using: composite
   steps:
-    - name: search artifacts in Nexus
-      id: search-artifacts
+    - name: count artifacts in Nexus
+      id: count-artifacts
       shell: bash
       env:
         NEXUS_USERNAME: ${{ inputs.nexus-username }}
@@ -46,8 +47,4 @@ runs:
           -d '{}')
         artifact_count=$(echo "$search_response" | yq '.items | length')
         echo "Artifact Count: $artifact_count"
-        echo "artifact_count=$artifact_count" >> $GITHUB_ENV
-
-    - name: set output
-      id: set-output
-      run: echo "::set-output name=artifact_count::${{ steps.search-artifacts.outputs.artifact_count }}"
+        echo "artifact_count=$artifact_count" >> $GITHUB_OUTPUT
