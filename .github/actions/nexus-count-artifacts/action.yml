@@ -1,0 +1,53 @@
+name: Count artifacts in Nexus Repository
+description: Count artifacts in Nexus Repository
+inputs:
+  nexus-username:
+    description: Nexus username
+    required: true
+  nexus-password:
+    description: Nexus password
+    required: true
+  nexus-url:
+    description: Base URL to the Nexus server
+    required: true
+  repository:
+    description: The repository to count artifacts
+    required: true
+  group:
+    description: The maven group-id of the components to be moved
+    required: true
+  version:
+    description: The version of the components to be moved
+    required: true
+outputs:
+  artifact_count:
+    description: The number of artifacts in the repository
+
+runs:
+  using: composite
+  steps:
+    - name: search artifacts in Nexus
+      id: search-artifacts
+      shell: bash
+      env:
+        NEXUS_USERNAME: ${{ inputs.nexus-username }}
+        NEXUS_PASSWORD: ${{ inputs.nexus-password }}
+        NEXUS_URL: ${{ inputs.nexus-url }}
+        REPOSITORY: ${{ inputs.repository }}
+        GROUP: ${{ inputs.group }}
+        VERSION: ${{ inputs.version }}
+
+      run: |
+        echo "Counting artifacts in repository ${REPOSITORY} in Nexus"
+        search_response=$(curl -sSf -u "${NEXUS_USERNAME}:${NEXUS_PASSWORD}" \
+          -X GET "${NEXUS_URL}/service/rest/v1/search?repository=${REPOSITORY}&group=${GROUP}&version=${VERSION}" \
+          -H 'Content-Type: application/json' \
+          -H 'accept: application/json' \
+          -d '{}')
+        artifact_count=$(echo "$search_response" | yq '.items | length')
+        echo "Artifact Count: $artifact_count"
+        echo "artifact_count=$artifact_count" >> $GITHUB_ENV
+
+    - name: set output
+      id: set-output
+      run: echo "::set-output name=artifact_count::${{ steps.search-artifacts.outputs.artifact_count }}"
