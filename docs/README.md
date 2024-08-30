@@ -1026,6 +1026,7 @@ Updates pom files to the provided version
       with:
         version: 1.0.0-alpha.1
 ```
+
 ### nexus-count-artifacts
 
 Count artifacts in a Nexus 3 repository, identified by a particular group and version.
