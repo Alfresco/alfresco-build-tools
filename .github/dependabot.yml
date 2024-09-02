@@ -386,23 +386,7 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
-    directory: "/.github/actions/nexus-close-staging"
-    schedule:
-      interval: "weekly"
-    groups:
-      catch-all:
-        patterns:
-          - "*"
-  - package-ecosystem: "github-actions"
-    directory: "/.github/actions/nexus-create-staging"
-    schedule:
-      interval: "weekly"
-    groups:
-      catch-all:
-        patterns:
-          - "*"
-  - package-ecosystem: "github-actions"
-    directory: "/.github/actions/nexus-release-staging"
+    directory: "/.github/actions/nexus-move-artifacts"
     schedule:
       interval: "weekly"
     groups:

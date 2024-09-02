@@ -69,9 +69,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [maven-deploy-file](#maven-deploy-file)
     - [maven-release](#maven-release)
     - [maven-update-pom-version](#maven-update-pom-version)
-    - [nexus-create-staging](#nexus-create-staging)
-    - [nexus-close-staging](#nexus-close-staging)
-    - [nexus-release-staging](#nexus-release-staging)
+    - [nexus-move-artifacts](#nexus-move-artifacts)
     - [pre-commit](#pre-commit)
     - [process-coverage-report](#process-coverage-report)
     - [pipenv](#pipenv)
@@ -1028,44 +1026,20 @@ Updates pom files to the provided version
         version: 1.0.0-alpha.1
 ```
 
-### nexus-create-staging
+### nexus-move-artifacts
 
-Creates a new staging repository on Nexus, unless there is an existing repository with the same description.
-The resulting staging repository will be available in the output named `staging-repository`.
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-create-staging@ref
-        with:
-          staging-description: Activiti staging ${{ steps.load-descriptor.outputs.version }}
-          nexus-profile-id: "${{ secrets.NEXUS_ACTIVITI7_PROFILE_ID }}"
-          nexus-username: "${{ secrets.NEXUS_USERNAME }}"
-          nexus-password: "${{ secrets.NEXUS_PASSWORD }}"
-```
-
-### nexus-close-staging
-
-Closes the specified staging repository on Nexus.
+Moves artifacts from one repository to another on Nexus 3, identified by a particular group and version.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-close-staging@ref
+      - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-move-artifacts@ref
         with:
-          version: ${{ inputs.version }}
-          staging-repository: ${{ inputs.staging-repository}}
+          destination-repository: destination-repository
+          source-repository: source-repository
           nexus-username: ${{ secrets.NEXUS_USERNAME }}
           nexus-password: ${{ secrets.NEXUS_PASSWORD }}
-```
-
-### nexus-release-staging
-
-Releases the specified staging repository on Nexus. The repository should be in the closed status before.
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-release-staging@ref
-        with:
-          version: ${{ inputs.version }}
-          staging-repository: ${{ inputs.staging-repository}}
-          nexus-username: ${{ secrets.NEXUS_USERNAME }}
-          nexus-password: ${{ secrets.NEXUS_PASSWORD }}
+          nexus-url: ${{ vars.NEXUS_URL }}
+          group: com.company
+          version: 1.0.0
 ```
 
 ### pre-commit
