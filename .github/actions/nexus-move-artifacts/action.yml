@@ -1,5 +1,5 @@
 name: Move artifacts to destination repository
-description: Move artifacts to destination repository in Nexus
+description: Move artifacts to destination repository in Nexus 3
 inputs:
   nexus-username:
     description: Nexus username
@@ -26,6 +26,26 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: count-artifacts
+      id: count-artifacts
+      shell: bash
+      env:
+        NEXUS_USERNAME: ${{ inputs.nexus-username }}
+        NEXUS_PASSWORD: ${{ inputs.nexus-password }}
+        NEXUS_URL: ${{ inputs.nexus-url }}
+        SOURCE_REPOSITORY: ${{ inputs.source-repository }}
+        GROUP: ${{ inputs.group }}
+        VERSION: ${{ inputs.version }}
+      run: |
+          echo "Counting artifacts in repository ${SOURCE_REPOSITORY} in Nexus"
+          search_response=$(curl -sSf -u "${NEXUS_USERNAME}:${NEXUS_PASSWORD}" \
+            -X GET "${NEXUS_URL}/service/rest/v1/search?repository=${SOURCE_REPOSITORY}&group=${GROUP}&version=${VERSION}" \
+            -H 'Content-Type: application/json' \
+            -H 'accept: application/json' \
+            -d '{}')
+          count=$(echo "$search_response" | yq '.items | length')
+          echo "count=$count" >> $GITHUB_OUTPUT
+
     - name: move-artifacts
       id: move-artifacts
       shell: bash
@@ -37,11 +57,15 @@ runs:
         SOURCE_REPOSITORY: ${{ inputs.source-repository }}
         GROUP: ${{ inputs.group }}
         VERSION: ${{ inputs.version }}
-
       run: |
-        echo "Moving artifacts to destination repository ${DESTINATION_REPOSITORY} from source repository ${SOURCE_REPOSITORY} in Nexus"
-        curl -sSf -u "${NEXUS_USERNAME}:${NEXUS_PASSWORD}" \
-          -X POST "${NEXUS_URL}/service/rest/v1/staging/move/${DESTINATION_REPOSITORY}?repository=${SOURCE_REPOSITORY}&group=${GROUP}&version=${VERSION}" \
-          -H 'Content-Type: application/json' \
-          -H 'accept: application/json' \
-          -d '{}'
+        count="${{ steps.count-artifacts.outputs.count }}"
+        if [ $count -eq 0 ]; then
+          echo "No artifacts found in repository ${SOURCE_REPOSITORY} for group ${GROUP} and version ${VERSION}"
+        else
+          echo "Moving artifacts to destination repository ${DESTINATION_REPOSITORY} from source repository ${SOURCE_REPOSITORY} in Nexus"
+          curl -sSf -u "${NEXUS_USERNAME}:${NEXUS_PASSWORD}" \
+            -X POST "${NEXUS_URL}/service/rest/v1/staging/move/${DESTINATION_REPOSITORY}?repository=${SOURCE_REPOSITORY}&group=${GROUP}&version=${VERSION}" \
+            -H 'Content-Type: application/json' \
+            -H 'accept: application/json' \
+            -d '{}'
+        fi

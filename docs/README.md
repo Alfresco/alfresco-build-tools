@@ -69,7 +69,6 @@ Here follows the list of GitHub Actions topics available in the current document
     - [maven-deploy-file](#maven-deploy-file)
     - [maven-release](#maven-release)
     - [maven-update-pom-version](#maven-update-pom-version)
-    - [nexus-count-artifacts](#nexus-count-artifacts)
     - [nexus-move-artifacts](#nexus-move-artifacts)
     - [pre-commit](#pre-commit)
     - [process-coverage-report](#process-coverage-report)
@@ -1025,25 +1024,6 @@ Updates pom files to the provided version
     - uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@ref
       with:
         version: 1.0.0-alpha.1
-```
-
-### nexus-count-artifacts
-
-Count artifacts in a Nexus 3 repository, identified by a particular group and version.
-
-```yaml
-      outputs:
-        artifact_count: ${{ steps.count-artifacts.outputs.artifact_count }}
-      steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-count-artifacts@ref
-        id: count-artifacts
-        with:
-          repository: repository
-          nexus-username: ${{ secrets.NEXUS_USERNAME }}
-          nexus-password: ${{ secrets.NEXUS_PASSWORD }}
-          nexus-url: ${{ vars.NEXUS_URL }}
-          group: com.company
-          version: 1.0.0
 ```
 
 ### nexus-move-artifacts
