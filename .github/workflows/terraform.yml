@@ -12,6 +12,10 @@ on:
         description: the terraform operation to perform (apply or destroy)
         type: string
         required: false
+      github_environment:
+        description: override the environment to apply the terraform operation to
+        type: string
+        required: false
     secrets:
       AWS_ACCESS_KEY_ID:
         required: false
@@ -42,8 +46,11 @@ jobs:
             environment="production"
           elif [ "$BRANCH_LOWER" == "develop" ]; then
             environment="develop"
+          elif [ -n "${{ inputs.github_environment }}" ]
+          then
+            environment="${{ inputs.github_environment }}"
           else
-            echo "$BRANCH_LOWER doesn't have a matching environment"
+            echo "current branch doesn't have a matching environment and no environment override was provided"
             exit 1
           fi
           echo "environment_name=${environment}" >> $GITHUB_OUTPUT
