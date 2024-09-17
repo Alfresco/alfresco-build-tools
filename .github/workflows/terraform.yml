@@ -77,9 +77,12 @@ jobs:
           unzip -q awscliv2.zip
         fi
         ./aws/install
+      PR_CHECKOUT_REF: refs/pull/${{ github.event.issue.number }}/merge
     steps:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+        with:
+          ref: ${{ github.event_name == 'issue_comment' && env.PR_CHECKOUT_REF || '' }}
 
       - name: Assume AWS Role if AWS_ROLE_ARN var is set
         uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
@@ -128,7 +131,7 @@ jobs:
 
       - name: Terraform apply
         uses: dflook/terraform-apply@7d435d4d115a11e5db1e710ac969f5382f0f6f9f # v1.44.0
-        if: github.event_name == 'push' || inputs.terraform_operation == 'apply'
+        if: github.event_name == 'push' || inputs.terraform_operation == 'apply' || (github.event_name == 'issue_comment' && contains(github.event.comment.body, 'terraform apply'))
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
           path: ${{ inputs.terraform_root_path }}
