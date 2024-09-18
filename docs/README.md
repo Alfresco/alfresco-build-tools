@@ -1609,6 +1609,9 @@ on:
     branches:
       - main
       - develop
+  # optional - to trigger a terraform apply adding a pr comment with text 'terraform apply'
+  issue_comment:
+    types: [created]
   workflow_dispatch:
     inputs:
       terraform_operation:
