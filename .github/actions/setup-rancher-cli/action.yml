@@ -17,7 +17,6 @@ inputs:
     description: 'Rancher context for kubectl configuration'
     required: false
     default: local
-
 runs:
   using: "composite"
   steps:
@@ -33,8 +32,7 @@ runs:
         sudo mv $TOOL_NAME /usr/local/bin/
         echo $($TOOL_NAME --version)
       env:
-        DEFAULT_RANCHER_CLI_VERSION: 2.8.4
-
+        DEFAULT_RANCHER_CLI_VERSION: 2.9.2
     - shell: bash
       run: |
         RANCHER2_BEARER_TOKEN=${{ inputs.access-key }}:${{ inputs.secret-key }}
@@ -46,7 +44,6 @@ runs:
         fi
       env:
         KUBECONTEXT: ${{ inputs.context }}
-
     - shell: bash
       run: |
         KUBECONTEXT="${{ inputs.context }}"
