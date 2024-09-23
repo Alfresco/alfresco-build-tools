@@ -54,7 +54,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - uses: madrapps/jacoco-report@642c39173b270639beeba5e2c6c160bfbba33388 # v1.7.0
+    - uses: madrapps/jacoco-report@7c362aca34caf958e7b1c03464bd8781db9f8da7 # v1.7.1
       id: jacoco-aggregate
       with:
         paths:  ${{ inputs.paths }}
