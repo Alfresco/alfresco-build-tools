@@ -1,5 +1,25 @@
 #!/bin/bash -e
 
+containers_dump_logs_on_error() {
+  echo "Dumping logs for all containers"
+  docker-compose logs --no-color
+  exit 1
+}
+
+wait_result() {
+  COMPONENT=$1
+  if (("${COUNTER}" < "${TIMEOUT}")); then
+    t1=$(date +%s)
+    delta=$(((t1 - t0) / 60))
+    echo "$COMPONENT Started in ${delta} minutes"
+  else
+    echo "Waited ${COUNTER} seconds"
+    echo "$COMPONENT could not start in time."
+    echo "The last response code was ${response}"
+    containers_dump_logs_on_error
+  fi
+}
+
 COMPOSE_FILE=$(basename $COMPOSE_FILE_PATH)
 COMPOSE_PATH=$(dirname $COMPOSE_FILE_PATH)
 COMPOSE_BIN="docker compose"
@@ -32,16 +52,7 @@ until [[ "200" -eq "${response}" ]] || [[ "${COUNTER}" -eq "${TIMEOUT}" ]]; do
   COUNTER=$((COUNTER + WAIT_INTERVAL))
   response=$(curl --write-out '%{http_code}' --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/ || true)
 done
-if (("${COUNTER}" < "${TIMEOUT}")); then
-  t1=$(date +%s)
-  delta=$(((t1 - t0) / 60))
-  echo "Alfresco Started in ${delta} minutes"
-else
-  echo "Waited ${COUNTER} seconds"
-  echo "Alfresco could not start in time."
-  echo "The last response code from /alfresco/ was ${response}"
-  exit 1
-fi
+wait_result Alfresco
 
 COUNTER=0
 echo "Waiting for share to start"
@@ -52,16 +63,7 @@ until [[ "200" -eq "${response}" ]] || [[ "${COUNTER}" -eq "${TIMEOUT}" ]]; do
   COUNTER=$((COUNTER + WAIT_INTERVAL))
   response=$(curl --write-out '%{http_code}' --output /dev/null --silent http://localhost:8080/share/page || true)
 done
-if (("${COUNTER}" < "${TIMEOUT}")); then
-  t1=$(date +%s)
-  delta=$(((t1 - t0) / 60))
-  echo "Share Started in ${delta} minutes"
-else
-  echo "Waited ${COUNTER} seconds"
-  echo "Share could not start in time."
-  echo "The last response code from /share/ was ${response}"
-  exit 1
-fi
+wait_result Share
 
 COUNTER=0
 TIMEOUT=20
@@ -73,12 +75,11 @@ until [[ "200" -eq "${response}" ]] || [[ "${COUNTER}" -eq "${TIMEOUT}" ]]; do
   COUNTER=$((COUNTER + WAIT_INTERVAL))
   response=$(curl --write-out '%{http_code}' --user admin:admin --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/s/api/solrstats || true)
 done
+wait_result Solr
 
 cd ..
 docker run -a STDOUT --volume "${PWD}"/test/postman/docker-compose:/etc/newman --network host postman/newman:5.3 run "acs-test-docker-compose-collection.json" --global-var "protocol=http" --global-var "url=localhost:8080"
+
 retVal=$?
-if [ "${retVal}" -ne 0 ]; then
-  # show logs
-  $COMPOSE_BIN logs --no-color
-  exit 1
-fi
+
+[ "${retVal}" -eq 0 ] && echo "Postman tests were successful" || containers_dump_logs_on_error
