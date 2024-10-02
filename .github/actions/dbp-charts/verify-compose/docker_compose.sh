@@ -65,17 +65,19 @@ until [[ "200" -eq "${response}" ]] || [[ "${COUNTER}" -eq "${TIMEOUT}" ]]; do
 done
 wait_result Share
 
-COUNTER=0
-TIMEOUT=20
-echo "Waiting more time for SOLR"
-response=$(curl --write-out '%{http_code}' --user admin:admin --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/s/api/solrstats || true)
-until [[ "200" -eq "${response}" ]] || [[ "${COUNTER}" -eq "${TIMEOUT}" ]]; do
-  printf '.'
-  sleep "${WAIT_INTERVAL}"
-  COUNTER=$((COUNTER + WAIT_INTERVAL))
+if [ $($COMPOSE_BIN -f "${COMPOSE_FILE}" config | yq '.services.alfresco.environment.JAVA_OPTS | contains(" -Dindex.subsystem.name=solr6")') == "true" ]; then echo "Waiting more time for SOLR"
+  COUNTER=0
+  TIMEOUT=20
+
   response=$(curl --write-out '%{http_code}' --user admin:admin --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/s/api/solrstats || true)
-done
-wait_result Solr
+  until [[ "200" -eq "${response}" ]] || [[ "${COUNTER}" -eq "${TIMEOUT}" ]]; do
+    printf '.'
+    sleep "${WAIT_INTERVAL}"
+    COUNTER=$((COUNTER + WAIT_INTERVAL))
+    response=$(curl --write-out '%{http_code}' --user admin:admin --output /dev/null --silent http://localhost:"${alf_port}"/alfresco/s/api/solrstats || true)
+  done
+  wait_result Solr
+fi
 
 cd ..
 docker run -a STDOUT --volume "${PWD}"/test/postman/docker-compose:/etc/newman --network host postman/newman:5.3 run "acs-test-docker-compose-collection.json" --global-var "protocol=http" --global-var "url=localhost:8080"
