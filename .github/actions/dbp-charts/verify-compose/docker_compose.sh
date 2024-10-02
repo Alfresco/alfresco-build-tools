@@ -1,8 +1,13 @@
 #!/bin/bash -e
 
+COMPOSE_FILE=$(basename $COMPOSE_FILE_PATH)
+COMPOSE_PATH=$(dirname $COMPOSE_FILE_PATH)
+COMPOSE_BIN="docker compose"
+alf_port=8080
+
 containers_dump_logs_on_error() {
   echo "Dumping logs for all containers"
-  docker-compose logs --no-color
+  $COMPOSE_BIN -f "${COMPOSE_FILE}" logs --no-color
   exit 1
 }
 
@@ -20,11 +25,6 @@ wait_result() {
   fi
 }
 
-COMPOSE_FILE=$(basename $COMPOSE_FILE_PATH)
-COMPOSE_PATH=$(dirname $COMPOSE_FILE_PATH)
-COMPOSE_BIN="docker compose"
-alf_port=8080
-
 cd "$COMPOSE_PATH" || {
   echo "Error: docker compose dir not found"
   exit 1
@@ -33,7 +33,7 @@ docker info
 $COMPOSE_BIN version
 $COMPOSE_BIN -f "${COMPOSE_FILE}" config
 echo "Starting Alfresco in docker compose"
-$COMPOSE_BIN ps
+$COMPOSE_BIN -f "${COMPOSE_FILE}" ps
 if [ "$COMPOSE_PULL" = "true" ]; then
   $COMPOSE_BIN -f "${COMPOSE_FILE}" pull --quiet
 fi
