@@ -5,7 +5,7 @@ COMPOSE_PATH=$(dirname $COMPOSE_FILE_PATH)
 COMPOSE_BIN="docker compose"
 alf_port=8080
 
-containers_dump_logs_on_error() {
+dump_all_compose_logs() {
   echo "Dumping logs for all containers"
   $COMPOSE_BIN -f "${COMPOSE_FILE}" logs --no-color
   exit 1
@@ -21,7 +21,7 @@ wait_result() {
     echo "Waited ${COUNTER} seconds"
     echo "$COMPONENT could not start in time."
     echo "The last response code was ${response}"
-    containers_dump_logs_on_error
+    dump_all_compose_logs
   fi
 }
 
@@ -84,4 +84,4 @@ docker run -a STDOUT --volume "${PWD}"/test/postman/docker-compose:/etc/newman -
 
 retVal=$?
 
-[ "${retVal}" -eq 0 ] && echo "Postman tests were successful" || containers_dump_logs_on_error
+[ "${retVal}" -eq 0 ] && echo "Postman tests were successful" || dump_all_compose_logs
