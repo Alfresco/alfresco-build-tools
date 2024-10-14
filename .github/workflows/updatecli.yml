@@ -18,6 +18,7 @@ permissions:
 jobs:
   build-matrix-github-releases:
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
