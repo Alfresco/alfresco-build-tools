@@ -26,6 +26,8 @@ fi
 export COMPOSE_HTTP_TIMEOUT=120
 $COMPOSE_BIN -f "${COMPOSE_FILE}" up -d --quiet-pull --wait
 
+echo "All services are up and running... starting postman tests"
+
 cd ..
 docker run -a STDOUT --volume "${PWD}"/test/postman/docker-compose:/etc/newman --network host postman/newman:5.3 run "acs-test-docker-compose-collection.json" --global-var "protocol=http" --global-var "url=localhost:8080"
 
