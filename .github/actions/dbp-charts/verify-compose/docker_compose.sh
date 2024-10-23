@@ -3,7 +3,6 @@
 COMPOSE_FILE=$(basename $COMPOSE_FILE_PATH)
 COMPOSE_PATH=$(dirname $COMPOSE_FILE_PATH)
 COMPOSE_BIN="docker compose"
-alf_port=8080
 
 dump_all_compose_logs() {
   echo "Dumping logs for all containers"
