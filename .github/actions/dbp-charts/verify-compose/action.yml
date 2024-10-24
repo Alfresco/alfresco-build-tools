@@ -9,6 +9,14 @@ inputs:
     description: "run docker-compose pull before tests"
     required: false
     default: "true"
+  postman_path:
+    description: "path to postman collection"
+    required: false
+    default: "test/postman/docker-compose"
+  postman_json:
+    description: "postman collection json file"
+    required: false
+    default: "acs-test-docker-compose-collection.json"
   docker_username:
     description: "username for Docker Hub"
     required: false
@@ -44,3 +52,5 @@ runs:
       env:
         COMPOSE_FILE_PATH: ${{ inputs.compose_file_path }}
         COMPOSE_PULL: ${{ inputs.compose_pull }}
+        POSTMAN_PATH: ${{ inputs.postman_path }}
+        POSTMAN_JSON: ${{ inputs.postman_json }}

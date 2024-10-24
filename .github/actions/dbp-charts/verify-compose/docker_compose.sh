@@ -1,13 +1,7 @@
 #!/bin/bash -e
 
-COMPOSE_FILE=$(basename $COMPOSE_FILE_PATH)
-COMPOSE_PATH=$(dirname $COMPOSE_FILE_PATH)
 COMPOSE_BIN="docker compose"
 
-cd "$COMPOSE_PATH" || {
-  echo "Error: docker compose dir not found"
-  exit 1
-}
 docker info
 $COMPOSE_BIN version
 $COMPOSE_BIN -f "${COMPOSE_FILE}" config
@@ -21,8 +15,7 @@ $COMPOSE_BIN -f "${COMPOSE_FILE}" up -d --quiet-pull --wait
 
 echo "All services are up and running... starting postman tests"
 
-cd ..
-docker run -a STDOUT --volume "${PWD}"/test/postman/docker-compose:/etc/newman --network host postman/newman:5.3 run "acs-test-docker-compose-collection.json" --global-var "protocol=http" --global-var "url=localhost:8080"
+docker run -a STDOUT --volume ${POSTMAN_PATH}:/etc/newman --network host postman/newman:5.3 run ${POSTMAN_JSON} --global-var "protocol=http" --global-var "url=localhost:8080"
 
 retVal=$?
 
