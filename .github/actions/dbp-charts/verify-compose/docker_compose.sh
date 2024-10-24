@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
 COMPOSE_BIN="docker compose"
+POSTMAN_PATH=$(realpath "${POSTMAN_PATH}")
 
 echo "Starting Alfresco in docker compose"
 $COMPOSE_BIN -f "${COMPOSE_FILE_PATH}" ps
