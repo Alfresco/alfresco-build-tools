@@ -4,12 +4,6 @@ COMPOSE_FILE=$(basename $COMPOSE_FILE_PATH)
 COMPOSE_PATH=$(dirname $COMPOSE_FILE_PATH)
 COMPOSE_BIN="docker compose"
 
-dump_all_compose_logs() {
-  echo "Dumping logs for all containers"
-  $COMPOSE_BIN -f "${COMPOSE_FILE}" logs --no-color
-  exit 1
-}
-
 cd "$COMPOSE_PATH" || {
   echo "Error: docker compose dir not found"
   exit 1
@@ -32,4 +26,4 @@ docker run -a STDOUT --volume "${PWD}"/test/postman/docker-compose:/etc/newman -
 
 retVal=$?
 
-[ "${retVal}" -eq 0 ] && echo "Postman tests were successful" || dump_all_compose_logs
+[ "${retVal}" -eq 0 ] && echo "Postman tests were successful" || echo "Postman tests failed"
