@@ -1,7 +1,6 @@
 #!/bin/bash -e
 
 COMPOSE_BIN="docker compose"
-POSTMAN_PATH=$(realpath "${POSTMAN_PATH}")
 
 echo "Starting Alfresco in docker compose"
 $COMPOSE_BIN -f "${COMPOSE_FILE_PATH}" ps
@@ -13,4 +12,4 @@ $COMPOSE_BIN -f "${COMPOSE_FILE_PATH}" up -d --quiet-pull --wait
 
 echo "All services are up and running... starting postman tests"
 
-docker run -a STDOUT --volume "${POSTMAN_PATH}:/etc/newman" --network host postman/newman:5.3 run "${POSTMAN_JSON}" --global-var "protocol=http" --global-var "url=localhost:8080"
+docker run -a STDOUT --volume "$(realpath "${POSTMAN_PATH}"):/etc/newman" --network host postman/newman:5.3 run "${POSTMAN_JSON}" --global-var "protocol=http" --global-var "url=localhost:8080"
