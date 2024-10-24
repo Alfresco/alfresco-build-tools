@@ -2,16 +2,13 @@
 
 COMPOSE_BIN="docker compose"
 
-docker info
-$COMPOSE_BIN version
-$COMPOSE_BIN -f "${COMPOSE_FILE}" config
 echo "Starting Alfresco in docker compose"
-$COMPOSE_BIN -f "${COMPOSE_FILE}" ps
+$COMPOSE_BIN -f "${COMPOSE_FILE_PATH}" ps
 if [ "$COMPOSE_PULL" = "true" ]; then
-  $COMPOSE_BIN -f "${COMPOSE_FILE}" pull --quiet
+  $COMPOSE_BIN -f "${COMPOSE_FILE_PATH}" pull --quiet
 fi
 export COMPOSE_HTTP_TIMEOUT=120
-$COMPOSE_BIN -f "${COMPOSE_FILE}" up -d --quiet-pull --wait
+$COMPOSE_BIN -f "${COMPOSE_FILE_PATH}" up -d --quiet-pull --wait
 
 echo "All services are up and running... starting postman tests"
 
