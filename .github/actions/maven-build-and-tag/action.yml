@@ -91,9 +91,9 @@ outputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-    - uses: actions/cache/restore@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4.1.1
+    - uses: actions/cache/restore@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
       with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -101,7 +101,7 @@ runs:
           ${{ runner.os }}-maven-
 
     - name: Set up JDK
-      uses: actions/setup-java@b36c23c0d998641eff861008f374ee103c25ac73 # v4.4.0
+      uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # v4.5.0
       with:
         java-version: ${{ inputs.java-version }}
         distribution: ${{ inputs.java-distribution }}
@@ -147,7 +147,7 @@ runs:
         echo "MAVEN_BUILD_CACHE_ENABLED=$MAVEN_BUILD_CACHE_ENABLED" >> $GITHUB_ENV
         echo "MAVEN_BUILD_CACHE_KEY=$MAVEN_BUILD_CACHE_KEY" >> $GITHUB_ENV
 
-    - uses: actions/cache/restore@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4.1.1
+    - uses: actions/cache/restore@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
       name: Restore Maven Build Cache before build
       if: env.MAVEN_BUILD_CACHE_ENABLED == 'true'
       with:
@@ -286,14 +286,14 @@ runs:
         rm -fr ~/.m2/repository/com/alfresco
 
     - name: Save maven cache
-      uses: actions/cache/save@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4.1.1
+      uses: actions/cache/save@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
       if: github.event_name == 'push' || env.IS_PREVIEW == 'true'
       with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
 
     - name: Save maven build cache on push
-      uses: actions/cache/save@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4.1.1
+      uses: actions/cache/save@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4.1.2
       if: env.MAVEN_BUILD_CACHE_ENABLED == 'true'
       with:
         path: ~/.m2/build-cache
