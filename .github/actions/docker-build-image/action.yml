@@ -53,6 +53,10 @@ inputs:
     description: The label name for creating a preview version
     required: false
     default: 'preview'
+outputs:
+  ecr-docker-image-url:
+    description: The ECR docker image URL
+    value: ${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}"
 
 runs:
   using: composite
