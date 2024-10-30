@@ -56,7 +56,7 @@ inputs:
 outputs:
   ecr-docker-image-url:
     description: The ECR docker image URL
-    value: ${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}"
+    value: ${{ steps.set-ecr-docker-image-url.outputs.ecr-docker-image-url }}
 
 runs:
   using: composite
@@ -234,3 +234,9 @@ runs:
           echo "${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}"
           echo "\`\`\`\`"
         } >> $GITHUB_STEP_SUMMARY
+
+    - name: set ecr-docker-image-url
+      id: set-ecr-docker-image-url
+      if: env.PUSH_IMAGE == 'true'
+      shell: bash
+      run: echo "ecr-docker-image-url=${steps.login-ecr.outputs.registry}/${env.IMAGE_NAME}:${steps.build-and-push.outputs.digest}" >> $GITHUB_ENV
