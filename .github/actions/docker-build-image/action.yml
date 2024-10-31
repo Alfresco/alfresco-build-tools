@@ -239,4 +239,4 @@ runs:
       id: set-ecr-docker-image-url
       if: env.PUSH_IMAGE == 'true'
       shell: bash
-      run: echo "ecr-docker-image-url=${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}" >> $GITHUB_ENV
+      run: echo "ecr-docker-image-url=${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}" >> $GITHUB_OUTPUT
