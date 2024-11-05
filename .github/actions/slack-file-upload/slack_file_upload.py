@@ -15,6 +15,7 @@ def upload_file_to_slack(token, channel_id, file_path, title):
         print(f"File uploaded successfully: {response['file']['id']}")
     except SlackApiError as e:
         print(f"Error uploading file: {e.response['error']}")
+        raise e
 
 if __name__ == "__main__":
     if 'SLACK_BOT_TOKEN' not in os.environ:
