@@ -27,7 +27,10 @@ inputs:
     description: User name to connect to GHCR
     required: false
     default: ${{ github.actor }}
-  ghcr-token:
+  ghcr-pull-token:
+    description: Github token to connect to GHCR
+    required: true
+  ghcr-push-token:
     description: Github token to connect to GHCR
     required: true
   aws-account-id:
@@ -115,6 +118,14 @@ runs:
         username: ${{ inputs.docker-username }}
         password: ${{ inputs.docker-password }}
 
+    - name: Login to ghcr.io before build
+      if: env.PUSH_IMAGE == 'true'
+      uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+      with:
+        registry: ghcr.io
+        username: ${{ inputs.ghcr-username }}
+        password: ${{ inputs.ghcr-pull-token }}
+
     - name: Build image ${{ env.IMAGE_NAME }} and export to docker
       if: inputs.grype-scan-enabled == 'true'
       uses: docker/build-push-action@4f58ea79222b3b9dc2c8bbdd6debcef730109a75 # v6.9.0
@@ -122,6 +133,7 @@ runs:
         context: ${{ inputs.base-directory }}/${{ inputs.image-dir }}
         tags: test-${{ env.IMAGE_NAME }}
         load: true
+        push: false
         provenance: false
 
     - name: Anchore Scan API Image
@@ -163,13 +175,13 @@ runs:
         username: ${{ inputs.quay-username }}
         password: ${{ inputs.quay-password }}
 
-    - name: Login to ghcr.io
+    - name: Login to ghcr.io to push
       if: env.PUSH_IMAGE == 'true'
       uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
       with:
         registry: ghcr.io
         username: ${{ inputs.ghcr-username }}
-        password: ${{ inputs.ghcr-token }}
+        password: ${{ inputs.ghcr-pull-token }}
 
     - name: Configure AWS credentials
       if: env.PUSH_IMAGE == 'true'
