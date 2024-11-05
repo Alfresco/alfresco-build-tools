@@ -19,12 +19,13 @@ runs:
       uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
       with:
         python-version: "3.9"
+    - name: Set requirements.txt path as variable
+      shell: bash
+      run: echo "REQ_FILE=${{ github.action_path }}/requirements.txt" >> $GITHUB_ENV
     - uses: actions/cache@v4
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles(format('{0}/requirements.txt', github.action_path)) }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
+        key: ${{ runner.os }}-pip-${{ hashFiles(env.REQ_FILE) }}
     - name: Install requirements via pip
       shell: bash
       run: pip install -r ${{ github.action_path }}/requirements.txt
