@@ -40,6 +40,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [free-hosted-runner-disk-space](#free-hosted-runner-disk-space)
     - [get-branch-name](#get-branch-name)
     - [get-build-info](#get-build-info)
+    - [gh-cache-cleanup-on-merge](#gh-cache-cleanup-on-merge)
     - [git-check-existing-tag](#git-check-existing-tag)
     - [get-commit-message](#get-commit-message)
     - [git-commit-changes](#git-commit-changes)
@@ -83,10 +84,10 @@ Here follows the list of GitHub Actions topics available in the current document
     - [setup-github-release-binary](#setup-github-release-binary)
     - [setup-java-build](#setup-java-build)
     - [setup-kind](#setup-kind)
+    - [slack-file-upload](#slack-file-upload)
     - [update-project-base-tag](#update-project-base-tag)
     - [validate-maven-versions](#validate-maven-versions)
     - [veracode](#veracode)
-    - [github cache cleanup](#github-cache-cleanup)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
     - [terraform](#terraform)
@@ -565,6 +566,26 @@ Loads the name of the branch on which the action was called into `BRANCH_NAME` e
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@ref
+```
+
+### gh-cache-cleanup-on-merge
+
+Performs the cleanup of all cache entries related with already closed PR
+
+```yaml
+name: Cleanup caches for work branch
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/gh-cache-cleanup-on-merge@ref
+        with:
+          token: ${{ secrets.GH_TOKEN }}
 ```
 
 ### git-check-existing-tag
@@ -1483,6 +1504,19 @@ Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
           helm install acs ./helm/chart
 ```
 
+### slack-file-upload
+
+Uploads a file to a Slack channel.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/slack-file-upload@ref
+        with:
+          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-channel-id: 'channel-id' # not the channel name
+          file-path: 'path/to/file'
+          file-title: 'file description' # optional
+```
+
 ### update-project-base-tag
 
 Used to update a base tag in the release descriptor. It will add or update the
@@ -1527,26 +1561,6 @@ This way, the agent-based scan results will be added in the latest promoted scan
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
           srcclr-project-ext: '' # optional, allows for directing scan results to Veracode project named: <default project name>/<srcclr-project-ext>
-```
-
-### github cache cleanup
-
-Performs the cleanup of all cache entries related with already closed PR
-
-```yaml
-name: Cleanup caches for work branch
-on:
-  pull_request:
-    types:
-      - closed
-
-jobs:
-  cleanup:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/gh-cache-cleanup-on-merge@ref
-        with:
-          token: ${{ secrets.GH_TOKEN }}
 ```
 
 ## Reusable workflows provided by us
