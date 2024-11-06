@@ -18,7 +18,8 @@ runs:
       if: github.event_name == 'pull_request'
       shell: bash
       run: |
-        if [[ "$(jq -r '.pull_request.labels[].name' <<< "${{ toJson(github.event) }}")" == *"${{ inputs.label }}"* ]]; then 
+        LABELS=$(jq -r '.pull_request.labels[].name' "$GITHUB_EVENT_PATH")
+        if [[ "$LABELS" == *"${{ inputs.label }}"* ]]; then
           echo "has-label=true" >> $GITHUB_OUTPUT
         else
           echo "has-label=false" >> $GITHUB_OUTPUT
