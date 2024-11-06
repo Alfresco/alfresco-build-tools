@@ -17,6 +17,7 @@ runs:
   steps:
     - name: Setup Python
       uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+      id: setup-python
       with:
         python-version: "3.9"
 
@@ -31,11 +32,11 @@ runs:
 
     - name: Install requirements via pip
       shell: bash
-      run: pip install -r ${{ github.action_path }}/requirements.txt
+      run: ${{ steps.setup-python.outputs.python-path }} -m pip install -r ${{ github.action_path }}/requirements.txt
 
     - name: Upload ${{ inputs.file-path }} to Slack
       shell: bash
       env:
         SLACK_BOT_TOKEN: ${{ inputs.slack-token }}
         SLACK_CHANNEL_ID: ${{ inputs.slack-channel-id }}
-      run: python3 ${{ github.action_path }}/slack_file_upload.py "${{ inputs.file-path }}" "${{ inputs.file-title }}"
+      run: ${{ steps.setup-python.outputs.python-path }} ${{ github.action_path }}/slack_file_upload.py "${{ inputs.file-path }}" "${{ inputs.file-title }}"
