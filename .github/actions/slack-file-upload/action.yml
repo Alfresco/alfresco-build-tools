@@ -12,6 +12,10 @@ inputs:
     required: true
   file-title:
     description: 'Title of file'
+  python-version:
+    description: 'Python version'
+    required: false
+    default: '3.9'
 runs:
   using: composite
   steps:
@@ -19,7 +23,7 @@ runs:
       uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
       id: setup-python
       with:
-        python-version: "3.9"
+        python-version: ${{ inputs.python-version }}
 
     - name: Workaround for hashFiles not working outside current workspace
       shell: bash
