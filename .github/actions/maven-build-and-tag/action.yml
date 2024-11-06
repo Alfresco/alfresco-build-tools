@@ -87,6 +87,9 @@ outputs:
   version:
     description: "The version of the new tag created by this workflow"
     value: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
+  skip-tests:
+    description: "Whether tests were skipped during build or not"
+    value: ${{ steps.set-skip-tests-env-variable.outputs.skip-tests }}
 
 runs:
   using: composite
@@ -222,13 +225,46 @@ runs:
         echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
         echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
 
+    - name: Set skip tests env variable
+      id: set-skip-tests-env-variable
+      if: github.event_name == 'pull_request'
+      env:
+        SKIP_TESTS: ${{ contains(github.event.pull_request.labels.*.name, 'skip-tests') }}
+      shell: bash
+      run: |
+        echo "SKIP_TESTS=$SKIP_TESTS" >> $GITHUB_ENV
+        echo "skip-tests=$SKIP_TESTS" >> $GITHUB_OUTPUT
+
+    - name: Set Maven test options
+      id: set-test-options
+      shell: bash
+      run: |
+        if [ "$SKIP_TESTS" == "true" ]; then
+          echo "TEST_OPTIONS=-DskipTests=true -DskipITs=true" >> $GITHUB_ENV
+        else
+          echo "TEST_OPTIONS=" >> $GITHUB_ENV
+        fi
+
     - name: Build and Test with Maven (and maybe Deploy)
       shell: bash
-      run: mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
+      run: mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }} ${{ env.TEST_OPTIONS }}
       env:
         MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip -Dmaven.build.cache.enabled=${{ env.MAVEN_BUILD_CACHE_ENABLED }}
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
+
+    #   The commented section should be added to consuming workflow using outputs from this action to prevent merging if tests are skipped
+    # - name: Set status check to prevent merge
+    #   if: env.SKIP_TESTS == 'true'
+    #   shell: bash
+    #   run: |
+    #     echo "This pull request cannot be merged."
+    #     exit 1
+
+    # - name: Set status check to merge
+    #   if: env.SKIP_TESTS != 'true'
+    #   shell: bash
+    #   run: echo "This pull request can be merged."
 
     - name: Remove running docker containers
       if: inputs.reuse-testcontainers == 'true'
@@ -245,7 +281,7 @@ runs:
           ${{ inputs.upload-jars-path }}
 
     - uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
-      if: inputs.upload-coverage == 'true'
+      if: inputs.upload-coverage == 'true' && env.SKIP_TESTS != 'true'
       with:
         name: coverage
         retention-days: 1
@@ -253,6 +289,7 @@ runs:
           **/target/site/jacoco-aggregate/jacoco.xml
 
     - name: Echo Longest Tests run
+      if: env.SKIP_TESTS != 'true'
       shell: bash
       run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
 
