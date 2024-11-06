@@ -42,9 +42,9 @@ Here follows the list of GitHub Actions topics available in the current document
     - [free-hosted-runner-disk-space](#free-hosted-runner-disk-space)
     - [get-branch-name](#get-branch-name)
     - [get-build-info](#get-build-info)
+    - [gh-cache-cleanup-on-merge](#gh-cache-cleanup-on-merge)
     - [git-check-existing-tag](#git-check-existing-tag)
     - [get-commit-message](#get-commit-message)
-    - [gh-cache-cleanup-on-merge](#gh-cache-cleanup-on-merge)
     - [git-commit-changes](#git-commit-changes)
     - [git-latest-tag](#git-latest-tag)
     - [github-check-upcoming-runs](#github-check-upcoming-runs)
@@ -96,12 +96,12 @@ Here follows the list of GitHub Actions topics available in the current document
     - [setup-rancher-cli](#setup-rancher-cli)
     - [setup-terraform-docs](#setup-terraform-docs)
     - [setup-updatebot](#setup-updatebot)
+    - [slack-file-upload](#slack-file-upload)
     - [update-deployment-runtime-versions](#update-deployment-runtime-versions)
     - [update-pom-to-next-pre-release](#update-pom-to-next-pre-release)
     - [update-project-base-tag](#update-project-base-tag)
     - [validate-maven-versions](#validate-maven-versions)
     - [veracode](#veracode)
-    - [github cache cleanup](#github-cache-cleanup)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
     - [terraform](#terraform)
@@ -598,6 +598,26 @@ Loads the name of the branch on which the action was called into `BRANCH_NAME` e
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@ref
 ```
 
+### gh-cache-cleanup-on-merge
+
+Performs the cleanup of all cache entries related with already closed PR
+
+```yaml
+name: Cleanup caches for work branch
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/gh-cache-cleanup-on-merge@ref
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+```
+
 ### git-check-existing-tag
 
 Checks if a tag with the given name already exists for this remote repository. Returns the output named `exists` with value `'true'` or `'false'`.
@@ -619,16 +639,6 @@ This action requires a checkout with fetch-depth option as follow:
         with:
           fetch-depth: 0
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@ref
-```
-
-### gh-cache-cleanup-on-merge
-
-Performs the cleanup of cache entries related with already closed PR:
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/gh-cache-cleanup-on-merge@ref
-        with:
-          token: ${{ secrets.BOT_GITHUB_TOKEN }}
 ```
 
 ### git-commit-changes
@@ -1617,6 +1627,19 @@ Install the updatebot binary from GitHub Releases and add it to the PATH.
           version: "1.1.60"
 ```
 
+### slack-file-upload
+
+Uploads a file to a Slack channel.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/slack-file-upload@ref
+        with:
+          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-channel-id: 'channel-id' # not the channel name
+          file-path: 'path/to/file'
+          file-title: 'file description' # optional
+```
+
 ### update-deployment-runtime-versions
 
 For more information, see [update-deployment-runtime-versions](../.github/actions/update-deployment-runtime-versions/action.yml).
@@ -1669,26 +1692,6 @@ This way, the agent-based scan results will be added in the latest promoted scan
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
           srcclr-project-ext: '' # optional, allows for directing scan results to Veracode project named: <default project name>/<srcclr-project-ext>
-```
-
-### github cache cleanup
-
-Performs the cleanup of all cache entries related with already closed PR
-
-```yaml
-name: Cleanup caches for work branch
-on:
-  pull_request:
-    types:
-      - closed
-
-jobs:
-  cleanup:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/gh-cache-cleanup-on-merge@ref
-        with:
-          token: ${{ secrets.GH_TOKEN }}
 ```
 
 ## Reusable workflows provided by us
