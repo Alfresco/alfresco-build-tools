@@ -222,9 +222,33 @@ runs:
         echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
         echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
 
+    - name: Check for skip-tests label
+      id: skip-tests
+      uses: ./.github/actions/check-pr-label
+      with:
+        label: 'skip-tests'
+        
+    - name: Set skip-tests env variable
+      run: |
+        if [ "${{ steps.skip-tests.outputs.has-label }}" == "true" ]; then
+          echo "SKIP_TESTS=true" >> $GITHUB_ENV
+        else
+          echo "SKIP_TESTS=false" >> $GITHUB_ENV
+        fi
+
+    - name: Set test options
+      id: set-test-options
+      shell: bash
+      run: |
+        if [ "$SKIP_TESTS" == "true" ]; then
+          echo "TEST_OPTIONS=-DskipTests=true -DskipITs=true" >> $GITHUB_ENV
+        else
+          echo "TEST_OPTIONS=" >> $GITHUB_ENV
+        fi
+
     - name: Build and Test with Maven (and maybe Deploy)
       shell: bash
-      run: mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
+      run: mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }} ${{ env.TEST_OPTIONS }}
       env:
         MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip -Dmaven.build.cache.enabled=${{ env.MAVEN_BUILD_CACHE_ENABLED }}
         MAVEN_USERNAME: ${{ inputs.maven-username }}
@@ -245,7 +269,7 @@ runs:
           ${{ inputs.upload-jars-path }}
 
     - uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
-      if: inputs.upload-coverage == 'true'
+      if: inputs.upload-coverage == 'true' && env.SKIP_TESTS != 'true'
       with:
         name: coverage
         retention-days: 1
@@ -253,6 +277,7 @@ runs:
           **/target/site/jacoco-aggregate/jacoco.xml
 
     - name: Echo Longest Tests run
+      if: env.SKIP_TESTS != 'true'
       shell: bash
       run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
 

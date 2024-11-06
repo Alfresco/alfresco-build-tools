@@ -1,0 +1,26 @@
+name: Check PR Label
+description: Check PR Label
+inputs:
+  label:
+    description: The label to check for
+    required: true
+
+outputs:
+  has-label:
+    description: True if label is present, false otherwise
+    value: ${{ steps.check.outputs.has-label }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check PR labels
+      id: check
+      if: github.event_name == 'pull_request'
+      shell: bash
+      run: |
+        if [[ "$(jq -r '.pull_request.labels[].name' <<< "${{ toJson(github.event) }}")" == *"${{ inputs.label }}"* ]]; then 
+          echo "has-label=true" >> $GITHUB_OUTPUT
+        else
+          echo "has-label=false" >> $GITHUB_OUTPUT
+        fi
+

@@ -1,0 +1,33 @@
+# Sample steps to be added in consuming workflow to prevent merge
+name: Label Check
+
+on:
+  pull_request:
+    types:
+      - labeled
+      - unlabeled
+
+jobs:
+  check-label:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check for skip-tests label
+        id: check-skip-tests-label
+        uses: ./.github/actions/check-pr-label
+        with:
+          label: "skip-tests"
+
+      - name: Set status check to prevent merge
+        if: steps.check-skip-tests-label.outputs.has-label == 'true'
+        run: |
+          echo "This pull request cannot be merged."
+          exit 1
+
+      - name: Set status check to merge
+        if: steps.check-skip-tests-label.outputs.has-label != 'true'
+        run: |
+          echo "This pull request can be merged."
