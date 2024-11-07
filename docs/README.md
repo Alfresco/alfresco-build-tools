@@ -1030,11 +1030,11 @@ The created maven artifacts and docker images will be tagged as `0.0.1-$GITHUB_P
 
 #### Option to skip tests for maven-build-and-tag
 
-There is a possibility to skip unit and integration tests during build for an open PR.
-In order to use it specify `skip-tests-label` input (or use default `skip-tests`). Create a PR with the `skip-tests-label` label.
+There is a possibility to skip Unit and Integration Tests during build for an open PR.
+In order to use it specify `skip-tests-label` input (or use default `skip-tests`). Create a PR with the `skip-tests` label.
 A PR should not be merged if tests are skpped.
 
-Sample usage to prevent merging when tests are skipped
+Sample usage to prevent merging when tests are skipped:
 
 ```yaml
   - name: Set status check
