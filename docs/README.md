@@ -1028,7 +1028,6 @@ There is a possibility to publish snapshot maven artifacts and docker images fro
 In order to use it specify `preview-label` input (or use default `preview`). Create a PR with the `preview-label` label.
 The created maven artifacts and docker images will be tagged as `0.0.1-$GITHUB_PR_NUMBER-SNAPSHOT`.
 
-
 #### Option to skip tests for maven-build-and-tag
 
 There is a possibility to skip unit and integration tests during build for an open PR.
