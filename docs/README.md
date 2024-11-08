@@ -492,6 +492,7 @@ When using OIDC on AWS, inputs `aws-access-key-id` and `aws-secret-access-key` c
           # grype-fail-build: true # optional
           # preview-label: ${{ vars.PREVIEW_LABEL }} # optional
 ```
+The returned output is the ECR image digest.
 
 ### docker-dump-containers-logs
 
