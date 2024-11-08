@@ -181,7 +181,7 @@ runs:
       with:
         registry: ghcr.io
         username: ${{ inputs.ghcr-username }}
-        password: ${{ inputs.ghcr-push-token }}
+        password: ${{ inputs.ghcr-pull-token }}
 
     - name: Configure AWS credentials
       if: env.PUSH_IMAGE == 'true'
