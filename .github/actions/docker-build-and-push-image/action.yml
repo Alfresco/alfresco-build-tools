@@ -55,7 +55,10 @@ inputs:
     description: The label name for creating a preview version
     required: false
     default: 'preview'
-
+outputs:
+  ecr-docker-image-url:
+    description: The ECR docker image URL
+    value: ${{ steps.set-ecr-docker-image-url.outputs.ecr-docker-image-url }}
 runs:
   using: composite
   steps:
@@ -240,3 +243,9 @@ runs:
           echo "${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}"
           echo "\`\`\`\`"
         } >> $GITHUB_STEP_SUMMARY
+
+    - name: set ecr-docker-image-url
+      id: set-ecr-docker-image-url
+      if: env.PUSH_IMAGE == 'true'
+      shell: bash
+      run: echo "ecr-docker-image-url=${{ steps.login-ecr.outputs.registry }}/${{ env.IMAGE_NAME }}@${{ steps.build-and-push.outputs.digest }}" >> $GITHUB_OUTPUT
