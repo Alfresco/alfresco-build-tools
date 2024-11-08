@@ -31,7 +31,9 @@ Here follows the list of GitHub Actions topics available in the current document
   - [GitHub Actions provided by us](#github-actions-provided-by-us)
     - [automate-dependabot](#automate-dependabot)
     - [automate-propagation](#automate-propagation)
+    - [calculate-next-internal-version](#calculate-next-internal-version)
     - [configure-git-author](#configure-git-author)
+    - [dbp-charts](#dbp-charts)
     - [docker-build-image](#docker-build-image)
     - [docker-dump-containers-logs](#docker-dump-containers-logs)
     - [docker-scan-image-dirs](#docker-scan-image-dirs)
@@ -40,12 +42,14 @@ Here follows the list of GitHub Actions topics available in the current document
     - [free-hosted-runner-disk-space](#free-hosted-runner-disk-space)
     - [get-branch-name](#get-branch-name)
     - [get-build-info](#get-build-info)
+    - [gh-cache-cleanup-on-merge](#gh-cache-cleanup-on-merge)
     - [git-check-existing-tag](#git-check-existing-tag)
     - [get-commit-message](#get-commit-message)
     - [git-commit-changes](#git-commit-changes)
     - [git-latest-tag](#git-latest-tag)
     - [github-check-upcoming-runs](#github-check-upcoming-runs)
-    - [github-deployment-create and github-deployment-status-update](#github-deployment-create-and-github-deployment-status-update)
+    - [github-deployment-create](#github-deployment-create)
+    - [github-deployment-status-update](#github-deployment-status-update)
     - [github-deployments-delete](#github-deployments-delete)
     - [github-download-file](#github-download-file)
     - [github-https-auth](#github-https-auth)
@@ -76,17 +80,28 @@ Here follows the list of GitHub Actions topics available in the current document
     - [rancher](#rancher)
     - [reportportal-prepare](#reportportal-prepare)
     - [reportportal-summarize](#reportportal-summarize)
+    - [resolve-preview-name](#resolve-preview-name)
     - [send-slack-notification-slow-job](#send-slack-notification-slow-job)
     - [send-slack-notification](#send-slack-notification)
     - [send-teams-notification](#send-teams-notification)
     - [setup-docker](#setup-docker)
     - [setup-github-release-binary](#setup-github-release-binary)
+    - [setup-helm-docs](#setup-helm-docs)
     - [setup-java-build](#setup-java-build)
+    - [setup-jx-release-version](#setup-jx-release-version)
+    - [setup-kcadm](#setup-kcadm)
     - [setup-kind](#setup-kind)
+    - [setup-kubepug](#setup-kubepug)
+    - [setup-pysemver](#setup-pysemver)
+    - [setup-rancher-cli](#setup-rancher-cli)
+    - [setup-terraform-docs](#setup-terraform-docs)
+    - [setup-updatebot](#setup-updatebot)
+    - [slack-file-upload](#slack-file-upload)
+    - [update-deployment-runtime-versions](#update-deployment-runtime-versions)
+    - [update-pom-to-next-pre-release](#update-pom-to-next-pre-release)
     - [update-project-base-tag](#update-project-base-tag)
     - [validate-maven-versions](#validate-maven-versions)
     - [veracode](#veracode)
-    - [github cache cleanup](#github-cache-cleanup)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
     - [terraform](#terraform)
@@ -377,6 +392,16 @@ Another token is also needed to handled approval. It can be the default `GITHUB_
         approval-token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
+### calculate-next-internal-version
+
+Calculate next internal version based on existing tags
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/calculate-next-internal-version@ref
+        with:
+          next-version: 1.2.3
+```
+
 ### configure-git-author
 
 Configures the git username and email to associate commits with the provided identity
@@ -390,6 +415,12 @@ Configures the git username and email to associate commits with the provided ide
 ```
 
 The two vars in the previous snippet are [workflow configuration variables](https://github.blog/changelog/2023-01-10-github-actions-support-for-configuration-variables-in-workflows/) that can be created at organization level and shared across different repositories.
+
+### dbp-charts
+
+A collection of actions used in Alfresco acs-deployment repository to manage Helm charts (mostly deprecated).
+
+See [dbp-charts](../.github/actions/dbp-charts/) for more details.
 
 ### docker-build-image
 
@@ -567,6 +598,26 @@ Loads the name of the branch on which the action was called into `BRANCH_NAME` e
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@ref
 ```
 
+### gh-cache-cleanup-on-merge
+
+Performs the cleanup of all cache entries related with already closed PR
+
+```yaml
+name: Cleanup caches for work branch
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/gh-cache-cleanup-on-merge@ref
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+```
+
 ### git-check-existing-tag
 
 Checks if a tag with the given name already exists for this remote repository. Returns the output named `exists` with value `'true'` or `'false'`.
@@ -637,7 +688,9 @@ With proper concurrency logic in place, the latest run might have been cancelled
           workflow: my-workflow.yml
 ```
 
-### github-deployment-create and github-deployment-status-update
+### github-deployment-create
+
+### github-deployment-status-update
 
 These actions create a [GitHub deployment](https://docs.github.com/en/rest/deployments/deployments) and allow updating its status. That can be useful to track progression on a workflow pipeline.
 
@@ -1282,6 +1335,17 @@ This will give the following sample output on the GH Actions run summary (when u
 
 ![GH Actions Summary Report Portal](./images/rp-gh-summary.png)
 
+### resolve-preview-name
+
+Resolve preview name based on the PR number and run number:
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/resolve-preview-name@ref
+        id: resolve-preview-name
+      - run: |
+          echo ${{ steps.resolve-preview-name.outputs.preview-name }}
+```
+
 ### send-slack-notification-slow-job
 
 Sends a slack notification when current run took more time than specified via `max-build-time-seconds` input.
@@ -1445,6 +1509,16 @@ Hosted runners.
 Allows the installation of a generic binary from GitHub Releases and add it to the PATH.
 See [setup-helm-docs](../.github/actions/setup-helm-docs/action.yml) for a usage example.
 
+### setup-helm-docs
+
+Install the helm-docs binary from GitHub Releases and add it to the PATH.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@ref
+        with:
+          version: "1.14.2"
+```
+
 ### setup-java-build
 
 [setup-java-build](../.github/actions/setup-java-build/action.yml) performs the setup of required build tools such as Java and Maven.
@@ -1458,6 +1532,26 @@ If the Maven settings file is not provided at all, then a default settings file 
           java-version: "17" # optional
           java-distribution: "temurin" # optional
           maven-settings: ".ci.settings.xml" # optional
+```
+
+### setup-jx-release-version
+
+Set up a specific version of jx-release-version and add it to the PATH.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-jx-release-version@ref
+        with:
+          version: "2.2.3"
+```
+
+### setup-kcadm
+
+Setup the `kcadm` binary from Keycloak distribution and add it to the PATH.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-kcadm@ref
+        with:
+          version: "24.0.5"
 ```
 
 ### setup-kind
@@ -1482,6 +1576,77 @@ Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
           helm dep up ./helm/chart
           helm install acs ./helm/chart
 ```
+
+### setup-kubepug
+
+Install the Kubernetes preupgrade checker and add it to the PATH.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-kubepug@ref
+        with:
+          version: "1.3.2"
+```
+
+### setup-pysemver
+
+Install the pysemver binary from GitHub Releases and add it to the PATH.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-pysemver@ref
+        with:
+          version: "2.13.0"
+```
+
+### setup-rancher-cli
+
+Install the Rancher CLI binary from GitHub Releases and add it to the PATH.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@ref
+        with:
+          version: "2.9.2"
+```
+
+### setup-terraform-docs
+
+Install the terraform-docs binary from GitHub Releases and add it to the PATH.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-terraform-docs@ref
+        with:
+          version: "0.16.0"
+```
+
+### setup-updatebot
+
+Install the updatebot binary from GitHub Releases and add it to the PATH.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatebot@ref
+        with:
+          version: "1.1.60"
+```
+
+### slack-file-upload
+
+Uploads a file to a Slack channel.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/slack-file-upload@ref
+        with:
+          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-channel-id: 'channel-id' # not the channel name
+          file-path: 'path/to/file'
+          file-title: 'file description' # optional
+```
+
+### update-deployment-runtime-versions
+
+For more information, see [update-deployment-runtime-versions](../.github/actions/update-deployment-runtime-versions/action.yml).
+
+### update-pom-to-next-pre-release
+
+For more information see [update-pom-to-next-pre-release](../.github/actions/update-pom-to-next-pre-release/action.yml).
 
 ### update-project-base-tag
 
@@ -1527,26 +1692,6 @@ This way, the agent-based scan results will be added in the latest promoted scan
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
           srcclr-project-ext: '' # optional, allows for directing scan results to Veracode project named: <default project name>/<srcclr-project-ext>
-```
-
-### github cache cleanup
-
-Performs the cleanup of all cache entries related with already closed PR
-
-```yaml
-name: Cleanup caches for work branch
-on:
-  pull_request:
-    types:
-      - closed
-
-jobs:
-  cleanup:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/gh-cache-cleanup-on-merge@ref
-        with:
-          token: ${{ secrets.GH_TOKEN }}
 ```
 
 ## Reusable workflows provided by us
