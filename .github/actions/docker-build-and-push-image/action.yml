@@ -1,5 +1,5 @@
-name: Build docker image
-description: Build docker image based on supplied jar files
+name: Build and push docker image
+description: Build docker image based on supplied jar files and push it with pull+push tokens
 inputs:
   base-directory:
     description: Base working directory
@@ -25,8 +25,7 @@ inputs:
     required: true
   ghcr-username:
     description: User name to connect to GHCR
-    required: false
-    default: ${{ github.actor }}
+    required: true
   ghcr-pull-token:
     description: Github token to connect to GHCR
     required: true
