@@ -1008,6 +1008,7 @@ Check out, builds a maven project and docker images, generating a new alpha vers
 ```yaml
     outputs:
       version: ${{ steps.build-and-tag.outputs.version }}
+      skip-tests: ${{ steps.build-and-tag.outputs.skip-tests }}
     steps:
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build-and-tag@ref
         id: build-and-tag
@@ -1026,6 +1027,26 @@ Check out, builds a maven project and docker images, generating a new alpha vers
 There is a possibility to publish snapshot maven artifacts and docker images from an open PR.
 In order to use it specify `preview-label` input (or use default `preview`). Create a PR with the `preview-label` label.
 The created maven artifacts and docker images will be tagged as `0.0.1-$GITHUB_PR_NUMBER-SNAPSHOT`.
+
+#### Option to skip tests for maven-build-and-tag
+
+There is a possibility to skip Unit and Integration Tests during build for an open PR.
+In order to use it specify `skip-tests-label` input (or use default `skip-tests`). Create a PR with the `skip-tests` label.
+A PR should not be merged if tests are skpped.
+
+Sample usage to prevent merging when tests are skipped:
+
+```yaml
+  - name: Set status check
+    shell: bash
+    run: |
+      if [[ ${{ steps.build-and-tag.outputs.skip-tests }} == 'true' ]]; then
+        echo "This pull request cannot be merged."
+        exit 1
+      else
+        echo "This pull request can be merged."
+      fi
+```
 
 ### maven-deploy-file
 
