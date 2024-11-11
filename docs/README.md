@@ -455,6 +455,8 @@ When using OIDC on AWS, inputs `aws-access-key-id` and `aws-secret-access-key` c
           # preview-label: ${{ vars.PREVIEW_LABEL }} # optional
 ```
 
+The returned output is the ECR image digest.
+
 ### docker-build-and-push-image
 
 Newer version of the `docker-build-image` action, with the same features plus the ability to declare separated token for pull/push images.
