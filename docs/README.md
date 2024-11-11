@@ -455,6 +455,8 @@ When using OIDC on AWS, inputs `aws-access-key-id` and `aws-secret-access-key` c
           # preview-label: ${{ vars.PREVIEW_LABEL }} # optional
 ```
 
+The returned output is the ECR image digest.
+
 ### docker-dump-containers-logs
 
 Dumps Docker containers logs. Each container's log will be stored in a separate `<container_name>.log` file. All files will be archived by default under `containers-logs-<job_id>-<job_retry_number>-<timestamp>.tar.gz` and will be available to download via the workflow's summary page.
