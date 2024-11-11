@@ -82,11 +82,18 @@ inputs:
     description: Whether testcontainers should be reused
     required: false
     default: 'false'
+  skip-tests-label:
+    description: The label name for skipping tests
+    required: false
+    default: 'skip-tests'
 
 outputs:
   version:
     description: "The version of the new tag created by this workflow"
     value: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
+  skip-tests:
+    description: "Whether tests were skipped during build or not"
+    value: ${{ steps.set-skip-tests-env-variable.outputs.skip-tests }}
 
 runs:
   using: composite
@@ -112,13 +119,24 @@ runs:
       with:
         maven-version: ${{ inputs.maven-version }}
 
+    - name: Set skip tests env variable
+      id: set-skip-tests-env-variable
+      env:
+        SKIP_TESTS: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, inputs.skip-tests-label) }}
+      shell: bash
+      run: |
+        echo "SKIP_TESTS=$SKIP_TESTS" >> $GITHUB_ENV
+        echo "skip-tests=$SKIP_TESTS" >> $GITHUB_OUTPUT
+
     - name: Compute maven options
       id: compute-maven-options
       shell: bash
       run: |
         NTP='--no-transfer-progress'
         ${{ inputs.verbose }} && NTP=''
-        echo "result=--show-version --settings settings.xml $NTP" >> $GITHUB_OUTPUT
+        TEST_OPTIONS=''
+        [[ $SKIP_TESTS == 'true' ]] && TEST_OPTIONS='-DskipTests=true -DskipITs=true'
+        echo "result=--show-version --settings settings.xml $NTP $TEST_OPTIONS" >> $GITHUB_OUTPUT
 
     - name: Set is_preview env variable
       id: set-is-preview-env-variable
@@ -160,7 +178,7 @@ runs:
     - name: Update pom files to the new version
       id: update-pom-to-next-version
       if: github.event_name == 'push' || env.IS_PREVIEW == 'true'
-      uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@v8.3.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@v8.4.0
       with:
         property-to-update: ${{ inputs.property-to-update }}
         maven-cli-opts: ${{ steps.compute-maven-options.outputs.result }}
@@ -245,7 +263,7 @@ runs:
           ${{ inputs.upload-jars-path }}
 
     - uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
-      if: inputs.upload-coverage == 'true'
+      if: inputs.upload-coverage == 'true' && env.SKIP_TESTS != 'true'
       with:
         name: coverage
         retention-days: 1
@@ -253,10 +271,11 @@ runs:
           **/target/site/jacoco-aggregate/jacoco.xml
 
     - name: Echo Longest Tests run
+      if: env.SKIP_TESTS != 'true'
       shell: bash
       run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v8.3.0
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v8.4.0
       if: github.event_name == 'push'
       with:
         username: ${{ inputs.git-username }}
