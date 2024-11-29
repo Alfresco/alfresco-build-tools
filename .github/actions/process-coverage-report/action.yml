@@ -1,6 +1,9 @@
 name: 'Process Coverage Report'
 description: 'Process the generated coverage for further reporting, uses JaCoCo-report plugin'
 inputs:
+  sonar_token:
+    description: 'SonarCloud token to upload the coverage report'
+    required: true
   paths:
     description: 'Comma separated paths of the generated JaCoCo xml files (supports wildcard glob pattern)'
     required: true
@@ -57,7 +60,7 @@ runs:
     - name: SonarCloud Scan
     - uses: sonarsource/sonarcloud-github-action@v3.1.0
       env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_TOKEN: ${{ inputs.sonar_token }}
 #    - uses: madrapps/jacoco-report@7c362aca34caf958e7b1c03464bd8781db9f8da7 # v1.7.1
 #      id: jacoco-aggregate
 #      with:
