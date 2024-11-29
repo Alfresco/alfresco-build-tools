@@ -54,19 +54,23 @@ outputs:
 runs:
   using: composite
   steps:
-    - uses: madrapps/jacoco-report@7c362aca34caf958e7b1c03464bd8781db9f8da7 # v1.7.1
-      id: jacoco-aggregate
-      with:
-        paths:  ${{ inputs.paths }}
-        token:  ${{ inputs.token }}
-        min-coverage-overall:  ${{ inputs.min-coverage-overall }}
-        min-coverage-changed-files:  ${{ inputs.min-coverage-changed-files }}
-        title:  ${{ inputs.title }}
-        update-comment:  ${{ inputs.update-comment }}
-        skip-if-no-changes:  ${{ inputs.skip-if-no-changes }}
-        pass-emoji:  ${{ inputs.pass-emoji }}
-        fail-emoji:  ${{ inputs.fail-emoji }}
-        continue-on-error:  ${{ inputs.continue-on-error }}
-        debug-mode:  ${{ inputs.debug-mode }}
-        coverage-overall:  ${{ inputs.coverage-overall }}
-        coverage-changed-files:  ${{ inputs.coverage-changed-files }}
+    - name: SonarCloud Scan
+    - uses: sonarsource/sonarcloud-github-action@v3.1.0
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#    - uses: madrapps/jacoco-report@7c362aca34caf958e7b1c03464bd8781db9f8da7 # v1.7.1
+#      id: jacoco-aggregate
+#      with:
+#        paths:  ${{ inputs.paths }}
+#        token:  ${{ inputs.token }}
+#        min-coverage-overall:  ${{ inputs.min-coverage-overall }}
+#        min-coverage-changed-files:  ${{ inputs.min-coverage-changed-files }}
+#        title:  ${{ inputs.title }}
+#        update-comment:  ${{ inputs.update-comment }}
+#        skip-if-no-changes:  ${{ inputs.skip-if-no-changes }}
+#        pass-emoji:  ${{ inputs.pass-emoji }}
+#        fail-emoji:  ${{ inputs.fail-emoji }}
+#        continue-on-error:  ${{ inputs.continue-on-error }}
+#        debug-mode:  ${{ inputs.debug-mode }}
+#        coverage-overall:  ${{ inputs.coverage-overall }}
+#        coverage-changed-files:  ${{ inputs.coverage-changed-files }}
