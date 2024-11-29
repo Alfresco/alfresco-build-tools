@@ -58,7 +58,7 @@ runs:
   using: composite
   steps:
     - name: SonarCloud Scan
-    - uses: sonarsource/sonarcloud-github-action@v3.1.0
+      uses: sonarsource/sonarcloud-github-action@v3.1.0
       env:
         SONAR_TOKEN: ${{ inputs.sonar_token }}
 #    - uses: madrapps/jacoco-report@7c362aca34caf958e7b1c03464bd8781db9f8da7 # v1.7.1
