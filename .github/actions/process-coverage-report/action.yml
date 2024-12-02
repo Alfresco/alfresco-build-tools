@@ -58,9 +58,11 @@ runs:
   using: composite
   steps:
     - name: Load JaCoCo report on SonarCloud
+      env:
+        SONAR_TOKEN: ${{ inputs.sonar_token }}
       shell: bash
       run: |
-        mvn sonar:sonar -Dsonar.token=${{ inputs.sonar_token }} -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=alfresco -Dsonar.projectKey=Alfresco_hxp-studio-services
+        mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=alfresco -Dsonar.projectKey=Alfresco_hxp-studio-services
 
 #    - name: SonarCloud Scan
 #      uses: sonarsource/sonarcloud-github-action@v3.1.0
