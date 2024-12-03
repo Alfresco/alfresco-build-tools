@@ -23,6 +23,9 @@ outputs:
   slack-message:
     description: Outcome message for slack
     value: ${{ steps.slack-message.outputs.message }}
+  teams-message:
+    description: Outcome message for teams
+    value: ${{ steps.teams-message.outputs.message }}
 
 runs:
   using: composite
@@ -54,3 +57,12 @@ runs:
         RP_CONTENT: ${{ steps.rp-output.outputs.content }}
         RP_LAUNCH_URL: ${{ steps.rp-output.outputs.url }}
       run: ${{ github.action_path }}/get-slack-message.sh
+
+    - name: Compute Teams message
+      id: teams-message
+      shell: bash
+      env:
+        RP_LAUNCH_KEY: ${{ inputs.rp-launch-key }}
+        RP_CONTENT: ${{ steps.rp-output.outputs.content }}
+        RP_LAUNCH_URL: ${{ steps.rp-output.outputs.url }}
+      run: ${{ github.action_path }}/get-teams-message.sh
