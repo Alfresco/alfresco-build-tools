@@ -51,6 +51,7 @@ runs:
         echo "Table of Contents successfully generated in ${{ inputs.md_src }}"
       shell: bash
     - name: Autocommit changes
+      if: inputs.dry_run == 'false'
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: Auto update TOC in ${{ inputs.md_src }}
