@@ -43,10 +43,12 @@ runs:
     - name: Generate Table of Contents
       env:
         MDTOC_IARG: ${{ inputs.dry_run == 'false' && '-i' || '' }}
+        MDTOC_BARG: ${{ inputs.bullets != '' && format('--bullets {0}', inputs.bullets) || '' }}
       run: |
-        markdown-toc "$MDTOC_IARG" \
-          --maxdepth "${{ inputs.depth }}" \
-          --append "${{ inputs.append }}" \
+        export MDTOC_ARGS="${{ env.MDTOC_IARG }} ${{ env.MDTOC_BARG }}"
+        markdown-toc $MDTOC_ARGS \
+          --maxdepth ${{ inputs.depth }} \
+          --append ${{ inputs.append }} \
           ${{ inputs.md_src }} && \
         echo "Table of Contents successfully generated in ${{ inputs.md_src }}"
       shell: bash
