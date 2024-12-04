@@ -43,10 +43,10 @@ runs:
       env:
         MDTOC_IARG: ${{ inputs.dry_run == 'false' || '' && '-i' }}
       run: |
-        markdown-toc $MDTOC_IARG \
-          --max-depth ${{ inputs.depth }} \
-          --bullets ${{ inputs.bullets }} \
-          --append ${{ inputs.append }} \
+        markdown-toc "$MDTOC_IARG" \
+          --maxdepth "${{ inputs.depth }}" \
+          --bullets "${{ inputs.bullets }}" \
+          --append "${{ inputs.append }}" \
           ${{ inputs.md_src }}
       shell: bash
     - name: Autocommit changes
