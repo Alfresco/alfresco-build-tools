@@ -40,13 +40,13 @@ runs:
       run: npm install -g markdown-toc@${{ inputs.md_toc_version }}
       shell: bash
     - name: Generate Table of Contents
+      env:
+        MDTOC_IARG: ${{ inputs.dry_run == 'false' || '' && '-i' }}
       run: |
-        echo "Generating Table of Contents for ${{ inputs.md_src }}"
-        markdown-toc \
+        markdown-toc $MDTOC_IARG \
           --max-depth ${{ inputs.depth }} \
           --bullets ${{ inputs.bullets }} \
           --append ${{ inputs.append }} \
-          ${{ inputs.dry_run ? '' : '-i' }} \
           ${{ inputs.md_src }}
       shell: bash
     - name: Autocommit changes
