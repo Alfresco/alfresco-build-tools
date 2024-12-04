@@ -1,0 +1,56 @@
+#Github Composite actions to generate Markdown Table of Contents
+name: Simple Markdown ToC Generator
+description: Generate a Table of Contents from a Markdown file
+inputs:
+  md_toc_version:
+    description: Markdown Table of Contents Package version
+    required: false
+    default: 1.2.0
+  md_src:
+    description: Markdown file to generate Table of Contents
+    required: true
+  depth:
+    description: Depth of Table of Contents
+    required: false
+    default: '2'
+  dry_run:
+    description: Skip destructive actions
+    required: false
+    default: 'false'
+  append:
+    description: Append to Table of Contents
+    required: false
+    default: ''
+  bullets:
+    description: Bullets to use for Table of Contents ("*", "-" or "+")
+    required: false
+    default: '*'
+  node_install:
+    description: Node.js installation should be skipped if done already before in calling wf
+    required: false
+    default: 'true'
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-node@v4
+      if: ${{ inputs.node_install }}
+      with:
+        node-version: 20
+    - name: Install Markdown ToC node package
+      run: npm install -g markdown-toc@${{ inputs.md_toc_version }}
+      shell: bash
+    - name: Generate Table of Contents
+      run: |
+        echo "Generating Table of Contents for ${{ inputs.md_src }}"
+        markdown-toc \
+          --max-depth ${{ inputs.depth }} \
+          --bullets ${{ inputs.bullets }} \
+          --append ${{ inputs.append }} \
+          ${{ inputs.dry_run ? '' : '-i' }} \
+          ${{ inputs.md_src }}
+      shell: bash
+    - name: Autocommit changes
+      if: ${{ !inputs.dry_run }}
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: Auto update TOC in ${{ inputs.md_src }}

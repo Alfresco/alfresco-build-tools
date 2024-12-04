@@ -97,6 +97,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [setup-terraform-docs](#setup-terraform-docs)
     - [setup-updatebot](#setup-updatebot)
     - [slack-file-upload](#slack-file-upload)
+    - [simple-md-toc](#simple-md-toc)
     - [update-deployment-runtime-versions](#update-deployment-runtime-versions)
     - [update-pom-to-next-pre-release](#update-pom-to-next-pre-release)
     - [update-project-base-tag](#update-project-base-tag)
@@ -1661,6 +1662,26 @@ Uploads a file to a Slack channel.
           slack-channel-id: 'channel-id' # not the channel name
           file-path: 'path/to/file'
           file-title: 'file description' # optional
+```
+
+### simple-md-toc
+
+Generates a Markdown table of contents for a file.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/simple-md-toc@ref
+        with:
+          md_src: 'docs/README.md'
+          bullets: '-'
+          depth: '4'
+          md_toc_version: 1.2.0
+          node_install: 'false'
+```
+
+For ToC to be iserted in your file, it needs to contains the HTML comment below:
+
+```markdown
+<!-- toc -->
 ```
 
 ### update-deployment-runtime-versions
