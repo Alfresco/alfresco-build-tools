@@ -41,7 +41,7 @@ runs:
       shell: bash
     - name: Generate Table of Contents
       env:
-        MDTOC_IARG: ${{ inputs.dry_run == 'false' || '' && '-i' }}
+        MDTOC_IARG: ${{ inputs.dry_run == 'false' && '-i' || '' }}
       run: |
         markdown-toc "$MDTOC_IARG" \
           --maxdepth "${{ inputs.depth }}" \
@@ -50,7 +50,7 @@ runs:
           ${{ inputs.md_src }}
       shell: bash
     - name: Autocommit changes
-      if: ${{ !inputs.dry_run }}
+      if: ${{ inputs.dry_run == 'true' }}
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: Auto update TOC in ${{ inputs.md_src }}
