@@ -28,3 +28,11 @@
   entry: bash -c 'find . -name Chart.yaml | xargs -I% bash -c "dirname %" | xargs -t -I% bash -c "helm template % | kubepug --error-on-deprecated --error-on-deleted --input-file=-"'
   language: system
   pass_filenames: false
+- id: md-toc
+  name: Markdown Table of Contents
+  entry: >-
+    bash -eu -o pipefail -c
+    "for f in $@; do
+      markdown-toc -i $f;
+    done"
+  language: system
