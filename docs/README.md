@@ -1678,7 +1678,7 @@ Generates a Markdown table of contents for a file.
           node_install: 'false'
 ```
 
-For ToC to be iserted in your file, it needs to contains the HTML comment below:
+For ToC to be inserted in your file, it needs to contain the HTML comment below:
 
 ```markdown
 <!-- toc -->
