@@ -25,7 +25,7 @@ inputs:
   bullets:
     description: Bullets to use for Table of Contents ("*", "-" or "+")
     required: false
-    default: '*'
+    default: ''
   node_version:
     description: Node.js version to install (false means do not install)
     required: false
@@ -46,7 +46,6 @@ runs:
       run: |
         markdown-toc "$MDTOC_IARG" \
           --maxdepth "${{ inputs.depth }}" \
-          --bullets "${{ inputs.bullets }}" \
           --append "${{ inputs.append }}" \
           ${{ inputs.md_src }} && \
         echo "Table of Contents successfully generated in ${{ inputs.md_src }}"
