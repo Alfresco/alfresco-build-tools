@@ -386,6 +386,14 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
+    directory: "/.github/actions/md-toc"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
     directory: "/.github/actions/nexus-move-artifacts"
     schedule:
       interval: "weekly"
@@ -563,14 +571,6 @@ updates:
           - "*"
   - package-ecosystem: "github-actions"
     directory: "/.github/actions/setup-updatebot"
-    schedule:
-      interval: "weekly"
-    groups:
-      catch-all:
-        patterns:
-          - "*"
-  - package-ecosystem: "github-actions"
-    directory: "/.github/actions/simple-md-toc"
     schedule:
       interval: "weekly"
     groups:
