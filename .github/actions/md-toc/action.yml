@@ -52,8 +52,7 @@ runs:
           if [ -f $f ]; then
             markdown-toc $MDTOC_ARGS \
               --maxdepth ${{ inputs.depth }} \
-              --append "${{ inputs.append }}" \
-              ${{ inputs.md_src }} && \
+              --append "${{ inputs.append }}" $f && \
             echo "Table of Contents successfully generated in ${{ inputs.md_src }}"
           else
             echo "File $f not found.. Skipping!"
