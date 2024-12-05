@@ -257,7 +257,7 @@ BATS
 
 @test "needs" {
     export NEEDS_JSON=$(<$BATS_TEST_DIRNAME/sample-needs.json)
-    export NEEDS=$(echo $NEEDS_JSON | jq -r 'to_entries | map([.key, .value.result]|join(": ")) | join("\n")')
+    export NEEDS=$(echo $NEEDS_JSON | jq -r 'to_entries[] | "\(.key): \(.value.result)"')
 
     run compute-message.sh
 
