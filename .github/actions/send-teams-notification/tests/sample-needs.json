@@ -1,0 +1,10 @@
+{
+  "build": {
+    "result": "success",
+    "outputs": {}
+  },
+  "promote": {
+    "result": "failure",
+    "outputs": {}
+  }
+}

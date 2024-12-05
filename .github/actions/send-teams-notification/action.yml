@@ -4,70 +4,261 @@ inputs:
   webhook-url:
     description: Microsoft Teams Incoming Webhooks URL
     required: true
-  needs:
-    description: JSON parsed needs context
+  title:
+    description: 'Text to show as message title'
     required: false
-    default: ""
+  message:
+    description: An optional message that overrides the default one
+    required: false
+  append:
+    description: Whether the optional message should be added after the default one
+    required: false
+    default: "false"
+  needs:
+    description: 'JSON parsed needs context'
+    required: false
+    default: '{}'
   dry-run:
     description: Do not actually send the message
     required: false
     default: 'false'
-  raw:
-    description: JSON object to send to Microsoft Teams
-    required: false
-    default: ""
-  overwrite:
-    description: JSON like object to overwrite default message
-    required: false
-    default: >-
-      {
-          title: `${{github.actor}} initialized ${{ github.event_name}} event on ${{ github.repository }} of branch ${{ github.ref_name}}`,
-          "potentialAction": [
-              {
-                "@type": "OpenUri",
-                "name": "Repository",
-                "targets": [
-                  {
-                    "os": "default",
-                    "uri": "${{ github.server_url }}/${{ github.repository }}"
-                  }
-                ]
-              },
-              {
-                "@type": "OpenUri",
-                "name": "Build URL",
-                "targets": [
-                  {
-                    "os": "default",
-                    "uri": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                  }
-                ]
-              },
-              {
-                "@type": "OpenUri",
-                "name": "Compare",
-                "targets": [
-                  {
-                    "os": "default",
-                    "uri": "${{ github.event.compare }}"
-                  }
-                ]
-              }
-            ]
-      }
+
 runs:
   using: composite
   steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-    - name: Check workflow status
+
+    - name: Compute workflow status
+      id: compute-workflow-status
       uses: martialonline/workflow-status@fe13c6a4716673e224038aa1b02387352fb35e13 # v4
-      id: workflow_status_check
+
+    - name: Compute color
+      shell: bash
+      id: compute-color
+      env:
+        STATUS: ${{ steps.compute-workflow-status.outputs.status }}
+      run: |
+        COLOR=808080
+        case $STATUS in
+          success)
+            COLOR=36A64F
+            ;;
+          failure)
+            COLOR=A30200
+            ;;
+        esac
+        echo "result=$COLOR" >> $GITHUB_OUTPUT
+
+    - name: Compute small sha
+      id: compute-small-sha
+      shell: bash
+      env:
+        GITHUB_LONG_SHA: ${{ github.sha }}
+      run: |
+        SMALL_SHA=${GITHUB_LONG_SHA:0:6}
+        echo "result=$SMALL_SHA" >> $GITHUB_OUTPUT
+
+    - name: Compute needs
+      id: compute-needs
+      shell: bash
+      env:
+        NEEDS: ${{ inputs.needs }}
+      run: |
+        NEEDS_OUTPUT=$(echo $NEEDS | jq -r 'to_entries[] | "\(.key): \(.value.result)"')
+        echo "result=$NEEDS_OUTPUT" >> $GITHUB_OUTPUT
+
+    - name: Compute message
+      id: compute-message
+      shell: bash
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        BLOCK_MESSAGE: ${{ inputs.message }}
+        APPEND: ${{ inputs.append }}
+        PR_TITLE: ${{ github.event.pull_request.title }}
+        ISSUE_BODY: ${{ github.event.issue.body }}
+        COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        NEEDS: ${{ steps.compute-needs.outputs.result }}
+      run: |
+        ${{ github.action_path }}/compute-message.sh >> $GITHUB_OUTPUT
+
+    - name: Compute event
+      id: compute-event
+      shell: bash
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        SHA: ${{ github.sha }}
+      run: |
+        RESULT="$EVENT_NAME"
+        if [[ "$EVENT_NAME" == 'pull_request' ]]; then
+          RESULT="[$EVENT_NAME #$PR_NUMBER]($REPO_URL/pull/$PR_NUMBER)"
+        elif [[ "$EVENT_NAME" == 'push' ]]; then
+          RESULT="[$EVENT_NAME]($REPO_URL/commit/$SHA/checks)"
+        fi
+        echo "result=$RESULT" >> $GITHUB_OUTPUT
+
+    - name: Compute run link
+      id: compute-run-link
+      shell: bash
+      env:
+        REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        WORKFLOW: ${{ github.workflow }}
+      run: |
+        RESULT="$REPO_URL/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT"
+        echo "result=$RESULT" >> $GITHUB_OUTPUT
+
+    - name: Compute workflow title
+      id: compute-workflow-title
+      shell: bash
+      run: |
+        RESULT="$GITHUB_WORKFLOW"
+        if [[ "$GITHUB_RUN_ATTEMPT" != '1' ]]; then
+          RESULT+=" (attempt #$GITHUB_RUN_ATTEMPT)"
+        fi
+        echo "result=$RESULT" >> $GITHUB_OUTPUT
+
+    - name: Get branch name
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v8.4.0
+
     - name: Send teams notification
-      uses: skitionek/notify-microsoft-teams@9c67757f64d610fb6748d8ff3c11f284355ed7ec # v1.0.8
+      uses: skitionek/notify-microsoft-teams@190d4d92146df11f854709774a4dae6eaf5e2aa3 # master
+      env:
+        ACTOR_URL: ${{ github.server_url }}/${{ github.triggering_actor }}
+        REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        SMALL_SHA: ${{ steps.compute-small-sha.outputs.result }}
+        MESSAGE_OUTPUT: ${{ steps.compute-message.outputs.result }}
+        RUN_LINK: ${{ steps.compute-run-link.outputs.result }}
+        WORKFLOW_TITLE: ${{ steps.compute-workflow-title.outputs.result }}
+        COLOR: ${{ steps.compute-color.outputs.result }}
+        TITLE: "Notification on ${{ steps.compute-event.outputs.result }} on branch [`${{ env.BRANCH_NAME }}`](${{ env.REPO_URL }}/tree/${{ env.BRANCH_NAME }})"
       with:
         webhook_url: ${{ inputs.webhook-url }}
-        job: ${{ toJSON(steps.workflow_status_check.outputs) }}
-        needs: ${{ inputs.needs }}
+        job: "{}"
+        steps: "{}"
+        needs: "{}"
         dry_run: ${{ inputs.dry-run }}
-        overwrite: ${{ inputs.overwrite }}
-        raw: ${{ inputs.raw }}
+        raw: >-
+          {
+            "type": "message",
+            "attachments": [
+              {
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "content": {
+                  "type": "AdaptiveCard",
+                  "body": [
+                    {
+                      "type": "TextBlock",
+                      "size": "medium",
+                      "weight": "bolder",
+                      "text": "${{ inputs.title || env.TITLE }}",
+                      "style": "heading",
+                      "wrap": true
+                    },
+                    {
+                      "type": "ColumnSet",
+                      "columns": [
+                        {
+                          "type": "Column",
+                          "items": [
+                            {
+                              "type": "Image",
+                              "style": "person",
+                              "url": "${{ env.ACTOR_URL }}.png?size=32",
+                              "altText": "${{ github.triggering_actor }}",
+                              "size": "small"
+                            }
+                          ],
+                          "width": "auto"
+                        },
+                        {
+                          "type": "Column",
+                          "items": [
+                            {
+                              "type": "TextBlock",
+                              "text": "[${{ github.triggering_actor }}](${{ env.ACTOR_URL }})"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Column",
+                          "items": [
+                            {
+                              "type": "Image",
+                              "style": "person",
+                              "url": "https://slack.github.com/static/img/favicon-neutral.png",
+                              "altText": "GitHub",
+                              "size": "small"
+                            }
+                          ],
+                          "width": "auto"
+                        },
+                        {
+                          "type": "Column",
+                          "items": [
+                            {
+                              "type": "TextBlock",
+                              "text": "[${{ github.repository }}](${{ env.REPO_URL }})"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ColumnSet",
+                      "columns": [
+                        {
+                          "type": "Column",
+                          "items": [
+                            {
+                              "type": "TextBlock",
+                              "text": "**Action**: [${{ env.WORKFLOW_TITLE }}](${{ env.RUN_LINK }})"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Column",
+                          "items": [
+                            {
+                              "type": "TextBlock",
+                              "text": "**Commit**: [`${{ env.SMALL_SHA }}`](${{ env.REPO_URL }}/commit/${{ github.sha }})"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "ColumnSet",
+                      "columns": [
+                        {
+                          "type": "Column",
+                          "items": [
+                            {
+                              "type": "TextBlock",
+                              "text": "**Message**"
+                            },
+                            {
+                              "type": "TextBlock",
+                              "text": "${{ env.MESSAGE_OUTPUT }} "
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "backgroundImage": {
+                    "url": "https://singlecolorimage.com/get/${{ env.COLOR }}/2x2",
+                    "fillMode": "RepeatHorizontally"
+                  },
+                  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                  "version": "1.5",
+                  "msteams": {
+                    "width": "full",
+                    "entities": [
+                      {}
+                    ]
+                  }
+                }
+              }
+            ]
+          }
