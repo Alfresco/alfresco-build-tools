@@ -31,7 +31,7 @@
 - id: md-toc
   name: Markdown Table of Contents
   entry: >-
-    bash -xeu -o pipefail -c
+    bash -eu -o pipefail -c
     "MDTOC_ARGS=\"\";
     for f in $@; do
       [[ \"x$f\" = x--* ]] && MDTOC_ARGS=\"$f $MDTOC_ARGS\" && continue;
