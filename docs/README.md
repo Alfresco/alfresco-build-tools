@@ -1681,6 +1681,8 @@ Generates a Markdown table of contents for a file.
 For ToC to be inserted in your file, it needs to contain the HTML comment below:
 
 ```markdown
+## Table of Contents
+
 <!-- toc -->
 ```
 
