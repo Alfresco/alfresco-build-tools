@@ -1,0 +1,5 @@
+AAE-12140 Check and fix inconsistent scenarios in UAT (#734)
+
+* AAE-12140 Add assertion to check for correct application status
+
+Co-authored-by: Elias Ricken de Medeiros <26007058+erdemedeiros@users.noreply.github.com>

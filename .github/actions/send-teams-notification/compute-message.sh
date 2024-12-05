@@ -2,16 +2,20 @@
 
 COMPUTED_MESSAGE=""
 
+if [ -n "$NEEDS" ]; then
+  COMPUTED_MESSAGE="$NEEDS\n\n"
+fi
+
 if [[ -n "$BLOCK_MESSAGE" && "$APPEND" == 'true' ]] || [ -z "$BLOCK_MESSAGE" ]; then
   case $EVENT_NAME in
     pull_request)
-    COMPUTED_MESSAGE="$PR_TITLE"
+    COMPUTED_MESSAGE="${COMPUTED_MESSAGE}$PR_TITLE"
     ;;
     issues)
-    COMPUTED_MESSAGE="$ISSUE_BODY"
+    COMPUTED_MESSAGE="${COMPUTED_MESSAGE}$ISSUE_BODY"
     ;;
     *)
-    COMPUTED_MESSAGE="$COMMIT_MESSAGE"
+    COMPUTED_MESSAGE="${COMPUTED_MESSAGE}$COMMIT_MESSAGE"
     ;;
   esac
 fi
@@ -21,10 +25,6 @@ if [ -n "$BLOCK_MESSAGE" ]; then
     COMPUTED_MESSAGE="${COMPUTED_MESSAGE}\n\n"
   fi
   COMPUTED_MESSAGE="${COMPUTED_MESSAGE}$BLOCK_MESSAGE"
-fi
-
-if [ -n "$NEEDS" ]; then
-  COMPUTED_MESSAGE="${COMPUTED_MESSAGE}\n\n$NEEDS"
 fi
 
 if [ -n "$COMPUTED_MESSAGE" ]; then
