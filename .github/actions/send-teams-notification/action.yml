@@ -65,7 +65,7 @@ runs:
         NEEDS: ${{ inputs.needs }}
       run: |
         echo "result<<EOF" >> $GITHUB_OUTPUT
-        echo $NEEDS | jq -r 'to_entries[] | "\(.key): \(.value.result)"' >> $GITHUB_OUTPUT
+        echo $NEEDS | jq -r 'to_entries | map([.key, .value.result]|join(": ")) | join("\n\n")' >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
 
     - name: Compute message
