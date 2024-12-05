@@ -18,15 +18,15 @@ if [[ -n "$RP_LAUNCH_KEY" ]]; then
       read -r status
       case $status in
         PASSED)
-        sstatus="✅" ;;
+        status_icon="✅" ;;
         FAILED)
-        sstatus="❌"
+        status_icon="❌"
         ;;
         *)
-        sstatus="$status"
+        status_icon="$status"
         ;;
       esac
-      MSG+="\n\n[Report #$number]($RP_LAUNCH_URL/$id) $sstatus"
+      MSG+="\n\n[Report #$number]($RP_LAUNCH_URL/$id) $status_icon"
     done < <(echo "$RP_CONTENT" | jq -r '.content[] | .id, .number, .status')
   fi
 fi
