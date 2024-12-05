@@ -48,7 +48,7 @@ runs:
         export MDTOC_ARGS="${{ env.MDTOC_IARG }} ${{ env.MDTOC_BARG }}"
         markdown-toc $MDTOC_ARGS \
           --maxdepth ${{ inputs.depth }} \
-          --append ${{ inputs.append }} \
+          --append "${{ inputs.append }}" \
           ${{ inputs.md_src }} && \
         echo "Table of Contents successfully generated in ${{ inputs.md_src }}"
       shell: bash
