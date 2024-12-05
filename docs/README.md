@@ -1359,6 +1359,8 @@ This will give the following sample output on the GH Actions run summary (when u
 
 ![GH Actions Summary Report Portal](./images/rp-gh-summary.png)
 
+The equivalent output "teams-message" (using standard markdown format) is available for Teams messages.
+
 ### resolve-preview-name
 
 Resolve preview name based on the PR number and run number:
@@ -1467,52 +1469,15 @@ The above webhook URL is a mandatory parameter. Make sure to [Create Incoming We
 
 Sample of a SUCCESS notification on a `push` event.
 
-![Teams Success](./images/teams-success.png)
+![Teams Success](./images/send-teams-push-success.png)
+
+Sample of a SUCCESS notification on a `pull_request` event.
+
+![Teams Success](./images/send-teams-pr-success.png)
 
 Sample of a FAILURE notification on a `push` event.
 
-![Teams Failure](./images/teams-failure.png)
-
-Below is the detailed description of the above message card.
-
-- The `summary` of the message card tells you the author, event name, and the repo where it was performed.
-- The below `Changelog` section will list the commits.
-- The `build_and_test` and `publish` are example job names passed via the `needs` input. If you want to display needs status, you need to explicitly send the JSON object of the `needs` context as an input.
-
-  ```yml
-      uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@ref
-      with:
-        webhook-url: ${{ secrets.MSTEAMS_WEBHOOK }}
-        needs: ${{ toJson(needs) }}
-  ```
-
-  The `Failure` status with an image reflects the workflow status.
-  For the ease of access, these action buttons will perform the respective actions.
-
-  **Note:** You're free to configure any action items based on your workflow need. You just need to send the JSON against the `overwrite` input.
-
-  ```json
-    {
-       "@type": "OpenUri",
-       "name": "Repository",
-       "targets": [
-         {
-            "os": "default",
-            "uri": "${{ github.server_url }}/${{ github.repository }}"
-         }
-      ]
-   }
-  ```
-
-  **Details of input parameter of this action:**
-
-  | Input       | Description                                                                       |
-  |-------------|-----------------------------------------------------------------------------------|
-  | webhook-url | URL of the MS Teams incoming webhook.                                             |
-  | needs       | JSON parsed needs context.                                                        |
-  | dry-run     | Do not actually send the message card to the teams channel.                       |
-  | raw         | The entire JSON object of the Message Card which will be sent to Microsoft Teams. |
-  | overwrite   | JSON like object to overwrite default message.                                    |
+![Teams Failure](./images/send-teams-push-failure.png)
 
 ### setup-docker
 
