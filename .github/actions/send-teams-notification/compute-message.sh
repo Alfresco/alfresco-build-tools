@@ -23,6 +23,10 @@ if [ -n "$BLOCK_MESSAGE" ]; then
   COMPUTED_MESSAGE="${COMPUTED_MESSAGE}$BLOCK_MESSAGE"
 fi
 
+if [ -n "$NEEDS" ]; then
+  COMPUTED_MESSAGE="${COMPUTED_MESSAGE}\n\n$NEEDS"
+fi
+
 if [ -n "$COMPUTED_MESSAGE" ]; then
   COMPUTED_MESSAGE="${COMPUTED_MESSAGE}"
   COMPUTED_MESSAGE=$(printf "${COMPUTED_MESSAGE}" | sed -z 's/\n/\\n/g' | sed -r 's/"/\\\"/g' | sed -e 's/\r//g')

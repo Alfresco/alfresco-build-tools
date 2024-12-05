@@ -58,6 +58,15 @@ runs:
         SMALL_SHA=${GITHUB_LONG_SHA:0:6}
         echo "result=$SMALL_SHA" >> $GITHUB_OUTPUT
 
+    - name: Compute needs
+      id: compute-needs
+      shell: bash
+      env:
+        NEEDS: ${{ inputs.needs }}
+      run: |
+        NEEDS_OUTPUT=$(echo $NEEDS | jq -r 'to_entries[] | "\(.key): \(.value.result)"')
+        echo "result=$NEEDS_OUTPUT" >> $GITHUB_OUTPUT
+
     - name: Compute message
       id: compute-message
       shell: bash
@@ -68,6 +77,7 @@ runs:
         PR_TITLE: ${{ github.event.pull_request.title }}
         ISSUE_BODY: ${{ github.event.issue.body }}
         COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        NEEDS: ${{ steps.compute-needs.outputs.result }}
       run: |
         ${{ github.action_path }}/compute-message.sh >> $GITHUB_OUTPUT
 
