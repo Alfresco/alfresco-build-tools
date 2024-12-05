@@ -73,6 +73,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [maven-deploy-file](#maven-deploy-file)
     - [maven-release](#maven-release)
     - [maven-update-pom-version](#maven-update-pom-version)
+    - [md-toc](#md-toc)
     - [nexus-move-artifacts](#nexus-move-artifacts)
     - [pre-commit](#pre-commit)
     - [process-coverage-report](#process-coverage-report)
@@ -97,7 +98,6 @@ Here follows the list of GitHub Actions topics available in the current document
     - [setup-terraform-docs](#setup-terraform-docs)
     - [setup-updatebot](#setup-updatebot)
     - [slack-file-upload](#slack-file-upload)
-    - [md-toc](#md-toc)
     - [update-deployment-runtime-versions](#update-deployment-runtime-versions)
     - [update-pom-to-next-pre-release](#update-pom-to-next-pre-release)
     - [update-project-base-tag](#update-project-base-tag)
@@ -1103,6 +1103,28 @@ Updates pom files to the provided version
         version: 1.0.0-alpha.1
 ```
 
+### md-toc
+
+Generates a Markdown table of contents for a file.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/md-toc@ref
+        with:
+          md_src: 'LICENSE.md README.md docs/*.md'
+          bullets: '-'
+          depth: '4'
+          md_toc_version: 1.2.0
+          node_install: 'false'
+```
+
+For ToC to be inserted in your file, it needs to contain the HTML comment below:
+
+```markdown
+## Table of Contents
+
+<!-- toc -->
+```
+
 ### nexus-move-artifacts
 
 Moves artifacts from one repository to another on Nexus 3, identified by a particular group and version.
@@ -1627,28 +1649,6 @@ Uploads a file to a Slack channel.
           slack-channel-id: 'channel-id' # not the channel name
           file-path: 'path/to/file'
           file-title: 'file description' # optional
-```
-
-### md-toc
-
-Generates a Markdown table of contents for a file.
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/md-toc@ref
-        with:
-          md_src: 'docs/README.md'
-          bullets: '-'
-          depth: '4'
-          md_toc_version: 1.2.0
-          node_install: 'false'
-```
-
-For ToC to be inserted in your file, it needs to contain the HTML comment below:
-
-```markdown
-## Table of Contents
-
-<!-- toc -->
 ```
 
 ### update-deployment-runtime-versions
