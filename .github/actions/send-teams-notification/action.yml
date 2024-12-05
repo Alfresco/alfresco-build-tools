@@ -64,7 +64,7 @@ runs:
       env:
         NEEDS: ${{ inputs.needs }}
       run: |
-        NEEDS_OUTPUT=$(echo $NEEDS | jq -r 'to_entries[] | "\(.key): \(.value.result)"')
+        NEEDS_OUTPUT=$(echo $NEEDS | jq -r 'to_entries | map([.key, .value.result]|join(": ")) | join("\n")')
         echo "result=$NEEDS_OUTPUT" >> $GITHUB_OUTPUT
 
     - name: Compute message

@@ -257,7 +257,7 @@ BATS
 
 @test "needs" {
     export NEEDS_JSON=$(<$BATS_TEST_DIRNAME/sample-needs.json)
-    export NEEDS=$(echo $NEEDS_JSON | jq -r 'to_entries[] | "\(.key): \(.value.result)"')
+    export NEEDS=$(echo $NEEDS_JSON | jq -r 'to_entries | map([.key, .value.result]|join(": ")) | join("\n")')
 
     run compute-message.sh
 
@@ -269,9 +269,6 @@ build: success\npromote: failure\n\nfix: update retry inputs to use string type\
 EOF
 BATS
 )
-
-    echo $output
-    echo $expected_output
 
     [ "$output" = "$expected_output" ]
 
