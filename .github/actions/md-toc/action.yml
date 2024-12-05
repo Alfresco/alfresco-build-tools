@@ -6,7 +6,9 @@ inputs:
     required: false
     default: 1.2.0
   md_src:
-    description: Markdown file to generate Table of Contents
+    description: |
+      Markdown file(s) to generate Table of Contents for. It can be a list of
+      space separated files or a glob pattern relative to the repository root.
     required: true
   depth:
     description: Depth of Table of Contents
@@ -46,11 +48,17 @@ runs:
         MDTOC_BARG: ${{ inputs.bullets != '' && format('--bullets {0}', inputs.bullets) || '' }}
       run: |
         export MDTOC_ARGS="${{ env.MDTOC_IARG }} ${{ env.MDTOC_BARG }}"
-        markdown-toc $MDTOC_ARGS \
-          --maxdepth ${{ inputs.depth }} \
-          --append "${{ inputs.append }}" \
-          ${{ inputs.md_src }} && \
-        echo "Table of Contents successfully generated in ${{ inputs.md_src }}"
+        for f in ${{ inputs.md_src }}; do
+          if [ -f $f ]; then
+            markdown-toc $MDTOC_ARGS \
+              --maxdepth ${{ inputs.depth }} \
+              --append "${{ inputs.append }}" \
+              ${{ inputs.md_src }} && \
+            echo "Table of Contents successfully generated in ${{ inputs.md_src }}"
+          else
+            echo "File $f not found.. Skipping!"
+          fi
+        done
       shell: bash
     - name: Autocommit changes
       if: inputs.dry_run == 'false'
