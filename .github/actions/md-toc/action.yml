@@ -1,0 +1,68 @@
+name: Markdown ToC Generator
+description: Generate a Table of Contents from a Markdown file
+inputs:
+  md_toc_version:
+    description: Markdown Table of Contents Package version
+    required: false
+    default: 1.2.0
+  md_src:
+    description: |
+      Markdown file(s) to generate Table of Contents for. It can be a list of
+      space separated files or a glob pattern relative to the repository root.
+    required: true
+  depth:
+    description: Depth of Table of Contents
+    required: false
+    default: '2'
+  dry_run:
+    description: Skip destructive actions
+    required: false
+    default: 'false'
+  append:
+    description: >-
+      A string to append to Table of Contents (e.g. you may want to append the
+      sha of the commit toc was added on top of?)
+    required: false
+    default: ''
+  bullets:
+    description: Bullets to use for Table of Contents ("*", "-" or "+")
+    required: false
+    default: ''
+  node_version:
+    description: Node.js version to install (false means do not install)
+    required: false
+    default: '20'
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+      if: ${{ inputs.node_install }}
+      with:
+        node-version: ${{ inputs.node_version }}
+    - name: Install Markdown ToC node package
+      run: npm install -g markdown-toc@${{ inputs.md_toc_version }}
+      shell: bash
+    - name: Generate Table of Contents
+      env:
+        MDTOC_IARG: ${{ inputs.dry_run == 'false' && '-i' || '' }}
+        MDTOC_BARG: ${{ inputs.bullets != '' && format('--bullets {0}', inputs.bullets) || '' }}
+      run: |
+        export MDTOC_ARGS="${{ env.MDTOC_IARG }} ${{ env.MDTOC_BARG }}"
+        for f in ${{ inputs.md_src }}; do
+          if [ -f $f ]; then
+            markdown-toc $MDTOC_ARGS \
+              --maxdepth ${{ inputs.depth }} \
+              --append "${{ inputs.append }}" $f && \
+            echo "Table of Contents successfully generated in ${{ inputs.md_src }}"
+          else
+            echo "File $f not found.. Skipping!"
+          fi
+        done
+      shell: bash
+    - name: Autocommit changes
+      if: inputs.dry_run == 'false'
+      uses: stefanzweifel/git-auto-commit-action@8621497c8c39c72f3e2a999a26b4ca1b5058a842 # v5.0.1
+      with:
+        commit_message: Auto update TOC in ${{ inputs.md_src }}
+        disable_globbing: true
+        file_pattern: ${{ inputs.md_src }}
