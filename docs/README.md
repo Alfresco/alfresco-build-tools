@@ -73,6 +73,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [maven-deploy-file](#maven-deploy-file)
     - [maven-release](#maven-release)
     - [maven-update-pom-version](#maven-update-pom-version)
+    - [md-toc](#md-toc)
     - [nexus-move-artifacts](#nexus-move-artifacts)
     - [pre-commit](#pre-commit)
     - [process-coverage-report](#process-coverage-report)
@@ -1100,6 +1101,28 @@ Updates pom files to the provided version
     - uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@ref
       with:
         version: 1.0.0-alpha.1
+```
+
+### md-toc
+
+Generates a Markdown table of contents for a file.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/md-toc@ref
+        with:
+          md_src: 'LICENSE.md README.md docs/*.md'
+          bullets: '-'
+          depth: '4'
+          md_toc_version: 1.2.0
+          node_install: 'false'
+```
+
+For ToC to be inserted in your file, it needs to contain the HTML comment below:
+
+```markdown
+## Table of Contents
+
+<!-- toc -->
 ```
 
 ### nexus-move-artifacts
