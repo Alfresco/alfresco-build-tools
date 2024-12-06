@@ -64,8 +64,9 @@ runs:
       env:
         NEEDS: ${{ inputs.needs }}
       run: |
-        NEEDS_OUTPUT=$(echo $NEEDS | jq -r 'to_entries[] | "\(.key): \(.value.result)"')
-        echo "result=$NEEDS_OUTPUT" >> $GITHUB_OUTPUT
+        echo "result<<EOF" >> $GITHUB_OUTPUT
+        echo $NEEDS | jq -r 'to_entries | map([.key, .value.result]|join(": ")) | join("\n\n")' >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
 
     - name: Compute message
       id: compute-message
@@ -119,7 +120,7 @@ runs:
         echo "result=$RESULT" >> $GITHUB_OUTPUT
 
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v8.6.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v8.6.1
 
     - name: Send teams notification
       uses: skitionek/notify-microsoft-teams@190d4d92146df11f854709774a4dae6eaf5e2aa3 # master
