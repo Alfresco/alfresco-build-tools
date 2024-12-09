@@ -240,6 +240,7 @@ runs:
                             },
                             {
                               "type": "TextBlock",
+                              "wrap": true,
                               "text": "${{ env.MESSAGE_OUTPUT }} "
                             }
                           ]
