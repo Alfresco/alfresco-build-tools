@@ -53,6 +53,10 @@ inputs:
     description: The label name for creating a preview version
     required: false
     default: 'preview'
+  force-preview:
+    description: Force create the preview version
+    required: false
+    default: 'false'
 outputs:
   ecr-docker-image-url:
     description: The ECR docker image URL
@@ -63,7 +67,7 @@ runs:
   steps:
     - name: Set is_preview env variable
       env:
-        IS_PREVIEW: ${{ github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, inputs.preview-label) || contains(github.event.pull_request.labels.*.name, inputs.preview-label.default) )}}
+        IS_PREVIEW: ${{ github.event_name == 'pull_request' && (contains(github.event.pull_request.labels.*.name, inputs.preview-label) || contains(github.event.pull_request.labels.*.name, inputs.preview-label.default) || inputs.force-preview == 'true' )}}
       shell: bash
       run: |
         echo "IS_PREVIEW=$IS_PREVIEW" >> $GITHUB_ENV

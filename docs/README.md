@@ -454,6 +454,7 @@ When using OIDC on AWS, inputs `aws-access-key-id` and `aws-secret-access-key` c
           # grype-scan-enabled: true # optional
           # grype-fail-build: true # optional
           # preview-label: ${{ vars.PREVIEW_LABEL }} # optional
+          # force-preview: true # optional
 ```
 
 The returned output is the ECR image digest.
