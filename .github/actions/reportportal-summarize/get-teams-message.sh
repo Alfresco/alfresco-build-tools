@@ -12,7 +12,7 @@ if [[ -n "$RP_LAUNCH_KEY" ]]; then
     [[ "$STATUS" == 'PASSED' ]] && ICON="✅" || ICON="❌"
     MSG+="See [report]($RP_LAUNCH_URL/$RP_LAUNCH_ID) $ICON"
   else
-    MSG+="$NB reports found for key "'`'"$RP_LAUNCH_KEY"'`'"."
+    MSG+="$NB reports found for key $RP_LAUNCH_KEY."
     while read -r id ; do
       read -r number
       read -r status

@@ -14,10 +14,10 @@ setup() {
     export RP_LAUNCH_URL=https://rpserver:8080/ui/#my-project/launches/all
 
     export NO_MESSAGE="message="
-    export KEY_NO_REPORT="message=No report found for key \`my-tests-push-3665876492\`.\n\nSee [latest reports](https://rpserver:8080/ui/#my-project/launches/all)."
+    export KEY_NO_REPORT="message=No report found for key my-tests-push-3665876492.\n\nSee [latest reports](https://rpserver:8080/ui/#my-project/launches/all)."
     export SINGLE_REPORT="message=See [report](https://rpserver:8080/ui/#my-project/launches/all/88) ✅"
     export MULTIPLE_REPORTS=$(cat << BATS
-message=3 reports found for key \`my-tests-push-3665876492\`.\n\n[Report #3](https://rpserver:8080/ui/#my-project/launches/all/91) ❌\n\n[Report #2](https://rpserver:8080/ui/#my-project/launches/all/90) WHATEVER_STATUS\n\n[Report #1](https://rpserver:8080/ui/#my-project/launches/all/89) ✅
+message=3 reports found for key my-tests-push-3665876492.\n\n[Report #3](https://rpserver:8080/ui/#my-project/launches/all/91) ❌\n\n[Report #2](https://rpserver:8080/ui/#my-project/launches/all/90) WHATEVER_STATUS\n\n[Report #1](https://rpserver:8080/ui/#my-project/launches/all/89) ✅
 BATS
 )
 }
