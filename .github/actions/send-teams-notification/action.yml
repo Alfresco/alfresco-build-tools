@@ -45,7 +45,7 @@ runs:
         jq -r '.jobs[].steps[] | select(.status == "completed" and .conclusion == "failure").conclusion' | \
         wc -l)
 
-        failure=$(echo $RUNS | \
+        cancelled=$(echo $RUNS | \
         jq -r '.jobs[].steps[] | select(.status == "completed" and .conclusion == "cancelled").conclusion' | \
         wc -l)
 
