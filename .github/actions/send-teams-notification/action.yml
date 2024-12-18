@@ -22,6 +22,10 @@ inputs:
     description: Do not actually send the message
     required: false
     default: 'false'
+  status:
+    description: 'The workflow status: if not filled, it will be computed based on the completed steps status'
+    required: false
+    default: ''
 
 runs:
   using: composite
@@ -30,13 +34,36 @@ runs:
 
     - name: Compute workflow status
       id: compute-workflow-status
-      uses: martialonline/workflow-status@fe13c6a4716673e224038aa1b02387352fb35e13 # v4
+      if: ${{ inputs.status == '' }}
+      shell: bash
+      run: |
+        API_URL="${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs?per_page=100"
+
+        RUNS=$(curl -s -H "Authorization: token ${{ github.token }}" "${API_URL}")
+
+        failure=$(echo $RUNS | \
+        jq -r '.jobs[].steps[] | select(.status == "completed" and .conclusion == "failure").conclusion' | \
+        wc -l)
+
+        cancelled=$(echo $RUNS | \
+        jq -r '.jobs[].steps[] | select(.status == "completed" and .conclusion == "cancelled").conclusion' | \
+        wc -l)
+
+        if [ "${failure}" -gt 0 ]; then
+          status="failure"
+        elif [ "${cancelled}" -gt 0 ]; then
+          status="cancelled"
+        else
+          status="success"
+        fi
+
+        echo "status=${status}" >> $GITHUB_OUTPUT
 
     - name: Compute color
       shell: bash
       id: compute-color
       env:
-        STATUS: ${{ steps.compute-workflow-status.outputs.status }}
+        STATUS: ${{ inputs.status || steps.compute-workflow-status.outputs.status }}
       run: |
         COLOR=808080
         case $STATUS in
