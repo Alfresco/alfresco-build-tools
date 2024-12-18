@@ -1489,7 +1489,7 @@ Sends a teams notification with a pre-defined payload.
 
 The above webhook URL is a mandatory parameter. Make sure to [Create Incoming Webhooks](https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=dotnet) before using this action. Add the webhook URL as a `secret` at the repo level.
 
-Is the `status` input is not filled, it will be computed based on the status of completed steps in currently running workflow.
+If the `status` input is not filled, it will be computed based on the status of completed steps in currently running workflow.
 The workflow permissions will require "actions: read" in this case.
 
 Sample of a SUCCESS notification on a `push` event.
