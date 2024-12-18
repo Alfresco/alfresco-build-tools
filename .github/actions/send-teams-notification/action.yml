@@ -22,6 +22,10 @@ inputs:
     description: Do not actually send the message
     required: false
     default: 'false'
+  status:
+    description: 'The workflow status: if not filled, it will be computed based on the completed steps status'
+    required: false
+    default: ''
 
 runs:
   using: composite
@@ -30,6 +34,7 @@ runs:
 
     - name: Compute workflow status
       id: compute-workflow-status
+      if: ${{ inputs.status == '' }}
       shell: bash
       run: |
         url="${GITHUB_API_URL}/repos"
@@ -59,7 +64,7 @@ runs:
       shell: bash
       id: compute-color
       env:
-        STATUS: ${{ steps.compute-workflow-status.outputs.status }}
+        STATUS: ${{ inputs.status || steps.compute-workflow-status.outputs.status }}
       run: |
         COLOR=808080
         case $STATUS in
