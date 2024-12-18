@@ -37,7 +37,6 @@ runs:
         run_id="${GITHUB_RUN_ID}"
         token="${{ github.token }}"
 
-        curl -s -H "Authorization: token ${token}" "${url}/${repo}/actions/runs/${run_id}/jobs?per_page=100"
         failure=$(curl -s -H "Authorization: token ${token}" "${url}/${repo}/actions/runs/${run_id}/jobs?per_page=100" | \
         jq -r '.jobs[].steps[] | select(.status == "completed" and .conclusion == "failure").conclusion' | \
         wc -l)
