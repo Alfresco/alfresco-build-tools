@@ -1,0 +1,23 @@
+name: 'Sonar Scanner'
+description: 'Run Sonar Scanner to load JaCoCo report on SonarCloud'
+inputs:
+  sonar_token:
+    description: 'SonarCloud token'
+    required: true
+  aggregate-report-path:
+    description: 'Path of the aggregated JaCoCo report'
+    required: true
+  project_key:
+    description: 'SonarCloud project key'
+    required: true
+
+
+runs:
+  using: composite
+  steps:
+    - name: Load JaCoCo report on SonarCloud
+      env:
+        SONAR_TOKEN: ${{ inputs.sonar_token }}
+      shell: bash
+      run: |
+        mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=alfresco -Dsonar.projectKey=${{ inputs.project_key}} -Dsonar.coverage.jacoco.xmlReportPaths=${{ inputs.aggregate-report-path }}
