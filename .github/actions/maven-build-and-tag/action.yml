@@ -248,12 +248,6 @@ runs:
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
 
-    - name: Load JaCoCo report on SonarCloud
-      shell: bash
-      run: |
-        mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=alfresco -Dsonar.projectKey=Alfresco_hxp-studio-services
-
-
     - name: Remove running docker containers
       if: inputs.reuse-testcontainers == 'true'
       shell: bash
