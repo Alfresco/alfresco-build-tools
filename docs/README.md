@@ -98,6 +98,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [setup-terraform-docs](#setup-terraform-docs)
     - [setup-updatebot](#setup-updatebot)
     - [slack-file-upload](#slack-file-upload)
+    - [sonar-scanner](#sonar-scanner)
     - [update-deployment-runtime-versions](#update-deployment-runtime-versions)
     - [update-pom-to-next-pre-release](#update-pom-to-next-pre-release)
     - [update-project-base-tag](#update-project-base-tag)
@@ -1653,6 +1654,21 @@ Uploads a file to a Slack channel.
           file-path: 'path/to/file'
           file-title: 'file description' # optional
 ```
+
+### sonar-scanner
+
+Run Sonar Scanner to load JaCoCo report on SonarCloud.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scanner@ref
+        with:
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+          aggregate-report-path: ${{ github.workspace }}/coverage-folder/target/site/jacoco-aggregate/jacoco.xml
+          project-key: sonar-project-key
+
+```
+
+sonar-host-url and sonar-organization are optional inputs. If not provided, the default values will be used.
 
 ### update-deployment-runtime-versions
 
