@@ -1668,6 +1668,8 @@ Run Sonar Scanner to load JaCoCo report on SonarCloud.
 
 ```
 
+sonar-host-url and sonar-organization are optional inputs. If not provided, the default values will be used.
+
 ### update-deployment-runtime-versions
 
 For more information, see [update-deployment-runtime-versions](../.github/actions/update-deployment-runtime-versions/action.yml).
