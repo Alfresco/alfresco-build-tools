@@ -633,3 +633,12 @@ updates:
       catch-all:
         patterns:
           - "*"
+
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/dispatch-resume-workflow"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
