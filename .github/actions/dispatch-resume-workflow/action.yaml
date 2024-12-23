@@ -26,7 +26,7 @@ inputs:
   display-workflow-run-url:
     description: 'Get the URL of the triggered workflow and display it in logs (useful to follow the progress of the triggered workflow)'
     required: false
-    default: true
+    default: 'true'
   display-workflow-run-url-interval:
     description: 'The time to wait (+unit) between two polls to get the URL of the workflow run'
     required: false
@@ -38,7 +38,7 @@ inputs:
   wait-for-completion:
     description: 'Block until the triggered workflow has finished'
     required: false
-    default: true
+    default: 'true'
   wait-for-completion-timeout:
     description: 'Maximum amount of time (+unit) to wait to mark workflow as timed out'
     required: false
