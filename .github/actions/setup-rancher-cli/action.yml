@@ -32,7 +32,7 @@ runs:
         sudo mv $TOOL_NAME /usr/local/bin/
         echo $($TOOL_NAME --version)
       env:
-        DEFAULT_RANCHER_CLI_VERSION: 2.9.2
+        DEFAULT_RANCHER_CLI_VERSION: 2.10.0
     - shell: bash
       run: |
         RANCHER2_BEARER_TOKEN=${{ inputs.access-key }}:${{ inputs.secret-key }}
