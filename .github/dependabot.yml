@@ -82,6 +82,14 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
+    directory: "/.github/actions/dispatch-resume-workflow"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
     directory: "/.github/actions/docker-build-image"
     schedule:
       interval: "weekly"
@@ -627,15 +635,6 @@ updates:
           - "*"
   - package-ecosystem: "github-actions"
     directory: "/.github/actions/veracode"
-    schedule:
-      interval: "weekly"
-    groups:
-      catch-all:
-        patterns:
-          - "*"
-
-  - package-ecosystem: "github-actions"
-    directory: "/.github/actions/dispatch-resume-workflow"
     schedule:
       interval: "weekly"
     groups:

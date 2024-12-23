@@ -23,7 +23,7 @@ For details of the `workflow_dispatch` even see [this blog post introducing this
 
 > **Required.** A GitHub access token (PAT) with write access to the repo in question.
 >
-> **NOTE.** The automatically provided token e.g. `${{ secrets.GITHUB_TOKEN }}` can not be used, GitHub prevents this token from being able to fire the  `workflow_dispatch` and `repository_dispatch` event.[The reasons are explained in the docs](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#triggering-new-workflows-using-a-personal-access-token).  
+> **NOTE.** The automatically provided token e.g. `${{ secrets.GITHUB_TOKEN }}` can not be used, GitHub prevents this token from being able to fire the  `workflow_dispatch` and `repository_dispatch` event.[The reasons are explained in the docs](https://docs.github.com/en/actions/reference/events-that-trigger-workflows#triggering-new-workflows-using-a-personal-access-token).
 > The solution is to manually create a PAT and store it as a secret e.g. `${{ secrets.PERSONAL_TOKEN }}`
 
 ### `inputs`
@@ -99,35 +99,35 @@ For details of the `workflow_dispatch` even see [this blog post introducing this
 > The result of the triggered workflow. May be one of `success`, `failure`, `cancelled`, `timed_out`, `skipped`, `neutral`, `action_required`. The step in your workflow will fail if the triggered workflow completes with `failure`, `cancelled` or `timed_out`. Other workflow conlusion are considered success.
 > Only available if `wait-for-completion` is `true`
 
-### `workflow-logs`
+### `output.workflow-logs`
 
 > The logs of the triggered workflow based if `inputs.workflow-logs` is set to either `output`, or `json-output`.
 > Based on the value, result will be:
 >
 > * `output`: Multiline string
     >
-    >   ```log
->   <job-name> | <datetime> <message>
->   <job-name> | <datetime> <message>
+    >   log
+>   job-name | datetime message
+>   job-name | datetime message
 >   ...
->   ```
+>
 >
 > * `json-output`: JSON string
     >
-    >   ```json
+    >   json
 >   {
->     "<job-name>": [
+>     "job-name": [
 >       {
->         "datetime": "<datetime>",
->         "message": "<message>"
+>         "datetime": "datetime",
+>         "message": "message"
 >       },
 >       {
->         "datetime": "<datetime>",
->         "message": "<message>"
+>         "datetime": "datetime",
+>         "message": "message"
 >       }
 >     ]
 >   }
->   ```
+>
 
 ## Example usage
 

@@ -104,6 +104,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [update-project-base-tag](#update-project-base-tag)
     - [validate-maven-versions](#validate-maven-versions)
     - [veracode](#veracode)
+    - [dispatch-resume-workflow](#dispatch-resume-workflow)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
     - [terraform](#terraform)
@@ -1689,6 +1690,17 @@ entry `release.baseTag.$PROJECT` with the value specified in the input `tag`.
           release-descriptor: release.yaml
           project: activiti
           tag: ${{ env.ALPHA_VERSION }}
+```
+
+### dispatch-resume-workflow
+
+Ability to dispatch or resume an existing workflow and wait for its completition
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/dispatch-resume-workflow@ref
+        with:
+          workflow: workflow-name.yml
+          run-id: existing_run_number (optional)
 ```
 
 ### validate-maven-versions

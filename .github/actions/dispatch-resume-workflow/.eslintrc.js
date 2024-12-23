@@ -32,6 +32,6 @@ module.exports = {
     '@typescript-eslint/quotes': ['error', 'single'],
 
     'comma-spacing': 'off',
-    '@typescript-eslint/comma-spacing': ['error']    
+    '@typescript-eslint/comma-spacing': ['error']
   }
 };
