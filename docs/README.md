@@ -34,6 +34,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [calculate-next-internal-version](#calculate-next-internal-version)
     - [configure-git-author](#configure-git-author)
     - [dbp-charts](#dbp-charts)
+    - [dispatch-resume-workflow](#dispatch-resume-workflow)
     - [docker-build-image](#docker-build-image)
     - [docker-dump-containers-logs](#docker-dump-containers-logs)
     - [docker-scan-image-dirs](#docker-scan-image-dirs)
@@ -104,7 +105,6 @@ Here follows the list of GitHub Actions topics available in the current document
     - [update-project-base-tag](#update-project-base-tag)
     - [validate-maven-versions](#validate-maven-versions)
     - [veracode](#veracode)
-    - [dispatch-resume-workflow](#dispatch-resume-workflow)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
     - [terraform](#terraform)
@@ -424,6 +424,17 @@ The two vars in the previous snippet are [workflow configuration variables](http
 A collection of actions used in Alfresco acs-deployment repository to manage Helm charts (mostly deprecated).
 
 See [dbp-charts](../.github/actions/dbp-charts/) for more details.
+
+### dispatch-resume-workflow
+
+Ability to dispatch or resume an existing workflow and wait for its completion.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/dispatch-resume-workflow@ref
+        with:
+          workflow: workflow-name.yml
+          run-id: existing_run_number (optional)
+```
 
 ### docker-build-image
 
@@ -1690,17 +1701,6 @@ entry `release.baseTag.$PROJECT` with the value specified in the input `tag`.
           release-descriptor: release.yaml
           project: activiti
           tag: ${{ env.ALPHA_VERSION }}
-```
-
-### dispatch-resume-workflow
-
-Ability to dispatch or resume an existing workflow and wait for its completition
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/dispatch-resume-workflow@ref
-        with:
-          workflow: workflow-name.yml
-          run-id: existing_run_number (optional)
 ```
 
 ### validate-maven-versions
