@@ -5,7 +5,7 @@ URL=''
 
 # support spaces on launch key
 urlEncode() {
-  echo $1 | curl -Gso /dev/null -w %{url_effective} --data-urlencode @- "" | sed -E 's/..(.*).../\1/'
+  echo $1 | python -c "import urllib.parse, sys; print(urllib.parse.quote(sys.stdin.read()))" | sed -E 's/(.*).../\1/' | tr -d '\n'
 }
 
 if [[ -n "$RP_LAUNCH_KEY" && -n "$RP_TOKEN" && -n "$RP_URL" && -n "$RP_PROJECT" ]]
