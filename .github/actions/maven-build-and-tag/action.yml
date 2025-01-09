@@ -265,7 +265,7 @@ runs:
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
         SONAR_SCANNER_OPTS: >
-          ${{ inputs.sonar-token }} != '' ? sonar:sonar -Dsonar.host.url=${{ inputs.sonar-host-url }} -Dsonar.organization=${{ inputs.sonar-organization }} -Dsonar.projectKey=${{ inputs.project-key }} -Dsonar.coverage.jacoco.xmlReportPaths=${{ inputs.aggregate-report-path }} : ''
+          ${{ inputs.sonar-token  != '' && github.actor != 'dependabot[bot]'}} ? sonar:sonar -Dsonar.host.url=${{ inputs.sonar-host-url }} -Dsonar.organization=${{ inputs.sonar-organization }} -Dsonar.projectKey=${{ inputs.project-key }} -Dsonar.coverage.jacoco.xmlReportPaths=${{ inputs.aggregate-report-path }} : ''
 
     - name: Remove running docker containers
       if: inputs.reuse-testcontainers == 'true'
