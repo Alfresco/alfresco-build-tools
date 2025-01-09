@@ -86,6 +86,23 @@ inputs:
     description: The label name for skipping tests
     required: false
     default: 'skip-tests'
+  sonar-token:
+    description: 'SonarCloud token'
+    required: false
+  aggregate-report-path:
+    description: 'Path of the aggregated JaCoCo report'
+    required: false
+  project-key:
+    description: 'SonarCloud project key'
+    required: false
+  sonar-host-url:
+    description: 'SonarCloud host url'
+    required: false
+    default: 'https://sonarcloud.io'
+  sonar-organization:
+    description: 'SonarCloud organization'
+    required: false
+    default: 'alfresco'
 
 outputs:
   version:
@@ -240,13 +257,19 @@ runs:
         echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
         echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
 
+    - name: Set SONAR_SCANNER_OPTS
+      if: inputs.sonar-token != ''
+      shell: bash
+      run: echo "SONAR_SCANNER_OPTS=sonar:sonar -Dsonar.host.url=${{ inputs.sonar-host-url }} -Dsonar.organization=${{ inputs.sonar-organization }} -Dsonar.projectKey=${{ inputs.project-key }} -Dsonar.coverage.jacoco.xmlReportPaths=${{ inputs.aggregate-report-path }}" >> $GITHUB_ENV
+
     - name: Build and Test with Maven (and maybe Deploy)
       shell: bash
-      run: mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS}} ${{ inputs.extra-maven-opts }}
+      run: mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS }} ${{ inputs.extra-maven-opts }} ${{ env.SONAR_SCANNER_OPTS }}
       env:
         MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip -Dmaven.build.cache.enabled=${{ env.MAVEN_BUILD_CACHE_ENABLED }}
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
 
     - name: Remove running docker containers
       if: inputs.reuse-testcontainers == 'true'
