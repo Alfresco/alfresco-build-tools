@@ -88,13 +88,13 @@ inputs:
     default: 'skip-tests'
   sonar-token:
     description: 'SonarCloud token'
-    required: true
+    required: false
   aggregate-report-path:
     description: 'Path of the aggregated JaCoCo report'
-    required: true
+    required: false
   project-key:
     description: 'SonarCloud project key'
-    required: true
+    required: false
   sonar-host-url:
     description: 'SonarCloud host url'
     required: false
