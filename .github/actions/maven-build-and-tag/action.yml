@@ -269,6 +269,7 @@ runs:
         MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip -Dmaven.build.cache.enabled=${{ env.MAVEN_BUILD_CACHE_ENABLED }}
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
 
     - name: Remove running docker containers
       if: inputs.reuse-testcontainers == 'true'
