@@ -21,7 +21,7 @@ runs:
   steps:
     - shell: bash
       env:
-        RUNTIME_VERSIONS_FILE: alfresco-deployment-service/src/main/resources/runtime-versions-info.json
+        RUNTIME_VERSIONS_FILE: alfresco-deployment-service-parent/alfresco-deployment-service/src/main/resources/runtime-versions-info.json
         DEVELOPMENT_BRANCH: ${{ inputs.developmentBranch }}
         DOCKER_IMAGE: "quay.io/alfresco/${{ inputs.dockerImageName }}:${{ inputs.dockerImageTag }}"
         SERVICE_NAME: ${{ inputs.serviceName }}
