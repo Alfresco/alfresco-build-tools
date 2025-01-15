@@ -29358,8 +29358,18 @@ function run() {
             const workflowHandler = new workflow_handler_1.WorkflowHandler(args.token, args.workflowRef, args.owner, args.repo, args.ref, args.runName, args.runId);
             if (args.runId) {
                 core.info(`Using existing workflow run ID: ${args.runId}`);
-                const status = yield workflowHandler.rerunFailedJobs();
-                core.info(`Response status ${status}`);
+                try {
+                  result = yield workflowHandler.getWorkflowRunStatus();
+                  conclusion = result.conclusion;
+                } catch (e) {
+                    core.warning(`Failed to get workflow status: ${e.message}`);
+                }
+                if (conclusion !== workflow_handler_1.WorkflowRunConclusion.SUCCESS) {
+                  const status = yield workflowHandler.rerunFailedJobs();
+                  core.info(`Response status ${status}`);
+                } else {
+                  core.info(`Workflow run is already successful`);
+                }
             }
             else {
                 // Trigger workflow run
