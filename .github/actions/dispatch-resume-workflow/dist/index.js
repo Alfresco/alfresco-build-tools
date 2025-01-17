@@ -29365,11 +29365,11 @@ function run() {
                 } catch (e) {
                     core.warning(`Failed to get workflow status: ${e.message}`);
                 }
-                if (conclusion !== workflow_handler_1.WorkflowRunConclusion.SUCCESS) {
+                if (conclusion === workflow_handler_1.WorkflowRunConclusion.SUCCESS) {
+                  core.info(`Workflow run is already successful`);
+                } else {
                   const status = yield workflowHandler.rerunFailedJobs();
                   core.info(`Response status ${status}`);
-                } else {
-                  core.info(`Workflow run is already successful`);
                 }
             } else {
                 // Trigger workflow run
