@@ -29358,8 +29358,9 @@ function run() {
             const workflowHandler = new workflow_handler_1.WorkflowHandler(args.token, args.workflowRef, args.owner, args.repo, args.ref, args.runName, args.runId);
             if (args.runId) {
                 core.info(`Using existing workflow run ID: ${args.runId}`);
+                let conclusion;
                 try {
-                  result = yield workflowHandler.getWorkflowRunStatus();
+                  const result = yield workflowHandler.getWorkflowRunStatus();
                   conclusion = result.conclusion;
                 } catch (e) {
                     core.warning(`Failed to get workflow status: ${e.message}`);
@@ -29370,8 +29371,7 @@ function run() {
                 } else {
                   core.info(`Workflow run is already successful`);
                 }
-            }
-            else {
+            } else {
                 // Trigger workflow run
                 yield workflowHandler.triggerWorkflow(args.inputs);
                 core.info('Workflow triggered 🚀');
