@@ -10,7 +10,6 @@ jobs:
     release:
         name: Release
         runs-on: ubuntu-latest
-        if: github.event.pull_request.merged == true
         steps:
           - run: |
               if [ $(($GITHUB_RUN_ATTEMPT%2)) -eq 0 ] ]; then
