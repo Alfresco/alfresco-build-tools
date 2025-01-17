@@ -41,7 +41,6 @@ jobs:
         id: dispatch-resume-workflow
         with:
           repo: Alfresco/alfresco-build-tools
-          run-id: 12832783890
           ref: fix/AAE-30060-fix-rerun-on-success
           workflow: release.yml
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
