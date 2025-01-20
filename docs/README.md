@@ -71,6 +71,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [load-release-descriptor](#load-release-descriptor)
     - [maven-build-and-tag](#maven-build-and-tag)
       - [Preview option for maven-build-and-tag](#preview-option-for-maven-build-and-tag)
+      - [Option to skip tests for maven-build-and-tag](#option-to-skip-tests-for-maven-build-and-tag)
     - [maven-deploy-file](#maven-deploy-file)
     - [maven-release](#maven-release)
     - [maven-update-pom-version](#maven-update-pom-version)
@@ -936,12 +937,13 @@ Installs and cache ansible galaxy dependencies. When `pipenv` binary exists, ins
 
 ### install-ubuntu-default-tools
 
-Install common Ubuntu tools such as docker, git, zip, unzip, python3. Meant to be used on top of self-hosted runners with vanilla ubuntu images.
+Install common Ubuntu tools such as docker, git, zip, unzip. Meant to be used on
+top of self-hosted runners coming with vanilla ubuntu images or the latest arm64 runners.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/install-ubuntu-default-tools@ref
         with:
-          package-names-list: "postgresql-client"
+          package-names-list: "postgresql-client" # optional packages to install
 ```
 
 ### jx-updatebot-pr
