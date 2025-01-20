@@ -13,9 +13,9 @@ repos:
         args: ['--fix=lf']
         exclude: .github/actions/send-slack-notification/tests/sample-commit-message.txt
       - id: end-of-file-fixer
-        exclude: '.github/actions/dispatch-resume-workflow/dist/*'
+        exclude: '.*/dist/.*'
       - id: trailing-whitespace
-        exclude: .github/actions/dispatch-resume-workflow/dist/*
+        exclude: '.*/dist/.*'
   - repo: https://github.com/sirosen/check-jsonschema
     rev: 0.31.0
     hooks:
