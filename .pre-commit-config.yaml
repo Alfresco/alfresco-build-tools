@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: check-yaml
         args: [--allow-multiple-documents]
@@ -13,17 +13,17 @@ repos:
         args: ['--fix=lf']
         exclude: .github/actions/send-slack-notification/tests/sample-commit-message.txt
       - id: end-of-file-fixer
-        exclude: '.github/actions/dispatch-resume-workflow/dist/*'
+        exclude: '.*/dist/.*'
       - id: trailing-whitespace
-        exclude: .github/actions/dispatch-resume-workflow/dist/*
+        exclude: '.*/dist/.*'
   - repo: https://github.com/sirosen/check-jsonschema
-    rev: 0.28.5
+    rev: 0.31.0
     hooks:
       - id: check-dependabot
       - id: check-github-actions
       - id: check-github-workflows
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.41.0
+    rev: v0.43.0
     hooks:
     - id: markdownlint
   - repo: local
