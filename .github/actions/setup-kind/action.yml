@@ -23,6 +23,15 @@ inputs:
   metrics:
     description: Whether Metrics Server should be installed upon cluster creation
     default: "false"
+  ingress-configmap-patch:
+    description: |
+      The patch to apply to the ingress-nginx-controller configmap. This is a JSON string.
+    default: '"allow-snippet-annotations":"true"'
+  registry-secret:
+    description: |
+      Whether to create a secret for the docker registry. It will create a secret from file $HOME/.docker/config.json.
+      You have to login to the registry when enabling this option.
+    default: "false"
 runs:
   using: "composite"
   steps:
@@ -58,3 +67,17 @@ runs:
           --for=condition=ready pod \
           --selector=app.kubernetes.io/component=controller \
           --timeout=90s
+
+    - name: Set nginx ingress config
+      shell: bash
+      run: |
+        kubectl -n ingress-nginx patch cm ingress-nginx-controller \
+          -p '{"data": {${{inputs.ingress-configmap-patch}}}}'
+
+    - name: Create registries auth secret
+      shell: bash
+      if: inputs.registry-secret == 'true'
+      run: |
+        kubectl create secret generic regcred \
+          --from-file=.dockerconfigjson=$HOME/.docker/config.json \
+          --type=kubernetes.io/dockerconfigjson
