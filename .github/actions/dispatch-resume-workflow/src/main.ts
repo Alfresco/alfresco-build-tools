@@ -79,8 +79,22 @@ async function run(): Promise<void> {
 
     if (args.runId) {
       core.info(`Using existing workflow run ID: ${args.runId}`)
-      const status = await workflowHandler.rerunFailedJobs()
-      core.info(`Response status ${status}`)
+
+      let conclusion;
+      try {
+        const result = await workflowHandler.getWorkflowRunStatus()
+        conclusion = result.conclusion;
+      } catch(e: any) {
+        core.warning(`Failed to get workflow status: ${e.message}`);
+      }
+
+      if (conclusion === WorkflowRunConclusion.SUCCESS) {
+        core.info(`Workflow run is already successful`);
+      } else {
+        const status = await workflowHandler.rerunFailedJobs();
+        core.info(`Response status ${status}`);
+      }
+
     } else {
       // Trigger workflow run
       await workflowHandler.triggerWorkflow(args.inputs)
