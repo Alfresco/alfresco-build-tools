@@ -25,9 +25,11 @@ inputs:
     default: "false"
   ingress-configmap-patch:
     description: |
-      The patch to apply to the ingress-nginx-controller configmap. This is a JSON string.
-    default: '"allow-snippet-annotations":"true"'
-  registry-secret:
+      The patch to apply to the ingress-nginx-controller configmap. The default is off. Other optons are:
+      - allow-snippet-annotations: for ingress-nginx-controller prior to v1.12
+      - annotations-risk-level-critical: for ingress-nginx-controller v1.12 and later
+    default: "off"
+  import-registry-secret:
     description: |
       Whether to create a secret for the docker registry. It will create a secret from file $HOME/.docker/config.json.
       You have to login to the registry when enabling this option.
@@ -60,6 +62,13 @@ runs:
       run: |
         kubectl apply -f "${NGINX_MANIFEST_URL}"
 
+    - name: Set nginx ingress config
+      shell: bash
+      if: inputs.ingress-configmap-patch != 'off'
+      run: |
+        kubectl -n ingress-nginx patch cm ingress-nginx-controller \
+          -p '{"data": {${{ inputs.ingress-configmap-patch == 'allow-snippet-annotations' && '"allow-snippet-annotations":"true"' || (inputs.ingress-configmap-patch == 'annotations-risk-level-critical' && '"annotations-risk-level":"critical"')}}}}'
+
     - name: Wait for ingress ready
       shell: bash
       run: |
@@ -68,15 +77,9 @@ runs:
           --selector=app.kubernetes.io/component=controller \
           --timeout=90s
 
-    - name: Set nginx ingress config
-      shell: bash
-      run: |
-        kubectl -n ingress-nginx patch cm ingress-nginx-controller \
-          -p '{"data": {${{inputs.ingress-configmap-patch}}}}'
-
     - name: Create registries auth secret
       shell: bash
-      if: inputs.registry-secret == 'true'
+      if: inputs.import-registry-secret == 'true'
       run: |
         kubectl create secret generic regcred \
           --from-file=.dockerconfigjson=$HOME/.docker/config.json \
