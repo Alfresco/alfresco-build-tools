@@ -1600,13 +1600,9 @@ Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
           # ingress-nginx-ref: controller-v1.8.2
           # Enable deploying Metrics server with KinD
           # metrics: true
-          # The patch to apply to the ingress-nginx-controller configmap (defaults to `off`).
-          # When set to `allow-snippet-annotations` patch with "allow-snippet-annotations":"true" will be applied.
-          # When set to `annotations-risk-level-critical` patch with "annotations-risk-level":"Critical" will be applied
-          # ingress-configmap-patch: allow-snippet-annotations
           # Whether to create a secret for the docker registry. It will create a secret from file $HOME/.docker/config.json.
           # You have to login to the registry when enabling this option (defaults to false)
-          # import-registry-secret: "true"
+          # import-docker-registry-secret: "true"
       - name: Helm deploy
         run: |
           helm dep up ./helm/chart
