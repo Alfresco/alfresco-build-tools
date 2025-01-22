@@ -23,12 +23,6 @@ inputs:
   metrics:
     description: Whether Metrics Server should be installed upon cluster creation
     default: "false"
-  ingress-configmap-patch:
-    description: |
-      The patch to apply to the ingress-nginx-controller configmap. The default is off. Other optons are:
-      - allow-snippet-annotations: for ingress-nginx-controller prior to v1.12
-      - annotations-risk-level-critical: for ingress-nginx-controller v1.12 and later
-    default: "off"
   import-docker-registry-secret:
     description: |
       Whether to create a secret for the docker registry. It will create a secret from file $HOME/.docker/config.json.
