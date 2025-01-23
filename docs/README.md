@@ -1601,7 +1601,7 @@ Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
           # Enable deploying Metrics server with KinD
           metrics: true
           # Enable creating docker registry secret using given name
-          import-docker-registry-secret: regcred
+          import-docker-credentials-secret-name: regcred
       - name: Helm deploy
         run: |
           helm dep up ./helm/chart
