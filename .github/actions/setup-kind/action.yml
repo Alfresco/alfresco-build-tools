@@ -65,7 +65,7 @@ runs:
 
     - name: Create registries auth secret
       shell: bash
-      if: inputs.import-docker-registry-secret != ''
+      if: inputs.import-docker-credentials-secret-name != ''
       run: |
         kubectl create secret generic ${{ inputs.import-docker-credentials-secret-name }} \
           --from-file=.dockerconfigjson=$HOME/.docker/config.json \
