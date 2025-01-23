@@ -1593,13 +1593,15 @@ Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
         with:
           # Specify kind and k8s version to use.
           # see https://github.com/kubernetes-sigs/kind/releases
-          # kind-version: v0.20.0
-          # kind-node-image: kindest/node:v1.27.3@sha256:3966ac761ae0136263ffdb6cfd4db23ef8a83cba8a463690e98317add2c9ba72
+          kind-version: v0.20.0
+          kind-node-image: kindest/node:v1.27.3@sha256:3966ac761ae0136263ffdb6cfd4db23ef8a83cba8a463690e98317add2c9ba72
           # Optional but ensure repeatable builds (defaults to latest nginx ingress version otherwise).
           # see https://github.com/kubernetes/ingress-nginx
-          # ingress-nginx-ref: controller-v1.8.2
+          ingress-nginx-ref: controller-v1.8.2
           # Enable deploying Metrics server with KinD
-          # metrics: true
+          metrics: true
+          # Enable creating docker registry secret using given name
+          import-docker-credentials-secret-name: regcred
       - name: Helm deploy
         run: |
           helm dep up ./helm/chart

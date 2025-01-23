@@ -23,6 +23,10 @@ inputs:
   metrics:
     description: Whether Metrics Server should be installed upon cluster creation
     default: "false"
+  import-docker-credentials-secret-name:
+    description: |
+      Whether to create a secret using the given name using file $HOME/.docker/config.json.
+      You have to login to one or more registries before using this option.
 runs:
   using: "composite"
   steps:
@@ -58,3 +62,11 @@ runs:
           --for=condition=ready pod \
           --selector=app.kubernetes.io/component=controller \
           --timeout=90s
+
+    - name: Create registries auth secret
+      shell: bash
+      if: inputs.import-docker-credentials-secret-name != ''
+      run: |
+        kubectl create secret generic ${{ inputs.import-docker-credentials-secret-name }} \
+          --from-file=.dockerconfigjson=$HOME/.docker/config.json \
+          --type=kubernetes.io/dockerconfigjson
