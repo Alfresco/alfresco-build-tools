@@ -95,3 +95,9 @@ jobs:
       - name: Test if available disk size increased
         run: test ${{ env.total_size_before }} -lt $(df --total --output=avail | tail -1)
       - uses: ./.github/actions/setup-updatecli
+      - uses: ./.github/actions/setup-github-release-binary
+        with:
+          repo: updatecli/updatecli
+          version: 0.93.0
+          url_template: 'v${VERSION}/${NAME}_${OS}_${ARCH}.tar.gz'
+          test_args: 'version'

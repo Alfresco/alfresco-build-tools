@@ -11,6 +11,10 @@ inputs:
     description: 'Template for download url, can use VERSION/NAME/OS/ARCH env vars'
     required: false
     default: 'v${VERSION}/${NAME}_${VERSION}_${OS}_${ARCH}.tar.gz'
+  test_args:
+    description: 'Arguments to test the binary'
+    required: false
+    default: '--version'
 runs:
   using: "composite"
   steps:
@@ -27,4 +31,4 @@ runs:
         echo "Downloading $URL ..."
         curl -fsSL $URL | tar xz $NAME
         sudo mv $NAME /usr/local/bin/$NAME
-        echo $($NAME --version)
+        $NAME ${{ inputs.test_args }}
