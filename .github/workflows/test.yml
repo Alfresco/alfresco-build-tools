@@ -94,3 +94,4 @@ jobs:
       - uses: ./.github/actions/free-hosted-runner-disk-space
       - name: Test if available disk size increased
         run: test ${{ env.total_size_before }} -lt $(df --total --output=avail | tail -1)
+      - uses: ./.github/actions/setup-updatecli

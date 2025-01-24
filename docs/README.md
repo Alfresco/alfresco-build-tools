@@ -99,6 +99,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [setup-rancher-cli](#setup-rancher-cli)
     - [setup-terraform-docs](#setup-terraform-docs)
     - [setup-updatebot](#setup-updatebot)
+    - [setup-updatecli](#setup-updatecli)
     - [slack-file-upload](#slack-file-upload)
     - [sonar-scanner](#sonar-scanner)
     - [update-deployment-runtime-versions](#update-deployment-runtime-versions)
@@ -1656,6 +1657,16 @@ Install the updatebot binary from GitHub Releases and add it to the PATH.
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatebot@ref
         with:
           version: "1.1.60"
+```
+
+### setup-updatecli
+
+Install the updatecli binary from GitHub Releases and add it to the PATH.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatecli@ref
+        with:
+          version: "0.93.0" # omit to use the default version provided by the action
 ```
 
 ### slack-file-upload
