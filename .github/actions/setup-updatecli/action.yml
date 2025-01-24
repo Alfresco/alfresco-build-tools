@@ -12,3 +12,4 @@ runs:
         repo: updatecli/updatecli
         version: ${{ inputs.version }}
         url_template: 'v${VERSION}/${NAME}_${OS}_${ARCH}.tar.gz'
+        test_args: 'version'
