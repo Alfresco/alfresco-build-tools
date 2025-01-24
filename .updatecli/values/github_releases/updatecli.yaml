@@ -1,0 +1,12 @@
+github:
+  prefix: 'build(deps)'
+  message: 'bump updatecli to {{ source "lastRelease" }}'
+
+github_release:
+  owner: 'updatecli'
+  repo: 'updatecli'
+
+target:
+  file: '.github/actions/setup-updatecli/action.yml'
+  key: '$.inputs.version.default'
+  trimprefix: 'v'
