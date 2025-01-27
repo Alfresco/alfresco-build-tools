@@ -110,7 +110,7 @@ jobs:
           fi
 
       - name: Terraform validate
-        uses: dflook/terraform-validate@4a73778c8a9a037688cb8518dfb766f8a77fae72 # v1.46.0
+        uses: dflook/terraform-validate@5e22e449923d40905db0b3ca67ebc5787e8b2dee # v1.46.1
         with:
           path: ${{ inputs.terraform_root_path }}
           backend_config: |
@@ -118,7 +118,7 @@ jobs:
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform plan
-        uses: dflook/terraform-plan@ef228c1f24b8a8e3e9f96e0e98a7e7f0c5d27e12 # v1.46.0
+        uses: dflook/terraform-plan@a6967bcc161f0df654b5df2f1f00eca83a4cbad9 # v1.46.1
         if: github.event_name == 'pull_request'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
@@ -131,7 +131,7 @@ jobs:
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform apply
-        uses: dflook/terraform-apply@246b817d35a57d998b824b632db06d3aa3051413 # v1.46.0
+        uses: dflook/terraform-apply@61432ffb5b94226bdfc9cd68a1702a2c40e0db8b # v1.46.1
         if: github.event_name == 'push' || inputs.terraform_operation == 'apply' || (github.event_name == 'issue_comment' && contains(github.event.comment.body, 'terraform apply'))
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
@@ -145,7 +145,7 @@ jobs:
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform destroy
-        uses: dflook/terraform-destroy@04ad22e67cc6e7f9d5a9c6aff8ec60514bd7c8eb # v1.46.0
+        uses: dflook/terraform-destroy@bb62ee1a9227ae0d9912faa11f48d2896ada5dcb # v1.46.1
         if: inputs.terraform_operation == 'destroy'
         with:
           path: ${{ inputs.terraform_root_path }}
