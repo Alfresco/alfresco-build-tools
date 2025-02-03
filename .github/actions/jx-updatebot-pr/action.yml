@@ -87,6 +87,18 @@ runs:
         sudo mv jx-updatebot /usr/local/bin
       shell: bash
       working-directory: /tmp
+
+    - name: Check for open PR with stop-propagation label
+      id: check-stop-propagation
+      shell: bash
+      run: |
+        while IFS= read -r url; do
+          PR_URL=$(gh pr list --repo "$url" --label stop-propagation --json url --jq '.[0].url')
+          if [ -n "$PR_URL" ]; then
+            sed -i.bak "/- urls:.*$url/,/reusePullRequest:/ s|reusePullRequest: true|reusePullRequest: false|g" ${{ inputs.config-file }}
+          fi
+        done < <(yq e '.spec.rules[].urls[]' ${{ inputs.config-file }})
+
     - name: Run jx-updatebot
       run: >
         jx-updatebot pr
