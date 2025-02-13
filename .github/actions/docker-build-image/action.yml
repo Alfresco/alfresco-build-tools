@@ -40,7 +40,7 @@ inputs:
   aws-role-name:
     required: false
     description: AWS role name
-    default: GithubOIDCRole
+    default: GithubOIDCRoleAlfresco
   grype-scan-enabled:
     description: Defines whether a Grype scan should be executed or not
     required: false
