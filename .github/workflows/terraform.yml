@@ -86,7 +86,7 @@ jobs:
           ref: ${{ github.event_name == 'issue_comment' && env.PR_CHECKOUT_REF || '' }}
 
       - name: Assume AWS Role if AWS_ROLE_ARN var is set
-        uses: aws-actions/configure-aws-credentials@4fc4975a852c8cd99761e2de1f4ba73402e44dd9 # v4.0.3
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
         if: vars.AWS_ROLE_ARN != ''
         with:
           aws-region: ${{ env.AWS_DEFAULT_REGION}}
