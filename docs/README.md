@@ -1554,6 +1554,7 @@ Install the helm-docs binary from GitHub Releases and add it to the PATH.
 [setup-java-build](../.github/actions/setup-java-build/action.yml) performs the setup of required build tools such as Java and Maven.
 The Maven settings file can either be placed in the repository's root folder as `.ci.settings.xml`, or in a different location. In the latter case, the full path to the settings file should be provided via the `maven-settings` input parameter.
 If the Maven settings file is not provided at all, then a default settings file will be installed. The default settings file  requires the following environment variables to be appropriately set with valid credentials: `MAVEN_USERNAME` and `MAVEN_PASSWORD`.
+Optionally, the `cache-key-label` can be provided. It will be added to the maven repository cache key, to distinguish caches for different environments.
 
 ```yaml
       - name: Setup Java build
@@ -1562,6 +1563,7 @@ If the Maven settings file is not provided at all, then a default settings file 
           java-version: "17" # optional
           java-distribution: "temurin" # optional
           maven-settings: ".ci.settings.xml" # optional
+          cache-key-label: "env1" # optional
 ```
 
 ### setup-jx-release-version
