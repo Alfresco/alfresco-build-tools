@@ -30,9 +30,7 @@ runs:
       shell: bash
       run: |
         kubectl get ${{ inputs.wait-resource }} --watch $NAMESPACE_PARAM &
-        KWPID=$!
         kubectl wait --timeout=${{ inputs.wait-timeout }} --all=true --for=condition=${{ inputs.wait-condition }} ${{ inputs.wait-resource }} $NAMESPACE_PARAM
-        kill $KWPID
 
     - name: Spit resources status after wait
       shell: bash
