@@ -13,16 +13,22 @@ inputs:
     description: the location of the custom Maven settings.xml file to install
     default: ".ci.settings.xml"
     required: false
+  cache-key-label:
+    description: the optional label for the maven repository cache key (eg. to distinguish caches for self hosted runners)
+    default: ""
+    required: false
 runs:
   using: composite
   steps:
     - name: "Cache local Maven repository"
       uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
+      env:
+        KEY_LABEL: ${{ inputs.cache-key-label != '' && format('-{0}', inputs.cache-key-label) || '' }}
       with:
         path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        key: ${{ runner.os }}-maven${{ env.KEY_LABEL }}-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
-          ${{ runner.os }}-maven-
+          ${{ runner.os }}-maven${{ env.KEY_LABEL }}-
     - name: "Install ${{ inputs.maven-settings }}"
       shell: bash
       run: |
