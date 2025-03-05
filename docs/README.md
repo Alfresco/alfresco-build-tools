@@ -68,6 +68,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [install-ubuntu-default-tools](#install-ubuntu-default-tools)
     - [jx-updatebot-pr](#jx-updatebot-pr)
     - [kubectl-keep-nslogs](#kubectl-keep-nslogs)
+    - [kubectl-wait](#kubectl-wait)
     - [load-release-descriptor](#load-release-descriptor)
     - [maven-build-and-tag](#maven-build-and-tag)
       - [Preview option for maven-build-and-tag](#preview-option-for-maven-build-and-tag)
@@ -1001,6 +1002,20 @@ This action allow to collect logs from pods if they are referenced in a deployme
       with:
         namespace: mynsapp
         log_retention: 7
+```
+
+### kubectl-wait
+
+Wait for k8s resources (usually pods) to be ready.
+
+```yaml
+    - name: Wait for pods to be ready
+      uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@ref
+      # with:
+        # wait-timeout: 10m
+        # wait-condition: Ready
+        # wait-resource: pods
+        # namespace: default
 ```
 
 ### load-release-descriptor
