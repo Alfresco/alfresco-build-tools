@@ -13,6 +13,10 @@ inputs:
     description: the location of the custom Maven settings.xml file to install
     default: ".ci.settings.xml"
     required: false
+  cache-key-prefix:
+    description: the prefix for the maven repository cache key (eg. to handle multiple maven caches within the same repository)
+    default: "maven"
+    required: false
 runs:
   using: composite
   steps:
@@ -20,9 +24,9 @@ runs:
       uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
       with:
         path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        key: ${{ runner.os }}-${{ inputs.cache-key-prefix }}-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
-          ${{ runner.os }}-maven-
+          ${{ runner.os }}-${{ inputs.cache-key-prefix }}-
     - name: "Install ${{ inputs.maven-settings }}"
       shell: bash
       run: |
