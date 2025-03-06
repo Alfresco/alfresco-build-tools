@@ -1553,10 +1553,10 @@ Install the helm-docs binary from GitHub Releases and add it to the PATH.
 
 [setup-java-build](../.github/actions/setup-java-build/action.yml) performs the setup of required build tools such as Java and Maven.
 The Maven settings file can either be placed in the repository's root folder as `.ci.settings.xml`, or in a different location. In the latter case, the full path to the settings file should be provided via the `maven-settings` input parameter.
-If the Maven settings file is not provided at all, then a default settings file will be installed. The default settings file  requires the following environment variables to be appropriately set with valid credentials: `MAVEN_USERNAME` and `MAVEN_PASSWORD`.
+If the Maven settings file is not provided at all, then a default settings file will be installed. The default settings file requires the following environment variables to be appropriately set with valid credentials: `MAVEN_USERNAME` and `MAVEN_PASSWORD`.
 
-The local Maven repository is cached. The structure of the cache key is composed of following parts: `{runner.os}-{label}-{hash(**/pom.xml)}`. By default, label is set to `maven`, e.g. `Linux-maven-38c8f5cb0598db15f3c14d1bdfa491de24645c5965fcdbbc8eb1849282247fd2`. 
-Optionally, the custom `cache-key-label` can be provided. It will override the default one. It can be useful to distinguish caches for different environments.
+The local Maven repository is cached. The structure of the cache key is composed of following parts: `{runner.os}-{prefix}-{hash(**/pom.xml)}`. By default, prefix is set to `maven`, e.g. `Linux-maven-38c8f5cb0598db15f3c14d1bdfa491de24645c5965fcdbbc8eb1849282247fd2`.
+Optionally, the custom `cache-key-prefix` can be provided. It will override the default one. It can be useful to handle multiple maven caches within the same repository.
 
 ```yaml
       - name: Setup Java build
