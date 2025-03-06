@@ -147,7 +147,7 @@ runs:
         echo "result=$RESULT" >> $GITHUB_OUTPUT
 
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v8.14.1
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v8.15.0
 
     - name: Send teams notification
       uses: skitionek/notify-microsoft-teams@190d4d92146df11f854709774a4dae6eaf5e2aa3 # master
