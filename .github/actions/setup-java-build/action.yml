@@ -23,12 +23,12 @@ runs:
     - name: "Cache local Maven repository"
       uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
       env:
-        KEY_LABEL: ${{ inputs.cache-key-label != '' && format('-{0}', inputs.cache-key-label) || '' }}
+        KEY_LABEL: ${{ inputs.cache-key-label != '' && format('maven-{0}', inputs.cache-key-label) || 'maven' }}
       with:
         path: ~/.m2/repository
-        key: ${{ runner.os }}-maven${{ env.KEY_LABEL }}-${{ hashFiles('**/pom.xml') }}
+        key: ${{ runner.os }}-${{ env.KEY_LABEL }}-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
-          ${{ runner.os }}-maven${{ env.KEY_LABEL }}-
+          ${{ runner.os }}-${{ env.KEY_LABEL }}-
     - name: "Install ${{ inputs.maven-settings }}"
       shell: bash
       run: |
