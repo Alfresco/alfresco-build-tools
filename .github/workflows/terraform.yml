@@ -94,7 +94,7 @@ jobs:
           role-session-name: TerraformWorkflow
 
       - name: Load environment variables from yml
-        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v8.14.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v8.15.0
         with:
           yml_path: ${{ inputs.terraform_root_path }}/tfenv.yml
 
@@ -111,7 +111,7 @@ jobs:
 
       - name: Terraform validate
         if: github.event_name == 'pull_request'
-        uses: dflook/terraform-validate@5e22e449923d40905db0b3ca67ebc5787e8b2dee # v1.46.1
+        uses: dflook/terraform-validate@a8236b6ed2ac088b60f65142d4933e6bfc9d71ec # v1.47.0
         with:
           path: ${{ inputs.terraform_root_path }}
           backend_config: |
@@ -119,7 +119,7 @@ jobs:
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform plan
-        uses: dflook/terraform-plan@a6967bcc161f0df654b5df2f1f00eca83a4cbad9 # v1.46.1
+        uses: dflook/terraform-plan@97e7c2da6afdc0ac7929f70fbafc63c135d0c4da # v1.47.0
         if: github.event_name == 'pull_request'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
@@ -132,7 +132,7 @@ jobs:
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform apply
-        uses: dflook/terraform-apply@61432ffb5b94226bdfc9cd68a1702a2c40e0db8b # v1.46.1
+        uses: dflook/terraform-apply@67a0570838139791d018128a40fbf9028330145a # v1.47.0
         if: github.event_name == 'push' || inputs.terraform_operation == 'apply' || (github.event_name == 'issue_comment' && contains(github.event.comment.body, 'terraform apply'))
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
@@ -146,7 +146,7 @@ jobs:
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform destroy
-        uses: dflook/terraform-destroy@bb62ee1a9227ae0d9912faa11f48d2896ada5dcb # v1.46.1
+        uses: dflook/terraform-destroy@4a4999dc9a13b0cc4e9e38635aa4a6bbdb3f45b5 # v1.47.0
         if: inputs.terraform_operation == 'destroy'
         with:
           path: ${{ inputs.terraform_root_path }}
