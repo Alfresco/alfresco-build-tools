@@ -1565,7 +1565,7 @@ Optionally, the custom `cache-key-prefix` can be provided. It will override the 
           java-version: "17" # optional
           java-distribution: "temurin" # optional
           maven-settings: ".ci.settings.xml" # optional
-          cache-key-label: "env1" # optional
+          cache-key-prefix: "alternate-maven" # optional
 ```
 
 ### setup-jx-release-version
