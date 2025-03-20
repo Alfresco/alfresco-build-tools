@@ -27,15 +27,11 @@ inputs:
     required: false
     default: ''
   mention-users:
-    description: 'Comma-separated list of users to mention in format "display name|email" (e.g., "John Doe|john.doe@example.com,Jane Doe|jane.doe@example.com")'
+    description: 'Comma-separated list of users to mention in format "display name|email" (e.g.: "John Doe|john.doe@example.com,Jane Doe|jane.doe@example.com")'
     required: false
     default: ''
   mention-tags:
-    description: 'Comma-separated list of Teams tags to mention in format "tag name|tag id" (e.g., "Security Champions|19:abc...@thread.tacv2")'
-    required: false
-    default: ''
-  mention-channels:
-    description: 'Comma-separated list of Teams channels to mention in format "channel name|channel id" (e.g., "General|19:xyz...@thread.tacv2")'
+    description: 'Comma-separated list of Teams tags to mention in format "tag name|tag id" (e.g.: "Security Champions|base64IdIncluding==")'
     required: false
     default: ''
 
@@ -167,7 +163,6 @@ runs:
       env:
         USERS: ${{ inputs.mention-users }}
         TAGS: ${{ inputs.mention-tags }}
-        CHANNELS: ${{ inputs.mention-channels }}
       run: |
         ENTITIES="["
         FIRST=true
@@ -194,9 +189,6 @@ runs:
                 tag)
                   ENTITIES+="{\"type\":\"mention\",\"text\":\"<at>${NAME}</at>\",\"mentioned\":{\"id\":\"${ID}\",\"name\":\"${NAME}\",\"type\":\"tag\"}}"
                   ;;
-                channel)
-                  ENTITIES+="{\"type\":\"mention\",\"text\":\"<at>${NAME}</at>\",\"mentioned\":{\"id\":\"${ID}\",\"name\":\"${NAME}\",\"type\":\"channel\"}}"
-                  ;;
               esac
             done
           fi
@@ -204,7 +196,6 @@ runs:
 
         add_entity "user" "$USERS"
         add_entity "tag" "$TAGS"
-        add_entity "channel" "$CHANNELS"
 
         ENTITIES+="]"
         echo "result=$ENTITIES" >> $GITHUB_OUTPUT
