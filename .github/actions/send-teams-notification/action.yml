@@ -26,6 +26,18 @@ inputs:
     description: 'The workflow status: if not filled, it will be computed based on the completed steps status'
     required: false
     default: ''
+  mention-users:
+    description: 'Comma-separated list of users to mention in format "display name|email" (e.g., "John Doe|john.doe@example.com,Jane Doe|jane.doe@example.com")'
+    required: false
+    default: ''
+  mention-tags:
+    description: 'Comma-separated list of Teams tags to mention in format "tag name|tag id" (e.g., "Security Champions|19:abc...@thread.tacv2")'
+    required: false
+    default: ''
+  mention-channels:
+    description: 'Comma-separated list of Teams channels to mention in format "channel name|channel id" (e.g., "General|19:xyz...@thread.tacv2")'
+    required: false
+    default: ''
 
 runs:
   using: composite
@@ -149,6 +161,54 @@ runs:
     - name: Get branch name
       uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v8.17.0
 
+    - name: Transform mentions to entities
+      id: transform-mentions
+      shell: bash
+      env:
+        USERS: ${{ inputs.mention-users }}
+        TAGS: ${{ inputs.mention-tags }}
+        CHANNELS: ${{ inputs.mention-channels }}
+      run: |
+        ENTITIES="["
+        FIRST=true
+
+        function add_entity() {
+          local TYPE=$1
+          local ITEMS=$2
+
+          if [ -n "$ITEMS" ]; then
+            IFS=',' read -ra ARRAY <<< "$ITEMS"
+            for ITEM in "${ARRAY[@]}"; do
+              if [ "$FIRST" = false ]; then
+                ENTITIES+=","
+              fi
+              FIRST=false
+
+              NAME="${ITEM%|*}"
+              ID="${ITEM#*|}"
+
+              case $TYPE in
+                user)
+                  ENTITIES+="{\"type\":\"mention\",\"text\":\"<at>${NAME}</at>\",\"mentioned\":{\"id\":\"${ID}\",\"name\":\"${NAME}\"}}"
+                  ;;
+                tag)
+                  ENTITIES+="{\"type\":\"mention\",\"text\":\"<at>${NAME}</at>\",\"mentioned\":{\"id\":\"${ID}\",\"name\":\"${NAME}\",\"type\":\"tag\"}}"
+                  ;;
+                channel)
+                  ENTITIES+="{\"type\":\"mention\",\"text\":\"<at>${NAME}</at>\",\"mentioned\":{\"id\":\"${ID}\",\"name\":\"${NAME}\",\"type\":\"channel\"}}"
+                  ;;
+              esac
+            done
+          fi
+        }
+
+        add_entity "user" "$USERS"
+        add_entity "tag" "$TAGS"
+        add_entity "channel" "$CHANNELS"
+
+        ENTITIES+="]"
+        echo "result=$ENTITIES" >> $GITHUB_OUTPUT
+
     - name: Send teams notification
       uses: skitionek/notify-microsoft-teams@190d4d92146df11f854709774a4dae6eaf5e2aa3 # master
       env:
@@ -160,6 +220,7 @@ runs:
         WORKFLOW_TITLE: ${{ steps.compute-workflow-title.outputs.result }}
         COLOR: ${{ steps.compute-color.outputs.result }}
         TITLE: "Notification on ${{ steps.compute-event.outputs.result }} on branch [`${{ env.BRANCH_NAME }}`](${{ env.REPO_URL }}/tree/${{ env.BRANCH_NAME }})"
+        ENTITIES: ${{ steps.transform-mentions.outputs.result }}
       with:
         webhook_url: ${{ inputs.webhook-url }}
         job: "{}"
@@ -282,9 +343,7 @@ runs:
                   "version": "1.5",
                   "msteams": {
                     "width": "full",
-                    "entities": [
-                      {}
-                    ]
+                    "entities": ${{ env.ENTITIES }}
                   }
                 }
               }
