@@ -106,6 +106,10 @@ inputs:
   working-directory:
     description: The working directory where the mvn command should be executed
     required: false
+  dependencies-version:
+    description: The version of the dependencies to use
+    required: false
+    default: ''
 
 outputs:
   version:
@@ -202,7 +206,7 @@ runs:
       with:
         property-to-update: ${{ inputs.property-to-update }}
         maven-cli-opts: ${{ steps.compute-maven-options.outputs.result }}
-        version: ${{ steps.set-preview-version.outputs.preview-version }}
+        version: ${{ inputs.dependencies-version != '' && inputs.dependencies-version || steps.set-preview-version.outputs.preview-version }}
       env:
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
