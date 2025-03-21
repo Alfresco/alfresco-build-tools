@@ -2,16 +2,16 @@ description: Sends a teams notification
 name: Send a teams notification
 inputs:
   webhook-url:
-    description: Microsoft Teams Incoming Webhooks URL
+    description: 'Microsoft Teams Incoming Webhooks URL'
     required: true
   title:
     description: 'Text to show as message title'
     required: false
   message:
-    description: An optional message that overrides the default one
+    description: 'An optional message that overrides the default one. If declaring any mention-users/tags, the message should include at least one instance of each declared <at>mentionable entity</at>'
     required: false
   append:
-    description: Whether the optional message should be added after the default one
+    description: 'Whether the optional message should be added after the default one'
     required: false
     default: "false"
   needs:
@@ -19,7 +19,7 @@ inputs:
     required: false
     default: '{}'
   dry-run:
-    description: Do not actually send the message
+    description: 'Do not actually send the message'
     required: false
     default: 'false'
   status:
