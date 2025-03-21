@@ -157,48 +157,14 @@ runs:
     - name: Get branch name
       uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v8.17.0
 
-    - name: Transform mentions to entities
+    - name: Transform mentions to JSON entities
       id: transform-mentions
       shell: bash
       env:
         USERS: ${{ inputs.mention-users }}
         TAGS: ${{ inputs.mention-tags }}
       run: |
-        ENTITIES="["
-        FIRST=true
-
-        function add_entity() {
-          local TYPE=$1
-          local ITEMS=$2
-
-          if [ -n "$ITEMS" ]; then
-            IFS=',' read -ra ARRAY <<< "$ITEMS"
-            for ITEM in "${ARRAY[@]}"; do
-              if [ "$FIRST" = false ]; then
-                ENTITIES+=","
-              fi
-              FIRST=false
-
-              NAME="${ITEM%|*}"
-              ID="${ITEM#*|}"
-
-              case $TYPE in
-                user)
-                  ENTITIES+="{\"type\":\"mention\",\"text\":\"<at>${NAME}</at>\",\"mentioned\":{\"id\":\"${ID}\",\"name\":\"${NAME}\"}}"
-                  ;;
-                tag)
-                  ENTITIES+="{\"type\":\"mention\",\"text\":\"<at>${NAME}</at>\",\"mentioned\":{\"id\":\"${ID}\",\"name\":\"${NAME}\",\"type\":\"tag\"}}"
-                  ;;
-              esac
-            done
-          fi
-        }
-
-        add_entity "user" "$USERS"
-        add_entity "tag" "$TAGS"
-
-        ENTITIES+="]"
-        echo "result=$ENTITIES" >> $GITHUB_OUTPUT
+        ${{ github.action_path }}/transform-mentions.sh >> $GITHUB_OUTPUT
 
     - name: Send teams notification
       uses: skitionek/notify-microsoft-teams@190d4d92146df11f854709774a4dae6eaf5e2aa3 # master
