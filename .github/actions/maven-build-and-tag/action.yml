@@ -270,6 +270,7 @@ runs:
       run: |
         if [ "${{ inputs.working-directory }}" != "" ]; then
           cd ${{ inputs.working-directory }}
+          echo "Current directory: $(pwd)"
         fi
         mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS }} ${{ inputs.extra-maven-opts }} ${{ env.SONAR_SCANNER_OPTS }}
       env:
