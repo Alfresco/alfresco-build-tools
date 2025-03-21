@@ -1568,7 +1568,7 @@ To get the necessary data for mentions:
 
 - For **users**: use their display name and email address in the format `Display Name|email@domain.com`
 - For **tags**: use a [PowerAutomate](https://make.powerautomate.com) flow with the "List all tags for a team" action:
-  1. Create a new "Instant Cloud Flow"
+  1. Create a new "Instant Cloud Flow", selecting the "Manually trigger a flow" option
   2. Add the "List all tags for a team" action
   3. Run the flow using the "Test" button
   4. Go to "Flow Runs" and click on the latest run
