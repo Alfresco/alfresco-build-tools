@@ -1557,6 +1557,7 @@ Sample usage with mentions:
 ```
 
 > **⚠️ IMPORTANT:** when using mentions in Teams notifications, ensure that:
+>
 > - all mentioned users and tags exist and are active in the target channel
 > - email addresses and tag IDs are correct
 > - all mention-users and mention-tags **must** appear in the message body text at least once
@@ -1565,7 +1566,7 @@ Sample usage with mentions:
 
 To get the necessary data for mentions:
 
-- For **users**: use their display name and email address in the format "Display Name|email@domain.com"
+- For **users**: use their display name and email address in the format `Display Name|email@domain.com`
 - For **tags**: use a [PowerAutomate](https://make.powerautomate.com) flow with the "List all tags for a team" action:
   1. Create a new "Instant Cloud Flow"
   2. Add the "List all tags for a team" action
