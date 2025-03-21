@@ -156,7 +156,7 @@ runs:
         ${{ inputs.verbose }} && NTP=''
         TEST_OPTIONS=''
         [[ $SKIP_TESTS == 'true' ]] && TEST_OPTIONS='-DskipTests=true -DskipITs=true'
-        echo "result=--show-version --settings settings.xml $NTP $TEST_OPTIONS" >> $GITHUB_OUTPUT
+        echo "result=--show-version --settings $GITHUB_WORKSPACE/settings.xml $NTP $TEST_OPTIONS" >> $GITHUB_OUTPUT
 
     - name: Set is_preview env variable
       id: set-is-preview-env-variable
