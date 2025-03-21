@@ -1550,7 +1550,7 @@ Sample usage with mentions:
       uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@ref
       with:
         webhook-url: ${{ secrets.MSTEAMS_WEBHOOK }}
-        message: "message: "<at>John Doe</at>, <at>Jane Doe</at>, <at>Security Champions</at>, please review the failure logs."
+        message: "<at>John Doe</at>, <at>Jane Doe</at>, <at>Security Champions</at>, please review the failure logs."
         mention-users: "John Doe|john.doe@example.com,Jane Doe|jane.doe@example.com"
         mention-tags: "Security Champions|MjY5OTQ0YzItODc4OS00YTRkLTk4N2UtMDZkYTEyNDE2Nm=="
         append: true
