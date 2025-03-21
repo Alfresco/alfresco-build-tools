@@ -1535,6 +1535,48 @@ Sample of a FAILURE notification on a `push` event.
 
 ![Teams Failure](./images/send-teams-push-failure.png)
 
+#### Mentions
+
+Teams notifications can include mentions of both users and Teams tags. The action supports two types of mentions via optional inputs:
+
+- `mention-users`: comma-separated list of users to mention in format "display name|email"
+- `mention-tags`: comma-separated list of Teams tags to mention in format "tag name|tag id"
+
+The mentionable entities defined via the aforementioned properties **need** to be referenced via the `<at>name</at>` syntax in the message body.
+
+Sample usage with mentions:
+
+```yml
+      uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@ref
+      with:
+        webhook-url: ${{ secrets.MSTEAMS_WEBHOOK }}
+        message: "<at>John Doe</at>, <at>Jane Doe</at>, <at>Security Champions</at>, please review the failure logs."
+        mention-users: "John Doe|john.doe@example.com,Jane Doe|jane.doe@example.com"
+        mention-tags: "Security Champions|MjY5OTQ0YzItODc4OS00YTRkLTk4N2UtMDZkYTEyNDE2Nm=="
+        append: true
+```
+
+> **⚠️ IMPORTANT:** when using mentions in Teams notifications, ensure that:
+>
+> - all mentioned users and tags exist and are active in the target channel
+> - email addresses and tag IDs are correct
+> - all mention-users and mention-tags **must** appear in the message body text at least once
+>
+> **Any error in the mention configuration will cause the entire message to fail to send, as the Teams API is very strict with mentions.**
+
+To get the necessary data for mentions:
+
+- For **users**: use their display name and email address in the format `Display Name|email@domain.com`
+- For **tags**: use a [PowerAutomate](https://make.powerautomate.com) flow with the "List all tags for a team" action:
+  1. Create a new "Instant Cloud Flow", selecting the "Manually trigger a flow" option
+  2. Add the "List all tags for a team" action
+  3. Run the flow using the "Test" button
+  4. Go to "Flow Runs" and click on the latest run
+  5. Look for the raw outputs of the "List all tags for a team" action
+  6. Tag IDs are shown as base-64 encoded strings in the "id" property
+
+![PowerAutomate Get Tag IDs Flow](./images/send-teams-get-tag-id.png)
+
 ### setup-docker
 
 When using a runner which is not a default hosted runner, all the default
