@@ -206,7 +206,7 @@ runs:
       with:
         property-to-update: ${{ inputs.property-to-update }}
         maven-cli-opts: ${{ steps.compute-maven-options.outputs.result }}
-        version: ${{ steps.set-preview-version.outputs.preview-version }}
+        version: ${{ inputs.dependencies-version != '' && inputs.dependencies-version || steps.set-preview-version.outputs.preview-version }}
       env:
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
@@ -214,7 +214,7 @@ runs:
     - name: Set version env variable
       if: github.event_name == 'push' || env.IS_PREVIEW == 'true'
       env:
-        VERSION:${{ inputs.dependencies-version != '' && inputs.dependencies-version || steps.update-pom-to-next-version.outputs.next-prerelease }}
+        VERSION: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
       shell: bash
       run: |
         echo "VERSION=$VERSION" >> $GITHUB_ENV
