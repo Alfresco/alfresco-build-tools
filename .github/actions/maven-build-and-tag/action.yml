@@ -211,6 +211,16 @@ runs:
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
 
+    - name: Debug Dependencies version
+      shell: bash
+      run: |
+        echo "Dependencies version: ${{ inputs.dependencies-version }}"
+
+    - name: Debug next-prerelease output
+      shell: bash
+      run: |
+        echo "Next prerelease: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}"
+
     - name: Set version env variable
       if: github.event_name == 'push' || env.IS_PREVIEW == 'true'
       env:
