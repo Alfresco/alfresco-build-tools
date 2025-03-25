@@ -57,6 +57,9 @@ outputs:
   ecr-docker-image-url:
     description: The ECR docker image URL
     value: ${{ steps.set-ecr-docker-image-url.outputs.ecr-docker-image-url }}
+  image-tag:
+    description: The image tag
+    value: ${{ env.IMAGE_TAG }}
 
 runs:
   using: composite
