@@ -258,7 +258,7 @@ runs:
         echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
 
     - name: Set SONAR_SCANNER_OPTS
-      if: inputs.sonar-token != ''
+      if: inputs.sonar-token != '' && github.event.pull_request.draft == false
       shell: bash
       run: echo "SONAR_SCANNER_OPTS=sonar:sonar -Dsonar.host.url=${{ inputs.sonar-host-url }} -Dsonar.organization=${{ inputs.sonar-organization }} -Dsonar.projectKey=${{ inputs.project-key }} -Dsonar.coverage.jacoco.xmlReportPaths=${{ inputs.aggregate-report-path }}" >> $GITHUB_ENV
 
