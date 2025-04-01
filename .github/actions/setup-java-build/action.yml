@@ -13,29 +13,33 @@ inputs:
     description: the location of the custom Maven settings.xml file to install
     default: ".ci.settings.xml"
     required: false
+  cache-key-prefix:
+    description: the prefix for the maven repository cache key (eg. to handle multiple maven caches within the same repository)
+    default: "maven"
+    required: false
 runs:
   using: composite
   steps:
     - name: "Cache local Maven repository"
-      uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
         path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        key: ${{ runner.os }}-${{ inputs.cache-key-prefix }}-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
-          ${{ runner.os }}-maven-
+          ${{ runner.os }}-${{ inputs.cache-key-prefix }}-
     - name: "Install ${{ inputs.maven-settings }}"
       shell: bash
       run: |
-        mkdir -p $HOME/.m2
+        mkdir -p ~/.m2
         if [ -f "${{ inputs.maven-settings }}" ]; then
           echo "Installing Maven settings file found in the repository: ${{ inputs.maven-settings }}"
-          cp "${{ inputs.maven-settings }}" $HOME/.m2/settings.xml
+          cp "${{ inputs.maven-settings }}" ~/.m2/settings.xml
         else
           echo "Maven settings file: ${{ inputs.maven-settings }} not found in the repository. Installing the default one"
-          cp ${{ github.action_path }}/settings.xml $HOME/.m2/settings.xml
+          cp ${{ github.action_path }}/settings.xml ~/.m2/settings.xml
         fi
     - name: "Set up Java"
-      uses: actions/setup-java@7a6d8a8234af8eb26422e24e3006232cccaa061b # v4.6.0
+      uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4.7.0
       with:
         java-version: ${{ inputs.java-version }}
         distribution: ${{ inputs.java-distribution }}

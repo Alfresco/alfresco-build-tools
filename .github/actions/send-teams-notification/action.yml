@@ -2,16 +2,16 @@ description: Sends a teams notification
 name: Send a teams notification
 inputs:
   webhook-url:
-    description: Microsoft Teams Incoming Webhooks URL
+    description: 'Microsoft Teams Incoming Webhooks URL'
     required: true
   title:
     description: 'Text to show as message title'
     required: false
   message:
-    description: An optional message that overrides the default one
+    description: 'An optional message that overrides the default one. If declaring any mention-users/tags, the message should include at least one instance of each declared <at>mentionable entity</at>'
     required: false
   append:
-    description: Whether the optional message should be added after the default one
+    description: 'Whether the optional message should be added after the default one'
     required: false
     default: "false"
   needs:
@@ -19,11 +19,19 @@ inputs:
     required: false
     default: '{}'
   dry-run:
-    description: Do not actually send the message
+    description: 'Do not actually send the message'
     required: false
     default: 'false'
   status:
     description: 'The workflow status: if not filled, it will be computed based on the completed steps status'
+    required: false
+    default: ''
+  mention-users:
+    description: 'Comma-separated list of users to mention in format "display name|email" (e.g.: "John Doe|john.doe@example.com,Jane Doe|jane.doe@example.com")'
+    required: false
+    default: ''
+  mention-tags:
+    description: 'Comma-separated list of Teams tags to mention in format "tag name|tag id" (e.g.: "Security Champions|base64IdIncluding==")'
     required: false
     default: ''
 
@@ -147,7 +155,16 @@ runs:
         echo "result=$RESULT" >> $GITHUB_OUTPUT
 
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v8.12.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v8.18.0
+
+    - name: Transform mentions to JSON entities
+      id: transform-mentions
+      shell: bash
+      env:
+        USERS: ${{ inputs.mention-users }}
+        TAGS: ${{ inputs.mention-tags }}
+      run: |
+        ${{ github.action_path }}/transform-mentions.sh >> $GITHUB_OUTPUT
 
     - name: Send teams notification
       uses: skitionek/notify-microsoft-teams@190d4d92146df11f854709774a4dae6eaf5e2aa3 # master
@@ -160,6 +177,7 @@ runs:
         WORKFLOW_TITLE: ${{ steps.compute-workflow-title.outputs.result }}
         COLOR: ${{ steps.compute-color.outputs.result }}
         TITLE: "Notification on ${{ steps.compute-event.outputs.result }} on branch [`${{ env.BRANCH_NAME }}`](${{ env.REPO_URL }}/tree/${{ env.BRANCH_NAME }})"
+        ENTITIES: ${{ steps.transform-mentions.outputs.result }}
       with:
         webhook_url: ${{ inputs.webhook-url }}
         job: "{}"
@@ -282,9 +300,7 @@ runs:
                   "version": "1.5",
                   "msteams": {
                     "width": "full",
-                    "entities": [
-                      {}
-                    ]
+                    "entities": ${{ env.ENTITIES }}
                   }
                 }
               }

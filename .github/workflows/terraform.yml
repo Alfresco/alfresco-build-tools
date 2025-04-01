@@ -86,7 +86,7 @@ jobs:
           ref: ${{ github.event_name == 'issue_comment' && env.PR_CHECKOUT_REF || '' }}
 
       - name: Assume AWS Role if AWS_ROLE_ARN var is set
-        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
+        uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
         if: vars.AWS_ROLE_ARN != ''
         with:
           aws-region: ${{ env.AWS_DEFAULT_REGION}}
@@ -94,7 +94,7 @@ jobs:
           role-session-name: TerraformWorkflow
 
       - name: Load environment variables from yml
-        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v8.12.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v8.18.0
         with:
           yml_path: ${{ inputs.terraform_root_path }}/tfenv.yml
 
@@ -110,7 +110,8 @@ jobs:
           fi
 
       - name: Terraform validate
-        uses: dflook/terraform-validate@5e22e449923d40905db0b3ca67ebc5787e8b2dee # v1.46.1
+        if: github.event_name == 'pull_request'
+        uses: dflook/terraform-validate@e5b807451c90196e19f033e3e5533a22f02aa32c # v1.48.0
         with:
           path: ${{ inputs.terraform_root_path }}
           backend_config: |
@@ -118,7 +119,7 @@ jobs:
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform plan
-        uses: dflook/terraform-plan@a6967bcc161f0df654b5df2f1f00eca83a4cbad9 # v1.46.1
+        uses: dflook/terraform-plan@2c1e6cc4d10cb56cf366d99b01fbf15307df65b5 # v1.48.0
         if: github.event_name == 'pull_request'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
@@ -131,7 +132,7 @@ jobs:
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform apply
-        uses: dflook/terraform-apply@61432ffb5b94226bdfc9cd68a1702a2c40e0db8b # v1.46.1
+        uses: dflook/terraform-apply@65f3817a939c123a753fcf72a13e74d6a01bfadf # v1.48.0
         if: github.event_name == 'push' || inputs.terraform_operation == 'apply' || (github.event_name == 'issue_comment' && contains(github.event.comment.body, 'terraform apply'))
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
@@ -145,7 +146,7 @@ jobs:
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform destroy
-        uses: dflook/terraform-destroy@bb62ee1a9227ae0d9912faa11f48d2896ada5dcb # v1.46.1
+        uses: dflook/terraform-destroy@0a67ba70bbde88bb76594da1a13b0a4014a9bcf1 # v1.48.0
         if: inputs.terraform_operation == 'destroy'
         with:
           path: ${{ inputs.terraform_root_path }}
