@@ -6,6 +6,8 @@ scms:
   github:
     kind: 'github'
     spec:
+      user: '{{ requiredEnv "UPDATECLI_USERNAME" }}'
+      email: '{{ requiredEnv "UPDATECLI_EMAIL" }}'
       username: '{{ requiredEnv "UPDATECLI_USERNAME" }}'
       token: '{{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}'
       owner: '{{ requiredEnv "UPDATECLI_REPO_OWNER" }}'
