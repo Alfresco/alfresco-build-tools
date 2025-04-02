@@ -23,6 +23,9 @@ inputs:
   extra-maven-opts:
     description: Extra maven options for the build command line
     required: false
+  maven-command:
+    description: The maven command to execute
+    required: false
   maven-username:
     description: Nexus user name
     required: true
@@ -241,14 +244,20 @@ runs:
       id: define_maven_command
       shell: bash
       run: |
-        if [ $DO_PUSH == 'true' ]
+        if [ $MAVEN_COMMAND == '' ]
         then
-          echo "command=deploy" >> $GITHUB_OUTPUT
+          if [ $DO_PUSH == 'true' ]
+          then
+            echo "command=deploy" >> $GITHUB_OUTPUT
+          else
+            echo "command=verify" >> $GITHUB_OUTPUT
+          fi
         else
-          echo "command=verify" >> $GITHUB_OUTPUT
+          echo "command=$MAVEN_COMMAND" >> $GITHUB_OUTPUT
         fi
       env:
         DO_PUSH: ${{ github.event_name == 'push' || env.IS_PREVIEW == 'true' }}
+        MAVEN_COMMAND: ${{ inputs.maven-command }}
 
     - name: Enable testcontainers reuse option
       if: inputs.reuse-testcontainers == 'true'
