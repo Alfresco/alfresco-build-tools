@@ -22,7 +22,7 @@ actions:
     kind: 'github/pullrequest'
     scmid: 'github'
     spec:
-      automerge: false
+      automerge: true
       mergemethod: squash
       draft: false
       title: '{{ .github.prefix }}: {{ .github.message }}'
