@@ -1,0 +1,12 @@
+github:
+  prefix: 'build(deps)'
+  message: 'bump terraform-docs to {{ source "lastRelease" }}'
+
+github_release:
+  owner: 'terraform-docs'
+  repo: 'terraform-docs'
+
+target:
+  file: '.github/actions/setup-terraform-docs/action.yml'
+  key: '$.inputs.version.default'
+  trimprefix: 'v'
