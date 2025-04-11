@@ -4,7 +4,7 @@ inputs:
   version:
     description: 'Version of terraform-docs'
     required: false
-    default: 0.16.0
+    default: 0.20.0
 runs:
   using: "composite"
   steps:
