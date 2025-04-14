@@ -167,7 +167,7 @@ runs:
         ${{ github.action_path }}/transform-mentions.sh >> $GITHUB_OUTPUT
 
     - name: Send teams notification
-      uses: skitionek/notify-microsoft-teams@190d4d92146df11f854709774a4dae6eaf5e2aa3 # master
+      uses: skitionek/notify-microsoft-teams@fab6aca2609ba706ebc981d066278d47ab4af0fc # master
       env:
         ACTOR_URL: ${{ github.server_url }}/${{ github.triggering_actor }}
         REPO_URL: ${{ github.server_url }}/${{ github.repository }}
