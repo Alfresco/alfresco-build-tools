@@ -19,6 +19,7 @@ Here follows the list of GitHub Actions topics available in the current document
       - [Setup Maven Credentials](#setup-maven-credentials)
       - [Setup Maven Build Options](#setup-maven-build-options)
   - [GitHub Actions provided by community](#github-actions-provided-by-community)
+    - [Comment a PR](#comment-a-pr)
     - [Docker build and push](#docker-build-and-push)
     - [Docker login](#docker-login)
     - [EC2 GitHub runner](#ec2-github-runner)
@@ -88,6 +89,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [send-slack-notification-slow-job](#send-slack-notification-slow-job)
     - [send-slack-notification](#send-slack-notification)
     - [send-teams-notification](#send-teams-notification)
+      - [Mentions](#mentions)
     - [setup-docker](#setup-docker)
     - [setup-github-release-binary](#setup-github-release-binary)
     - [setup-helm-docs](#setup-helm-docs)
@@ -195,6 +197,36 @@ useful.
 ```
 
 ## GitHub Actions provided by community
+
+### Comment a PR
+
+To improve developer experience and make build results like reports or test
+results more accessible, link/post them as a comment on the PR. Any subsequent
+re-run will update the comment to keep the information current and avoid
+clutter.
+
+```yml
+    - name: Find Comment
+      uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
+      id: fc
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-author: 'github-actions[bot]'
+        body-includes: Build output
+
+    - name: Create or update comment
+      uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4.0.0
+      with:
+        comment-id: ${{ steps.fc.outputs.comment-id }}
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          Build output
+          ${{ steps.build.outputs.build-log }}
+        edit-mode: replace
+```
+
+Upstream documentation at
+[peter-evans/create-or-update-comment](https://github.com/peter-evans/create-or-update-comment).
 
 ### Docker build and push
 
