@@ -12,6 +12,10 @@ on:
         description: the terraform operation to perform (apply or destroy)
         type: string
         required: false
+      terraform_env:
+        description: the terraform environment to use (e.g. dev, staging, prod)
+        type: string
+        required: false
     secrets:
       AWS_ACCESS_KEY_ID:
         required: false
@@ -38,7 +42,9 @@ jobs:
         run: |
           BRANCH_NAME=${{ github.base_ref || github.ref_name }}
           BRANCH_LOWER=${BRANCH_NAME,,}
-          if [ "$BRANCH_LOWER" == "main" ]; then
+          if [ -n "${{ inputs.terraform_env }}" ]; then
+            environment=${{ inputs.terraform_env }}
+          elif [ "$BRANCH_LOWER" == "main" ]; then
             environment="production"
           elif [ "$BRANCH_LOWER" == "develop" ]; then
             environment="develop"
