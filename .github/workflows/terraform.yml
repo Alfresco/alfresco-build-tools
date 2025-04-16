@@ -110,7 +110,8 @@ jobs:
       - name: Request token
         if: ${{ inputs.create_oidc_token_file }}
         run: |
-          IDTOKEN=$(curl -H "Authorization: bearer  ${{steps.token.outputs.TOKEN}}" ${{steps.token.outputs.IDTOKENURL}}  -H "Accept: application/json; api-version=2.0" -H "Content-Type: application/json" -d "{}" | jq -r '.value')
+          AUDIENCE="sts.amazonaws.com"
+          IDTOKEN=$(curl -H "Authorization: bearer  ${{steps.token.outputs.TOKEN}}" ${{steps.token.outputs.IDTOKENURL}}  -H "Accept: application/json; api-version=2.0" -H "Content-Type: application/json" -d "{\"audience\": \"${AUDIENCE}\"}" | jq -r '.value')
           echo $IDTOKEN
           jwtd() {
               if [[ -x $(command -v jq) ]]; then
