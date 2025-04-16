@@ -80,7 +80,7 @@ jobs:
       RANCHER2_SECRET_KEY: ${{ secrets.RANCHER2_SECRET_KEY }}
       RANCHER2_URL: ${{ vars.RANCHER2_URL }}
       RESOURCE_NAME: ${{ vars.RESOURCE_NAME }}
-      AWS_WEB_IDENTITY_TOKEN_FILE: idtoken.json
+      AWS_WEB_IDENTITY_TOKEN_FILE: /github/workspace/idtoken.json
       TERRAFORM_HTTP_CREDENTIALS: |
         github.com/Alfresco=alfresco-build:${{ secrets.BOT_GITHUB_TOKEN }}
       TERRAFORM_PRE_RUN: |
