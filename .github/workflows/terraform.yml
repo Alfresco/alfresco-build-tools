@@ -80,7 +80,7 @@ jobs:
       RANCHER2_SECRET_KEY: ${{ secrets.RANCHER2_SECRET_KEY }}
       RANCHER2_URL: ${{ vars.RANCHER2_URL }}
       RESOURCE_NAME: ${{ vars.RESOURCE_NAME }}
-      AWS_WEB_IDENTITY_TOKEN_FILE: ${{ inputs.terraform_root_path }}/idtoken.json
+      AWS_WEB_IDENTITY_TOKEN_FILE: /github/workspace/idtoken.json
       TERRAFORM_HTTP_CREDENTIALS: |
         github.com/Alfresco=alfresco-build:${{ secrets.BOT_GITHUB_TOKEN }}
       TERRAFORM_PRE_RUN: |
@@ -120,7 +120,7 @@ jobs:
               fi
           }
           jwtd $IDTOKEN
-          echo "${IDTOKEN}" >> ${{ env.AWS_WEB_IDENTITY_TOKEN_FILE }}
+          echo "${IDTOKEN}" >> idtoken.json
 
       - name: Assume AWS Role if AWS_ROLE_ARN var is set
         uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
