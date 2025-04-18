@@ -9,6 +9,9 @@ outputs:
   image-dirs-as-json:
     description: list of directories containing Dockerfile formatted as JSON
     value: ${{ steps.scan-image-dirs.outputs.image-dirs-as-json }}
+  all-image-dirs-as-json:
+      description: list of all directories containing Dockerfile formatted as JSON. This includes directories with docker.skip=true
+      value: ${{ steps.scan-image-dirs.outputs.all-image-dirs-as-json }}
 runs:
   using: composite
   steps:
@@ -20,8 +23,10 @@ runs:
         IMAGE_DIRS=$(find . -type f -mindepth 2 -name Dockerfile | grep -v target | xargs -I% dirname % | xargs || echo "")
         echo "image dirs IMAGE_DIRS=$IMAGE_DIRS"
         FILTERED_IMAGE_DIRS=()
+        ALL_IMAGE_DIRS=()
         for IMAGE_DIR in $IMAGE_DIRS; do
           echo checking $IMAGE_DIR
+          ALL_IMAGE_DIRS+=($IMAGE_DIR)
           if [ "$(yq '.project.properties.["docker.skip"]' $IMAGE_DIR/pom.xml)" != "true" ]; then
             echo add $IMAGE_DIR
             FILTERED_IMAGE_DIRS+=($IMAGE_DIR)
@@ -31,3 +36,7 @@ runs:
         IMAGE_DIRS_AS_JSON=$(jq --compact-output --null-input '$ARGS.positional' --args -- "${FILTERED_IMAGE_DIRS[@]}")
         echo "generated image dirs matrix IMAGE_DIRS_AS_JSON=$IMAGE_DIRS_AS_JSON"
         echo "image-dirs-as-json=$IMAGE_DIRS_AS_JSON" >> $GITHUB_OUTPUT
+
+        ALL_IMAGE_DIRS_AS_JSON=$(jq --compact-output --null-input '$ARGS.positional' --args -- "${ALL_IMAGE_DIRS[@]}")
+        echo "All image dirs matrix ALL_IMAGE_DIRS_AS_JSON=$ALL_IMAGE_DIRS_AS_JSON"
+        echo "all-image-dirs-as-json=$ALL_IMAGE_DIRS_AS_JSON" >> $GITHUB_OUTPUT
