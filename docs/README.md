@@ -1868,9 +1868,23 @@ Reusable workflow which implements an opinionated workflow to manage terraform
 repositories leveraging [dflook/terraform-github-actions](https://github.com/dflook/terraform-github-actions),
 optionally allowing a multi-state approach for managing resources.
 
-This workflow assumes a GitHub environment named `production` to be present when
-run against the `main` branch, and a `develop` GitHub environment to be present when
+You can provide Github environment name with `terraform_env` input if not this
+workflow assumes a GitHub environment named `production` to be present when run
+against the `main` branch, and a `develop` GitHub environment to be present when
 run against the `develop` branch.
+
+Using below input is a alternative option to setting the `AWS_ROLE_ARN`.
+Setting `create_oidc_token_file` input to `true` triggers creation of oidc token
+which is saved into file and can be used on terraform side e.g. like this:
+
+```tf
+backend "s3" {
+  assume_role_with_web_identity = {
+    role_arn                = "arn:aws:iam::372466110691:role/AlfrescoCI/alfresco-common-resources-deploy"
+    web_identity_token_file = "/github/workspace/idtoken.json"
+  }
+}
+```
 
 GitHub environments must be configured with the following variables:
 

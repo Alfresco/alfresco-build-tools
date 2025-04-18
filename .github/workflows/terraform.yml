@@ -12,6 +12,15 @@ on:
         description: the terraform operation to perform (apply or destroy)
         type: string
         required: false
+      terraform_env:
+        description: the terraform environment to use (e.g. dev, staging, prod)
+        type: string
+        required: false
+      create_oidc_token_file:
+        description: whether to create a file with the OIDC token
+        type: boolean
+        required: false
+        default: false
     secrets:
       AWS_ACCESS_KEY_ID:
         required: false
@@ -38,7 +47,9 @@ jobs:
         run: |
           BRANCH_NAME=${{ github.base_ref || github.ref_name }}
           BRANCH_LOWER=${BRANCH_NAME,,}
-          if [ "$BRANCH_LOWER" == "main" ]; then
+          if [ -n "${{ inputs.terraform_env }}" ]; then
+            environment=${{ inputs.terraform_env }}
+          elif [ "$BRANCH_LOWER" == "main" ]; then
             environment="production"
           elif [ "$BRANCH_LOWER" == "develop" ]; then
             environment="develop"
@@ -84,6 +95,24 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ github.event_name == 'issue_comment' && env.PR_CHECKOUT_REF || '' }}
+
+      - name: Install OIDC Client from Core Package
+        if: ${{ inputs.create_oidc_token_file }}
+        run: npm install @actions/core@1.11.0 @actions/http-client@2.2.3
+
+      - name: Request token
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        if: ${{ inputs.create_oidc_token_file }}
+        id: idtoken
+        with:
+          script: |
+            const coredemo = require('@actions/core')
+            let id_token = await coredemo.getIDToken("sts.amazonaws.com")
+            coredemo.setOutput('id_token', id_token)
+
+      - name: Save token to file
+        if: ${{ inputs.create_oidc_token_file }}
+        run: echo "${{ steps.idtoken.outputs.id_token }}" >> idtoken.json
 
       - name: Assume AWS Role if AWS_ROLE_ARN var is set
         uses: aws-actions/configure-aws-credentials@ececac1a45f3b08a01d2dd070d28d111c5fe6722 # v4.1.0
