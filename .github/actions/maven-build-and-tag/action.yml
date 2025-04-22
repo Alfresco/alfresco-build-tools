@@ -358,7 +358,7 @@ runs:
     - name: Save project artifacts
       uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
-        path: ~/.m2/repository/com/alfresco**/{{ steps.get-current-pom-version.outputs.current-version }}
+        path: ~/.m2/repository/com/alfresco/**/${{ steps.get-current-pom-version.outputs.current-version }}
         key: ${{ inputs.maven-project-artifacts-key }}
 
     - name: Clean m2 cache
