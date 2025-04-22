@@ -140,6 +140,7 @@ runs:
           ${{ runner.os }}-maven-
 
     - uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      if: inputs.maven-project-artifacts-key != ''
       with:
         path: ~/.m2/repository
         key: ${{ inputs.maven-project-artifacts-key }}
@@ -356,6 +357,7 @@ runs:
         echo "current-version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
 
     - name: Save project artifacts
+      if: inputs.maven-project-artifacts-key != ''
       uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
         path: ~/.m2/repository/com/alfresco/**/${{ steps.get-current-pom-version.outputs.current-version }}
