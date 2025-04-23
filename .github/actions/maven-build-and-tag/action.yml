@@ -116,6 +116,10 @@ inputs:
     description: Whether the checkout step should be skipped or not
     required: false
     default: 'false'
+  skip-tag:
+    description: Whether the tag creation step should be skipped or not
+    required: false
+    default: 'false'
 
 
 outputs:
@@ -335,7 +339,7 @@ runs:
         commit-message: "release $VERSION"
 
     - name: Create and push tag
-      if: github.event_name == 'push'
+      if: github.event_name == 'push' && inputs.skip-tag != 'true'
       shell: bash
       run: |
         git tag -a $VERSION -m "Release version $VERSION"
