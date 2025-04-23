@@ -20,21 +20,21 @@ jobs:
 
           - name: Fetch next version
             run: |
-              echo "VERSION=$(cat version.txt)" >> $GITHUB_ENV
+              echo "VERSION=$(cat version.txt)" >> "$GITHUB_ENV"
 
           - name: Check if release is necessary
             id: release_guard
             run: |
               if git tag | grep -q "^${VERSION}$"; then
-                echo "do_release=false" >> $GITHUB_OUTPUT
+                echo "do_release=false" >> "$GITHUB_OUTPUT"
               else
-                echo "do_release=true" >> $GITHUB_OUTPUT
+                echo "do_release=true" >> "$GITHUB_OUTPUT"
               fi
 
           - name: Apply release changes
             if: steps.release_guard.outputs.do_release == 'true'
             run: |
-              ./release.sh $VERSION
+              ./release.sh "$VERSION"
 
           - uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5.2.0
             with:

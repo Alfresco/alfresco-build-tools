@@ -83,18 +83,20 @@ jobs:
     steps:
       - name: Compute Release conditions
         id: compute
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           SHOULD_RELEASE=false
           RELEASE_BRANCHES="${{ inputs.release-branches }}"
           if [[ -z "$RELEASE_BRANCHES" ]]; then
             RELEASE_BRANCHES="^${{ github.event.repository.default_branch }}$"
           fi
-          if [[ ! "${{ github.event.head_commit.message }}" =~ \[no-release\] ]] && [[ "${{ github.ref_name }}" =~ $RELEASE_BRANCHES ]]; then
-            if [[ "${{ inputs.auto-release }}" == "true" ]] || [[  "${{ github.event.head_commit.message }}" =~ \[release\] ]]; then
+          if [[ ! "${COMMIT_MESSAGE}" =~ \[no-release\] ]] && [[ "${{ github.ref_name }}" =~ $RELEASE_BRANCHES ]]; then
+            if [[ "${{ inputs.auto-release }}" == "true" ]] || [[  "${COMMIT_MESSAGE}" =~ \[release\] ]]; then
               SHOULD_RELEASE=true
             fi
           fi
-          echo "should_release=${SHOULD_RELEASE}" >> $GITHUB_OUTPUT
+          echo "should_release=${SHOULD_RELEASE}" >> "$GITHUB_OUTPUT"
     outputs:
       should_release: ${{ steps.compute.outputs.should_release }}
 
