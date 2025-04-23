@@ -227,6 +227,7 @@ runs:
         property-to-update: ${{ inputs.property-to-update }}
         maven-cli-opts: ${{ steps.compute-maven-options.outputs.result }}
         version: ${{ steps.set-preview-version.outputs.preview-version }}
+        prerelease-type: 'temp'
       env:
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
