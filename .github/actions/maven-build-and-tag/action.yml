@@ -273,7 +273,7 @@ runs:
       id: define_maven_command
       shell: bash
       run: |
-        if [ $MAVEN_COMMAND == '' ]
+        if [ "$MAVEN_COMMAND" == '' ]
         then
           if [ $DO_PUSH == 'true' ]
           then
