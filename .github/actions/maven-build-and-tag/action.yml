@@ -120,6 +120,10 @@ inputs:
     description: Whether the tag creation step should be skipped or not
     required: false
     default: 'false'
+  skip-depency-graph:
+    description: Whether the dependency graph submission step should be skipped or not
+    required: false
+    default: 'false'
 
 
 outputs:
@@ -347,7 +351,7 @@ runs:
         git push origin $VERSION
 
     - name: Submit Dependency Graph
-      if: github.event_name == 'push'
+      if: github.event_name == 'push' && inputs.skip-depency-graph != 'true'
       uses: advanced-security/maven-dependency-submission-action@aeab9f885293af501bae8bdfe88c589528ea5e25 # v4.1.2
       env:
         MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
