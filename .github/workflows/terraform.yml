@@ -46,7 +46,7 @@ jobs:
             echo "$BRANCH_LOWER doesn't have a matching environment"
             exit 1
           fi
-          echo "environment_name=${environment}" >> $GITHUB_OUTPUT
+          echo "environment_name=${environment}" >> "$GITHUB_OUTPUT"
     outputs:
       environment_name: ${{ steps.basic_vars.outputs.environment_name }}
 

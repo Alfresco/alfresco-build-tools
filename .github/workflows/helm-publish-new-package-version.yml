@@ -54,12 +54,12 @@ jobs:
         env:
           VERSION: ${{ steps.next-release.outputs.next-prerelease }}
         run: |
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 
       - name: Update chart version
         uses: Alfresco/alfresco-build-tools/.github/actions/helm-update-chart-version@v8.18.2
         with:
-          new-version: ${{env.VERSION}}
+          new-version: ${{ env.VERSION }}
           chart-dir: ${{ inputs.chart-dir }}
           helm-docs-version: ${{ inputs.helm-docs-version }}
 
@@ -70,7 +70,7 @@ jobs:
           commit-message: "release $VERSION"
 
       - name: Create local tag
-        run: git tag -a $VERSION -m "Release version $VERSION"
+        run: git tag -a "$VERSION" -m "Release version $VERSION"
 
       - name: Package Helm Chart
         id: package-helm-chart
@@ -79,7 +79,7 @@ jobs:
           chart-dir: ${{ inputs.chart-dir }}
 
       - name: Push tag
-        run: git push origin $VERSION
+        run: git push origin "$VERSION"
 
       - name: Publish Helm chart
         uses: Alfresco/alfresco-build-tools/.github/actions/helm-publish-chart@v8.18.2

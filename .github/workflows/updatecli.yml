@@ -29,7 +29,7 @@ jobs:
         run: |
           FILES_JSON=$(find .updatecli/values/github_releases -type f -exec basename {} \; | jq -R -s -c 'split("\n")[:-1]')
           echo "Files: $FILES_JSON"
-          echo "matrix=$FILES_JSON" >> $GITHUB_OUTPUT
+          echo "matrix=$FILES_JSON" >> "$GITHUB_OUTPUT"
 
   update-github-releases:
     needs: build-matrix-github-releases
