@@ -80,7 +80,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@7fe2ba29289759f9b5d5074a2b87c4a9e583988c
+    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@a79d744c1011469a0058f96aa11347d0ba9454cf
       with:
         java-version: ${{ inputs.java-version }}
         java-distribution: ${{ inputs.java-distribution }}
