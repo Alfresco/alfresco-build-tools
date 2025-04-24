@@ -1,0 +1,69 @@
+name: Maven Tag
+description: Updates POM files to the next pre-release, commits changes, and creates a Git tag.
+inputs:
+  java-version:
+    description: Java version to use.
+    required: true
+  maven-version:
+    description: Maven version to use.
+    required: true
+  maven-build-cache-key:
+    description: Maven build cache key.
+    required: true
+  property-to-update:
+    description: Maven property to update.
+    required: true
+  prerelease-type:
+    description: Pre-release type.
+    required: false
+    default: alpha
+  maven-username:
+    description: Maven username for authentication.
+    required: true
+  maven-password:
+    description: Maven password for authentication.
+    required: true
+  git-username:
+    description: Git username for committing changes.
+    required: true
+  version:
+    description: Version to tag.
+    required: true
+
+outputs:
+  tag:
+    description: The updated version from the POM file.
+    value: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@7d08fbbe83f0157925aaa82cc0a96376f8ead9c1
+      id: maven-configure
+      with:
+        java-version: ${{ inputs.java-version }}
+        maven-version: ${{ inputs.maven-version }}
+        maven-build-cache-key: ${{ inputs.maven-build-cache-key }}
+
+    - name: Update pom files to the new version
+      id: update-pom-to-next-version
+      uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@7fe2ba29289759f9b5d5074a2b87c4a9e583988c
+      with:
+        property-to-update: ${{ inputs.property-to-update }}
+        maven-cli-opts: ${{ steps.maven-configure.outputs.maven-options }}
+        prerelease-type: ${{ inputs.prerelease-type }}
+      env:
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
+
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v8.18.0
+      with:
+        username: ${{ inputs.git-username }}
+        add-options: -u
+        commit-message: "release ${{ inputs.version }}"
+
+    - name: Create and push tag
+      shell: bash
+      run: |
+        git tag -a ${{ inputs.version }} -m "Release version ${{ inputs.version }}"
+        git push origin ${{ inputs.version }}
