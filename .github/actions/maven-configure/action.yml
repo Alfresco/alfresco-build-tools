@@ -41,6 +41,11 @@ inputs:
     required: false
     default: 'preview'
 
+outputs:
+  maven-options:
+    description: Computed Maven options.
+    value: ${{ steps.compute-maven-options.outputs.result }}
+
 runs:
   using: composite
   steps:
