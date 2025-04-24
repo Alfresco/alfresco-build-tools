@@ -31,9 +31,12 @@ inputs:
     required: true
 
 outputs:
-  tag:
+  version:
     description: The updated version from the POM file.
     value: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
+  skip-tests:
+    description: Whether to skip tests.
+    value: ${{steps.maven-configure.outputs.skip-tests}}
 
 runs:
   using: "composite"

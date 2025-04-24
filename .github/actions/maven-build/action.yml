@@ -73,22 +73,13 @@ inputs:
   jacoco-report-options:
     description: Jacoco report options
     required: false
-  upload-artifact-name:
+  upload-target-folder-artifact-name:
     description: The name of the artifact to upload the target folders
     required: false
-
-outputs:
-  version:
-    description: "The version of the new tag created by this workflow"
-    value: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
-  skip-tests:
-    description: "Whether tests were skipped during build or not"
-    value: ${{ steps.set-skip-tests-env-variable.outputs.skip-tests }}
 
 runs:
   using: composite
   steps:
-
     - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@7fe2ba29289759f9b5d5074a2b87c4a9e583988c
       with:
         java-version: ${{ inputs.java-version }}
@@ -192,10 +183,10 @@ runs:
         mvn jacoco:report ${{ jacoco-report-options }}
 
     - name: Upload target folders
-      if: inputs.upload-artifact-name != ''
+      if: inputs.upload-target-folder-artifact-name != ''
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        name: ${{ inputs.upload-artifact-name }}
+        name: ${{ inputs.upload-target-folder-artifact-name }}
         path: |
           ${{ github.workspace }}/**/target
           !${{ github.workspace }}/**/target/surefire-reports
