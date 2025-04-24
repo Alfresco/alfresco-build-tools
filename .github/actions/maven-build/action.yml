@@ -180,7 +180,7 @@ runs:
       if: inputs.jacoco-report-options != ''
       shell: bash
       run: |
-        mvn jacoco:report ${{ jacoco-report-options }}
+        mvn jacoco:report ${{ inputs.jacoco-report-options }}
 
     - name: Upload target folders
       if: inputs.upload-target-folder-artifact-name != ''
