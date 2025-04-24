@@ -39,6 +39,9 @@ outputs:
   maven-options:
     description: Computed Maven options.
     value: ${{ steps.compute-maven-options.outputs.result }}
+  skip-tests:
+    description: Whether to skip tests.
+    value: ${{ steps.set-skip-tests-env-variable.outputs.skip-tests }}
 
 runs:
   using: composite
