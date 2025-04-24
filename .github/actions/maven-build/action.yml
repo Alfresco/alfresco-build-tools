@@ -183,7 +183,7 @@ runs:
 
     - name: Upload M2 Build artifacts
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-      if: upload-m2-current-build-artifacts-name != ''
+      if: inputs.upload-m2-current-build-artifacts-name != ''
       with:
         name: ${{ inputs.upload-m2-current-build-artifacts-name }}
         path: ~/.m2/repository/${{inputs.upload-m2-inclusion-pattern}}
