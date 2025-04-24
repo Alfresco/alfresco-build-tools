@@ -22,12 +22,6 @@ inputs:
     description: The label to skip Maven build cache.
     required: false
     default: 'maven-build-cache-skip'
-  maven-project-artifacts-key:
-    description: The key to restore Maven project artifacts.
-    required: false
-  maven-project-artifacts-restore-key:
-    description: The restore key for Maven project artifacts.
-    required: false
   skip-tests-label:
     description: The label to skip tests.
     required: false
@@ -55,14 +49,6 @@ runs:
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-maven-
-
-    - uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
-      if: inputs.maven-project-artifacts-key != ''
-      with:
-        path: ~/.m2/repository
-        key: ${{ inputs.maven-project-artifacts-key }}
-        restore-keys: |
-          ${{ inputs.maven-project-artifacts-restore-key }}
 
     - name: Set up JDK
       uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4.7.0
