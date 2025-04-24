@@ -9,10 +9,10 @@ inputs:
     required: true
   maven-build-cache-key:
     description: Maven build cache key.
-    required: true
+    required: false
   property-to-update:
     description: Maven property to update.
-    required: true
+    required: false
   prerelease-type:
     description: Pre-release type.
     required: false
