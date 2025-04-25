@@ -177,8 +177,9 @@ runs:
       with:
         name: ${{ inputs.upload-target-folder-artifact-name }}
         path: |
-          ${{ github.workspace }}/**/target
-          !${{ github.workspace }}/**/target/surefire-reports
+          ${{ github.workspace }}/**/target/classes
+          ${{ github.workspace }}/**/target/test-classes
+          ${{ github.workspace }}/**/target/site
         retention-days: 7
 
     - name: Upload M2 Build artifacts
