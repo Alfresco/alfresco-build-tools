@@ -48,9 +48,6 @@ inputs:
   docker-password:
     description: Docker.io password
     required: false
-  git-username:
-    description: The username to commit on the git repository
-    required: true
   verbose:
     description: Whether additional logs should be displayed (maven download logs for instance)
     required: false

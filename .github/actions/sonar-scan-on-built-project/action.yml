@@ -1,0 +1,72 @@
+name: SonarQube Scan
+description: >-
+    Reusable action for running SonarQube scans with Maven on projects that were already built in prior jobs
+    and have their artifacts available in the workspace. This action is designed to be used in conjunction with
+    maven-build actions and will start by downloading the target and m2 artifacts uploaded by the maven-build action.
+
+inputs:
+  sonar-host-url:
+    description: The SonarQube host URL.
+    required: false
+    default: 'https://sonarcloud.io'
+  sonar-organization:
+    description: The SonarQube organization.
+    required: false
+    default: 'alfresco'
+  sonar-project:
+    description: The SonarQube project key.
+    required: true
+  sonar-coverage-jacoco-xmlReportPaths:
+    description: Path to the JaCoCo XML report for SonarQube coverage.
+    required: false
+    default: '**/target/site/jacoco-*/jacoco.xml'
+  m2-uploaded-group-path:
+    description: The path to the group id uploaded from m2 repository
+    required: true
+  nexus-username:
+    description: Nexus username for Maven authentication.
+    required: true
+  nexus-password:
+    description: Nexus password for Maven authentication.
+    required: true
+  sonar-token:
+    description: SonarQube token for authentication.
+    required: true
+  ghcr-username:
+    description: GitHub Container Registry username.
+    required: true
+  ghcr-password:
+    description: GitHub Container Registry password.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Download target
+      uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+      with:
+        pattern: target*
+        merge-multiple: true
+
+    - name: Download M2 build artifacts
+      uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+      with:
+        pattern: m2*
+        merge-multiple: true
+        path: ${{ inputs.m2-uploaded-group-path }}
+
+    - name: SonarQube Scan
+      uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ad72f579036e6c52e1eda644b8cca41d1da70bff
+      env:
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
+      with:
+        maven-command: >-
+          sonar:sonar
+          -Dsonar.host.url=${{ inputs.sonar-host-url }}
+          -Dsonar.organization=${{ inputs.sonar-organization }}
+          -Dsonar.projectKey=${{ inputs.sonar-project }}
+          -Dsonar.coverage.jacoco.xmlReportPaths=${{ inputs.sonar-coverage-jacoco-xmlReportPaths }}
+        maven-username: ${{ inputs.nexus-username }}
+        maven-password: ${{ inputs.nexus-password }}
+        ghcr-username: ${{ inputs.ghcr-username }}
+        ghcr-password: ${{ inputs.ghcr-password }}
