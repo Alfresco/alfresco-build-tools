@@ -201,7 +201,7 @@ runs:
       id: m2-inclusion-pattern
       shell: bash
       env:
-        VERSION=${{ steps.project-info.outputs.version }}
+        VERSION: ${{ steps.project-info.outputs.version }}
       run: |
         M2_GROUP_PATH="$(yq e '.project.groupId | sub("\.", "/")' pom.xml)"
         INCLUSION_PATTERN="~/.m2/repository/${M2_GROUP_PATH}/**/${VERSION}"
