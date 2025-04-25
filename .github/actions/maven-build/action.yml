@@ -220,7 +220,7 @@ runs:
       if: github.event_name == 'push'
       shell: bash
       env:
-        EXCLUSION_PATTERN: ${{ inputs.maven-cache-exclusion-pattern }}
+        EXCLUSION_PATTERN: ${{ inputs.m2-cache-exclusion-pattern }}
       run: |
         if [ "$EXCLUSION_PATTERN" == '' ]
         then
