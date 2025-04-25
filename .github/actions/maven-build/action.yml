@@ -76,15 +76,22 @@ inputs:
   upload-target-folder-artifact-name:
     description: The name of the artifact to upload the target folders
     required: false
-  maven-cache-exclusion-pattern:
-    description: The exclusion pattern for the maven cache
+  m2-cache-exclusion-pattern:
+    description: The exclusion pattern to be applied while creating cache for the Maven m2 repository. By default `organ/activiti` and `com/alfresco` are excluded
     required: false
-  upload-m2-current-build-artifacts-name:
+  m2-current-build-artifacts-upload-name:
     description: The name of the artifact to upload m2 repository related to artifacts produced by the current build
     required: false
-  upload-m2-inclusion-pattern:
-    description: The inclusion pattern for the m2 cache
+  uploaded-artifacts-retention-days:
+    description: The number of days to retain the uploaded artifacts
     required: false
+    default: 7
+
+  outputs:
+    m2-uploaded-group-path:
+      description: The path to the group id uploaded from m2 repository
+      value: ${{ steps.m2-inclusion-pattern.outputs.group-path }}
+
 
 runs:
   using: composite
@@ -101,11 +108,19 @@ runs:
         verbose: ${{ inputs.verbose }}
         preview-label: ${{ inputs.preview-label }}
 
+    - name: Get project information
+      id: project-info
+      shell: bash
+      run: |
+        VERSION=$(yq e '.project.version' pom.xml)
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
     - name: Set version env variable
       if: github.event_name == 'push' || env.IS_PREVIEW == 'true'
       shell: bash
+      env:
+        VERSION: ${{ steps.project-info.outputs.version }}
       run: |
-        VERSION=$(yq -p=xml e '.project.version' pom.xml)
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "## 📋 Built version: $VERSION" >> $GITHUB_STEP_SUMMARY
 
@@ -180,15 +195,26 @@ runs:
           ${{ github.workspace }}/**/target/classes
           ${{ github.workspace }}/**/target/test-classes
           ${{ github.workspace }}/**/target/site
-        retention-days: 7
+        retention-days: ${{ inputs.uploaded-artifacts-retention-days }}
+
+    - name: Get m2 inclusion pattern
+      id: m2-inclusion-pattern
+      shell: bash
+      env:
+        VERSION=${{ steps.project-info.outputs.version }}
+      run: |
+        M2_GROUP_PATH="$(yq e '.project.groupId | sub("\.", "/")' pom.xml)"
+        INCLUSION_PATTERN="~/.m2/repository/${M2_GROUP_PATH}/**/${VERSION}"
+        echo "group-path=$M2_GROUP_PATH" >> $GITHUB_OUTPUT
+        echo "pattern=$INCLUSION_PATTERN" >> $GITHUB_OUTPUT
 
     - name: Upload M2 Build artifacts
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       if: inputs.upload-m2-current-build-artifacts-name != ''
       with:
         name: ${{ inputs.upload-m2-current-build-artifacts-name }}
-        path: ~/.m2/repository/${{inputs.upload-m2-inclusion-pattern}}
-        retention-days: 7
+        path: ${{ steps.m2-inclusion-pattern.outputs.pattern }}
+        retention-days: ${{ inputs.uploaded-artifacts-retention-days }}
 
     - name: Clean m2 cache
       if: github.event_name == 'push'
