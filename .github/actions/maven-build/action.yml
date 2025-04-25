@@ -210,9 +210,9 @@ runs:
 
     - name: Upload M2 Build artifacts
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-      if: inputs.upload-m2-current-build-artifacts-name != ''
+      if: inputs.m2-current-build-artifacts-upload-name!= ''
       with:
-        name: ${{ inputs.upload-m2-current-build-artifacts-name }}
+        name: ${{ inputs.m2-current-build-artifacts-upload-name}}
         path: ${{ steps.m2-inclusion-pattern.outputs.pattern }}
         retention-days: ${{ inputs.uploaded-artifacts-retention-days }}
 
