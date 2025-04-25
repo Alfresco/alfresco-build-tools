@@ -195,7 +195,14 @@ runs:
       shell: bash
       env:
         EXCLUSION_PATTERN: ${{ inputs.maven-cache-exclusion-pattern }}
-      run: rm -fr ~/.m2/repository/${EXCLUSION_PATTERN}
+      run: |
+        if [ "$EXCLUSION_PATTERN" == '' ]
+        then
+          rm -fr ~/.m2/repository/org/activiti
+          rm -fr ~/.m2/repository/com/alfresco
+        else
+          rm -fr ~/.m2/repository/${EXCLUSION_PATTERN}
+        fi
 
     - name: Save maven cache
       uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
