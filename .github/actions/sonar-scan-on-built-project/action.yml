@@ -38,6 +38,14 @@ inputs:
   ghcr-password:
     description: GitHub Container Registry password.
     required: true
+  maven-version:
+    description: Maven version to setup, i.e. 3.9+ for Maven Build Cache extension
+    required: false
+    default: ''
+  java-version:
+    description: The Java version to perform the build
+    required: false
+    default: '11'
 
 runs:
   using: composite
@@ -70,3 +78,5 @@ runs:
         maven-password: ${{ inputs.nexus-password }}
         ghcr-username: ${{ inputs.ghcr-username }}
         ghcr-password: ${{ inputs.ghcr-password }}
+        maven-version: ${{ inputs.maven-version }}
+        java-version: ${{ inputs.java-version }}
