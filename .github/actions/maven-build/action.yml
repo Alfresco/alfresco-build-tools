@@ -87,10 +87,10 @@ inputs:
     required: false
     default: 7
 
-  outputs:
-    m2-uploaded-group-path:
-      description: The path to the group id uploaded from m2 repository
-      value: ${{ steps.m2-inclusion-pattern.outputs.group-path }}
+outputs:
+  m2-uploaded-group-path:
+    description: The path to the group id uploaded from m2 repository
+    value: ${{ steps.m2-inclusion-pattern.outputs.group-path }}
 
 
 runs:
