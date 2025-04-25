@@ -202,9 +202,10 @@ runs:
       env:
         VERSION: ${{ steps.project-info.outputs.version }}
       run: |
-        M2_GROUP_PATH="$(yq e '.project.groupId | sub("\.", "/")' pom.xml)"
-        INCLUSION_PATTERN="~/.m2/repository/${M2_GROUP_PATH}/**/${VERSION}"
-        echo "group-path=$M2_GROUP_PATH" >> $GITHUB_OUTPUT
+        M2_GROUP_RELATIVE_PATH="$(yq e '.project.groupId | sub("\.", "/")' pom.xml)"
+        M2_GROUP_FULL_PATH="~/.m2/repository/${M2_GROUP_RELATIVE_PATH}"
+        INCLUSION_PATTERN="${M2_GROUP_FULL_PATH}/**/${VERSION}"
+        echo "group-path=$M2_GROUP_FULL_PATH" >> $GITHUB_OUTPUT
         echo "pattern=$INCLUSION_PATTERN" >> $GITHUB_OUTPUT
 
     - name: Upload M2 Build artifacts
