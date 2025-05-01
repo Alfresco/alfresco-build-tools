@@ -83,6 +83,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [process-coverage-report](#process-coverage-report)
     - [pipenv](#pipenv)
     - [rancher](#rancher)
+    - [release-notes-aggregator](#release-notes-aggregator)
     - [reportportal-prepare](#reportportal-prepare)
     - [reportportal-summarize](#reportportal-summarize)
     - [resolve-preview-name](#resolve-preview-name)
@@ -1294,6 +1295,21 @@ AWS credentials are required only when registering the cluster.
           aws-access-key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: "us-east-2"
+```
+
+### release-notes-aggregator
+
+The action allows to aggregate an external release note into the current one
+
+```yaml
+      - name: Release Notes Aggregate
+        uses: Alfresco/alfresco-build-tools/.github/actions/release-notes-aggregator@ref
+        with:
+          externalRepo: 'external-repo'
+          generateRNfromVersion: ${{ env.FROM_EXTERNAL_RELEASE_TAG }}
+          generateRNtoVersion: ${{ env.TO_EXTERNAL_RELEASE_TAG }}
+          releaseId: ${{ env.RELEASE_ID }}
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
 ```
 
 ### reportportal-prepare
