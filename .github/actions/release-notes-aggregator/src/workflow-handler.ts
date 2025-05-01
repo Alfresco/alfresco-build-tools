@@ -19,48 +19,10 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import { debug } from './debug'
 
-export enum WorkflowRunStatus {
-  QUEUED = 'queued',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed'
-}
-
-const ofStatus = (status: string | null): WorkflowRunStatus => {
-  if (!status) {
-    return WorkflowRunStatus.QUEUED
-  }
-  const key = status.toUpperCase() as keyof typeof WorkflowRunStatus
-  return WorkflowRunStatus[key]
-}
-
-export enum WorkflowRunConclusion {
-  SUCCESS = 'success',
-  FAILURE = 'failure',
-  CANCELLED = 'cancelled',
-  SKIPPED = 'skipped',
-  NEUTRAL = 'neutral',
-  TIMED_OUT = 'timed_out',
-  ACTION_REQUIRED = 'action_required'
-}
-
-const ofConclusion = (conclusion: string | null): WorkflowRunConclusion => {
-  if (!conclusion) {
-    return WorkflowRunConclusion.NEUTRAL
-  }
-  const key = conclusion.toUpperCase() as keyof typeof WorkflowRunConclusion
-  return WorkflowRunConclusion[key]
-}
-
-export interface WorkflowRunResult {
-  id: number,
-  url: string,
-  status: WorkflowRunStatus,
-  conclusion: WorkflowRunConclusion
-}
-
-
 export class WorkflowHandler {
   private octokit: any
+  private releaseNotesExternal: string = '';
+  private aggregatedReleaseNotes: string = '';
 
   constructor(token: string,
     private owner: string,
@@ -74,7 +36,7 @@ export class WorkflowHandler {
     this.octokit = github.getOctokit(token)
   }
 
-  async generateReleaseNotesFromExternalRepo(): Promise<string> {
+  async generateReleaseNotesFromExternalRepo(): Promise<void> {
     try {
       const releaseNotesExternalResponse = await this.octokit.rest.repos.generateReleaseNotes({
         owner: this.owner,
@@ -83,15 +45,49 @@ export class WorkflowHandler {
         previous_tag_name: this.generateRNfromVersion,
       });
 
-      const releaseNotesExternal = releaseNotesExternalResponse.data.body;
-      debug('Release Notes External', releaseNotesExternal)
-
-      return releaseNotesExternal;
+      this.releaseNotesExternal = releaseNotesExternalResponse.data.body;
+      debug('Release Notes External', this.releaseNotesExternal)
 
     } catch (error: any) {
-      debug('Workflow Release Notes from external repo status error', error)
+      debug('External Release Notes in status error', error)
       throw error
     }
+  }
+
+  async aggregateExternalReleaseToCurrentReleaseNotes(): Promise<void> {
+    try {
+      const currentRelease = await this.octokit.rest.repos.getRelease({
+          owner: this.owner,
+          repo: this.repo,
+          release_id: this.releaseId,
+      });
+      debug('Current Release Notes:', currentRelease.data.body);
+
+      // concatenate the external release to the current by using the repo name as a header
+      this.aggregatedReleaseNotes = `${currentRelease.data.body}\n\n---\n\n## ${this.externalRepo}\n\n${this.releaseNotesExternal}`;
+    } catch (error: any) {
+      debug('Release Notes aggregation in status error', error)
+      throw error
+    }
+  }
+
+  async updateReleaseNotes(): Promise<void> {
+    try {
+      await this.octokit.rest.repos.updateRelease({
+          owner: this.owner,
+          repo: this.repo,
+          release_id: this.releaseId,
+          body: this.aggregatedReleaseNotes,
+          draft: false,
+          prerelease: false,
+      });
+    } catch (error: any) {
+      debug('Release Notes update in status error', error)
+      throw error
+    }
+
+    debug(`Conclusion`,`Release notes for the external repo ${this.externalRepo} was aggregated successfully`);
+
   }
 
 }

@@ -24,14 +24,15 @@ async function run(): Promise<void> {
     const args = getArgs()
     const workflowHandler = new WorkflowHandler(args.token, args.owner, args.repo, args.externalRepo, args.generateRNfromVersion, args.generateRNtoVersion, args.releaseId)
 
-    let releaseNotesExternal = ''
     try {
-      releaseNotesExternal = await workflowHandler.generateReleaseNotesFromExternalRepo()
-    } catch(e: any) {
-      core.warning(`Failed to get workflow status: ${e.message}`);
-    }
+      await workflowHandler.generateReleaseNotesFromExternalRepo();
 
-    core.setOutput('releaseNotes', releaseNotesExternal);
+      await workflowHandler.aggregateExternalReleaseToCurrentReleaseNotes();
+
+      await workflowHandler.updateReleaseNotes();
+    } catch(e: any) {
+      core.warning(`Failed to generate the external release note: ${e.message}`);
+    }
 
   } catch (error: any) {
     core.setFailed(error.message)

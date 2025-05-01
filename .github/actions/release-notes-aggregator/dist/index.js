@@ -29335,14 +29335,16 @@ function run() {
         try {
             const args = (0, utils_1.getArgs)();
             const workflowHandler = new workflow_handler_1.WorkflowHandler(args.token, args.owner, args.repo, args.externalRepo, args.generateRNfromVersion, args.generateRNtoVersion, args.releaseId);
-            let releaseNotesExternal = '';
+            let result = '';
             try {
-                releaseNotesExternal = yield workflowHandler.generateReleaseNotesFromExternalRepo();
+                yield workflowHandler.generateReleaseNotesFromExternalRepo();
+                yield workflowHandler.aggregateExternalReleaseToCurrentReleaseNotes();
+                yield workflowHandler.updateReleaseNotes();
             }
             catch (e) {
-                core.warning(`Failed to get workflow status: ${e.message}`);
+                core.warning(`Failed to generate the external release note: ${e.message}`);
             }
-            core.setOutput('releaseNotes', releaseNotesExternal);
+            core.setOutput('releaseNotes', result);
         }
         catch (error) {
             core.setFailed(error.message);
@@ -29496,39 +29498,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.WorkflowHandler = exports.WorkflowRunConclusion = exports.WorkflowRunStatus = void 0;
+exports.WorkflowHandler = void 0;
 const github = __importStar(__nccwpck_require__(5438));
 const debug_1 = __nccwpck_require__(1417);
-var WorkflowRunStatus;
-(function (WorkflowRunStatus) {
-    WorkflowRunStatus["QUEUED"] = "queued";
-    WorkflowRunStatus["IN_PROGRESS"] = "in_progress";
-    WorkflowRunStatus["COMPLETED"] = "completed";
-})(WorkflowRunStatus || (exports.WorkflowRunStatus = WorkflowRunStatus = {}));
-const ofStatus = (status) => {
-    if (!status) {
-        return WorkflowRunStatus.QUEUED;
-    }
-    const key = status.toUpperCase();
-    return WorkflowRunStatus[key];
-};
-var WorkflowRunConclusion;
-(function (WorkflowRunConclusion) {
-    WorkflowRunConclusion["SUCCESS"] = "success";
-    WorkflowRunConclusion["FAILURE"] = "failure";
-    WorkflowRunConclusion["CANCELLED"] = "cancelled";
-    WorkflowRunConclusion["SKIPPED"] = "skipped";
-    WorkflowRunConclusion["NEUTRAL"] = "neutral";
-    WorkflowRunConclusion["TIMED_OUT"] = "timed_out";
-    WorkflowRunConclusion["ACTION_REQUIRED"] = "action_required";
-})(WorkflowRunConclusion || (exports.WorkflowRunConclusion = WorkflowRunConclusion = {}));
-const ofConclusion = (conclusion) => {
-    if (!conclusion) {
-        return WorkflowRunConclusion.NEUTRAL;
-    }
-    const key = conclusion.toUpperCase();
-    return WorkflowRunConclusion[key];
-};
 class WorkflowHandler {
     constructor(token, owner, repo, externalRepo, generateRNfromVersion, generateRNtoVersion, releaseId) {
         this.owner = owner;
@@ -29537,6 +29509,8 @@ class WorkflowHandler {
         this.generateRNfromVersion = generateRNfromVersion;
         this.generateRNtoVersion = generateRNtoVersion;
         this.releaseId = releaseId;
+        this.releaseNotesExternal = '';
+        this.aggregatedReleaseNotes = '';
         // Get octokit client for making API calls
         this.octokit = github.getOctokit(token);
     }
@@ -29549,14 +29523,50 @@ class WorkflowHandler {
                     tag_name: this.generateRNtoVersion,
                     previous_tag_name: this.generateRNfromVersion,
                 });
-                const releaseNotesExternal = releaseNotesExternalResponse.data.body;
-                (0, debug_1.debug)('Release Notes External', releaseNotesExternal);
-                return releaseNotesExternal;
+                this.releaseNotesExternal = releaseNotesExternalResponse.data.body;
+                (0, debug_1.debug)('Release Notes External', this.releaseNotesExternal);
             }
             catch (error) {
-                (0, debug_1.debug)('Workflow Release Notes from external repo status error', error);
+                (0, debug_1.debug)('External Release Notes in status error', error);
                 throw error;
             }
+        });
+    }
+    aggregateExternalReleaseToCurrentReleaseNotes() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const currentRelease = yield this.octokit.rest.repos.getRelease({
+                    owner: this.owner,
+                    repo: this.repo,
+                    release_id: this.releaseId,
+                });
+                (0, debug_1.debug)('Current Release Notes:', currentRelease.data.body);
+                // concatenate the external release to the current by using the repo name as a header
+                this.aggregatedReleaseNotes = `${currentRelease.data.body}\n\n---\n\n## ${this.externalRepo}\n\n${this.releaseNotesExternal}`;
+            }
+            catch (error) {
+                (0, debug_1.debug)('Release Notes aggregation in status error', error);
+                throw error;
+            }
+        });
+    }
+    updateReleaseNotes() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield this.octokit.rest.repos.updateRelease({
+                    owner: this.owner,
+                    repo: this.repo,
+                    release_id: this.releaseId,
+                    body: this.aggregatedReleaseNotes,
+                    draft: false,
+                    prerelease: false,
+                });
+            }
+            catch (error) {
+                (0, debug_1.debug)('Release Notes update in status error', error);
+                throw error;
+            }
+            (0, debug_1.debug)(`Conclusion`, `Release notes for the external repo ${this.externalRepo} was aggregated successfully`);
         });
     }
 }

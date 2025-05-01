@@ -17,19 +17,6 @@ inputs:
     description: 'GitHub Token for accessing GHCR.'
     required: true
 
-outputs:
-  workflow-conclusion:
-    description: 'Conclusion of the triggered workflow'
-  workflow-id:
-    description: 'ID of the triggered workflow'
-  workflow-url:
-    description: 'URL of the triggered workflow'
-  workflow-logs:
-    description: |
-      Logs of the triggered workflow. Based on `inputs.workflow-logs`, format is set to:
-        - `output`: Multiline logs formatted as: '<job-name> | <datetime> <message>'
-        - `json-output`: JSON logs formatted as: '{"<job-name>": [{"<datetime>": "<message>"}]'
-
 runs:
   using: 'node20'
   main: 'dist/index.js'
