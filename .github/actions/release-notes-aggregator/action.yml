@@ -1,16 +1,16 @@
 name: Release Notes Aggregator
 description: 'Creates a release notes by aggregating external repositories release notes.'
 inputs:
-  externalRepo:
+  external-repo:
     description: 'The name of the external repositories to aggregate release notes from'
     required: true
-  generateRNfromVersion:
+  generate-rn-from-version:
     description: 'The version to generate release notes from'
     required: false
-  generateRNtoVersion:
+  generate-rn-to-version:
     description: 'The version to generate release notes to'
     required: false
-  releaseId:
+  release-id:
     description: 'The release ID of the origin repository'
     required: true
   token:
