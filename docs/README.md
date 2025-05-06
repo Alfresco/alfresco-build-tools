@@ -1305,10 +1305,10 @@ The action allows to aggregate an external release note into the current one
       - name: Release Notes Aggregate
         uses: Alfresco/alfresco-build-tools/.github/actions/release-notes-aggregator@ref
         with:
-          externalRepo: 'external-repo'
-          generateRNfromVersion: ${{ env.FROM_EXTERNAL_RELEASE_TAG }}
-          generateRNtoVersion: ${{ env.TO_EXTERNAL_RELEASE_TAG }}
-          releaseId: ${{ env.RELEASE_ID }}
+          external-repo: 'external-repo'
+          generate-rn-from-version: ${{ env.FROM_EXTERNAL_RELEASE_TAG }}
+          generate-rn-to-version: ${{ env.TO_EXTERNAL_RELEASE_TAG }}
+          release-id: ${{ env.RELEASE_ID }}
           github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
 ```
 
