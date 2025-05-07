@@ -5,13 +5,22 @@ inputs:
     description: base directory to be scanned
     required: false
     default: .
+  extra-shortener-pattern:
+    description: >-
+      extra pattern to be removed from the directory name. This is useful for
+      instance to remove a common prefix from the name.
+    required: false
+    default: ""
 outputs:
   image-dirs-as-json:
     description: list of directories containing Dockerfile formatted as JSON
     value: ${{ steps.scan-image-dirs.outputs.image-dirs-as-json }}
-  all-image-dirs-as-json:
-      description: list of all directories containing Dockerfile formatted as JSON. This includes directories with docker.skip=true
-      value: ${{ steps.scan-image-dirs.outputs.all-image-dirs-as-json }}
+  image-dirs-with-metadata:
+      description: >-
+        JSON containing the list of all directories containing Dockerfile including metadata. i.e. path to the directory, whether the docker docker image should be skipped or not
+        and shortened name of the directly (useful for display names in the CI for instance).
+        This includes directories with docker.skip=true
+      value: ${{ steps.scan-image-dirs.outputs.image-dirs-with-metadata }}
 runs:
   using: composite
   steps:
@@ -19,24 +28,44 @@ runs:
       name: Scan Image Dirs
       shell: bash
       working-directory: ${{ inputs.base-directory }}
+      env:
+        EXTRA_SHORTENER_PATTERN: ${{ inputs.extra-shortener-pattern }}
       run: |
         IMAGE_DIRS=$(find . -type f -mindepth 2 -name Dockerfile | grep -v target | xargs -I% dirname % | xargs || echo "")
         echo "image dirs IMAGE_DIRS=$IMAGE_DIRS"
+
         FILTERED_IMAGE_DIRS=()
-        ALL_IMAGE_DIRS=()
+        IMAGE_DIRS_WITH_METADATA="[]"
         for IMAGE_DIR in $IMAGE_DIRS; do
+          export IMAGE_DIR
           echo checking $IMAGE_DIR
-          ALL_IMAGE_DIRS+=($IMAGE_DIR)
+
+          SKIP_DOCKER=true
           if [ "$(yq '.project.properties.["docker.skip"]' $IMAGE_DIR/pom.xml)" != "true" ]; then
+            SKIP_DOCKER=false
+          fi
+          export SKIP_DOCKER
+
+          if [ "$SKIP_DOCKER" = "false" ]; then
             echo add $IMAGE_DIR
             FILTERED_IMAGE_DIRS+=($IMAGE_DIR)
           fi
+
+          IMAGE_DIRS_WITH_METADATA=$(echo $IMAGE_DIRS_WITH_METADATA | yq -o json -I=0 \
+             '. + {"path" : env(IMAGE_DIR), "skip-docker" : env(SKIP_DOCKER), "short-name" : env(IMAGE_DIR) | sub(".*\/", "")}' )
+
         done
+
+        if [ "$EXTRA_SHORTENER_PATTERN" != "" ]; then
+          IMAGE_DIRS_WITH_METADATA=$(echo $IMAGE_DIRS_WITH_METADATA | yq -o json \
+          '. | map(.["short-name"] |= sub(env(EXTRA_SHORTENER_PATTERN), ""))')
+        fi
+
         echo "filtered image dirs FILTERED_IMAGE_DIRS=${FILTERED_IMAGE_DIRS[@]}"
         IMAGE_DIRS_AS_JSON=$(jq --compact-output --null-input '$ARGS.positional' --args -- "${FILTERED_IMAGE_DIRS[@]}")
         echo "generated image dirs matrix IMAGE_DIRS_AS_JSON=$IMAGE_DIRS_AS_JSON"
         echo "image-dirs-as-json=$IMAGE_DIRS_AS_JSON" >> $GITHUB_OUTPUT
 
-        ALL_IMAGE_DIRS_AS_JSON=$(jq --compact-output --null-input '$ARGS.positional' --args -- "${ALL_IMAGE_DIRS[@]}")
-        echo "All image dirs matrix ALL_IMAGE_DIRS_AS_JSON=$ALL_IMAGE_DIRS_AS_JSON"
-        echo "all-image-dirs-as-json=$ALL_IMAGE_DIRS_AS_JSON" >> $GITHUB_OUTPUT
+        echo "Generated dirs matrix with metadata:"
+        echo "$IMAGE_DIRS_WITH_METADATA" | yq -o=json
+        echo "image-dirs-with-metadata=$IMAGE_DIRS_WITH_METADATA" >> $GITHUB_OUTPUT
