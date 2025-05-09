@@ -176,6 +176,7 @@ runs:
       shell: bash
       run: |
         if [ "${{ inputs.jacoco-report-name }}" != "" ]
+        then
           echo "path=${{ github.workspace }}/target/${{ inputs.jacoco-report-name }}.exec" >> $GITHUB_OUTPUT
         fi
 
