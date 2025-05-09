@@ -70,13 +70,13 @@ inputs:
   jacoco-report-options:
     description: Jacoco report additional options
     required: false
-  upload-target-folder-artifact-name:
+  target-folder-upload-name:
     description: The name of the artifact to upload the target folders
     required: false
   m2-cache-exclusion-pattern:
-    description: The exclusion pattern to be applied while creating cache for the Maven m2 repository. By default `organ/activiti` and `com/alfresco` are excluded
+    description: The exclusion pattern to be applied while creating cache for the Maven m2 repository. By default `org/activiti` and `com/alfresco` are excluded
     required: false
-  m2-current-build-artifacts-upload-name:
+  m2-current-build-upload-name:
     description: The name of the artifact to upload m2 repository related to artifacts produced by the current build
     required: false
   uploaded-artifacts-retention-days:
@@ -192,10 +192,10 @@ runs:
         mvn jacoco:report -Djacoco.dataFile=${{ steps.get-jacoco-report-path.outputs.path }} -Djacoco-report-dir-suffix=${{ inputs.jacoco-report-name }} ${{ inputs.jacoco-report-options }}
 
     - name: Upload target folders
-      if: inputs.upload-target-folder-artifact-name != ''
+      if: inputs.target-folder-upload-name != ''
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        name: ${{ inputs.upload-target-folder-artifact-name }}
+        name: ${{ inputs.target-folder-upload-name }}
         path: |
           ${{ github.workspace }}/**/target/classes
           ${{ github.workspace }}/**/target/test-classes
@@ -216,9 +216,9 @@ runs:
 
     - name: Upload M2 Build artifacts
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-      if: inputs.m2-current-build-artifacts-upload-name!= ''
+      if: inputs.m2-current-build-upload-name!= ''
       with:
-        name: ${{ inputs.m2-current-build-artifacts-upload-name}}
+        name: ${{ inputs.m2-current-build-upload-name}}
         path: ${{ steps.m2-inclusion-pattern.outputs.pattern }}
         retention-days: ${{ inputs.uploaded-artifacts-retention-days }}
 
