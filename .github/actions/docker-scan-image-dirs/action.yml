@@ -57,7 +57,7 @@ runs:
         done
 
         if [ "$EXTRA_SHORTENER_PATTERN" != "" ]; then
-          IMAGE_DIRS_WITH_METADATA=$(echo $IMAGE_DIRS_WITH_METADATA | yq -o json \
+          IMAGE_DIRS_WITH_METADATA=$(echo $IMAGE_DIRS_WITH_METADATA | yq -o json -I=0 \
           '. | map(.["short-name"] |= sub(env(EXTRA_SHORTENER_PATTERN), ""))')
         fi
 
