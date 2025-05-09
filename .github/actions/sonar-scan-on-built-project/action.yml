@@ -23,6 +23,14 @@ inputs:
   m2-uploaded-group-path:
     description: The path to the group id uploaded from m2 repository
     required: true
+  target-folder-artifacts-pattern:
+    description: Pattern to match artifacts uploaded from target folder in a previous job.
+    required: false
+    default: 'target*'
+  m2-current-build-artifacts-pattern:
+    description: Pattern to match current build artifacts uploaded from m2 repository from a previous job.
+    required: false
+    default: 'm2*'
   maven-username:
     description: Nexus username for Maven authentication.
     required: true
@@ -53,13 +61,13 @@ runs:
     - name: Download target
       uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
       with:
-        pattern: target*
+        pattern: ${{ inputs.target-folder-artifacts-pattern }}
         merge-multiple: true
 
     - name: Download M2 build artifacts
       uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
       with:
-        pattern: m2*
+        pattern: ${{ inputs.m2-current-build-artifacts-pattern }}
         merge-multiple: true
         path: ${{ inputs.m2-uploaded-group-path }}
 
