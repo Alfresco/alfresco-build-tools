@@ -38,10 +38,10 @@ export function getArgs() {
 
   // Decode inputs, this MUST be a valid JSON string
   const inputs = parse(core.getInput('inputs'))
-  const externalRepo = core.getInput('externalRepo')
-  const generateRNfromVersion = core.getInput('generateRNfromVersion')
-  const generateRNtoVersion = core.getInput('generateRNtoVersion')
-  const releaseId = core.getInput('releaseId')
+  const externalRepo = core.getInput('external-repo')
+  const generateRNfromVersion = core.getInput('from-external-version')
+  const generateRNtoVersion = core.getInput('to-external-version')
+  const releaseId = core.getInput('release-id')
 
   return {
     token,

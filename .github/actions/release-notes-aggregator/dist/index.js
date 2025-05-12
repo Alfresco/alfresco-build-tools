@@ -29335,7 +29335,6 @@ function run() {
         try {
             const args = (0, utils_1.getArgs)();
             const workflowHandler = new workflow_handler_1.WorkflowHandler(args.token, args.owner, args.repo, args.externalRepo, args.generateRNfromVersion, args.generateRNtoVersion, args.releaseId);
-            let result = '';
             try {
                 yield workflowHandler.generateReleaseNotesFromExternalRepo();
                 yield workflowHandler.aggregateExternalReleaseToCurrentReleaseNotes();
@@ -29344,7 +29343,6 @@ function run() {
             catch (e) {
                 core.warning(`Failed to generate the external release note: ${e.message}`);
             }
-            core.setOutput('releaseNotes', result);
         }
         catch (error) {
             core.setFailed(error.message);
@@ -29424,10 +29422,10 @@ function getArgs() {
     const [owner, repo] = [github.context.repo.owner, github.context.repo.repo];
     // Decode inputs, this MUST be a valid JSON string
     const inputs = parse(core.getInput('inputs'));
-    const externalRepo = core.getInput('externalRepo');
-    const generateRNfromVersion = core.getInput('generateRNfromVersion');
-    const generateRNtoVersion = core.getInput('generateRNtoVersion');
-    const releaseId = core.getInput('releaseId');
+    const externalRepo = core.getInput('external-repo');
+    const generateRNfromVersion = core.getInput('from-external-version');
+    const generateRNtoVersion = core.getInput('to-external-version');
+    const releaseId = core.getInput('release-id');
     return {
         token,
         owner,
