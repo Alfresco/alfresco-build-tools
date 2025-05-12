@@ -4,11 +4,11 @@ inputs:
   external-repo:
     description: 'The name of the external repositories to aggregate release notes from'
     required: true
-  generate-rn-from-version:
-    description: 'The version to generate release notes from'
+  from-external-version:
+    description: 'The version to generate external release notes from'
     required: false
-  generate-rn-to-version:
-    description: 'The version to generate release notes to'
+  to-external-version:
+    description: 'The version to generate external release notes to'
     required: false
   release-id:
     description: 'The release ID of the origin repository'

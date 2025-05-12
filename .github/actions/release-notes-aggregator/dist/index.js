@@ -29423,8 +29423,8 @@ function getArgs() {
     // Decode inputs, this MUST be a valid JSON string
     const inputs = parse(core.getInput('inputs'));
     const externalRepo = core.getInput('external-repo');
-    const generateRNfromVersion = core.getInput('generate-rn-from-version');
-    const generateRNtoVersion = core.getInput('generate-rn-to-version');
+    const generateRNfromVersion = core.getInput('from-external-version');
+    const generateRNtoVersion = core.getInput('to-external-version');
     const releaseId = core.getInput('release-id');
     return {
         token,
