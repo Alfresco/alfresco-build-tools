@@ -286,6 +286,7 @@ runs:
                             {
                               "type": "TextBlock",
                               "text": "${{ env.MESSAGE_OUTPUT }} "
+                              "wrap": true
                             }
                           ]
                         }
