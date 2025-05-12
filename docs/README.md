@@ -1566,7 +1566,7 @@ Sends a teams notification with a pre-defined payload.
         webhook-url: ${{ secrets.MSTEAMS_WEBHOOK }}
 ```
 
-The above webhook URL is a mandatory parameter. Make sure to [Create Incoming Webhooks](https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=dotnet) before using this action. Add the webhook URL as a `secret` at the repo level.
+The above webhook URL is a mandatory parameter. Make sure to [Create Incoming Webhooks](https://support.microsoft.com/en-us/office/create-incoming-webhooks-with-workflows-for-microsoft-teams-8ae491c7-0394-4861-ba59-055e33f75498) before using this action. Add the webhook URL as a `secret` at the repo level.
 
 If the `status` input is not filled, it will be computed based on the status of completed steps in currently running workflow.
 The workflow permissions will require "actions: read" in this case.
