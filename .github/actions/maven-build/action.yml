@@ -20,6 +20,9 @@ inputs:
   maven-command:
     description: The maven command to execute
     required: false
+  property-to-update:
+    description: Maven property to update in case of a preview.
+    required: false
   maven-username:
     description: Nexus user name
     required: true
@@ -153,6 +156,14 @@ runs:
       run: |
         echo "testcontainers.reuse.enable=true" > ~/.testcontainers.properties
         echo "TESTCONTAINERS_RYUK_DISABLED=true" >> $GITHUB_ENV
+
+    - name: Update pom files to the preview version
+      if:  steps.maven-configure.outputs.preview-version != ''
+      uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@78bff56d1f8dbeb0ccfa6defbd1d68a040034f05
+      with:
+        version: ${{ steps.maven-configure.outputs.preview-version }}
+        maven-cli-opts: ${{ steps.maven-configure.outputs.maven-options }}
+        property-to-update: ${{ inputs.property-to-update }}
 
     - name: Build Maven using provided command
       shell: bash
