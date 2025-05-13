@@ -88,6 +88,9 @@ outputs:
   m2-uploaded-group-path:
     description: The path to the group id uploaded from m2 repository
     value: ${{ steps.m2-inclusion-pattern.outputs.group-path }}
+  skip-tests:
+    description: Whether the tests were skipped during build or not.
+    value: ${{ steps.maven-configure.outputs.skip-tests }}
 
 
 runs:
