@@ -20,6 +20,9 @@ inputs:
     description: Path to the JaCoCo XML report for SonarQube coverage.
     required: false
     default: '**/target/site/jacoco-*/jacoco.xml'
+  property-to-update:
+    description: Maven property to update in case of a preview.
+    required: false
   m2-uploaded-group-path:
     description: The path to the group id uploaded from m2 repository
     required: true
@@ -72,7 +75,7 @@ runs:
         path: ${{ inputs.m2-uploaded-group-path }}
 
     - name: SonarQube Scan
-      uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@586968f9b4c02ca32a51d2ec7e9981b8ee9624fb
+      uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@7bc96f2ea6d57cd6f011e6970adf44c901a24b9d
       env:
         SONAR_TOKEN: ${{ inputs.sonar-token }}
       with:
@@ -82,6 +85,7 @@ runs:
           -Dsonar.organization=${{ inputs.sonar-organization }}
           -Dsonar.projectKey=${{ inputs.sonar-project }}
           -Dsonar.coverage.jacoco.xmlReportPaths=${{ inputs.sonar-coverage-jacoco-xmlReportPaths }}
+        property-to-update: ${{ inputs.property-to-update }}
         maven-username: ${{ inputs.maven-username }}
         maven-password: ${{ inputs.maven-password }}
         ghcr-username: ${{ inputs.ghcr-username }}
