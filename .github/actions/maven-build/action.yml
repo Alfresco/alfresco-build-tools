@@ -20,6 +20,9 @@ inputs:
   maven-command:
     description: The maven command to execute
     required: false
+  maven-resolver-transport-options:
+      description: Maven resolver transport options
+      required: false
   property-to-update:
     description: Maven property to update in case of a preview.
     required: false
@@ -119,7 +122,7 @@ runs:
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
       with:
         version: ${{ steps.maven-configure.outputs.preview-version }}
-        maven-cli-opts: ${{ steps.maven-configure.outputs.maven-options }}
+        maven-cli-opts: ${{ steps.maven-configure.outputs.maven-options }} ${{ inputs.maven-resolver-transport-options }}
         property-to-update: ${{ inputs.property-to-update }}
 
     - name: Get project information
@@ -170,8 +173,9 @@ runs:
 
     - name: Build Maven using provided command
       shell: bash
-      run: mvn ${{ inputs.maven-command  }} ${{ env.MAVEN_CLI_OPTS }}
+      run: mvn ${{ inputs.maven-command  }} ${{ env.MAVEN_CLI_OPTS }} ${{ env.MAVEN_RESOLVER_TRANSPORT_OPTS }}
       env:
+        MAVEN_RESOLVER_TRANSPORT_OPTS: ${{ inputs.maven-resolver-transport-options }}
         MAVEN_CLI_OPTS: ${{ steps.maven-configure.outputs.maven-options }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip -Dmaven.build.cache.enabled=${{ env.MAVEN_BUILD_CACHE_ENABLED }}
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
@@ -200,14 +204,19 @@ runs:
     - name: Merge Jacoco Reports
       if: inputs.jacoco-report-name != ''
       shell: bash
+      env:
+        MAVEN_RESOLVER_TRANSPORT_OPTS: ${{ inputs.maven-resolver-transport-options }}
       run: |
-        mvn -N jacoco:merge -Djacoco.destFile=${{ steps.get-jacoco-report-path.outputs.path }}
+        mvn -N jacoco:merge -Djacoco.destFile=${{ steps.get-jacoco-report-path.outputs.path }} ${MAVEN_RESOLVER_TRANSPORT_OPTS}
 
     - name: Update Jacoco Reports
       if: inputs.jacoco-report-name != ''
       shell: bash
+      env:
+        MAVEN_RESOLVER_TRANSPORT_OPTS: ${{ inputs.maven-resolver-transport-options }}
       run: |
-        mvn jacoco:report -Djacoco.dataFile=${{ steps.get-jacoco-report-path.outputs.path }} -Djacoco-report-dir-suffix=${{ inputs.jacoco-report-name }} ${{ inputs.jacoco-report-options }}
+        mvn jacoco:report -Djacoco.dataFile=${{ steps.get-jacoco-report-path.outputs.path }} \
+          -Djacoco-report-dir-suffix=${{ inputs.jacoco-report-name }} ${{ inputs.jacoco-report-options }} ${MAVEN_RESOLVER_TRANSPORT_OPTS}
 
     - name: Upload target folders
       if: inputs.target-folder-upload-name != ''
