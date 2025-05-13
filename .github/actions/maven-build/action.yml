@@ -160,6 +160,9 @@ runs:
     - name: Update pom files to the preview version
       if:  steps.maven-configure.outputs.preview-version != ''
       uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@78bff56d1f8dbeb0ccfa6defbd1d68a040034f05
+      env:
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
       with:
         version: ${{ steps.maven-configure.outputs.preview-version }}
         maven-cli-opts: ${{ steps.maven-configure.outputs.maven-options }}
