@@ -99,7 +99,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@a79d744c1011469a0058f96aa11347d0ba9454cf
+    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@e113e1940de607a5d1ecbb3ff5d2973618cbb630
       id: maven-configure
       with:
         java-version: ${{ inputs.java-version }}
