@@ -124,6 +124,10 @@ runs:
         restore-keys: |
           ${{ runner.os }}-maven-
 
+    - name: Going mvn offline
+      shell: bash
+      run: mvn dependency:go-offline
+
     - name: Set up JDK
       uses: actions/setup-java@7a6d8a8234af8eb26422e24e3006232cccaa061b # v4.6.0
       with:
