@@ -42,6 +42,9 @@ outputs:
   skip-tests:
     description: Whether to skip tests.
     value: ${{ steps.set-skip-tests-env-variable.outputs.skip-tests }}
+  preview-version:
+    description: The preview version when it's a preview.
+    value: ${{ steps.set-preview-version.outputs.preview-version }}
 
 runs:
   using: composite
