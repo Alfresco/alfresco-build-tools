@@ -141,6 +141,7 @@ runs:
       if: inputs.skip-checkout != 'true'
 
     - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@7fe2ba29289759f9b5d5074a2b87c4a9e583988c
+      id: maven-configure
       with:
         java-version: ${{ inputs.java-version }}
         java-distribution: ${{ inputs.java-distribution }}
@@ -158,7 +159,7 @@ runs:
       with:
         property-to-update: ${{ inputs.property-to-update }}
         maven-cli-opts: ${{ steps.maven-configure.outputs.maven-options }}
-        version: ${{ steps.set-preview-version.outputs.preview-version }}
+        version: ${{ steps.maven-configure.outputs.preview-version }}
         prerelease-type: 'temp'
       env:
         MAVEN_USERNAME: ${{ inputs.maven-username }}
