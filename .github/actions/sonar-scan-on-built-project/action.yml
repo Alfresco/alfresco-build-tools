@@ -2,7 +2,7 @@ name: SonarQube Scan
 description: >-
     Reusable action for running SonarQube scans with Maven on projects that were already built in prior jobs
     and have their artifacts available in the workspace. This action is designed to be used in conjunction with
-    maven-build actions and will start by downloading the target and m2 artifacts uploaded by the maven-build action.
+    `maven-build` action and will start by downloading the target and m2 artifacts uploaded by the `maven-build` action.
 
 inputs:
   sonar-host-url:
