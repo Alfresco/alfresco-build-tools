@@ -17,9 +17,10 @@ outputs:
     value: ${{ steps.scan-image-dirs.outputs.image-dirs-as-json }}
   image-dirs-with-metadata:
       description: >-
-        JSON containing the list of all directories containing Dockerfile including metadata. i.e. path to the directory, whether the docker docker image should be skipped or not
-        and shortened name of the directly (useful for display names in the CI for instance).
-        This includes directories with docker.skip=true
+        JSON containing the list of all directories containing Dockerfile including metadata. i.e. path to the directory,
+        whether the docker docker image should be skipped or not and shortened name of the directly (useful for display
+        names in the CI for instance).
+        This includes directories with `docker.skip=true`
       value: ${{ steps.scan-image-dirs.outputs.image-dirs-with-metadata }}
 runs:
   using: composite
