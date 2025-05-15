@@ -110,14 +110,14 @@ outputs:
     value: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
   skip-tests:
     description: "Whether tests were skipped during build or not"
-    value: ${{ steps.set-skip-tests-env-variable.outputs.skip-tests }}
+    value: ${{ steps.maven-configure.outputs.skip-tests }}
 
 runs:
   using: composite
   steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@7fe2ba29289759f9b5d5074a2b87c4a9e583988c
+    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@21333c0af238e2f2476a31d3cf6ea63553610b09
       id: maven-configure
       with:
         java-version: ${{ inputs.java-version }}
