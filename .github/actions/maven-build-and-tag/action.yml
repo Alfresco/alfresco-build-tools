@@ -17,20 +17,11 @@ inputs:
     description: The name of the label to skip maven build cache if needed
     required: false
     default: 'maven-build-cache-skip'
-  maven-project-artifacts-key:
-    description: The key to use for restoring and saving maven project artifacts
-    required: false
-  maven-project-artifacts-restore-key:
-    description: The restore key to use for restoring maven project artifacts
-    required: false
   property-to-update:
     description: Property to update in addition to the version of the pom file
     required: false
   extra-maven-opts:
     description: Extra maven options for the build command line
-    required: false
-  maven-command:
-    description: The maven command to execute
     required: false
   maven-username:
     description: Nexus user name
@@ -112,19 +103,6 @@ inputs:
     description: 'SonarCloud organization'
     required: false
     default: 'alfresco'
-  skip-checkout:
-    description: Whether the checkout step should be skipped or not
-    required: false
-    default: 'false'
-  skip-tag:
-    description: Whether the tag creation step should be skipped or not
-    required: false
-    default: 'false'
-  skip-depency-graph:
-    description: Whether the dependency graph submission step should be skipped or not
-    required: false
-    default: 'false'
-
 
 outputs:
   version:
@@ -138,7 +116,6 @@ runs:
   using: composite
   steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      if: inputs.skip-checkout != 'true'
 
     - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@7fe2ba29289759f9b5d5074a2b87c4a9e583988c
       id: maven-configure
@@ -202,20 +179,14 @@ runs:
       id: define_maven_command
       shell: bash
       run: |
-        if [ "$MAVEN_COMMAND" == '' ]
+        if [ $DO_PUSH == 'true' ]
         then
-          if [ $DO_PUSH == 'true' ]
-          then
-            echo "command=deploy" >> $GITHUB_OUTPUT
-          else
-            echo "command=verify" >> $GITHUB_OUTPUT
-          fi
+          echo "command=deploy" >> $GITHUB_OUTPUT
         else
-          echo "command=$MAVEN_COMMAND" >> $GITHUB_OUTPUT
+          echo "command=verify" >> $GITHUB_OUTPUT
         fi
       env:
         DO_PUSH: ${{ github.event_name == 'push' || env.IS_PREVIEW == 'true' }}
-        MAVEN_COMMAND: ${{ inputs.maven-command }}
 
     - name: Enable testcontainers reuse option
       if: inputs.reuse-testcontainers == 'true'
@@ -273,33 +244,19 @@ runs:
         commit-message: "release $VERSION"
 
     - name: Create and push tag
-      if: github.event_name == 'push' && inputs.skip-tag != 'true'
+      if: github.event_name == 'push'
       shell: bash
       run: |
         git tag -a $VERSION -m "Release version $VERSION"
         git push origin $VERSION
 
     - name: Submit Dependency Graph
-      if: github.event_name == 'push' && inputs.skip-depency-graph != 'true'
+      if: github.event_name == 'push'
       uses: advanced-security/maven-dependency-submission-action@aeab9f885293af501bae8bdfe88c589528ea5e25 # v4.1.2
       env:
         MAVEN_CLI_OPTS: ${{ steps.maven-configure.outputs.maven-options }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
-
-    - name:  Get current pom version
-      id: get-current-pom-version
-      shell: bash
-      run: |
-        CURRENT_VERSION=$(yq -p=xml e '.project.version' pom.xml )
-        echo "current-version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-
-    - name: Save project artifacts
-      if: inputs.maven-project-artifacts-key != ''
-      uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
-      with:
-        path: ~/.m2/repository/com/alfresco/**/${{ steps.get-current-pom-version.outputs.current-version }}
-        key: ${{ inputs.maven-project-artifacts-key }}
 
     - name: Clean m2 cache
       if: github.event_name == 'push'

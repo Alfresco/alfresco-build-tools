@@ -1,5 +1,5 @@
 name: Maven Tag
-description: Updates POM files to the next pre-release, commits changes, and creates a Git tag.
+description: Updates POM files to the next pre-release, commits changes and creates a Git tag.
 inputs:
   java-version:
     description: Java version to use.

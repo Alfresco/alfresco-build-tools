@@ -1103,6 +1103,43 @@ Used to release Activiti Projects. Load release information from release.yaml fi
           release-descriptor: release.yaml
 ```
 
+### maven-configure
+Set up Java and Maven version and compute common maven options including settings.xml to be used. It also restores Maven cache.
+```yaml
+      - uses: Alfresco/alfresco-build-tools//.github/actions/maven-configure@ref
+        with:
+          java-version: '21'
+          maven-version: '3.8.8'
+```
+
+### maven-build
+Builds a maven project using the provided command.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ref
+        with:
+          java-version: '21'
+          maven-command: 'verify'
+          maven-resolver-transport-options: '-Dmaven.wagon.http.pool=false'
+          maven-username: ${{ secrets.MAVEN_USERNAME }}
+          maven-password: ${{ secrets.MAVEN_PASSWORD }}
+          maven-version: '3.8.8'
+          quay-username: ${{ secrets.QUAY_USERNAME }}
+          quay-password: ${{ secrets.QUAY_PASSWORD }}
+          ghcr-username: ${{ secrets.GHCR_USERNAME }}
+          ghcr-password: ${{ secrets.GHCR_PASSWORD }}
+          docker-username: ${{ secrets.DOCKER_USERNAME }}
+          docker-password: ${{ secrets.DOCKER_PASSWORD }}
+          jacoco-report-name: 'jacoco-report'
+          target-folder-upload-name: 'build-artifacts'
+          m2-current-build-upload-name: 'm2-artifacts'
+```
+
+#### Jacoco report options
+If the inputs `jacoco-report-name`, `target-folder-upload-name` and `m2-current-build-upload-name` are provided,
+it also generates aggregated coverage reports and makes them available as build artifact for a next job processing it. It's typically followed by a job containing a step
+with the action `sonar-scan-on-built-project`.
+
 ### maven-build-and-tag
 
 Check out, builds a maven project and docker images, generating a new alpha version for it on push events:
@@ -1196,6 +1233,20 @@ Used to release Activiti projects. Update versions in POM files, create git tags
           gpg-owner-trust: "${{ secrets.GPG_OWNERTRUST }}"
           nexus-username: "${{ secrets.NEXUS_USERNAME }}"
           nexus-password: "${{ secrets.NEXUS_PASSWORD }}"
+```
+
+### maven-tag
+Updates POM files to the next pre-release, commits changes and creates a Git tag.
+```yaml
+- uses: ./.github/actions/maven-tag
+  with:
+    java-version: '21'
+    maven-version: '3.8.8'
+    prerelease-type: 'alpha'
+    maven-username: ${{ secrets.MAVEN_USERNAME }}
+    maven-password: ${{ secrets.MAVEN_PASSWORD }}
+    git-username: ${{secrets.GITHUB_USERNAME }}
+    m2-cache-exclusion-pattern: 'org/example'
 ```
 
 ### maven-update-pom-version
