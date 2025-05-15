@@ -1,0 +1,125 @@
+name: Configure Maven, Set Up Java, restore Maven Cache
+description: Restores Maven cache, sets up JDK, and configures Maven build cache.
+
+inputs:
+  java-version:
+    description: The Java version to set up.
+    required: true
+    default: '11'
+  java-distribution:
+    description: The Java distribution to set up.
+    required: true
+    default: 'temurin'
+  maven-version:
+    description: Maven version to set up.
+    required: false
+    default: ''
+  maven-build-cache-key:
+    description: The build cache key to use for Maven build cache.
+    required: false
+    default: ''
+  maven-build-cache-skip-label:
+    description: The label to skip Maven build cache.
+    required: false
+    default: 'maven-build-cache-skip'
+  skip-tests-label:
+    description: The label to skip tests.
+    required: false
+    default: 'skip-tests'
+  verbose:
+    description: Whether additional logs should be displayed.
+    required: false
+    default: 'false'
+  preview-label:
+    description: The label for creating a preview version.
+    required: false
+    default: 'preview'
+
+outputs:
+  maven-options:
+    description: Computed Maven options.
+    value: ${{ steps.compute-maven-options.outputs.result }}
+  skip-tests:
+    description: Whether to skip tests.
+    value: ${{ steps.set-skip-tests-env-variable.outputs.skip-tests }}
+  preview-version:
+    description: The preview version when it's a preview.
+    value: ${{ steps.set-preview-version.outputs.preview-version }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Set up JDK
+      uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4.7.0
+      with:
+        java-version: ${{ inputs.java-version }}
+        distribution: ${{ inputs.java-distribution }}
+
+    - name: Set up Maven
+      if: inputs.maven-version != ''
+      uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
+      with:
+        maven-version: ${{ inputs.maven-version }}
+
+    - name: Set skip tests env variable
+      id: set-skip-tests-env-variable
+      env:
+        SKIP_TESTS: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, inputs.skip-tests-label) }}
+      shell: bash
+      run: |
+        echo "SKIP_TESTS=$SKIP_TESTS" >> $GITHUB_ENV
+        echo "skip-tests=$SKIP_TESTS" >> $GITHUB_OUTPUT
+
+    - name: Compute maven options
+      id: compute-maven-options
+      shell: bash
+      run: |
+        NTP='--no-transfer-progress'
+        ${{ inputs.verbose }} && NTP=''
+        TEST_OPTIONS=''
+        [[ $SKIP_TESTS == 'true' ]] && TEST_OPTIONS='-DskipTests=true -DskipITs=true'
+        echo "result=--show-version --settings settings.xml $NTP $TEST_OPTIONS" >> $GITHUB_OUTPUT
+
+    - name: Set is_preview env variable
+      id: set-is-preview-env-variable
+      env:
+        IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, inputs.preview-label) }}
+      shell: bash
+      run: |
+        echo "IS_PREVIEW=$IS_PREVIEW" >> $GITHUB_ENV
+
+    - name: Set preview version
+      id: set-preview-version
+      if: env.IS_PREVIEW == 'true'
+      shell: bash
+      run: |
+        GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
+        echo "preview-version=0.0.1-$GITHUB_PR_NUMBER-SNAPSHOT" >> $GITHUB_OUTPUT
+        echo "GITHUB_PR_NUMBER=$GITHUB_PR_NUMBER" >> $GITHUB_ENV
+
+    - name: Set MAVEN_BUILD_CACHE_ENABLED env variable
+      id: set-use-maven_build-cache-env-variable
+      env:
+        MAVEN_BUILD_CACHE_ENABLED: ${{ inputs.maven-build-cache-key != '' && !contains(github.event.pull_request.labels.*.name, inputs.maven-build-cache-skip-label) }}
+        MAVEN_BUILD_CACHE_KEY: ${{ runner.os }}-build-cache-${{ inputs.maven-build-cache-key }}-${{ env.GITHUB_PR_NUMBER || github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
+      shell: bash
+      run: |
+        echo "MAVEN_BUILD_CACHE_ENABLED=$MAVEN_BUILD_CACHE_ENABLED" >> $GITHUB_ENV
+        echo "MAVEN_BUILD_CACHE_KEY=$MAVEN_BUILD_CACHE_KEY" >> $GITHUB_ENV
+
+    - uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      name: Restore Maven Build Cache before build
+      if: env.MAVEN_BUILD_CACHE_ENABLED == 'true'
+      with:
+        path: ~/.m2/build-cache
+        key: ${{ env.MAVEN_BUILD_CACHE_KEY }}
+        restore-keys: |
+          ${{ runner.os }}-build-cache-${{ inputs.maven-build-cache-key }}-PR-${{ github.event.pull_request.number }}-
+          ${{ runner.os }}-build-cache-${{ inputs.maven-build-cache-key }}-${{ github.base_ref || github.ref_name }}-
