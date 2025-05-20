@@ -35,6 +35,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [calculate-next-internal-version](#calculate-next-internal-version)
     - [configure-git-author](#configure-git-author)
     - [dbp-charts](#dbp-charts)
+    - [dependabot-check](#dependabot-check)
     - [dispatch-resume-workflow](#dispatch-resume-workflow)
     - [docker-build-image](#docker-build-image)
     - [docker-dump-containers-logs](#docker-dump-containers-logs)
@@ -460,6 +461,19 @@ The two vars in the previous snippet are [workflow configuration variables](http
 A collection of actions used in Alfresco acs-deployment repository to manage Helm charts (mostly deprecated).
 
 See [dbp-charts](../.github/actions/dbp-charts/) for more details.
+
+### dependabot-check
+
+Action to check if a pull request is opened by dependabot with a specific label.
+
+```yaml
+      - name: dependabot check
+        id: dependabot
+        uses: ./.github/actions/dependabot-check
+        with:
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
+          label: github_actions
+```
 
 ### dispatch-resume-workflow
 
