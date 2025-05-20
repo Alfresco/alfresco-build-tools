@@ -77,6 +77,7 @@ Here follows the list of GitHub Actions topics available in the current document
       - [Preview option for maven-build-and-tag](#preview-option-for-maven-build-and-tag)
       - [Option to skip tests for maven-build-and-tag](#option-to-skip-tests-for-maven-build-and-tag)
     - [maven-configure](#maven-configure)
+    - [maven-dependency-scan](#maven-dependency-scan)
     - [maven-deploy-file](#maven-deploy-file)
     - [maven-release](#maven-release)
     - [maven-tag](#maven-tag)
@@ -1112,11 +1113,34 @@ Used to release Activiti Projects. Load release information from release.yaml fi
 Set up Java and Maven version and compute common maven options including settings.xml to be used. It also restores Maven cache.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools//.github/actions/maven-configure@ref
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@ref
         with:
           java-version: '21'
           maven-version: '3.8.8'
 ```
+
+### maven-dependency-scan
+
+Create the project Dependency Graph
+
+```yaml
+- uses: Alfresco/alfresco-build-tools/.github/actions/maven-dependency-scan@ref
+  with:
+    restore-artifact-pattern: 'm2*'
+    restore-artifact-path: '~./m2/com/groupId'
+    java-version: '21'
+    maven-version: '3.8.8'
+    maven-args: '--settings settings.xml'
+    maven-username: ${{ secrets.MAVEN_USERNAME }}
+    maven-password: ${{ secrets.MAVEN_PASSWORD }}
+    ghcr-username: ${{ secrets.GHCR_USERNAME }}
+    ghcr-password: ${{ secrets.GHCR_PASSWORD }}
+```
+
+#### `restore-artifact-pattern` option
+
+Allow restoring artifacts from an earlier job to avoid attempts to download them from remote. To be used alongside with the option `restore-artifact-path`
+to specify the path where the artifacts are stored.
 
 ### maven-build
 

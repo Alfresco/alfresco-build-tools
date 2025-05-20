@@ -402,6 +402,14 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
+    directory: "/.github/actions/maven-dependency-scan"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
     directory: "/.github/actions/maven-deploy-file"
     schedule:
       interval: "weekly"
