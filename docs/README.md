@@ -35,7 +35,6 @@ Here follows the list of GitHub Actions topics available in the current document
     - [calculate-next-internal-version](#calculate-next-internal-version)
     - [configure-git-author](#configure-git-author)
     - [dbp-charts](#dbp-charts)
-    - [dependabot-check](#dependabot-check)
     - [dispatch-resume-workflow](#dispatch-resume-workflow)
     - [docker-build-image](#docker-build-image)
     - [docker-dump-containers-logs](#docker-dump-containers-logs)
@@ -51,6 +50,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [git-commit-changes](#git-commit-changes)
     - [git-latest-tag](#git-latest-tag)
     - [github-check-upcoming-runs](#github-check-upcoming-runs)
+    - [github-dependabot-check](#github-dependabot-check)
     - [github-deployment-create](#github-deployment-create)
     - [github-deployment-status-update](#github-deployment-status-update)
     - [github-deployments-delete](#github-deployments-delete)
@@ -462,19 +462,6 @@ A collection of actions used in Alfresco acs-deployment repository to manage Hel
 
 See [dbp-charts](../.github/actions/dbp-charts/) for more details.
 
-### dependabot-check
-
-Action to check if a pull request is opened by dependabot with a specific label.
-
-```yaml
-      - name: dependabot check
-        id: dependabot
-        uses: ./.github/actions/dependabot-check
-        with:
-          gh-token: ${{ secrets.GITHUB_TOKEN }}
-          label: github_actions
-```
-
 ### dispatch-resume-workflow
 
 Ability to dispatch or resume an existing workflow and wait for its completion.
@@ -752,6 +739,19 @@ With proper concurrency logic in place, the latest run might have been cancelled
         with:
           github-token: ${{ secrets.MY_GITHUB_TOKEN }}
           workflow: my-workflow.yml
+```
+
+### github-dependabot-check
+
+Action to check if a pull request is opened by dependabot with a specific label.
+
+```yaml
+      - name: dependabot check
+        id: dependabot
+        uses: ./.github/actions/github-dependabot-check
+        with:
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
+          label: github_actions
 ```
 
 ### github-deployment-create
