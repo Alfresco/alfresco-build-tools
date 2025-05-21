@@ -3,10 +3,10 @@ description: Checks if author is dependabot and if specific label is added to PR
 
 inputs:
   gh-token:
-    description: 'GitHub token'
+    description: 'GitHub token with content read permission'
     required: true
   label:
-    description: 'Check if the pull request contains this label '
+    description: 'Check if the pull request contains this label'
     required: true
 
 outputs:
