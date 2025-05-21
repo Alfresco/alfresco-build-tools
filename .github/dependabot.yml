@@ -82,14 +82,6 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
-    directory: "/.github/actions/github-dependabot-check"
-    schedule:
-      interval: "weekly"
-    groups:
-      catch-all:
-        patterns:
-          - "*"
-  - package-ecosystem: "github-actions"
     directory: "/.github/actions/dispatch-resume-workflow"
     schedule:
       interval: "weekly"
@@ -203,6 +195,14 @@ updates:
           - "*"
   - package-ecosystem: "github-actions"
     directory: "/.github/actions/github-check-upcoming-runs"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/github-dependabot-check"
     schedule:
       interval: "weekly"
     groups:
