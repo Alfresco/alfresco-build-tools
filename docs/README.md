@@ -746,7 +746,6 @@ With proper concurrency logic in place, the latest run might have been cancelled
 Action to check if a pull request is opened by dependabot with a specific label.
 
 ```yaml
-      name: CI
 
 on:
   push:
@@ -764,7 +763,7 @@ jobs:
 
   deploy:
     needs: check-dependabot
-    if: steps.dependabot.outputs.is_dependabot != 'true'
+    if: steps.dependabot.outputs.result != 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy
