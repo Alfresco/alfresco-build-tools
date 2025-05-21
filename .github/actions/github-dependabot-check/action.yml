@@ -27,10 +27,11 @@ runs:
       shell: bash
       run: |
         echo "Event name: $GITHUB_EVENT_NAME"
-        LABELS=$(gh api /repos/$GITHUB_REPOSITORY/commits/$SHA/pulls | jq -r '.[].labels.[].name')
+        PR_INFO=$(gh api /repos/$GITHUB_REPOSITORY/commits/$SHA/pulls | jq -r '.[0] | {user_login: .user.login, labels: [.labels[].name]}' )
+        LABELS=$(echo $PR_INFO | jq -r '.labels')
         echo "Labels found: $LABELS"
         if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
-            GITHUB_ACTOR=$(gh api /repos/$GITHUB_REPOSITORY/commits/$SHA/pulls | jq -r '.[0].user.login')
+            GITHUB_ACTOR=$( echo $PR_INFO | jq -r '.user_login' )
             echo "Creator: $GITHUB_ACTOR"
         fi
         if [[ "$GITHUB_ACTOR" == "dependabot[bot]" && "$LABELS" == *"$FOUND_LABEL"* ]]
