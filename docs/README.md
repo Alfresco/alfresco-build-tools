@@ -743,7 +743,9 @@ With proper concurrency logic in place, the latest run might have been cancelled
 
 ### github-dependabot-check
 
-Action to check if a pull request is opened by dependabot with a specific label.
+This action helps checking, on push caused by the merge of a Pull Request, if this PR was opened by dependabot, with a specific label (usually relating to the type of dependency update).
+
+Sample usage:
 
 ```yaml
 
@@ -769,13 +771,12 @@ jobs:
       - name: Deploy
         run: echo "Deploying..."
 ```
-How it works
-The dependabot check step uses your action to check if the PR is from Dependabot and has the github_actions label.
-If both conditions are true, the action sets an output (e.g., result: true).
-The deploy job only runs if result is not true, so deploys are skipped for these PRs.
-Benefit:
-This saves CI/CD resources and time by skipping unnecessary deploys for automated dependency updates that only affect GitHub Actions workflows.
 
+On this sample, if the commit was merged with a PR opened by Dependabot, **and** has the `github_actions` label, the action sets the `result` output to `true`.
+
+The `deploy` job only runs if result is not true, so deploys are skipped when merging these PRs.
+
+The main benefit is to save CI/CD resources and time by skipping unnecessary deploys for automated dependency updates that only affect GitHub Actions workflows.
 
 ### github-deployment-create
 
