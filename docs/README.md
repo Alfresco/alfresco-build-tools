@@ -771,8 +771,8 @@ jobs:
 ```
 How it works
 The dependabot check step uses your action to check if the PR is from Dependabot and has the github_actions label.
-If both conditions are true, the action sets an output (e.g., is_dependabot: true).
-The deploy job only runs if is_dependabot is not true, so deploys are skipped for these PRs.
+If both conditions are true, the action sets an output (e.g., result: true).
+The deploy job only runs if result is not true, so deploys are skipped for these PRs.
 Benefit:
 This saves CI/CD resources and time by skipping unnecessary deploys for automated dependency updates that only affect GitHub Actions workflows.
 
