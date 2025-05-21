@@ -31,7 +31,7 @@ runs:
         LABELS=$(echo $PR_INFO | jq -r '.labels')
         echo "Labels found: $LABELS"
         if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
-            GITHUB_ACTOR=$( echo $PR_INFO | jq -r '.user_login' )
+            GITHUB_ACTOR=$(echo $PR_INFO | jq -r '.user_login')
             echo "Creator: $GITHUB_ACTOR"
         fi
         if [[ "$GITHUB_ACTOR" == "dependabot[bot]" && "$LABELS" == *"$FOUND_LABEL"* ]]
