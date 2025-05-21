@@ -12,7 +12,7 @@ inputs:
 outputs:
   result:
     description: "Result of the check"
-    value: ${{ steps.check.outputs.SKIP }}
+    value: ${{ steps.check.outputs.result }}
 
 runs:
   using: composite
@@ -37,8 +37,8 @@ runs:
         if [[ "$GITHUB_ACTOR" == "dependabot[bot]" && "$LABELS" == *"$FOUND_LABEL"* ]]
         then
           echo "PR opened by dependabot and with $FOUND_LABEL. The result is true"
-          echo "SKIP=true" >> $GITHUB_OUTPUT
+          echo "result=true" >> $GITHUB_OUTPUT
         else
           echo "PR not opened by dependabot. The result is false"
-          echo "SKIP=false" >> $GITHUB_OUTPUT
+          echo "result=false" >> $GITHUB_OUTPUT
         fi
