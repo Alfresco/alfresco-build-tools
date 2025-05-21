@@ -746,13 +746,37 @@ With proper concurrency logic in place, the latest run might have been cancelled
 Action to check if a pull request is opened by dependabot with a specific label.
 
 ```yaml
+      name: CI
+
+on:
+  push:
+
+jobs:
+  check-dependabot:
+    runs-on: ubuntu-latest
+    steps:
       - name: dependabot check
         id: dependabot
         uses: ./.github/actions/github-dependabot-check
         with:
           gh-token: ${{ secrets.GITHUB_TOKEN }}
           label: github_actions
+
+  deploy:
+    needs: check-dependabot
+    if: steps.dependabot.outputs.is_dependabot != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy
+        run: echo "Deploying..."
 ```
+How it works
+The dependabot check step uses your action to check if the PR is from Dependabot and has the github_actions label.
+If both conditions are true, the action sets an output (e.g., is_dependabot: true).
+The deploy job only runs if is_dependabot is not true, so deploys are skipped for these PRs.
+Benefit:
+This saves CI/CD resources and time by skipping unnecessary deploys for automated dependency updates that only affect GitHub Actions workflows.
+
 
 ### github-deployment-create
 
