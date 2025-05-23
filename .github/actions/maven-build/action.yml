@@ -135,14 +135,6 @@ runs:
         VERSION=$(yq e '.project.version' pom.xml)
         echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-    - name: Set version env variable
-      if: github.event_name == 'push' || env.IS_PREVIEW == 'true'
-      shell: bash
-      env:
-        VERSION: ${{ steps.project-info.outputs.version }}
-      run: |
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-
     - name: Login to DockerHub Registry
       if: inputs.docker-username != ''
       uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
