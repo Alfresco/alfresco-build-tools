@@ -5,10 +5,11 @@ inputs:
     description: base directory to be scanned
     required: false
     default: .
-  extra-shortener-pattern:
+  name-shortener-pattern:
     description: >-
-      extra pattern to be removed from the directory name. This is useful for
-      instance to remove a common prefix from the name.
+      Pattern to be removed from the directory name while generating the the field `short-name`. This is useful to remove a common prefix from the name.
+      For instance, if the directory path is `./some/path/to/my/docker-image/images-my-service` and the pattern is `images-`, the resulting
+        `short-name` will be `my-service`. In the case where no pattern is provided, the short name will be the same as the directory name, i.e. `images-my-service`.
     required: false
     default: ""
 outputs:
@@ -30,7 +31,7 @@ runs:
       shell: bash
       working-directory: ${{ inputs.base-directory }}
       env:
-        EXTRA_SHORTENER_PATTERN: ${{ inputs.extra-shortener-pattern }}
+        NAME_SHORTENER_PATTERN: ${{ inputs.name-shortener-pattern }}
       run: |
         IMAGE_DIRS=$(find . -type f -mindepth 2 -name Dockerfile | grep -v target | xargs -I% dirname % | xargs || echo "")
         echo "image dirs IMAGE_DIRS=$IMAGE_DIRS"
@@ -54,9 +55,9 @@ runs:
 
         done
 
-        if [ "$EXTRA_SHORTENER_PATTERN" != "" ]; then
+        if [ "$NAME_SHORTENER_PATTERN" != "" ]; then
           IMAGE_DIRS_WITH_METADATA=$(echo $IMAGE_DIRS_WITH_METADATA | yq -o json -I=0 \
-          '. | map(.["short-name"] |= sub(env(EXTRA_SHORTENER_PATTERN), ""))')
+          '. | map(.["short-name"] |= sub(env(NAME_SHORTENER_PATTERN), ""))')
         fi
 
         echo "filtered image dirs FILTERED_IMAGE_DIRS=${FILTERED_IMAGE_DIRS[@]}"
