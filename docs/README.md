@@ -50,10 +50,10 @@ Here follows the list of GitHub Actions topics available in the current document
     - [git-commit-changes](#git-commit-changes)
     - [git-latest-tag](#git-latest-tag)
     - [github-check-upcoming-runs](#github-check-upcoming-runs)
-    - [github-dependabot-check](#github-dependabot-check)
     - [github-deployment-create](#github-deployment-create)
     - [github-deployment-status-update](#github-deployment-status-update)
     - [github-deployments-delete](#github-deployments-delete)
+    - [github-pr-check-metadata](#github-pr-check-metadata)
     - [github-download-file](#github-download-file)
     - [github-https-auth](#github-https-auth)
     - [github-list-changes](#github-list-changes)
@@ -741,43 +741,6 @@ With proper concurrency logic in place, the latest run might have been cancelled
           workflow: my-workflow.yml
 ```
 
-### github-dependabot-check
-
-This action helps checking, on push caused by the merge of a Pull Request, if this PR was opened by dependabot, with a specific label (usually relating to the type of dependency update).
-
-Sample usage:
-
-```yaml
-
-on:
-  push:
-
-jobs:
-  check-dependabot:
-    runs-on: ubuntu-latest
-    steps:
-      - name: dependabot check
-        id: dependabot
-        uses: ./.github/actions/github-dependabot-check
-        with:
-          gh-token: ${{ secrets.GITHUB_TOKEN }}
-          label: github_actions
-
-  deploy:
-    needs: check-dependabot
-    if: steps.dependabot.outputs.result != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy
-        run: echo "Deploying..."
-```
-
-On this sample, if the commit was merged with a PR opened by Dependabot, **and** has the `github_actions` label, the action sets the `result` output to `true`.
-
-The `deploy` job only runs if result is not true, so deploys are skipped when merging these PRs.
-
-The main benefit is to save CI/CD resources and time by skipping unnecessary deploys for automated dependency updates that only affect GitHub Actions workflows.
-
 ### github-deployment-create
 
 ### github-deployment-status-update
@@ -877,6 +840,46 @@ This action requires a checkout with `fetch-depth: 0` option as follow:
 ```
 
 The action outputs the list of changed files (one path per line) using the output `all_changed_files` and optionally to the env variable `GITHUB_MODIFIED_FILES`.
+
+### github-pr-check-metadata
+
+This action helps checking, on a Pull Request, or on push caused by the merge of a Pull Request, who opened the PR and if it was holding a specific label.
+
+This is typically useful for Dependabot PRs, where the label usually relates to the type of dependency update.
+
+Sample usage:
+
+```yaml
+
+on:
+  push:
+
+jobs:
+  check-dependabot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: dependabot check
+        id: dependabot
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@ref
+        with:
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
+          actor: 'dependabot[bot]'
+          label: github_actions
+
+  deploy:
+    needs: check-dependabot
+    if: steps.dependabot.outputs.result != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy
+        run: echo "Deploying..."
+```
+
+On this sample, if the commit was merged with a PR opened by Dependabot, **and** has the `github_actions` label, the action sets the `result` output to `true`.
+
+The `deploy` job only runs if result is not true, so deploys are skipped when merging these PRs.
+
+The main benefit is to save CI/CD resources and time by skipping unnecessary deploys for automated dependency updates that only affect GitHub Actions workflows.
 
 ### helm-build-chart
 
