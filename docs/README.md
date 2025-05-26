@@ -72,11 +72,15 @@ Here follows the list of GitHub Actions topics available in the current document
     - [kubectl-keep-nslogs](#kubectl-keep-nslogs)
     - [kubectl-wait](#kubectl-wait)
     - [load-release-descriptor](#load-release-descriptor)
+    - [maven-build](#maven-build)
     - [maven-build-and-tag](#maven-build-and-tag)
       - [Preview option for maven-build-and-tag](#preview-option-for-maven-build-and-tag)
       - [Option to skip tests for maven-build-and-tag](#option-to-skip-tests-for-maven-build-and-tag)
+    - [maven-configure](#maven-configure)
+    - [maven-dependency-scan](#maven-dependency-scan)
     - [maven-deploy-file](#maven-deploy-file)
     - [maven-release](#maven-release)
+    - [maven-tag](#maven-tag)
     - [maven-update-pom-version](#maven-update-pom-version)
     - [md-toc](#md-toc)
     - [nexus-move-artifacts](#nexus-move-artifacts)
@@ -107,6 +111,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [setup-updatecli](#setup-updatecli)
     - [slack-file-upload](#slack-file-upload)
     - [sonar-scanner](#sonar-scanner)
+    - [sonar-scan-on-built-project](#sonar-scan-on-built-project)
     - [update-deployment-runtime-versions](#update-deployment-runtime-versions)
     - [update-pom-to-next-pre-release](#update-pom-to-next-pre-release)
     - [update-project-base-tag](#update-project-base-tag)
@@ -1103,6 +1108,70 @@ Used to release Activiti Projects. Load release information from release.yaml fi
           release-descriptor: release.yaml
 ```
 
+### maven-configure
+
+Set up Java and Maven version and compute common maven options including settings.xml to be used. It also restores Maven cache.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@ref
+        with:
+          java-version: '21'
+          maven-version: '3.8.8'
+```
+
+### maven-dependency-scan
+
+Create the project Dependency Graph
+
+```yaml
+- uses: Alfresco/alfresco-build-tools/.github/actions/maven-dependency-scan@ref
+  with:
+    restore-artifact-pattern: 'm2*'
+    restore-artifact-path: '~./m2/com/groupId'
+    java-version: '21'
+    maven-version: '3.8.8'
+    maven-args: '--settings settings.xml'
+    maven-username: ${{ secrets.MAVEN_USERNAME }}
+    maven-password: ${{ secrets.MAVEN_PASSWORD }}
+    ghcr-username: ${{ secrets.GHCR_USERNAME }}
+    ghcr-password: ${{ secrets.GHCR_PASSWORD }}
+```
+
+#### `restore-artifact-pattern` option
+
+Allow restoring artifacts from an earlier job to avoid attempts to download them from remote. To be used alongside with the option `restore-artifact-path`
+to specify the path where the artifacts are stored.
+
+### maven-build
+
+Builds a maven project using the provided command.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ref
+        with:
+          java-version: '21'
+          maven-command: 'verify'
+          maven-resolver-transport-options: '-Dmaven.wagon.http.pool=false'
+          maven-username: ${{ secrets.MAVEN_USERNAME }}
+          maven-password: ${{ secrets.MAVEN_PASSWORD }}
+          maven-version: '3.8.8'
+          quay-username: ${{ secrets.QUAY_USERNAME }}
+          quay-password: ${{ secrets.QUAY_PASSWORD }}
+          ghcr-username: ${{ secrets.GHCR_USERNAME }}
+          ghcr-password: ${{ secrets.GHCR_PASSWORD }}
+          docker-username: ${{ secrets.DOCKER_USERNAME }}
+          docker-password: ${{ secrets.DOCKER_PASSWORD }}
+          jacoco-report-name: 'jacoco-report'
+          target-folder-upload-name: 'build-artifacts'
+          m2-current-build-upload-name: 'm2-artifacts'
+```
+
+#### Jacoco report options
+
+If the inputs `jacoco-report-name`, `target-folder-upload-name` and `m2-current-build-upload-name` are provided,
+it also generates aggregated coverage reports and makes them available as build artifact for a next job processing it. It's typically followed by a job containing a step
+with the action `sonar-scan-on-built-project`.
+
 ### maven-build-and-tag
 
 Check out, builds a maven project and docker images, generating a new alpha version for it on push events:
@@ -1196,6 +1265,22 @@ Used to release Activiti projects. Update versions in POM files, create git tags
           gpg-owner-trust: "${{ secrets.GPG_OWNERTRUST }}"
           nexus-username: "${{ secrets.NEXUS_USERNAME }}"
           nexus-password: "${{ secrets.NEXUS_PASSWORD }}"
+```
+
+### maven-tag
+
+Updates POM files to the next pre-release, commits changes and creates a Git tag.
+
+```yaml
+- uses: ./.github/actions/maven-tag
+  with:
+    java-version: '21'
+    maven-version: '3.8.8'
+    prerelease-type: 'alpha'
+    maven-username: ${{ secrets.MAVEN_USERNAME }}
+    maven-password: ${{ secrets.MAVEN_PASSWORD }}
+    git-username: ${{secrets.GITHUB_USERNAME }}
+    m2-cache-exclusion-pattern: 'org/example'
 ```
 
 ### maven-update-pom-version
@@ -1830,6 +1915,27 @@ Uploads a file to a Slack channel.
           slack-channel-id: 'channel-id' # not the channel name
           file-path: 'path/to/file'
           file-title: 'file description' # optional
+```
+
+### sonar-scan-on-built-project
+
+Run Sonar Scanner to load JaCoCo report on SonarCloud.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@ref
+        with:
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+          sonar-project: 'example-project-key'
+          sonar-coverage-jacoco-xmlReportPaths: '**/custom/path/to/jacoco.xml'
+          m2-uploaded-group-path: 'com/example/group'
+          target-folder-artifacts-pattern: 'target*'
+          m2-current-build-artifacts-pattern: 'm2*'
+          maven-username: ${{ secrets.MAVEN_USERNAME }}
+          maven-password: ${{ secrets.MAVEN_PASSWORD }}
+          ghcr-username: ${{ secrets.GITHUB_USERNAME }}
+          ghcr-password: ${{ secrets.GITHUB_TOKEN }}
+          maven-version: '3.8.8'
+          java-version: '21'
 ```
 
 ### sonar-scanner
