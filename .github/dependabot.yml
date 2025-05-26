@@ -250,6 +250,14 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
+    directory: "/.github/actions/github-pr-check-metadata"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
     directory: "/.github/actions/helm-build-chart"
     schedule:
       interval: "weekly"
