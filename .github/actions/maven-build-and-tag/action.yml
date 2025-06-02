@@ -110,87 +110,24 @@ outputs:
     value: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
   skip-tests:
     description: "Whether tests were skipped during build or not"
-    value: ${{ steps.set-skip-tests-env-variable.outputs.skip-tests }}
+    value: ${{ steps.maven-configure.outputs.skip-tests }}
 
 runs:
   using: composite
   steps:
     - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-    - uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
-
-    - name: Set up JDK
-      uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@21333c0af238e2f2476a31d3cf6ea63553610b09
+      id: maven-configure
       with:
         java-version: ${{ inputs.java-version }}
-        distribution: ${{ inputs.java-distribution }}
-
-    - name: Set up Maven
-      if: inputs.maven-version != ''
-      uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
-      with:
+        java-distribution: ${{ inputs.java-distribution }}
         maven-version: ${{ inputs.maven-version }}
-
-    - name: Set skip tests env variable
-      id: set-skip-tests-env-variable
-      env:
-        SKIP_TESTS: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, inputs.skip-tests-label) }}
-      shell: bash
-      run: |
-        echo "SKIP_TESTS=$SKIP_TESTS" >> $GITHUB_ENV
-        echo "skip-tests=$SKIP_TESTS" >> $GITHUB_OUTPUT
-
-    - name: Compute maven options
-      id: compute-maven-options
-      shell: bash
-      run: |
-        NTP='--no-transfer-progress'
-        ${{ inputs.verbose }} && NTP=''
-        TEST_OPTIONS=''
-        [[ $SKIP_TESTS == 'true' ]] && TEST_OPTIONS='-DskipTests=true -DskipITs=true'
-        echo "result=--show-version --settings settings.xml $NTP $TEST_OPTIONS" >> $GITHUB_OUTPUT
-
-    - name: Set is_preview env variable
-      id: set-is-preview-env-variable
-      env:
-        IS_PREVIEW: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, inputs.preview-label) }}
-      shell: bash
-      run: |
-        echo "IS_PREVIEW=$IS_PREVIEW" >> $GITHUB_ENV
-
-    - name: Set preview version
-      id: set-preview-version
-      if: env.IS_PREVIEW == 'true'
-      shell: bash
-      run: |
-        GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
-        echo "preview-version=0.0.1-$GITHUB_PR_NUMBER-SNAPSHOT" >> $GITHUB_OUTPUT
-        echo "GITHUB_PR_NUMBER=$GITHUB_PR_NUMBER" >> $GITHUB_ENV
-
-    - name: Set MAVEN_BUILD_CACHE_ENABLED env variable
-      id: set-use-maven_build-cache-env-variable
-      env:
-        MAVEN_BUILD_CACHE_ENABLED: ${{ inputs.maven-build-cache-key != '' && !contains(github.event.pull_request.labels.*.name, inputs.maven-build-cache-skip-label) }}
-        MAVEN_BUILD_CACHE_KEY: ${{ runner.os }}-build-cache-${{ inputs.maven-build-cache-key }}-${{ env.GITHUB_PR_NUMBER || github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
-      shell: bash
-      run: |
-        echo "MAVEN_BUILD_CACHE_ENABLED=$MAVEN_BUILD_CACHE_ENABLED" >> $GITHUB_ENV
-        echo "MAVEN_BUILD_CACHE_KEY=$MAVEN_BUILD_CACHE_KEY" >> $GITHUB_ENV
-
-    - uses: actions/cache/restore@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
-      name: Restore Maven Build Cache before build
-      if: env.MAVEN_BUILD_CACHE_ENABLED == 'true'
-      with:
-        path: ~/.m2/build-cache
-        key: ${{ env.MAVEN_BUILD_CACHE_KEY }}
-        restore-keys: |
-          ${{ runner.os }}-build-cache-${{ inputs.maven-build-cache-key }}-PR-${{ github.event.pull_request.number }}-
-          ${{ runner.os }}-build-cache-${{ inputs.maven-build-cache-key }}-${{ github.base_ref || github.ref_name }}-
+        maven-build-cache-key: ${{ inputs.maven-build-cache-key }}
+        maven-build-cache-skip-label: ${{ inputs.maven-build-cache-skip-label }}
+        skip-tests-label: ${{ inputs.skip-tests-label }}
+        verbose: ${{ inputs.verbose }}
+        preview-label: ${{ inputs.preview-label }}
 
     - name: Update pom files to the new version
       id: update-pom-to-next-version
@@ -198,8 +135,8 @@ runs:
       uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@v8.22.1
       with:
         property-to-update: ${{ inputs.property-to-update }}
-        maven-cli-opts: ${{ steps.compute-maven-options.outputs.result }}
-        version: ${{ steps.set-preview-version.outputs.preview-version }}
+        maven-cli-opts: ${{ steps.maven-configure.outputs.maven-options }}
+        version: ${{ steps.maven-configure.outputs.preview-version }}
       env:
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
@@ -266,7 +203,7 @@ runs:
       shell: bash
       run: mvn ${{ steps.define_maven_command.outputs.command }} ${{ env.MAVEN_CLI_OPTS }} ${{ inputs.extra-maven-opts }} ${{ env.SONAR_SCANNER_OPTS }}
       env:
-        MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip -Dmaven.build.cache.enabled=${{ env.MAVEN_BUILD_CACHE_ENABLED }}
+        MAVEN_CLI_OPTS: ${{ steps.maven-configure.outputs.maven-options }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip -Dmaven.build.cache.enabled=${{ env.MAVEN_BUILD_CACHE_ENABLED }}
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
         SONAR_TOKEN: ${{ inputs.sonar-token }}
@@ -316,7 +253,7 @@ runs:
       if: github.event_name == 'push'
       uses: advanced-security/maven-dependency-submission-action@aeab9f885293af501bae8bdfe88c589528ea5e25 # v4.1.2
       env:
-        MAVEN_CLI_OPTS: ${{ steps.compute-maven-options.outputs.result }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
+        MAVEN_CLI_OPTS: ${{ steps.maven-configure.outputs.maven-options }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
 
