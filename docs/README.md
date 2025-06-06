@@ -32,7 +32,6 @@ Here follows the list of GitHub Actions topics available in the current document
     - [SSH debug](#ssh-debug)
     - [Triggering a workflow in another repository](#triggering-a-workflow-in-another-repository)
   - [GitHub Actions provided by us](#github-actions-provided-by-us)
-    - [automate-dependabot](#automate-dependabot)
     - [automate-propagation](#automate-propagation)
     - [calculate-next-internal-version](#calculate-next-internal-version)
     - [configure-git-author](#configure-git-author)
@@ -410,24 +409,6 @@ on:
 ```
 
 ## GitHub Actions provided by us
-
-### automate-dependabot
-
-Handles automated approval and merge of dependabot PRs, for minor and patch version updates only:
-
-- automated approval on minor and patch versions
-- automated merge on patch versions
-
-This action requires a dedicated secret (named `DEPENDABOT_GITHUB_TOKEN` in the sample) to setup the "auto-merge" behavior: the default `GITHUB_TOKEN` is not used in this case, otherwise a build would not be triggered when the PR is merged, [see reference solution](https://david.gardiner.net.au/2021/07/github-actions-not-running.html).
-
-This secret should be a [dependabot secret](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/managing-encrypted-secrets-for-dependabot), and the token should hold the `repo > repo:status` and `repo > public_repo` scopes for public repositories.
-The whole list of "repo" scopes might be needed for the workflow to run ok on private repositories.
-
-```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/automate-dependabot@ref
-      with:
-        token: ${{ secrets.DEPENDABOT_GITHUB_TOKEN }}
-```
 
 ### automate-propagation
 
