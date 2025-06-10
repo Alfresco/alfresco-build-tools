@@ -42,7 +42,7 @@ runs:
           export IMAGE_DIR
           echo checking $IMAGE_DIR
 
-          SKIP_DOCKER=$(yq '.project.properties.["docker.skip"] // "false"'  $IMAGE_DIR/pom.xml)
+          SKIP_DOCKER=$(yq '.project.properties.["docker.skip"] // "false"' "$IMAGE_DIR/pom.xml")
           export SKIP_DOCKER
 
           if [ "$SKIP_DOCKER" = "false" ]; then
