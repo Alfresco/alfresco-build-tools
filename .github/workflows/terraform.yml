@@ -44,6 +44,8 @@ jobs:
     steps:
       - name: Evaluate branch name
         id: basic_vars
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           if [ -n "${{ inputs.terraform_env }}" ]; then
             echo "Using environment from input: ${{ inputs.terraform_env }}"

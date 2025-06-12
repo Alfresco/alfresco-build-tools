@@ -72,12 +72,14 @@ Here follows the list of GitHub Actions topics available in the current document
     - [kubectl-keep-nslogs](#kubectl-keep-nslogs)
     - [kubectl-wait](#kubectl-wait)
     - [load-release-descriptor](#load-release-descriptor)
+    - [maven-configure](#maven-configure)
+    - [maven-dependency-scan](#maven-dependency-scan)
+      - [`restore-artifact-pattern` option](#restore-artifact-pattern-option)
     - [maven-build](#maven-build)
+      - [Jacoco report options](#jacoco-report-options)
     - [maven-build-and-tag](#maven-build-and-tag)
       - [Preview option for maven-build-and-tag](#preview-option-for-maven-build-and-tag)
       - [Option to skip tests for maven-build-and-tag](#option-to-skip-tests-for-maven-build-and-tag)
-    - [maven-configure](#maven-configure)
-    - [maven-dependency-scan](#maven-dependency-scan)
     - [maven-deploy-file](#maven-deploy-file)
     - [maven-release](#maven-release)
     - [maven-tag](#maven-tag)
@@ -110,8 +112,8 @@ Here follows the list of GitHub Actions topics available in the current document
     - [setup-updatebot](#setup-updatebot)
     - [setup-updatecli](#setup-updatecli)
     - [slack-file-upload](#slack-file-upload)
-    - [sonar-scanner](#sonar-scanner)
     - [sonar-scan-on-built-project](#sonar-scan-on-built-project)
+    - [sonar-scanner](#sonar-scanner)
     - [update-deployment-runtime-versions](#update-deployment-runtime-versions)
     - [update-pom-to-next-pre-release](#update-pom-to-next-pre-release)
     - [update-project-base-tag](#update-project-base-tag)
@@ -2061,7 +2063,7 @@ and the following (optional) secrets:
 
 - AWS_ACCESS_KEY_ID: access key to use the AWS terraform provider
 - AWS_SECRET_ACCESS_KEY: secret key to use the AWS terraform provider
-- BOT_GITHUB_TOKEN (to access private terraform module of the Alfresco org)
+- BOT_GITHUB_TOKEN (to access private terraform modules in the Alfresco org)
 - DOCKER_USERNAME (optional): Docker Hub credentials
 - DOCKER_PASSWORD (optional): Docker Hub credentials
 - RANCHER2_ACCESS_KEY (optional): access key to use the rancher terraform
@@ -2094,6 +2096,10 @@ on:
           - apply
           - destroy
         default: apply
+
+permissions:
+  pull-requests: write
+  contents: read
 
 jobs:
   invoke-terraform-infra:
