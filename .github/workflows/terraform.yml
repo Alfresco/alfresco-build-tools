@@ -56,7 +56,7 @@ jobs:
           BRANCH_NAME=${{ github.base_ref || github.ref_name }}
           if [ -n "${{ github.event.issue.pull_request }}" ]; then
             echo "Evaluating branch name for issue_comment event"
-            BRANCH_NAME=$(gh pr view ${{ github.event.issue.pull_request.html_url }} --json baseRefName --jq '.baseRefName')
+            BRANCH_NAME=$(gh pr view ${{ github.event.issue.pull_request.html_url }} --json baseRefName --jq '.baseRefName' 2>/dev/null)
           fi
 
           BRANCH_LOWER=${BRANCH_NAME,,}
