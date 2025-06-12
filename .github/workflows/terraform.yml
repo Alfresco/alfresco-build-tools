@@ -17,7 +17,7 @@ on:
         type: string
         required: false
       create_oidc_token_file:
-        description: whether to create a file with the OIDC token
+        description: whether to create a file with an OIDC token for AWS
         type: boolean
         required: false
         default: false
@@ -45,11 +45,20 @@ jobs:
       - name: Evaluate branch name
         id: basic_vars
         run: |
-          BRANCH_NAME=${{ github.base_ref || github.ref_name }}
-          BRANCH_LOWER=${BRANCH_NAME,,}
           if [ -n "${{ inputs.terraform_env }}" ]; then
-            environment=${{ inputs.terraform_env }}
-          elif [ "$BRANCH_LOWER" == "main" ]; then
+            echo "Using environment from input: ${{ inputs.terraform_env }}"
+            echo "environment_name=${{ inputs.terraform_env }}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          BRANCH_NAME=${{ github.base_ref || github.ref_name }}
+          if [ -n "${{ github.event.issue.pull_request }}" ]; then
+            echo "Evaluating branch name for issue_comment event"
+            BRANCH_NAME=$(gh pr view ${{ github.event.issue.pull_request.html_url }} --json baseRefName --jq '.baseRefName')
+          fi
+
+          BRANCH_LOWER=${BRANCH_NAME,,}
+          if [ "$BRANCH_LOWER" == "main" ]; then
             environment="production"
           elif [ "$BRANCH_LOWER" == "develop" ]; then
             environment="develop"
@@ -57,6 +66,8 @@ jobs:
             echo "$BRANCH_LOWER doesn't have a matching environment"
             exit 1
           fi
+
+          echo "Using environment: $environment"
           echo "environment_name=${environment}" >> "$GITHUB_OUTPUT"
     outputs:
       environment_name: ${{ steps.basic_vars.outputs.environment_name }}
