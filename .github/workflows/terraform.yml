@@ -62,10 +62,14 @@ jobs:
           BRANCH_LOWER=${BRANCH_NAME,,}
           if [ "$BRANCH_LOWER" == "main" ]; then
             environment="production"
-          elif [ "$BRANCH_LOWER" == "develop" ]; then
-            environment="develop"
+          elif [[ "$BRANCH_LOWER" =~ ^[a-z][a-z0-9-]{3,}$ ]]; then
+            environment="${BRANCH_LOWER}"
           else
-            echo "$BRANCH_LOWER doesn't have a matching environment"
+            echo "$BRANCH_LOWER is not a valid environment name."
+            echo "It must:"
+            echo " - start with a letter"
+            echo " - contain only lowercase chars, numbers, and hyphens"
+            echo " - be at least 4 characters long"
             exit 1
           fi
 

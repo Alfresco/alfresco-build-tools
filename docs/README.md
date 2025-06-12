@@ -2035,12 +2035,25 @@ optionally allowing a multi-state approach for managing resources.
 
 You can provide Github environment name with `terraform_env` input if not this
 workflow assumes a GitHub environment named `production` to be present when run
-against the `main` branch, and a `develop` GitHub environment to be present when
-run against the `develop` branch.
+against the `main` branch, and any other environment when run against `develop`
+branch or any other branch.
 
-Using below input is a alternative option to setting the `AWS_ROLE_ARN`.
-Setting `create_oidc_token_file` input to `true` triggers creation of oidc token
-which is saved into file and can be used on terraform side e.g. like this:
+GitHub environments must be configured with the following GitHub variables
+(repository or environment):
+
+- AWS_DEFAULT_REGION: where the AWS resources will be created
+- AWS_ROLE_ARN (optional): the ARN of the role to assume in case OIDC
+  authentication is available
+- RANCHER2_URL (optional): automatically register EKS cluster on a given rancher
+  instance
+- RESOURCE_NAME: used to namespace every resource created, e.g. cluster name
+- TERRAFORM_STATE_BUCKET: the name of the S3 bucket where to store the terraform
+  state. You can reuse the same bucket for multiple environments as long as you
+  provide a different `RESOURCE_NAME` for each environment.
+
+Alternatively to providing `AWS_ROLE_ARN` as GitHub variable, you can set
+`create_oidc_token_file` input to `true` to request an AWS OIDC token which will
+be persisted into a file and can be used inside terraform code e.g. like this:
 
 ```tf
 backend "s3" {
@@ -2051,15 +2064,7 @@ backend "s3" {
 }
 ```
 
-GitHub environments must be configured with the following variables:
-
-- AWS_DEFAULT_REGION: where the aws resources will be created
-- AWS_ROLE_ARN: the ARN of the role to assume in case OIDC authentication is available
-- RANCHER2_URL (optional): automatically register cluster on this rancher instance
-- RESOURCE_NAME: used to namespace every resource created, e.g. the cluster name
-- TERRAFORM_STATE_BUCKET: the name of the S3 bucket where to store the terraform state
-
-and the following (optional) secrets:
+The following GitHub secrets (all optional) are also accepted by this workflow:
 
 - AWS_ACCESS_KEY_ID: access key to use the AWS terraform provider
 - AWS_SECRET_ACCESS_KEY: secret key to use the AWS terraform provider
@@ -2079,10 +2084,12 @@ on:
     branches:
       - main
       - develop
+      - preprod
   push:
     branches:
       - main
       - develop
+      - preprod
   # optional - to trigger a terraform apply adding a pr comment with text 'terraform apply'
   issue_comment:
     types: [created]
