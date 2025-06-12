@@ -20,7 +20,7 @@ runs:
   using: "composite"
   steps:
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v8.23.2
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v8.23.3
 
     - name: Check upcoming runs
       id: check
