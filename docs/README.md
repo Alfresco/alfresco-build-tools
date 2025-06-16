@@ -1083,6 +1083,7 @@ This action allow to collect logs from pods if they are referenced in a deployme
       with:
         namespace: mynsapp
         log_retention: 7
+        log_name_identifier: ${{ env.MY_APP_VERSION }}
 ```
 
 ### kubectl-wait
