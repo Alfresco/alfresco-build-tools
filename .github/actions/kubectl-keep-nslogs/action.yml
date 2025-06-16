@@ -13,7 +13,7 @@ inputs:
     required: false
     default: "10"
   log_name_identifier:
-    description: Suffix to append to the log name
+    description: Add custom identifier to the log name
     required: false
     default: "logs"
 runs:
