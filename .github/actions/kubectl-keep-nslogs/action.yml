@@ -12,7 +12,7 @@ inputs:
     description: Number of days to keep the logs for
     required: false
     default: "10"
-  log_name_suffix:
+  log_name_identifier:
     description: Suffix to append to the log name
     required: false
     default: ""
@@ -33,14 +33,13 @@ runs:
         for type in deployment.apps statefulset.apps jobs; do
           [ -d "${type}" ] || mkdir "${type}"
           for i in $(kubectl get "$type" -o name); do \
-            kubectl logs "$i" --all-containers=true | \
-            gzip > "${i}.log.gz"
+            kubectl logs "$i" --all-containers=true > ${i}.log
           done
         done
     - name: upload kubernetes logs as artifact
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: >-
-          ${{ inputs.namespace }}_logs.${{ github.run_number }}.${{ github.run_attempt }}${{ inputs.log_name_suffix }}
+          ${{ inputs.namespace }}_${{ log_name_identifier }}_logs
         retention-days: ${{ inputs.log_retention }}
         path: ${{ steps.artifactdir.outputs.ARTIFACTS_DIR }}
