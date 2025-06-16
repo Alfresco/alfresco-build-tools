@@ -40,6 +40,6 @@ runs:
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: >-
-          ${{ inputs.namespace }}_${{ inputs.log_name_identifier || format('{0}.{1}', github.run_number, github.run_attempt) }}_logs
+          ${{ inputs.namespace }}_${{ inputs.log_name_identifier}}_${{ github.run_number }}_${{ github.run_attempt }}
         retention-days: ${{ inputs.log_retention }}
         path: ${{ steps.artifactdir.outputs.ARTIFACTS_DIR }}
