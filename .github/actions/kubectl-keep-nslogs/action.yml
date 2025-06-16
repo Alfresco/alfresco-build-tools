@@ -15,6 +15,7 @@ inputs:
   log_name_identifier:
     description: Suffix to append to the log name
     required: false
+    default: "logs"
 runs:
   using: composite
   steps:
