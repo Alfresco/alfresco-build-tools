@@ -140,7 +140,7 @@ jobs:
           role-session-name: TerraformWorkflow
 
       - name: Load environment variables from yml
-        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v8.23.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v8.24.0
         with:
           yml_path: ${{ inputs.terraform_root_path }}/tfenv.yml
 
