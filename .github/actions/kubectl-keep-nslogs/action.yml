@@ -12,6 +12,10 @@ inputs:
     description: Number of days to keep the logs for
     required: false
     default: "10"
+  log_name_suffix:
+    description: Suffix to append to the log name
+    required: false
+    default: ""
 runs:
   using: composite
   steps:
@@ -37,6 +41,6 @@ runs:
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: >-
-          ${{ inputs.namespace }}_logs.${{ github.run_number }}.${{ github.run_attempt }}
+          ${{ inputs.namespace }}_logs.${{ github.run_number }}.${{ github.run_attempt }}${{ inputs.log_name_suffix }}
         retention-days: ${{ inputs.log_retention }}
         path: ${{ steps.artifactdir.outputs.ARTIFACTS_DIR }}
