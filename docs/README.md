@@ -73,12 +73,14 @@ Here follows the list of GitHub Actions topics available in the current document
     - [kubectl-keep-nslogs](#kubectl-keep-nslogs)
     - [kubectl-wait](#kubectl-wait)
     - [load-release-descriptor](#load-release-descriptor)
+    - [maven-configure](#maven-configure)
+    - [maven-dependency-scan](#maven-dependency-scan)
+      - [`restore-artifact-pattern` option](#restore-artifact-pattern-option)
     - [maven-build](#maven-build)
+      - [Jacoco report options](#jacoco-report-options)
     - [maven-build-and-tag](#maven-build-and-tag)
       - [Preview option for maven-build-and-tag](#preview-option-for-maven-build-and-tag)
       - [Option to skip tests for maven-build-and-tag](#option-to-skip-tests-for-maven-build-and-tag)
-    - [maven-configure](#maven-configure)
-    - [maven-dependency-scan](#maven-dependency-scan)
     - [maven-deploy-file](#maven-deploy-file)
     - [maven-release](#maven-release)
     - [maven-tag](#maven-tag)
@@ -111,8 +113,8 @@ Here follows the list of GitHub Actions topics available in the current document
     - [setup-updatebot](#setup-updatebot)
     - [setup-updatecli](#setup-updatecli)
     - [slack-file-upload](#slack-file-upload)
-    - [sonar-scanner](#sonar-scanner)
     - [sonar-scan-on-built-project](#sonar-scan-on-built-project)
+    - [sonar-scanner](#sonar-scanner)
     - [update-deployment-runtime-versions](#update-deployment-runtime-versions)
     - [update-pom-to-next-pre-release](#update-pom-to-next-pre-release)
     - [update-project-base-tag](#update-project-base-tag)
@@ -1116,6 +1118,7 @@ This action allow to collect logs from pods if they are referenced in a deployme
       with:
         namespace: mynsapp
         log_retention: 7
+        log_name_identifier: myapp_v1
 ```
 
 ### kubectl-wait
@@ -2068,12 +2071,25 @@ optionally allowing a multi-state approach for managing resources.
 
 You can provide Github environment name with `terraform_env` input if not this
 workflow assumes a GitHub environment named `production` to be present when run
-against the `main` branch, and a `develop` GitHub environment to be present when
-run against the `develop` branch.
+against the `main` branch, and any other environment when run against `develop`
+branch or any other branch.
 
-Using below input is a alternative option to setting the `AWS_ROLE_ARN`.
-Setting `create_oidc_token_file` input to `true` triggers creation of oidc token
-which is saved into file and can be used on terraform side e.g. like this:
+GitHub environments must be configured with the following GitHub variables
+(repository or environment):
+
+- AWS_DEFAULT_REGION: where the AWS resources will be created
+- AWS_ROLE_ARN (optional): the ARN of the role to assume in case OIDC
+  authentication is available
+- RANCHER2_URL (optional): automatically register EKS cluster on a given rancher
+  instance
+- RESOURCE_NAME: used to namespace every resource created, e.g. cluster name
+- TERRAFORM_STATE_BUCKET: the name of the S3 bucket where to store the terraform
+  state. You can reuse the same bucket for multiple environments as long as you
+  provide a different `RESOURCE_NAME` for each environment.
+
+Alternatively to providing `AWS_ROLE_ARN` as GitHub variable, you can set
+`create_oidc_token_file` input to `true` to request an AWS OIDC token which will
+be persisted into a file and can be used inside terraform code e.g. like this:
 
 ```tf
 backend "s3" {
@@ -2084,19 +2100,11 @@ backend "s3" {
 }
 ```
 
-GitHub environments must be configured with the following variables:
-
-- AWS_DEFAULT_REGION: where the aws resources will be created
-- AWS_ROLE_ARN: the ARN of the role to assume in case OIDC authentication is available
-- RANCHER2_URL (optional): automatically register cluster on this rancher instance
-- RESOURCE_NAME: used to namespace every resource created, e.g. the cluster name
-- TERRAFORM_STATE_BUCKET: the name of the S3 bucket where to store the terraform state
-
-and the following (optional) secrets:
+The following GitHub secrets (all optional) are also accepted by this workflow:
 
 - AWS_ACCESS_KEY_ID: access key to use the AWS terraform provider
 - AWS_SECRET_ACCESS_KEY: secret key to use the AWS terraform provider
-- BOT_GITHUB_TOKEN (to access private terraform module of the Alfresco org)
+- BOT_GITHUB_TOKEN (to access private terraform modules in the Alfresco org)
 - DOCKER_USERNAME (optional): Docker Hub credentials
 - DOCKER_PASSWORD (optional): Docker Hub credentials
 - RANCHER2_ACCESS_KEY (optional): access key to use the rancher terraform
@@ -2112,10 +2120,12 @@ on:
     branches:
       - main
       - develop
+      - preprod
   push:
     branches:
       - main
       - develop
+      - preprod
   # optional - to trigger a terraform apply adding a pr comment with text 'terraform apply'
   issue_comment:
     types: [created]
@@ -2129,6 +2139,10 @@ on:
           - apply
           - destroy
         default: apply
+
+permissions:
+  pull-requests: write
+  contents: read
 
 jobs:
   invoke-terraform-infra:
