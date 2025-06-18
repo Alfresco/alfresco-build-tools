@@ -1,0 +1,80 @@
+name: Manage Dependabot PR Approval
+description: >
+  Automate the validation and auto-merge of Dependabot pull requests on approval.
+inputs:
+  github-token:
+    description: >
+      Token used to enable auto-merge, comment on the PR, and change PR milestone/label.
+      This token CANNOT be the default `GITHUB_TOKEN`, otherwise the merge of the PR will not trigger a build.
+    required: true
+  merge-option:
+    description: 'Merge option'
+    required: false
+    default: '--squash'
+  milestone-on-approval:
+    description: 'Milestone to set on the PR when it is approved. This should trigger validation of the PR.'
+    required: false
+  label-on-approval:
+    description: 'Label to set on the PR when it is approved. This should trigger validation of the PR.'
+    required: false
+  auto-merge-on-approval:
+    description: 'If true, auto-merge will be enabled for the PR when it is approved.'
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Check if the PR is an approved Dependabot PR
+      id: check
+      env:
+        REVIEW_STATE: ${{ github.event.review.state }}
+        PR_LOGIN: ${{ github.event.pull_request.user.login }}
+      shell: bash
+      run: |
+        if [[ "$REVIEW_STATE" == 'approved' && "$PR_LOGIN" == 'dependabot[bot]' ]]
+        then
+            echo "continue=true" >> $GITHUB_OUTPUT
+        else
+            echo "continue=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Trigger PR validation
+      if: steps.check.outputs.continue == 'true'
+      env:
+        MILESTONE: ${{ inputs.milestone-on-approval }}
+        LABEL: ${{ inputs.label-on-approval }}
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+      shell: bash
+      run: |
+        if [[ -n "$MILESTONE" ]]; then
+          echo "Milestone to PR to trigger PR validation"
+          gh pr edit -R $GITHUB_REPOSITORY $PR_NUMBER --milestone "$MILESTONE"
+        fi
+        if [[ -n "$MILESTONE" ]]; then
+          echo "Label PR to trigger PR validation"
+          gh pr edit -R $GITHUB_REPOSITORY $PR_NUMBER --add-label "$LABEL"
+        fi
+
+    - uses: actions/github-script@v7
+      if: steps.check.outputs.continue == 'true' and inputs.auto-merge-on-approval == 'true'
+      env:
+        ACTOR: ${{ github.triggering_actor }}
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: 'Setting auto-merge on Dependabot PR after action from @${{ env.ACTOR }}',
+          })
+
+    - name: Enable auto-merge for propagation Pull Request
+      if: steps.check.outputs.continue == 'true' and inputs.auto-merge-on-approval == 'true'
+      env:
+        PR_URL: ${{ github.event.pull_request.html_url }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+      shell: bash
+      run: gh pr merge --auto ${{ inputs.merge-option }} "$PR_URL"

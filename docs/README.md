@@ -51,6 +51,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [get-commit-message](#get-commit-message)
     - [git-commit-changes](#git-commit-changes)
     - [git-latest-tag](#git-latest-tag)
+    - [github-check-secrets-source](#github-check-secrets-source)
     - [github-check-upcoming-runs](#github-check-upcoming-runs)
     - [github-deployment-create](#github-deployment-create)
     - [github-deployment-status-update](#github-deployment-status-update)
@@ -58,6 +59,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [github-download-file](#github-download-file)
     - [github-https-auth](#github-https-auth)
     - [github-list-changes](#github-list-changes)
+    - [github-manage-dependabot-pr-approval](#github-manage-dependabot-pr-approval)
     - [github-pr-check-metadata](#github-pr-check-metadata)
     - [helm-build-chart](#helm-build-chart)
     - [helm-integration-tests](#helm-integration-tests)
@@ -718,6 +720,32 @@ Gets the latest tag and commit sha for the given pattern. The result is returned
           pattern: 1.0.0-alpha*
 ```
 
+### github-check-secrets-source
+
+This action fails the current run if it detects that the secrets source is not enough for proper PR validation.
+
+This is useful to stop a build early and cleanly, when validating dependabot PRs that do not have access to Dependabot secrets.
+
+Good practices for proper validation of such PRs is to trigger the validation by labelling or setting the milestone on the PR, so that it is run with the user's credentials instead of having to share secrets with Dependabot.
+
+See also sibling action [github-manage-dependabot-pr-approval](#github-manage-dependabot-pr-approval).
+
+```yaml
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - milestoned
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-check-secrets-source@ref
+```
+
 ### github-check-upcoming-runs
 
 This action fails the current run if it detects that another run if upcoming on the same branch.
@@ -838,6 +866,32 @@ This action requires a checkout with `fetch-depth: 0` option as follow:
 ```
 
 The action outputs the list of changed files (one path per line) using the output `all_changed_files` and optionally to the env variable `GITHUB_MODIFIED_FILES`.
+
+### github-manage-dependabot-pr-approval
+
+This action helps triggering validation of Dependabot PRs, as well as setting up auto-merge, so that only a reviewer's approval is needed to merging such PR.
+
+This action requires a dedicated secret (named `BOT_GITHUB_TOKEN` in the sample) to setup the "auto-merge" behavior: the default `GITHUB_TOKEN` is not used in this case, otherwise a build would not be triggered when the PR is merged, [see reference solution](https://david.gardiner.net.au/2021/07/github-actions-not-running.html).
+
+This approach also allows to avoid re-triggering validations when the PR is already approved.
+
+See also sibling action [github-check-secrets-source](#github-check-secrets-source).
+
+```yaml
+on:
+  pull_request_review:
+    types:
+      - submitted
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-manage-dependabot-approval@ref
+        with:
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          milestone-on-approval: Dependabot
+```
 
 ### github-pr-check-metadata
 
