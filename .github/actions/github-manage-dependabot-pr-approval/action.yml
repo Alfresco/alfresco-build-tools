@@ -46,14 +46,15 @@ runs:
         LABEL: ${{ inputs.label-on-approval }}
         GH_TOKEN: ${{ inputs.github-token }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
+        PR_URL: ${{ github.event.pull_request.html_url }}
       shell: bash
       run: |
         if [[ -n "$MILESTONE" ]]; then
-          echo "Milestone to PR to trigger PR validation"
+          echo "::notice::Milestone PR to trigger PR validation: $PR_URL"
           gh pr edit -R $GITHUB_REPOSITORY $PR_NUMBER --milestone "$MILESTONE"
         fi
         if [[ -n "$MILESTONE" ]]; then
-          echo "Label PR to trigger PR validation"
+          echo "::notice::Label PR to trigger PR validation: $PR_URL"
           gh pr edit -R $GITHUB_REPOSITORY $PR_NUMBER --add-label "$LABEL"
         fi
 
