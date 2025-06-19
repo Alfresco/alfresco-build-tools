@@ -53,7 +53,7 @@ runs:
           echo "::notice::Milestone PR to trigger PR validation: $PR_URL"
           gh pr edit -R $GITHUB_REPOSITORY $PR_NUMBER --milestone "$MILESTONE"
         fi
-        if [[ -n "$MILESTONE" ]]; then
+        if [[ -n "$LABEL" ]]; then
           echo "::notice::Label PR to trigger PR validation: $PR_URL"
           gh pr edit -R $GITHUB_REPOSITORY $PR_NUMBER --add-label "$LABEL"
         fi
