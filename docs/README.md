@@ -2221,6 +2221,10 @@ using the [docker-maven-plugin](https://dmp.fabric8.io):
 
 ### Running a dependabot PR workflow only when pull request is approved
 
+For helper actions on validation/merge of dependabot PRs following good practices,
+please check [github-check-secrets-source](#github-check-secrets-source) and
+[github-manage-dependabot-pr-approval](#github-manage-dependabot-pr-approval).
+
 When a workflow requires secrets to function properly, you either need to
 provide dependabot-specific secrets (doubling the effort to maintain these
 secrets) or gracefully downgrade the workflow to allow it to complete
