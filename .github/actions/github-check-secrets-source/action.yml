@@ -1,0 +1,19 @@
+name: Check Github Actions Source
+description: Fails if actions source is not valid for secrets usage
+
+runs:
+  using: composite
+  steps:
+    - name: Check secret source
+      env:
+        SECRET_SOURCE: ${{ github.secret_source }}
+      shell: bash
+      run: |
+        if [[ $SECRET_SOURCE == 'Dependabot' ]]
+        then
+          echo "::error::Access to secrets forbidden to Dependabot: follow your repository process for PR validation" && exit 1
+        fi
+        if [[ $SECRET_SOURCE != 'Actions' && $SECRET_SOURCE != 'Codespaces' ]]
+        then
+          echo "::error::Missing proper secrets source: failing build" && exit 1
+        fi
