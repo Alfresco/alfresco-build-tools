@@ -1,0 +1,16 @@
+name: "PR Review check"
+
+on:
+  pull_request_review:
+    types:
+      - submitted
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/github-manage-dependabot-pr-approval
+        with:
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          milestone-on-approval: Dependabot
+          auto-merge-on-approval: false
