@@ -39,7 +39,7 @@ runs:
         then
           [[ "$CREATOR" == "$INPUT_ACTOR" && "$LABELS" == *"$INPUT_LABEL"* ]] && RESULT=true || RESULT=false
         else
-          [[ "$CREATOR" == *"$INPUT_LABEL"* ]] && RESULT=true || RESULT=false
+          [[ "$LABELS" == *"$INPUT_LABEL"* ]] && RESULT=true || RESULT=false
         fi
 
         echo "result=$RESULT"
