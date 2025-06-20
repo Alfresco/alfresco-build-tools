@@ -29,19 +29,15 @@ runs:
         INPUT_ACTOR: ${{ inputs.actor }}
       shell: bash
       run: |
-        echo "Event name: $GITHUB_EVENT_NAME"
-        PR_INFO=$(gh api /repos/$GITHUB_REPOSITORY/commits/$SHA/pulls | jq -r '.[0] | {user_login: .user.login, labels: [.labels[].name]}' )
-        LABELS=$(echo $PR_INFO | jq -r '.labels')
-        echo "Labels found: $LABELS"
+        PR_INFO=$(gh api /repos/$GITHUB_REPOSITORY/commits/$SHA/pulls | jq -r '.[0] | {creator: .user.login, labels: [.labels[].name], url: .html_url}')
+        echo "PR Info: $PR_INFO"
 
-        if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
-            GITHUB_ACTOR=$(echo $PR_INFO | jq -r '.user_login')
-        fi
-        echo "Creator: $GITHUB_ACTOR"
+        CREATOR=$(echo $PR_INFO | jq -r '.creator')
+        LABELS=$(echo $PR_INFO | jq -r '.labels')
 
         if [ -n "$INPUT_ACTOR" ]
         then
-          [[ "$GITHUB_ACTOR" == "$INPUT_ACTOR" && "$LABELS" == *"$INPUT_LABEL"* ]] && RESULT=true || RESULT=false
+          [[ "$CREATOR" == "$INPUT_ACTOR" && "$LABELS" == *"$INPUT_LABEL"* ]] && RESULT=true || RESULT=false
         else
           [[ "$LABELS" == *"$INPUT_LABEL"* ]] && RESULT=true || RESULT=false
         fi
