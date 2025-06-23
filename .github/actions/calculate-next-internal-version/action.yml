@@ -28,3 +28,4 @@ runs:
         NEXT_VERSION: ${{ inputs.next-version }}
         PRERELEASE_TYPE: ${{ inputs.prerelease-type }}
         REPO_DIR: ${{inputs.repository-directory}}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
