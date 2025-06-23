@@ -14,6 +14,9 @@ inputs:
   version:
     description: custom version to be set
     required: false
+  github-token:
+    description: GitHub token to use for API access
+    required: true
 outputs:
   next-prerelease:
     description: "Next prerelease"
@@ -35,7 +38,7 @@ runs:
       if: inputs.version == ''
       uses: Alfresco/alfresco-build-tools/.github/actions/calculate-next-internal-version@improvement/AAE-36080-Reducing-Noisy-Tags
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        github-token: ${{ inputs.github-token }}
         next-version: ${{ steps.parse-next-final-version.outputs.result }}
         prerelease-type: ${{ inputs.prerelease-type }}
 
