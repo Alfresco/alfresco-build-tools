@@ -78,6 +78,7 @@ jobs:
       - uses: ./.github/actions/setup-pysemver
       - uses: ./.github/actions/calculate-next-internal-version
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           next-version: 7.3.0
       - uses: ./.github/actions/resolve-preview-name
       - uses: ./.github/actions/setup-terraform-docs
