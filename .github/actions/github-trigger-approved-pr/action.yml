@@ -63,7 +63,7 @@ runs:
           gh pr edit -R $GITHUB_REPOSITORY $PR_NUMBER --add-label "$LABEL"
         fi
 
-    - uses: uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+    - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
       if: steps.check.outputs.continue == 'true' and inputs.auto-merge-on-approval == 'true'
       env:
         ACTOR: ${{ github.triggering_actor }}
