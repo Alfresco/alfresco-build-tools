@@ -32,7 +32,7 @@ runs:
         PR_LOGIN: ${{ github.event.pull_request.user.login }}
       shell: bash
       run: |
-        if [[ "$REVIEW_STATE" == 'approved' && "$PR_LOGIN" == 'atchertchian' ]]
+        if [[ "$REVIEW_STATE" == 'approved' && "$PR_LOGIN" == 'dependabot[bot]' ]]
         then
             echo "continue=true" >> $GITHUB_OUTPUT
         else
