@@ -29,5 +29,5 @@ runs:
       env:
         NEXT_VERSION: ${{ inputs.next-version }}
         PRERELEASE_TYPE: ${{ inputs.prerelease-type }}
-        REPO_DIR: ${{inputs.repository-directory}}
-        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        REPO_DIR: ${{ inputs.repository-directory }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
