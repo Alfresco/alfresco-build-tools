@@ -194,14 +194,6 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
-    directory: "/.github/actions/github-check-secrets-source"
-    schedule:
-      interval: "weekly"
-    groups:
-      catch-all:
-        patterns:
-          - "*"
-  - package-ecosystem: "github-actions"
     directory: "/.github/actions/github-check-upcoming-runs"
     schedule:
       interval: "weekly"
@@ -258,7 +250,7 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
-    directory: "/.github/actions/github-manage-dependabot-pr-approval"
+    directory: "/.github/actions/github-pr-check-metadata"
     schedule:
       interval: "weekly"
     groups:
@@ -266,7 +258,15 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
-    directory: "/.github/actions/github-pr-check-metadata"
+    directory: "/.github/actions/github-require-secrets"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/github-trigger-approved-pr"
     schedule:
       interval: "weekly"
     groups:
