@@ -7,7 +7,7 @@ then
 fi
 
 echo "Fetching tags ... "
-git fetch --tags
+git fetch --tags --no-recurse-submodules --quiet
 
 FIRST_PRERELEASE_SUFFIX="-${PRERELEASE_TYPE}.1"
 
