@@ -11,7 +11,9 @@ inputs:
   repository-directory:
     description: "Path to the directory holding the git repository"
     required: false
-
+  github-token:
+    description: "GitHub token to use for API requests"
+    required: true
 outputs:
   next-prerelease:
     description: "Next prerelease"
@@ -28,4 +30,4 @@ runs:
         NEXT_VERSION: ${{ inputs.next-version }}
         PRERELEASE_TYPE: ${{ inputs.prerelease-type }}
         REPO_DIR: ${{inputs.repository-directory}}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
