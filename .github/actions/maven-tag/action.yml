@@ -29,9 +29,9 @@ inputs:
   m2-cache-exclusion-pattern:
     description: The exclusion pattern to be applied while creating cache for the Maven m2 repository. By default `organ/activiti` and `com/alfresco` are excluded
     required: false
-    github-token:
-      description: "GitHub token to use for API requests"
-      required: true
+  github-token:
+    description: "GitHub token to use for API requests"
+    required: true
 
 outputs:
   version:
