@@ -3,8 +3,14 @@ set -euo pipefail
 
 : "${NEXT_VERSION:?}"
 : "${PRERELEASE_TYPE:?}"
-: "${GITHUB_REPOSITORY:?}"
-: "${GITHUB_TOKEN:?}"
+: "${GITHUB_TOKEN:?Missing GITHUB_TOKEN}"
+
+# Use runner default if not explicitly set
+GITHUB_REPOSITORY="${GITHUB_REPOSITORY:-}"
+if [[ -z "$GITHUB_REPOSITORY" ]]; then
+  echo "GITHUB_REPOSITORY is not set"
+  exit 1
+fi
 
 API_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/tags"
 PER_PAGE=100
