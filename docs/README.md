@@ -885,7 +885,7 @@ The main benefit is to save CI/CD resources and time by skipping unnecessary dep
 
 This action fails the current run if it detects that the secrets source is not enough for proper PR validation.
 
-This is useful to stop a build early and cleanly, when validating dependabot PRs that do not have access to Dependabot secrets.
+This is useful to stop a build early and cleanly, when validating dependabot PRs that do not have access to Dependabot secrets, or which are forks.
 
 Good practices for proper validation of such PRs is to trigger the validation by labelling or setting the milestone on the PR, so that it is run with the user's credentials instead of having to share secrets with Dependabot.
 
@@ -910,8 +910,9 @@ jobs:
 ### github-trigger-approved-pr
 
 This action helps triggering validation of Dependabot PRs, as well as setting up auto-merge, so that only a reviewer's approval is needed to merging such PR.
+By default, it uses `dependabot[bot]` as the PR creator to check, but can be changed using the `actor` input.
 
-This action requires a dedicated secret (named `BOT_GITHUB_TOKEN` in the sample) to setup the "auto-merge" behavior: the default `GITHUB_TOKEN` is not used in this case, otherwise a build would not be triggered when the PR is merged, [see reference solution](https://david.gardiner.net.au/2021/07/github-actions-not-running.html).
+It requires a dedicated secret (named `BOT_GITHUB_TOKEN` in the sample) to setup the "auto-merge" behavior: the default `GITHUB_TOKEN` is not used in this case, otherwise a build would not be triggered when the PR is merged, [see reference solution](https://david.gardiner.net.au/2021/07/github-actions-not-running.html).
 
 This approach also allows to avoid re-triggering validations when the PR is already approved.
 

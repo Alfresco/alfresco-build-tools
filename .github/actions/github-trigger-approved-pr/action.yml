@@ -1,7 +1,11 @@
-name: Manage Dependabot PR Approval
+name: Trigger events on PR Approval
 description: >
-  Automate the validation and auto-merge of Dependabot pull requests on approval.
+  Trigger events to automate the validation and auto-merge of some pull requests on approval.
 inputs:
+  actor:
+    description: 'Check if the pull request was created by this actor'
+    required: true
+    default: 'dependabot[bot]'
   github-token:
     description: >
       Token used to enable auto-merge, comment on the PR, and change PR milestone/label.
@@ -25,14 +29,15 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Check if the PR is an approved Dependabot PR
+    - name: Check if the PR is an approved PR with input actor as creator
       id: check
       env:
         REVIEW_STATE: ${{ github.event.review.state }}
         PR_LOGIN: ${{ github.event.pull_request.user.login }}
+        ACTOR: ${{ inputs.actor }}
       shell: bash
       run: |
-        if [[ "$REVIEW_STATE" == 'approved' && "$PR_LOGIN" == 'dependabot[bot]' ]]
+        if [[ "$REVIEW_STATE" == 'approved' && "$PR_LOGIN" == '$ACTOR' ]]
         then
             echo "continue=true" >> $GITHUB_OUTPUT
         else
