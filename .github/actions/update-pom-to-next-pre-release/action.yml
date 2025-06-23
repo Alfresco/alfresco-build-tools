@@ -38,9 +38,12 @@ runs:
       if: inputs.version == ''
       uses: Alfresco/alfresco-build-tools/.github/actions/calculate-next-internal-version@improvement/AAE-36080-Reducing-Noisy-Tags
       with:
-        GITHUB_TOKEN : ${{ inputs.github-token }}
+        github-token : ${{ inputs.github-token }}
         next-version: ${{ steps.parse-next-final-version.outputs.result }}
         prerelease-type: ${{ inputs.prerelease-type }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        REPO_DIR: ${{ github.workspace }}
 
     - id: resolve-version
       name: Resolve version
