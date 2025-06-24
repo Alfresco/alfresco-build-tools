@@ -64,7 +64,7 @@ runs:
         fi
 
     - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
-      if: steps.check.outputs.continue == 'true' and inputs.auto-merge-on-approval == 'true'
+      if: ${{ steps.check.outputs.continue == 'true' && inputs.auto-merge-on-approval == 'true' }}
       env:
         ACTOR: ${{ github.triggering_actor }}
       with:
@@ -78,7 +78,7 @@ runs:
           })
 
     - name: Enable auto-merge for propagation Pull Request
-      if: steps.check.outputs.continue == 'true' and inputs.auto-merge-on-approval == 'true'
+      if: ${{ steps.check.outputs.continue == 'true' && inputs.auto-merge-on-approval == 'true' }}
       env:
         PR_URL: ${{ github.event.pull_request.html_url }}
         GITHUB_TOKEN: ${{ inputs.github-token }}
