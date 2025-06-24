@@ -68,7 +68,7 @@ runs:
         aws-region: ${{ inputs.aws_region }}
         aws-access-key-id: ${{ inputs.aws_access_key_id }}
         aws-secret-access-key: ${{ inputs.aws_secret_access_key }}
-    - uses: azure/setup-kubectl@3e0aec4d80787158d308d7b364cb1b702e7feb7f # v4.0.0
+    - uses: azure/setup-kubectl@776406bce94f63e41d621b960d78ee25c8b76ede # v4.0.1
       with:
         version: ${{ inputs.kubectl_version }}
     - name: Login to Quay.io
