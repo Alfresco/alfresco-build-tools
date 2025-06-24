@@ -14,6 +14,7 @@ inputs:
   github-token:
     description: GitHub token to use for API requests
     required: true
+    default: ${{ github.token }}
 outputs:
   next-prerelease:
     description: "Next prerelease"
