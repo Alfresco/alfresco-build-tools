@@ -75,7 +75,7 @@ runs:
             body: 'Setting auto-merge on Dependabot PR after action from @${{ env.ACTOR }}',
           })
 
-    - name: Enable auto-merge for propagation Pull Request
+    - name: Enable auto-merge for Pull Request
       if: ${{ steps.check.outputs.continue == 'true' && inputs.auto-merge-on-approval == 'true' }}
       env:
         PR_URL: ${{ github.event.pull_request.html_url }}
