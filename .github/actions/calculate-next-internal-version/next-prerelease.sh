@@ -7,7 +7,7 @@ set -euo pipefail
 MATCHING_TAG=""
 NEXT_PRERELEASE=""
 
-# Choose strategy based on GITHUB_TOKEN
+# Strategy 1: GitHub API (preferred if token is available)
 if [[ -n "${GITHUB_TOKEN:-}" ]]; then
   echo "::group::Fetching tags via GitHub API"
   : "${GITHUB_REPOSITORY:?}"
@@ -27,9 +27,9 @@ if [[ -n "${GITHUB_TOKEN:-}" ]]; then
 
     for tag in $tag_names; do
       if [[ "$tag" =~ ^${NEXT_VERSION}-${PRERELEASE_TYPE}\.[0-9]+$ ]]; then
-        echo "Matched: $tag"
-        MATCHING_TAG="$tag"
-        break 2
+        if [[ -z "$MATCHING_TAG" || "$tag" > "$MATCHING_TAG" ]]; then
+          MATCHING_TAG="$tag"
+        fi
       fi
     done
 
@@ -37,27 +37,22 @@ if [[ -n "${GITHUB_TOKEN:-}" ]]; then
   done
   echo "::endgroup::"
 
+# Strategy 2: Fallback to git
 else
   echo "::warning::GITHUB_TOKEN not provided. Falling back to git fetch and local tag search..."
   cd "${REPO_DIR:-.}"
-  git fetch --tags --quiet
+  git fetch --tags --no-recurse-submodules --quiet
 
-  for tag in $(git tag); do
-    if [[ "$tag" =~ ^${NEXT_VERSION}-${PRERELEASE_TYPE}\.[0-9]+$ ]]; then
-      echo "Matched: $tag"
-      MATCHING_TAG="$tag"
-      break
-    fi
-  done
-fi
-
-# Determine next prerelease version
-if [[ -n "$MATCHING_TAG" ]]; then
-  echo "Found latest matching prerelease tag: $MATCHING_TAG"
-  NEXT_PRERELEASE=$(pysemver bump prerelease "$MATCHING_TAG")
-else
-  echo "No prerelease found, starting at .1"
-  NEXT_PRERELEASE="${NEXT_VERSION}-${PRERELEASE_TYPE}.1"
+  FIRST_PRERELEASE_SUFFIX="-${PRERELEASE_TYPE}.1"
+  echo "Next version: $NEXT_VERSION"
+  LATEST_PRERELEASE="$(git tag --sort=-creatordate | grep -m 1  "^$NEXT_VERSION\-$PRERELEASE_TYPE\.[[:digit:]]\{1,4\}$" | cat)"
+  if [ -n "$LATEST_PRERELEASE" ]; then
+    echo "Latest prerelease version found: $LATEST_PRERELEASE"
+    NEXT_PRERELEASE="$(pysemver bump prerelease "$LATEST_PRERELEASE")"
+  else
+    echo "No prerelease found for version $NEXT_VERSION yet"
+    NEXT_PRERELEASE="$NEXT_VERSION$FIRST_PRERELEASE_SUFFIX"
+  fi
 fi
 
 echo "Resolved next prerelease version: $NEXT_PRERELEASE"
