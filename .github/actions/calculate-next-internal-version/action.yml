@@ -28,9 +28,11 @@ runs:
       run: |
         if [[ -n "${{ inputs.github-token }}" ]]; then
           echo "Using GitHub API strategy"
+          chmod +x "${{ github.action_path }}/next-prerelease.sh"
           "${{ github.action_path }}/next-prerelease.sh"
         else
           echo "::warning::GITHUB_TOKEN not found. Using fallback strategy."
+          chmod +x "${{ github.action_path }}/next-prerelease-fallback.sh"
           "${{ github.action_path }}/next-prerelease-fallback.sh"
         fi
       env:
