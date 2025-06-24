@@ -12,7 +12,7 @@ inputs:
     description: "Path to the directory holding the git repository"
     required: false
   github-token:
-    description: "GitHub token to use for API requests"
+    description: GitHub token to use for API requests
     required: true
 outputs:
   next-prerelease:
