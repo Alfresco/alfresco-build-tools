@@ -4,8 +4,7 @@ description: >
 inputs:
   actor:
     description: 'Check if the pull request was created by this actor'
-    required: true
-    default: 'dependabot[bot]'
+    required: false
   github-token:
     description: >
       Token used to enable auto-merge, comment on the PR, and change PR milestone/label.
@@ -37,11 +36,10 @@ runs:
         ACTOR: ${{ inputs.actor }}
       shell: bash
       run: |
-        if [[ "$REVIEW_STATE" == 'approved' && "$PR_LOGIN" == '$ACTOR' ]]
-        then
-            echo "continue=true" >> $GITHUB_OUTPUT
+        if [[ "$REVIEW_STATE" == 'approved' && ( -z "$ACTOR" || "$PR_LOGIN" == "$ACTOR" ) ]]; then
+          echo "continue=true" >> $GITHUB_OUTPUT
         else
-            echo "continue=false" >> $GITHUB_OUTPUT
+          echo "continue=false" >> $GITHUB_OUTPUT
         fi
 
     - name: Trigger PR validation
