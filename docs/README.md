@@ -909,12 +909,14 @@ jobs:
 
 ### github-trigger-approved-pr
 
-This action helps triggering validation of Dependabot PRs, as well as setting up auto-merge, so that only a reviewer's approval is needed to merging such PR.
-By default, it uses `dependabot[bot]` as the PR creator to check, but can be changed using the `actor` input.
+This action is typically helpful to trigger validation of Dependabot PRs, as well as setting up auto-merge, so that only a reviewer's approval is needed to merging such PR.
+
+The corresponding workflow needs to be triggered by corresponding labeled or milestoned event.
+This approach also allows to avoid re-triggering validations when the PR is already approved.
+
+For Dependabot use case, that also allows following good security practices where secrets needed for the validation are not shared as Dependabot secrets.
 
 It requires a dedicated secret (named `BOT_GITHUB_TOKEN` in the sample) to setup the "auto-merge" behavior: the default `GITHUB_TOKEN` is not used in this case, otherwise a build would not be triggered when the PR is merged, [see reference solution](https://david.gardiner.net.au/2021/07/github-actions-not-running.html).
-
-This approach also allows to avoid re-triggering validations when the PR is already approved.
 
 See also sibling action [github-require-secrets](#github-require-secrets).
 
@@ -930,8 +932,9 @@ jobs:
     steps:
       - uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-manage-dependabot-approval@ref
         with:
-          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          actor: dependabot[bot]
           milestone-on-approval: Dependabot
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
 ```
 
 ### helm-build-chart
