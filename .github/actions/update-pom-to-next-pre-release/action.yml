@@ -14,6 +14,9 @@ inputs:
   version:
     description: custom version to be set
     required: false
+  github-token:
+    description: GitHub token to use for API access
+    required: true
 outputs:
   next-prerelease:
     description: "Next prerelease"
@@ -32,21 +35,27 @@ runs:
 
     - id: next-prerelease-resolver
       name: Calculate next internal release
-      if: inputs.version == ''
+      if: ${{ inputs.version == '' }}
       uses: Alfresco/alfresco-build-tools/.github/actions/calculate-next-internal-version@v8.24.1
       with:
+        github-token: ${{ inputs.github-token }}
         next-version: ${{ steps.parse-next-final-version.outputs.result }}
         prerelease-type: ${{ inputs.prerelease-type }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        REPO_DIR: ${{ github.workspace }}
 
     - id: resolve-version
       name: Resolve version
       shell: bash
+      env:
+        INPUT_VERSION: ${{ inputs.version }}
+        NEXT_PRERELEASE: ${{ steps.next-prerelease-resolver.outputs.next-prerelease }}
       run: |
-        if [ ${{ inputs.version }} != '' ]
-        then
-          echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+        if [ "$INPUT_VERSION" != '' ]; then
+          echo "version=$INPUT_VERSION" >> $GITHUB_OUTPUT
         else
-          echo "version=${{ steps.next-prerelease-resolver.outputs.next-prerelease }}" >> $GITHUB_OUTPUT
+          echo "version=$NEXT_PRERELEASE" >> $GITHUB_OUTPUT
         fi
 
     - name: Update pom files to the new version

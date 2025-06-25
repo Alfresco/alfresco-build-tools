@@ -1,24 +1,51 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
-if [ -n "$REPO_DIR" ]
-then
-  cd "$REPO_DIR"
+: "${NEXT_VERSION:?}"
+: "${PRERELEASE_TYPE:?}"
+: "${GITHUB_TOKEN:?Missing GITHUB_TOKEN}"
+
+# Use runner default if not explicitly set
+GITHUB_REPOSITORY="${GITHUB_REPOSITORY:-}"
+if [[ -z "$GITHUB_REPOSITORY" ]]; then
+  echo "GITHUB_REPOSITORY is not set"
+  exit 1
 fi
 
-echo "Fetching tags ... "
-git fetch --tags
+API_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/tags"
+PER_PAGE=100
+PAGE=1
+MATCHING_TAG=""
+echo "::group::Fetching tags from GitHub API"
 
-FIRST_PRERELEASE_SUFFIX="-${PRERELEASE_TYPE}.1"
+while true; do
+  response=$(curl -s -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+    "${API_URL}?per_page=${PER_PAGE}&page=${PAGE}")
 
-echo "Next version: $NEXT_VERSION"
-LATEST_PRERELEASE="$(git tag --sort=-creatordate | grep -m 1  "^$NEXT_VERSION\-$PRERELEASE_TYPE\.[[:digit:]]\{1,4\}$" | cat)"
-if [ -n "$LATEST_PRERELEASE" ]; then
-  echo "Latest prerelease version found: $LATEST_PRERELEASE"
-  NEXT_PRERELEASE="$(pysemver bump prerelease "$LATEST_PRERELEASE")"
+  tag_names=$(echo "$response" | jq -r '.[].name')
+  if [[ -z "$tag_names" || "$tag_names" == "null" ]]; then
+    break
+  fi
+
+  for tag in $tag_names; do
+    if [[ "$tag" =~ ^${NEXT_VERSION}-${PRERELEASE_TYPE}\.[0-9]+$ ]]; then
+      echo "Matched: $tag"
+      MATCHING_TAG="$tag"
+      break 2
+    fi
+  done
+
+  PAGE=$((PAGE + 1))
+done
+echo "::endgroup::"
+
+if [[ -n "$MATCHING_TAG" ]]; then
+  echo "Found latest matching prerelease tag: $MATCHING_TAG"
+  NEXT_PRERELEASE=$(pysemver bump prerelease "$MATCHING_TAG")
 else
-  echo "No prerelease found for version $NEXT_VERSION yet"
-  NEXT_PRERELEASE="$NEXT_VERSION$FIRST_PRERELEASE_SUFFIX"
+  echo "No prerelease found, starting at .1"
+  NEXT_PRERELEASE="${NEXT_VERSION}-${PRERELEASE_TYPE}.1"
 fi
-echo "Next prerelease: $NEXT_PRERELEASE"
-echo "next-prerelease=$NEXT_PRERELEASE" >> $GITHUB_OUTPUT
+
+echo "Resolved next prerelease version: $NEXT_PRERELEASE"
+echo "next-prerelease=$NEXT_PRERELEASE" >> "$GITHUB_OUTPUT"
