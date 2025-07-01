@@ -9,7 +9,11 @@ on:
         required: false
         default: .
       terraform_operation:
-        description: the terraform operation to perform (apply or destroy)
+        description: |
+          the terraform operation to perform (plan, apply or destroy).
+          If not set, the operation will be determined based on the GitHub event.
+          For pull requests, it will run plan and for pushes it will run apply based on the PR plan.
+          For pull requests comments, it will run apply if the comment contains 'terraform apply'.
         type: string
         required: false
       terraform_env:
