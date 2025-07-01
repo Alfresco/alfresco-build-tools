@@ -2101,6 +2101,7 @@ on:
         type: choice
         required: true
         options:
+          - plan
           - apply
           - destroy
         default: apply
