@@ -110,14 +110,18 @@ jobs:
     steps:
       - name: Check inputs
         run: |
-          case "${{ inputs.terraform_operation }}" in
-            apply|destroy|plan)
-              ;;
-            *)
-              echo "Invalid terraform_operation: ${{ inputs.terraform_operation }}. Must be 'apply', 'destroy', or 'plan'."
-              exit 1
-              ;;
-          esac
+          if [ -z "${{ inputs.terraform_operation }}" ]; then
+            echo "terraform_operation is not set, defaulting to github event based handling."
+          else
+            case "${{ inputs.terraform_operation }}" in
+              apply|destroy|plan)
+                ;;
+              *)
+                echo "Invalid terraform_operation: ${{ inputs.terraform_operation }}. Must be 'apply', 'destroy', or 'plan'."
+                exit 1
+                ;;
+            esac
+          fi
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
