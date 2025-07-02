@@ -35,7 +35,7 @@ runs:
   steps:
     - name: Download M2 build artifacts
       if: ${{ inputs.restore-artifact-pattern != '' }}
-      uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+      uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
       with:
         pattern: ${{ inputs.restore-artifact-pattern }}
         merge-multiple: true
@@ -48,9 +48,9 @@ runs:
         maven-version: ${{ inputs.maven-version }}
 
     - name: Submit Dependency Graph
-      uses: advanced-security/maven-dependency-submission-action@4f64ddab9d742a4806eeb588d238e4c311a8397d # v4.1.1
+      uses: advanced-security/maven-dependency-submission-action@b275d12641ac2d2108b2cbb7598b154ad2f2cee8 # v5.0.0
       with:
-        maven-args: ${{steps.maven-configure.outputs.maven-options}} ${{ inputs.maven-args }}
+        maven-args: ${{ steps.maven-configure.outputs.maven-options }} ${{ inputs.maven-args }}
       env:
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
