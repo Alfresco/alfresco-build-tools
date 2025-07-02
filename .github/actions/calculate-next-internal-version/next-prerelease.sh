@@ -20,7 +20,6 @@ if [ -n "$LATEST_PRERELEASE" ]; then
 else
   echo "No prerelease found for version $NEXT_VERSION yet"
   NEXT_PRERELEASE="$NEXT_VERSION$FIRST_PRERELEASE_SUFFIX"
-  echo "latest-prerelease=" >> $GITHUB_OUTPUT
 fi
 echo "Next prerelease: $NEXT_PRERELEASE"
 echo "next-prerelease=$NEXT_PRERELEASE" >> $GITHUB_OUTPUT
