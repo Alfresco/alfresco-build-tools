@@ -16,9 +16,11 @@ LATEST_PRERELEASE="$(git tag --sort=-creatordate | grep -m 1  "^$NEXT_VERSION\-$
 if [ -n "$LATEST_PRERELEASE" ]; then
   echo "Latest prerelease version found: $LATEST_PRERELEASE"
   NEXT_PRERELEASE="$(pysemver bump prerelease "$LATEST_PRERELEASE")"
+  echo "latest-prerelease=$LATEST_PRERELEASE" >> $GITHUB_OUTPUT
 else
   echo "No prerelease found for version $NEXT_VERSION yet"
   NEXT_PRERELEASE="$NEXT_VERSION$FIRST_PRERELEASE_SUFFIX"
+  echo "latest-prerelease=" >> $GITHUB_OUTPUT
 fi
 echo "Next prerelease: $NEXT_PRERELEASE"
 echo "next-prerelease=$NEXT_PRERELEASE" >> $GITHUB_OUTPUT
