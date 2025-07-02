@@ -29,9 +29,6 @@ inputs:
   m2-cache-exclusion-pattern:
     description: The exclusion pattern to be applied while creating cache for the Maven m2 repository. By default `organ/activiti` and `com/alfresco` are excluded
     required: false
-  github-token:
-    description: "GitHub token to use for API requests"
-    required: true
 
 outputs:
   version:
@@ -55,7 +52,6 @@ runs:
       id: update-pom-to-next-version
       uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@v8.24.1
       with:
-        github-token: ${{ inputs.github-token }}
         property-to-update: ${{ inputs.property-to-update }}
         maven-cli-opts: ${{ steps.maven-configure.outputs.maven-options }}
         prerelease-type: ${{ inputs.prerelease-type }}

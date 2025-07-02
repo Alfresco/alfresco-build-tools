@@ -11,10 +11,7 @@ inputs:
   repository-directory:
     description: "Path to the directory holding the git repository"
     required: false
-  github-token:
-    description: GitHub token to use for API requests
-    required: false
-    default: ${{ github.token }}
+
 outputs:
   next-prerelease:
     description: "Next prerelease"
@@ -25,19 +22,9 @@ runs:
     - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
     - uses: Alfresco/alfresco-build-tools/.github/actions/setup-pysemver@v8.24.1
     - id: next-prerelease-resolver
+      run: ${{ github.action_path }}/next-prerelease.sh
       shell: bash
-      run: |
-        if [[ -n "${{ inputs.github-token }}" ]]; then
-          echo "Using GitHub API strategy"
-          chmod +x "${{ github.action_path }}/next-prerelease.sh"
-          "${{ github.action_path }}/next-prerelease.sh"
-        else
-          echo "::warning::GITHUB_TOKEN not found. Using fallback strategy."
-          chmod +x "${{ github.action_path }}/next-prerelease-fallback.sh"
-          "${{ github.action_path }}/next-prerelease-fallback.sh"
-        fi
       env:
         NEXT_VERSION: ${{ inputs.next-version }}
         PRERELEASE_TYPE: ${{ inputs.prerelease-type }}
-        REPO_DIR: ${{ inputs.repository-directory }}
-        GITHUB_TOKEN: ${{ inputs.github-token }}
+        REPO_DIR: ${{inputs.repository-directory}}

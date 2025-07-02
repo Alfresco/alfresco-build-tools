@@ -32,7 +32,7 @@ runs:
 
     - id: next-prerelease-resolver
       name: Calculate next internal release
-      if: ${{ inputs.version == '' }}
+      if: inputs.version == ''
       uses: Alfresco/alfresco-build-tools/.github/actions/calculate-next-internal-version@v8.24.1
       with:
         next-version: ${{ steps.parse-next-final-version.outputs.result }}
@@ -41,14 +41,12 @@ runs:
     - id: resolve-version
       name: Resolve version
       shell: bash
-      env:
-        INPUT_VERSION: ${{ inputs.version }}
-        NEXT_PRERELEASE: ${{ steps.next-prerelease-resolver.outputs.next-prerelease }}
       run: |
-        if [ "$INPUT_VERSION" != '' ]; then
-          echo "version=$INPUT_VERSION" >> $GITHUB_OUTPUT
+        if [ ${{ inputs.version }} != '' ]
+        then
+          echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
         else
-          echo "version=$NEXT_PRERELEASE" >> $GITHUB_OUTPUT
+          echo "version=${{ steps.next-prerelease-resolver.outputs.next-prerelease }}" >> $GITHUB_OUTPUT
         fi
 
     - name: Update pom files to the new version
