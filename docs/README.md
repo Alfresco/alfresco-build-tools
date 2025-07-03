@@ -2104,7 +2104,7 @@ on:
           - plan
           - apply
           - destroy
-        default: apply
+        default: plan
 
 permissions:
   pull-requests: write
