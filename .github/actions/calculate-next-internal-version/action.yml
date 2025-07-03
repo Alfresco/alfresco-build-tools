@@ -16,6 +16,9 @@ outputs:
   next-prerelease:
     description: "Next prerelease"
     value: ${{ steps.next-prerelease-resolver.outputs.next-prerelease }}
+  latest-prerelease:
+    description: "Latest prerelease version found"
+    value: ${{ steps.next-prerelease-resolver.outputs.latest-prerelease }}
 runs:
   using: "composite"
   steps:
