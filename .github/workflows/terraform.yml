@@ -9,7 +9,11 @@ on:
         required: false
         default: .
       terraform_operation:
-        description: the terraform operation to perform (apply or destroy)
+        description: |
+          the terraform operation to perform (plan, apply or destroy).
+          If not set, the operation will be determined based on the GitHub event.
+          For pull requests, it will run plan and for pushes it will run apply based on the PR plan.
+          For pull requests comments, it will run apply if the comment contains 'terraform apply'.
         type: string
         required: false
       terraform_env:
@@ -108,6 +112,20 @@ jobs:
       # https://github.com/dflook/terraform-github-actions/tree/main/terraform-apply#applying-a-plan-using-a-comment
       PR_CHECKOUT_REF: refs/pull/${{ github.event.issue.number }}/merge
     steps:
+      - name: Check inputs
+        run: |
+          if [ -z "${{ inputs.terraform_operation }}" ]; then
+            echo "terraform_operation is not set, defaulting to github event based handling."
+          else
+            case "${{ inputs.terraform_operation }}" in
+              apply|destroy|plan)
+                ;;
+              *)
+                echo "Invalid terraform_operation: ${{ inputs.terraform_operation }}. Must be 'apply', 'destroy', or 'plan'."
+                exit 1
+                ;;
+            esac
+          fi
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -166,7 +184,7 @@ jobs:
 
       - name: Terraform plan
         uses: dflook/terraform-plan@b7bf0aabcffd1699464b3ef10c9bff6b265231c0 # v2.1.0
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' || inputs.terraform_operation == 'plan'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
           path: ${{ inputs.terraform_root_path }}

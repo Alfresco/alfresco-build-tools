@@ -2101,9 +2101,10 @@ on:
         type: choice
         required: true
         options:
+          - plan
           - apply
           - destroy
-        default: apply
+        default: plan
 
 permissions:
   pull-requests: write
