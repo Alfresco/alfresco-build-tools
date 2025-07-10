@@ -114,6 +114,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [slack-file-upload](#slack-file-upload)
     - [sonar-scan-on-built-project](#sonar-scan-on-built-project)
     - [sonar-scanner](#sonar-scanner)
+    - [tfupdate](#tfupdate)
     - [update-deployment-runtime-versions](#update-deployment-runtime-versions)
     - [update-pom-to-next-pre-release](#update-pom-to-next-pre-release)
     - [update-project-base-tag](#update-project-base-tag)
@@ -1955,6 +1956,10 @@ Run Sonar Scanner to load JaCoCo report on SonarCloud.
 ```
 
 sonar-host-url and sonar-organization are optional inputs. If not provided, the default values will be used.
+
+### tfupdate
+
+TBD
 
 ### update-deployment-runtime-versions
 

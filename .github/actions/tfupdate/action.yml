@@ -1,0 +1,23 @@
+name: tfupdate
+description: 'Run tfupdate to update Terraform providers versions'
+inputs:
+  tfupdate-version:
+    description: 'Version of tfupdate to use'
+    required: false
+    default: 'v0.9.1'
+  terraform-file-path:
+    description: 'Filename of the Terraform file(s) to update'
+    required: false
+    default: versions.tf
+runs:
+  using: composite
+  steps:
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v8.26.0
+      with:
+        repo: minamijoyo/tfupdate
+        version: ${{ inputs.tfupdate-version }}
+        url_template: 'v${VERSION}/${NAME}-${OS}-${ARCH}.tar.gz'
+    - name: Run tfupdate
+      run: |
+        ${{ github.action_path }}/tfupdate.sh ${{ inputs.terraform-file-path }}
+      shell: bash
