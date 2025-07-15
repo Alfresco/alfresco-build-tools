@@ -26,7 +26,12 @@ runs:
       run: |
         NAME=${NAME:-${REPO##*\/}}
         OS=${OS:-$(uname | tr '[:upper:]' '[:lower:]')}
-        ARCH=${ARCH:-$(uname -m)}
+        ARCH_RAW=$(uname -m)
+        case $ARCH_RAW in
+          x86_64) ARCH=${ARCH:-amd64} ;;
+          aarch64) ARCH=${ARCH:-arm64} ;;
+          *) ARCH=${ARCH:-$ARCH_RAW} ;;
+        esac
         URL=https://github.com/$REPO/releases/download/$(eval echo $URL_TEMPLATE)
         echo "Downloading $URL ..."
         curl -fsSL $URL | tar xz $NAME
