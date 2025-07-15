@@ -15,6 +15,7 @@ runs:
       with:
         repo: norwoodj/helm-docs
         version: ${{ inputs.version != '' && inputs.version || env.DEFAULT_HELM_DOCS_VERSION }}
+        x86_64_arch: 'x86_64'
       env:
         DEFAULT_HELM_DOCS_VERSION: 1.14.2
     - name: Set version as output
