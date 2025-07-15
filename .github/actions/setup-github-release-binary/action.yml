@@ -1,4 +1,4 @@
-name: 'Setup binary'
+name: Setup GitHub Release Binary
 description: 'Set up a specific version of a binary from GitHub Releases and add it to the PATH.'
 inputs:
   repo:
