@@ -1773,6 +1773,23 @@ Hosted runners.
 Allows the installation of a generic binary from GitHub Releases and add it to the PATH.
 See [setup-helm-docs](../.github/actions/setup-helm-docs/action.yml) for a usage example.
 
+```yaml
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v8.26.0
+      with:
+        repo: org/repo-name
+        version: '1.2.3'
+        # Each repository can have a different URL template for the binary.
+        #url_template: 'v${VERSION}/${NAME}-v${VERSION}-${OS}-${ARCH}.tar.gz'
+        # Alternate argument to test the binary
+        #test_args: '--version'
+        # Alternate mappings for ARCH
+        #x86_64_arch: 'amd64'
+        #aarch64_arch: 'arm64'
+        # Alternatively, override the ARCH environment variable but it will break multi-arch support.
+        #env:
+        #  ARCH: "amd64" # or "arm64"
+```
+
 ### setup-helm-docs
 
 Install the helm-docs binary from GitHub Releases and add it to the PATH.
