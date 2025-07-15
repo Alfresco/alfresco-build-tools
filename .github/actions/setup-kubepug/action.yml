@@ -8,6 +8,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Install kubepug
-      shell: bash
-      run: ${{ github.action_path }}/setup-kubepug.sh ${{ inputs.kubepug-version }}
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v8.26.0
+      with:
+        repo: kubepug/kubepug
+        version: ${{ inputs.version }}
+        url_template: 'v${VERSION}/${NAME}_${OS}_${ARCH}.tar.gz'
+        test_args: 'version'
