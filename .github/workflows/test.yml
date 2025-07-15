@@ -102,7 +102,8 @@ jobs:
         id: free-hosted-runner-disk-space
         run: echo "total_size_before=$(df --total --output=avail | tail -1)" >> "$GITHUB_OUTPUT"
       - uses: ./.github/actions/free-hosted-runner-disk-space
-      - name: Test if available disk size increased
+      - name: Assert that space available on the runner has increased
+        if: matrix.os == 'ubuntu-latest'
         env:
           TOTAL_SIZE_BEFORE: ${{ steps.free-hosted-runner-disk-space.outputs.total_size_before }}
         run: test "$TOTAL_SIZE_BEFORE" -lt "$(df --total --output=avail | tail -1)"
@@ -114,3 +115,4 @@ jobs:
           version: 0.93.0
           url_template: 'v${VERSION}/${NAME}_${OS}_${ARCH}.tar.gz'
           test_args: 'version'
+          x86_64_arch: 'x86_64'
