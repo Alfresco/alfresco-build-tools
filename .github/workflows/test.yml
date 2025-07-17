@@ -25,22 +25,23 @@ jobs:
           allowlist: |
             Alfresco/alfresco-build-tools/
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      # - name: Manual test for send slack notification
-      #   uses: ./.github/actions/send-slack-notification
-      #   with:
-      #     channel-id: '' # grab your slack id from your profile -> three dots -> Copy member ID
-      #     token: ${{ secrets.SLACK_BOT_TOKEN }}
-      #     notification-color: '#A30200'
-      #     append: true
-      #     message: |
-      #       This is a multiline message with `code`
-      #
-      #       * another line
-      #       * one more
+
+      - name: Switch to local actions when requested
+        if: contains(github.event.pull_request.labels.*.name, 'test/local-actions')
+        run: |
+          find .github/actions -name "action.yml" -type f \
+            -exec sed -i 's|uses: Alfresco/alfresco-build-tools/\.github/actions/\([^@]*\)@v[0-9]\+\.[0-9]\+\.[0-9]\+|uses: ./.github/actions/\1|g' {} \;
+          git diff
 
       #region Test setup-helm-docs
       - uses: ./.github/actions/setup-helm-docs
@@ -60,7 +61,7 @@ jobs:
       - uses: ./.github/actions/setup-jx-release-version
       - uses: ./.github/actions/setup-kubepug
       - uses: ./.github/actions/rancher
-        if: ${{ ! github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+        if: ${{ ! github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' && matrix.os == 'ubuntu-latest' }}
         with:
           rancher-url: 'https://rancher2.envalfresco.com'
           rancher-access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
@@ -68,7 +69,7 @@ jobs:
           cluster-name: "fake_cluster"
           action: "detach"
       - uses: ./.github/actions/setup-rancher-cli
-        if: ${{ ! github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' }}
+        if: ${{ ! github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' && matrix.os == 'ubuntu-latest' }}
         with:
           url: ${{ secrets.RANCHER2_URL }}
           access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
@@ -96,11 +97,17 @@ jobs:
             echo TRAVIS_BRANCH should not be set!
             exit 1
           fi
+
       - name: Preserve available disk size before cleanup
-        run: echo "total_size_before=$(df --total --output=avail | tail -1)" >> "$GITHUB_ENV"
+        id: free-hosted-runner-disk-space
+        run: echo "total_size_before=$(df --total --output=avail | tail -1)" >> "$GITHUB_OUTPUT"
       - uses: ./.github/actions/free-hosted-runner-disk-space
-      - name: Test if available disk size increased
-        run: test "${{ env.total_size_before }}" -lt "$(df --total --output=avail | tail -1)"
+      - name: Assert that space available on the runner has increased
+        if: matrix.os == 'ubuntu-latest'
+        env:
+          TOTAL_SIZE_BEFORE: ${{ steps.free-hosted-runner-disk-space.outputs.total_size_before }}
+        run: test "$TOTAL_SIZE_BEFORE" -lt "$(df --total --output=avail | tail -1)"
+
       - uses: ./.github/actions/setup-updatecli
       - uses: ./.github/actions/setup-github-release-binary
         with:
@@ -108,3 +115,4 @@ jobs:
           version: 0.93.0
           url_template: 'v${VERSION}/${NAME}_${OS}_${ARCH}.tar.gz'
           test_args: 'version'
+          x86_64_arch: 'x86_64'

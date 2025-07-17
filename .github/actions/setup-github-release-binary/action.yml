@@ -1,4 +1,4 @@
-name: 'Setup binary'
+name: Setup GitHub Release Binary
 description: 'Set up a specific version of a binary from GitHub Releases and add it to the PATH.'
 inputs:
   repo:
@@ -15,6 +15,14 @@ inputs:
     description: 'Arguments to test the binary'
     required: false
     default: '--version'
+  x86_64_arch:
+    description: 'Override the package architecture when x86_64'
+    required: false
+    default: 'amd64'
+  aarch64_arch:
+    description: 'Override the package architecture when aarch64'
+    required: false
+    default: 'arm64'
 runs:
   using: "composite"
   steps:
@@ -26,7 +34,12 @@ runs:
       run: |
         NAME=${NAME:-${REPO##*\/}}
         OS=${OS:-$(uname | tr '[:upper:]' '[:lower:]')}
-        ARCH=${ARCH:-$(uname -m)}
+        ARCH_RAW=$(uname -m)
+        case $ARCH_RAW in
+          x86_64) ARCH=${ARCH:-${{ inputs.x86_64_arch }}} ;;
+          aarch64) ARCH=${ARCH:-${{ inputs.aarch64_arch }}} ;;
+          *) ARCH=${ARCH:-$ARCH_RAW} ;;
+        esac
         URL=https://github.com/$REPO/releases/download/$(eval echo $URL_TEMPLATE)
         echo "Downloading $URL ..."
         curl -fsSL $URL | tar xz $NAME

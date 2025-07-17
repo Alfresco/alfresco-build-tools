@@ -13,5 +13,3 @@ runs:
         repo: terraform-docs/terraform-docs
         version: ${{ inputs.version }}
         url_template: 'v${VERSION}/${NAME}-v${VERSION}-${OS}-${ARCH}.tar.gz'
-      env:
-        ARCH: amd64
