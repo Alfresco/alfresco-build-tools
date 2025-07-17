@@ -1,0 +1,32 @@
+name: dependabot-coverage-check
+author: wojciech.piotrowiak
+description: Workaround for https://github.com/dependabot/dependabot-core/issues/6345. This action checks if all GitHub Actions in .github/actions are listed in .github/dependabot.yml.
+runs:
+  using: composite
+
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+    - name: Fail if missing dependabot config
+      shell: bash
+      run: |
+        # List all action directories
+        actions=$(find .github/actions -mindepth 1 -maxdepth 1 -type d | sed 's|^./||')
+
+        # Extract listed directories from dependabot.yml
+        listed=$(yq '.updates[] | select(.package-ecosystem == "github-actions") | .directories[]' .github/dependabot.yml | sed 's|^/||' | grep '^.github/actions/')
+
+        # Check for missing actions
+        missing=""
+        for action in $actions; do
+        if ! echo "$listed" | grep -qx "$action"; then
+        missing="$missing\n$action"
+        fi
+        done
+
+        if [ -n "$missing" ]; then
+        echo -e "Missing actions in dependabot.yml:$missing"
+        exit 1
+        else
+        echo "All actions are listed in dependabot.yml"
+        fi
