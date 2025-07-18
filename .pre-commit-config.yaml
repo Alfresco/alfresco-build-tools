@@ -38,3 +38,7 @@ repos:
         language: system
         entry: ./check_readme.sh
         pass_filenames: false
+      - id: check-dependabot-coverage
+        name: Check if all actions are listed in dependabot.yml
+        language: system
+        entry: .github/actions/dependabot-coverage-check/dependabot-coverage-check.sh
