@@ -1,6 +1,6 @@
 name: dependabot-coverage-check
 author: wojciech.piotrowiak
-description: Workaround for https://github.com/dependabot/dependabot-core/issues/6345. This action checks if all GitHub Actions in .github/actions are listed in .github/dependabot.yml.
+description: Ensure that all GitHub Actions defined in the current repo have managed dependabot updates. Workaround for https://github.com/dependabot/dependabot-core/issues/6345
 runs:
   using: composite
 
