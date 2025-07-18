@@ -5,6 +5,11 @@
 # Description: Workaround for https://github.com/dependabot/dependabot-core/issues/6345.
 # This script checks if all GitHub Actions in .github/actions are listed in .github/dependabot.yml.
 
+if ! command -v yq >/dev/null 2>&1; then
+  echo "Error: yq is not installed. Please install yq to continue."
+  exit 1
+fi
+
 # Find repository root (where .git directory exists)
 repo_root=$(git rev-parse --show-toplevel 2>/dev/null)
 if [ -z "$repo_root" ]; then
