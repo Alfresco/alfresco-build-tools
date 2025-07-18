@@ -82,7 +82,7 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
-    directory: "/.github/actions/dependabot-coverage-check"
+    directory: "/.github/actions/dependabot-missing-actions-check"
     schedule:
       interval: "weekly"
     groups:

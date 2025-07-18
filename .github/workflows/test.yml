@@ -18,6 +18,8 @@ jobs:
         with:
           allowlist: |
             Alfresco/alfresco-build-tools/
+      - name: Dependanbot missing actions check
+        uses: ./.github/actions/dependabot-missing-actions-check
   test:
     runs-on: ubuntu-latest
     steps:
