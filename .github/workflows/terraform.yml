@@ -179,7 +179,7 @@ jobs:
           fi
 
       - name: Terraform validate
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_review'
         uses: dflook/terraform-validate@8d7c17b0ec40bddfb05535a9ee9c1587d790a3aa # v2.1.0
         with:
           path: ${{ inputs.terraform_root_path }}
