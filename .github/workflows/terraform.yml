@@ -63,6 +63,11 @@ jobs:
             BRANCH_NAME=$(gh pr view ${{ github.event.issue.pull_request.html_url }} --json baseRefName --jq '.baseRefName' 2>/dev/null)
           fi
 
+          if [ -n "${{ github.event.review }}" ]; then
+            echo "Evaluating branch name for pull_request_review event"
+            BRANCH_NAME=$(gh pr view ${{ github.event.pull_request.html_url }} --json baseRefName --jq '.baseRefName' 2>/dev/null)
+          fi
+
           BRANCH_LOWER=${BRANCH_NAME,,}
           if [ "$BRANCH_LOWER" == "main" ]; then
             environment="production"
