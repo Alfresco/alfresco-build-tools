@@ -2098,6 +2098,7 @@ The following GitHub secrets (all optional) are also accepted by this workflow:
 
 ```yaml
 name: "terraform"
+run-name: "terraform ${{ inputs.terraform_operation || (github.event_name == 'issue_comment' && 'apply') || ((github.event_name == 'pull_request' || github.event_name == 'pull_request_review') && 'plan' || 'apply') }} on ${{ github.event_name == 'issue_comment' && 'pr comment' || github.base_ref || github.ref_name }}"
 
 on:
   pull_request:
