@@ -2051,10 +2051,10 @@ Reusable workflow which implements an opinionated workflow to manage terraform
 repositories leveraging [dflook/terraform-github-actions](https://github.com/dflook/terraform-github-actions),
 optionally allowing a multi-state approach for managing resources.
 
-You can provide Github environment name with `terraform_env` input if not this
-workflow assumes a GitHub environment named `production` to be present when run
-against the `main` branch, and any other environment when run against `develop`
-branch or any other branch.
+You can provide Github environment name with `terraform_env` input. If not set,
+this workflow assumes a GitHub environment named `production` to be present when
+run against the `main` branch, and any other environment when run against
+`develop` branch or any other branch.
 
 GitHub environments must be configured with the following GitHub variables
 (repository or environment):
@@ -2064,7 +2064,9 @@ GitHub environments must be configured with the following GitHub variables
   authentication is available
 - RANCHER2_URL (optional): automatically register EKS cluster on a given rancher
   instance
-- RESOURCE_NAME: used to namespace every resource created, e.g. cluster name
+- RESOURCE_NAME: used to namespace every resource created, e.g. State file in
+  the S3 bucket. You can use it as well inside Terraform by defining a variable
+  `resource_name` in your Terraform code.
 - TERRAFORM_STATE_BUCKET: the name of the S3 bucket where to store the terraform
   state. You can reuse the same bucket for multiple environments as long as you
   provide a different `RESOURCE_NAME` for each environment.
@@ -2096,6 +2098,7 @@ The following GitHub secrets (all optional) are also accepted by this workflow:
 
 ```yaml
 name: "terraform"
+run-name: "terraform ${{ inputs.terraform_operation || (github.event_name == 'issue_comment' && 'apply') || ((github.event_name == 'pull_request' || github.event_name == 'pull_request_review') && 'plan' || 'apply') }} on ${{ github.event_name == 'issue_comment' && 'pr comment' || github.base_ref || github.ref_name }}"
 
 on:
   pull_request:
@@ -2126,6 +2129,7 @@ on:
 permissions:
   pull-requests: write
   contents: read
+  # id-token: write # required to use OIDC authentication with AWS
 
 jobs:
   invoke-terraform-infra:

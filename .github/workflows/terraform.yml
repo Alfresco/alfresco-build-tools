@@ -106,6 +106,7 @@ jobs:
       RANCHER2_SECRET_KEY: ${{ secrets.RANCHER2_SECRET_KEY }}
       RANCHER2_URL: ${{ vars.RANCHER2_URL }}
       RESOURCE_NAME: ${{ vars.RESOURCE_NAME }}
+      TF_VAR_resource_name: ${{ vars.RESOURCE_NAME }}
       TERRAFORM_HTTP_CREDENTIALS: |
         github.com/Alfresco=alfresco-build:${{ secrets.BOT_GITHUB_TOKEN }}
       TERRAFORM_PRE_RUN: |
