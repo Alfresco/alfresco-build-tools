@@ -1,0 +1,46 @@
+name: PR author and label check
+description: Checks PR author and label, using PR that led to merge on push
+
+inputs:
+  gh-token:
+    description: 'GitHub token with content read permission'
+    required: true
+  actor:
+    description: 'Check if the pull request was created by this actor'
+    required: false
+  label:
+    description: 'Check if the pull request contains this label'
+    required: true
+
+outputs:
+  result:
+    description: "Result of the check"
+    value: ${{ steps.check.outputs.result }}
+
+runs:
+  using: composite
+  steps:
+    - name: Check
+      id: check
+      env:
+        GH_TOKEN: ${{ inputs.gh-token }}
+        SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        INPUT_LABEL: ${{ inputs.label }}
+        INPUT_ACTOR: ${{ inputs.actor }}
+      shell: bash
+      run: |
+        PR_INFO=$(gh api /repos/$GITHUB_REPOSITORY/commits/$SHA/pulls | jq -r '.[0] | {creator: .user.login, labels: [.labels[].name], url: .html_url}')
+        echo "PR Info: $PR_INFO"
+
+        CREATOR=$(echo $PR_INFO | jq -r '.creator')
+        LABELS=$(echo $PR_INFO | jq -r '.labels')
+
+        if [ -n "$INPUT_ACTOR" ]
+        then
+          [[ "$CREATOR" == "$INPUT_ACTOR" && "$LABELS" == *"$INPUT_LABEL"* ]] && RESULT=true || RESULT=false
+        else
+          [[ "$LABELS" == *"$INPUT_LABEL"* ]] && RESULT=true || RESULT=false
+        fi
+
+        echo "result=$RESULT"
+        echo "result=$RESULT" >> $GITHUB_OUTPUT

@@ -1,0 +1,100 @@
+name: Maven Tag
+description: Updates POM files to the next pre-release, commits changes and creates a Git tag.
+inputs:
+  java-version:
+    description: Java version to use.
+    required: true
+  maven-version:
+    description: Maven version to use.
+    required: true
+  maven-build-cache-key:
+    description: Maven build cache key.
+    required: false
+  property-to-update:
+    description: Maven property to update.
+    required: false
+  prerelease-type:
+    description: Pre-release type.
+    required: false
+    default: alpha
+  maven-username:
+    description: Maven username for authentication.
+    required: true
+  maven-password:
+    description: Maven password for authentication.
+    required: true
+  git-username:
+    description: Git username for committing changes.
+    required: true
+  m2-cache-exclusion-pattern:
+    description: The exclusion pattern to be applied while creating cache for the Maven m2 repository. By default `organ/activiti` and `com/alfresco` are excluded
+    required: false
+
+outputs:
+  version:
+    description: The updated version from the POM file.
+    value: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
+  skip-tests:
+    description: Whether to skip tests.
+    value: ${{steps.maven-configure.outputs.skip-tests}}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@v8.28.1
+      id: maven-configure
+      with:
+        java-version: ${{ inputs.java-version }}
+        maven-version: ${{ inputs.maven-version }}
+        maven-build-cache-key: ${{ inputs.maven-build-cache-key }}
+
+    - name: Update pom files to the new version
+      id: update-pom-to-next-version
+      uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@v8.28.1
+      with:
+        property-to-update: ${{ inputs.property-to-update }}
+        maven-cli-opts: ${{ steps.maven-configure.outputs.maven-options }}
+        prerelease-type: ${{ inputs.prerelease-type }}
+      env:
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
+
+    - name: Update summary
+      shell: bash
+      env:
+        VERSION: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
+      run: |
+        echo "## 📋 Built version: $VERSION" >> $GITHUB_STEP_SUMMARY
+
+    - name: Clean m2 cache
+      shell: bash
+      env:
+        EXCLUSION_PATTERN: ${{ inputs.m2-cache-exclusion-pattern}}
+      run: |
+        if [ "$EXCLUSION_PATTERN" == '' ]
+        then
+          rm -fr ~/.m2/repository/org/activiti
+          rm -fr ~/.m2/repository/com/alfresco
+        else
+          rm -fr ~/.m2/repository/${EXCLUSION_PATTERN}
+        fi
+
+    - name: Save maven cache
+      uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v8.28.1
+      with:
+        username: ${{ inputs.git-username }}
+        add-options: -u
+        commit-message: "Release ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}"
+
+    - name: Create and push tag
+      shell: bash
+      env:
+        VERSION: ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}
+      run: |
+        git tag -a $VERSION -m "Release version $VERSION"
+        git push origin $VERSION

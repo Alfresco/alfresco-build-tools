@@ -46,7 +46,7 @@ jobs:
 
       - id: next-release
         name: Calculate next internal release
-        uses: Alfresco/alfresco-build-tools/.github/actions/calculate-next-internal-version@v8.12.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/calculate-next-internal-version@v8.28.1
         with:
           next-version: ${{ inputs.next-version }}
 
@@ -54,35 +54,35 @@ jobs:
         env:
           VERSION: ${{ steps.next-release.outputs.next-prerelease }}
         run: |
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 
       - name: Update chart version
-        uses: Alfresco/alfresco-build-tools/.github/actions/helm-update-chart-version@v8.12.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/helm-update-chart-version@v8.28.1
         with:
-          new-version: ${{env.VERSION}}
+          new-version: ${{ env.VERSION }}
           chart-dir: ${{ inputs.chart-dir }}
           helm-docs-version: ${{ inputs.helm-docs-version }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v8.12.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v8.28.1
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
           commit-message: "release $VERSION"
 
       - name: Create local tag
-        run: git tag -a $VERSION -m "Release version $VERSION"
+        run: git tag -a "$VERSION" -m "Release version $VERSION"
 
       - name: Package Helm Chart
         id: package-helm-chart
-        uses: Alfresco/alfresco-build-tools/.github/actions/helm-package-chart@v8.12.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/helm-package-chart@v8.28.1
         with:
           chart-dir: ${{ inputs.chart-dir }}
 
       - name: Push tag
-        run: git push origin $VERSION
+        run: git push origin "$VERSION"
 
       - name: Publish Helm chart
-        uses: Alfresco/alfresco-build-tools/.github/actions/helm-publish-chart@v8.12.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/helm-publish-chart@v8.28.1
         with:
             helm-charts-repo: ${{ inputs.helm-charts-repo }}
             helm-charts-repo-branch: ${{ inputs.helm-charts-repo-branch }}

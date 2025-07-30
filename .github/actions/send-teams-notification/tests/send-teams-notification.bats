@@ -26,6 +26,8 @@ commit
 )
 }
 
+# compute-message.sh tests
+
 @test "basic teams message" {
     export BLOCK_MESSAGE="my custom message"
 
@@ -272,4 +274,76 @@ BATS
 
     [ "$output" = "$expected_output" ]
 
+}
+
+# transform-mentions.sh tests
+
+@test "transform-mentions with no mentions" {
+    export USERS=""
+    export TAGS=""
+
+    run transform-mentions.sh
+
+    [ "$status" -eq 0 ]
+    [ "$output" = "result=[]" ]
+}
+
+@test "transform-mentions with single user" {
+    export USERS="John Doe|john.doe@example.com"
+    export TAGS=""
+
+    run transform-mentions.sh
+
+    [ "$status" -eq 0 ]
+    [ "$output" = 'result=[{"type":"mention","text":"<at>John Doe</at>","mentioned":{"id":"john.doe@example.com","name":"John Doe"}}]' ]
+}
+
+@test "transform-mentions with multiple users" {
+    export USERS="John Doe|john.doe@example.com,Jane Smith|jane.smith@example.com"
+    export TAGS=""
+
+    run transform-mentions.sh
+
+    [ "$status" -eq 0 ]
+    [ "$output" = 'result=[{"type":"mention","text":"<at>John Doe</at>","mentioned":{"id":"john.doe@example.com","name":"John Doe"}},{"type":"mention","text":"<at>Jane Smith</at>","mentioned":{"id":"jane.smith@example.com","name":"Jane Smith"}}]' ]
+}
+
+@test "transform-mentions with single tag" {
+    export USERS=""
+    export TAGS="Security|TagId123=="
+
+    run transform-mentions.sh
+
+    [ "$status" -eq 0 ]
+    [ "$output" = 'result=[{"type":"mention","text":"<at>Security</at>","mentioned":{"id":"TagId123==","name":"Security","type":"tag"}}]' ]
+}
+
+@test "transform-mentions with multiple tags" {
+    export USERS=""
+    export TAGS="Security|TagId123==,DevOps|TagId456=="
+
+    run transform-mentions.sh
+
+    [ "$status" -eq 0 ]
+    [ "$output" = 'result=[{"type":"mention","text":"<at>Security</at>","mentioned":{"id":"TagId123==","name":"Security","type":"tag"}},{"type":"mention","text":"<at>DevOps</at>","mentioned":{"id":"TagId456==","name":"DevOps","type":"tag"}}]' ]
+}
+
+@test "transform-mentions with users and tags" {
+    export USERS="John Doe|john.doe@example.com"
+    export TAGS="Security|TagId123=="
+
+    run transform-mentions.sh
+
+    [ "$status" -eq 0 ]
+    [ "$output" = 'result=[{"type":"mention","text":"<at>John Doe</at>","mentioned":{"id":"john.doe@example.com","name":"John Doe"}},{"type":"mention","text":"<at>Security</at>","mentioned":{"id":"TagId123==","name":"Security","type":"tag"}}]' ]
+}
+
+@test "transform-mentions with missing mention id" {
+    export USERS="John Doe"
+    export TAGS=""
+
+    run transform-mentions.sh
+
+    [ "$status" -eq 1 ]
+    [ "$output" = "Error: Input 'John Doe' does not contain the expected format with a '|' separator" ]
 }

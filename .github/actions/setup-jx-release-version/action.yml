@@ -8,10 +8,8 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v8.12.0
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v8.28.1
       with:
         repo: jenkins-x-plugins/jx-release-version
         version: ${{ inputs.version }}
         url_template: 'v${VERSION}/${NAME}-${OS}-${ARCH}.tar.gz'
-      env:
-        ARCH: amd64

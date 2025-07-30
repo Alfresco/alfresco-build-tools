@@ -1,0 +1,98 @@
+name: SonarQube Scan
+description: >-
+    Reusable action for running SonarQube scans with Maven on projects that were already built in prior jobs
+    and have their artifacts available in the workspace. This action is designed to be used in conjunction with
+    `maven-build` action and will start by downloading the target and m2 artifacts uploaded by the `maven-build` action.
+
+inputs:
+  sonar-host-url:
+    description: The SonarQube host URL.
+    required: false
+    default: 'https://sonarcloud.io'
+  sonar-organization:
+    description: The SonarQube organization.
+    required: false
+    default: 'alfresco'
+  sonar-project:
+    description: The SonarQube project key.
+    required: true
+  sonar-coverage-jacoco-xmlReportPaths:
+    description: Path to the JaCoCo XML report for SonarQube coverage.
+    required: false
+    default: '**/target/site/jacoco-*/jacoco.xml'
+  property-to-update:
+    description: Maven property to update in case of a preview.
+    required: false
+  maven-resolver-transport-options:
+    description: Maven resolver transport options
+    required: false
+  m2-uploaded-group-path:
+    description: The path to the group id uploaded from m2 repository
+    required: true
+  target-folder-artifacts-pattern:
+    description: Pattern to match artifacts uploaded from target folder in a previous job.
+    required: false
+    default: 'target*'
+  m2-current-build-artifacts-pattern:
+    description: Pattern to match current build artifacts uploaded from m2 repository from a previous job.
+    required: false
+    default: 'm2*'
+  maven-username:
+    description: Nexus username for Maven authentication.
+    required: true
+  maven-password:
+    description: Nexus password for Maven authentication.
+    required: true
+  sonar-token:
+    description: SonarQube token for authentication.
+    required: true
+  ghcr-username:
+    description: GitHub Container Registry username.
+    required: true
+  ghcr-password:
+    description: GitHub Container Registry password.
+    required: true
+  maven-version:
+    description: Maven version to setup, i.e. 3.9+ for Maven Build Cache extension
+    required: false
+    default: ''
+  java-version:
+    description: The Java version to perform the build
+    required: false
+    default: '11'
+
+runs:
+  using: composite
+  steps:
+    - name: Download target
+      uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      with:
+        pattern: ${{ inputs.target-folder-artifacts-pattern }}
+        merge-multiple: true
+
+    - name: Download M2 build artifacts
+      uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      with:
+        pattern: ${{ inputs.m2-current-build-artifacts-pattern }}
+        merge-multiple: true
+        path: ${{ inputs.m2-uploaded-group-path }}
+
+    - name: SonarQube Scan
+      uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@v8.28.1
+      env:
+        SONAR_TOKEN: ${{ inputs.sonar-token }}
+      with:
+        maven-command: >-
+          sonar:sonar
+          -Dsonar.host.url=${{ inputs.sonar-host-url }}
+          -Dsonar.organization=${{ inputs.sonar-organization }}
+          -Dsonar.projectKey=${{ inputs.sonar-project }}
+          -Dsonar.coverage.jacoco.xmlReportPaths=${{ inputs.sonar-coverage-jacoco-xmlReportPaths }}
+        property-to-update: ${{ inputs.property-to-update }}
+        maven-resolver-transport-options: ${{ inputs.maven-resolver-transport-options }}
+        maven-username: ${{ inputs.maven-username }}
+        maven-password: ${{ inputs.maven-password }}
+        ghcr-username: ${{ inputs.ghcr-username }}
+        ghcr-password: ${{ inputs.ghcr-password }}
+        maven-version: ${{ inputs.maven-version }}
+        java-version: ${{ inputs.java-version }}

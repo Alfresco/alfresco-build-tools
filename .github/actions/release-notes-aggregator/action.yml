@@ -1,0 +1,26 @@
+name: Release Notes Aggregator
+description: 'Creates a release notes by aggregating external repositories release notes.'
+inputs:
+  external-repo:
+    description: 'The name of the external repositories to aggregate release notes from'
+    required: true
+  from-external-version:
+    description: 'The version to generate external release notes from'
+    required: false
+  to-external-version:
+    description: 'The version to generate external release notes to'
+    required: false
+  release-id:
+    description: 'The release ID of the origin repository'
+    required: true
+  token:
+    description: 'GitHub Token for accessing GHCR.'
+    required: true
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+
+branding:
+  color: purple
+  icon: send

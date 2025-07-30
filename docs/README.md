@@ -19,6 +19,7 @@ Here follows the list of GitHub Actions topics available in the current document
       - [Setup Maven Credentials](#setup-maven-credentials)
       - [Setup Maven Build Options](#setup-maven-build-options)
   - [GitHub Actions provided by community](#github-actions-provided-by-community)
+    - [Comment a PR](#comment-a-pr)
     - [Docker build and push](#docker-build-and-push)
     - [Docker login](#docker-login)
     - [EC2 GitHub runner](#ec2-github-runner)
@@ -56,6 +57,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [github-download-file](#github-download-file)
     - [github-https-auth](#github-https-auth)
     - [github-list-changes](#github-list-changes)
+    - [github-pr-check-metadata](#github-pr-check-metadata)
     - [helm-build-chart](#helm-build-chart)
     - [helm-integration-tests](#helm-integration-tests)
     - [helm-package-chart](#helm-package-chart)
@@ -69,12 +71,19 @@ Here follows the list of GitHub Actions topics available in the current document
     - [install-ubuntu-default-tools](#install-ubuntu-default-tools)
     - [jx-updatebot-pr](#jx-updatebot-pr)
     - [kubectl-keep-nslogs](#kubectl-keep-nslogs)
+    - [kubectl-wait](#kubectl-wait)
     - [load-release-descriptor](#load-release-descriptor)
+    - [maven-configure](#maven-configure)
+    - [maven-dependency-scan](#maven-dependency-scan)
+      - [`restore-artifact-pattern` option](#restore-artifact-pattern-option)
+    - [maven-build](#maven-build)
+      - [Jacoco report options](#jacoco-report-options)
     - [maven-build-and-tag](#maven-build-and-tag)
       - [Preview option for maven-build-and-tag](#preview-option-for-maven-build-and-tag)
       - [Option to skip tests for maven-build-and-tag](#option-to-skip-tests-for-maven-build-and-tag)
     - [maven-deploy-file](#maven-deploy-file)
     - [maven-release](#maven-release)
+    - [maven-tag](#maven-tag)
     - [maven-update-pom-version](#maven-update-pom-version)
     - [md-toc](#md-toc)
     - [nexus-move-artifacts](#nexus-move-artifacts)
@@ -82,12 +91,14 @@ Here follows the list of GitHub Actions topics available in the current document
     - [process-coverage-report](#process-coverage-report)
     - [pipenv](#pipenv)
     - [rancher](#rancher)
+    - [release-notes-aggregator](#release-notes-aggregator)
     - [reportportal-prepare](#reportportal-prepare)
     - [reportportal-summarize](#reportportal-summarize)
     - [resolve-preview-name](#resolve-preview-name)
     - [send-slack-notification-slow-job](#send-slack-notification-slow-job)
     - [send-slack-notification](#send-slack-notification)
     - [send-teams-notification](#send-teams-notification)
+      - [Mentions](#mentions)
     - [setup-docker](#setup-docker)
     - [setup-github-release-binary](#setup-github-release-binary)
     - [setup-helm-docs](#setup-helm-docs)
@@ -102,6 +113,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [setup-updatebot](#setup-updatebot)
     - [setup-updatecli](#setup-updatecli)
     - [slack-file-upload](#slack-file-upload)
+    - [sonar-scan-on-built-project](#sonar-scan-on-built-project)
     - [sonar-scanner](#sonar-scanner)
     - [update-deployment-runtime-versions](#update-deployment-runtime-versions)
     - [update-pom-to-next-pre-release](#update-pom-to-next-pre-release)
@@ -195,6 +207,36 @@ useful.
 ```
 
 ## GitHub Actions provided by community
+
+### Comment a PR
+
+To improve developer experience and make build results like reports or test
+results more accessible, link/post them as a comment on the PR. Any subsequent
+re-run will update the comment to keep the information current and avoid
+clutter.
+
+```yml
+    - name: Find Comment
+      uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
+      id: fc
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-author: 'github-actions[bot]'
+        body-includes: Build output
+
+    - name: Create or update comment
+      uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4.0.0
+      with:
+        comment-id: ${{ steps.fc.outputs.comment-id }}
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          Build output
+          ${{ steps.build.outputs.build-log }}
+        edit-mode: replace
+```
+
+Upstream documentation at
+[peter-evans/create-or-update-comment](https://github.com/peter-evans/create-or-update-comment).
 
 ### Docker build and push
 
@@ -812,6 +854,46 @@ This action requires a checkout with `fetch-depth: 0` option as follow:
 
 The action outputs the list of changed files (one path per line) using the output `all_changed_files` and optionally to the env variable `GITHUB_MODIFIED_FILES`.
 
+### github-pr-check-metadata
+
+This action helps checking, on a Pull Request, or on push caused by the merge of a Pull Request, who opened the PR and if it was holding a specific label.
+
+This is typically useful for Dependabot PRs, where the label usually relates to the type of dependency update.
+
+Sample usage:
+
+```yaml
+
+on:
+  push:
+
+jobs:
+  check-dependabot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: dependabot check
+        id: dependabot
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@ref
+        with:
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
+          actor: 'dependabot[bot]'
+          label: github_actions
+
+  deploy:
+    needs: check-dependabot
+    if: steps.dependabot.outputs.result != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy
+        run: echo "Deploying..."
+```
+
+On this sample, if the commit was merged with a PR opened by Dependabot, **and** has the `github_actions` label, the action sets the `result` output to `true`.
+
+The `deploy` job only runs if result is not true, so deploys are skipped when merging these PRs.
+
+The main benefit is to save CI/CD resources and time by skipping unnecessary deploys for automated dependency updates that only affect GitHub Actions workflows.
+
 ### helm-build-chart
 
 Run `helm dep up` and `helm lint` on the specified chart
@@ -1007,6 +1089,21 @@ This action allow to collect logs from pods if they are referenced in a deployme
       with:
         namespace: mynsapp
         log_retention: 7
+        log_name_identifier: myapp_v1
+```
+
+### kubectl-wait
+
+Wait for k8s resources (usually pods) to be ready.
+
+```yaml
+    - name: Wait for pods to be ready
+      uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@ref
+      # with:
+        # wait-timeout: 10m
+        # wait-condition: Ready
+        # wait-resource: pods
+        # namespace: default
 ```
 
 ### load-release-descriptor
@@ -1019,6 +1116,70 @@ Used to release Activiti Projects. Load release information from release.yaml fi
         with:
           release-descriptor: release.yaml
 ```
+
+### maven-configure
+
+Set up Java and Maven version and compute common maven options including settings.xml to be used. It also restores Maven cache.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@ref
+        with:
+          java-version: '21'
+          maven-version: '3.8.8'
+```
+
+### maven-dependency-scan
+
+Create the project Dependency Graph
+
+```yaml
+- uses: Alfresco/alfresco-build-tools/.github/actions/maven-dependency-scan@ref
+  with:
+    restore-artifact-pattern: 'm2*'
+    restore-artifact-path: '~./m2/com/groupId'
+    java-version: '21'
+    maven-version: '3.8.8'
+    maven-args: '--settings settings.xml'
+    maven-username: ${{ secrets.MAVEN_USERNAME }}
+    maven-password: ${{ secrets.MAVEN_PASSWORD }}
+    ghcr-username: ${{ secrets.GHCR_USERNAME }}
+    ghcr-password: ${{ secrets.GHCR_PASSWORD }}
+```
+
+#### `restore-artifact-pattern` option
+
+Allow restoring artifacts from an earlier job to avoid attempts to download them from remote. To be used alongside with the option `restore-artifact-path`
+to specify the path where the artifacts are stored.
+
+### maven-build
+
+Builds a maven project using the provided command.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@ref
+        with:
+          java-version: '21'
+          maven-command: 'verify'
+          maven-resolver-transport-options: '-Dmaven.wagon.http.pool=false'
+          maven-username: ${{ secrets.MAVEN_USERNAME }}
+          maven-password: ${{ secrets.MAVEN_PASSWORD }}
+          maven-version: '3.8.8'
+          quay-username: ${{ secrets.QUAY_USERNAME }}
+          quay-password: ${{ secrets.QUAY_PASSWORD }}
+          ghcr-username: ${{ secrets.GHCR_USERNAME }}
+          ghcr-password: ${{ secrets.GHCR_PASSWORD }}
+          docker-username: ${{ secrets.DOCKER_USERNAME }}
+          docker-password: ${{ secrets.DOCKER_PASSWORD }}
+          jacoco-report-name: 'jacoco-report'
+          target-folder-upload-name: 'build-artifacts'
+          m2-current-build-upload-name: 'm2-artifacts'
+```
+
+#### Jacoco report options
+
+If the inputs `jacoco-report-name`, `target-folder-upload-name` and `m2-current-build-upload-name` are provided,
+it also generates aggregated coverage reports and makes them available as build artifact for a next job processing it. It's typically followed by a job containing a step
+with the action `sonar-scan-on-built-project`.
 
 ### maven-build-and-tag
 
@@ -1113,6 +1274,22 @@ Used to release Activiti projects. Update versions in POM files, create git tags
           gpg-owner-trust: "${{ secrets.GPG_OWNERTRUST }}"
           nexus-username: "${{ secrets.NEXUS_USERNAME }}"
           nexus-password: "${{ secrets.NEXUS_PASSWORD }}"
+```
+
+### maven-tag
+
+Updates POM files to the next pre-release, commits changes and creates a Git tag.
+
+```yaml
+- uses: ./.github/actions/maven-tag
+  with:
+    java-version: '21'
+    maven-version: '3.8.8'
+    prerelease-type: 'alpha'
+    maven-username: ${{ secrets.MAVEN_USERNAME }}
+    maven-password: ${{ secrets.MAVEN_PASSWORD }}
+    git-username: ${{secrets.GITHUB_USERNAME }}
+    m2-cache-exclusion-pattern: 'org/example'
 ```
 
 ### maven-update-pom-version
@@ -1253,6 +1430,21 @@ AWS credentials are required only when registering the cluster.
           aws-access-key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: "us-east-2"
+```
+
+### release-notes-aggregator
+
+The action allows to aggregate an external release note into the current one
+
+```yaml
+      - name: Release Notes Aggregate
+        uses: Alfresco/alfresco-build-tools/.github/actions/release-notes-aggregator@ref
+        with:
+          external-repo: 'external-repo'
+          from-external-version: ${{ env.FROM_EXTERNAL_RELEASE_TAG }}
+          to-external-version: ${{ env.TO_EXTERNAL_RELEASE_TAG }}
+          release-id: ${{ env.RELEASE_ID }}
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
 ```
 
 ### reportportal-prepare
@@ -1509,7 +1701,7 @@ Sends a teams notification with a pre-defined payload.
         webhook-url: ${{ secrets.MSTEAMS_WEBHOOK }}
 ```
 
-The above webhook URL is a mandatory parameter. Make sure to [Create Incoming Webhooks](https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=dotnet) before using this action. Add the webhook URL as a `secret` at the repo level.
+The above webhook URL is a mandatory parameter. Make sure to [Create Incoming Webhooks](https://support.microsoft.com/en-us/office/create-incoming-webhooks-with-workflows-for-microsoft-teams-8ae491c7-0394-4861-ba59-055e33f75498) before using this action. Add the webhook URL as a `secret` at the repo level.
 
 If the `status` input is not filled, it will be computed based on the status of completed steps in currently running workflow.
 The workflow permissions will require "actions: read" in this case.
@@ -1525,6 +1717,48 @@ Sample of a SUCCESS notification on a `pull_request` event.
 Sample of a FAILURE notification on a `push` event.
 
 ![Teams Failure](./images/send-teams-push-failure.png)
+
+#### Mentions
+
+Teams notifications can include mentions of both users and Teams tags. The action supports two types of mentions via optional inputs:
+
+- `mention-users`: comma-separated list of users to mention in format "display name|email"
+- `mention-tags`: comma-separated list of Teams tags to mention in format "tag name|tag id"
+
+The mentionable entities defined via the aforementioned properties **need** to be referenced via the `<at>name</at>` syntax in the message body.
+
+Sample usage with mentions:
+
+```yml
+      uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@ref
+      with:
+        webhook-url: ${{ secrets.MSTEAMS_WEBHOOK }}
+        message: "<at>John Doe</at>, <at>Jane Doe</at>, <at>Security Champions</at>, please review the failure logs."
+        mention-users: "John Doe|john.doe@example.com,Jane Doe|jane.doe@example.com"
+        mention-tags: "Security Champions|MjY5OTQ0YzItODc4OS00YTRkLTk4N2UtMDZkYTEyNDE2Nm=="
+        append: true
+```
+
+> **⚠️ IMPORTANT:** when using mentions in Teams notifications, ensure that:
+>
+> - all mentioned users and tags exist and are active in the target channel
+> - email addresses and tag IDs are correct
+> - all mention-users and mention-tags **must** appear in the message body text at least once
+>
+> **Any error in the mention configuration will cause the entire message to fail to send, as the Teams API is very strict with mentions.**
+
+To get the necessary data for mentions:
+
+- For **users**: use their display name and email address in the format `Display Name|email@domain.com`
+- For **tags**: use a [PowerAutomate](https://make.powerautomate.com) flow with the "List all tags for a team" action:
+  1. Create a new "Instant Cloud Flow", selecting the "Manually trigger a flow" option
+  2. Add the "List all tags for a team" action
+  3. Run the flow using the "Test" button
+  4. Go to "Flow Runs" and click on the latest run
+  5. Look for the raw outputs of the "List all tags for a team" action
+  6. Tag IDs are shown as base-64 encoded strings in the "id" property
+
+![PowerAutomate Get Tag IDs Flow](./images/send-teams-get-tag-id.png)
 
 ### setup-docker
 
@@ -1545,6 +1779,23 @@ Hosted runners.
 Allows the installation of a generic binary from GitHub Releases and add it to the PATH.
 See [setup-helm-docs](../.github/actions/setup-helm-docs/action.yml) for a usage example.
 
+```yaml
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v8.28.1
+      with:
+        repo: org/repo-name
+        version: '1.2.3'
+        # Each repository can have a different URL template for the binary.
+        #url_template: 'v${VERSION}/${NAME}-v${VERSION}-${OS}-${ARCH}.tar.gz'
+        # Alternate argument to test the binary
+        #test_args: '--version'
+        # Alternate mappings for ARCH
+        #x86_64_arch: 'amd64'
+        #aarch64_arch: 'arm64'
+        # Alternatively, override the ARCH environment variable but it will break multi-arch support.
+        #env:
+        #  ARCH: "amd64" # or "arm64"
+```
+
 ### setup-helm-docs
 
 Install the helm-docs binary from GitHub Releases and add it to the PATH.
@@ -1559,7 +1810,10 @@ Install the helm-docs binary from GitHub Releases and add it to the PATH.
 
 [setup-java-build](../.github/actions/setup-java-build/action.yml) performs the setup of required build tools such as Java and Maven.
 The Maven settings file can either be placed in the repository's root folder as `.ci.settings.xml`, or in a different location. In the latter case, the full path to the settings file should be provided via the `maven-settings` input parameter.
-If the Maven settings file is not provided at all, then a default settings file will be installed. The default settings file  requires the following environment variables to be appropriately set with valid credentials: `MAVEN_USERNAME` and `MAVEN_PASSWORD`.
+If the Maven settings file is not provided at all, then a default settings file will be installed. The default settings file requires the following environment variables to be appropriately set with valid credentials: `MAVEN_USERNAME` and `MAVEN_PASSWORD`.
+
+The local Maven repository is cached. The structure of the cache key is composed of following parts: `{runner.os}-{prefix}-{hash(**/pom.xml)}`. By default, prefix is set to `maven`, e.g. `Linux-maven-38c8f5cb0598db15f3c14d1bdfa491de24645c5965fcdbbc8eb1849282247fd2`.
+Optionally, the custom `cache-key-prefix` can be provided. It will override the default one. It can be useful to handle multiple maven caches within the same repository.
 
 ```yaml
       - name: Setup Java build
@@ -1568,6 +1822,7 @@ If the Maven settings file is not provided at all, then a default settings file 
           java-version: "17" # optional
           java-distribution: "temurin" # optional
           maven-settings: ".ci.settings.xml" # optional
+          cache-key-prefix: "alternate-maven" # optional
 ```
 
 ### setup-jx-release-version
@@ -1688,6 +1943,27 @@ Uploads a file to a Slack channel.
           file-title: 'file description' # optional
 ```
 
+### sonar-scan-on-built-project
+
+Run Sonar Scanner to load JaCoCo report on SonarCloud.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@ref
+        with:
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+          sonar-project: 'example-project-key'
+          sonar-coverage-jacoco-xmlReportPaths: '**/custom/path/to/jacoco.xml'
+          m2-uploaded-group-path: 'com/example/group'
+          target-folder-artifacts-pattern: 'target*'
+          m2-current-build-artifacts-pattern: 'm2*'
+          maven-username: ${{ secrets.MAVEN_USERNAME }}
+          maven-password: ${{ secrets.MAVEN_PASSWORD }}
+          ghcr-username: ${{ secrets.GITHUB_USERNAME }}
+          ghcr-password: ${{ secrets.GITHUB_TOKEN }}
+          maven-version: '3.8.8'
+          java-version: '21'
+```
+
 ### sonar-scanner
 
 Run Sonar Scanner to load JaCoCo report on SonarCloud.
@@ -1781,23 +2057,44 @@ Reusable workflow which implements an opinionated workflow to manage terraform
 repositories leveraging [dflook/terraform-github-actions](https://github.com/dflook/terraform-github-actions),
 optionally allowing a multi-state approach for managing resources.
 
-This workflow assumes a GitHub environment named `production` to be present when
-run against the `main` branch, and a `develop` GitHub environment to be present when
-run against the `develop` branch.
+You can provide Github environment name with `terraform_env` input. If not set,
+this workflow assumes a GitHub environment named `production` to be present when
+run against the `main` branch, and any other environment when run against
+`develop` branch or any other branch.
 
-GitHub environments must be configured with the following variables:
+GitHub environments must be configured with the following GitHub variables
+(repository or environment):
 
-- AWS_DEFAULT_REGION: where the aws resources will be created
-- AWS_ROLE_ARN: the ARN of the role to assume in case OIDC authentication is available
-- RANCHER2_URL (optional): automatically register cluster on this rancher instance
-- RESOURCE_NAME: used to namespace every resource created, e.g. the cluster name
-- TERRAFORM_STATE_BUCKET: the name of the S3 bucket where to store the terraform state
+- AWS_DEFAULT_REGION: where the AWS resources will be created
+- AWS_ROLE_ARN (optional): the ARN of the role to assume in case OIDC
+  authentication is available
+- RANCHER2_URL (optional): automatically register EKS cluster on a given rancher
+  instance
+- RESOURCE_NAME: used to namespace every resource created, e.g. State file in
+  the S3 bucket. You can use it as well inside Terraform by defining a variable
+  `resource_name` in your Terraform code.
+- TERRAFORM_STATE_BUCKET: the name of the S3 bucket where to store the terraform
+  state. You can reuse the same bucket for multiple environments as long as you
+  provide a different `RESOURCE_NAME` for each environment.
 
-and the following (optional) secrets:
+Alternatively to providing `AWS_ROLE_ARN` as GitHub variable, you can set
+`create_oidc_token_file` input to `true` to request an AWS OIDC token which will
+be persisted into a file and can be used inside terraform code e.g. like this:
+
+```tf
+backend "s3" {
+  assume_role_with_web_identity = {
+    role_arn                = "arn:aws:iam::372466110691:role/AlfrescoCI/alfresco-common-resources-deploy"
+    web_identity_token_file = "/github/workspace/idtoken.json"
+  }
+}
+```
+
+The following GitHub secrets (all optional) are also accepted by this workflow:
 
 - AWS_ACCESS_KEY_ID: access key to use the AWS terraform provider
 - AWS_SECRET_ACCESS_KEY: secret key to use the AWS terraform provider
-- BOT_GITHUB_TOKEN (to access private terraform module of the Alfresco org)
+- BOT_GITHUB_TOKEN (to access private terraform modules in the Alfresco org)
 - DOCKER_USERNAME (optional): Docker Hub credentials
 - DOCKER_PASSWORD (optional): Docker Hub credentials
 - RANCHER2_ACCESS_KEY (optional): access key to use the rancher terraform
@@ -1807,16 +2104,19 @@ and the following (optional) secrets:
 
 ```yaml
 name: "terraform"
+run-name: "terraform ${{ inputs.terraform_operation || (github.event_name == 'issue_comment' && 'apply') || ((github.event_name == 'pull_request' || github.event_name == 'pull_request_review') && 'plan' || 'apply') }} on ${{ github.event_name == 'issue_comment' && 'pr comment' || github.base_ref || github.ref_name }}"
 
 on:
   pull_request:
     branches:
       - main
       - develop
+      - preprod
   push:
     branches:
       - main
       - develop
+      - preprod
   # optional - to trigger a terraform apply adding a pr comment with text 'terraform apply'
   issue_comment:
     types: [created]
@@ -1827,9 +2127,15 @@ on:
         type: choice
         required: true
         options:
+          - plan
           - apply
           - destroy
-        default: apply
+        default: plan
+
+permissions:
+  pull-requests: write
+  contents: read
+  # id-token: write # required to use OIDC authentication with AWS
 
 jobs:
   invoke-terraform-infra:
