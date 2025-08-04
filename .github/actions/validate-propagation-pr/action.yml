@@ -12,8 +12,8 @@ runs:
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
-        PR_NUMBER="${{ github.event.pull_request.number }}"
-        GITHUB_REPOSITORY="${{ github.repository }}"
+        PR_NUMBER=$(jq -r .pull_request.number "$GITHUB_EVENT_PATH")
+        GITHUB_REPOSITORY="$GITHUB_REPOSITORY"
         echo "Fetching commits for propagation PR #$PR_NUMBER..."
         COMMITS="$(gh api repos/\"${GITHUB_REPOSITORY}\"/pulls/\"$PR_NUMBER\"/commits --jq '.[]')"
         echo "$COMMITS" | jq -c '.' | while read -r commit; do
