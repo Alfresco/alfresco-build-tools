@@ -1,0 +1,39 @@
+name: validate-propagation-pr
+author: sbhattacharyya
+description: Validate commits in propagation PR
+runs:
+  using: "composite"
+  steps:
+    - name: Validate commits in propagation PR
+      shell: bash
+      env:
+        GH_TOKEN: ${{ env.GH_TOKEN }}
+        PR_NUMBER: ${{ env.PR_NUMBER }}
+        GITHUB_REPOSITORY: ${{ env.GITHUB_REPOSITORY }}
+      run: |
+        echo "Fetching commits for propagation PR #$PR_NUMBER..."
+        COMMITS="$(gh api repos/\"${GITHUB_REPOSITORY}\"/pulls/\"$PR_NUMBER\"/commits --jq '.[]')"
+        echo "$COMMITS" | jq -c '.' | while read -r commit; do
+          gh_author=$(echo "$commit" | jq -r '.author.login')
+          commit_author=$(echo "$commit" | jq -r '.commit.author.name')
+          parents_count=$(echo "$commit" | jq '.parents | length')
+          # 1. Commit from Sourav-Bhattacharyya (GitHub user)
+          if [[ "$gh_author" == "Sourav-Bhattacharyya" ]]; then
+            echo "✅ Allowed commit from GitHub user Sourav-Bhattacharyya"
+            continue
+          fi
+          # 2. Merge commits (multiple parents)
+          if [[ "$parents_count" -gt 1 ]]; then
+            echo "✅ Allowed merge commit (multiple parents)"
+            continue
+          fi
+          # 3. Rebase commits (authored by Sourav-Bhattacharyya but committed by another user)
+          if [[ "$commit_author" == "Sourav-Bhattacharyya" ]]; then
+            echo "✅ Allowed rebase commit (authored by Sourav-Bhattacharyya)"
+            continue
+          fi
+          # 4. Block anything else
+          echo "❌ Unauthorized commit by GitHub user '$gh_author' (author: '$commit_author')"
+          exit 1
+        done
+        echo "✅ All commits are valid for propagation PR"
