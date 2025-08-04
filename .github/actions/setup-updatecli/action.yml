@@ -3,7 +3,7 @@ description: 'Install updatecli binary'
 inputs:
   version:
     description: 'Version of binary'
-    default: 0.104.0
+    default: 0.105.0
 runs:
   using: "composite"
   steps:
