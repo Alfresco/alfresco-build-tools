@@ -717,7 +717,7 @@ updates:
     directory: "/.github/actions/validate-propagation-pr"
     schedule:
      interval: "weekly"
-     groups:
+    groups:
       catch-all:
         patterns:
           - "*"
