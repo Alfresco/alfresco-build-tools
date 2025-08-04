@@ -1780,7 +1780,7 @@ Allows the installation of a generic binary from GitHub Releases and add it to t
 See [setup-helm-docs](../.github/actions/setup-helm-docs/action.yml) for a usage example.
 
 ```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v8.28.1
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v8.28.2
       with:
         repo: org/repo-name
         version: '1.2.3'
