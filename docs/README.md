@@ -34,6 +34,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [automate-propagation](#automate-propagation)
     - [calculate-next-internal-version](#calculate-next-internal-version)
     - [configure-git-author](#configure-git-author)
+    - [dependabot-missing-actions-check](#dependabot-missing-actions-check)
     - [dbp-charts](#dbp-charts)
     - [dispatch-resume-workflow](#dispatch-resume-workflow)
     - [docker-build-image](#docker-build-image)
@@ -462,6 +463,11 @@ Configures the git username and email to associate commits with the provided ide
 ```
 
 The two vars in the previous snippet are [workflow configuration variables](https://github.blog/changelog/2023-01-10-github-actions-support-for-configuration-variables-in-workflows/) that can be created at organization level and shared across different repositories.
+
+### dependabot-missing-actions-check
+
+This action checks if all GitHub Actions are listed in the `.github/dependabot.yml` file.
+This is a workaround for a [GH Link](https://github.com/dependabot/dependabot-core/issues/6345) problem where global configuration does not work.
 
 ### dbp-charts
 
@@ -1774,7 +1780,7 @@ Allows the installation of a generic binary from GitHub Releases and add it to t
 See [setup-helm-docs](../.github/actions/setup-helm-docs/action.yml) for a usage example.
 
 ```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v8.28.1
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v8.28.2
       with:
         repo: org/repo-name
         version: '1.2.3'
