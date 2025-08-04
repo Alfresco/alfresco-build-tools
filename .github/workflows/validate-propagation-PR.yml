@@ -28,7 +28,7 @@ jobs:
           PR_NUMBER="${{ github.event.pull_request.number }}"
           echo "Fetching commits for propagation PR #$PR_NUMBER..."
 
-          COMMITS=$(gh api repos/${GITHUB_REPOSITORY}/pulls/$PR_NUMBER/commits --jq '.[]')
+          COMMITS="$(gh api repos/${GITHUB_REPOSITORY}/pulls/$PR_NUMBER/commits --jq '.[]')"
 
           echo "$COMMITS" | jq -c '.' | while read commit; do
             gh_author=$(echo "$commit" | jq -r '.author.login')
