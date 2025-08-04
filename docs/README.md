@@ -118,6 +118,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [update-pom-to-next-pre-release](#update-pom-to-next-pre-release)
     - [update-project-base-tag](#update-project-base-tag)
     - [validate-maven-versions](#validate-maven-versions)
+    - [validate-propagation-pr](#validate-propagation-pr)
     - [veracode](#veracode)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
@@ -2005,6 +2006,9 @@ Validates Maven dependency graph versions to ensure all target includes artifact
           maven-password: ${{ secrets.NEXUS_PASSWORD }}
           m2-settings-xml: settings.xml
 ```
+### validate-propagation-pr
+
+This workflow validates propagation PR commits to ensure only authorized commits are included. It checks commit authorship and commit types to enforce repository contribution policies.
 
 ### veracode
 
