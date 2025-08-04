@@ -13,9 +13,17 @@ runs:
         GH_TOKEN: ${{ github.token }}
       run: |
         PR_NUMBER=$(jq -r .pull_request.number "$GITHUB_EVENT_PATH")
-        GITHUB_REPOSITORY="$GITHUB_REPOSITORY"
+        GITHUB_REPOSITORY=$(echo "$GITHUB_REPOSITORY")
         echo "Fetching commits for propagation PR #$PR_NUMBER..."
-        COMMITS="$(gh api repos/\"${GITHUB_REPOSITORY}\"/pulls/\"$PR_NUMBER\"/commits --jq '.[]')"
+        # Debug: Show token permissions and repo
+        echo "Repository: $GITHUB_REPOSITORY"
+        echo "PR Number: $PR_NUMBER"
+        echo "GH_TOKEN length: ${#GH_TOKEN}"
+        # Try fetching PR details for debug
+        gh api repos/"$GITHUB_REPOSITORY"/pulls/"$PR_NUMBER" || {
+          echo "❌ Could not fetch PR details. Check permissions or PR existence."; exit 1;
+        }
+        COMMITS=$(gh api repos/"$GITHUB_REPOSITORY"/pulls/"$PR_NUMBER"/commits --jq '.[]')
         echo "$COMMITS" | jq -c '.' | while read -r commit; do
           gh_author=$(echo "$commit" | jq -r '.author.login')
           commit_author=$(echo "$commit" | jq -r '.commit.author.name')
