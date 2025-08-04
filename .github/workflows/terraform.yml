@@ -181,7 +181,7 @@ jobs:
 
       - name: Terraform validate
         if: github.event_name == 'pull_request' || github.event_name == 'pull_request_review'
-        uses: dflook/terraform-validate@8d7c17b0ec40bddfb05535a9ee9c1587d790a3aa # v2.1.0
+        uses: dflook/terraform-validate@8bd4064878bbbce34b3f76a832abade6354668cc # v2.2.1
         with:
           path: ${{ inputs.terraform_root_path }}
           backend_config: |
@@ -189,7 +189,7 @@ jobs:
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform plan
-        uses: dflook/terraform-plan@b7bf0aabcffd1699464b3ef10c9bff6b265231c0 # v2.1.0
+        uses: dflook/terraform-plan@5c312f52c8997a0833d0cfd44573a6225f1d0a0c # v2.2.1
         if: github.event_name == 'pull_request' || github.event_name == 'pull_request_review' || inputs.terraform_operation == 'plan'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
@@ -202,7 +202,7 @@ jobs:
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform apply
-        uses: dflook/terraform-apply@d62f3b833781560bf16193fd56940796a44f70ec # v2.1.0
+        uses: dflook/terraform-apply@b8eeae1fcfefe833fa52b09b9c1f89eed0cd8ac7 # v2.2.1
         if: github.event_name == 'push' || inputs.terraform_operation == 'apply' || (github.event_name == 'issue_comment' && contains(github.event.comment.body, 'terraform apply'))
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
@@ -216,7 +216,7 @@ jobs:
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform destroy
-        uses: dflook/terraform-destroy@b59d0f1842b0f8a8ee458d29d0122f8c028e12d7 # v2.1.0
+        uses: dflook/terraform-destroy@5180759c647bb14bbc8f5eec62e77bf2c7dbc953 # v2.2.1
         if: inputs.terraform_operation == 'destroy'
         with:
           path: ${{ inputs.terraform_root_path }}
