@@ -2006,6 +2006,7 @@ Validates Maven dependency graph versions to ensure all target includes artifact
           maven-password: ${{ secrets.NEXUS_PASSWORD }}
           m2-settings-xml: settings.xml
 ```
+
 ### validate-propagation-pr
 
 This workflow validates propagation PR commits to ensure only authorized commits are included. It checks commit authorship and commit types to enforce repository contribution policies.
