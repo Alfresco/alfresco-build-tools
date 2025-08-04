@@ -30,7 +30,7 @@ jobs:
 
           COMMITS="$(gh api repos/"${GITHUB_REPOSITORY}"/pulls/"$PR_NUMBER"/commits --jq '.[]')"
 
-          echo "$COMMITS" | jq -c '.' | while read commit; do
+          echo "$COMMITS" | jq -c '.' | while read -r commit; do
             gh_author=$(echo "$commit" | jq -r '.author.login')
             commit_author=$(echo "$commit" | jq -r '.commit.author.name')
             parents_count=$(echo "$commit" | jq '.parents | length')
