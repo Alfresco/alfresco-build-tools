@@ -5,12 +5,15 @@ runs:
   using: "composite"
   steps:
     - name: Validate commits in propagation PR
+      if: |
+        github.event.pull_request.user.login == 'Sourav-Bhattacharyya' &&
+        contains(toJson(github.event.pull_request.labels.*.name), 'updatebot')
       shell: bash
       env:
-        GH_TOKEN: ${{ env.GH_TOKEN }}
-        PR_NUMBER: ${{ env.PR_NUMBER }}
-        GITHUB_REPOSITORY: ${{ env.GITHUB_REPOSITORY }}
+        GH_TOKEN: ${{ github.token }}
       run: |
+        PR_NUMBER="${{ github.event.pull_request.number }}"
+        GITHUB_REPOSITORY="${{ github.repository }}"
         echo "Fetching commits for propagation PR #$PR_NUMBER..."
         COMMITS="$(gh api repos/\"${GITHUB_REPOSITORY}\"/pulls/\"$PR_NUMBER\"/commits --jq '.[]')"
         echo "$COMMITS" | jq -c '.' | while read -r commit; do
