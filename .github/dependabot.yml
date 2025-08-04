@@ -706,7 +706,7 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
-    directory: "/.github/actions/veracode"
+    directory: "/.github/actions/validate-propagation-pr"
     schedule:
       interval: "weekly"
     groups:
@@ -714,9 +714,9 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
-    directory: "/.github/actions/validate-propagation-pr"
+    directory: "/.github/actions/veracode"
     schedule:
-     interval: "weekly"
+      interval: "weekly"
     groups:
       catch-all:
         patterns:
