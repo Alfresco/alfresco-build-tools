@@ -14,8 +14,8 @@ fi
 cd "$repo_root"
 
 if [ ! -d ".github/actions" ]; then
-  echo "Error: .github/actions directory not found"
-  exit 1
+  echo "Info: .github/actions directory not found, skipping dependabot check"
+  exit 0
 fi
 
 if [ ! -f ".github/dependabot.yml" ]; then
