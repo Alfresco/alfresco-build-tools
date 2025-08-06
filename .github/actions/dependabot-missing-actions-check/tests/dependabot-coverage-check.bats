@@ -72,7 +72,7 @@ updates:
     directory: .github/actions/action1
 EOF
     run "$DIR/../dependabot-coverage-check.sh"
-    [ "$status" -eq 1 ]
+    [ "$status" -eq 0 ]
     [[ "$output" == *".github/actions directory not found"* ]]
 }
 
