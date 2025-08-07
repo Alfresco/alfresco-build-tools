@@ -1,0 +1,43 @@
+name: "Compute Image Tag"
+description: "Compute image tag and labels based on git ref"
+inputs:
+  default_branch:
+    description: "Default branch name"
+    required: false
+    default: "main"
+  expiration_time:
+    description: "Expiration time for non-release images"
+    required: false
+    default: "2w"
+outputs:
+  image_tag:
+    description: "Computed image tag"
+    value: ${{ steps.compute.outputs.image_tag }}
+  image_labels:
+    description: "Computed image labels"
+    value: ${{ steps.compute.outputs.image_labels }}
+  image_created:
+    description: "Image creation timestamp"
+    value: ${{ steps.compute.outputs.image_created }}
+  timestamp:
+    description: "Timestamp in YYYYMMDDHHMM format"
+    value: ${{ steps.compute.outputs.timestamp }}
+runs:
+  using: composite
+  steps:
+    - id: compute
+      name: Compute image tag and metadata
+      shell: bash
+      run: |
+        if [[ "${{ github.ref_name }}" == "${{ inputs.default_branch }}" ]]; then
+          echo "image_tag=latest" >> $GITHUB_OUTPUT
+          echo "image_labels=" >> $GITHUB_OUTPUT
+        elif [[ "${{ github.ref_type }}" == "tag" ]]; then
+          echo "image_tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          echo "image_labels=" >> $GITHUB_OUTPUT
+        else
+          echo "image_tag=${GITHUB_REF_NAME//\//-}" >> $GITHUB_OUTPUT
+          echo "image_labels=quay.expires-after=${{ inputs.expiration_time }}" >> $GITHUB_OUTPUT
+        fi
+        echo "image_created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+        echo "timestamp=$(date -u +'%Y%m%d%H%M')" >> $GITHUB_OUTPUT
