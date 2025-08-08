@@ -33,6 +33,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [automate-dependabot](#automate-dependabot)
     - [automate-propagation](#automate-propagation)
     - [calculate-next-internal-version](#calculate-next-internal-version)
+    - [compute-image-tag](#compute-image-tag)
     - [configure-git-author](#configure-git-author)
     - [dependabot-missing-actions-check](#dependabot-missing-actions-check)
     - [dbp-charts](#dbp-charts)
@@ -449,6 +450,39 @@ Calculate next internal version based on existing tags
         with:
           next-version: 1.2.3
 ```
+
+### compute-image-tag
+
+Computes the image tag and labels based on the git reference.
+
+```yaml
+    outputs:
+      image_tag: ${{ steps.compute.outputs.image_tag }}
+      image_labels: ${{ steps.compute.outputs.image_labels }}
+      image_created: ${{ steps.compute.outputs.image_created }}
+      timestamp: ${{ steps.compute.outputs.timestamp }}
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/compute-image-tag@ref
+        id: compute
+        with:
+          default_branch: main
+          expiration_time: 2w
+
+      - name: Build and Push to quay.io
+        uses: docker/build-push-action@ca877d9245402d1537745e0e356eab47c3520991 # v6.13.0
+        with:
+          push: ${{ github.actor != 'dependabot[bot]' }}
+          build-args: |
+            CREATED=${{ steps.compute.outputs.image_created }}
+          tags: |
+            quay.io/registry/image:${{ steps.compute.outputs.image_tag }}
+          platforms: linux/amd64,linux/arm64/v8
+          labels: ${{ steps.compute.outputs.image_labels }}
+```
+
+When running on default branch - tag will be `latest`, otherwise it will be
+computed based on the git reference e.g. `OPSEXP-0000`, `v0.1.0`. When not
+running on a tag, expires in 2 weeks by default.
 
 ### configure-git-author
 
