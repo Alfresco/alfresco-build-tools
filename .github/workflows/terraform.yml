@@ -124,8 +124,8 @@ jobs:
         if [ "${{ inputs.install_kubectl }}" == "true" ]; then
           echo "📦 Downloading latest stable kubectl..."
           KUBECTL_VERSION=$(curl -sSL https://dl.k8s.io/release/stable.txt)
-          curl -sSL -o kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
-          curl -sSL -o kubectl.sha256 "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256"
+          curl -sSL --max-time 60 --retry 3 -o kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+          curl -sSL --max-time 60 --retry 3 -o kubectl.sha256 "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256"
 
           echo "🔍 Verifying kubectl checksum..."
           if ! echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check --status; then
