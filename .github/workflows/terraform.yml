@@ -128,15 +128,14 @@ jobs:
           curl -sSL -o kubectl.sha256 "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256"
 
           echo "🔍 Verifying kubectl checksum..."
-          echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check --status
-          if [ $? -ne 0 ]; then
+          if ! echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check --status; then
             echo "❌ Checksum verification failed for kubectl!"
             exit 1
           fi
 
           echo "🔐 Installing kubectl to /usr/local/bin..."
           install -m 0755 kubectl /usr/local/bin/kubectl
-          rm -f kubectl
+          rm -f kubectl kubectl.sha256
 
           echo "✅ kubectl installed:"
           kubectl version --client
