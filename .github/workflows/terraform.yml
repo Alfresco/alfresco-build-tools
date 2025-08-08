@@ -115,14 +115,13 @@ jobs:
       TERRAFORM_HTTP_CREDENTIALS: |
         github.com/Alfresco=alfresco-build:${{ secrets.BOT_GITHUB_TOKEN }}
       TERRAFORM_PRE_RUN: |
+        set -euo pipefail
         if [ ! -x ./aws/install ]; then
           curl -sSf https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip
           unzip -q awscliv2.zip
         fi
         ./aws/install
         if [ "${{ inputs.install_kubectl }}" == "true" ]; then
-          set -euo pipefail
-
           echo "📦 Downloading latest stable kubectl..."
           KUBECTL_VERSION=$(curl -sSL https://dl.k8s.io/release/stable.txt)
           curl -sSL -o kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
@@ -132,7 +131,7 @@ jobs:
           rm -f kubectl
 
           echo "✅ kubectl installed:"
-          kubectl version --client || echo "⚠️  kubectl installed but version check failed"
+          kubectl version --client
         else
           echo "⚙️ Skipping kubectl installation"
         fi
