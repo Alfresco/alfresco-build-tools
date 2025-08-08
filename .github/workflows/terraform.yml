@@ -135,7 +135,7 @@ jobs:
           fi
 
           echo "🔐 Installing kubectl to /usr/local/bin..."
-          install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+          install -m 0755 kubectl /usr/local/bin/kubectl
           rm -f kubectl
 
           echo "✅ kubectl installed:"
