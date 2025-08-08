@@ -2153,6 +2153,18 @@ jobs:
     secrets: inherit
 ```
 
+Optionally you can install `kubectl` while running Terraform:
+
+```bash
+  invoke-terraform-infra:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@ref
+    with:
+      terraform_root_path: infra
+      terraform_operation: ${{ inputs.terraform_operation }}
+      install_kubectl: true
+    secrets: inherit
+```
+
 ## Cookbook
 
 This section contains a list of recipes and common patterns organized by desired
