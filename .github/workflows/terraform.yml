@@ -125,6 +125,14 @@ jobs:
           echo "📦 Downloading latest stable kubectl..."
           KUBECTL_VERSION=$(curl -sSL https://dl.k8s.io/release/stable.txt)
           curl -sSL -o kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+          curl -sSL -o kubectl.sha256 "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256"
+
+          echo "🔍 Verifying kubectl checksum..."
+          echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check --status
+          if [ $? -ne 0 ]; then
+            echo "❌ Checksum verification failed for kubectl!"
+            exit 1
+          fi
 
           echo "🔐 Installing kubectl to /usr/local/bin..."
           install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
