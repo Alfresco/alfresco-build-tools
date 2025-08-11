@@ -114,7 +114,7 @@ runs:
           network=host
 
     - name: Login to docker.io
-      uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+      uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
       with:
         username: ${{ inputs.docker-username }}
         password: ${{ inputs.docker-password }}
@@ -130,7 +130,7 @@ runs:
 
     - name: Anchore Scan API Image
       if: inputs.grype-scan-enabled == 'true'
-      uses: anchore/scan-action@df395807f4554463d4455b8047cf58e37b6acaae # v6.5.0
+      uses: anchore/scan-action@1638637db639e0ade3258b51db49a9a137574c3e # v6.5.1
       id: scan
       with:
         fail-build: ${{ inputs.grype-fail-build }}
@@ -145,7 +145,7 @@ runs:
 
     - name: Upload SARIF Files
       if: always() && inputs.grype-scan-enabled == 'true' && github.event_name == 'push'
-      uses: github/codeql-action/upload-sarif@51f77329afa6477de8c49fc9c7046c15b9a4e79d # v3.29.5
+      uses: github/codeql-action/upload-sarif@76621b61decf072c1cee8dd1ce2d2a82d33c17ed # v3.29.5
       continue-on-error: true # do not fail if GHAS is not enabled
       with:
         sarif_file: ${{ steps.scan.outputs.sarif }}
@@ -161,7 +161,7 @@ runs:
 
     - name: Login to quay.io
       if: env.PUSH_IMAGE == 'true'
-      uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+      uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
       with:
         registry: quay.io
         username: ${{ inputs.quay-username }}
@@ -169,7 +169,7 @@ runs:
 
     - name: Login to ghcr.io
       if: env.PUSH_IMAGE == 'true'
-      uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+      uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
       with:
         registry: ghcr.io
         username: ${{ inputs.ghcr-username }}
@@ -177,7 +177,7 @@ runs:
 
     - name: Configure AWS credentials
       if: env.PUSH_IMAGE == 'true'
-      uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+      uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
       with:
         aws-region: ${{ inputs.aws-region }}
         role-to-assume: arn:aws:iam::${{ inputs.aws-account-id }}:role/${{ inputs.aws-role-name }}
