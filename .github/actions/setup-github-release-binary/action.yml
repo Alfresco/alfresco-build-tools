@@ -40,8 +40,19 @@ runs:
           aarch64) ARCH=${ARCH:-${{ inputs.aarch64_arch }}} ;;
           *) ARCH=${ARCH:-$ARCH_RAW} ;;
         esac
+
         URL=https://github.com/$REPO/releases/download/$(eval echo $URL_TEMPLATE)
+        ARCHIVE=$(basename "$URL")
+
         echo "Downloading $URL ..."
-        curl -fsSL $URL | tar xz $NAME
+        curl -fsSL -o "$ARCHIVE" "$URL"
+
+        if [[ "$ARCHIVE" == *.zip ]]; then
+          unzip -j -qq "$ARCHIVE" "*$NAME" -d .
+        else
+          tar -xzf "$ARCHIVE" "$NAME"
+        fi
+        rm -f "$ARCHIVE"
+
         sudo mv $NAME /usr/local/bin/$NAME
         $NAME ${{ inputs.test_args }}
