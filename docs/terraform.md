@@ -1,4 +1,4 @@
-# Terraform workflows
+# Terraform in Alfresco CI
 
 This document describes the Terraform approach to managing infrastructure as
 code (IaC) using Terraform. It outlines best practices, directory structure, and
@@ -19,15 +19,15 @@ run against the `main` branch, and any other environment when run against
 GitHub Environments must be configured with the following GitHub variables
 (repository or environment):
 
-- AWS_DEFAULT_REGION: where the AWS resources will be created
-- AWS_ROLE_ARN (optional): the ARN of the role to assume in case OIDC
+- `AWS_DEFAULT_REGION`: where the AWS resources will be created
+- `AWS_ROLE_ARN` (optional): the ARN of the role to assume in case OIDC
   authentication is available
-- RANCHER2_URL (optional): automatically register EKS cluster on a given rancher
+- `RANCHER2_URL` (optional): automatically register EKS cluster on a given rancher
   instance
-- RESOURCE_NAME: used to namespace every resource created, e.g. State file in
+- `RESOURCE_NAME`: used to namespace every resource created, e.g. State file in
   the S3 bucket. You can use it as well inside Terraform by defining a variable
   `resource_name` in your Terraform code.
-- TERRAFORM_STATE_BUCKET: the name of the S3 bucket where to store the terraform
+- `TERRAFORM_STATE_BUCKET`: the name of the S3 bucket where to store the terraform
   state. You can reuse the same bucket for multiple environments as long as you
   provide a different `RESOURCE_NAME` for each environment.
 
@@ -46,14 +46,14 @@ backend "s3" {
 
 The following GitHub secrets (all optional) are also accepted by this workflow:
 
-- AWS_ACCESS_KEY_ID: access key to use the AWS terraform provider
-- AWS_SECRET_ACCESS_KEY: secret key to use the AWS terraform provider
-- BOT_GITHUB_TOKEN (to access private terraform modules in the Alfresco org)
-- DOCKER_USERNAME (optional): Docker Hub credentials
-- DOCKER_PASSWORD (optional): Docker Hub credentials
-- RANCHER2_ACCESS_KEY (optional): access key to use the rancher terraform
+- `AWS_ACCESS_KEY_ID`: access key to use the AWS terraform provider
+- `AWS_SECRET_ACCESS_KEY`: secret key to use the AWS terraform provider
+- `BOT_GITHUB_TOKEN` (to access private terraform modules in the Alfresco org)
+- `DOCKER_USERNAME` (optional): Docker Hub credentials
+- `DOCKER_PASSWORD` (optional): Docker Hub credentials
+- `RANCHER2_ACCESS_KEY` (optional): access key to use the rancher terraform
   provider
-- RANCHER2_SECRET_KEY (optional): secret key to use the rancher terraform
+- `RANCHER2_SECRET_KEY` (optional): secret key to use the rancher terraform
   provider
 
 An example workflow using this reusable workflow could look like this:
