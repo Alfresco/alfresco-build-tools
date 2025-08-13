@@ -99,6 +99,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [send-slack-notification](#send-slack-notification)
     - [send-teams-notification](#send-teams-notification)
       - [Mentions](#mentions)
+    - [setup-checkov](#setup-checkov)
     - [setup-docker](#setup-docker)
     - [setup-github-release-binary](#setup-github-release-binary)
     - [setup-helm-docs](#setup-helm-docs)
@@ -1759,6 +1760,16 @@ To get the necessary data for mentions:
   6. Tag IDs are shown as base-64 encoded strings in the "id" property
 
 ![PowerAutomate Get Tag IDs Flow](./images/send-teams-get-tag-id.png)
+
+### setup-checkov
+
+Set up a specific version of Checkov and add it to the PATH.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-checkov@ref
+        with:
+          version: '3.2.0'
+```
 
 ### setup-docker
 

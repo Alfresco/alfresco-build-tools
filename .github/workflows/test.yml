@@ -117,3 +117,4 @@ jobs:
           url_template: 'v${VERSION}/${NAME}_${OS}_${ARCH}.tar.gz'
           test_args: 'version'
           x86_64_arch: 'x86_64'
+      - uses: ./.github/actions/setup-checkov
