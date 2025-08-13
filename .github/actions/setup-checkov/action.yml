@@ -14,4 +14,4 @@ runs:
         version: ${{ inputs.version }}
         x86_64_arch: 'X86_64'
         aarch64_arch: 'arm64'
-        url_template: 'v${VERSION}/${NAME}_${OS}_${ARCH}.zip'
+        url_template: '${VERSION}/${NAME}_${OS}_${ARCH}.zip'
