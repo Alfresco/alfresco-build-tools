@@ -1,0 +1,12 @@
+github:
+  prefix: 'build(deps)'
+  message: 'bump checkov to {{ source "lastRelease" }}'
+
+github_release:
+  owner: 'bridgecrewio'
+  repo: 'checkov'
+
+target:
+  file: '.github/actions/setup-checkov/action.yml'
+  key: '$.inputs.version.default'
+  trimprefix: 'v'
