@@ -10,6 +10,8 @@ This repository contains shared/reusable CI configurations for GitHub Actions to
 
 For security-related topics of GitHub Actions, see the [Security section](security.md).
 
+For terraform-related topics of GitHub Actions, see the [Terraform section](terraform.md).
+
 Here follows the list of GitHub Actions topics available in the current document:
 
 - [alfresco-build-tools](#alfresco-build-tools)
@@ -1923,6 +1925,9 @@ Install the terraform-docs binary from GitHub Releases and add it to the PATH.
           version: "0.16.0"
 ```
 
+For more details on terraform related workflows, see the dedicated
+[terraform section](terraform.md).
+
 ### setup-updatebot
 
 Install the updatebot binary from GitHub Releases and add it to the PATH.
@@ -2066,117 +2071,8 @@ Calculates the new alpha version, creates new git tag and publishes the new pack
 
 ### terraform
 
-Reusable workflow which implements an opinionated workflow to manage terraform
-repositories leveraging [dflook/terraform-github-actions](https://github.com/dflook/terraform-github-actions),
-optionally allowing a multi-state approach for managing resources.
-
-You can provide Github environment name with `terraform_env` input. If not set,
-this workflow assumes a GitHub environment named `production` to be present when
-run against the `main` branch, and any other environment when run against
-`develop` branch or any other branch.
-
-GitHub environments must be configured with the following GitHub variables
-(repository or environment):
-
-- AWS_DEFAULT_REGION: where the AWS resources will be created
-- AWS_ROLE_ARN (optional): the ARN of the role to assume in case OIDC
-  authentication is available
-- RANCHER2_URL (optional): automatically register EKS cluster on a given rancher
-  instance
-- RESOURCE_NAME: used to namespace every resource created, e.g. State file in
-  the S3 bucket. You can use it as well inside Terraform by defining a variable
-  `resource_name` in your Terraform code.
-- TERRAFORM_STATE_BUCKET: the name of the S3 bucket where to store the terraform
-  state. You can reuse the same bucket for multiple environments as long as you
-  provide a different `RESOURCE_NAME` for each environment.
-
-Alternatively to providing `AWS_ROLE_ARN` as GitHub variable, you can set
-`create_oidc_token_file` input to `true` to request an AWS OIDC token which will
-be persisted into a file and can be used inside terraform code e.g. like this:
-
-```tf
-backend "s3" {
-  assume_role_with_web_identity = {
-    role_arn                = "arn:aws:iam::372466110691:role/AlfrescoCI/alfresco-common-resources-deploy"
-    web_identity_token_file = "/github/workspace/idtoken.json"
-  }
-}
-```
-
-The following GitHub secrets (all optional) are also accepted by this workflow:
-
-- AWS_ACCESS_KEY_ID: access key to use the AWS terraform provider
-- AWS_SECRET_ACCESS_KEY: secret key to use the AWS terraform provider
-- BOT_GITHUB_TOKEN (to access private terraform modules in the Alfresco org)
-- DOCKER_USERNAME (optional): Docker Hub credentials
-- DOCKER_PASSWORD (optional): Docker Hub credentials
-- RANCHER2_ACCESS_KEY (optional): access key to use the rancher terraform
-  provider
-- RANCHER2_SECRET_KEY (optional): secret key to use the rancher terraform
-  provider
-
-```yaml
-name: "terraform"
-run-name: "terraform ${{ inputs.terraform_operation || (github.event_name == 'issue_comment' && 'apply') || ((github.event_name == 'pull_request' || github.event_name == 'pull_request_review') && 'plan' || 'apply') }} on ${{ github.event_name == 'issue_comment' && 'pr comment' || github.base_ref || github.ref_name }}"
-
-on:
-  pull_request:
-    branches:
-      - main
-      - develop
-      - preprod
-  push:
-    branches:
-      - main
-      - develop
-      - preprod
-  # optional - to trigger a terraform apply adding a pr comment with text 'terraform apply'
-  issue_comment:
-    types: [created]
-  workflow_dispatch:
-    inputs:
-      terraform_operation:
-        description: 'Perform the requested operation on terraform'
-        type: choice
-        required: true
-        options:
-          - plan
-          - apply
-          - destroy
-        default: plan
-
-permissions:
-  pull-requests: write
-  contents: read
-  # id-token: write # required to use OIDC authentication with AWS
-
-jobs:
-  invoke-terraform-infra:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@ref
-    with:
-      terraform_root_path: infra
-      terraform_operation: ${{ inputs.terraform_operation }}
-    secrets: inherit
-  invoke-terraform-k8s:
-    needs: invoke-terraform-infra
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@ref
-    with:
-      terraform_root_path: k8s
-      terraform_operation: ${{ inputs.terraform_operation }}
-    secrets: inherit
-```
-
-Optionally you can install `kubectl` while running Terraform:
-
-```bash
-  invoke-terraform-infra:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@ref
-    with:
-      terraform_root_path: infra
-      terraform_operation: ${{ inputs.terraform_operation }}
-      install_kubectl: true
-    secrets: inherit
-```
+See the dedicated [terraform](terraform.md) for more information on the reusable
+workflows provided by us.
 
 ## Cookbook
 
