@@ -1875,6 +1875,8 @@ Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
           metrics: true
           # Enable creating docker registry secret using given name
           import-docker-credentials-secret-name: regcred
+          # optional, default is 90s
+          ingress-creation-timeout: 120s
       - name: Helm deploy
         run: |
           helm dep up ./helm/chart
