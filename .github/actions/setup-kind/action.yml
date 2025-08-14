@@ -67,13 +67,13 @@ runs:
           --for=condition=ready pod \
           --selector=app.kubernetes.io/component=controller \
           --timeout=${{ inputs.ingress-creation-timeout }} || {
-        echo "Ingress controller failed to become ready. Debugging information:"
-        echo "=== Pod Description ==="
-        kubectl describe pods -n ingress-nginx -l app.kubernetes.io/component=controller
-        echo "=== Pod Logs ==="
-        kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller --tail=100
-        exit 1
-        }
+            echo "Ingress controller failed to become ready. Debugging information:"
+            echo "=== Pod Description ==="
+            kubectl describe pods -n ingress-nginx -l app.kubernetes.io/component=controller
+            echo "=== Pod Logs ==="
+            kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller --tail=100
+            exit 1
+          }
 
     - name: Create registries auth secret
       shell: bash
