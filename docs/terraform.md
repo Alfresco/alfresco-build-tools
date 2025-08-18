@@ -94,7 +94,7 @@ permissions:
 
 jobs: # one job for each terraform folder/stack
   invoke-terraform-infra:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@ref
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v8.31.0
     with:
       terraform_root_path: infra
       terraform_operation: ${{ inputs.terraform_operation }}
@@ -102,7 +102,7 @@ jobs: # one job for each terraform folder/stack
 
   invoke-terraform-k8s:
     needs: invoke-terraform-infra
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@ref
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v8.31.0
     with:
       terraform_root_path: k8s
       terraform_operation: ${{ inputs.terraform_operation }}
@@ -164,28 +164,10 @@ on:
 
 jobs:
   pre-commit:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write # required only when auto-commit is enabled
-    steps:
-      - uses: terraform-linters/setup-tflint@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-terraform-docs@v8.31.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-checkov@v8.31.0
-
-      - name: Detect terraform version
-        run: echo "TERRAFORM_VERSION=$(cat .terraform-version)" >> $GITHUB_ENV
-
-      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
-        with:
-          terraform_version: ${{ env.TERRAFORM_VERSION }}
-
-      - name: Setup authentication for private terraform modules
-        run: |
-          git config --global url."https://${{ vars.BOT_GITHUB_USERNAME }}:${{ secrets.BOT_GITHUB_TOKEN }}@github.com".insteadOf "https://github.com"
-
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v8.28.1
-        with:
-          auto-commit: "true" # mainly to push back terraform-docs changes
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v8.31.0
+    with:
+      private-modules-username: ${{ vars.BOT_GITHUB_USERNAME }}
+    secrets: inherit
 ```
 
 ## Environment badges
