@@ -79,7 +79,7 @@ on:
   workflow_dispatch:
     inputs:
       terraform_operation:
-        description: 'CAUTION: perform the requested operation with terraform on the selected branch'
+        description: 'CAUTION: perform the requested operation with Terraform on the selected branch'
         type: choice
         required: true
         options:
