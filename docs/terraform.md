@@ -169,7 +169,7 @@ jobs:
   pre-commit:
     uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v8.31.0
     with:
-      private-modules-username: ${{ vars.BOT_GITHUB_USERNAME }}
+      BOT_GITHUB_USERNAME: ${{ vars.BOT_GITHUB_USERNAME }}
     secrets: inherit
 ```
 
