@@ -162,6 +162,9 @@ on:
       - develop
       - ...
 
+permissions:
+  contents: write
+
 jobs:
   pre-commit:
     uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v8.31.0
