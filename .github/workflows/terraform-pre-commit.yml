@@ -3,8 +3,10 @@ name: Pre-commit for terraform
 on:
   workflow_call:
     inputs:
-      private-modules-username:
+      BOT_GITHUB_USERNAME:
+        description: 'Username to allow fetching private modules on GitHub (BOT_GITHUB_TOKEN is required)'
         type: string
+        required: false
     secrets:
       BOT_GITHUB_TOKEN:
         required: false
@@ -35,7 +37,7 @@ jobs:
       - name: Setup authentication for private terraform modules
         if: env.BOT_GITHUB_USERNAME && env.BOT_GITHUB_TOKEN
         env:
-          BOT_GITHUB_USERNAME: ${{ inputs.private-modules-username }}
+          BOT_GITHUB_USERNAME: ${{ inputs.BOT_GITHUB_USERNAME }}
           BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
         run: |
           git config --global url."https://${BOT_GITHUB_USERNAME}:${BOT_GITHUB_TOKEN}@github.com".insteadOf "https://github.com"
