@@ -162,7 +162,7 @@ jobs:
           fi
 
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           ref: ${{ github.event_name == 'issue_comment' && env.PR_CHECKOUT_REF || '' }}
 
@@ -193,7 +193,7 @@ jobs:
           role-session-name: TerraformWorkflow
 
       - name: Load environment variables from yml
-        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v8.29.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v8.31.0
         with:
           yml_path: ${{ inputs.terraform_root_path }}/tfenv.yml
 

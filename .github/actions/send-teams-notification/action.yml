@@ -38,7 +38,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+    - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
     - name: Compute workflow status
       id: compute-workflow-status
@@ -155,7 +155,7 @@ runs:
         echo "result=$RESULT" >> $GITHUB_OUTPUT
 
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v8.29.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v8.31.0
 
     - name: Transform mentions to JSON entities
       id: transform-mentions

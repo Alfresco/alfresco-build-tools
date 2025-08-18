@@ -101,6 +101,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [send-slack-notification](#send-slack-notification)
     - [send-teams-notification](#send-teams-notification)
       - [Mentions](#mentions)
+    - [setup-checkov](#setup-checkov)
     - [setup-docker](#setup-docker)
     - [setup-github-release-binary](#setup-github-release-binary)
     - [setup-helm-docs](#setup-helm-docs)
@@ -1762,6 +1763,16 @@ To get the necessary data for mentions:
 
 ![PowerAutomate Get Tag IDs Flow](./images/send-teams-get-tag-id.png)
 
+### setup-checkov
+
+Set up a specific version of Checkov and add it to the PATH.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-checkov@ref
+        with:
+          version: '3.2.0'
+```
+
 ### setup-docker
 
 When using a runner which is not a default hosted runner, all the default
@@ -1782,7 +1793,7 @@ Allows the installation of a generic binary from GitHub Releases and add it to t
 See [setup-helm-docs](../.github/actions/setup-helm-docs/action.yml) for a usage example.
 
 ```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v8.29.0
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v8.31.0
       with:
         repo: org/repo-name
         version: '1.2.3'
@@ -1866,6 +1877,8 @@ Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
           metrics: true
           # Enable creating docker registry secret using given name
           import-docker-credentials-secret-name: regcred
+          # optional, default is 90s
+          ingress-creation-timeout: 120s
       - name: Helm deploy
         run: |
           helm dep up ./helm/chart

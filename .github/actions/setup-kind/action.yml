@@ -27,6 +27,11 @@ inputs:
     description: |
       Whether to create a secret using the given name using file $HOME/.docker/config.json.
       You have to login to one or more registries before using this option.
+  ingress-creation-timeout:
+    description: |
+      The timeout for waiting for the ingress controller to become ready.
+      Default is 90 seconds, which should be enough for most cases.
+    default: 90s
 runs:
   using: "composite"
   steps:
@@ -61,7 +66,14 @@ runs:
         kubectl wait --namespace ingress-nginx \
           --for=condition=ready pod \
           --selector=app.kubernetes.io/component=controller \
-          --timeout=90s
+          --timeout=${{ inputs.ingress-creation-timeout }} || {
+            echo "Ingress controller failed to become ready. Debugging information:"
+            echo "=== Pod Description ==="
+            kubectl describe pods -n ingress-nginx -l app.kubernetes.io/component=controller
+            echo "=== Pod Logs ==="
+            kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller --tail=100
+            exit 1
+          }
 
     - name: Create registries auth secret
       shell: bash
