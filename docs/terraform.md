@@ -169,8 +169,8 @@ jobs:
       contents: write # required only when auto-commit is enabled
     steps:
       - uses: terraform-linters/setup-tflint@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-terraform-docs@v8.30.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-checkov@v8.30.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-terraform-docs@v8.31.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-checkov@v8.31.0
 
       - name: Detect terraform version
         run: echo "TERRAFORM_VERSION=$(cat .terraform-version)" >> $GITHUB_ENV
