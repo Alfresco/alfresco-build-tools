@@ -117,7 +117,7 @@ runs:
   steps:
     - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@v8.31.0
+    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@v8.32.0
       id: maven-configure
       with:
         java-version: ${{ inputs.java-version }}
@@ -132,7 +132,7 @@ runs:
     - name: Update pom files to the new version
       id: update-pom-to-next-version
       if: github.event_name == 'push' || env.IS_PREVIEW == 'true'
-      uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@v8.31.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@v8.32.0
       with:
         property-to-update: ${{ inputs.property-to-update }}
         maven-cli-opts: ${{ steps.maven-configure.outputs.maven-options }}
@@ -235,7 +235,7 @@ runs:
       shell: bash
       run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v8.31.0
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v8.32.0
       if: github.event_name == 'push'
       with:
         username: ${{ inputs.git-username }}
