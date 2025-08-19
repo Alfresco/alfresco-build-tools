@@ -5,6 +5,8 @@ on:
   schedule:
     - cron: '0 6 * * 1'
   push:
+    tags-ignore:
+      - '**'
     paths:
       - '.updatecli/**'
       - .github/workflows/updatecli.yml
