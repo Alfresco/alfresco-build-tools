@@ -89,7 +89,6 @@ Here follows the list of GitHub Actions topics available in the current document
     - [maven-update-pom-version](#maven-update-pom-version)
     - [md-toc](#md-toc)
     - [nexus-move-artifacts](#nexus-move-artifacts)
-    - [pre-commit](#pre-commit)
     - [process-coverage-report](#process-coverage-report)
     - [pipenv](#pipenv)
     - [rancher](#rancher)
@@ -1341,46 +1340,6 @@ Moves artifacts from one repository to another on Nexus 3, identified by a parti
           nexus-url: ${{ vars.NEXUS_URL }}
           group: com.company
           version: 1.0.0
-```
-
-### pre-commit
-
-Executes a [pre-commit](https://pre-commit.com/) step.
-
-This action is usually added in a dedicated workflow:
-
-```yml
-name: pre-commit
-
-on:
-  pull_request:
-    branches: [ master ]
-  push:
-    branches: [ master ]
-
-jobs:
-  pre-commit:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write # required only when auto-commit is enabled
-    steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
-        with:
-          auto-commit: "true" # optionally commit automated fix changes back
-```
-
-This action requires a pre-existing `.pre-commit-config.yaml` file that needs to
-be present into the caller repository. You can find more documentation related
-to pre-commit hooks in the [dedicated section](pre-commit-hooks.md).
-
-Note that this action includes an `actions/checkout` as a first step that
-usually helps when running this step as the first step in a job and is mandatory
-for the proper handling of auto-commit feature, unless you specify:
-
-```yml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@ref
-        with:
-          skip_checkout: "true"
 ```
 
 ### process-coverage-report
