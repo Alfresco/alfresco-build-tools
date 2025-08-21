@@ -38,7 +38,7 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
 
-    - name: build extra_args
+    - name: Build extra_args
       shell: bash
       env:
         EXTRA_ARGS: ''
@@ -47,7 +47,8 @@ runs:
         EXTRA_ARGS="${EXTRA_ARGS} ${{ inputs.pre-commit-args }}"
         echo EXTRA_ARGS="${EXTRA_ARGS}" >> $GITHUB_ENV
 
-    - uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
+    - name: Run pre-commit
+      uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
       id: pre-commit
       env:
         CONTINUE_ON_ERROR: ${{ inputs.auto-commit == 'true' }}
@@ -55,11 +56,13 @@ runs:
       with:
         extra_args: ${{ env.EXTRA_ARGS }}
 
-    - uses: stefanzweifel/git-auto-commit-action@778341af668090896ca464160c2def5d1d1a3eb0 # v6.0.1
+    - name: Auto-commit changes
+      uses: stefanzweifel/git-auto-commit-action@778341af668090896ca464160c2def5d1d1a3eb0 # v6.0.1
       id: auto-commit-action
       if: inputs.auto-commit == 'true'
 
-    - name: Re-throw potential pre-commit failure when no changes detected for auto-commit
-      if: inputs.auto-commit == 'true' && steps.pre-commit.outcome == 'failure' && steps.auto-commit-action.outputs.changes_detected == 'false'
-      run: echo "pre-commit failed and no changes detected to auto-commit" && exit 1
-      shell: bash
+    - name: Run pre-commit again to verify changes
+      uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
+      if: inputs.auto-commit == 'true' && steps.pre-commit.outcome == 'failure'
+      with:
+        extra_args: ${{ env.EXTRA_ARGS }}
