@@ -2,7 +2,7 @@ name: Setup GitHub Release Binary
 description: 'Set up a specific version of a binary from GitHub Releases and add it to the PATH.'
 inputs:
   repo:
-    description: 'Repository of binary'
+    description: 'Repository of binary in the form owner/repo'
     required: true
   version:
     description: 'Version of binary'
@@ -23,6 +23,10 @@ inputs:
     description: 'Override the package architecture when aarch64'
     required: false
     default: 'arm64'
+  name:
+    description: 'Override the binary name, defaults to repo name'
+    required: false
+    default: ''
 runs:
   using: "composite"
   steps:
@@ -31,6 +35,7 @@ runs:
         REPO: ${{ inputs.repo }}
         VERSION: ${{ inputs.version }}
         URL_TEMPLATE: ${{ inputs.url_template }}
+        NAME: ${{ inputs.name }}
       run: |
         NAME=${NAME:-${REPO##*\/}}
         OS=${OS:-$(uname | tr '[:upper:]' '[:lower:]')}
