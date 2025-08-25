@@ -48,3 +48,4 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v8.32.1
         with:
           auto-commit: "true" # optionally commit automated fix changes back
+          skip_checkout: "true"
