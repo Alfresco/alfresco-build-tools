@@ -18,7 +18,7 @@ jobs:
       contents: write # required only when auto-commit is enabled
     steps:
       - name: Install tflint
-        uses: terraform-linters/setup-tflint@90f302c255ef959cbfb4bd10581afecdb7ece3e6 # v4.1.1
+        uses: terraform-linters/setup-tflint@ae78205cfffec9e8d93fd2b3115c7e9d3166d4b6 # v5.0.0
 
       - name: Install checkov
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-checkov@v8.32.1
