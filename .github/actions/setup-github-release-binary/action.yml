@@ -23,7 +23,7 @@ inputs:
     description: 'Override the package architecture when aarch64'
     required: false
     default: 'arm64'
-  name:
+  binary_name:
     description: 'Override the binary name, defaults to repo name'
     required: false
     default: ''
@@ -35,9 +35,9 @@ runs:
         REPO: ${{ inputs.repo }}
         VERSION: ${{ inputs.version }}
         URL_TEMPLATE: ${{ inputs.url_template }}
-        NAME: ${{ inputs.name }}
+        BINARY_NAME: ${{ inputs.binary_name }}
       run: |
-        NAME=${NAME:-${REPO##*\/}}
+        NAME=${BINARY_NAME:-${REPO##*\/}}
         OS=${OS:-$(uname | tr '[:upper:]' '[:lower:]')}
         ARCH_RAW=$(uname -m)
         case $ARCH_RAW in
