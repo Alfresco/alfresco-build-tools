@@ -1,0 +1,15 @@
+name: 'Setup Flux CLI'
+description: 'Set up a specific version of Flux CLI and add it to the PATH.'
+inputs:
+  version:
+    description: 'Version of Flux CLI'
+    required: false
+    default: '2.6.4'
+runs:
+  using: "composite"
+  steps:
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v8.32.2
+      with:
+        binary_name: flux
+        repo: fluxcd/flux2
+        version: ${{ inputs.version }}
