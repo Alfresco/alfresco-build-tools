@@ -1,0 +1,12 @@
+github:
+  prefix: 'build(deps)'
+  message: 'bump flux to {{ source "lastRelease" }}'
+
+github_release:
+  owner: 'fluxcd'
+  repo: 'flux2'
+
+target:
+  file: '.github/actions/setup-fluxcli/action.yml'
+  key: '$.inputs.version.default'
+  trimprefix: 'v'

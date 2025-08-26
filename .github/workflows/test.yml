@@ -118,3 +118,4 @@ jobs:
           test_args: 'version'
           x86_64_arch: 'x86_64'
       - uses: ./.github/actions/setup-checkov
+      - uses: ./.github/actions/setup-fluxcli

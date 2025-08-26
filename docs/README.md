@@ -103,6 +103,7 @@ Here follows the list of GitHub Actions topics available in the current document
       - [Mentions](#mentions)
     - [setup-checkov](#setup-checkov)
     - [setup-docker](#setup-docker)
+    - [setup-fluxcli](#setup-fluxcli)
     - [setup-github-release-binary](#setup-github-release-binary)
     - [setup-helm-docs](#setup-helm-docs)
     - [setup-java-build](#setup-java-build)
@@ -1784,6 +1785,16 @@ Hosted runners.
 ```yaml
       - name: Setup Docker Engine
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-docker@ref
+```
+
+### setup-fluxcli
+
+Set up a specific version of Flux CLI and add it to the PATH.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-fluxcli@ref
+        with:
+          version: '2.6.4'
 ```
 
 ### setup-github-release-binary
