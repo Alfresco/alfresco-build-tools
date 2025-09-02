@@ -20,10 +20,10 @@ jobs:
       - name: pre-commit checks
         uses: ./.github/actions/pre-commit
       - name: Ensure SHA pinned actions
-        uses: zgosalvez/github-actions-ensure-sha-pinned-actions@fc87bb5b5a97953d987372e74478de634726b3e5 # v3.0.25
+        uses: ./.github/actions/github-actions-ensure-sha-pinned-actions
         with:
           allowlist: |
-            Alfresco/alfresco-build-tools/
+            Alfresco/alfresco-build-tools/*
   test:
     runs-on: ${{ matrix.os }}
     needs: build

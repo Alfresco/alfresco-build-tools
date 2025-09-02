@@ -1,0 +1,128 @@
+name: GitHub Actions Ensure SHA Pinned Actions
+description: Ensures all GitHub Actions use SHA-pinned versions instead of tag references
+author: Alfresco
+
+inputs:
+  allowlist:
+    description: |
+      List of action patterns to exclude from SHA pinning (one per line).
+      Supports wildcards with *, e.g., 'owner/repo/*' or 'owner/*'.
+      Can also specify specific actions like 'owner/repo/action@v1.0.0'.
+    required: false
+    default: ''
+
+  exclude-first-party:
+    description: |
+      Whether to exclude first-party actions (actions from same owner as current repo).
+      Set to 'true' to skip checking actions from the same GitHub organization.
+    required: false
+    default: 'false'
+
+  dry-run:
+    description: |
+      When set to 'true', only reports what would be changed without making modifications.
+      Useful for validation or reporting purposes.
+    required: false
+    default: 'false'
+
+  discovery:
+    description: |
+      When set to 'true', only discovers and lists actions without making API calls.
+      Faster execution but won't provide SHA conversion information.
+    required: false
+    default: 'false'
+
+  github-token:
+    description: |
+      GitHub token for API access. Uses GITHUB_TOKEN by default.
+      Required for SHA resolution unless running in discovery mode.
+    required: false
+    default: ${{ github.token }}
+
+  path:
+    description: |
+      Path to search for GitHub Actions workflows and actions.
+      Defaults to current repository root.
+    required: false
+    default: '.'
+
+outputs:
+  actions-found:
+    description: Number of action references found
+    value: ${{ steps.sha-convert.outputs.actions-found }}
+
+  actions-converted:
+    description: Number of actions that were converted to SHA format
+    value: ${{ steps.sha-convert.outputs.actions-converted }}
+
+  files-modified:
+    description: Number of files that were modified
+    value: ${{ steps.sha-convert.outputs.files-modified }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install Python dependencies
+      shell: bash
+      run: |
+        python3 -m pip install --upgrade pip
+        python3 -m pip install requests urllib3
+
+    - name: Run GitHub Actions SHA Converter
+      id: sha-convert
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: |
+        cd "${{ github.action_path }}/../../.."
+
+        # Build command arguments
+        args=()
+        args+=("--path" "${{ inputs.path }}")
+
+        if [[ "${{ inputs.dry-run }}" == "true" ]]; then
+          args+=("--dry-run")
+        fi
+
+        if [[ "${{ inputs.discovery }}" == "true" ]]; then
+          args+=("--discovery")
+        fi
+
+        if [[ "${{ inputs.exclude-first-party }}" == "true" ]]; then
+          args+=("--exclude-first-party")
+        fi
+
+        # Handle allowlist - write to temp file if provided
+        if [[ -n "${{ inputs.allowlist }}" ]]; then
+          allowlist_file=$(mktemp)
+          echo '${{ inputs.allowlist }}' > "$allowlist_file"
+          args+=("--allowlist" "$allowlist_file")
+        fi
+
+        echo "Running: python3 gha-sha-convert/gha_sha_convert.py ${args[*]}"
+
+        # Capture output and statistics
+        output=$(python3 gha-sha-convert/gha_sha_convert.py "${args[@]}" 2>&1) || exit_code=$?
+
+        echo "$output"
+
+        # Extract statistics from output (if available)
+        actions_found=$(echo "$output" | grep -o "Found [0-9]\+ action references" | grep -o "[0-9]\+" || echo "0")
+        actions_converted=$(echo "$output" | grep -o "Converted [0-9]\+ actions" | grep -o "[0-9]\+" || echo "0")
+        files_modified=$(echo "$output" | grep -o "Modified [0-9]\+ files" | grep -o "[0-9]\+" || echo "0")
+
+        echo "actions-found=$actions_found" >> $GITHUB_OUTPUT
+        echo "actions-converted=$actions_converted" >> $GITHUB_OUTPUT
+        echo "files-modified=$files_modified" >> $GITHUB_OUTPUT
+
+        # Clean up temp file if created
+        if [[ -n "${{ inputs.allowlist }}" ]]; then
+          rm -f "$allowlist_file"
+        fi
+
+        # Exit with the same code as the Python script
+        exit ${exit_code:-0}
+
+branding:
+  icon: shield
+  color: blue

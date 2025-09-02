@@ -20,18 +20,20 @@ from urllib3.util.retry import Retry
 class GitHubActionsConverter:
     """Converts GitHub Actions references to SHA-pinned versions."""
 
-    def __init__(self, token: Optional[str] = None, force: bool = False):
+    def __init__(self, token: Optional[str] = None, force: bool = False, allowlist: Optional[List[str]] = None):
         """Initialize the converter.
 
         Args:
             token: GitHub token for API access
             force: Force conversion even if already using SHA
+            allowlist: List of action patterns to exclude from conversion
         """
         self.token = token or os.environ.get('GITHUB_TOKEN')
         self.force = force
         self.discovery_mode = False
         self.dry_run_mode = False
         self.exclude_first_party = False
+        self.allowlist = allowlist or []
         self.session = self._create_session()
         self.cache: Dict[str, str] = {}
 
@@ -103,6 +105,33 @@ class GitHubActionsConverter:
             'hashicorp/',
         ]
         return any(action_ref.startswith(org) for org in first_party_orgs)
+
+    def is_allowlisted(self, action_ref: str) -> bool:
+        """Check if action matches any allowlist pattern."""
+        if not self.allowlist:
+            return False
+
+        # Extract the full action reference for matching
+        import fnmatch
+
+        for pattern in self.allowlist:
+            pattern = pattern.strip()
+            if not pattern or pattern.startswith('#'):
+                continue
+
+            # Support wildcard matching
+            if fnmatch.fnmatch(action_ref, pattern):
+                return True
+
+            # Support exact matching
+            if action_ref == pattern:
+                return True
+
+            # Support owner/* patterns
+            if pattern.endswith('/*') and action_ref.startswith(pattern[:-1]):
+                return True
+
+        return False
 
     def get_sha_for_tag(self, owner_repo: str, tag: str) -> Optional[str]:
         """Get SHA hash for a given tag.
@@ -276,6 +305,11 @@ class GitHubActionsConverter:
                 print(f"Skipping first-party action: {action_ref}")
                 continue
 
+            # Check if this action is allowlisted (should be excluded)
+            if self.is_allowlisted(action_ref):
+                print(f"Skipping allowlisted action: {action_ref}")
+                continue
+
             owner_repo = self.extract_owner_repo(action_ref)
 
             # In discovery mode, just report what would be processed
@@ -391,6 +425,10 @@ def main():
         help="Exclude first-party actions (actions/, microsoft/, azure/, etc.)"
     )
     parser.add_argument(
+        '--allowlist',
+        help="Path to file containing allowlist patterns (one per line) or comma-separated patterns"
+    )
+    parser.add_argument(
         'files',
         nargs='*',
         help="Specific files to process (default: search workflow directories)"
@@ -411,8 +449,32 @@ def main():
         else:
             print("Warning: GITHUB_TOKEN not set. Limited functionality available.")
 
+    # Parse allowlist if provided
+    allowlist = []
+    if args.allowlist:
+        try:
+            # Check if it's a file path
+            allowlist_path = Path(args.allowlist)
+            if allowlist_path.exists():
+                # Read from file
+                allowlist_content = allowlist_path.read_text().strip()
+                allowlist = [line.strip() for line in allowlist_content.split('\n')
+                           if line.strip() and not line.strip().startswith('#')]
+                print(f"Loaded {len(allowlist)} patterns from allowlist file: {allowlist_path}")
+            else:
+                # Treat as comma-separated patterns
+                allowlist = [pattern.strip() for pattern in args.allowlist.split(',')
+                           if pattern.strip()]
+                print(f"Using {len(allowlist)} allowlist patterns from command line")
+
+            if allowlist:
+                print(f"Allowlist patterns: {allowlist}")
+        except Exception as e:
+            print(f"Error processing allowlist: {e}")
+            sys.exit(1)
+
     # Initialize converter
-    converter = GitHubActionsConverter(token=token, force=args.force)
+    converter = GitHubActionsConverter(token=token, force=args.force, allowlist=allowlist)
     converter.discovery_mode = args.discovery
     converter.dry_run_mode = args.dry_run
     converter.exclude_first_party = args.exclude_first_party

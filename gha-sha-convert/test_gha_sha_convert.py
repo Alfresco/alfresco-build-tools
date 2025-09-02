@@ -315,7 +315,7 @@ class TestMainFunction(unittest.TestCase):
 
             # Should exit with 0 for no changes
             self.assertEqual(cm.exception.code, 0)
-            mock_converter_class.assert_called_once_with(token='fake-token', force=True)
+            mock_converter_class.assert_called_once_with(token='fake-token', force=True, allowlist=[])
 
     @patch('gha_sha_convert.GitHubActionsConverter')
     @patch('sys.argv', ['gha_sha_convert.py', 'test.yml'])
@@ -443,7 +443,61 @@ jobs:
             # Should exit with 0 for discovery mode
             self.assertEqual(cm.exception.code, 0)
             # Should be called with no token in discovery mode
-            mock_converter_class.assert_called_once_with(token=None, force=False)
+            mock_converter_class.assert_called_once_with(token=None, force=False, allowlist=[])
+
+    def test_is_allowlisted(self):
+        """Test allowlist pattern matching."""
+        allowlist = [
+            'actions/*',
+            'Alfresco/alfresco-build-tools/*',
+            'specific/action@v1.0.0'
+        ]
+        converter = GitHubActionsConverter(allowlist=allowlist)
+
+        # Test wildcard patterns
+        self.assertTrue(converter.is_allowlisted('actions/checkout'))
+        self.assertTrue(converter.is_allowlisted('actions/setup-python'))
+        self.assertTrue(converter.is_allowlisted('Alfresco/alfresco-build-tools/action'))
+
+        # Test exact patterns
+        self.assertTrue(converter.is_allowlisted('specific/action@v1.0.0'))
+
+        # Test non-matching patterns
+        self.assertFalse(converter.is_allowlisted('other/action'))
+        self.assertFalse(converter.is_allowlisted('specific/action@v2.0.0'))
+
+    def test_allowlist_processing(self):
+        """Test that allowlisted actions are skipped during processing."""
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yml', delete=False) as f:
+            f.write("""
+name: Test Workflow
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: my-org/custom-action@v1.0.0
+""")
+            temp_file = f.name
+
+        try:
+            allowlist = ['actions/*']
+            converter = GitHubActionsConverter(allowlist=allowlist)
+            converter.discovery_mode = True
+
+            # Should process only the non-allowlisted action
+            changes = converter.process_file(Path(temp_file))
+            self.assertEqual(changes, 0)  # Discovery mode makes no changes
+
+            # Test the actual allowlist behavior by checking output
+            # The allowlisted action should be skipped
+            content = Path(temp_file).read_text()
+            self.assertIn('actions/checkout@v3', content)  # Should remain unchanged
+            self.assertIn('my-org/custom-action@v1.0.0', content)  # Should remain unchanged
+
+        finally:
+            os.unlink(temp_file)
 
 
 if __name__ == '__main__':

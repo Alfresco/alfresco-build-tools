@@ -11,10 +11,50 @@ Before creating / modifying any GitHub Actions workflow make sure you're familia
 In this page we are also providing guidance on how to setup common tooling related to security.
 
 - [Security best practices](#security-best-practices)
+  - [SHA Pinning for GitHub Actions](#sha-pinning-for-github-actions)
   - [Secrets detection](#secrets-detection)
     - [First setup](#first-setup)
     - [Updating new/old secrets to the baseline](#updating-newold-secrets-to-the-baseline)
       - [Excluding multiple secrets via regex](#excluding-multiple-secrets-via-regex)
+
+## SHA Pinning for GitHub Actions
+
+To enhance supply chain security, it's crucial to pin GitHub Actions to specific SHA hashes instead of using mutable tag references. This prevents potential supply chain attacks where malicious code could be injected by compromising action repositories.
+
+### Why SHA Pinning Matters
+
+- **Immutable References**: SHA hashes cannot be changed, ensuring the exact same code runs every time
+- **Supply Chain Security**: Prevents malicious updates to existing tags that could introduce vulnerabilities
+- **Reproducible Builds**: Guarantees consistent behavior across all workflow runs
+- **Audit Trail**: Clear visibility of exactly which action versions are being used
+
+### Automated SHA Pinning
+
+This repository provides an automated solution to convert tag references to SHA-pinned versions:
+
+```yaml
+- name: Ensure SHA pinned actions
+  uses: Alfresco/alfresco-build-tools/.github/actions/github-actions-ensure-sha-pinned-actions@ref
+  with:
+    allowlist: |
+      Alfresco/alfresco-build-tools/*
+```
+
+For detailed configuration options and usage examples, see the [github-actions-ensure-sha-pinned-actions](README.md#github-actions-ensure-sha-pinned-actions) section in the main documentation.
+
+### Manual SHA Pinning
+
+If you prefer to pin actions manually, follow this pattern:
+
+```yaml
+# Instead of:
+uses: actions/checkout@v4
+
+# Use:
+uses: actions/checkout@abc123...def789 # v4.1.7
+```
+
+Always include the semantic version in a comment to maintain readability and update tracking.
 
 ## Secrets detection
 
