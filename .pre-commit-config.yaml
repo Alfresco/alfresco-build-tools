@@ -42,3 +42,10 @@ repos:
         language: system
         entry: ./check_readme.sh
         pass_filenames: false
+      - id: gha-sha-convert
+        name: GitHub Actions SHA Converter
+        description: Convert GitHub Actions to use SHA-pinned versions
+        entry: python3 gha-sha-convert/gha_sha_convert.py
+        language: system
+        files: ^\.github/(workflows|actions)/.*\.(yml|yaml)$
+        pass_filenames: true

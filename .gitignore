@@ -56,3 +56,5 @@ node_modules
 
 # vscode settings
 .vscode
+
+gha-sha-convert/__pycache__/
