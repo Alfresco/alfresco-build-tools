@@ -29,6 +29,9 @@ class GitHubActionsConverter:
         """
         self.token = token or os.environ.get('GITHUB_TOKEN')
         self.force = force
+        self.discovery_mode = False
+        self.dry_run_mode = False
+        self.exclude_first_party = False
         self.session = self._create_session()
         self.cache: Dict[str, str] = {}
 
@@ -86,6 +89,20 @@ class GitHubActionsConverter:
         if len(version) != 40:
             return False
         return bool(re.match(r'^[a-f0-9]+$', version))
+
+    def is_first_party_action(self, action_ref: str) -> bool:
+        """Check if action is from a first-party/trusted organization."""
+        first_party_orgs = [
+            'actions/',
+            'microsoft/',
+            'azure/',
+            'github/',
+            'docker/',
+            'aws-actions/',
+            'google-github-actions/',
+            'hashicorp/',
+        ]
+        return any(action_ref.startswith(org) for org in first_party_orgs)
 
     def get_sha_for_tag(self, owner_repo: str, tag: str) -> Optional[str]:
         """Get SHA hash for a given tag.
@@ -254,7 +271,19 @@ class GitHubActionsConverter:
 
             covered.add(original_line)
 
+            # Check if this is a first-party action that should be excluded
+            if self.exclude_first_party and self.is_first_party_action(action_ref):
+                print(f"Skipping first-party action: {action_ref}")
+                continue
+
             owner_repo = self.extract_owner_repo(action_ref)
+
+            # In discovery mode, just report what would be processed
+            if self.discovery_mode:
+                ref = comment_version if comment_version else version
+                status = "SHA+semver" if (self.is_sha(version) and comment_version and self.is_semver(comment_version)) else "needs conversion"
+                print(f"Found: {action_ref}@{version} ({status})")
+                continue
 
             # Determine the reference to use for SHA lookup
             ref = comment_version if comment_version else version
@@ -287,11 +316,15 @@ class GitHubActionsConverter:
             new_line = f"uses: {action_ref}@{sha} # {final_version}"
 
             if original_line != new_line:
-                print(f"Updating '{original_line}' -> '{new_line}'")
-                content = content.replace(original_line, new_line)
-                changes += 1
+                if self.dry_run_mode:
+                    print(f"Would update: '{original_line}' -> '{new_line}'")
+                    changes += 1
+                else:
+                    print(f"Updating '{original_line}' -> '{new_line}'")
+                    content = content.replace(original_line, new_line)
+                    changes += 1
 
-        if changes > 0:
+        if changes > 0 and not self.discovery_mode and not self.dry_run_mode:
             try:
                 file_path.write_text(content)
                 print(f"Updated {file_path} with {changes} changes")
@@ -334,37 +367,110 @@ def main():
         help="Force conversion even if already using SHA"
     )
     parser.add_argument(
+        '--token',
+        help="GitHub token (default: GITHUB_TOKEN environment variable)"
+    )
+    parser.add_argument(
+        '--path',
+        action='append',
+        help="Path to search for workflow files (can be specified multiple times)"
+    )
+    parser.add_argument(
+        '--discovery',
+        action='store_true',
+        help="Discovery mode: scan files but make no API calls or changes"
+    )
+    parser.add_argument(
+        '--dry-run',
+        action='store_true',
+        help="Dry run mode: make API calls but no file changes"
+    )
+    parser.add_argument(
+        '--exclude-first-party',
+        action='store_true',
+        help="Exclude first-party actions (actions/, microsoft/, azure/, etc.)"
+    )
+    parser.add_argument(
         'files',
         nargs='*',
-        help="Specific files to process (default: all workflow files)"
+        help="Specific files to process (default: search workflow directories)"
     )
 
     args = parser.parse_args()
 
-    # Check for GitHub token
-    token = os.environ.get('GITHUB_TOKEN')
-    if not token:
-        print("Warning: GITHUB_TOKEN not set. Some features may not work.")
+    # Get GitHub token
+    token = args.token or os.environ.get('GITHUB_TOKEN')
 
+    if args.discovery:
+        print("Discovery mode: scanning files without API calls or changes")
+        token = None
+    elif not token:
+        if args.dry_run:
+            print("Error: --dry-run requires a GitHub token", file=sys.stderr)
+            sys.exit(1)
+        else:
+            print("Warning: GITHUB_TOKEN not set. Limited functionality available.")
+
+    # Initialize converter
     converter = GitHubActionsConverter(token=token, force=args.force)
+    converter.discovery_mode = args.discovery
+    converter.dry_run_mode = args.dry_run
+    converter.exclude_first_party = args.exclude_first_party
+
+    total_changes = 0
+    files_processed = 0
+    errors_encountered = 0
 
     if args.files:
         # Process specific files
-        total_changes = 0
         for file_path in args.files:
             path = Path(file_path)
             if path.exists() and path.suffix in ['.yml', '.yaml']:
-                total_changes += converter.process_file(path)
+                try:
+                    changes = converter.process_file(path)
+                    total_changes += changes
+                    files_processed += 1
+                except Exception as e:
+                    print(f"Error processing {file_path}: {e}")
+                    errors_encountered += 1
     else:
-        # Process all workflow files in current directory
-        total_changes = converter.process_directory(Path('.'))
+        # Process directories
+        search_paths = args.path or ['.']
 
-    if total_changes > 0:
-        print(f"\nTotal changes made: {total_changes}")
-        sys.exit(1)  # Exit with error to fail pre-commit if changes were made
+        for search_path in search_paths:
+            try:
+                path = Path(search_path)
+                if path.is_file() and path.suffix in ['.yml', '.yaml']:
+                    changes = converter.process_file(path)
+                    total_changes += changes
+                    files_processed += 1
+                elif path.is_dir():
+                    changes = converter.process_directory(path)
+                    total_changes += changes
+                    # Count files in directory
+                    files_processed += len(converter.find_yaml_files(path))
+            except Exception as e:
+                print(f"Error processing {search_path}: {e}")
+                errors_encountered += 1
+
+    # Print summary
+    if args.discovery:
+        print(f"\nDiscovery complete: {files_processed} files scanned")
+    elif args.dry_run:
+        print(f"\nDry run complete: {files_processed} files processed, {total_changes} potential changes")
     else:
-        print("\nNo changes needed")
-        sys.exit(0)
+        print(f"\nProcessing complete: {files_processed} files processed, {total_changes} changes made")
+
+    if errors_encountered > 0:
+        print(f"Errors encountered: {errors_encountered}")
+
+    # Exit code handling
+    if errors_encountered > 0:
+        sys.exit(2)  # Error exit code
+    elif total_changes > 0 and not args.discovery and not args.dry_run:
+        sys.exit(1)  # Changes made (pre-commit convention)
+    else:
+        sys.exit(0)  # Success
 
 
 if __name__ == '__main__':

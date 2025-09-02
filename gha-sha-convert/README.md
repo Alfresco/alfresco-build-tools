@@ -17,6 +17,10 @@ This tool helps secure your GitHub workflows by:
 - **Semantic Version Preservation**: Maintains version information in comments for readability
 - **Smart Caching**: Reduces API calls by caching SHA lookups
 - **Force Mode**: Option to re-process already converted actions
+- **Discovery Mode**: Scan files without making API calls or changes
+- **Dry Run Mode**: Make API calls but don't modify files
+- **First-Party Exclusion**: Option to exclude trusted actions (actions/, microsoft/, etc.)
+- **Flexible Path Support**: Process specific paths or directories
 - **Comprehensive Error Handling**: Graceful handling of API errors and rate limits
 - **Pre-commit Integration**: Works seamlessly with pre-commit hooks
 
@@ -72,13 +76,37 @@ python3 gha_sha_convert.py .github/workflows/ci.yml
 
 # Force re-processing of already converted actions
 python3 gha_sha_convert.py --force
+
+# Discovery mode - scan without making changes
+python3 gha_sha_convert.py --discovery
+
+# Dry run mode - show what would be changed
+python3 gha_sha_convert.py --dry-run --token YOUR_TOKEN
+
+# Exclude first-party actions from conversion
+python3 gha_sha_convert.py --exclude-first-party
+
+# Process specific directory paths
+python3 gha_sha_convert.py --path .github/workflows --path .github/actions
+
+# Use custom token
+python3 gha_sha_convert.py --token YOUR_GITHUB_TOKEN
 ```
 
 ## Configuration
 
 ### Environment Variables
 
-- `GITHUB_TOKEN`: GitHub personal access token for API access (required for new conversions)
+- `GITHUB_TOKEN`: GitHub personal access token for API access (required for conversions)
+
+### Command Line Options
+
+- `--force`: Force re-processing of already converted actions
+- `--token TOKEN`: Specify GitHub token directly (alternative to environment variable)
+- `--path PATH`: Specify custom search paths (can be used multiple times)
+- `--discovery`: Discovery mode - scan files without making API calls or changes
+- `--dry-run`: Dry run mode - make API calls but don't modify files (requires token)
+- `--exclude-first-party`: Exclude first-party actions from conversion (actions/, microsoft/, azure/, etc.)
 
 ### GitHub Token Setup
 

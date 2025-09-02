@@ -302,6 +302,10 @@ class TestMainFunction(unittest.TestCase):
         """Test main function with force flag."""
         mock_converter = Mock()
         mock_converter.process_directory.return_value = 0
+        mock_converter.find_yaml_files.return_value = []
+        mock_converter.discovery_mode = False
+        mock_converter.dry_run_mode = False
+        mock_converter.exclude_first_party = False
         mock_converter_class.return_value = mock_converter
 
         with patch('os.environ.get', return_value='fake-token'):
@@ -337,6 +341,109 @@ class TestMainFunction(unittest.TestCase):
                         self.assertEqual(cm.exception.code, 1)
             finally:
                 os.unlink(tmp_file.name)
+
+
+class TestNewFeatures(unittest.TestCase):
+    """Test new features added from TODO comments."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.converter = GitHubActionsConverter(token="fake-token", force=False)
+
+    def test_is_first_party_action(self):
+        """Test first-party action detection."""
+        test_cases = [
+            ("actions/checkout", True),
+            ("microsoft/setup-msbuild", True),
+            ("azure/login", True),
+            ("docker/build-push-action", True),
+            ("my-org/custom-action", False),
+            ("random/action", False),
+        ]
+
+        for action_ref, expected in test_cases:
+            with self.subTest(action_ref=action_ref):
+                result = self.converter.is_first_party_action(action_ref)
+                self.assertEqual(result, expected)
+
+    def test_discovery_mode(self):
+        """Test discovery mode functionality."""
+        self.converter.discovery_mode = True
+
+        test_content = """name: Test
+on: [push]
+jobs:
+  test:
+    steps:
+      - uses: actions/checkout@v3
+"""
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yml', delete=False) as tmp_file:
+            tmp_file.write(test_content)
+            tmp_file.flush()
+
+            changes = self.converter.process_file(Path(tmp_file.name))
+
+            # Discovery mode should not make any changes
+            self.assertEqual(changes, 0)
+
+            # File content should remain unchanged
+            updated_content = Path(tmp_file.name).read_text()
+            self.assertEqual(updated_content, test_content)
+
+            # Clean up
+            os.unlink(tmp_file.name)
+
+    def test_exclude_first_party(self):
+        """Test excluding first-party actions."""
+        self.converter.exclude_first_party = True
+
+        test_content = """name: Test
+on: [push]
+jobs:
+  test:
+    steps:
+      - uses: actions/checkout@v3
+      - uses: my-org/custom-action@v1.0.0
+"""
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yml', delete=False) as tmp_file:
+            tmp_file.write(test_content)
+            tmp_file.flush()
+
+            with patch.object(self.converter, 'get_sha_for_tag') as mock_get_sha, \
+                 patch.object(self.converter, 'find_best_version_for_sha') as mock_find_version:
+
+                mock_get_sha.return_value = "a" * 40
+                mock_find_version.return_value = "v1.0.0"
+
+                changes = self.converter.process_file(Path(tmp_file.name))
+
+                # Should only process the non-first-party action
+                updated_content = Path(tmp_file.name).read_text()
+                self.assertIn("actions/checkout@v3", updated_content)  # Unchanged
+                self.assertIn(f"my-org/custom-action@{'a' * 40}", updated_content)  # Changed
+
+            # Clean up
+            os.unlink(tmp_file.name)
+
+    @patch('sys.argv', ['gha_sha_convert.py', '--discovery'])
+    def test_main_discovery_mode(self):
+        """Test main function with discovery mode."""
+        with patch('gha_sha_convert.GitHubActionsConverter') as mock_converter_class:
+            mock_converter = Mock()
+            mock_converter.find_yaml_files.return_value = []
+            mock_converter.process_directory.return_value = 0
+            mock_converter_class.return_value = mock_converter
+
+            from gha_sha_convert import main
+            with self.assertRaises(SystemExit) as cm:
+                main()
+
+            # Should exit with 0 for discovery mode
+            self.assertEqual(cm.exception.code, 0)
+            # Should be called with no token in discovery mode
+            mock_converter_class.assert_called_once_with(token=None, force=False)
 
 
 if __name__ == '__main__':
