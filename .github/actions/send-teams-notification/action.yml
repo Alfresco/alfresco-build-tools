@@ -197,7 +197,7 @@ runs:
 
     - name: Send teams notification
       id: send-teams-notification
-      uses: atchertchian/notify-microsoft-teams@cb805ae50a14a72897af904279f5e0ca023a61a0 # testing
+      uses: atchertchian/notify-microsoft-teams@d8becc6a9d78574d063ced88da3d36a73654a201 # testing
       env:
         ACTOR_URL: ${{ steps.compute-actor-urls.outputs.actor_url }}
         ACTOR_AVATAR_URL: ${{ steps.compute-actor-urls.outputs.actor_avatar_url }}
