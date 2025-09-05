@@ -166,10 +166,31 @@ runs:
       run: |
         ${{ github.action_path }}/transform-mentions.sh >> $GITHUB_OUTPUT
 
+    - name: Compute actor URLs
+      id: compute-actor-urls
+      shell: bash
+      env:
+        TRIGGERING_ACTOR: ${{ github.triggering_actor }}
+        SERVER_URL: ${{ github.server_url }}
+        AVATARS_URL: https://avatars.githubusercontent.com
+      run: |
+        # Handle different actor types
+        if [[ "$TRIGGERING_ACTOR" == *"[bot]" ]]; then
+          # All bots (github-actions[bot], dependabot[bot], etc.)
+          BOT_NAME=${TRIGGERING_ACTOR%\[bot\]}
+          echo "actor_url=$SERVER_URL/apps/$BOT_NAME" >> $GITHUB_OUTPUT
+          echo "actor_avatar_url=$AVATARS_URL/$BOT_NAME?s=32" >> $GITHUB_OUTPUT
+        else
+          # Regular users
+          echo "actor_url=$SERVER_URL/$TRIGGERING_ACTOR" >> $GITHUB_OUTPUT
+          echo "actor_avatar_url=$AVATARS_URL/$TRIGGERING_ACTOR?s=32" >> $GITHUB_OUTPUT
+        fi
+
     - name: Send teams notification
       uses: skitionek/notify-microsoft-teams@11e40c38c3a629ae65a985b582eca4897b01e79e # v1.0.9
       env:
-        ACTOR_URL: ${{ github.server_url }}/${{ github.triggering_actor }}
+        ACTOR_URL: ${{ steps.compute-actor-urls.outputs.actor_url }}
+        ACTOR_AVATAR_URL: ${{ steps.compute-actor-urls.outputs.actor_avatar_url }}
         REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         SMALL_SHA: ${{ steps.compute-small-sha.outputs.result }}
         MESSAGE_OUTPUT: ${{ steps.compute-message.outputs.result }}
@@ -210,7 +231,7 @@ runs:
                             {
                               "type": "Image",
                               "style": "person",
-                              "url": "${{ env.ACTOR_URL }}.png?size=32",
+                              "url": "${{ env.ACTOR_AVATAR_URL }}",
                               "altText": "${{ github.triggering_actor }}",
                               "size": "small"
                             }
