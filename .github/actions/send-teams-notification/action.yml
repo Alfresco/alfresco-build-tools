@@ -39,6 +39,11 @@ inputs:
     required: false
     default: ''
 
+outputs:
+  message-id:
+    description: 'The ID of the sent Teams message for threading purposes'
+    value: ${{ steps.send-teams-notification.outputs.message-id }}
+
 runs:
   using: composite
   steps:
@@ -191,6 +196,7 @@ runs:
         fi
 
     - name: Send teams notification
+      id: send-teams-notification
       uses: atchertchian/notify-microsoft-teams@cb805ae50a14a72897af904279f5e0ca023a61a0 # testing
       env:
         ACTOR_URL: ${{ steps.compute-actor-urls.outputs.actor_url }}
