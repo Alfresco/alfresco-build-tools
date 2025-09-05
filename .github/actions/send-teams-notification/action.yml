@@ -34,6 +34,10 @@ inputs:
     description: 'Comma-separated list of Teams tags to mention in format "tag name|tag id" (e.g.: "Security Champions|base64IdIncluding==")'
     required: false
     default: ''
+  reply-to:
+    description: 'Message ID to reply to for threading notifications'
+    required: false
+    default: ''
 
 runs:
   using: composite
@@ -187,7 +191,7 @@ runs:
         fi
 
     - name: Send teams notification
-      uses: skitionek/notify-microsoft-teams@11e40c38c3a629ae65a985b582eca4897b01e79e # v1.0.9
+      uses: atchertchian/notify-microsoft-teams@cb805ae50a14a72897af904279f5e0ca023a61a0 # testing
       env:
         ACTOR_URL: ${{ steps.compute-actor-urls.outputs.actor_url }}
         ACTOR_AVATAR_URL: ${{ steps.compute-actor-urls.outputs.actor_avatar_url }}
@@ -208,6 +212,7 @@ runs:
         raw: >-
           {
             "type": "message",
+            "replyToId": "${{ inputs.reply-to }}",
             "attachments": [
               {
                 "contentType": "application/vnd.microsoft.card.adaptive",

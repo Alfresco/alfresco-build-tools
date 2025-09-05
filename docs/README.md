@@ -1731,7 +1731,7 @@ Teams notifications can include mentions of both users and Teams tags. The actio
 
 The mentionable entities defined via the aforementioned properties **need** to be referenced via the `<at>name</at>` syntax in the message body.
 
-Sample usage with mentions:
+Sample usage:
 
 ```yml
       uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@ref
@@ -1763,6 +1763,29 @@ To get the necessary data for mentions:
   6. Tag IDs are shown as base-64 encoded strings in the "id" property
 
 ![PowerAutomate Get Tag IDs Flow](./images/send-teams-get-tag-id.png)
+
+
+#### Threading
+
+Teams notifications support message threading to group related notifications together. Use the `reply-to` input parameter to specify the message ID of a previous notification to reply to:
+
+```yml
+- name: Send initial notification
+  id: initial-notification
+  uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@ref
+  with:
+    webhook-url: ${{ secrets.MSTEAMS_WEBHOOK }}
+    message: "Starting deployment process..."
+
+- name: Send follow-up notification
+  uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@ref
+  with:
+    webhook-url: ${{ secrets.MSTEAMS_WEBHOOK }}
+    reply-to: ${{ steps.initial-notification.outputs.message-id }}
+    message: "Deployment completed successfully! This message will be threaded with the initial notification."
+```
+
+The `reply-to` value should be the message ID returned by a previous Teams notification step. The action outputs a `message-id` that can be referenced by subsequent notifications to create threaded conversations.
 
 ### setup-checkov
 
