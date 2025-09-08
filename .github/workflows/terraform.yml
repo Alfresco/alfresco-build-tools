@@ -171,7 +171,7 @@ jobs:
         run: npm install @actions/core@1.11.0 @actions/http-client@2.2.3
 
       - name: Request token
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         if: ${{ inputs.create_oidc_token_file }}
         id: idtoken
         with:
@@ -185,7 +185,7 @@ jobs:
         run: echo "${{ steps.idtoken.outputs.id_token }}" >> idtoken.json
 
       - name: Assume AWS Role if AWS_ROLE_ARN var is set
-        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
+        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v5.0.0
         if: vars.AWS_ROLE_ARN != ''
         with:
           aws-region: ${{ env.AWS_DEFAULT_REGION}}
