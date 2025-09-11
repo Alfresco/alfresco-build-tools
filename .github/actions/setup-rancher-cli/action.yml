@@ -82,8 +82,6 @@ runs:
           echo "Error: Failed to activate context index $RANCHER_SYSTEM_CONTEXT_INDEX."
           exit 1
         fi
-
-        echo "Selected Rancher context index: $RANCHER_SYSTEM_CONTEXT_INDEX"
       env:
         KUBECONTEXT: ${{ inputs.context }}
     - shell: bash
