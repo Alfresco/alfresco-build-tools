@@ -40,7 +40,7 @@ runs:
         set -o pipefail
 
         if [[ -z "${RANCHER2_URL:-}" || -z "${RANCHER2_BEARER_TOKEN:-}" ]]; then
-        echo "Error: Missing Rancher URL or bearer token."
+          echo "Error: Missing Rancher URL or bearer token."
           exit 1
         fi
         if [[ -z "${KUBECONTEXT:-}" ]]; then
