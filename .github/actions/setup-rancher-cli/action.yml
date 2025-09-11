@@ -73,6 +73,21 @@ runs:
           printf '%s\n' "${MATCHES[@]}"
           exit 1
         fi
+
+        RANCHER_SYSTEM_CONTEXT_INDEX=$(awk '{print $1}' <<<"${MATCHES[0]}")
+
+        if [[ ! $RANCHER_SYSTEM_CONTEXT_INDEX =~ ^[0-9]+$ ]]; then
+          echo "Error: Extracted context index '${RANCHER_SYSTEM_CONTEXT_INDEX}' is not numeric."
+          exit 1
+        fi
+
+        # Select the context
+        if ! printf '%s\n' "$RANCHER_SYSTEM_CONTEXT_INDEX" | rancher login "$RANCHER2_URL" -t "$RANCHER2_BEARER_TOKEN" >/dev/null 2>&1; then
+          echo "Error: Failed to activate context index $RANCHER_SYSTEM_CONTEXT_INDEX."
+          exit 1
+        fi
+
+        echo "Selected Rancher context index: $RANCHER_SYSTEM_CONTEXT_INDEX"
       env:
         KUBECONTEXT: ${{ inputs.context }}
     - shell: bash
