@@ -43,10 +43,6 @@ runs:
           echo "Error: Missing Rancher URL or bearer token."
           exit 1
         fi
-        if [[ -z "${KUBECONTEXT:-}" ]]; then
-          echo "Error: KUBECONTEXT not provided."
-          exit 1
-        fi
 
         # Capture login output (suppress automatic exit on failure to inspect status)
         set +e
