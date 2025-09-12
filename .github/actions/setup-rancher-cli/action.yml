@@ -33,8 +33,6 @@ runs:
         echo $($TOOL_NAME --version)
       env:
         DEFAULT_RANCHER_CLI_VERSION: 2.12.1
-        RANCHER2_BEARER_TOKEN: ${{ inputs.access-key }}:${{ inputs.secret-key }}
-        RANCHER2_URL: ${{ inputs.url }}
     - shell: bash
       run: |
         set -o pipefail
@@ -76,6 +74,8 @@ runs:
         fi
       env:
         KUBECONTEXT: ${{ inputs.context }}
+        RANCHER2_BEARER_TOKEN: ${{ inputs.access-key }}:${{ inputs.secret-key }}
+        RANCHER2_URL: ${{ inputs.url }}
     - shell: bash
       run: |
         KUBECONTEXT="${{ inputs.context }}"
