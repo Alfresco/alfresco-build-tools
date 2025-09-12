@@ -33,16 +33,11 @@ runs:
         echo $($TOOL_NAME --version)
       env:
         DEFAULT_RANCHER_CLI_VERSION: 2.12.1
+        RANCHER2_BEARER_TOKEN: ${{ inputs.access-key }}:${{ inputs.secret-key }}
+        RANCHER2_URL: ${{ inputs.url }}
     - shell: bash
       run: |
-        RANCHER2_BEARER_TOKEN=${{ inputs.access-key }}:${{ inputs.secret-key }}
-        RANCHER2_URL=${{ inputs.url }}
         set -o pipefail
-
-        if [[ -z "${RANCHER2_URL:-}" || -z "${RANCHER2_BEARER_TOKEN:-}" ]]; then
-          echo "Error: Missing Rancher URL or bearer token."
-          exit 1
-        fi
 
         # Capture login output (suppress automatic exit on failure to inspect status)
         set +e
@@ -56,17 +51,14 @@ runs:
         fi
 
         # Find lines containing both the desired context and 'System'
-        mapfile -t MATCHES < <(printf '%s\n' "$LOGIN_OUTPUT" | grep -F "System" | grep -F "$KUBECONTEXT" || true)
+        mapfile -t MATCHES < <(printf '%s\n' "$LOGIN_OUTPUT" | grep -F "System" | grep -F " $KUBECONTEXT " || true)
         COUNT=${#MATCHES[@]}
 
         if (( COUNT == 0 )); then
           echo "Error: No matching context for '$KUBECONTEXT'."
-          echo "Available contexts:"
-          printf '%s\n' "$LOGIN_OUTPUT"
           exit 1
         elif (( COUNT > 1 )); then
           echo "Error: Multiple ($COUNT) contexts match '$KUBECONTEXT':"
-          printf '%s\n' "${MATCHES[@]}"
           exit 1
         fi
 
