@@ -85,7 +85,7 @@ runs:
             issue_number: context.issue.number,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: `Setting auto-merge on Dependabot PR after action from @${process.env.ACTOR}`,
+            body: `Setting auto-merge on PR after action from @${process.env.ACTOR}`,
           })
 
     - name: Enable auto-merge for Pull Request
