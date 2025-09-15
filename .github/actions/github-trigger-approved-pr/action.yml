@@ -49,6 +49,7 @@ runs:
     - name: Trigger PR validation
       if: steps.check.outputs.continue == 'true'
       env:
+        CLEAR_ON_APPROVAL: ${{ inputs.force-trigger }}
         MILESTONE: ${{ inputs.milestone-on-approval }}
         LABEL: ${{ inputs.label-on-approval }}
         GH_TOKEN: ${{ inputs.github-token }}
