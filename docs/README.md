@@ -930,11 +930,22 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-manage-dependabot-approval@ref
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-trigger-approved-pr@ref
         with:
           actor: dependabot[bot]
           milestone-on-approval: Dependabot
           github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+```
+
+To ensure milestone/label events are triggered even if they're already set, use the `force-trigger` option:
+
+```yaml
+- uses: Alfresco/alfresco-build-tools/.github/actions/github-trigger-approved-pr@ref
+  with:
+    actor: dependabot[bot]
+    milestone-on-approval: Dependabot
+    force-trigger: true
+    github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
 ```
 
 ### helm-build-chart
