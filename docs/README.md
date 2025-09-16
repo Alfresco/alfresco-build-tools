@@ -52,6 +52,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [get-commit-message](#get-commit-message)
     - [git-commit-changes](#git-commit-changes)
     - [git-latest-tag](#git-latest-tag)
+    - [github-actions-ensure-sha-pinned-actions](#github-actions-ensure-sha-pinned-actions)
     - [github-check-upcoming-runs](#github-check-upcoming-runs)
     - [github-deployment-create](#github-deployment-create)
     - [github-deployment-status-update](#github-deployment-status-update)
@@ -736,6 +737,68 @@ Gets the latest tag and commit sha for the given pattern. The result is returned
         with:
           pattern: 1.0.0-alpha*
 ```
+
+### github-actions-ensure-sha-pinned-actions
+
+Ensures all GitHub Actions in your workflows use SHA-pinned versions instead of tag references for enhanced supply chain security. This action converts tag references (e.g., `v1.0.0`) to SHA hashes while preserving semantic version comments.
+
+**Key Features:**
+
+- **SHA Pinning**: Automatically converts tag references to SHA hashes with version comments
+- **Allowlist Support**: Skip specific actions from conversion using flexible pattern matching
+- **First-party Exclusion**: Option to exclude actions from trusted organizations
+- **Dry Run Mode**: Preview changes without modifying files
+- **Discovery Mode**: Fast scanning without API calls
+
+**Basic Usage:**
+
+```yaml
+- name: Ensure SHA pinned actions
+  uses: Alfresco/alfresco-build-tools/.github/actions/github-actions-ensure-sha-pinned-actions@ref
+```
+
+**With Allowlist:**
+
+```yaml
+- name: Ensure SHA pinned actions
+  uses: Alfresco/alfresco-build-tools/.github/actions/github-actions-ensure-sha-pinned-actions@ref
+  with:
+    allowlist: |
+      actions/*
+      microsoft/*
+      Alfresco/alfresco-build-tools/*
+```
+
+**Advanced Configuration:**
+
+```yaml
+- name: Ensure SHA pinned actions
+  uses: Alfresco/alfresco-build-tools/.github/actions/github-actions-ensure-sha-pinned-actions@ref
+  with:
+    allowlist: |
+      actions/checkout@*
+      actions/setup-*
+    exclude-first-party: 'true'
+    dry-run: 'true'
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+**Example Conversion:**
+
+```yaml
+# Before
+uses: actions/checkout@v4
+
+# After
+uses: actions/checkout@abc123...def789 # v4.1.7
+```
+
+**Security Benefits:**
+
+- Prevents malicious updates to existing tags
+- Ensures reproducible builds with exact action versions
+- Maintains clear audit trail of action versions
+- Preserves human-readable version information in comments
 
 ### github-check-upcoming-runs
 
