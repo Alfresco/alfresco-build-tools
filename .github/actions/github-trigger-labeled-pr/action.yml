@@ -36,13 +36,12 @@ runs:
         # Check if the added label is in the list of trigger labels
         if echo "$LABELS" | jq -e --arg label "$ADDED_LABEL" 'any(. == $label)' > /dev/null; then
           echo "::notice::Label '$ADDED_LABEL' matches trigger labels, proceeding with milestone action"
-        fi
-
-        if [[ -n "$MILESTONE" ]]; then
-          if [[ "$CLEAR_ON_APPROVAL" == 'true' ]]; then
-            echo "::notice::Clearing milestone on PR: $PR_URL"
-            gh pr edit -R $GITHUB_REPOSITORY $PR_NUMBER --milestone ""
+          if [[ -n "$MILESTONE" ]]; then
+            if [[ "$CLEAR_ON_APPROVAL" == 'true' ]]; then
+              echo "::notice::Clearing milestone on PR: $PR_URL"
+              gh pr edit -R $GITHUB_REPOSITORY $PR_NUMBER --milestone ""
+            fi
+            echo "::notice::Milestone PR to trigger PR validation: $PR_URL"
+            gh pr edit -R $GITHUB_REPOSITORY $PR_NUMBER --milestone "$MILESTONE"
           fi
-          echo "::notice::Milestone PR to trigger PR validation: $PR_URL"
-          gh pr edit -R $GITHUB_REPOSITORY $PR_NUMBER --milestone "$MILESTONE"
         fi
