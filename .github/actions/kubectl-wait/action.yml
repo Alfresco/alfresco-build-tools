@@ -11,7 +11,7 @@ inputs:
     required: false
     default: 10m
   wait-for-what:
-    description: What to wait for (create, jsonpath, condition)
+    description: What to wait for (jsonpath, condition)
     required: false
     default: condition
   wait-condition:
