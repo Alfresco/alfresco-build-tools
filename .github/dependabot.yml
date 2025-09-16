@@ -194,6 +194,14 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
+    directory: "/.github/actions/github-actions-ensure-sha-pinned-actions"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
     directory: "/.github/actions/github-check-upcoming-runs"
     schedule:
       interval: "weekly"
@@ -267,6 +275,14 @@ updates:
           - "*"
   - package-ecosystem: "github-actions"
     directory: "/.github/actions/github-trigger-approved-pr"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/github-trigger-labeled-pr"
     schedule:
       interval: "weekly"
     groups:

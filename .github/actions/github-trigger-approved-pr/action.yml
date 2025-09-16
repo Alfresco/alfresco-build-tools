@@ -2,14 +2,15 @@ name: Trigger events on PR Approval
 description: >
   Trigger events to automate the validation and auto-merge of some pull requests on approval.
 inputs:
-  creator:
-    description: 'Check if the pull request was created by this actor'
-    required: false
   github-token:
     description: >
       Token used to enable auto-merge, comment on the PR, and change PR milestone/label.
-      This token CANNOT be the default `GITHUB_TOKEN`, otherwise the merge of the PR will not trigger a build.
+      This token CANNOT be the default `GITHUB_TOKEN` if auto-merge is set, otherwise the merge of the PR will not trigger a build.
     required: true
+    default: ${{ github.token }}
+  creator:
+    description: 'Check if the pull request was created by this actor'
+    required: false
   merge-option:
     description: 'Merge option'
     required: false
@@ -20,10 +21,6 @@ inputs:
   label-on-approval:
     description: 'Label to set on the PR when it is approved. This should trigger validation of the PR.'
     required: false
-  force-trigger:
-    description: 'If true, clear any existing milestone or label on the PR when it is approved, to make sure associated event is sent.'
-    required: false
-    default: 'false'
   auto-merge-on-approval:
     description: 'If true, auto-merge will be enabled for the PR when it is approved.'
     required: false
@@ -49,7 +46,6 @@ runs:
     - name: Trigger PR validation
       if: steps.check.outputs.continue == 'true'
       env:
-        CLEAR_ON_APPROVAL: ${{ inputs.force-trigger }}
         MILESTONE: ${{ inputs.milestone-on-approval }}
         LABEL: ${{ inputs.label-on-approval }}
         GH_TOKEN: ${{ inputs.github-token }}
@@ -58,18 +54,10 @@ runs:
       shell: bash
       run: |
         if [[ -n "$MILESTONE" ]]; then
-          if [[ "$CLEAR_ON_APPROVAL" == 'true' ]]; then
-            echo "::notice::Clearing milestone on PR: $PR_URL"
-            gh pr edit -R $GITHUB_REPOSITORY $PR_NUMBER --milestone ""
-          fi
           echo "::notice::Milestone PR to trigger PR validation: $PR_URL"
           gh pr edit -R $GITHUB_REPOSITORY $PR_NUMBER --milestone "$MILESTONE"
         fi
         if [[ -n "$LABEL" ]]; then
-          if [[ "$CLEAR_ON_APPROVAL" == 'true' ]]; then
-            echo "::notice::Clearing labels on PR: $PR_URL"
-            gh pr edit -R $GITHUB_REPOSITORY $PR_NUMBER --remove-label "$LABEL"
-          fi
           echo "::notice::Label PR to trigger PR validation: $PR_URL"
           gh pr edit -R $GITHUB_REPOSITORY $PR_NUMBER --add-label "$LABEL"
         fi

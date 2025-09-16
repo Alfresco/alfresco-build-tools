@@ -1,0 +1,48 @@
+name: Trigger events on PR Labeled
+description: >
+  Trigger events to automate the validation of some pull requests on labeling.
+inputs:
+  github-token:
+    description: >
+      Token used to change PR milestone/label.
+    required: true
+    default: ${{ github.token }}
+  labels:
+    description: 'Labels that will trigger the event, in JSON array format (e.g. ["label1", "label2"])'
+    required: true
+  milestone:
+    description: 'Milestone to set on the PR when labeled with one of the specified labels. This should trigger validation of the PR.'
+    required: false
+  force-trigger:
+    description: 'If true, clear any existing milestone on the PR when it is labeled, to make sure associated event is sent.'
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+
+    - name: Trigger PR validation
+      env:
+        CLEAR_ON_APPROVAL: ${{ inputs.force-trigger }}
+        ADDED_LABEL: ${{ github.event.label.name }}
+        LABELS: ${{ inputs.labels }}
+        MILESTONE: ${{ inputs.milestone }}
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        PR_URL: ${{ github.event.pull_request.html_url }}
+      shell: bash
+      run: |
+        # Check if the added label is in the list of trigger labels
+        if echo "$LABELS" | jq -e --arg label "$ADDED_LABEL" 'any(. == $label)' > /dev/null; then
+          echo "::notice::Label '$ADDED_LABEL' matches trigger labels, proceeding with milestone action"
+        fi
+
+        if [[ -n "$MILESTONE" ]]; then
+          if [[ "$CLEAR_ON_APPROVAL" == 'true' ]]; then
+            echo "::notice::Clearing milestone on PR: $PR_URL"
+            gh pr edit -R $GITHUB_REPOSITORY $PR_NUMBER --milestone ""
+          fi
+          echo "::notice::Milestone PR to trigger PR validation: $PR_URL"
+          gh pr edit -R $GITHUB_REPOSITORY $PR_NUMBER --milestone "$MILESTONE"
+        fi

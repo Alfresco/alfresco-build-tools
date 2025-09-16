@@ -61,6 +61,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [github-pr-check-metadata](#github-pr-check-metadata)
     - [github-require-secrets](#github-require-secrets)
     - [github-trigger-approved-pr](#github-trigger-approved-pr)
+    - [github-trigger-labeled-pr](#github-trigger-labeled-pr)
     - [helm-build-chart](#helm-build-chart)
     - [helm-integration-tests](#helm-integration-tests)
     - [helm-package-chart](#helm-package-chart)
@@ -933,19 +934,34 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/github-trigger-approved-pr@ref
         with:
           actor: dependabot[bot]
-          milestone-on-approval: Dependabot
+          milestone-on-approval: Validating
           github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
 ```
 
-To ensure milestone/label events are triggered even if they're already set, use the `force-trigger` option:
+### github-trigger-labeled-pr
+
+This action helps triggering events on a Pull Request when it is labeled with one of the specified labels.
+
+The corresponding workflow needs to be triggered by corresponding milestoned event.
+This approach allows to avoid re-triggering validations when any label is added to the PR, as the list of labels can be specified.
 
 ```yaml
-- uses: Alfresco/alfresco-build-tools/.github/actions/github-trigger-approved-pr@ref
-  with:
-    actor: dependabot[bot]
-    milestone-on-approval: Dependabot
-    force-trigger: true
-    github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+on:
+  pull_request:
+    types:
+      - labeled
+
+env:
+  TRIGGER_LABELS: '["CI", "preview", "skip-tests"]'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-trigger-labeled-pr@ref
+        with:
+          labels: ${{ env.TRIGGER_LABELS }}
+          milestone: Validating
 ```
 
 ### helm-build-chart
