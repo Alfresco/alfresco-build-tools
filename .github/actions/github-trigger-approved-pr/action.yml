@@ -2,7 +2,7 @@ name: Trigger events on PR Approval
 description: >
   Trigger events to automate the validation and auto-merge of some pull requests on approval.
 inputs:
-  actor:
+  creator:
     description: 'Check if the pull request was created by this actor'
     required: false
   github-token:
@@ -32,15 +32,15 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Check if the PR is an approved PR with input actor as creator
+    - name: Check if the PR is an approved PR and if creator matches
       id: check
       env:
         REVIEW_STATE: ${{ github.event.review.state }}
         PR_LOGIN: ${{ github.event.pull_request.user.login }}
-        ACTOR: ${{ inputs.actor }}
+        CREATOR: ${{ inputs.creator }}
       shell: bash
       run: |
-        if [[ "$REVIEW_STATE" == 'approved' && ( -z "$ACTOR" || "$PR_LOGIN" == "$ACTOR" ) ]]; then
+        if [[ "$REVIEW_STATE" == 'approved' && ( -z "$CREATOR" || "$PR_LOGIN" == "$CREATOR" ) ]]; then
           echo "continue=true" >> $GITHUB_OUTPUT
         else
           echo "continue=false" >> $GITHUB_OUTPUT
