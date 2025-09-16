@@ -1105,7 +1105,8 @@ Wait for k8s resources (usually pods) to be ready.
       uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@ref
       # with:
         # wait-timeout: 10m
-        # wait-condition: condition=Ready
+        # wait-for-what: condition
+        # wait-condition: Ready
         # wait-resource: pods
         # namespace: default
 ```
