@@ -1111,6 +1111,32 @@ Wait for k8s resources (usually pods) to be ready.
         # namespace: default
 ```
 
+If your deployment relies on a Job that must finish before continuing, you’ll
+need a different approach. This is because the Pod created by the Job briefly
+reports a `Ready` status, which can cause kubectl wait to miss it. A more reliable
+method is shown in the example below:
+
+```yaml
+      - name: Wait for deployments to be ready
+        uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@ref
+        with:
+          wait-resource: "deployments"
+          wait-condition: "Available"
+
+      - name: Wait for statefulsets to be ready
+        uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@ref
+        with:
+          wait-resource: "sts"
+          wait-for-what: "jsonpath"
+          wait-condition: "'{.status.readyReplicas}'=1"
+
+      - name: Wait for jobs to be completed
+        uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@ref
+        with:
+          wait-resource: "jobs"
+          wait-condition: "complete"
+```
+
 ### load-release-descriptor
 
 Used to release Activiti Projects. Load release information from release.yaml file.
