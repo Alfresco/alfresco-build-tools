@@ -1113,7 +1113,7 @@ Wait for k8s resources (usually pods) to be ready.
 
 If your deployment relies on a Job that must finish before continuing, you’ll
 need a different approach. This is because the Pod created by the Job briefly
-reports a `Ready` status, which can cause kubectl wait to miss it. A more reliable
+reports a `Ready` status, which can cause `kubectl wait` to miss it. A more reliable
 method is shown in the example below:
 
 ```yaml
