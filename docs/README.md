@@ -1120,21 +1120,21 @@ method is shown in the example below:
       - name: Wait for deployments to be ready
         uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@ref
         with:
-          wait-resource: "deployments"
-          wait-condition: "Available"
+          wait-resource: deployments
+          wait-condition: Available
 
       - name: Wait for statefulsets to be ready
         uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@ref
         with:
-          wait-resource: "sts"
-          wait-for-what: "jsonpath"
-          wait-condition: "'{.status.readyReplicas}'=1"
+          wait-resource: sts
+          wait-for-what: jsonpath
+          wait-condition: '{.status.readyReplicas}'=1
 
       - name: Wait for jobs to be completed
         uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@ref
         with:
-          wait-resource: "jobs"
-          wait-condition: "complete"
+          wait-resource: jobs
+          wait-condition: complete
 ```
 
 ### load-release-descriptor
