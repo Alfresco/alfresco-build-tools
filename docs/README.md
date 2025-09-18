@@ -1128,7 +1128,7 @@ method is shown in the example below:
         with:
           wait-resource: sts
           wait-for-what: jsonpath
-          wait-condition: '{.status.readyReplicas}'=1
+          wait-condition: "'{.status.readyReplicas}'=1"
 
       - name: Wait for jobs to be completed
         uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@ref
