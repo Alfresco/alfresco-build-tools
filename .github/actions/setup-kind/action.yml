@@ -19,6 +19,7 @@ inputs:
       the Nginx ingress ref to get the ingress controller deployment manifest from
       (https://github.com/kubernetes/ingress-nginx). Consider main (the default) a floating tag which can result in
       deploying any version (including betas) and non repeatable builds.
+      Set to "skip" or "none" to NOT install ingress-nginx.
     default: main
   metrics:
     description: Whether Metrics Server should be installed upon cluster creation
@@ -54,6 +55,8 @@ runs:
 
     - name: Install ingress-nginx
       shell: bash
+      if: >-
+        !contains(fromJson('["skip", "none"]'), inputs.ingress-nginx-ref)
       env:
         NGINX_MANIFEST_URL: >-
           https://raw.githubusercontent.com/kubernetes/ingress-nginx/${{ inputs.ingress-nginx-ref }}/deploy/static/provider/kind/deploy.yaml
