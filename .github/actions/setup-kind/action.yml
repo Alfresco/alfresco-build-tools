@@ -33,9 +33,20 @@ inputs:
       The timeout for waiting for the ingress controller to become ready.
       Default is 90 seconds, which should be enough for most cases.
     default: 90s
+  kind-config-override:
+    description: |
+      Optional YAML string to override the default kind configuration passed to
+      kind during cluster creation.
+      See https://kind.sigs.k8s.io/docs/user/configuration/ for details.
+    default: ""
 runs:
   using: "composite"
   steps:
+    - name: Override kind config
+      if: inputs.kind-config-override != ''
+      run: |
+        echo "${{ inputs.kind-config-override }}" > ${{ github.action_path }}/kind.yml
+      shell: bash
     - name: Create cluster
       uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
       with:
@@ -65,6 +76,8 @@ runs:
 
     - name: Wait for ingress ready
       shell: bash
+      if: >-
+        !contains(fromJson('["skip", "none"]'), inputs.ingress-nginx-ref)
       run: |
         kubectl wait --namespace ingress-nginx \
           --for=condition=ready pod \
