@@ -2,10 +2,10 @@ name: Require Secrets for Github Actions
 description: Fails if secrets source is not valid for the workflow run
 
 inputs:
-  dependabot-error-message:
-    description: 'Error message to show when secrets source is invalid'
+  error-message:
+    description: 'Error message to show when secrets source is invalid because of Dependabot or forks'
     required: false
-    default: 'Access to secrets forbidden to Dependabot: follow your repository process for PR validation'
+    default: 'Access to secrets forbidden: follow your repository process for PR validation'
 
 runs:
   using: composite
@@ -16,7 +16,7 @@ runs:
         ERROR_MESSAGE: ${{ inputs.dependabot-error-message }}
       shell: bash
       run: |
-        if [[ $SECRET_SOURCE == 'Dependabot' ]]
+        if [[ $SECRET_SOURCE == 'Dependabot' || $SECRET_SOURCE == 'None' ]]
         then
           echo "::error::$ERROR_MESSAGE" && exit 1
         fi
