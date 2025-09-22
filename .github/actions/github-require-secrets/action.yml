@@ -1,17 +1,24 @@
 name: Require Secrets for Github Actions
 description: Fails if secrets source is not valid for the workflow run
 
+inputs:
+  dependabot-error-message:
+    description: 'Error message to show when secrets source is invalid'
+    required: false
+    default: 'Access to secrets forbidden to Dependabot: follow your repository process for PR validation'
+
 runs:
   using: composite
   steps:
     - name: Check secret source
       env:
         SECRET_SOURCE: ${{ github.secret_source }}
+        ERROR_MESSAGE: ${{ inputs.dependabot-error-message }}
       shell: bash
       run: |
         if [[ $SECRET_SOURCE == 'Dependabot' ]]
         then
-          echo "::error::Access to secrets forbidden to Dependabot: follow your repository process for PR validation" && exit 1
+          echo "::error::$ERROR_MESSAGE" && exit 1
         fi
         if [[ $SECRET_SOURCE != 'Actions' && $SECRET_SOURCE != 'Codespaces' ]]
         then

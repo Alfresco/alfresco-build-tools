@@ -906,6 +906,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@ref
+        with:
+          dependabot-error-message: "This PR requires additional validation, please set the milestone to 'Validating' or ask a reviewer to approve it."
 ```
 
 ### github-trigger-approved-pr
