@@ -22,5 +22,5 @@ runs:
         fi
         if [[ $SECRET_SOURCE != 'Actions' && $SECRET_SOURCE != 'Codespaces' ]]
         then
-          echo "::error::Unexpected secrets source \"$SECRET_SOURCE\"": failing build" && exit 1
+          echo "::error::Unexpected secrets source '$SECRET_SOURCE': failing build" && exit 1
         fi
