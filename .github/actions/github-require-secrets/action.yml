@@ -13,7 +13,7 @@ runs:
     - name: Check secret source
       env:
         SECRET_SOURCE: ${{ github.secret_source }}
-        ERROR_MESSAGE: ${{ inputs.dependabot-error-message }}
+        ERROR_MESSAGE: ${{ inputs.error-message }}
       shell: bash
       run: |
         if [[ $SECRET_SOURCE == 'Dependabot' || $SECRET_SOURCE == 'None' ]]
