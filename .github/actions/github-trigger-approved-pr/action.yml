@@ -80,6 +80,6 @@ runs:
       if: ${{ steps.check.outputs.continue == 'true' && inputs.auto-merge-on-approval == 'true' }}
       env:
         PR_URL: ${{ github.event.pull_request.html_url }}
-        GITHUB_TOKEN: ${{ inputs.github-token }}
+        GH_TOKEN: ${{ inputs.github-token }}
       shell: bash
       run: gh pr merge --auto ${{ inputs.merge-option }} "$PR_URL"
