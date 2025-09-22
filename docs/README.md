@@ -1910,7 +1910,21 @@ Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
           kind-node-image: kindest/node:v1.27.3@sha256:3966ac761ae0136263ffdb6cfd4db23ef8a83cba8a463690e98317add2c9ba72
           # Optional but ensure repeatable builds (defaults to latest nginx ingress version otherwise).
           # see https://github.com/kubernetes/ingress-nginx
+          # can be skip using "skip" or "none"
           ingress-nginx-ref: controller-v1.8.2
+          # Use your own config file provided as YAML string.
+          kind-config-override: |
+            kind: Cluster
+            apiVersion: kind.x-k8s.io/v1alpha4
+            nodes:
+              - role: control-plane
+                extraPortMappings:
+                  - containerPort: 80
+                    hostPort: 8080
+                    protocol: TCP
+                  - containerPort: 443
+                    hostPort: 8443
+                    protocol: TCP
           # Enable deploying Metrics server with KinD
           metrics: true
           # Enable creating docker registry secret using given name
