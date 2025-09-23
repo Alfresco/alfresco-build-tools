@@ -38,19 +38,14 @@ inputs:
       Optional YAML string to override the default kind configuration passed to
       kind during cluster creation.
       See https://kind.sigs.k8s.io/docs/user/configuration/ for details.
-    default: ""
+    default: ${{ github.action_path }}/kind.yml
 runs:
   using: "composite"
   steps:
-    - name: Override kind config
-      if: inputs.kind-config-override != ''
-      run: |
-        echo "${{ inputs.kind-config-override }}" > ${{ github.action_path }}/kind.yml
-      shell: bash
     - name: Create cluster
       uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
       with:
-        config: ${{ github.action_path }}/kind.yml
+        config: ${{ inputs.kind-config-override }}
         version: ${{ inputs.kind-version }}
         node_image: ${{ inputs.kind-node-image }}
         wait: ${{ inputs.kind-wait }}
