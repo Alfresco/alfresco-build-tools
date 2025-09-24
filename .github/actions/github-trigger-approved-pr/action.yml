@@ -9,7 +9,9 @@ inputs:
     required: true
     default: ${{ github.token }}
   creator:
-    description: 'Check if the pull request was created by this actor'
+    description: >
+      Check if the pull request was created by this actor.
+      If this field is empty or not provided, the creator check is skipped and the action will proceed for any PR approval.
     required: false
   merge-option:
     description: 'Merge option'
