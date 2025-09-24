@@ -49,7 +49,7 @@ runs:
         fi
 
         # Find lines containing both the desired context and 'System'
-        mapfile -t MATCHES < <(printf '%s\n' "$LOGIN_OUTPUT" | grep -F "System" | grep -F " $KUBECONTEXT " || true)
+        mapfile -t MATCHES < <(printf '%s\n' "$LOGIN_OUTPUT" | grep -F "System" | grep -F "$KUBECONTEXT" || true)
         COUNT=${#MATCHES[@]}
 
         if (( COUNT == 0 )); then
