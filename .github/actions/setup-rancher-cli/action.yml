@@ -57,7 +57,7 @@ runs:
           # Cluster name format - match with surrounding spaces to avoid partial matches
           SEARCH_PATTERN=" $KUBECONTEXT "
         fi
-        
+
         mapfile -t MATCHES < <(printf '%s\n' "$LOGIN_OUTPUT" | grep -F "System" | grep -F "$SEARCH_PATTERN" || true)
         COUNT=${#MATCHES[@]}
 
