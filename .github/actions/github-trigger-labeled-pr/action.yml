@@ -6,7 +6,7 @@ inputs:
     description: >
       Token used to change PR milestone/label.
     description: >
-      This token CANNOT be the default `GITHUB_TOKEN` if auto-merge if labeled and milestoned events are expected to trigger a new build.
+      This token CANNOT be the default `GITHUB_TOKEN` if milestoned event is expected to trigger a new build.
     required: true
     default: ${{ github.token }}
   labels:
