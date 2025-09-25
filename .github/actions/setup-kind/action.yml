@@ -33,21 +33,18 @@ inputs:
       The timeout for waiting for the ingress controller to become ready.
       Default is 90 seconds, which should be enough for most cases.
     default: 90s
-  kind-config-override:
+  kind-config-path:
     description: |
-      Optional YAML string to override the default kind configuration passed to
-      kind during cluster creation.
-      See https://kind.sigs.k8s.io/docs/user/configuration/ for details.
-    default: ""
+      Path to a custom kind configuration file. If not provided, the action will use the default configuration
+      located at `./kind.yml` relative to the action.yml file.
+    required: false
 runs:
   using: "composite"
   steps:
     - name: Create cluster
-      env:
-        KIND_CFG: ${{ inputs.kind-config-override == '' && format('{0}/kind.yml', github.action_path) || inputs.kind-config-override }}
       uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
       with:
-        config: ${{ env.KIND_CFG }}
+        config: ${{ inputs.kind-config-path == '' && format('{0}/kind.yml', github.action_path) || inputs.kind-config-path }}
         version: ${{ inputs.kind-version }}
         node_image: ${{ inputs.kind-node-image }}
         wait: ${{ inputs.kind-wait }}
