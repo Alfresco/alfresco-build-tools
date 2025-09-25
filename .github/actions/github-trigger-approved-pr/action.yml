@@ -6,6 +6,7 @@ inputs:
     description: >
       Token used to enable auto-merge, comment on the PR, and change PR milestone/label.
       This token CANNOT be the default `GITHUB_TOKEN` if auto-merge is set, otherwise the merge of the PR will not trigger a build.
+      Or similarly, if labeled and milestoned events are expected to trigger a new build.
     required: true
     default: ${{ github.token }}
   creator:
@@ -13,10 +14,6 @@ inputs:
       Check if the pull request was created by this actor.
       If this field is empty or not provided, the creator check is skipped and the action will proceed for any PR approval.
     required: false
-  merge-option:
-    description: 'Merge option'
-    required: false
-    default: '--squash'
   milestone-on-approval:
     description: 'Milestone to set on the PR when it is approved. This should trigger validation of the PR.'
     required: false
@@ -27,6 +24,10 @@ inputs:
     description: 'If true, auto-merge will be enabled for the PR when it is approved.'
     required: false
     default: 'true'
+  merge-option:
+    description: 'Merge option'
+    required: false
+    default: '--squash'
 
 runs:
   using: composite

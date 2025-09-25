@@ -935,9 +935,9 @@ jobs:
     steps:
       - uses: Alfresco/alfresco-build-tools/.github/actions/github-trigger-approved-pr@ref
         with:
-          actor: dependabot[bot]
-          milestone-on-approval: Validating
           github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          creator: dependabot[bot]
+          milestone-on-approval: Validating
 ```
 
 ### github-trigger-labeled-pr
@@ -962,6 +962,7 @@ jobs:
     steps:
       - uses: Alfresco/alfresco-build-tools/.github/actions/github-trigger-labeled-pr@ref
         with:
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           labels: ${{ env.TRIGGER_LABELS }}
           milestone: Validating
 ```
