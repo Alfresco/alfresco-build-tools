@@ -49,7 +49,16 @@ runs:
         fi
 
         # Find lines containing both the desired context and 'System'
-        mapfile -t MATCHES < <(printf '%s\n' "$LOGIN_OUTPUT" | grep -F "System" | grep -F " $KUBECONTEXT " || true)
+        # Set search pattern based on context format
+        if [[ $KUBECONTEXT =~ ^c-[a-z0-9]+$ ]]; then
+          # Context ID format - match exact ID followed by colon
+          SEARCH_PATTERN="$KUBECONTEXT:"
+        else
+          # Cluster name format - match with surrounding spaces to avoid partial matches
+          SEARCH_PATTERN=" $KUBECONTEXT "
+        fi
+
+        mapfile -t MATCHES < <(printf '%s\n' "$LOGIN_OUTPUT" | grep -F "System" | grep -F "$SEARCH_PATTERN" || true)
         COUNT=${#MATCHES[@]}
 
         if (( COUNT == 0 )); then
