@@ -1900,7 +1900,7 @@ Allows the installation of a generic binary from GitHub Releases and add it to t
 See [setup-helm-docs](../.github/actions/setup-helm-docs/action.yml) for a usage example.
 
 ```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v8.35.2
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v8.36.0
       with:
         repo: org/repo-name
         version: '1.2.3'
@@ -1979,7 +1979,10 @@ Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
           kind-node-image: kindest/node:v1.27.3@sha256:3966ac761ae0136263ffdb6cfd4db23ef8a83cba8a463690e98317add2c9ba72
           # Optional but ensure repeatable builds (defaults to latest nginx ingress version otherwise).
           # see https://github.com/kubernetes/ingress-nginx
+          # can be skipped using "skip" or "none"
           ingress-nginx-ref: controller-v1.8.2
+          # Use your own config file provided as YAML string.
+          kind-config-path: /path/to/file.yml
           # Enable deploying Metrics server with KinD
           metrics: true
           # Enable creating docker registry secret using given name

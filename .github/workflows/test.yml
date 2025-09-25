@@ -99,6 +99,10 @@ jobs:
             exit 1
           fi
 
+      - uses: ./.github/actions/setup-checkov
+      - uses: ./.github/actions/setup-fluxcli
+      - uses: ./.github/actions/setup-kind
+
       - name: Preserve available disk size before cleanup
         id: free-hosted-runner-disk-space
         run: echo "total_size_before=$(df --total --output=avail | tail -1)" >> "$GITHUB_OUTPUT"
@@ -117,5 +121,3 @@ jobs:
           url_template: 'v${VERSION}/${NAME}_${OS}_${ARCH}.tar.gz'
           test_args: 'version'
           x86_64_arch: 'x86_64'
-      - uses: ./.github/actions/setup-checkov
-      - uses: ./.github/actions/setup-fluxcli
