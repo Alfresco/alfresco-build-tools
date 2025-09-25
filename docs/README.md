@@ -581,15 +581,21 @@ To exempt specific branch names from *both* checks, the optional input parameter
 
 The inputs `jira-project-key`, `valid-branch-regex` and `valid-pr-title-regex` are optional: if `valid-branch-regex` or `valid-pr-title-regex` are not provided, the action will consume `jira-project-key` to generate the default regex.
 
-**Default regex for Branch name**: `"^(revert-)|(improvement|fix|feature|test|tmp)\/($JIRA_KEY)-[0-9]+[_-]{1}[A-Za-z0-9._-]+$"`
+**Default regex for Branch name**: `"^(revert-)|(improvement|fix|feature|test|tmp)\/($JIRA_KEY)-[0-9]+[_-]{1}[A-Za-z0-9._-]+$|^copilot\/fix\/[A-Za-z0-9._-]+$"`
 
 If the branch name starts with `(revert-)` it will be considered valid.
+
+Branches starting with `copilot/fix/` are also valid and do not require a Jira key in the branch name. However, the PR title must still contain a valid Jira key.
 
 Examples:
 
 ✅ improvement/JKEY-12345-the-topic-of-the-branch
 
 ✅ revert-123-improvement/JKEY-12345-the-topic-of-the-branch
+
+✅ copilot/fix/bug-123
+
+✅ copilot/fix/issue-description
 
 ❌ dev-uname-jkey-12345
 
@@ -598,6 +604,8 @@ Examples:
 If the PR title starts with "Revert", it will be considered valid.
 
 If the PR title does not start with "Revert", it will be checked against `^($JIRA_KEY)-[0-9]+ [A-Z]{1}[A-Za-z].*$` regex.
+
+For branches starting with `copilot/fix/`, the PR title must contain the Jira key since the branch name does not include it.
 
 Examples:
 
