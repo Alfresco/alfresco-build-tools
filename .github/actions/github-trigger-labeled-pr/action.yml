@@ -5,7 +5,6 @@ inputs:
   github-token:
     description: >
       Token used to change PR milestone/label.
-    description: >
       This token CANNOT be the default `GITHUB_TOKEN` if milestoned event is expected to trigger a new build.
     required: true
     default: ${{ github.token }}
