@@ -265,14 +265,14 @@ runs:
         rm -fr ~/.m2/repository/com/alfresco
 
     - name: Save maven cache
-      uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+      uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       if: github.event_name == 'push' || env.IS_PREVIEW == 'true'
       with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
 
     - name: Save maven build cache on push
-      uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+      uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       if: env.MAVEN_BUILD_CACHE_ENABLED == 'true'
       with:
         path: ~/.m2/build-cache
