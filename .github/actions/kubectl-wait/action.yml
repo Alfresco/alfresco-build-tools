@@ -28,7 +28,7 @@ runs:
     - name: Set vars
       shell: bash
       run: |
-        NAMESPACE_PARAM="${{ inputs.namespace != '' && format('-n {0}', inputs.namespace) || '' }}" >> $GITHUB_ENV
+        echo "NAMESPACE_PARAM=${{ inputs.namespace != '' && format('-n {0}', inputs.namespace) || '' }}" >> $GITHUB_ENV
 
     - name: Watch resources
       shell: bash
