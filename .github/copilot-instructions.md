@@ -117,12 +117,6 @@ For installing tools and dependencies:
 - Support version pinning via inputs
 - Add tool to PATH
 
-### GitHub Integration Actions  
-For GitHub API interactions:
-- Pattern: `github-*` naming convention
-- Use `secrets.BOT_GITHUB_TOKEN` for authentication
-- Handle API rate limits gracefully
-- Provide clear error messages
 
 ### Build/Deploy Actions
 For CI/CD operations:
