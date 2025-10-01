@@ -3,19 +3,20 @@ name: "PR Review check"
 on:
   workflow_call:
     inputs:
-      github-token:
-        description: >
-          Token used to enable auto-merge, comment on the PR, and change PR milestone/label.
-          This token CANNOT be the default `GITHUB_TOKEN` if auto-merge is set, otherwise the merge of the PR will not trigger a build.
-          Or similarly, if labeled and milestoned events are expected to trigger a new build.
-        required: true
-        type: string
       trigger-labels:
         description: JSON object mapping the list of labels that should trigger the validation
         required: true
         type: string
       milestone-name:
         description: Milestone to set on the PR when validation is triggered
+        required: true
+        type: string
+    secrets:
+      BOT_GITHUB_TOKEN:
+        description: >
+          Token used to enable auto-merge, comment on the PR, and change PR milestone/label.
+          This token CANNOT be the default `GITHUB_TOKEN` if auto-merge is set, otherwise the merge of the PR will not trigger a build.
+          Or similarly, if labeled and milestoned events are expected to trigger a new build.
         required: true
         type: string
 
@@ -37,7 +38,7 @@ jobs:
         uses: Alfresco/alfresco-build-tools/.github/actions/github-trigger-approved-pr@c295ecd6ca6b9c473dcada1e0478cdeaba79d5ea # v9.0.0
         with:
           creator: ${{ env.DEPENDABOT_CREATOR }}
-          github-token: ${{ inputs.github-token }}
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           milestone-on-approval: ${{ inputs.milestone-name }}
           auto-merge-on-approval: true
 
@@ -45,7 +46,7 @@ jobs:
         if: github.event_name == 'pull_request' && github.event.action == 'labeled' && github.secret_source == 'Actions' && inputs.milestone-name != ''
         uses: Alfresco/alfresco-build-tools/.github/actions/github-trigger-labeled-pr@c295ecd6ca6b9c473dcada1e0478cdeaba79d5ea # v9.0.0
         with:
-          github-token: ${{ inputs.github-token }}
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           labels: ${{ inputs.trigger-labels }}
           milestone: ${{ inputs.milestone-name }}
           force-trigger: true
