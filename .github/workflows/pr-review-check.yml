@@ -17,8 +17,6 @@ on:
           Token used to enable auto-merge, comment on the PR, and change PR milestone/label.
           This token CANNOT be the default `GITHUB_TOKEN` if auto-merge is set, otherwise the merge of the PR will not trigger a build.
           Or similarly, if labeled and milestoned events are expected to trigger a new build.
-        required: true
-        type: string
 
 env:
   DEPENDABOT_CREATOR: 'dependabot[bot]'
