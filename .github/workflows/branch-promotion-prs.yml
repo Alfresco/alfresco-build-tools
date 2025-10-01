@@ -23,6 +23,14 @@ on:
         description: 'Create PRs as drafts'
         type: boolean
         default: true
+      reviewers:
+        description: 'A comma or newline-separated list of reviewers (GitHub usernames) to request'
+        type: string
+        required: false
+      team-reviewers:
+        description: 'A comma or newline-separated list of GitHub teams to request as reviewers'
+        type: string
+        required: false
     secrets:
       gh-token:
         description: 'GitHub token for creating PRs'
@@ -55,4 +63,6 @@ jobs:
           title: ${{ format(inputs.pr-title-template, matrix.branch) }}
           draft: ${{ inputs.draft-pr }}
           body: ${{ format(inputs.pr-body-template, matrix.branch, inputs.source-branch) }}
+          reviewers: ${{ inputs.reviewers }}
+          team-reviewers: ${{ inputs.team-reviewers }}
           token: ${{ secrets.gh-token }}

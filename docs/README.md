@@ -2188,8 +2188,10 @@ jobs:
       pr-title-template: 'Promote to {0} environment' # optional
       pr-body-template: 'This PR promotes the latest changes from {1} to the {0} environment.' # optional
       draft-pr: false
+      reviewers: 'user1,user2,user3' # optional - comma or newline-separated list of GitHub usernames
+      team-reviewers: 'team1,team2' # optional - comma or newline-separated list of GitHub teams
     secrets:
-      gh-token: ${{ secrets.GITHUB_TOKEN }}
+      gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
 ```
 
 ### helm-publish-new-package-version
