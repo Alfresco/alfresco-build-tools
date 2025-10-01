@@ -127,7 +127,8 @@ Here follows the list of GitHub Actions topics available in the current document
     - [validate-maven-versions](#validate-maven-versions)
     - [veracode](#veracode)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
-    - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
+    - [branch-promotion-prs](#branch-promotion-prs)
+    - [helm-publish-new-package-version](#helm-publish-new-package-version)
     - [terraform](#terraform)
   - [Cookbook](#cookbook)
     - [Conditional job/step depending on PR labels](#conditional-jobstep-depending-on-pr-labels)
@@ -2163,7 +2164,35 @@ This way, the agent-based scan results will be added in the latest promoted scan
 
 ## Reusable workflows provided by us
 
-### helm-publish-new-package-version.yml
+### branch-promotion-prs
+
+Automates the creation of pull requests to promote changes from a source branch to multiple target branches. This workflow is useful for promoting changes across different environments (e.g., from develop to staging and production branches).
+
+```yaml
+name: Promote to Environment Branches
+
+on:
+  push:
+    branches:
+      - 'develop'  # Source branch to monitor for changes
+
+permissions:
+  contents: write  # Required to create pull requests
+
+jobs:
+  promote:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/branch-promotion-prs.yml@ref
+    with:
+      source-branch: 'develop' # default branch to promote from
+      target-branches: '["staging", "production"]' # JSON array of branches to promote to
+      pr-title-template: 'Promote to {0} environment' # optional
+      pr-body-template: 'This PR promotes the latest changes from {1} to the {0} environment.' # optional
+      draft-pr: false
+    secrets:
+      gh-token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+### helm-publish-new-package-version
 
 Calculates the new alpha version, creates new git tag and publishes the new package to the helm chart repository
 

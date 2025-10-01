@@ -1,0 +1,58 @@
+name: Automated Branch Promotion PRs
+
+on:
+  workflow_call:
+    inputs:
+      source-branch:
+        description: 'Source branch to promote from'
+        type: string
+        default: 'develop'
+      target-branches:
+        description: 'JSON array of target branches to promote to'
+        type: string
+        required: true
+      pr-title-template:
+        description: 'Template for PR title (use {0} placeholder for branch)'
+        type: string
+        default: 'Update {0} env'
+      pr-body-template:
+        description: 'Template for PR body (use {0} for branch and {1} for source placeholders)'
+        type: string
+        default: 'This PR updates the {0} environment with the latest changes from the {1} branch.'
+      draft-pr:
+        description: 'Create PRs as drafts'
+        type: boolean
+        default: true
+    secrets:
+      gh-token:
+        description: 'GitHub token for creating PRs'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  promotion:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        branch: ${{ fromJson(inputs.target-branches) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        with:
+          ref: ${{ matrix.branch }}
+
+      - name: Reset promotion branch
+        run: |
+          git fetch origin ${{ inputs.source-branch }}
+          git reset --hard origin/${{ inputs.source-branch }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
+        with:
+          branch: ${{ inputs.source-branch }}
+          title: ${{ format(inputs.pr-title-template, matrix.branch) }}
+          draft: ${{ inputs.draft-pr }}
+          body: ${{ format(inputs.pr-body-template, matrix.branch, inputs.source-branch) }}
+          token: ${{ secrets.gh-token }}
