@@ -18,14 +18,6 @@ updates:
     schedule:
       interval: "monthly"
   - package-ecosystem: "github-actions"
-    directory: "/.github/actions/automate-dependabot"
-    schedule:
-      interval: "weekly"
-    groups:
-      catch-all:
-        patterns:
-          - "*"
-  - package-ecosystem: "github-actions"
     directory: "/.github/actions/automate-propagation"
     schedule:
       interval: "weekly"
@@ -259,6 +251,30 @@ updates:
           - "*"
   - package-ecosystem: "github-actions"
     directory: "/.github/actions/github-pr-check-metadata"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/github-require-secrets"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/github-trigger-approved-pr"
+    schedule:
+      interval: "weekly"
+    groups:
+      catch-all:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/github-trigger-labeled-pr"
     schedule:
       interval: "weekly"
     groups:

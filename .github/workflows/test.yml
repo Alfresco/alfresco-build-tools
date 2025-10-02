@@ -20,7 +20,7 @@ jobs:
       - name: pre-commit checks
         uses: ./.github/actions/pre-commit
       - name: Ensure SHA pinned actions
-        uses: zgosalvez/github-actions-ensure-sha-pinned-actions@fc87bb5b5a97953d987372e74478de634726b3e5 # v3.0.25
+        uses: zgosalvez/github-actions-ensure-sha-pinned-actions@9e9574ef04ea69da568d6249bd69539ccc704e74 # v4.0.0
         with:
           allowlist: |
             Alfresco/alfresco-build-tools/
@@ -99,6 +99,10 @@ jobs:
             exit 1
           fi
 
+      - uses: ./.github/actions/setup-checkov
+      - uses: ./.github/actions/setup-fluxcli
+      - uses: ./.github/actions/setup-kind
+
       - name: Preserve available disk size before cleanup
         id: free-hosted-runner-disk-space
         run: echo "total_size_before=$(df --total --output=avail | tail -1)" >> "$GITHUB_OUTPUT"
@@ -117,5 +121,3 @@ jobs:
           url_template: 'v${VERSION}/${NAME}_${OS}_${ARCH}.tar.gz'
           test_args: 'version'
           x86_64_arch: 'x86_64'
-      - uses: ./.github/actions/setup-checkov
-      - uses: ./.github/actions/setup-fluxcli

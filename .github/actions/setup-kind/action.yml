@@ -19,6 +19,7 @@ inputs:
       the Nginx ingress ref to get the ingress controller deployment manifest from
       (https://github.com/kubernetes/ingress-nginx). Consider main (the default) a floating tag which can result in
       deploying any version (including betas) and non repeatable builds.
+      Set to "skip" or "none" to NOT install ingress-nginx.
     default: main
   metrics:
     description: Whether Metrics Server should be installed upon cluster creation
@@ -32,13 +33,18 @@ inputs:
       The timeout for waiting for the ingress controller to become ready.
       Default is 90 seconds, which should be enough for most cases.
     default: 90s
+  kind-config-path:
+    description: |
+      Path to a custom kind configuration file. If not provided, the action will use the default configuration
+      located at `./kind.yml` relative to the action.yml file.
+    required: false
 runs:
   using: "composite"
   steps:
     - name: Create cluster
       uses: helm/kind-action@a1b0e391336a6ee6713a0583f8c6240d70863de3 # v1.12.0
       with:
-        config: ${{ github.action_path }}/kind.yml
+        config: ${{ inputs.kind-config-path == '' && format('{0}/kind.yml', github.action_path) || inputs.kind-config-path }}
         version: ${{ inputs.kind-version }}
         node_image: ${{ inputs.kind-node-image }}
         wait: ${{ inputs.kind-wait }}
@@ -54,6 +60,8 @@ runs:
 
     - name: Install ingress-nginx
       shell: bash
+      if: >-
+        !contains(fromJson('["skip", "none"]'), inputs.ingress-nginx-ref)
       env:
         NGINX_MANIFEST_URL: >-
           https://raw.githubusercontent.com/kubernetes/ingress-nginx/${{ inputs.ingress-nginx-ref }}/deploy/static/provider/kind/deploy.yaml
@@ -62,6 +70,8 @@ runs:
 
     - name: Wait for ingress ready
       shell: bash
+      if: >-
+        !contains(fromJson('["skip", "none"]'), inputs.ingress-nginx-ref)
       run: |
         kubectl wait --namespace ingress-nginx \
           --for=condition=ready pod \

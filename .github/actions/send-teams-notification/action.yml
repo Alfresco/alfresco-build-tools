@@ -34,11 +34,16 @@ inputs:
     description: 'Comma-separated list of Teams tags to mention in format "tag name|tag id" (e.g.: "Security Champions|base64IdIncluding==")'
     required: false
     default: ''
+  skip_checkout:
+    description: If the internal checkout action should be skipped or not
+    required: false
+    default: 'false'
 
 runs:
   using: composite
   steps:
     - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      if: inputs.skip_checkout == 'false'
 
     - name: Compute workflow status
       id: compute-workflow-status
@@ -155,7 +160,7 @@ runs:
         echo "result=$RESULT" >> $GITHUB_OUTPUT
 
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v8.33.1
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v9.2.0
 
     - name: Transform mentions to JSON entities
       id: transform-mentions

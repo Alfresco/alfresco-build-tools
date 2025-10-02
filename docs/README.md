@@ -32,7 +32,6 @@ Here follows the list of GitHub Actions topics available in the current document
     - [SSH debug](#ssh-debug)
     - [Triggering a workflow in another repository](#triggering-a-workflow-in-another-repository)
   - [GitHub Actions provided by us](#github-actions-provided-by-us)
-    - [automate-dependabot](#automate-dependabot)
     - [automate-propagation](#automate-propagation)
     - [calculate-next-internal-version](#calculate-next-internal-version)
     - [configure-git-author](#configure-git-author)
@@ -60,6 +59,9 @@ Here follows the list of GitHub Actions topics available in the current document
     - [github-https-auth](#github-https-auth)
     - [github-list-changes](#github-list-changes)
     - [github-pr-check-metadata](#github-pr-check-metadata)
+    - [github-require-secrets](#github-require-secrets)
+    - [github-trigger-approved-pr](#github-trigger-approved-pr)
+    - [github-trigger-labeled-pr](#github-trigger-labeled-pr)
     - [helm-build-chart](#helm-build-chart)
     - [helm-integration-tests](#helm-integration-tests)
     - [helm-package-chart](#helm-package-chart)
@@ -125,7 +127,8 @@ Here follows the list of GitHub Actions topics available in the current document
     - [validate-maven-versions](#validate-maven-versions)
     - [veracode](#veracode)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
-    - [helm-publish-new-package-version.yml](#helm-publish-new-package-versionyml)
+    - [branch-promotion-prs](#branch-promotion-prs)
+    - [helm-publish-new-package-version](#helm-publish-new-package-version)
     - [terraform](#terraform)
   - [Cookbook](#cookbook)
     - [Conditional job/step depending on PR labels](#conditional-jobstep-depending-on-pr-labels)
@@ -410,24 +413,6 @@ on:
 ```
 
 ## GitHub Actions provided by us
-
-### automate-dependabot
-
-Handles automated approval and merge of dependabot PRs, for minor and patch version updates only:
-
-- automated approval on minor and patch versions
-- automated merge on patch versions
-
-This action requires a dedicated secret (named `DEPENDABOT_GITHUB_TOKEN` in the sample) to setup the "auto-merge" behavior: the default `GITHUB_TOKEN` is not used in this case, otherwise a build would not be triggered when the PR is merged, [see reference solution](https://david.gardiner.net.au/2021/07/github-actions-not-running.html).
-
-This secret should be a [dependabot secret](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/managing-encrypted-secrets-for-dependabot), and the token should hold the `repo > repo:status` and `repo > public_repo` scopes for public repositories.
-The whole list of "repo" scopes might be needed for the workflow to run ok on private repositories.
-
-```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/automate-dependabot@ref
-      with:
-        token: ${{ secrets.DEPENDABOT_GITHUB_TOKEN }}
-```
 
 ### automate-propagation
 
@@ -764,6 +749,8 @@ With proper concurrency logic in place, the latest run might have been cancelled
 
 These actions create a [GitHub deployment](https://docs.github.com/en/rest/deployments/deployments) and allow updating its status. That can be useful to track progression on a workflow pipeline.
 
+On creation, an optional git sha can be provided, otherwise the sha of the commit that triggered the workflow is used.
+
 Sample usage:
 
 ```yaml
@@ -897,6 +884,91 @@ On this sample, if the commit was merged with a PR opened by Dependabot, **and**
 The `deploy` job only runs if result is not true, so deploys are skipped when merging these PRs.
 
 The main benefit is to save CI/CD resources and time by skipping unnecessary deploys for automated dependency updates that only affect GitHub Actions workflows.
+
+### github-require-secrets
+
+This action fails the current run if it detects that the secrets source is not enough for proper PR validation.
+
+This is useful to stop a build early and cleanly, when validating dependabot PRs that do not have access to Dependabot secrets, or which are forks.
+
+Good practices for proper validation of such PRs is to trigger the validation by labelling or setting the milestone on the PR, so that it is run with the user's credentials instead of having to share secrets with Dependabot.
+
+See also sibling action [github-trigger-approved-pr](#github-trigger-approved-pr).
+
+```yaml
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - milestoned
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@ref
+        with:
+          dependabot-error-message: "This PR requires additional validation, please set the milestone to 'Validating' or ask a reviewer to approve it."
+```
+
+### github-trigger-approved-pr
+
+This action is typically helpful to trigger validation of Dependabot PRs, as well as setting up auto-merge, so that only a reviewer's approval is needed to merging such PR.
+
+The corresponding workflow needs to be triggered by corresponding labeled or milestoned event.
+This approach also allows to avoid re-triggering validations when the PR is already approved.
+
+For Dependabot use case, that also allows following good security practices where secrets needed for the validation are not shared as Dependabot secrets.
+
+It requires a dedicated secret (named `BOT_GITHUB_TOKEN` in the sample) to setup the "auto-merge" behavior: the default `GITHUB_TOKEN` is not used in this case, otherwise a build would not be triggered when the PR is merged, [see reference solution](https://david.gardiner.net.au/2021/07/github-actions-not-running.html).
+
+See also sibling action [github-require-secrets](#github-require-secrets).
+
+```yaml
+on:
+  pull_request_review:
+    types:
+      - submitted
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-trigger-approved-pr@ref
+        with:
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          creator: dependabot[bot]
+          milestone-on-approval: Validating
+```
+
+### github-trigger-labeled-pr
+
+This action helps triggering events on a Pull Request when it is labeled with one of the specified labels.
+
+The corresponding workflow needs to be triggered by corresponding milestoned event.
+This approach allows to avoid re-triggering validations when any label is added to the PR, as the list of labels can be specified.
+
+```yaml
+on:
+  pull_request:
+    types:
+      - labeled
+
+env:
+  TRIGGER_LABELS: '["CI", "preview", "skip-tests"]'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-trigger-labeled-pr@ref
+        with:
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          labels: ${{ env.TRIGGER_LABELS }}
+          milestone: Validating
+```
 
 ### helm-build-chart
 
@@ -1105,9 +1177,36 @@ Wait for k8s resources (usually pods) to be ready.
       uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@ref
       # with:
         # wait-timeout: 10m
+        # wait-for-what: condition
         # wait-condition: Ready
         # wait-resource: pods
         # namespace: default
+```
+
+If your deployment relies on a Job that must finish before continuing, you’ll
+need a different approach. This is because the Pod created by the Job briefly
+reports a `Ready` status, which can cause `kubectl wait` to miss it. A more reliable
+method is shown in the example below:
+
+```yaml
+      - name: Wait for deployments to be ready
+        uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@ref
+        with:
+          wait-resource: deployments
+          wait-condition: Available
+
+      - name: Wait for statefulsets to be ready
+        uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@ref
+        with:
+          wait-resource: sts
+          wait-for-what: jsonpath
+          wait-condition: "'{.status.readyReplicas}'=1"
+
+      - name: Wait for jobs to be completed
+        uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@ref
+        with:
+          wait-resource: jobs
+          wait-condition: complete
 ```
 
 ### load-release-descriptor
@@ -1804,7 +1903,7 @@ Allows the installation of a generic binary from GitHub Releases and add it to t
 See [setup-helm-docs](../.github/actions/setup-helm-docs/action.yml) for a usage example.
 
 ```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v8.33.1
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v9.2.0
       with:
         repo: org/repo-name
         version: '1.2.3'
@@ -1883,7 +1982,10 @@ Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
           kind-node-image: kindest/node:v1.27.3@sha256:3966ac761ae0136263ffdb6cfd4db23ef8a83cba8a463690e98317add2c9ba72
           # Optional but ensure repeatable builds (defaults to latest nginx ingress version otherwise).
           # see https://github.com/kubernetes/ingress-nginx
+          # can be skipped using "skip" or "none"
           ingress-nginx-ref: controller-v1.8.2
+          # Use your own config file provided as YAML string.
+          kind-config-path: /path/to/file.yml
           # Enable deploying Metrics server with KinD
           metrics: true
           # Enable creating docker registry secret using given name
@@ -2064,7 +2166,37 @@ This way, the agent-based scan results will be added in the latest promoted scan
 
 ## Reusable workflows provided by us
 
-### helm-publish-new-package-version.yml
+### branch-promotion-prs
+
+Automates the creation of pull requests to promote changes from a source branch to multiple target branches. This workflow is useful for promoting changes across different environments (e.g., from develop to staging and production branches).
+
+```yaml
+name: Promote to Environment Branches
+
+on:
+  push:
+    branches:
+      - 'develop'  # Source branch to monitor for changes
+
+permissions:
+  contents: write  # Required to create pull requests
+
+jobs:
+  promote:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/branch-promotion-prs.yml@ref
+    with:
+      source-branch: 'develop' # default branch to promote from
+      target-branches: '["staging", "production"]' # JSON array of branches to promote to
+      pr-title-template: 'Promote to {0} environment' # optional
+      pr-body-template: 'This PR promotes the latest changes from {1} to the {0} environment.' # optional
+      draft-pr: false
+      reviewers: 'user1,user2,user3' # optional - comma or newline-separated list of GitHub usernames
+      team-reviewers: 'team1,team2' # optional - comma or newline-separated list of GitHub teams
+    secrets:
+      gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+```
+
+### helm-publish-new-package-version
 
 Calculates the new alpha version, creates new git tag and publishes the new package to the helm chart repository
 
@@ -2185,6 +2317,10 @@ using the [docker-maven-plugin](https://dmp.fabric8.io):
 ```
 
 ### Running a dependabot PR workflow only when pull request is approved
+
+For helper actions on validation/merge of dependabot PRs following good practices,
+please check [github-require-secrets](#github-require-secrets) and
+[github-trigger-approved-pr](#github-trigger-approved-pr).
 
 When a workflow requires secrets to function properly, you either need to
 provide dependabot-specific secrets (doubling the effort to maintain these
