@@ -81,8 +81,8 @@ Additional notes or configuration details.
 
 **For external actions (from other repositories):**
 
-- **SHOULD** use SHA pins for security: `actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8`
-- Can use version tags if necessary, but SHA pins are preferred for security
+- **MUST** use SHA pins for security: `actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8`
+- Can't use version tags as they are mutable, SHA pins are mandatory for security
 
 ### Security Best Practices
 
