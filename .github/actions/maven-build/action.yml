@@ -201,6 +201,8 @@ runs:
       shell: bash
       env:
         MAVEN_RESOLVER_TRANSPORT_OPTS: ${{ inputs.maven-resolver-transport-options }}
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
       run: |
         mvn -N jacoco:merge -Djacoco.destFile=${{ steps.get-jacoco-report-path.outputs.path }} ${MAVEN_RESOLVER_TRANSPORT_OPTS}
 
@@ -209,6 +211,8 @@ runs:
       shell: bash
       env:
         MAVEN_RESOLVER_TRANSPORT_OPTS: ${{ inputs.maven-resolver-transport-options }}
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
       run: |
         mvn jacoco:report -Djacoco.dataFile=${{ steps.get-jacoco-report-path.outputs.path }} \
           -Djacoco-report-dir-suffix=${{ inputs.jacoco-report-name }} ${{ inputs.jacoco-report-options }} ${MAVEN_RESOLVER_TRANSPORT_OPTS}
