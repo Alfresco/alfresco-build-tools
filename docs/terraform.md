@@ -173,17 +173,11 @@ jobs:
     secrets: inherit
 ```
 
-## Environment badges
+## Branch promotion workflow
 
-At the top of the README file, you should list a badge for every configured environment, to ease raising PRs to keep them up to date. You can use the following Markdown snippet to add a badge for each environment:
+For Terraform projects with multiple environment branches, you can use the
+branch promotion workflow to automate the creation of pull requests when
+promoting changes across environments.
 
-```markdown
-[![update ENV-NAME env](https://img.shields.io/badge/⚠️-update%20ENV--NAME%20env-blue)](https://github.com/Alfresco/REPO-NAME/compare/ENV-NAME...develop?expand=1&title=Update%20ENV-NAME%20env)
-```
-
-Replace `REPO-NAME` with the name of the GitHub repository and `ENV-NAME` with
-the name of the environment (e.g., `development`, `staging`, `production`) which
-also correspond to the branch name.
-
-Please note that `img.shields.io` badge also requires escaping single dash to
-double dash to work properly.
+See [main documentation](README.md#branch-promotion-prs) for usage
+documentation.
