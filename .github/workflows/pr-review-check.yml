@@ -41,7 +41,7 @@ jobs:
           milestone-on-approval: ${{ inputs.milestone-name }}
           auto-merge-on-approval: true
 
-      - name: Trigger validation on labeling, unless token is readonly (dependabot/fork) or milestone
+      - name: Trigger validation on labeling when token is not readonly and milestone is set
         if: github.event_name == 'pull_request' && github.event.action == 'labeled' && github.secret_source == 'Actions' && inputs.milestone-name != ''
         uses: Alfresco/alfresco-build-tools/.github/actions/github-trigger-labeled-pr@v9.2.0
         with:
