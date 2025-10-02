@@ -70,11 +70,13 @@ Additional notes or configuration details.
 **Examples:**
 
 ✅ **Correct (version tag):**
+
 ```yaml
 - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.1.0
 ```
 
 ❌ **Incorrect (SHA pin):**
+
 ```yaml
 - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@abc123def456
 ```
