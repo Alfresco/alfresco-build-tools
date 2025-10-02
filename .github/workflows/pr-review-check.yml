@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       trigger-labels:
-        description: JSON object mapping the list of labels that should trigger the validation
+        description: JSON array of labels that should trigger the validation
         required: true
         type: string
       milestone-name:
