@@ -10,6 +10,9 @@ inputs:
   state:
     description: The Initial State to set right after creation
     default: ""
+  git-sha:
+    description: SHA reference for deployment - will default to workflow SHA if not provided
+    default: ""
 
 outputs:
   id:
@@ -24,13 +27,14 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.github-token }}
         TARGET_ENV: ${{ inputs.environment }}
+        TARGET_SHA: ${{ inputs.git-sha != '' && inputs.git-sha || github.sha }}
       shell: bash
       run: |
         URL="/repos/$GITHUB_REPOSITORY/deployments"
 
-        echo "Creating deployment at $URL for sha $GITHUB_SHA and env $TARGET_ENV"
+        echo "Creating deployment at $URL for sha $TARGET_SHA and env $TARGET_ENV"
         # use a json object to be able to empty the required_contexts array
-        CREATED="$(jq -n --arg ref "$GITHUB_SHA" --arg environment "$TARGET_ENV" '{ref: $ref, environment: $environment, "auto_merge": false, "required_contexts": []}' | gh api -X POST $URL --input -)"
+        CREATED="$(jq -n --arg ref "$TARGET_SHA" --arg environment "$TARGET_ENV" '{ref: $ref, environment: $environment, "auto_merge": false, "required_contexts": []}' | gh api -X POST $URL --input -)"
         echo $CREATED
 
         DEPLOYMENT_ID="$(echo $CREATED | jq -r ".id")"

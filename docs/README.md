@@ -749,6 +749,8 @@ With proper concurrency logic in place, the latest run might have been cancelled
 
 These actions create a [GitHub deployment](https://docs.github.com/en/rest/deployments/deployments) and allow updating its status. That can be useful to track progression on a workflow pipeline.
 
+On creation, an optional git sha can be provided, otherwise the sha of the commit that triggered the workflow is used.
+
 Sample usage:
 
 ```yaml
