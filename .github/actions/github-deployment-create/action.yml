@@ -9,10 +9,9 @@ inputs:
     required: true
   state:
     description: The Initial State to set right after creation
-    default: ""
+
   git-sha:
     description: SHA reference for deployment - will default to workflow SHA if not provided
-    default: ""
 
 outputs:
   id:
