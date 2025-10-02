@@ -117,7 +117,7 @@ runs:
   steps:
     - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@v8.33.1
+    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@b88d5790c053ff2be25f1991a98874620f5acb51
       id: maven-configure
       with:
         java-version: ${{ inputs.java-version }}
