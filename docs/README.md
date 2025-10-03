@@ -2333,7 +2333,51 @@ after a contributor approves the PR.
 > Maintainers still have to carefully review updates to prevent exposing secrets
 > to potentially malicious updates.
 
-Here is an example workflow with a job condition to achieve this:
+#### Using the pr-review-check reusable workflow
+
+We provide a reusable workflow that automates PR review checks for Dependabot PRs and manual validation triggers. This workflow enables auto-merge on approval and validates PRs when specific labels are applied.
+
+```yaml
+name: "PR Review check"
+
+on:
+  pull_request_review:
+    types:
+      - submitted
+  pull_request:
+    branches:
+      - develop
+    types:
+      - labeled
+
+jobs:
+  check:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/pr-review-check.yml@ref
+    with:
+      trigger-labels: '["CI", "preview", "skip-tests"]'
+      milestone-name: 'Validating'
+    secrets:
+      BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+```
+
+**Inputs:**
+
+- `trigger-labels`: JSON array of labels that should trigger validation when applied to a PR
+- `milestone-name`: Milestone to set on the PR when validation is triggered
+
+**Secrets:**
+
+- `BOT_GITHUB_TOKEN`: Token used to enable auto-merge, comment on the PR, and change PR milestone/label. This **cannot** be the default `GITHUB_TOKEN` if auto-merge is set, otherwise the merge of the PR will not trigger a build.
+
+**Behavior:**
+
+- When a PR review is submitted with "approved" state and the PR creator is `dependabot[bot]`, the workflow sets the specified milestone and enables auto-merge
+- When a PR is labeled with one of the specified trigger labels, the workflow sets the milestone to trigger validation workflows
+- Requires appropriate permissions: `contents: read`, `pull-requests: write`, `issues: write`
+
+#### Manual job condition approach
+
+Here is an example workflow with a job condition to achieve this manually:
 
 ```yml
 on:
