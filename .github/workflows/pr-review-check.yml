@@ -22,11 +22,6 @@ on:
 env:
   DEPENDABOT_CREATOR: 'dependabot[bot]'
 
-permissions:
-  contents: read          # Required to read repository content
-  pull-requests: write    # Required to edit PR (milestones, labels, auto-merge)
-  issues: write          # Required to create comments on PRs
-
 jobs:
   check:
     if: github.secret_source != 'None'
