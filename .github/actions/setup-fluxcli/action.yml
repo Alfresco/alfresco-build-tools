@@ -4,7 +4,7 @@ inputs:
   version:
     description: 'Version of Flux CLI'
     required: false
-    default: 2.6.4
+    default: 2.7.0
 runs:
   using: "composite"
   steps:
