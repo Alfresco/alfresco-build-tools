@@ -17,9 +17,9 @@ This repository contains shared/reusable CI configurations for GitHub Actions se
 echo "v9.1.0" > version.txt
 ```
 
-When referencing internal actions in workflow YAML files, **always use the latest released tag** (e.g., `v9.2.0`).  
-Do **not** update these references to the next release version (e.g., `v9.3.0`) **in a pull request that is bumping the version** in `version.txt`.  
-This is because the new tag (e.g., `v9.3.0`) will only be created and pushed at the end of the release build process.  
+When referencing internal actions in workflow YAML files, **always use the latest released tag** (e.g., `v9.2.0`).
+Do **not** update these references to the next release version (e.g., `v9.3.0`) **in a pull request that is bumping the version** in `version.txt`.
+This is because the new tag (e.g., `v9.3.0`) will only be created and pushed at the end of the release build process.
 If you update the reference before the tag exists, the master build will fail after merging, as the referenced tag does not yet exist.
 
 ### Documentation Requirements
