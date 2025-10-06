@@ -2352,7 +2352,7 @@ on:
 
 jobs:
   check:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/pr-review-check.yml@ref
+    uses: Alfresco/alfresco-build-tools/.github/workflows/pr-review-check.yml@v9.2.0
     with:
       trigger-labels: '["CI", "preview", "skip-tests"]'
       milestone-name: 'Validating'
@@ -2385,7 +2385,7 @@ jobs:
       - name: Check dependabot/fork build
         # Require secrets if triggered by dependabot, or if this is a fork PR not being validated through milestone setup
         if: github.secret_source == 'Dependabot' || (github.secret_source == 'None' && github.event.action != 'milestoned')
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@ref
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@v9.2.0
         with:
           dependabot-error-message: "This PR requires additional validation, please set the milestone to 'Validating' or ask a reviewer to approve it."
           none-error-message: "This PR requires additional validation, please set the milestone to 'Validating'."
