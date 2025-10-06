@@ -25,7 +25,7 @@ jobs:
         run: echo "terraform_version=$(cat .terraform-version)" >> "$GITHUB_OUTPUT"
 
       - name: Install tflint
-        uses: terraform-linters/setup-tflint@ae78205cfffec9e8d93fd2b3115c7e9d3166d4b6 # v5.0.0
+        uses: terraform-linters/setup-tflint@a8a2cbdfb17397afadcc4fb3fcd64fdb215f0f9f # v6.1.0
 
       - name: Install checkov
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-checkov@v9.2.0
