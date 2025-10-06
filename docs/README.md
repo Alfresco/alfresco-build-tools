@@ -2398,7 +2398,6 @@ jobs:
         uses: actions/checkout@ref
 ```
 
-
 **Inputs:**
 
 - `trigger-labels`: JSON array of labels that should trigger validation when applied to a PR
