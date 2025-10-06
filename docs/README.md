@@ -2360,6 +2360,45 @@ jobs:
       BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
 ```
 
+Sample main workflow being triggered by milestone event
+
+```yaml
+name: Build
+
+on:
+  push:
+   branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - milestoned
+
+jobs:
+  pre-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check dependabot/fork build
+        # Require secrets if triggered by dependabot, or if this is a fork PR not being validated through milestone setup
+        if: github.secret_source == 'Dependabot' || (github.secret_source == 'None' && github.event.action != 'milestoned')
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@ref
+        with:
+          dependabot-error-message: "This PR requires additional validation, please set the milestone to 'Validating' or ask a reviewer to approve it."
+          none-error-message: "This PR requires additional validation, please set the milestone to 'Validating'."
+
+  build:
+    runs-on: ubuntu-latest
+    needs: pre-checks
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@ref
+```
+
+
 **Inputs:**
 
 - `trigger-labels`: JSON array of labels that should trigger validation when applied to a PR
