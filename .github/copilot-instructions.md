@@ -47,7 +47,7 @@ Brief description of what the action does.
 
 Additional notes or configuration details.
 
-**Note**: When creating actual workflows/actions that reference internal actions, replace `@ref` with the current version tag (e.g., `@v9.1.0`).
+**Note**: Always replace `@ref` with the current version tag (e.g., `@v9.1.0`) found in `version.txt`.
 
 **Run validation script** to ensure all actions are documented:
 
