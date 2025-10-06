@@ -2394,8 +2394,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: pre-checks
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@ref
+      - name: Build
+        run: echo "Building..."
 ```
 
 **Inputs:**
