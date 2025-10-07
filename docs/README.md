@@ -135,6 +135,9 @@ Here follows the list of GitHub Actions topics available in the current document
     - [Serialize pull request builds](#serialize-pull-request-builds)
     - [Expiring tags for quay.io images](#expiring-tags-for-quayio-images)
     - [Running a dependabot PR workflow only when pull request is approved](#running-a-dependabot-pr-workflow-only-when-pull-request-is-approved)
+      - [Using the pr-review-check reusable workflow](#using-the-pr-review-check-reusable-workflow)
+      - [Manual job condition approach](#manual-job-condition-approach)
+    - [Automating github-actions updates](#automating-github-actions-updates)
   - [Known issues](#known-issues)
     - [realpath not available under macosx](#realpath-not-available-under-macosx)
   - [Release](#release)
@@ -2435,6 +2438,31 @@ jobs:
       (github.event.review.state == 'approved' && github.event.pull_request.user.login == 'dependabot[bot]') ||
       (github.actor != 'dependabot[bot]' && github.event_name != 'pull_request_review')
 ```
+
+### Automating github-actions updates
+
+To keep the workflows and actions up to date, you can use the
+[dependabot](https://dependabot.com/) feature of GitHub.
+
+Add a `.github/dependabot.yml` file with the following content:
+
+```yml
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directories:
+      - "/"
+      - "/.github/actions/*"
+    schedule:
+      interval: "monthly"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+```
+
+This will create a single monthly PR with all the github-actions updates to be
+reviewed and merged.
 
 ## Known issues
 
