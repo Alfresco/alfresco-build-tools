@@ -458,8 +458,18 @@ The two vars in the previous snippet are [workflow configuration variables](http
 
 ### dependabot-missing-actions-check
 
-This action checks if all GitHub Actions are listed in the `.github/dependabot.yml` file.
-This is a workaround for a [GH Link](https://github.com/dependabot/dependabot-core/issues/6345) problem where global configuration does not work.
+This action checks if all GitHub Actions are listed in the
+`.github/dependabot.yml` file.
+
+This is a workaround for an old [dependabot
+issue](https://github.com/dependabot/dependabot-core/issues/6345) when all
+actions were needed to be listed explicitly to be updated.
+
+Nowdays, dependabot supports glob patterns, so this action is not strictly necessary anymore, see [Automating github-actions updates](#automating-github-actions-updates) in the [Cookbook](#cookbook) section for more details.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/dependabot-missing-actions-check@v9.3.1
+```
 
 ### dbp-charts
 
