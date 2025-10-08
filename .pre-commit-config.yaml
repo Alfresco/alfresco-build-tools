@@ -32,11 +32,6 @@ repos:
       - id: actionlint
   - repo: local
     hooks:
-      - id: generate-dependabot
-        name: Generate dependabot config for actions
-        language: system
-        entry: ./update-dependabot.sh
-        pass_filenames: false
       - id: check-readme
         name: Check README entries
         language: system
