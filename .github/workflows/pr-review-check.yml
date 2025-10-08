@@ -1,0 +1,46 @@
+name: "PR Review check"
+
+on:
+  workflow_call:
+    inputs:
+      trigger-labels:
+        description: JSON array of labels that should trigger the validation
+        required: true
+        type: string
+      milestone-name:
+        description: Milestone to set on the PR when validation is triggered
+        required: true
+        type: string
+    secrets:
+      BOT_GITHUB_TOKEN:
+        description: >
+          Token used to enable auto-merge, comment on the PR, and change PR milestone/label.
+          This token CANNOT be the default `GITHUB_TOKEN` if auto-merge is set, otherwise the merge of the PR will not trigger a build.
+          Or similarly, if labeled and milestoned events are expected to trigger a new build.
+        required: true
+
+env:
+  DEPENDABOT_CREATOR: 'dependabot[bot]'
+
+jobs:
+  check:
+    if: github.secret_source != 'None'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger validation on approval
+        if: github.event_name == 'pull_request_review'
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-trigger-approved-pr@v9.3.1
+        with:
+          creator: ${{ env.DEPENDABOT_CREATOR }}
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          milestone-on-approval: ${{ inputs.milestone-name }}
+          auto-merge-on-approval: true
+
+      - name: Trigger validation on labeling when token is not readonly and milestone is set
+        if: github.event_name == 'pull_request' && github.event.action == 'labeled' && github.secret_source == 'Actions' && inputs.milestone-name != ''
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-trigger-labeled-pr@v9.3.1
+        with:
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          labels: ${{ inputs.trigger-labels }}
+          milestone: ${{ inputs.milestone-name }}
+          force-trigger: true
