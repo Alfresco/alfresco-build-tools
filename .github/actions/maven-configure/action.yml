@@ -122,4 +122,4 @@ runs:
         key: ${{ env.MAVEN_BUILD_CACHE_KEY }}
         restore-keys: |
           ${{ runner.os }}-build-cache-${{ inputs.maven-build-cache-key }}-${{ github.event.pull_request.number }}
-          ${{ runner.os }}-build-cache-${{ inputs.maven-build-cache-key }}-${{ env.GITHUB_PR_NUMBER || github.ref_name }}
+          ${{ runner.os }}-build-cache-${{ inputs.maven-build-cache-key }}-${{ github.event.pull_request.number || github.ref_name }}
