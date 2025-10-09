@@ -120,9 +120,7 @@ runs:
     - name: Update pom files to the preview version
       if: steps.maven-configure.outputs.preview-version != ''
       uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@v9.3.1
-      env:
-        MAVEN_USERNAME: ${{ inputs.maven-username }}
-        MAVEN_PASSWORD: ${{ inputs.maven-password }}
+
       with:
         version: ${{ steps.maven-configure.outputs.preview-version }}
         maven-cli-opts: ${{ steps.maven-configure.outputs.maven-options }} ${{ inputs.maven-resolver-transport-options }}
@@ -172,8 +170,6 @@ runs:
       env:
         MAVEN_RESOLVER_TRANSPORT_OPTS: ${{ inputs.maven-resolver-transport-options }}
         MAVEN_CLI_OPTS: ${{ steps.maven-configure.outputs.maven-options }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip -Dmaven.build.cache.enabled=${{ env.MAVEN_BUILD_CACHE_ENABLED }}
-        MAVEN_USERNAME: ${{ inputs.maven-username }}
-        MAVEN_PASSWORD: ${{ inputs.maven-password }}
 
     - name: Remove running docker containers
       if: inputs.reuse-testcontainers == 'true'
@@ -201,8 +197,6 @@ runs:
       shell: bash
       env:
         MAVEN_RESOLVER_TRANSPORT_OPTS: ${{ inputs.maven-resolver-transport-options }}
-        MAVEN_USERNAME: ${{ inputs.maven-username }}
-        MAVEN_PASSWORD: ${{ inputs.maven-password }}
       run: |
         mvn -N jacoco:merge -Djacoco.destFile=${{ steps.get-jacoco-report-path.outputs.path }} ${MAVEN_RESOLVER_TRANSPORT_OPTS}
 
@@ -211,8 +205,6 @@ runs:
       shell: bash
       env:
         MAVEN_RESOLVER_TRANSPORT_OPTS: ${{ inputs.maven-resolver-transport-options }}
-        MAVEN_USERNAME: ${{ inputs.maven-username }}
-        MAVEN_PASSWORD: ${{ inputs.maven-password }}
       run: |
         mvn jacoco:report -Djacoco.dataFile=${{ steps.get-jacoco-report-path.outputs.path }} \
           -Djacoco-report-dir-suffix=${{ inputs.jacoco-report-name }} ${{ inputs.jacoco-report-options }} ${MAVEN_RESOLVER_TRANSPORT_OPTS}
