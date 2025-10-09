@@ -45,9 +45,6 @@ outputs:
   preview-version:
     description: The preview version when it's a preview.
     value: ${{ steps.set-preview-version.outputs.preview-version }}
-  maven-build-cache-hit:
-    description: Whether the Maven build cache was hit.
-    value: ${{ steps.restore-maven-build-cache.outputs.cache-hit }}
 
 runs:
   using: composite
@@ -119,7 +116,6 @@ runs:
 
     - uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       name: Restore Maven Build Cache before build
-      id: restore-maven-build-cache
       if: env.MAVEN_BUILD_CACHE_ENABLED == 'true'
       with:
         path: ~/.m2/build-cache
