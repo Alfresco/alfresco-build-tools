@@ -32,13 +32,6 @@ inputs:
   maven-username:
     description: Nexus user name
     required: true
-  maven-password:
-    description: Nexus password
-    required: true
-  maven-version:
-    description: Maven version to setup, i.e. 3.9+ for Maven Build Cache extension
-    required: false
-    default: ''
   quay-username:
     description: Quay.io user name
     required: false
