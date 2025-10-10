@@ -108,7 +108,7 @@ runs:
       id: set-use-maven_build-cache-env-variable
       env:
         MAVEN_BUILD_CACHE_ENABLED: ${{ inputs.maven-build-cache-key != '' && !contains(github.event.pull_request.labels.*.name, inputs.maven-build-cache-skip-label) }}
-        MAVEN_BUILD_CACHE_KEY: ${{ runner.os }}-build-cache-${{ inputs.maven-build-cache-key }}-${{ env.GITHUB_PR_NUMBER || github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
+        MAVEN_BUILD_CACHE_KEY: ${{ runner.os }}-build-cache-${{ inputs.maven-build-cache-key }}
       shell: bash
       run: |
         echo "MAVEN_BUILD_CACHE_ENABLED=$MAVEN_BUILD_CACHE_ENABLED" >> $GITHUB_ENV
@@ -121,5 +121,4 @@ runs:
         path: ~/.m2/build-cache
         key: ${{ env.MAVEN_BUILD_CACHE_KEY }}
         restore-keys: |
-          ${{ runner.os }}-build-cache-${{ inputs.maven-build-cache-key }}-PR-${{ github.event.pull_request.number }}-
-          ${{ runner.os }}-build-cache-${{ inputs.maven-build-cache-key }}-${{ github.base_ref || github.ref_name }}-
+          ${{ runner.os }}-build-cache-${{ inputs.maven-build-cache-key }}
