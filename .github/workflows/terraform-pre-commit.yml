@@ -28,7 +28,7 @@ jobs:
         uses: terraform-linters/setup-tflint@4cb9feea73331a35b422df102992a03a44a3bb33 # v6.2.1
 
       - name: Install checkov
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-checkov@OPSEXP-3596-bump-checkov
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-checkov@v9.3.2
 
       - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
         with:
