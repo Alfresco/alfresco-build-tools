@@ -4,7 +4,7 @@ inputs:
   version:
     description: 'Version of checkov'
     required: false
-    default: '3.2.461'
+    default: '3.2.490' # cannot be automated via updatecli because bridgecrew allow api access only from whitelisted IPs
 runs:
   using: "composite"
   steps:
