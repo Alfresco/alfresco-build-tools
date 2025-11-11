@@ -12,14 +12,6 @@ inputs:
     description: The Java distribution to perform the build
     required: false
     default: 'temurin'
-  maven-build-cache-key:
-    description: The build cache key to use for restoring and saving Maven build cache in Github
-    required: false
-    default: ''
-  maven-build-cache-skip-label:
-    description: The name of the label to skip maven build cache if needed
-    required: false
-    default: 'maven-build-cache-skip'
   maven-command:
     description: The maven command to execute
     required: false
@@ -104,8 +96,6 @@ runs:
         java-version: ${{ inputs.java-version }}
         java-distribution: ${{ inputs.java-distribution }}
         maven-version: ${{ inputs.maven-version }}
-        maven-build-cache-key: ${{ inputs.maven-build-cache-key }}
-        maven-build-cache-skip-label: ${{ inputs.maven-build-cache-skip-label }}
         skip-tests-label: ${{ inputs.skip-tests-label }}
         verbose: ${{ inputs.verbose }}
         preview-label: ${{ inputs.preview-label }}
@@ -253,9 +243,3 @@ runs:
       with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-    - name: Save maven build cache on push
-      uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-      if: env.MAVEN_BUILD_CACHE_ENABLED == 'true'
-      with:
-        path: ~/.m2/build-cache
-        key: ${{ env.MAVEN_BUILD_CACHE_KEY }}

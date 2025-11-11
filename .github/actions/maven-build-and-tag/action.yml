@@ -9,14 +9,6 @@ inputs:
     description: The Java distribution to perform the build
     required: false
     default: 'temurin'
-  maven-build-cache-key:
-    description: The build cache key to use for restoring and saving Maven build cache in Github
-    required: false
-    default: ''
-  maven-build-cache-skip-label:
-    description: The name of the label to skip maven build cache if needed
-    required: false
-    default: 'maven-build-cache-skip'
   property-to-update:
     description: Property to update in addition to the version of the pom file
     required: false
@@ -123,8 +115,6 @@ runs:
         java-version: ${{ inputs.java-version }}
         java-distribution: ${{ inputs.java-distribution }}
         maven-version: ${{ inputs.maven-version }}
-        maven-build-cache-key: ${{ inputs.maven-build-cache-key }}
-        maven-build-cache-skip-label: ${{ inputs.maven-build-cache-skip-label }}
         skip-tests-label: ${{ inputs.skip-tests-label }}
         verbose: ${{ inputs.verbose }}
         preview-label: ${{ inputs.preview-label }}
