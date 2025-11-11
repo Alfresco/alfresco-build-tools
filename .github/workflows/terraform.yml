@@ -111,7 +111,7 @@ jobs:
           COMMENT_CONTAINS_TERRAFORM_PLAN: ${{ contains(github.event.comment.body, 'terraform plan') || false }}
           COMMENT_CONTAINS_TERRAFORM_APPLY: ${{ contains(github.event.comment.body, 'terraform apply') || false }}
         run: |
-          echo "### Terraform 🚀" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Running Terraform 🚀" >> "$GITHUB_STEP_SUMMARY"
           echo "- Environment: **${{ steps.basic_vars.outputs.environment_name }}**" >> "$GITHUB_STEP_SUMMARY"
           if [ "${{ env.COMMENT_CONTAINS_TERRAFORM_PLAN }}" == "true" ]; then
             echo "- Operation: **plan**" >> "$GITHUB_STEP_SUMMARY"
