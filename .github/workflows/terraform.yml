@@ -51,6 +51,23 @@ jobs:
     name: compute basic variables
     runs-on: ubuntu-latest
     steps:
+      - name: Validate inputs
+        env:
+          TERRAFORM_OPERATION: ${{ inputs.terraform_operation }}
+        run: |
+          if [ -z "${TERRAFORM_OPERATION}" ]; then
+            echo "terraform_operation is not set, defaulting to github event based handling."
+          else
+            case "${TERRAFORM_OPERATION}" in
+              apply|destroy|plan)
+                ;;
+              *)
+                echo "Invalid terraform_operation: ${TERRAFORM_OPERATION}. Must be 'apply', 'destroy', or 'plan'."
+                exit 1
+                ;;
+            esac
+          fi
+
       - name: Evaluate branch name
         id: basic_vars
         env:
@@ -160,19 +177,15 @@ jobs:
       # https://github.com/dflook/terraform-github-actions/tree/main/terraform-apply#applying-a-plan-using-a-comment
       PR_CHECKOUT_REF: refs/pull/${{ github.event.issue.number }}/merge
     steps:
-      - name: Check inputs
+      - name: Check environment requirements
         run: |
-          if [ -z "${{ inputs.terraform_operation }}" ]; then
-            echo "terraform_operation is not set, defaulting to github event based handling."
-          else
-            case "${{ inputs.terraform_operation }}" in
-              apply|destroy|plan)
-                ;;
-              *)
-                echo "Invalid terraform_operation: ${{ inputs.terraform_operation }}. Must be 'apply', 'destroy', or 'plan'."
-                exit 1
-                ;;
-            esac
+          if [ -z "${{ vars.RESOURCE_NAME }}" ]; then
+            echo "RESOURCE_NAME must be set in the vars context to provide a unique identifier"
+            exit 1
+          fi
+          if [ -z "${{ vars.TERRAFORM_STATE_BUCKET }}" ]; then
+            echo "TERRAFORM_STATE_BUCKET must be set in the vars context"
+            exit 1
           fi
 
       - name: Checkout
@@ -210,17 +223,6 @@ jobs:
         uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v9.3.3
         with:
           yml_path: ${{ inputs.terraform_root_path }}/tfenv.yml
-
-      - name: Check vars requirements
-        run: |
-          if [ -z "${{ vars.RESOURCE_NAME }}" ]; then
-            echo "RESOURCE_NAME must be set in the vars context to provide a unique identifier"
-            exit 1
-          fi
-          if [ -z "${{ vars.TERRAFORM_STATE_BUCKET }}" ]; then
-            echo "TERRAFORM_STATE_BUCKET must be set in the vars context"
-            exit 1
-          fi
 
       - name: Terraform validate
         if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_review') && github.run_attempt == 1
