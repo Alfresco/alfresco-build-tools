@@ -87,8 +87,22 @@ jobs:
             exit 1
           fi
 
-          echo "Using environment: $environment"
           echo "environment_name=${environment}" >> "$GITHUB_OUTPUT"
+
+      - name: Add summary info
+        env:
+          COMMENT_CONTAINS_TERRAFORM_PLAN: ${{ contains(github.event.comment.body, 'terraform plan') || false }}
+          COMMENT_CONTAINS_TERRAFORM_APPLY: ${{ contains(github.event.comment.body, 'terraform apply') || false }}
+        run: |
+          echo "### Terraform 🚀" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Environment: **${{ steps.basic_vars.outputs.environment_name }}**" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ env.COMMENT_CONTAINS_TERRAFORM_PLAN }}" == "true" ]; then
+            echo "- Operation: **plan**" >> "$GITHUB_STEP_SUMMARY"
+          elif [ "${{ env.COMMENT_CONTAINS_TERRAFORM_APPLY }}" == "true" ]; then
+            echo "- Operation: **apply**" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- Operation: **${{ inputs.terraform_operation || ((github.event_name == 'pull_request' || github.event_name == 'pull_request_review') && 'plan' || 'apply') }}**" >> "$GITHUB_STEP_SUMMARY"
+          fi
     outputs:
       environment_name: ${{ steps.basic_vars.outputs.environment_name }}
 
