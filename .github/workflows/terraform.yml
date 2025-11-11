@@ -219,7 +219,7 @@ jobs:
 
       - name: Terraform plan
         uses: dflook/terraform-plan@dc251c444763eed5defd065b866874b6343017ca # v2.2.2
-        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_review' || inputs.terraform_operation == 'plan'
+        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_review' || inputs.terraform_operation == 'plan' || (github.event_name == 'issue_comment' && contains(github.event.comment.body, 'terraform plan'))
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
           path: ${{ inputs.terraform_root_path }}
