@@ -152,7 +152,7 @@ runs:
       run: mvn ${{ inputs.maven-command  }} ${{ env.MAVEN_CLI_OPTS }} ${{ env.MAVEN_RESOLVER_TRANSPORT_OPTS }}
       env:
         MAVEN_RESOLVER_TRANSPORT_OPTS: ${{ inputs.maven-resolver-transport-options }}
-        MAVEN_CLI_OPTS: ${{ steps.maven-configure.outputs.maven-options }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip -Dmaven.build.cache.enabled=${{ env.MAVEN_BUILD_CACHE_ENABLED }}
+        MAVEN_CLI_OPTS: ${{ steps.maven-configure.outputs.maven-options }} -Dlogging.root.level=off -Dspring.main.banner-mode=off -Ddocker.skip
 
     - name: Remove running docker containers
       if: inputs.reuse-testcontainers == 'true'
