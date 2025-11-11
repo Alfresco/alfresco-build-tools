@@ -142,8 +142,8 @@ jobs:
         else
           echo "⚙️ Skipping kubectl installation"
         fi
-      # https://github.com/dflook/terraform-github-actions/tree/main/terraform-apply#applying-a-plan-using-a-comment
 
+      # https://github.com/dflook/terraform-github-actions/tree/main/terraform-apply#applying-a-plan-using-a-comment
       PR_CHECKOUT_REF: refs/pull/${{ github.event.issue.number }}/merge
     steps:
       - name: Check inputs
@@ -184,7 +184,7 @@ jobs:
         if: ${{ inputs.create_oidc_token_file }}
         run: echo "${{ steps.idtoken.outputs.id_token }}" >> idtoken.json
 
-      - name: Assume AWS Role if AWS_ROLE_ARN var is set
+      - name: Assume AWS Role when AWS_ROLE_ARN is set
         uses: aws-actions/configure-aws-credentials@00943011d9042930efac3dcd3a170e4273319bc8 # v5.1.0
         if: vars.AWS_ROLE_ARN != ''
         with:
