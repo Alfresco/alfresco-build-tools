@@ -25,9 +25,6 @@ inputs:
   property-to-update:
     description: Maven property to update in case of a preview.
     required: false
-  maven-username:
-    description: Nexus user name
-    required: true
   quay-username:
     description: Quay.io user name
     required: false

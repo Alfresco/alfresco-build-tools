@@ -90,8 +90,6 @@ runs:
           -Dsonar.coverage.jacoco.xmlReportPaths=${{ inputs.sonar-coverage-jacoco-xmlReportPaths }}
         property-to-update: ${{ inputs.property-to-update }}
         maven-resolver-transport-options: ${{ inputs.maven-resolver-transport-options }}
-        maven-username: ${{ inputs.maven-username }}
-        maven-password: ${{ inputs.maven-password }}
         ghcr-username: ${{ inputs.ghcr-username }}
         ghcr-password: ${{ inputs.ghcr-password }}
         maven-version: ${{ inputs.maven-version }}
