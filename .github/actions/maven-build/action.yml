@@ -15,6 +15,10 @@ inputs:
   maven-command:
     description: The maven command to execute
     required: false
+  maven-version:
+    description: Maven version to set up.
+    required: false
+    default: ''
   maven-resolver-transport-options:
       description: Maven resolver transport options
       required: false
