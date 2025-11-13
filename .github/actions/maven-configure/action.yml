@@ -14,14 +14,6 @@ inputs:
     description: Maven version to set up.
     required: false
     default: ''
-  maven-build-cache-key:
-    description: The build cache key to use for Maven build cache.
-    required: false
-    default: ''
-  maven-build-cache-skip-label:
-    description: The label to skip Maven build cache.
-    required: false
-    default: 'maven-build-cache-skip'
   skip-tests-label:
     description: The label to skip tests.
     required: false
@@ -103,22 +95,3 @@ runs:
         GITHUB_PR_NUMBER=PR-${{ github.event.pull_request.number }}
         echo "preview-version=0.0.1-$GITHUB_PR_NUMBER-SNAPSHOT" >> $GITHUB_OUTPUT
         echo "GITHUB_PR_NUMBER=$GITHUB_PR_NUMBER" >> $GITHUB_ENV
-
-    - name: Set MAVEN_BUILD_CACHE_ENABLED env variable
-      id: set-use-maven_build-cache-env-variable
-      env:
-        MAVEN_BUILD_CACHE_ENABLED: ${{ inputs.maven-build-cache-key != '' && !contains(github.event.pull_request.labels.*.name, inputs.maven-build-cache-skip-label) }}
-        MAVEN_BUILD_CACHE_KEY: ${{ runner.os }}-build-cache-${{ inputs.maven-build-cache-key }}
-      shell: bash
-      run: |
-        echo "MAVEN_BUILD_CACHE_ENABLED=$MAVEN_BUILD_CACHE_ENABLED" >> $GITHUB_ENV
-        echo "MAVEN_BUILD_CACHE_KEY=$MAVEN_BUILD_CACHE_KEY" >> $GITHUB_ENV
-
-    - uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-      name: Restore Maven Build Cache before build
-      if: env.MAVEN_BUILD_CACHE_ENABLED == 'true'
-      with:
-        path: ~/.m2/build-cache
-        key: ${{ env.MAVEN_BUILD_CACHE_KEY }}
-        restore-keys: |
-          ${{ runner.os }}-build-cache-${{ inputs.maven-build-cache-key }}

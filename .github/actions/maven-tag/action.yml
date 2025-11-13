@@ -7,9 +7,6 @@ inputs:
   maven-version:
     description: Maven version to use.
     required: true
-  maven-build-cache-key:
-    description: Maven build cache key.
-    required: false
   property-to-update:
     description: Maven property to update.
     required: false
@@ -46,7 +43,6 @@ runs:
       with:
         java-version: ${{ inputs.java-version }}
         maven-version: ${{ inputs.maven-version }}
-        maven-build-cache-key: ${{ inputs.maven-build-cache-key }}
 
     - name: Update pom files to the new version
       id: update-pom-to-next-version
