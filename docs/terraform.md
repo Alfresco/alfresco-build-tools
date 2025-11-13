@@ -60,7 +60,7 @@ An example workflow using this reusable workflow could look like this:
 
 ```yaml
 name: "terraform"
-run-name: "terraform ${{ inputs.terraform_operation || (github.event_name == 'issue_comment' && 'apply') || ((github.event_name == 'pull_request' || github.event_name == 'pull_request_review') && 'plan' || 'apply') }} on ${{ github.event_name == 'issue_comment' && 'pr comment' || github.base_ref || github.ref_name }}"
+run-name: "terraform ${{ inputs.terraform_operation || (github.event_name == 'issue_comment' && 'run') || ((github.event_name == 'pull_request' || github.event_name == 'pull_request_review') && 'plan' || 'apply') }} on ${{ github.event_name == 'issue_comment' && 'pr comment' || github.base_ref || github.ref_name }}"
 
 on:
   pull_request:
@@ -94,7 +94,7 @@ permissions:
 
 jobs: # one job for each terraform folder/stack
   invoke-terraform-infra:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v9.3.3
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v9.4.0
     with:
       terraform_root_path: infra
       terraform_operation: ${{ inputs.terraform_operation }}
@@ -102,7 +102,7 @@ jobs: # one job for each terraform folder/stack
 
   invoke-terraform-k8s:
     needs: invoke-terraform-infra
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v9.3.3
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v9.4.0
     with:
       terraform_root_path: k8s
       terraform_operation: ${{ inputs.terraform_operation }}
@@ -167,7 +167,7 @@ permissions:
 
 jobs:
   pre-commit:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v9.3.3
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v9.4.0
     with:
       BOT_GITHUB_USERNAME: ${{ vars.BOT_GITHUB_USERNAME }}
     secrets: inherit

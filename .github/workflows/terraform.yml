@@ -51,6 +51,23 @@ jobs:
     name: compute basic variables
     runs-on: ubuntu-latest
     steps:
+      - name: Validate inputs
+        env:
+          TERRAFORM_OPERATION: ${{ inputs.terraform_operation }}
+        run: |
+          if [ -z "${TERRAFORM_OPERATION}" ]; then
+            echo "terraform_operation is not set, defaulting to github event based handling."
+          else
+            case "${TERRAFORM_OPERATION}" in
+              apply|destroy|plan)
+                ;;
+              *)
+                echo "Invalid terraform_operation: ${TERRAFORM_OPERATION}. Must be 'apply', 'destroy', or 'plan'."
+                exit 1
+                ;;
+            esac
+          fi
+
       - name: Evaluate branch name
         id: basic_vars
         env:
@@ -87,8 +104,22 @@ jobs:
             exit 1
           fi
 
-          echo "Using environment: $environment"
           echo "environment_name=${environment}" >> "$GITHUB_OUTPUT"
+
+      - name: Add summary info
+        env:
+          COMMENT_CONTAINS_TERRAFORM_PLAN: ${{ contains(github.event.comment.body, 'terraform plan') || false }}
+          COMMENT_CONTAINS_TERRAFORM_APPLY: ${{ contains(github.event.comment.body, 'terraform apply') || false }}
+        run: |
+          echo "### Running Terraform 🚀" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Environment: **${{ steps.basic_vars.outputs.environment_name }}**" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ env.COMMENT_CONTAINS_TERRAFORM_PLAN }}" == "true" ]; then
+            echo "- Operation: **plan**" >> "$GITHUB_STEP_SUMMARY"
+          elif [ "${{ env.COMMENT_CONTAINS_TERRAFORM_APPLY }}" == "true" ]; then
+            echo "- Operation: **apply**" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- Operation: **${{ inputs.terraform_operation || ((github.event_name == 'pull_request' || github.event_name == 'pull_request_review') && 'plan' || 'apply') }}**" >> "$GITHUB_STEP_SUMMARY"
+          fi
     outputs:
       environment_name: ${{ steps.basic_vars.outputs.environment_name }}
 
@@ -142,23 +173,19 @@ jobs:
         else
           echo "⚙️ Skipping kubectl installation"
         fi
-      # https://github.com/dflook/terraform-github-actions/tree/main/terraform-apply#applying-a-plan-using-a-comment
 
+      # https://github.com/dflook/terraform-github-actions/tree/main/terraform-apply#applying-a-plan-using-a-comment
       PR_CHECKOUT_REF: refs/pull/${{ github.event.issue.number }}/merge
     steps:
-      - name: Check inputs
+      - name: Check environment requirements
         run: |
-          if [ -z "${{ inputs.terraform_operation }}" ]; then
-            echo "terraform_operation is not set, defaulting to github event based handling."
-          else
-            case "${{ inputs.terraform_operation }}" in
-              apply|destroy|plan)
-                ;;
-              *)
-                echo "Invalid terraform_operation: ${{ inputs.terraform_operation }}. Must be 'apply', 'destroy', or 'plan'."
-                exit 1
-                ;;
-            esac
+          if [ -z "${{ vars.RESOURCE_NAME }}" ]; then
+            echo "RESOURCE_NAME must be set in the vars context to provide a unique identifier"
+            exit 1
+          fi
+          if [ -z "${{ vars.TERRAFORM_STATE_BUCKET }}" ]; then
+            echo "TERRAFORM_STATE_BUCKET must be set in the vars context"
+            exit 1
           fi
 
       - name: Checkout
@@ -184,7 +211,7 @@ jobs:
         if: ${{ inputs.create_oidc_token_file }}
         run: echo "${{ steps.idtoken.outputs.id_token }}" >> idtoken.json
 
-      - name: Assume AWS Role if AWS_ROLE_ARN var is set
+      - name: Assume AWS Role when AWS_ROLE_ARN is set
         uses: aws-actions/configure-aws-credentials@00943011d9042930efac3dcd3a170e4273319bc8 # v5.1.0
         if: vars.AWS_ROLE_ARN != ''
         with:
@@ -193,23 +220,12 @@ jobs:
           role-session-name: TerraformWorkflow
 
       - name: Load environment variables from yml
-        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v9.3.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v9.4.0
         with:
           yml_path: ${{ inputs.terraform_root_path }}/tfenv.yml
 
-      - name: Check vars requirements
-        run: |
-          if [ -z "${{ vars.RESOURCE_NAME }}" ]; then
-            echo "RESOURCE_NAME must be set in the vars context to provide a unique identifier"
-            exit 1
-          fi
-          if [ -z "${{ vars.TERRAFORM_STATE_BUCKET }}" ]; then
-            echo "TERRAFORM_STATE_BUCKET must be set in the vars context"
-            exit 1
-          fi
-
       - name: Terraform validate
-        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_review'
+        if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_review') && github.run_attempt == 1
         uses: dflook/terraform-validate@03889814f1c6cf2fea714787218b2f4edc85c369 # v2.2.2
         with:
           path: ${{ inputs.terraform_root_path }}
@@ -219,7 +235,7 @@ jobs:
 
       - name: Terraform plan
         uses: dflook/terraform-plan@dc251c444763eed5defd065b866874b6343017ca # v2.2.2
-        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_review' || inputs.terraform_operation == 'plan'
+        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_review' || inputs.terraform_operation == 'plan' || (github.event_name == 'issue_comment' && contains(github.event.comment.body, 'terraform plan'))
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
           path: ${{ inputs.terraform_root_path }}
