@@ -76,7 +76,7 @@ runs:
         NTP='--no-transfer-progress'
         ${{ inputs.verbose }} && NTP=''
         TEST_OPTIONS=''
-        [[ $SKIP_TESTS == 'true' ]] && TEST_OPTIONS='-DskipTests=true -DskipITs=true'
+        [[ $SKIP_TESTS == 'true' ]] && TEST_OPTIONS='-DskipTests=true -DskipITs=true -DskipUTs=true'
         echo "result=--show-version --settings settings.xml $NTP $TEST_OPTIONS" >> $GITHUB_OUTPUT
 
     - name: Set is_preview env variable
