@@ -23,7 +23,7 @@ jobs:
         uses: hyland/github-actions-ensure-sha-pinned-actions@22ca7a8cf33e873ba1d6fbcd2b71fa0ec5006b17 # v1.1.0
         with:
           allowlist: |
-            Alfresco/alfresco-build-tools/
+            Alfresco/alfresco-build-tools/*
   test:
     runs-on: ${{ matrix.os }}
     needs: build
