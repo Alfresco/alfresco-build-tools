@@ -51,7 +51,7 @@ runs:
         fi
 
         if [[ -z "$BRANCH_REGEX" ]]; then
-          echo "valid-branch-regex=^(revert-)|(improvement|fix|feature|test|tmp)\/($JIRA_KEY)-[0-9]+[_-]{1}[A-Za-z0-9._-]+$" >> $GITHUB_OUTPUT
+          echo "valid-branch-regex=^(revert-|copilot.*|(improvement|fix|feature|test|tmp)\/($JIRA_KEY)-[0-9]+[_-]{1}[A-Za-z0-9._-]+)$" >> $GITHUB_OUTPUT
         else
           echo "valid-branch-regex=$BRANCH_REGEX" >> $GITHUB_OUTPUT
         fi
