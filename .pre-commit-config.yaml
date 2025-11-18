@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-yaml
         args: [--allow-multiple-documents]
@@ -17,26 +17,21 @@ repos:
       - id: trailing-whitespace
         exclude: '.*/dist/.*'
   - repo: https://github.com/sirosen/check-jsonschema
-    rev: 0.31.0
+    rev: 0.34.1
     hooks:
       - id: check-dependabot
       - id: check-github-actions
       - id: check-github-workflows
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.43.0
+    rev: v0.45.0
     hooks:
     - id: markdownlint
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.7
+    rev: v1.7.8
     hooks:
       - id: actionlint
   - repo: local
     hooks:
-      - id: generate-dependabot
-        name: Generate dependabot config for actions
-        language: system
-        entry: ./update-dependabot.sh
-        pass_filenames: false
       - id: check-readme
         name: Check README entries
         language: system

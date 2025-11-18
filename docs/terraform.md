@@ -60,7 +60,7 @@ An example workflow using this reusable workflow could look like this:
 
 ```yaml
 name: "terraform"
-run-name: "terraform ${{ inputs.terraform_operation || (github.event_name == 'issue_comment' && 'apply') || ((github.event_name == 'pull_request' || github.event_name == 'pull_request_review') && 'plan' || 'apply') }} on ${{ github.event_name == 'issue_comment' && 'pr comment' || github.base_ref || github.ref_name }}"
+run-name: "terraform ${{ inputs.terraform_operation || (github.event_name == 'issue_comment' && 'run') || ((github.event_name == 'pull_request' || github.event_name == 'pull_request_review') && 'plan' || 'apply') }} on ${{ github.event_name == 'issue_comment' && 'pr comment' || github.base_ref || github.ref_name }}"
 
 on:
   pull_request:
@@ -94,7 +94,7 @@ permissions:
 
 jobs: # one job for each terraform folder/stack
   invoke-terraform-infra:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v8.35.2
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v9.4.1
     with:
       terraform_root_path: infra
       terraform_operation: ${{ inputs.terraform_operation }}
@@ -102,7 +102,7 @@ jobs: # one job for each terraform folder/stack
 
   invoke-terraform-k8s:
     needs: invoke-terraform-infra
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v8.35.2
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v9.4.1
     with:
       terraform_root_path: k8s
       terraform_operation: ${{ inputs.terraform_operation }}
@@ -167,23 +167,17 @@ permissions:
 
 jobs:
   pre-commit:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v8.35.2
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v9.4.1
     with:
       BOT_GITHUB_USERNAME: ${{ vars.BOT_GITHUB_USERNAME }}
     secrets: inherit
 ```
 
-## Environment badges
+## Branch promotion workflow
 
-At the top of the README file, you should list a badge for every configured environment, to ease raising PRs to keep them up to date. You can use the following Markdown snippet to add a badge for each environment:
+For Terraform projects with multiple environment branches, you can use the
+branch promotion workflow to automate the creation of pull requests when
+promoting changes across environments.
 
-```markdown
-[![update ENV-NAME env](https://img.shields.io/badge/⚠️-update%20ENV--NAME%20env-blue)](https://github.com/Alfresco/REPO-NAME/compare/ENV-NAME...develop?expand=1&title=Update%20ENV-NAME%20env)
-```
-
-Replace `REPO-NAME` with the name of the GitHub repository and `ENV-NAME` with
-the name of the environment (e.g., `development`, `staging`, `production`) which
-also correspond to the branch name.
-
-Please note that `img.shields.io` badge also requires escaping single dash to
-double dash to work properly.
+See [main documentation](README.md#branch-promotion-prs) for usage
+documentation.

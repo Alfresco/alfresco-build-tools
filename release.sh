@@ -22,6 +22,6 @@ echo "Going to flip refs to $1"
 
 grep -Rl "Alfresco/alfresco-build-tools.*@$CURRENT_VERSION" | xargs sed -i -e "s/\(Alfresco\/alfresco-build-tools.*@\)$CURRENT_VERSION/\1$1/g"
 sed -i -e "s/$CURRENT_VERSION/$1/" .pre-commit-config.yaml
-sed -i -e "s/$CURRENT_VERSION/$1/" docs/terraform.md
+sed -i -e "s/@$CURRENT_VERSION/@$1/" docs/*.md
 
-echo "Rename completed succesfully"
+echo "Bump to $1 completed successfully."

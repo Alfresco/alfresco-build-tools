@@ -35,7 +35,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+    - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
       if: ${{ inputs.node_install }}
       with:
         node-version: ${{ inputs.node_version }}
@@ -61,7 +61,7 @@ runs:
       shell: bash
     - name: Autocommit changes
       if: inputs.dry_run == 'false'
-      uses: stefanzweifel/git-auto-commit-action@778341af668090896ca464160c2def5d1d1a3eb0 # v6.0.1
+      uses: stefanzweifel/git-auto-commit-action@28e16e81777b558cc906c8750092100bbb34c5e3 # v7.0.0
       with:
         commit_message: Auto update TOC in ${{ inputs.md_src }}
         disable_globbing: true

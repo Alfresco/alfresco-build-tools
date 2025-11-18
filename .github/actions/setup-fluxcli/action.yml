@@ -4,11 +4,11 @@ inputs:
   version:
     description: 'Version of Flux CLI'
     required: false
-    default: 2.6.4
+    default: 2.7.3
 runs:
   using: "composite"
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v8.35.2
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v9.4.1
       with:
         binary_name: flux
         repo: fluxcd/flux2

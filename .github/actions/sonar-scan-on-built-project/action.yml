@@ -65,20 +65,20 @@ runs:
   using: composite
   steps:
     - name: Download target
-      uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+      uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
       with:
         pattern: ${{ inputs.target-folder-artifacts-pattern }}
         merge-multiple: true
 
     - name: Download M2 build artifacts
-      uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+      uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
       with:
         pattern: ${{ inputs.m2-current-build-artifacts-pattern }}
         merge-multiple: true
         path: ${{ inputs.m2-uploaded-group-path }}
 
     - name: SonarQube Scan
-      uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@v8.35.2
+      uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@v9.4.1
       env:
         SONAR_TOKEN: ${{ inputs.sonar-token }}
       with:
@@ -90,8 +90,6 @@ runs:
           -Dsonar.coverage.jacoco.xmlReportPaths=${{ inputs.sonar-coverage-jacoco-xmlReportPaths }}
         property-to-update: ${{ inputs.property-to-update }}
         maven-resolver-transport-options: ${{ inputs.maven-resolver-transport-options }}
-        maven-username: ${{ inputs.maven-username }}
-        maven-password: ${{ inputs.maven-password }}
         ghcr-username: ${{ inputs.ghcr-username }}
         ghcr-password: ${{ inputs.ghcr-password }}
         maven-version: ${{ inputs.maven-version }}
