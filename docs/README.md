@@ -583,7 +583,7 @@ The inputs `jira-project-key`, `valid-branch-regex` and `valid-pr-title-regex` a
 
 If the branch name starts with `(revert-)` it will be considered valid.
 
-If the branch name starts with '(copilot)' it will be considered valid.
+If the branch name starts with `copilot` it will be considered valid.
 
 Examples:
 
