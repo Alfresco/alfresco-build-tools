@@ -546,6 +546,12 @@ Checks if the branch name and pull request title follow conventions.
 
 This action is only valid for workflows triggered by the `pull_request` event.
 
+**Note**: The following types of branches automatically bypass all validation checks:
+
+- Dependabot PRs (user: `dependabot[bot]`)
+- Propagation PRs (branches starting with `pr-*`)
+- Copilot-generated PRs (branches starting with `copilot/`, `copilot-`, or `copilot_`)
+
 Enforce PR conventions with a Jira ticket reference, assuming the Jira project key is `JKEY`:
 
 ```yaml
@@ -579,13 +585,15 @@ To exempt specific branch names from *both* checks, the optional input parameter
 
 The inputs `jira-project-key`, `valid-branch-regex` and `valid-pr-title-regex` are optional: if `valid-branch-regex` or `valid-pr-title-regex` are not provided, the action will consume `jira-project-key` to generate the default regex.
 
-**Default regex for Branch name**: `"^(revert-)|(improvement|fix|feature|test|tmp)\/($JIRA_KEY)-[0-9]+[_-]{1}[A-Za-z0-9._-]+$"`
+**Default regex for Branch name**: `"^(revert-)|(improvement|fix|feature|test|tmp|copilot)\/($JIRA_KEY)-[0-9]+[_-]{1}[A-Za-z0-9._-]+$"`
 
 If the branch name starts with `(revert-)` it will be considered valid.
 
 Examples:
 
 ✅ improvement/JKEY-12345-the-topic-of-the-branch
+
+✅ copilot/JKEY-12345-the-topic-of-the-branch
 
 ✅ revert-123-improvement/JKEY-12345-the-topic-of-the-branch
 

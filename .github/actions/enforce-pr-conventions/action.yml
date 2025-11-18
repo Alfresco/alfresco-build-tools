@@ -22,13 +22,13 @@ runs:
     - name: Get branch name
       uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v9.4.1
 
-    - name: Check is Dependabot PR or Propagation PR
+    - name: Check is Dependabot PR or Propagation PR or Copilot PR
       id: check
       env:
         PR_USER: ${{ github.event.pull_request.user.login }}
       shell: bash
       run: |
-          if [[ $PR_USER != 'dependabot[bot]' && $BRANCH_NAME != pr-* ]]; then
+          if [[ $PR_USER != 'dependabot[bot]' && $BRANCH_NAME != pr-* && $BRANCH_NAME != copilot/* && $BRANCH_NAME != copilot-* && $BRANCH_NAME != copilot_* ]]; then
             echo "continue=true" >> $GITHUB_OUTPUT
           else
             echo "continue=false" >> $GITHUB_OUTPUT
@@ -51,7 +51,7 @@ runs:
         fi
 
         if [[ -z "$BRANCH_REGEX" ]]; then
-          echo "valid-branch-regex=^(revert-)|(improvement|fix|feature|test|tmp)\/($JIRA_KEY)-[0-9]+[_-]{1}[A-Za-z0-9._-]+$" >> $GITHUB_OUTPUT
+          echo "valid-branch-regex=^(revert-)|(improvement|fix|feature|test|tmp|copilot)\/($JIRA_KEY)-[0-9]+[_-]{1}[A-Za-z0-9._-]+$" >> $GITHUB_OUTPUT
         else
           echo "valid-branch-regex=$BRANCH_REGEX" >> $GITHUB_OUTPUT
         fi
