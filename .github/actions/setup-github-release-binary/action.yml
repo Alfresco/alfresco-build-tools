@@ -36,6 +36,7 @@ runs:
         VERSION: ${{ inputs.version }}
         URL_TEMPLATE: ${{ inputs.url_template }}
         BINARY_NAME: ${{ inputs.binary_name }}
+      working-directory: ${{ runner.temp }}
       run: |
         NAME=${BINARY_NAME:-${REPO##*\/}}
         OS=${OS:-$(uname | tr '[:upper:]' '[:lower:]')}
@@ -54,10 +55,12 @@ runs:
 
         if [[ "$ARCHIVE" == *.zip ]]; then
           unzip -j -qq "$ARCHIVE" "*$NAME" -d .
-        else
+        elif [[ "$ARCHIVE" == *.tar.gz ]] || [[ "$ARCHIVE" == *.tgz ]]; then
           tar -xzf "$ARCHIVE" "$NAME"
+        else
+          mv "$ARCHIVE" "$NAME"
+          chmod +x "$NAME"
         fi
-        rm -f "$ARCHIVE"
 
         sudo mv $NAME /usr/local/bin/$NAME
         $NAME ${{ inputs.test_args }}
