@@ -3,6 +3,7 @@ description: >-
   Builds a maven project using the provided command. If the inputs `jacoco-report-name`, `target-folder-upload-name` and `m2-current-build-upload-name` are provided,
   it also generates aggregated coverage reports and makes them available as build artifact for a next job processing it. It's typically followed by a job containing a step
   with the action `sonar-scan-on-built-project`.
+  Parameters with maven credentials have to be passed as environment variables.
 inputs:
   java-version:
     description: The Java version to perform the build
