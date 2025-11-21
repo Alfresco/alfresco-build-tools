@@ -91,6 +91,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [maven-update-pom-version](#maven-update-pom-version)
     - [md-toc](#md-toc)
     - [nexus-move-artifacts](#nexus-move-artifacts)
+    - [nuxeo-docker-build](#nuxeo-docker-build)
     - [pre-commit](#pre-commit)
     - [process-coverage-report](#process-coverage-report)
     - [pipenv](#pipenv)
@@ -1459,6 +1460,84 @@ Moves artifacts from one repository to another on Nexus 3, identified by a parti
           group: com.company
           version: 1.0.0
 ```
+
+### nuxeo-docker-build
+
+Builds a custom Nuxeo Docker image with packages from Nuxeo Connect and/or local addon files.
+
+This action allows you to:
+
+- Use any Nuxeo base image as a starting point
+- Install packages from Nuxeo Connect with authentication
+- Install local addon JARs/ZIPs
+- Add custom Dockerfile instructions
+- Support multi-platform builds (amd64, arm64)
+- Push to any container registry (GHCR, Quay, Docker Hub, or custom)
+
+**Basic usage with local addons:**
+
+```yaml
+      - name: Build addon
+        run: mvn clean package -DskipTests
+
+      - uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo-docker-build@v9.5.0
+        with:
+          base-image: nuxeo:2023
+          local-addons: "target/my-nuxeo-addon-1.0.0.jar"
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
+```
+
+**With Nuxeo Connect packages:**
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo-docker-build@v9.5.0
+        with:
+          base-image: docker.packages.nuxeo.com/nuxeo/nuxeo:2023.x
+          nuxeo-connect-username: ${{ secrets.NUXEO_CONNECT_USERNAME }}
+          nuxeo-connect-password: ${{ secrets.NUXEO_CONNECT_PASSWORD }}
+          nuxeo-packages: "nuxeo-web-ui nuxeo-dam nuxeo-platform-3d"
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
+```
+
+**Complete example with all features:**
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo-docker-build@v9.5.0
+        with:
+          base-image: docker.packages.nuxeo.com/nuxeo/nuxeo:2023.x
+          nuxeo-connect-username: ${{ secrets.NUXEO_CONNECT_USERNAME }}
+          nuxeo-connect-password: ${{ secrets.NUXEO_CONNECT_PASSWORD }}
+          nuxeo-packages: "nuxeo-web-ui nuxeo-dam"
+          local-addons: "target/my-addon-1.0.0.jar custom-packages/other-addon.zip"
+          custom-dockerfile: docker/custom.dockerfile
+          image-name: my-custom-nuxeo
+          image-tag: ${{ github.ref_name }}
+          registry: ghcr.io
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
+          platforms: linux/amd64,linux/arm64
+          labels: |
+            org.opencontainers.image.description=My Custom Nuxeo Platform
+            maintainer=devops@example.com
+```
+
+The action outputs the full image URL with digest which can be used in subsequent steps:
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo-docker-build@v9.5.0
+        id: build-nuxeo
+        with:
+          base-image: nuxeo:2023
+          local-addons: "target/my-addon.jar"
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Use built image
+        run: |
+          echo "Built image: ${{ steps.build-nuxeo.outputs.image-url }}"
+          echo "Image tag: ${{ steps.build-nuxeo.outputs.image-tag }}"
+          echo "Image digest: ${{ steps.build-nuxeo.outputs.image-digest }}"
+```
+
+See the [action's README](../.github/actions/nuxeo-docker-build/README.md) for complete documentation.
 
 ### pre-commit
 
