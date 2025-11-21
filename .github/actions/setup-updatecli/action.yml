@@ -3,11 +3,11 @@ description: 'Install updatecli binary'
 inputs:
   version:
     description: 'Version of binary'
-    default: 0.110.1
+    default: 0.110.3
 runs:
   using: "composite"
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v9.4.1
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v9.5.0
       with:
         repo: updatecli/updatecli
         version: ${{ inputs.version }}

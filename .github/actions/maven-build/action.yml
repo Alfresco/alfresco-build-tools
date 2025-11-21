@@ -92,7 +92,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@v9.4.1
+    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@v9.5.0
       id: maven-configure
       with:
         java-version: ${{ inputs.java-version }}
@@ -104,7 +104,7 @@ runs:
 
     - name: Update pom files to the preview version
       if: steps.maven-configure.outputs.preview-version != ''
-      uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@v9.4.1
+      uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@v9.5.0
 
       with:
         version: ${{ steps.maven-configure.outputs.preview-version }}
@@ -159,7 +159,7 @@ runs:
     - name: Remove running docker containers
       if: inputs.reuse-testcontainers == 'true'
       shell: bash
-      run: docker rm -f $(docker ps -a -q)
+      run: docker ps -aq | xargs -r docker rm -f
       continue-on-error: true
 
     - name: Echo Longest Tests run

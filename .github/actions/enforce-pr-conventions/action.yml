@@ -20,7 +20,7 @@ runs:
   using: composite
   steps:
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v9.4.1
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v9.5.0
 
     - name: Check is Dependabot PR or Propagation PR
       id: check
@@ -51,7 +51,7 @@ runs:
         fi
 
         if [[ -z "$BRANCH_REGEX" ]]; then
-          echo "valid-branch-regex=^(revert-)|(improvement|fix|feature|test|tmp)\/($JIRA_KEY)-[0-9]+[_-]{1}[A-Za-z0-9._-]+$" >> $GITHUB_OUTPUT
+          echo "valid-branch-regex=^(revert-|copilot.*|(improvement|fix|feature|test|tmp)\/($JIRA_KEY)-[0-9]+[_-]{1}[A-Za-z0-9._-]+)$" >> $GITHUB_OUTPUT
         else
           echo "valid-branch-regex=$BRANCH_REGEX" >> $GITHUB_OUTPUT
         fi
