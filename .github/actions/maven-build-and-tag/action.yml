@@ -201,7 +201,7 @@ runs:
     - name: Remove running docker containers
       if: inputs.reuse-testcontainers == 'true'
       shell: bash
-      run: docker rm -f $(docker ps -a -q)
+      run: docker ps -aq | xargs -r docker rm -f
       continue-on-error: true
 
     - uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
