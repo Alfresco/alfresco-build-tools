@@ -1,229 +1,96 @@
----
-name: Build Nuxeo Docker Image
-description: Build a custom Nuxeo Docker image with packages from Nuxeo Connect and local addons
+name: nuxeo-docker-build
+description: Build a customized Nuxeo image (connect modules, local addons, optional OS packages) and push it.
 inputs:
-  base-image:
-    description: Base Nuxeo Docker image tag (e.g., nuxeo:2023 or docker.packages.nuxeo.com/nuxeo/nuxeo:2023.x)
+  base-image-tag:
+    description: Base Nuxeo image tag (e.g. docker-private.packages.nuxeo.com/nuxeo/nuxeo:2023)
     required: true
-  nuxeo-connect-username:
-    description: Nuxeo Connect username for downloading packages
+  nuxeo-connect-modules:
+    description: Space or comma separated list of Nuxeo Connect marketplace packages to install online
     required: false
-  nuxeo-connect-password:
-    description: Nuxeo Connect password for downloading packages
+    default: ""
+  local-addons-path:
+    description: Path (directory) containing offline addon .zip/.jar files to install (relative to repository root)
     required: false
-  nuxeo-packages:
-    description: |
-      Space-separated list of Nuxeo package IDs to install from Nuxeo Connect.
-      Example: "nuxeo-web-ui nuxeo-platform-3d"
+  os-packages:
+    description: Space separated list of OS packages to install via private yum repo (optional)
     required: false
-  local-addons:
-    description: |
-      Space-separated list of local addon JAR/ZIP files to install.
-      Files should be relative to the base-directory.
-      Example: "target/my-addon-1.0.jar custom-packages/another-addon.zip"
-    required: false
-  custom-dockerfile:
-    description: |
-      Path to a custom Dockerfile with additional instructions to append.
-      The file should contain only the additional instructions (FROM will be prepended automatically).
-      If not provided, a default Dockerfile will be generated.
-    required: false
-  base-directory:
-    description: Base working directory
-    required: false
-    default: .
+    default: ""
   image-name:
-    description: |
-      Name of the output image (without tag). If not provided, uses repository name.
-      Example: "my-custom-nuxeo" or "ghcr.io/myorg/custom-nuxeo"
+    description: Image name without registry (defaults to <repo>-nuxeo)
     required: false
+    default: ""
   image-tag:
-    description: Tag for the output image. Defaults to branch/tag name sanitized.
+    description: Image tag to use (defaults to sanitized ref name or short sha)
     required: false
+    default: ""
   registry:
-    description: |
-      Container registry to push the image to. Defaults to ghcr.io.
-      Options: ghcr.io, quay.io, docker.io, or custom registry URL
+    description: Target registry (default ghcr.io)
     required: false
     default: ghcr.io
-  registry-username:
-    description: Username for container registry authentication
-    required: false
-    default: ${{ github.actor }}
-  registry-password:
-    description: Password/token for container registry authentication
-    required: true
-  push:
-    description: Whether to push the built image to the registry
-    required: false
-    default: "true"
   platforms:
-    description: |
-      Comma-separated list of platforms to build for.
-      Example: "linux/amd64,linux/arm64"
+    description: Comma separated build platforms
     required: false
-    default: linux/amd64
-  build-args:
-    description: |
-      Additional build arguments to pass to docker build (newline-separated).
-      Example: |
-        ARG1=value1
-        ARG2=value2
+    default: linux/amd64,linux/arm64
+  push-image:
+    description: Force push image even on PR (true/false). Default push only on push events.
     required: false
-  labels:
-    description: |
-      Additional labels to add to the image (newline-separated).
-      Example: |
-        org.opencontainers.image.description=My Custom Nuxeo
-        maintainer=myteam@example.com
-    required: false
+    default: ""
 
 outputs:
   image-url:
-    description: Full URL of the built image with digest
-    value: ${{ steps.build-and-push.outputs.imageid }}
-  image-tag:
-    description: The tag used for the image
-    value: ${{ steps.set-image-vars.outputs.image-tag }}
-  image-digest:
-    description: The digest of the pushed image
-    value: ${{ steps.build-and-push.outputs.digest }}
+    description: Fully qualified image reference (registry/image-name:image-tag)
+    value: ${{ steps.compute-output.outputs.image_url }}
 
 runs:
   using: composite
   steps:
-    - name: Set image variables
-      id: set-image-vars
+    - name: Prepare variables
+      id: prep
       shell: bash
       run: |
-        # Determine image name
-        if [ -n "${{ inputs.image-name }}" ]; then
-          IMAGE_NAME="${{ inputs.image-name }}"
-        else
-          # Extract repository name from GitHub context
-          IMAGE_NAME="${GITHUB_REPOSITORY#*/}"
-        fi
+        REF_NAME="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
+        SHORT_SHA="${GITHUB_SHA:0:12}"
+        SANITIZED_REF=$(echo "$REF_NAME" | sed -e 's/[^-_.[:alnum:]]/_/g')
+        IMAGE_TAG_INPUT='${{ inputs.image-tag }}'
+        IMAGE_TAG=${IMAGE_TAG_INPUT:-$SANITIZED_REF}
+        IMAGE_TAG=${IMAGE_TAG:-$SHORT_SHA}
+        REPO_NAME="${GITHUB_REPOSITORY##*/}"
+        IMAGE_NAME_INPUT='${{ inputs.image-name }}'
+        IMAGE_NAME=${IMAGE_NAME_INPUT:-"${REPO_NAME}-nuxeo"}
+        BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+        echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+        echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
 
-        # Determine image tag
-        if [ -n "${{ inputs.image-tag }}" ]; then
-          IMAGE_TAG="${{ inputs.image-tag }}"
-        else
-          # Get the branch or tag name
-          REF_NAME="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
-          # Sanitize: limit to 128 chars and replace invalid chars
-          IMAGE_TAG="$(echo "${REF_NAME:0:128}" | sed -e 's/[^-_.[:alnum:]]/_/g')"
-        fi
-
-        # Build full image reference
-        REGISTRY="${{ inputs.registry }}"
-        if [[ "$REGISTRY" != ghcr.io && "$REGISTRY" != quay.io && "$REGISTRY" != docker.io ]]; then
-          # Custom registry, use as-is
-          FULL_IMAGE="${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
-        else
-          # Standard registries, add organization
-          if [[ "$IMAGE_NAME" != */* ]]; then
-            # Add default org if not already prefixed
-            case "$REGISTRY" in
-              ghcr.io)
-                IMAGE_NAME="${GITHUB_REPOSITORY_OWNER,,}/${IMAGE_NAME}"
-                ;;
-              quay.io)
-                IMAGE_NAME="${GITHUB_REPOSITORY_OWNER,,}/${IMAGE_NAME}"
-                ;;
-              docker.io)
-                IMAGE_NAME="${GITHUB_REPOSITORY_OWNER,,}/${IMAGE_NAME}"
-                ;;
-            esac
-          fi
-          FULL_IMAGE="${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
-        fi
-
-        echo "image-name=${IMAGE_NAME}" >> $GITHUB_OUTPUT
-        echo "image-tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
-        echo "full-image=${FULL_IMAGE}" >> $GITHUB_OUTPUT
-
-        echo "📦 Image will be: ${FULL_IMAGE}"
-
-    - name: Create build context
+    - name: Ensure addons directory exists
       shell: bash
-      working-directory: ${{ inputs.base-directory }}
       run: |
-        set -e
-        BUILD_DIR=".nuxeo-docker-build"
-        mkdir -p "${BUILD_DIR}"
-
-        echo "🏗️ Creating Nuxeo Docker build context..."
-
-        # Start Dockerfile
-        cat > "${BUILD_DIR}/Dockerfile" <<'DOCKERFILE_START'
-        FROM ${{ inputs.base-image }}
-
-        USER root
-
-        DOCKERFILE_START
-
-        # Add Nuxeo Connect credentials if provided
-        if [ -n "${{ inputs.nuxeo-connect-username }}" ] && [ -n "${{ inputs.nuxeo-connect-password }}" ]; then
-          cat >> "${BUILD_DIR}/Dockerfile" <<'DOCKERFILE_CONNECT'
-        # Configure Nuxeo Connect credentials
-        ARG NUXEO_CONNECT_USERNAME
-        ARG NUXEO_CONNECT_PASSWORD
-        ENV NUXEO_CONNECT_USERNAME=${NUXEO_CONNECT_USERNAME}
-        ENV NUXEO_CONNECT_PASSWORD=${NUXEO_CONNECT_PASSWORD}
-
-        DOCKERFILE_CONNECT
+        ADDONS_DIR='${{ inputs.local-addons-path }}'
+        if [ ! -d "$ADDONS_DIR" ]; then
+          echo "Local addons directory '$ADDONS_DIR' not found. Creating empty directory." >&2
+          mkdir -p "$ADDONS_DIR"
         fi
 
-        # Install packages from Nuxeo Connect
-        if [ -n "${{ inputs.nuxeo-packages }}" ]; then
-          echo "📦 Adding Nuxeo Connect packages: ${{ inputs.nuxeo-packages }}"
-          for package in ${{ inputs.nuxeo-packages }}; do
-            echo "RUN nuxeoctl mp-install ${package} --accept=true --relax=false" >> "${BUILD_DIR}/Dockerfile"
-          done
+    - name: Decide push policy
+      id: push-policy
+      shell: bash
+      run: |
+        FORCE='${{ inputs.push-image }}'
+        if [ -n "$FORCE" ]; then
+          PUSH_IMAGE=$FORCE
+        else
+          if [ "$GITHUB_EVENT_NAME" = "push" ]; then PUSH_IMAGE=true; else PUSH_IMAGE=false; fi
         fi
+        echo "PUSH_IMAGE=$PUSH_IMAGE" >> $GITHUB_ENV
+        echo "push_image=$PUSH_IMAGE" >> $GITHUB_OUTPUT
 
-        # Copy and install local addons
-        if [ -n "${{ inputs.local-addons }}" ]; then
-          echo "📂 Adding local addon files..."
-          mkdir -p "${BUILD_DIR}/local-addons"
-
-          for addon in ${{ inputs.local-addons }}; do
-            if [ -f "${addon}" ]; then
-              addon_basename="$(basename "${addon}")"
-              cp "${addon}" "${BUILD_DIR}/local-addons/${addon_basename}"
-              echo "COPY local-addons/${addon_basename} /opt/nuxeo/server/nxserver/bundles/" >> "${BUILD_DIR}/Dockerfile"
-              echo "  ✅ Added: ${addon}"
-            else
-              echo "  ⚠️  Warning: File not found: ${addon}"
-            fi
-          done
-        fi
-
-        # Append custom Dockerfile instructions if provided
-        if [ -n "${{ inputs.custom-dockerfile }}" ]; then
-          if [ -f "${{ inputs.custom-dockerfile }}" ]; then
-            echo "" >> "${BUILD_DIR}/Dockerfile"
-            echo "# Custom instructions from ${{ inputs.custom-dockerfile }}" >> "${BUILD_DIR}/Dockerfile"
-            cat "${{ inputs.custom-dockerfile }}" >> "${BUILD_DIR}/Dockerfile"
-            echo "  ✅ Appended custom Dockerfile instructions"
-          else
-            echo "  ⚠️  Warning: Custom Dockerfile not found: ${{ inputs.custom-dockerfile }}"
-          fi
-        fi
-
-        # Finalize Dockerfile
-        cat >> "${BUILD_DIR}/Dockerfile" <<'DOCKERFILE_END'
-
-        # Reset to nuxeo user
-        USER 1000
-
-        DOCKERFILE_END
-
-        echo ""
-        echo "📄 Generated Dockerfile:"
-        echo "---"
-        cat "${BUILD_DIR}/Dockerfile"
-        echo "---"
+    - name: Login to GHCR (only if pushing)
+      if: env.PUSH_IMAGE == 'true'
+      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
@@ -231,56 +98,46 @@ runs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
       with:
-        version: v0.11.0
         driver-opts: |
           image=moby/buildkit:v0.11.6
           network=host
 
-    - name: Login to container registry
-      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
-      with:
-        registry: ${{ inputs.registry }}
-        username: ${{ inputs.registry-username }}
-        password: ${{ inputs.registry-password }}
-
-    - name: Extract metadata for Docker
-      id: meta
-      uses: docker/metadata-action@318604b99e75e41977312d83839a89be02ca4893 # v5.9.0
-      with:
-        images: ${{ steps.set-image-vars.outputs.full-image }}
-        labels: |
-          org.opencontainers.image.title=Custom Nuxeo Image
-          org.opencontainers.image.version=${{ steps.set-image-vars.outputs.image-tag }}
-          ${{ inputs.labels }}
-
-    - name: Build and push Docker image
-      id: build-and-push
+    - name: Build image
+      id: build
       uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+      env:
+        NUXEO_CLID: ${{ secrets.NUXEO_CLID }}
       with:
-        context: ${{ inputs.base-directory }}/.nuxeo-docker-build
+        context: .github/actions/nuxeo-docker-build
+        build-contexts: |
+          modules=${{ inputs.local-addons-path }}
+        push: ${{ env.PUSH_IMAGE }}
         platforms: ${{ inputs.platforms }}
-        push: ${{ inputs.push }}
-        tags: ${{ steps.set-image-vars.outputs.full-image }}
-        labels: ${{ steps.meta.outputs.labels }}
-        build-args: |
-          NUXEO_CONNECT_USERNAME=${{ inputs.nuxeo-connect-username }}
-          NUXEO_CONNECT_PASSWORD=${{ inputs.nuxeo-connect-password }}
-          ${{ inputs.build-args }}
         provenance: false
+        tags: ${{ inputs.registry }}/alfresco/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+        build-args: |
+          BASE_IMAGE=${{ inputs.base-image-tag }}
+          BUILD_TAG=${{ github.run_id }}
+          SCM_REF=${{ github.sha }}
+          VERSION=${{ env.IMAGE_TAG }}
+          BUILD_DATE=${{ env.BUILD_DATE }}
+          PACKAGES_LIST=${{ inputs.os-packages }}
+          NUXEO_CONNECT_MODULES=${{ inputs.nuxeo-connect-modules }}
+        secrets: |
+          id=nuxeo-private,src=.github/actions/nuxeo-docker-build/nuxeo-private.repo
+          id=NUXEO_CLID,env=NUXEO_CLID
 
-    - name: Output summary
+    - name: Summary
       shell: bash
-      if: inputs.push == 'true'
       run: |
-        {
-          echo "### 🚀 Nuxeo Docker Image Built"
-          echo ""
-          echo "**Image:** \`${{ steps.set-image-vars.outputs.full-image }}\`"
-          echo ""
-          echo "**Digest:** \`${{ steps.build-and-push.outputs.digest }}\`"
-          echo ""
-          echo "**Full Reference:**"
-          echo "\`\`\`"
-          echo "${{ steps.set-image-vars.outputs.full-image }}@${{ steps.build-and-push.outputs.digest }}"
-          echo "\`\`\`"
-        } >> $GITHUB_STEP_SUMMARY
+        echo "### :package: Nuxeo image build" >> $GITHUB_STEP_SUMMARY
+        echo "Registry: ${{ inputs.registry }}" >> $GITHUB_STEP_SUMMARY
+        echo "Image: ${{ inputs.registry }}/alfresco/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
+        if [ '${{ steps.push-policy.outputs.push_image }}' != 'true' ]; then
+          echo "(Not pushed - preview build)" >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: Compute output image URL
+      id: compute-output
+      shell: bash
+      run: echo "image_url=${{ inputs.registry }}/alfresco/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
