@@ -2,7 +2,13 @@ name: nuxeo-docker-build
 description: Build a customized Nuxeo image (connect modules, local addons, optional OS packages) and push it.
 inputs:
   base-image-tag:
-    description: Base Nuxeo image tag (e.g. docker-private.packages.nuxeo.com/nuxeo/nuxeo:2023)
+    description: Base Nuxeo image tag (defaults to docker-private.packages.nuxeo.com/nuxeo/nuxeo:2023)
+    required: false
+  base-registry-username:
+    description: Username to connect to base image registry
+    required: true
+  base-registry-password:
+    description: Password to connect to base image registry
     required: true
   nuxeo-connect-modules:
     description: Space or comma separated list of Nuxeo Connect marketplace packages to install online
@@ -20,7 +26,7 @@ inputs:
     required: false
     default: ""
   image-tag:
-    description: Image tag to use (defaults to sanitized ref name or short sha)
+    description: Image tag to use (defaults to short sha)
     required: false
     default: ""
   registry:
@@ -55,6 +61,9 @@ runs:
         IMAGE_NAME_INPUT='${{ inputs.image-name }}'
         IMAGE_NAME=${IMAGE_NAME_INPUT:-"${REPO_NAME}"}
         BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+        BASE_IMAGE="${{ inputs.base-image-tag }}"
+        BASE_REGISTRY="${BASE_IMAGE%%/*}"
+        echo "BASE_REGISTRY=$BASE_REGISTRY" >> $GITHUB_ENV
         echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
         echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
         echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
@@ -68,12 +77,19 @@ runs:
           mkdir -p "$ADDONS_DIR"
         fi
 
-    - name: Login to GHCR
+    - name: Login to base image registry
+      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+      with:
+        registry: ${{ env.BASE_REGISTRY }}
+        username: ${{ inputs.base-registry-username }}
+        password: ${{ inputs.base-registry-password }}
+
+    - name: Login to target registry
       uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
       with:
         registry: ${{ inputs.registry }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        username: ${{ inputs.registry-username || github.actor }}
+        password: ${{ inputs.registry-password || secrets.GITHUB_TOKEN }}
 
     - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
 
@@ -98,8 +114,12 @@ runs:
           SCM_REF=${{ github.sha }}
           VERSION=${{ env.IMAGE_TAG }}
           BUILD_DATE=${{ env.BUILD_DATE }}
-          PACKAGES_LIST=${{ inputs.os-packages }}
+          IMAGE_TITLE=${{ inputs.image-title }}
+          IMAGE_VENDOR=${{ inputs.image-vendor }}
           NUXEO_CONNECT_MODULES=${{ inputs.nuxeo-connect-modules }}
+          PACKAGES_LIST=${{ inputs.os-packages }}
+          PACKAGES_AUTH_USER=${{ inputs.os-packages-user }}
+          PACKAGES_AUTH_TOKEN=${{ inputs.os-packages-token }}
         secret-envs: |
           NUXEO_CLID=NUXEO_CLID
         secret-files: |
