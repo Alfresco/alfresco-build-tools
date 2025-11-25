@@ -44,7 +44,7 @@ RUN --mount=type=secret,id=nuxeo-private,target=/tmp/nuxeo-private.repo \
 
 USER nuxeo
 
-RUN --mount=type=bind,target=/modules \
+RUN --mount=type=bind,from=modules,target=/modules \
     --mount=type=secret,id=NUXEO_CLID,env=NUXEO_CLID \
     if [ -n "${NUXEO_CONNECT_MODULES}" ]; then \
         /install-packages.sh --clid ${NUXEO_CLID} ${NUXEO_CONNECT_MODULES}; \
