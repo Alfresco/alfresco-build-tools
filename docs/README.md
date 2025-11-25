@@ -1474,7 +1474,7 @@ Pushes the resulting image to a target registry (default `ghcr.io`) and outputs 
 
 ```yaml
       - name: Build Nuxeo image
-        uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo-docker-build@v9.7.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/nuxeo-docker-build@v9.7.0
         with:
           base-image-tag: docker-private.packages.nuxeo.com/nuxeo/nuxeo:2023
           nuxeo-connect-modules: "nuxeo-web-ui nuxeo-drive" # optional
