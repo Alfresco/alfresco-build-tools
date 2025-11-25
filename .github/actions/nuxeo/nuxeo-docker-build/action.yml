@@ -1,0 +1,127 @@
+name: nuxeo-docker-build
+description: Build a customized Nuxeo image (connect modules, local addons, optional OS packages) and push it.
+inputs:
+  base-image-tag:
+    description: Base Nuxeo image tag (e.g. docker-private.packages.nuxeo.com/nuxeo/nuxeo:2023)
+    required: true
+  nuxeo-connect-modules:
+    description: Space or comma separated list of Nuxeo Connect marketplace packages to install online
+    required: false
+    default: ""
+  local-addons-path:
+    description: Path (directory) containing offline addon .zip/.jar files to install (relative to repository root)
+    required: false
+  os-packages:
+    description: Space separated list of OS packages to install via private yum repo (optional)
+    required: false
+    default: ""
+  image-name:
+    description: Image name without registry (defaults to <repo>-nuxeo)
+    required: false
+    default: ""
+  image-tag:
+    description: Image tag to use (defaults to sanitized ref name or short sha)
+    required: false
+    default: ""
+  registry:
+    description: Target registry (default ghcr.io)
+    required: false
+    default: ghcr.io
+  platforms:
+    description: Comma separated build platforms
+    required: false
+    default: linux/amd64,linux/arm64
+  push-image:
+    description: Force push image even on PR (true/false). Default push only on push events.
+    required: false
+    default: ""
+
+outputs:
+  image-url:
+    description: Fully qualified image reference (registry/image-name:image-tag)
+    value: ${{ steps.compute-output.outputs.image_url }}
+
+runs:
+  using: composite
+  steps:
+    - name: Prepare variables
+      id: prep
+      shell: bash
+      run: |
+        REF_NAME="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
+        SHORT_SHA="${GITHUB_SHA:0:12}"
+        SANITIZED_REF=$(echo "$REF_NAME" | sed -e 's/[^-_.[:alnum:]]/_/g')
+        IMAGE_TAG_INPUT='${{ inputs.image-tag }}'
+        IMAGE_TAG=${IMAGE_TAG_INPUT:-$SANITIZED_REF}
+        IMAGE_TAG=${IMAGE_TAG:-$SHORT_SHA}
+        REPO_NAME="${GITHUB_REPOSITORY##*/}"
+        IMAGE_NAME_INPUT='${{ inputs.image-name }}'
+        IMAGE_NAME=${IMAGE_NAME_INPUT:-"${REPO_NAME}-nuxeo"}
+        BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+        echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+        echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
+
+    - name: Ensure addons directory exists
+      shell: bash
+      run: |
+        ADDONS_DIR='${{ inputs.local-addons-path }}'
+        if [ ! -d "$ADDONS_DIR" ]; then
+          echo "Local addons directory '$ADDONS_DIR' not found. Creating empty directory." >&2
+          mkdir -p "$ADDONS_DIR"
+        fi
+
+    - name: Login to GHCR (only if pushing)
+      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
+      with:
+        driver-opts: |
+          image=moby/buildkit:v0.11.6
+          network=host
+
+    - name: Build image
+      id: build
+      uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+      env:
+        NUXEO_CLID: ${{ secrets.NUXEO_CLID }}
+      with:
+        context: ${{ github.action_path }}
+        build-contexts: |
+          modules=${{ github.workspace }}/${{ inputs.local-addons-path }}
+        push: ${{ inputs.push-image }}
+        platforms: ${{ inputs.platforms }}
+        provenance: false
+        tags: ${{ inputs.registry }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+        build-args: |
+          BASE_IMAGE=${{ inputs.base-image-tag }}
+          BUILD_TAG=${{ github.run_id }}
+          SCM_REF=${{ github.sha }}
+          VERSION=${{ env.IMAGE_TAG }}
+          BUILD_DATE=${{ env.BUILD_DATE }}
+          PACKAGES_LIST=${{ inputs.os-packages }}
+          NUXEO_CONNECT_MODULES=${{ inputs.nuxeo-connect-modules }}
+        secret-envs: |
+          NUXEO_CLID=NUXEO_CLID
+        secret-files: |
+          nuxeo-private=${{ github.action_path }}/nuxeo-private.repo
+
+    - name: Summary
+      shell: bash
+      run: |
+        echo "### :package: Nuxeo image build" >> $GITHUB_STEP_SUMMARY
+        echo "Registry: ${{ inputs.registry }}" >> $GITHUB_STEP_SUMMARY
+        echo "Image: ${{ inputs.registry }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
+
+    - name: Compute output image URL
+      id: compute-output
+      shell: bash
+      run: echo "image_url=${{ inputs.registry }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
