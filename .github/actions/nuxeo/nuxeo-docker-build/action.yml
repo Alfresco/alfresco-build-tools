@@ -16,7 +16,7 @@ inputs:
     required: false
     default: ""
   image-name:
-    description: Image name without registry (defaults to <repo>-nuxeo)
+    description: Image name without registry (defaults to <repo>)
     required: false
     default: ""
   image-tag:
@@ -34,7 +34,7 @@ inputs:
   push-image:
     description: Force push image even on PR (true/false). Default push only on push events.
     required: false
-    default: ""
+    default: "false"
 
 outputs:
   image-url:
@@ -48,15 +48,12 @@ runs:
       id: prep
       shell: bash
       run: |
-        REF_NAME="${GITHUB_HEAD_REF:-$GITHUB_REF_NAME}"
         SHORT_SHA="${GITHUB_SHA:0:12}"
-        SANITIZED_REF=$(echo "$REF_NAME" | sed -e 's/[^-_.[:alnum:]]/_/g')
         IMAGE_TAG_INPUT='${{ inputs.image-tag }}'
-        IMAGE_TAG=${IMAGE_TAG_INPUT:-$SANITIZED_REF}
-        IMAGE_TAG=${IMAGE_TAG:-$SHORT_SHA}
+        IMAGE_TAG=${IMAGE_TAG_INPUT:-$SHORT_SHA}
         REPO_NAME="${GITHUB_REPOSITORY##*/}"
         IMAGE_NAME_INPUT='${{ inputs.image-name }}'
-        IMAGE_NAME=${IMAGE_NAME_INPUT:-"${REPO_NAME}-nuxeo"}
+        IMAGE_NAME=${IMAGE_NAME_INPUT:-"${REPO_NAME}"}
         BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
         echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
         echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
@@ -71,22 +68,16 @@ runs:
           mkdir -p "$ADDONS_DIR"
         fi
 
-    - name: Login to GHCR (only if pushing)
+    - name: Login to GHCR
       uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
       with:
         registry: ${{ inputs.registry }}
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
+    - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
-      with:
-        driver-opts: |
-          image=moby/buildkit:v0.11.6
-          network=host
+    - uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
 
     - name: Build image
       id: build
