@@ -14,6 +14,9 @@ inputs:
     description: Space or comma separated list of Nuxeo Connect marketplace packages to install online
     required: false
     default: ""
+  nuxeo-clid:
+    description: Nuxeo Connect License ID (CLID) to use for installing Nuxeo Connect packages
+    required: false
   local-addons-path:
     description: Path (directory) containing offline addon .zip/.jar files to install (relative to repository root)
     required: false
@@ -113,7 +116,7 @@ runs:
       id: build
       uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
       env:
-        NUXEO_CLID: ${{ secrets.NUXEO_CLID }}
+        NUXEO_CLID: ${{ inputs.nuxeo-clid }}
       with:
         context: ${{ github.action_path }}
         build-contexts: |

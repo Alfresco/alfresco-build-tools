@@ -1474,17 +1474,16 @@ Pushes the resulting image to a target registry (default `ghcr.io`) and outputs 
 
 ```yaml
       - name: Build Nuxeo image
-        uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/nuxeo-docker-build@v9.7.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/nuxeo-docker-build@v9.6.0
         with:
           base-image-tag: docker-private.packages.nuxeo.com/nuxeo/nuxeo:2023
           nuxeo-connect-modules: "nuxeo-web-ui nuxeo-drive" # optional
+          nuxeo-clid: ${{ secrets.NUXEO_CLID }} # optional if nuxeo-connect-modules is empty
           local-addons-path: addons # directory with offline addon zips
           os-packages: "ImageMagick jq" # optional
           image-name: my-nuxeo-custom
           image-tag: ${{ github.sha }}
           registry: ghcr.io
-        # secrets:
-        #   NUXEO_CLID: ${{ secrets.NUXEO_CLID }}
 ```
 
 Outputs:
@@ -1496,7 +1495,7 @@ Notes:
 - If no connect modules are provided, that phase is skipped.
 - If the addons directory does not exist it is created empty (offline install skipped).
 - Set `push-image: true` to force pushing on pull requests (otherwise only pushes on `push` events).
-- Provide private yum repo credentials via secret file if needed (already templated by `nuxeo-private.repo`).
+- Provide private yum repo credentials via inputs (`os-packages-user`, `os-packages-token`) if needed (templated by `nuxeo-private.repo`).
 
 ### pre-commit
 
