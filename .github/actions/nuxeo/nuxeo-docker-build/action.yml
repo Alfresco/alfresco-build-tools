@@ -21,6 +21,14 @@ inputs:
     description: Space separated list of OS packages to install via private yum repo (optional)
     required: false
     default: ""
+  os-packages-user:
+    description: Username for accessing private yum repo (optional)
+    required: false
+    default: ""
+  os-packages-token:
+    description: Token/password for accessing private yum repo (optional)
+    required: false
+    default: ""
   image-name:
     description: Image name without registry (defaults to <repo>)
     required: false
@@ -33,6 +41,12 @@ inputs:
     description: Target registry (default ghcr.io)
     required: false
     default: ghcr.io
+  registry-username:
+    description: Username to connect to target registry
+    required: false
+  registry-password:
+    description: Password to connect to target registry
+    required: false
   platforms:
     description: Comma separated build platforms
     required: false
