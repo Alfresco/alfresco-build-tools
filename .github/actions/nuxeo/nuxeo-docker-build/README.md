@@ -33,21 +33,3 @@ Build and optionally push a customized Nuxeo Docker image layering:
 ## Output
 
 `image-url` – Fully qualified reference: `<registry>/<image-name>:<image-tag>`.
-
-## Example
-
-```yaml
-      - name: Build Nuxeo image
-        uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/nuxeo-docker-build@v9.7.1
-        with:
-          base-image-tag: docker-private.packages.nuxeo.com/nuxeo/nuxeo:2023
-          base-registry-username: ${{ secrets.NUXEO_BASE_USER }}
-          base-registry-password: ${{ secrets.NUXEO_BASE_PASS }}
-          nuxeo-connect-modules: "nuxeo-web-ui nuxeo-drive"
-          nuxeo-clid: ${{ secrets.NUXEO_CLID }}
-          nuxeo-local-modules-path: addons
-          os-packages: "ImageMagick jq"
-          image-name: my-nuxeo
-          image-tag: ${{ github.sha }}
-          push-image: true
-```
