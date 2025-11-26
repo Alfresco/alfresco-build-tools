@@ -16,7 +16,7 @@ inputs:
     required: false
     default: ""
   nuxeo-clid:
-    description: Nuxeo Connect License ID (CLID) to use for installing Nuxeo Connect packages
+    description: Nuxeo Connect License ID (CLID) to use for installing Nuxeo Connect packages. Required for nuxeo connect modules.
     required: false
   local-addons-path:
     description: Path (directory) containing offline addon .zip/.jar files to install (relative to repository root)
@@ -37,6 +37,14 @@ inputs:
     description: Image name without registry (defaults to <repo>)
     required: false
     default: ""
+  image-title:
+    description: Image title label metadata
+    required: false
+    default: "Nuxeo Server"
+  image-vendor:
+    description: Image vendor label metadata
+    required: false
+    default: "Nuxeo"
   image-tag:
     description: Image tag to use (defaults to short sha)
     required: false
@@ -56,7 +64,7 @@ inputs:
     required: false
     default: linux/amd64,linux/arm64
   push-image:
-    description: Force push image even on PR (true/false). Default push only on push events.
+    description: Whether to push the built image (true/false)
     required: false
     default: "false"
 
@@ -149,8 +157,3 @@ runs:
         echo "### :package: Nuxeo image build" >> $GITHUB_STEP_SUMMARY
         echo "Registry: ${{ inputs.registry }}" >> $GITHUB_STEP_SUMMARY
         echo "Image: ${{ inputs.registry }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
-
-    - name: Compute output image URL
-      id: compute-output
-      shell: bash
-      run: echo "image_url=${{ inputs.registry }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
