@@ -1477,6 +1477,8 @@ Pushes the resulting image to a target registry (default `ghcr.io`) and outputs 
         uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/nuxeo-docker-build@v9.6.0
         with:
           base-image-tag: docker-private.packages.nuxeo.com/nuxeo/nuxeo:2023
+          base-registry-username: ${{ secrets.NUXEO_REGISTRY_USERNAME }}
+          base-registry-password: ${{ secrets.NUXEO_REGISTRY_PASSWORD }}
           nuxeo-connect-modules: "nuxeo-web-ui nuxeo-drive" # optional
           nuxeo-clid: ${{ secrets.NUXEO_CLID }} # optional if nuxeo-connect-modules is empty
           nuxeo-local-modules-path: addons # directory with offline addon zips
