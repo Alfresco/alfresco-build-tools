@@ -4,6 +4,7 @@ inputs:
   base-image-tag:
     description: Base Nuxeo image tag (defaults to docker-private.packages.nuxeo.com/nuxeo/nuxeo:2023)
     required: false
+    default: "docker-private.packages.nuxeo.com/nuxeo/nuxeo:2023"
   base-registry-username:
     description: Username to connect to base image registry
     required: true
