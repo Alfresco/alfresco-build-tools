@@ -1494,7 +1494,7 @@ Notes:
 
 - If no connect modules are provided, that phase is skipped.
 - If the addons directory does not exist it is created empty (offline install skipped).
-- Set `push-image: true` to force pushing on pull requests (otherwise only pushes on `push` events).
+- Set `push-image: true` to push the image to the target registry.
 - Provide private yum repo credentials via inputs (`os-packages-user`, `os-packages-token`) if needed (templated by `nuxeo-private.repo`).
 
 ### pre-commit
