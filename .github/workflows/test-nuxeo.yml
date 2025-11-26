@@ -33,7 +33,7 @@ jobs:
         with:
           base-registry-username: ${{ secrets.NUXEO_NEXUS_USER }}
           base-registry-password: ${{ secrets.NUXEO_NEXUS_PASSWORD }}
-          nuxeo-connect-modules: "nuxeo-web-ui replace-administrator-user-1.0.0"
+          nuxeo-connect-modules: nuxeo-web-ui
           nuxeo-clid: ${{ secrets.NUXEO_CLID }}
           nuxeo-local-modules-path: addons
           os-packages: |
