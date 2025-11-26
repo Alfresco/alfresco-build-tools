@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ master ]
     paths:
-      - '.github/actions/nuxeo/nuxeo-image-builder/**'
+      - '.github/actions/nuxeo/nuxeo-docker-build/**'
 
 jobs:
   test:
