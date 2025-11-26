@@ -1484,6 +1484,8 @@ Pushes the resulting image to a target registry (default `ghcr.io`) and outputs 
           image-name: my-nuxeo-custom
           image-tag: ${{ github.sha }}
           registry: ghcr.io
+          registry-username: ${{ secrets.GITHUB_USERNAME }}
+          registry-token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 Outputs:
