@@ -1479,7 +1479,7 @@ Pushes the resulting image to a target registry (default `ghcr.io`) and outputs 
           base-image-tag: docker-private.packages.nuxeo.com/nuxeo/nuxeo:2023
           nuxeo-connect-modules: "nuxeo-web-ui nuxeo-drive" # optional
           nuxeo-clid: ${{ secrets.NUXEO_CLID }} # optional if nuxeo-connect-modules is empty
-          local-addons-path: addons # directory with offline addon zips
+          nuxeo-local-modules-path: addons # directory with offline addon zips
           os-packages: "ImageMagick jq" # optional
           image-name: my-nuxeo-custom
           image-tag: ${{ github.sha }}

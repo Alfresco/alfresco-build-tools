@@ -18,7 +18,7 @@ inputs:
   nuxeo-clid:
     description: Nuxeo Connect License ID (CLID) to use for installing Nuxeo Connect packages. Required for nuxeo connect modules.
     required: false
-  local-addons-path:
+  nuxeo-local-modules-path:
     description: Path (directory) containing offline addon .zip/.jar files to install (relative to repository root)
     required: false
   os-packages:
@@ -37,6 +37,10 @@ inputs:
     description: Image name without registry (defaults to <repo>)
     required: false
     default: ""
+  image-tag:
+    description: Image tag to use (defaults to short sha)
+    required: false
+    default: ""
   image-title:
     description: Image title label metadata
     required: false
@@ -45,10 +49,6 @@ inputs:
     description: Image vendor label metadata
     required: false
     default: "Nuxeo"
-  image-tag:
-    description: Image tag to use (defaults to short sha)
-    required: false
-    default: ""
   registry:
     description: Target registry (default ghcr.io)
     required: false
@@ -97,7 +97,7 @@ runs:
     - name: Ensure addons directory exists
       shell: bash
       run: |
-        ADDONS_DIR='${{ inputs.local-addons-path }}'
+        ADDONS_DIR='${{ inputs.nuxeo-local-modules-path }}'
         if [ ! -d "$ADDONS_DIR" ]; then
           echo "Local addons directory '$ADDONS_DIR' not found. Creating empty directory." >&2
           mkdir -p "$ADDONS_DIR"
@@ -129,7 +129,7 @@ runs:
       with:
         context: ${{ github.action_path }}
         build-contexts: |
-          modules=${{ github.workspace }}/${{ inputs.local-addons-path }}
+          modules=${{ github.workspace }}/${{ inputs.nuxeo-local-modules-path }}
         push: ${{ inputs.push-image }}
         platforms: ${{ inputs.platforms }}
         provenance: false
@@ -157,3 +157,8 @@ runs:
         echo "### :package: Nuxeo image build" >> $GITHUB_STEP_SUMMARY
         echo "Registry: ${{ inputs.registry }}" >> $GITHUB_STEP_SUMMARY
         echo "Image: ${{ inputs.registry }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
+
+    - name: Compute output image URL
+      id: compute-output
+      shell: bash
+      run: echo "image_url=${{ inputs.registry }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
