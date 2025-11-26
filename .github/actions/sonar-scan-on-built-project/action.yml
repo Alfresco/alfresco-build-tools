@@ -3,6 +3,7 @@ description: >-
     Reusable action for running SonarQube scans with Maven on projects that were already built in prior jobs
     and have their artifacts available in the workspace. This action is designed to be used in conjunction with
     `maven-build` action and will start by downloading the target and m2 artifacts uploaded by the `maven-build` action.
+    Parameters with maven credentials have to be passed as environment variables.
 
 inputs:
   sonar-host-url:
@@ -37,12 +38,6 @@ inputs:
     description: Pattern to match current build artifacts uploaded from m2 repository from a previous job.
     required: false
     default: 'm2*'
-  maven-username:
-    description: Nexus username for Maven authentication.
-    required: true
-  maven-password:
-    description: Nexus password for Maven authentication.
-    required: true
   sonar-token:
     description: SonarQube token for authentication.
     required: true
@@ -78,7 +73,7 @@ runs:
         path: ${{ inputs.m2-uploaded-group-path }}
 
     - name: SonarQube Scan
-      uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@v9.5.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@v9.5.1
       env:
         SONAR_TOKEN: ${{ inputs.sonar-token }}
       with:
