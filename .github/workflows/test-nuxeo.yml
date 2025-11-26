@@ -1,0 +1,62 @@
+name: Test nuxeo image builder
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+    paths:
+      - '.github/actions/nuxeo/nuxeo-image-builder/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+
+      - name: Prepare addons directory
+        shell: bash
+        run: mkdir -p addons
+
+      - name: Fetch Nuxeo local module
+        shell: bash
+        env:
+          PKG_URL: https://packages.nuxeo.com/repository/maven-public-releases/org/nuxeo/ai/nuxeo-ai-image-quality-package/4.0.2/nuxeo-ai-image-quality-package-4.0.2.zip
+          NEXUS_USER: ${{ secrets.NUXEO_NEXUS_USER }}
+          NEXUS_TOKEN: ${{ secrets.NUXEO_NEXUS_PASSWORD }}
+        run: |
+          curl -fsSL -u "$NEXUS_USER:$NEXUS_TOKEN" "$PKG_URL" -o addons/nuxeo-ai-image-quality-package-4.0.2.zip;
+          test -s addons/nuxeo-ai-image-quality-package-4.0.2.zip
+
+      - name: Build nuxeo image and push to registry
+        uses: ./.github/actions/nuxeo/nuxeo-docker-build
+        with:
+          base-registry-username: ${{ secrets.NUXEO_NEXUS_USER }}
+          base-registry-password: ${{ secrets.NUXEO_NEXUS_PASSWORD }}
+          nuxeo-connect-modules: nuxeo-web-ui replace-administrator-user-1.0.0
+          nuxeo-clid: ${{ secrets.NUXEO_CLID }}
+          nuxeo-local-modules-path: addons
+          os-packages: |
+            awscli
+            ghostscript
+            libwpd-tools
+            perl-Archive-Zip
+            perl-Image-ExifTool
+            poppler-utils
+            libreoffice-calc
+            libreoffice-headless
+            libreoffice-impress
+            curl
+            unzip
+            zip
+            ffmpeg-nuxeo
+            ccextractor-nuxeo
+          os-packages-user: ${{ secrets.NUXEO_NEXUS_USER }}
+          os-packages-token: ${{ secrets.NUXEO_NEXUS_PASSWORD }}
+          image-name: nuxeo/nuxeo-ci-builder-test
+          image-tag: ${{ github.run_id }}
+          image-title: "Nuxeo CI Builder Test"
+          registry: docker-internal.packages.nuxeo.com
+          registry-username: ${{ secrets.NUXEO_NEXUS_USER }}
+          registry-password: ${{ secrets.NUXEO_NEXUS_PASSWORD }}
+          push-image: "true"
