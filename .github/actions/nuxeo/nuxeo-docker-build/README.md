@@ -26,7 +26,7 @@ Build and optionally push a customized Nuxeo Docker image layering:
 | `image-tag` | false | short SHA | Image tag for built image |
 | `registry` | false | ghcr.io | Target registry host |
 | `registry-username` | false | github.actor | Username for target registry |
-| `registry-password` | false | GITHUB_TOKEN | Password/token for target registry |
+| `registry-password` | false | (none) | Password/token for target registry |
 | `platforms` | false | linux/amd64,linux/arm64 | Build platforms |
 | `push-image` | false | false | Push built image (otherwise metadata only) |
 
