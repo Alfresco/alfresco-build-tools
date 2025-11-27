@@ -12,7 +12,8 @@ jobs:
   test:
     env:
       NUXEO_CONNECT_MODULE: nuxeo-web-ui
-      NUXEO_LOCAL_MODULE: nuxeo-ai-image-quality-package
+      NUXEO_LOCAL_MODULE_PACKAGE: nuxeo-ai-image-quality-package
+      NUXEO_LOCAL_MODULE: nuxeo-ai-image-quality
       NUXEO_LOCAL_MODULES_PATH: addons
       NUXEO_OS_PACKAGES: |
         awscli
@@ -28,12 +29,12 @@ jobs:
       - name: Fetch Nuxeo local module
         shell: bash
         env:
-          PKG_URL: https://packages.nuxeo.com/repository/maven-public-releases/org/nuxeo/ai/${{ env.NUXEO_LOCAL_MODULE }}/4.0.2/${{ env.NUXEO_LOCAL_MODULE }}-4.0.2.zip
+          PKG_URL: https://packages.nuxeo.com/repository/maven-public-releases/org/nuxeo/ai/${{ env.NUXEO_LOCAL_MODULE_PACKAGE }}/4.0.2/${{ env.NUXEO_LOCAL_MODULE_PACKAGE }}-4.0.2.zip
           NEXUS_USER: ${{ secrets.NUXEO_NEXUS_USER }}
           NEXUS_TOKEN: ${{ secrets.NUXEO_NEXUS_PASSWORD }}
         run: |
-          curl -fsSL -u "$NEXUS_USER:$NEXUS_TOKEN" "$PKG_URL" -o ${{ env.NUXEO_LOCAL_MODULES_PATH }}/${{ env.NUXEO_LOCAL_MODULE }}-4.0.2.zip;
-          test -s ${{ env.NUXEO_LOCAL_MODULES_PATH }}/${{ env.NUXEO_LOCAL_MODULE }}-4.0.2.zip
+          curl -fsSL -u "$NEXUS_USER:$NEXUS_TOKEN" "$PKG_URL" -o ${{ env.NUXEO_LOCAL_MODULES_PATH }}/${{ env.NUXEO_LOCAL_MODULE_PACKAGE }}-4.0.2.zip;
+          test -s ${{ env.NUXEO_LOCAL_MODULES_PATH }}/${{ env.NUXEO_LOCAL_MODULE_PACKAGE }}-4.0.2.zip
 
       - name: Build nuxeo image and push to registry
         uses: ./.github/actions/nuxeo/nuxeo-docker-build
