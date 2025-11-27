@@ -137,6 +137,14 @@ runs:
 
     - uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
 
+    - name: Normalize module and package lists
+      shell: bash
+      run: |
+          CONNECT_NORM=$(echo '${{ inputs.nuxeo-connect-modules }}' | tr ',\n\r\t' ' ' | xargs)
+          PACKAGES_NORM=$(echo '${{ inputs.os-packages }}' | tr ',\n\r\t' ' ' | xargs)
+          echo "SANITIZED_CONNECT_MODULES=$CONNECT_NORM" >> $GITHUB_ENV
+          echo "SANITIZED_PACKAGES=$PACKAGES_NORM" >> $GITHUB_ENV
+
     - name: Build image
       id: build
       uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
@@ -159,8 +167,8 @@ runs:
           BUILD_DATE=${{ env.BUILD_DATE }}
           IMAGE_TITLE=${{ inputs.image-title }}
           IMAGE_VENDOR=${{ inputs.image-vendor }}
-          NUXEO_CONNECT_MODULES=${{ inputs.nuxeo-connect-modules }}
-          PACKAGES_LIST=${{ inputs.os-packages }}
+          NUXEO_CONNECT_MODULES=${{ env.SANITIZED_CONNECT_MODULES }}
+          PACKAGES_LIST=${{ env.SANITIZED_PACKAGES }}
           PACKAGES_AUTH_USER=${{ inputs.os-packages-user }}
           PACKAGES_AUTH_TOKEN=${{ inputs.os-packages-token }}
         secret-envs: |

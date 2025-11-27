@@ -36,8 +36,7 @@ USER root
 RUN --mount=type=secret,id=nuxeo-private,target=/tmp/nuxeo-private.repo \
     dnf -y install gettext && \
     envsubst </tmp/nuxeo-private.repo >/etc/yum.repos.d/nuxeo-private.repo && \
-    dnf -y install --skip-broken \
-        $(printf "%s" "$PACKAGES_LIST" | tr '\n' ' ' | tr -s ' ') && \
+    dnf -y install --skip-broken $PACKAGES_LIST && \
     rm /etc/yum.repos.d/nuxeo-private.repo && \
     dnf clean all && \
     rm -rf /var/cache/dnf
@@ -47,7 +46,7 @@ USER nuxeo
 RUN --mount=type=bind,from=modules,target=/modules \
     --mount=type=secret,id=NUXEO_CLID,env=NUXEO_CLID \
     if [ -n "${NUXEO_CONNECT_MODULES}" ]; then \
-        /install-packages.sh --clid ${NUXEO_CLID} $(printf "%s" "${NUXEO_CONNECT_MODULES}" | tr '\n' ' ' | tr -s ' '); \
+        /install-packages.sh --clid ${NUXEO_CLID} ${NUXEO_CONNECT_MODULES}; \
     else \
         echo "No Nuxeo Connect modules specified - skipping connect installation"; \
     fi && \
