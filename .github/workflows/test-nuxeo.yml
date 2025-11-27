@@ -27,7 +27,6 @@ jobs:
         run: mkdir -p ${{ env.NUXEO_LOCAL_MODULES_PATH }}
 
       - name: Fetch Nuxeo local module
-        shell: bash
         env:
           PKG_URL: https://packages.nuxeo.com/repository/maven-public-releases/org/nuxeo/ai/${{ env.NUXEO_LOCAL_MODULE_PACKAGE }}/4.0.2/${{ env.NUXEO_LOCAL_MODULE_PACKAGE }}-4.0.2.zip
           NEXUS_USER: ${{ secrets.NUXEO_NEXUS_USER }}
@@ -56,43 +55,8 @@ jobs:
           registry: localhost
 
       - name: Verify installed Nuxeo Modules
-        shell: bash
-        run: |
-          IMAGE_URL=${{ steps.build_nuxeo_image.outputs.image-url }}
-
-          MP_LIST_OUTPUT=$(docker run --rm $IMAGE_URL bash -lc 'nuxeoctl mp-list')
-
-          echo "--- nuxeoctl mp-list output ---"
-          echo "$MP_LIST_OUTPUT"
-          echo "------------------------------"
-
-          if echo "$MP_LIST_OUTPUT" | grep -q "${{ env.NUXEO_CONNECT_MODULE }}"; then
-            echo "✅ connect module found."
-          else
-            echo "❌ connect module NOT found."
-            exit 1
-          fi
-
-          if echo "$MP_LIST_OUTPUT" | grep -q "${{ env.NUXEO_LOCAL_MODULE }}"; then
-            echo "✅ local module found."
-          else
-            echo "❌ local module NOT found."
-            exit 1
-          fi
-
-          INSTALLED_PACKAGES_OUTPUT=$(docker run --rm $IMAGE_URL bash -lc 'rpm -qa')
-
-          echo "--- Installed OS packages ---"
-          echo "$INSTALLED_PACKAGES_OUTPUT"
-          echo "-----------------------------"
-
-          # Iterate over OS packages, preserving newlines and spaces safely
-          while IFS= read -r pkg; do
-            [ -z "$pkg" ] && continue
-            if echo "$INSTALLED_PACKAGES_OUTPUT" | grep -q "^${pkg}"; then
-              echo "✅ OS package '$pkg' found."
-            else
-              echo "❌ OS package '$pkg' NOT found."
-              exit 1
-            fi
-          done <<< "${{ env.NUXEO_OS_PACKAGES }}"
+        env:
+          IMAGE_URL: ${{ steps.build_nuxeo_image.outputs.image-url }}
+          EXPECTED_MODULES: ${{ env.NUXEO_CONNECT_MODULE }} ${{ env.NUXEO_LOCAL_MODULE }}
+          EXPECTED_PACKAGES: ${{ env.NUXEO_OS_PACKAGES }}
+        run: "${{ github.workspace }}/.github/actions/nuxeo/nuxeo-docker-build/verify.sh"
