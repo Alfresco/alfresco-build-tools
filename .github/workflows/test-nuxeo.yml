@@ -59,4 +59,4 @@ jobs:
           IMAGE_URL: ${{ steps.build_nuxeo_image.outputs.image-url }}
           EXPECTED_MODULES: ${{ env.NUXEO_CONNECT_MODULE }} ${{ env.NUXEO_LOCAL_MODULE }}
           EXPECTED_PACKAGES: ${{ env.NUXEO_OS_PACKAGES }}
-        run: "${{ github.workspace }}/.github/actions/nuxeo/nuxeo-docker-build/verify.sh"
+        run: .github/actions/nuxeo/nuxeo-docker-build/verify.sh
