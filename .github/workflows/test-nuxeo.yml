@@ -65,14 +65,14 @@ jobs:
           echo "$MP_LIST_OUTPUT"
           echo "------------------------------"
 
-          if echo "$MP_LIST_OUTPUT" | grep -q "${{ env.NUXEO_CONNECT_MODULE}}"; then
+          if echo "$MP_LIST_OUTPUT" | grep -q "${{ env.NUXEO_CONNECT_MODULE }}"; then
             echo "✅ connect module found."
           else
             echo "❌ connect module NOT found."
             exit 1
           fi
 
-          if echo "$MP_LIST_OUTPUT" | grep -q "${{ env.NUXEO_LOCAL_MODULE}}"; then
+          if echo "$MP_LIST_OUTPUT" | grep -q "${{ env.NUXEO_LOCAL_MODULE }}"; then
             echo "✅ local module found."
           else
             echo "❌ local module NOT found."
