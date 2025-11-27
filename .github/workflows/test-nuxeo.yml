@@ -57,3 +57,4 @@ jobs:
           image-tag: ${{ github.run_id }}
           image-title: "Nuxeo CI Builder Test"
           load-image: "true"
+          platforms: linux/amd64 # load can only be done for a single platform
