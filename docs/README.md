@@ -1476,7 +1476,7 @@ Pushes the resulting image to a target registry (default `ghcr.io`) and outputs 
       - name: Build Nuxeo image
         uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/nuxeo-docker-build@v10.1.0
         with:
-          base-image-tag: docker-private.packages.nuxeo.com/nuxeo/nuxeo:2023
+          base-image-tag: 2023
           base-registry-username: ${{ secrets.NUXEO_REGISTRY_USERNAME }}
           base-registry-password: ${{ secrets.NUXEO_REGISTRY_PASSWORD }}
           nuxeo-connect-modules: "nuxeo-web-ui nuxeo-drive" # optional

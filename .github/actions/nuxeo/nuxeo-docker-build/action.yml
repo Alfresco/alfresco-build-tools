@@ -102,7 +102,7 @@ runs:
       run: |
         ADDONS_DIR='${{ inputs.nuxeo-local-modules-path }}'
         if [ ! -d "$ADDONS_DIR" ]; then
-          echo "Local addons directory '$ADDONS_DIR' not found. Creating empty directory." >&2
+          echo "Local addons directory '$ADDONS_DIR' not found. Creating empty directory at ${{ env.EMPTY_DIR }}." >&2
           mkdir -p ${{ env.EMPTY_DIR }}
           echo "NUXEO_LOCAL_MODULES_PATH=${{ env.EMPTY_DIR }}" >> $GITHUB_ENV
         else
@@ -125,6 +125,13 @@ runs:
           exit 1
         fi
 
+    - name: Check if CLID is provided when connect modules are specified
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.nuxeo-connect-modules }}" ] && [ -z "${{ inputs.nuxeo-clid }}" ]; then
+          echo "Error: nuxeo-clid input is required when nuxeo-connect-modules is provided." >&2
+          exit 1
+        fi
     - name: Login to target registry
       if: ${{ inputs.push-image == 'true' }}
       uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0

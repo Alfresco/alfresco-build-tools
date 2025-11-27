@@ -11,7 +11,7 @@ Build and optionally push a customized Nuxeo Docker image layering:
 
 | Name | Required | Default | Description |
 |------|----------|---------|-------------|
-| `base-image-tag` | false | docker-private.packages.nuxeo.com/nuxeo/nuxeo:2023 | Base image reference |
+| `base-image-tag` | false | 2023 | Base image tag (full path: docker-private.packages.nuxeo.com/nuxeo/nuxeo:TAG) |
 | `base-registry-username` | true | (none) | Username for base image registry login |
 | `base-registry-password` | true | (none) | Password/token for base image registry |
 | `nuxeo-connect-modules` | false | "" | Space/comma separated marketplace modules |
