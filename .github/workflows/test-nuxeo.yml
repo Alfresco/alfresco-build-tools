@@ -86,11 +86,13 @@ jobs:
           echo "$INSTALLED_PACKAGES_OUTPUT"
           echo "-----------------------------"
 
-          for pkg in $(echo "${{ env.NUXEO_OS_PACKAGES }}"); do
+          # Iterate over OS packages, preserving newlines and spaces safely
+          while IFS= read -r pkg; do
+            [ -z "$pkg" ] && continue
             if echo "$INSTALLED_PACKAGES_OUTPUT" | grep -q "^${pkg}"; then
               echo "✅ OS package '$pkg' found."
             else
               echo "❌ OS package '$pkg' NOT found."
               exit 1
             fi
-          done
+          done <<< "${{ env.NUXEO_OS_PACKAGES }}"
