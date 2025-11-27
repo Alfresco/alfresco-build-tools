@@ -29,6 +29,7 @@ Build and optionally push a customized Nuxeo Docker image layering:
 | `registry-password` | false | (none) | Password/token for target registry |
 | `platforms` | false | linux/amd64,linux/arm64 | Build platforms |
 | `push-image` | false | false | Push built image (otherwise metadata only) |
+| `load-image` | false | false | Load built image into local docker daemon (only single platform allowed) |
 
 ## Output
 

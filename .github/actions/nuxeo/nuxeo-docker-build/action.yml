@@ -68,7 +68,7 @@ inputs:
     required: false
     default: "false"
   load-image:
-    description: Whether to load the built image into local docker daemon (true/false)
+    description: Whether to load the built image into local docker daemon (true/false). When set to true, only a single platform can be specified.
     required: false
     default: "false"
 
