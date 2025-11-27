@@ -2,9 +2,9 @@ name: nuxeo-docker-build
 description: Build a customized Nuxeo image (connect modules, local addons, optional OS packages) and push it.
 inputs:
   base-image-tag:
-    description: Base Nuxeo image tag (defaults to docker-private.packages.nuxeo.com/nuxeo/nuxeo:2023)
+    description: Base Nuxeo image tag for docker-private.packages.nuxeo.com/nuxeo/nuxeo (defaults to 2023)
     required: false
-    default: "docker-private.packages.nuxeo.com/nuxeo/nuxeo:2023"
+    default: "2023"
   base-registry-username:
     description: Username to connect to base image registry
     required: true
@@ -67,6 +67,10 @@ inputs:
     description: Whether to push the built image (true/false)
     required: false
     default: "false"
+  load-image:
+    description: Whether to load the built image into local docker daemon (true/false)
+    required: false
+    default: "false"
 
 outputs:
   image-url:
@@ -87,9 +91,6 @@ runs:
         IMAGE_NAME_INPUT='${{ inputs.image-name }}'
         IMAGE_NAME=${IMAGE_NAME_INPUT:-"${REPO_NAME}"}
         BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-        BASE_IMAGE="${{ inputs.base-image-tag }}"
-        BASE_REGISTRY="${BASE_IMAGE%%/*}"
-        echo "BASE_REGISTRY=$BASE_REGISTRY" >> $GITHUB_ENV
         echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
         echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
         echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
@@ -111,7 +112,7 @@ runs:
     - name: Login to base image registry
       uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
       with:
-        registry: ${{ env.BASE_REGISTRY }}
+        registry: docker-private.packages.nuxeo.com
         username: ${{ inputs.base-registry-username }}
         password: ${{ inputs.base-registry-password }}
 
@@ -146,11 +147,12 @@ runs:
         build-contexts: |
           modules=${{ github.workspace }}/${{ env.NUXEO_LOCAL_MODULES_PATH }}
         push: ${{ inputs.push-image }}
+        load: ${{ inputs.load-image }}
         platforms: ${{ inputs.platforms }}
         provenance: false
         tags: ${{ inputs.registry }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
         build-args: |
-          BASE_IMAGE=${{ inputs.base-image-tag }}
+          BASE_IMAGE_TAG=${{ inputs.base-image-tag }}
           BUILD_TAG=${{ github.run_id }}
           SCM_REF=${{ github.sha }}
           VERSION=${{ env.IMAGE_TAG }}

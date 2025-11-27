@@ -1,6 +1,6 @@
 # Base image
-ARG BASE_IMAGE="docker-private.packages.nuxeo.com/nuxeo/nuxeo:2023"
-FROM ${BASE_IMAGE}
+ARG BASE_IMAGE_TAG="2023"
+FROM docker-private.packages.nuxeo.com/nuxeo/nuxeo:${BASE_IMAGE_TAG}
 
 # Build arguments
 ARG BUILD_TAG=unknown

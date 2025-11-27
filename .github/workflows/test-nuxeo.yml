@@ -56,7 +56,4 @@ jobs:
           image-name: nuxeo/nuxeo-ci-builder-test
           image-tag: ${{ github.run_id }}
           image-title: "Nuxeo CI Builder Test"
-          registry: docker-internal.packages.nuxeo.com
-          registry-username: ${{ secrets.NUXEO_NEXUS_USER }}
-          registry-password: ${{ secrets.NUXEO_NEXUS_PASSWORD }}
-          push-image: "true"
+          load-image: "true"
