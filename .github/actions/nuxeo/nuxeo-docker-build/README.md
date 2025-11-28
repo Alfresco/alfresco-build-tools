@@ -1,11 +1,11 @@
 # nuxeo-docker-build
 
-Build and optionally push a customized Nuxeo Docker image layering:
+Build a customized Nuxeo Docker image by layering:
 
-1. Base Nuxeo image (`base-image-tag`).
-2. Online Nuxeo Connect modules (`nuxeo-connect-modules`) – requires secret `NUXEO_CLID`.
-3. Offline local addon files (`nuxeo-local-modules-path`) – all `.zip`/`.jar` files installed.
-4. Optional OS packages (`os-packages`) via private yum repo (`nuxeo-private.repo`).
+- A chosen base image tag
+- Online Nuxeo Connect marketplace modules (requires `NUXEO_CLID` secret)
+- Offline local addon `.zip`/`.jar` files
+- Optional OS packages installed through the private yum repository
 
 Pushes the resulting image to a target registry (default `ghcr.io`) and outputs the full image URL.
 
