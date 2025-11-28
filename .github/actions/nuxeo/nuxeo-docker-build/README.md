@@ -22,7 +22,6 @@ Build and optionally push a customized Nuxeo Docker image layering:
 | `os-packages-token` | false | "" | Yum repo token/password |
 | `image-name` | false | `<repo>` | Image name without registry|
 | `image-title` | false | `Nuxeo Server` | Image title label metadata |
-| `image-vendor` | false | `Nuxeo` | Image vendor label metadata |
 | `image-tag` | false | short SHA | Image tag for built image |
 | `registry` | false | ghcr.io | Target registry host |
 | `registry-username` | false | github.actor | Username for target registry |

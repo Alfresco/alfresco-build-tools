@@ -12,7 +12,6 @@ ARG PACKAGES_AUTH_TOKEN
 ARG PACKAGES_LIST
 ARG NUXEO_CONNECT_MODULES
 ARG IMAGE_TITLE="Nuxeo Server"
-ARG IMAGE_VENDOR="Nuxeo"
 ARG IMAGE_LICENSE="Apache 2.0"
 
 # Labels
@@ -26,7 +25,7 @@ LABEL org.nuxeo.build-tag=$BUILD_TAG \
       org.opencontainers.image.created="$BUILD_DATE" \
       org.opencontainers.image.licenses="$IMAGE_LICENSE" \
       org.opencontainers.image.title="$IMAGE_TITLE" \
-      org.opencontainers.image.vendor="$IMAGE_VENDOR"
+      org.opencontainers.image.vendor="Nuxeo"
 
 # Switch to root
 USER root

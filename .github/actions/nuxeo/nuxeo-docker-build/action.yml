@@ -45,10 +45,6 @@ inputs:
     description: Image title label metadata
     required: false
     default: "Nuxeo Server"
-  image-vendor:
-    description: Image vendor label metadata
-    required: false
-    default: "Nuxeo"
   registry:
     description: Target registry (default ghcr.io)
     required: false
@@ -173,7 +169,6 @@ runs:
           VERSION=${{ env.IMAGE_TAG }}
           BUILD_DATE=${{ env.BUILD_DATE }}
           IMAGE_TITLE=${{ inputs.image-title }}
-          IMAGE_VENDOR=${{ inputs.image-vendor }}
           NUXEO_CONNECT_MODULES=${{ env.SANITIZED_CONNECT_MODULES }}
           PACKAGES_LIST=${{ env.SANITIZED_PACKAGES }}
           PACKAGES_AUTH_USER=${{ inputs.os-packages-user }}
