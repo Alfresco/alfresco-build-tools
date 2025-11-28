@@ -1490,6 +1490,10 @@ Pushes the resulting image to a target registry (default `ghcr.io`) and outputs 
           registry-password: ${{ secrets.GITHUB_TOKEN }}
 ```
 
+Inputs:
+
+Check `action.yml` for the full list of inputs and their descriptions.
+
 Outputs:
 
 - The composite action sets output `image-url` to the fully qualified reference.
