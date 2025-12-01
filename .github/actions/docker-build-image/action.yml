@@ -130,7 +130,7 @@ runs:
 
     - name: Anchore Scan API Image
       if: inputs.grype-scan-enabled == 'true'
-      uses: anchore/scan-action@3aaf50d765cfcceafa51d322ccb790e40f6cd8c5 # v7.2.0
+      uses: anchore/scan-action@40a61b52209e9d50e87917c5b901783d546b12d0 # v7.2.1
       id: scan
       with:
         fail-build: ${{ inputs.grype-fail-build }}
@@ -153,7 +153,7 @@ runs:
     - name: Extract metadata for Docker
       if: env.PUSH_IMAGE == 'true'
       id: meta
-      uses: docker/metadata-action@318604b99e75e41977312d83839a89be02ca4893 # v5.9.0
+      uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
       with:
         images: ${{ env.IMAGE_NAME }}
         labels: |
@@ -177,7 +177,7 @@ runs:
 
     - name: Configure AWS credentials
       if: env.PUSH_IMAGE == 'true'
-      uses: aws-actions/configure-aws-credentials@00943011d9042930efac3dcd3a170e4273319bc8 # v5.1.0
+      uses: aws-actions/configure-aws-credentials@61815dcd50bd041e203e49132bacad1fd04d2708 # v5.1.1
       with:
         aws-region: ${{ inputs.aws-region }}
         role-to-assume: arn:aws:iam::${{ inputs.aws-account-id }}:role/${{ inputs.aws-role-name }}
