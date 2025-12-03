@@ -27,6 +27,10 @@ inputs:
     description: 'Override the binary name, defaults to repo name'
     required: false
     default: ''
+  checksum:
+    description: 'SHA256 checksum of the downloaded file for verification'
+    required: false
+    default: ''
 runs:
   using: "composite"
   steps:
@@ -36,6 +40,7 @@ runs:
         VERSION: ${{ inputs.version }}
         URL_TEMPLATE: ${{ inputs.url_template }}
         BINARY_NAME: ${{ inputs.binary_name }}
+        CHECKSUM: ${{ inputs.checksum }}
       working-directory: ${{ runner.temp }}
       run: |
         NAME=${BINARY_NAME:-${REPO##*\/}}
@@ -52,6 +57,24 @@ runs:
 
         echo "Downloading $URL ..."
         curl -fsSL -o "$ARCHIVE" "$URL"
+
+        # Calculate checksum
+        ACTUAL_CHECKSUM=$(shasum -a 256 "$ARCHIVE" | awk '{print $1}')
+
+        # Validate checksum if provided
+        if [[ -n "$CHECKSUM" ]]; then
+          echo "Validating checksum..."
+          if [[ "$ACTUAL_CHECKSUM" != "$CHECKSUM" ]]; then
+            echo "::error::Checksum validation failed!"
+            echo "::error::Expected: $CHECKSUM"
+            echo "::error::Actual:   $ACTUAL_CHECKSUM"
+            exit 1
+          fi
+          echo "Checksum validation passed ✓"
+        else
+          echo "::warning::No checksum provided for verification. For better security, consider adding the checksum input."
+          echo "::warning::Current file checksum (SHA256): $ACTUAL_CHECKSUM"
+        fi
 
         if [[ "$ARCHIVE" == *.zip ]]; then
           unzip -j -qq "$ARCHIVE" "*$NAME" -d .
