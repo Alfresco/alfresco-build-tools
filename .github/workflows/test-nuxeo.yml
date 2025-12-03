@@ -20,14 +20,14 @@ jobs:
       - name: Build zip package
         run: |
           echo "Preparing package file 📦"
-          zip ${ env.ZIP_PACKAGE_NAME } package.xml install.xml
-        working-directory: ${{ github.action_path }}
+          zip ${{ env.ZIP_PACKAGE_NAME }} package.xml install.xml
+        working-directory: .github/actions/nuxeo/nos-publish
 
       - name: Publish Nuxeo Package to NOS staging Connect
         id: publish_nos
         uses: ./.github/actions/nuxeo/nos-publish
         with:
-          package-path: ${{ github.action_path }}/${{ env.ZIP_PACKAGE_NAME }}
+          package-path: .github/actions/nuxeo/nos-publish/${{ env.ZIP_PACKAGE_NAME }}
           nos-username: ${{ secrets.NOS_CONNECT_USER }}
           nos-token: ${{ secrets.NOS_CONNECT_TOKEN }}
           nos-env: staging

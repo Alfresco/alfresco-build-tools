@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package type="addon" name="ops-readiness-ci" version="0.1.1">
+<package type="addon" name="ops-readiness-ci" version="0.1.0">
   <title>A dummy package to test OPS Readiness CI</title>
   <description>
     <div>

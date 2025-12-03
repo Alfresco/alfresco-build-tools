@@ -46,12 +46,13 @@ runs:
         echo "📦 Extracting package information from ${{ inputs.package-path }}..."
         for i in name version; do
           VALUE=$(unzip -p "${{ inputs.package-path }}" $PACKAGE_XML | yq -p=xml ".package.+@${i}")
+          export "PACKAGE_${i^^}=${VALUE}"
           echo "PACKAGE_${i^^}=${VALUE}" | tee -a $GITHUB_ENV
         done
-        [[ -z "${PACKAGE_NAME}" || -z "${PACKAGE_VERSION}" ]] && {
+        if [[ -z "${PACKAGE_NAME}" || -z "${PACKAGE_VERSION}" ]]; then
           echo "❌ Unable to extract package name or version from descriptor"
           exit 1
-        }
+        fi
 
     - name: Get Branch name
       uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v10.1.0
@@ -98,6 +99,7 @@ runs:
       id: verify
       env:
         NOS_USERNAME: ${{ inputs.nos-username }}
+        NOS_TOKEN: ${{ inputs.nos-token }}
       shell: bash
       if: inputs.skip-verify == 'false'
       run: |
@@ -117,7 +119,7 @@ runs:
       if: always()
       env:
         CONNECT_BASE_URL: https://${{ env.CONNECT_HOST }}/nuxeo/site/marketplace/package
-        STATUS: ${{ inputs.skip-verify == 'false' && ${ steps.verify.outcome } || ${ steps.publish.outcome } }}
+        STATUS: ${{ inputs.skip-verify == 'false' && steps.verify.outcome || steps.publish.outcome }}
       run: |
         echo "url=${CONNECT_BASE_URL}/${PACKAGE_NAME}?version=${PACKAGE_VERSION}" >> $GITHUB_OUTPUT
         echo "status=${STATUS}" >> $GITHUB_OUTPUT
