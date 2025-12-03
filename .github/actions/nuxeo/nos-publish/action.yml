@@ -57,16 +57,16 @@ runs:
       run: |
         case "${{ inputs.nos-env }}" in
           "production")
-            CONNECT_HOST=connect
+            CONNECT_HOST=connect.nuxeocloud.com
             ;;
           "staging")
-            CONNECT_HOST=nos-preprod-connect
+            CONNECT_HOST=nos-preprod-connect.nuxeocloud.com
             ;;
           *)
             if [[ "${BRANCH_NAME}" == ${{ github.event.repository.default_branch }} ]]; then
-              CONNECT_HOST=connect"
+              CONNECT_HOST=connect.nuxeocloud.com
             else
-              CONNECT_HOST=nos-preprod-connect
+              CONNECT_HOST=nos-preprod-connect.nuxeocloud.com
             fi
             ;;
         esac
@@ -84,7 +84,7 @@ runs:
           -u "${NOS_USERNAME}:${NOS_TOKEN}" \
           -w "%{http_code}" \
           -F "package=@${{ inputs.package-path }}" \
-          "https://${CONNECT_HOST}.nuxeo.com/nuxeo/site/marketplace/upload?batch=true")
+          "https://${CONNECT_HOST}/nuxeo/site/marketplace/upload?batch=true")
         if [[ "${PUBLISH: -3}" != "200" ]]; then
           echo "❌ Failed to publish package. HTTP Status: ${PUBLISH: -3}"
           exit 1
@@ -100,7 +100,7 @@ runs:
         PUBLISHED=$(curl -sX GET \
           -u "${NOS_USERNAME}:${NOS_TOKEN}" \
           -w "%{http_code}" \
-          "https://${CONNECT_HOST}.nuxeo.com/nuxeo/site/marketplace/package/${PACKAGE_NAME}?version=${PACKAGE_VERSION}")
+          "https://${CONNECT_HOST}/nuxeo/site/marketplace/package/${PACKAGE_NAME}?version=${PACKAGE_VERSION}")
         if [[ "${PUBLISHED: -3}" != "200" ]]; then
           echo "❌ Published package verification failed. HTTP Status: ${PUBLISHED: -3}"
           exit 1
@@ -112,7 +112,7 @@ runs:
       shell: bash
       if: always()
       env:
-        CONNECT_BASE_URL: https://${{ env.CONNECT_HOST }}.nuxeo.com/nuxeo/site/marketplace/package
+        CONNECT_BASE_URL: https://${{ env.CONNECT_HOST }}/nuxeo/site/marketplace/package
         STATUS: ${{ inputs.skip-verify == 'false' && ${ steps.verify.outcome } || ${ steps.publish.outcome } }}
       run: |
         echo "url=${CONNECT_BASE_URL}/${PACKAGE_NAME}?version=${PACKAGE_VERSION}" >> $GITHUB_OUTPUT
