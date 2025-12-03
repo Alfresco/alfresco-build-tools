@@ -104,7 +104,7 @@ runs:
       shell: bash
       if: inputs.skip-verify == 'false'
       run: |
-        sleep 10
+        sleep 5
         echo "🔍 Verifying published package on Nuxeo Online Services..."
         PUBLISHED=$(curl -sX GET \
           -u "${NOS_USERNAME}:${NOS_TOKEN}" \
