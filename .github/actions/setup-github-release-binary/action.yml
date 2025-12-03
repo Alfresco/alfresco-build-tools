@@ -27,8 +27,8 @@ inputs:
     description: 'Override the binary name, defaults to repo name'
     required: false
     default: ''
-  checksum:
-    description: 'SHA256 checksum of the downloaded file for verification'
+  checksums:
+    description: 'SHA256 checksums for verification. Can be a single checksum string or a JSON object mapping OS_ARCH to checksums (e.g., {"linux_amd64": "abc...", "darwin_arm64": "def..."})'
     required: false
     default: ''
 runs:
@@ -40,7 +40,7 @@ runs:
         VERSION: ${{ inputs.version }}
         URL_TEMPLATE: ${{ inputs.url_template }}
         BINARY_NAME: ${{ inputs.binary_name }}
-        CHECKSUM: ${{ inputs.checksum }}
+        CHECKSUMS: ${{ inputs.checksums }}
       working-directory: ${{ runner.temp }}
       run: |
         NAME=${BINARY_NAME:-${REPO##*\/}}
@@ -61,18 +61,37 @@ runs:
         # Calculate checksum
         ACTUAL_CHECKSUM=$(shasum -a 256 "$ARCHIVE" | awk '{print $1}')
 
-        # Validate checksum if provided
-        if [[ -n "$CHECKSUM" ]]; then
-          echo "Validating checksum..."
-          if [[ "$ACTUAL_CHECKSUM" != "$CHECKSUM" ]]; then
+        # Determine expected checksum
+        EXPECTED_CHECKSUM=""
+        if [[ -n "$CHECKSUMS" ]]; then
+          # Check if CHECKSUMS is JSON (starts with '{')
+          if [[ "$CHECKSUMS" =~ ^\{.*\}$ ]]; then
+            # Parse JSON to get checksum for current OS_ARCH
+            PLATFORM_KEY="${OS}_${ARCH}"
+            EXPECTED_CHECKSUM=$(echo "$CHECKSUMS" | jq -r --arg key "$PLATFORM_KEY" '.[$key] // ""' 2>/dev/null || echo "")
+
+            if [[ -z "$EXPECTED_CHECKSUM" ]]; then
+              echo "::warning::No checksum found for platform '$PLATFORM_KEY' in checksums JSON"
+            fi
+          else
+            # Treat as single checksum string
+            EXPECTED_CHECKSUM="$CHECKSUMS"
+          fi
+        fi
+
+        # Validate checksum if we have one
+        if [[ -n "$EXPECTED_CHECKSUM" ]]; then
+          echo "Validating checksum for platform ${OS}_${ARCH}..."
+          if [[ "$ACTUAL_CHECKSUM" != "$EXPECTED_CHECKSUM" ]]; then
             echo "::error::Checksum validation failed!"
-            echo "::error::Expected: $CHECKSUM"
+            echo "::error::Expected: $EXPECTED_CHECKSUM"
             echo "::error::Actual:   $ACTUAL_CHECKSUM"
             exit 1
           fi
           echo "Checksum validation passed ✓"
         else
-          echo "::warning::No checksum provided for verification. For better security, consider adding the checksum input."
+          echo "::warning::No checksum provided for verification. For better security, consider adding the checksums input."
+          echo "::warning::Current platform: ${OS}_${ARCH}"
           echo "::warning::Current file checksum (SHA256): $ACTUAL_CHECKSUM"
         fi
 
