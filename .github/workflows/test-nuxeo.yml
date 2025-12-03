@@ -25,7 +25,7 @@ jobs:
         run: zip ${{ env.ZIP_PACKAGE_NAME }} package.xml install.xml
         working-directory: .github/actions/nuxeo/nos-publish
 
-      - name: Publish Nuxeo Package to NOS staging Connect
+      - name: Publish Nuxeo Package to NOS staging Connect 🫸
         id: publish_nos
         uses: ./.github/actions/nuxeo/nos-publish
         with:
