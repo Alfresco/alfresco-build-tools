@@ -1986,8 +1986,8 @@ checksum verification is performed but warning is emitted to ease configuration.
         #  ARCH: "amd64" # or "arm64"
         # checksums: |
         #   {
-        #     "linux_amd64":"b8ca6b54dccbff5c6f4f819a36905b56c2a5110b0f496058106792e4d272808b",
-        #     "linux_arm64":"d41d8cd98f00b204eec4b0d6f8f6f1427b1e3f5e6e0b4c8e5f8f6f8f6f1427b1"
+        #     "linux_amd64":"b8ca6b54dccbff5c6f4f819a36905b56c2",
+        #     "linux_arm64":"d41d8cd98f00b204eec4b0d6f8f6f1427b"
         #   }
 ```
 
