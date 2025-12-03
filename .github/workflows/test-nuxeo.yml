@@ -1,4 +1,4 @@
-name: Test nuxeo image builder
+name: Test Nuxeo 🟦 actions
 
 on:
   push:
@@ -6,11 +6,46 @@ on:
   pull_request:
     branches: [ master ]
     paths:
-      - '.github/actions/nuxeo/nuxeo-docker-build/**'
+      - '.github/actions/nuxeo/**'
       - '.github/workflows/test-nuxeo.yml'
 
 jobs:
-  test:
+  nos-publish:
+    runs-on: ubuntu-latest
+    env:
+      ZIP_PACKAGE_NAME: dummy.zip
+    steps:
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+
+      - name: Build zip package
+        run: |
+          echo "Preparing package file 📦"
+          zip ${ env.ZIP_PACKAGE_NAME } package.xml install.xml
+        working-directory: ${{ github.action_path }}
+
+      - name: Publish Nuxeo Package to NOS staging Connect
+        id: publish_nos
+        uses: ./.github/actions/nuxeo/nos-publish
+        with:
+          package-path: ${{ github.action_path }}/${{ env.ZIP_PACKAGE_NAME }}
+          nos-username: ${{ secrets.NOS_CONNECT_USER }}
+          nos-token: ${{ secrets.NOS_CONNECT_TOKEN }}
+          nos-env: staging
+
+      - name: Unpublish Module
+        env:
+          PACKAGE_URL: ${{ steps.publish_nos.outputs.package-url }}
+        run: |
+          RESPONSE=$(curl \
+            -w "%{http_code}" \
+            -su "${{ secrets.NOS_CONNECT_USER }}:${{ secrets.NOS_CONNECT_TOKEN }}" \
+            ${PACKAGE_URL//\?//delete?})
+          if [ "$RESPONSE" != "303" ]; then
+            echo "Failed to delete package from NOS. Response code: $RESPONSE"
+            exit 1
+          fi
+
+  nuxeo-docker-build:
     runs-on: ubuntu-latest
     env:
       NUXEO_CONNECT_MODULE: nuxeo-web-ui
