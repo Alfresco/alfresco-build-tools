@@ -84,6 +84,11 @@ runs:
           if [[ "$CHECKSUMS" =~ ^[a-fA-F0-9]{64}$ ]]; then
             EXPECTED_CHECKSUM="$CHECKSUMS"
           else
+            if ! command -v jq &> /dev/null; then
+              echo "::error::jq is required to parse checksums JSON but it's not installed. Please install jq or provide a single checksum string."
+              exit 1
+            fi
+
             PLATFORM_KEY="${BINARY_OS}_${BINARY_ARCH}"
             EXPECTED_CHECKSUM=$(echo "$CHECKSUMS" | jq -r --arg key "$PLATFORM_KEY" '.[$key] // ""' 2>/dev/null || echo "")
 
