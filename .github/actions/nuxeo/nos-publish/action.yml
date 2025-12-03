@@ -1,0 +1,119 @@
+# A github composite action to publish package to Nuxeo Online service using a form post request.
+name: 📦 Publish to Nuxeo Online Services
+description: |
+  Publish package to Nuxeo Online service.
+inputs:
+  package-path:
+    description: Path to the package file to be published.
+    required: true
+  nos-username:
+    description: Nuxeo Online Service username for authentication.
+    required: true
+  nos-token:
+    description: Nuxeo Online Service token for authentication.
+    required: true
+  nos-env:
+    description: |
+      Nuxeo Online Service target environment (e.g., production, staging).
+      If not set, it will be determined based on the branch name.
+  skip-verify:
+    description: Skip verification of the published package.
+    default: "false"
+outputs:
+  publishing-status:
+    description: Status of the publishing process.
+    value: ${{ steps.publish-output.outputs.status }}
+  package-url:
+    description: URL of the published package on Nuxeo Online Services.
+    value: ${{ steps.publish-output.outputs.url }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Extract package info
+      shell: bash
+      env:
+        PACKAGE_XML: "package.xml"
+      run: |
+        unzip -t "${{ inputs.package-path }}" $PACKAGE_XML || {
+          echo "❌ The package file '${{ inputs.package-path }}' has no valid descriptor"
+          exit 1
+        }
+        echo "📦 Extracting package information from ${{ inputs.package-path }}..."
+        for i in name version; do
+          VALUE=$(unzip -p "${{ inputs.package-path }}" $PACKAGE_XML | yq -p=xml ".package.+@${i}")
+          echo "PACKAGE_${i^^}=${VALUE}" | tee -a $GITHUB_ENV
+        done
+        [[ -z "${PACKAGE_NAME}" || -z "${PACKAGE_VERSION}" ]] && {
+          echo "❌ Unable to extract package name or version from descriptor"
+          exit 1
+        }
+
+    - name: Get Branch name
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v10.1.0
+
+    - name: Evaluate Target env if none has been set
+      shell: bash
+      run: |
+        case "${{ inputs.nos-env }}" in
+          "production")
+            CONNECT_HOST=connect
+            ;;
+          "staging")
+            CONNECT_HOST=nos-preprod-connect
+            ;;
+          *)
+            if [[ "${BRANCH_NAME}" == ${{ github.event.repository.default_branch }} ]]; then
+              CONNECT_HOST=connect"
+            else
+              CONNECT_HOST=nos-preprod-connect
+            fi
+            ;;
+        esac
+        echo "CONNECT_HOST=${CONNECT_HOST}" >> $GITHUB_ENV
+
+    - name: Publish package to Nuxeo Online Services
+      shell: bash
+      id: publish
+      env:
+        NOS_USERNAME: ${{ inputs.nos-username }}
+        NOS_TOKEN: ${{ inputs.nos-token }}
+      run: |
+        echo "📢 Publishing package to Nuxeo Online Services..."
+        PUBLISH=$(curl -sX POST \
+          -u "${NOS_USERNAME}:${NOS_TOKEN}" \
+          -w "%{http_code}" \
+          -F "package=@${{ inputs.package-path }}" \
+          "https://${CONNECT_HOST}.nuxeo.com/nuxeo/site/marketplace/upload?batch=true")
+        if [[ "${PUBLISH: -3}" != "200" ]]; then
+          echo "❌ Failed to publish package. HTTP Status: ${PUBLISH: -3}"
+          exit 1
+        fi
+
+    - name: Verify published package on Nuxeo Online Services
+      id: verify
+      env:
+        NOS_USERNAME: ${{ inputs.nos-username }}
+      shell: bash
+      if: inputs.skip-verify == 'false'
+      run: |
+        PUBLISHED=$(curl -sX GET \
+          -u "${NOS_USERNAME}:${NOS_TOKEN}" \
+          -w "%{http_code}" \
+          "https://${CONNECT_HOST}.nuxeo.com/nuxeo/site/marketplace/package/${PACKAGE_NAME}?version=${PACKAGE_VERSION}")
+        if [[ "${PUBLISHED: -3}" != "200" ]]; then
+          echo "❌ Published package verification failed. HTTP Status: ${PUBLISHED: -3}"
+          exit 1
+        fi
+        echo "✅ Package '${PACKAGE_NAME}' version '${PACKAGE_VERSION}' successfully published to Nuxeo Online Services."
+
+    - name: Populate outputs
+      id: publish-output
+      shell: bash
+      if: always()
+      env:
+        CONNECT_BASE_URL: https://${{ env.CONNECT_HOST }}.nuxeo.com/nuxeo/site/marketplace/package
+        STATUS: ${{ inputs.skip-verify == 'false' && ${ steps.verify.outcome } || ${ steps.publish.outcome } }}
+      run: |
+        echo "url=${CONNECT_BASE_URL}/${PACKAGE_NAME}?version=${PACKAGE_VERSION}" >> $GITHUB_OUTPUT
+        echo "status=${STATUS}" >> $GITHUB_OUTPUT
