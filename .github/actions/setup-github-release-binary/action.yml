@@ -80,18 +80,15 @@ runs:
         # Determine expected checksum
         EXPECTED_CHECKSUM=""
         if [[ -n "$CHECKSUMS" ]]; then
-          # Check if CHECKSUMS is JSON (starts with '{')
-          if [[ "$CHECKSUMS" =~ ^\{.*\}$ ]]; then
-            # Parse JSON to get checksum for current OS_ARCH
+          if [[ "$CHECKSUMS" =~ ^[a-fA-F0-9]{64}$ ]]; then
+            EXPECTED_CHECKSUM="$CHECKSUMS"
+          else
             PLATFORM_KEY="${BINARY_OS}_${BINARY_ARCH}"
             EXPECTED_CHECKSUM=$(echo "$CHECKSUMS" | jq -r --arg key "$PLATFORM_KEY" '.[$key] // ""' 2>/dev/null || echo "")
 
             if [[ -z "$EXPECTED_CHECKSUM" ]]; then
-              echo "::warning::No checksum found for platform '$PLATFORM_KEY' in checksums JSON"
+              echo "::warning::No checksum found for platform '$PLATFORM_KEY' in checksums JSON, or invalid JSON format provided"
             fi
-          else
-            # Treat as single checksum string
-            EXPECTED_CHECKSUM="$CHECKSUMS"
           fi
         fi
 
