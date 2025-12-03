@@ -34,17 +34,18 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - shell: bash
+    - name: Download binary
+      id: download
+      shell: bash
       env:
         REPO: ${{ inputs.repo }}
         VERSION: ${{ inputs.version }}
         URL_TEMPLATE: ${{ inputs.url_template }}
         BINARY_NAME: ${{ inputs.binary_name }}
-        CHECKSUMS: ${{ inputs.checksums }}
       working-directory: ${{ runner.temp }}
       run: |
         NAME=${BINARY_NAME:-${REPO##*\/}}
-        OS=${OS:-$(uname | tr '[:upper:]' '[:lower:]')}
+        OS=$(uname | tr '[:upper:]' '[:lower:]')
         ARCH_RAW=$(uname -m)
         case $ARCH_RAW in
           x86_64) ARCH=${ARCH:-${{ inputs.x86_64_arch }}} ;;
@@ -58,8 +59,23 @@ runs:
         echo "Downloading $URL ..."
         curl -fsSL -o "$ARCHIVE" "$URL"
 
+        # Store values for next steps
+        echo "binary_name=$NAME" >> $GITHUB_OUTPUT
+        echo "binary_os=$OS" >> $GITHUB_OUTPUT
+        echo "binary_arch=$ARCH" >> $GITHUB_OUTPUT
+        echo "binary_archive=$ARCHIVE" >> $GITHUB_OUTPUT
+
+    - name: Validate checksum
+      shell: bash
+      env:
+        CHECKSUMS: ${{ inputs.checksums }}
+        BINARY_ARCHIVE: ${{ steps.download.outputs.binary_archive }}
+        BINARY_OS: ${{ steps.download.outputs.binary_os }}
+        BINARY_ARCH: ${{ steps.download.outputs.binary_arch }}
+      working-directory: ${{ runner.temp }}
+      run: |
         # Calculate checksum
-        ACTUAL_CHECKSUM=$(shasum -a 256 "$ARCHIVE" | awk '{print $1}')
+        ACTUAL_CHECKSUM=$(shasum -a 256 "$BINARY_ARCHIVE" | awk '{print $1}')
 
         # Determine expected checksum
         EXPECTED_CHECKSUM=""
@@ -67,7 +83,7 @@ runs:
           # Check if CHECKSUMS is JSON (starts with '{')
           if [[ "$CHECKSUMS" =~ ^\{.*\}$ ]]; then
             # Parse JSON to get checksum for current OS_ARCH
-            PLATFORM_KEY="${OS}_${ARCH}"
+            PLATFORM_KEY="${BINARY_OS}_${BINARY_ARCH}"
             EXPECTED_CHECKSUM=$(echo "$CHECKSUMS" | jq -r --arg key "$PLATFORM_KEY" '.[$key] // ""' 2>/dev/null || echo "")
 
             if [[ -z "$EXPECTED_CHECKSUM" ]]; then
@@ -81,7 +97,7 @@ runs:
 
         # Validate checksum if we have one
         if [[ -n "$EXPECTED_CHECKSUM" ]]; then
-          echo "Validating checksum for platform ${OS}_${ARCH}..."
+          echo "Validating checksum for platform ${BINARY_OS}_${BINARY_ARCH}..."
           if [[ "$ACTUAL_CHECKSUM" != "$EXPECTED_CHECKSUM" ]]; then
             echo "::error::Checksum validation failed!"
             echo "::error::Expected: $EXPECTED_CHECKSUM"
@@ -91,18 +107,25 @@ runs:
           echo "Checksum validation passed ✓"
         else
           echo "::warning::No checksum provided for verification. For better security, consider adding the checksums input."
-          echo "::warning::Current platform: ${OS}_${ARCH}"
+          echo "::warning::Current platform: ${BINARY_OS}_${BINARY_ARCH}"
           echo "::warning::Current file checksum (SHA256): $ACTUAL_CHECKSUM"
         fi
 
-        if [[ "$ARCHIVE" == *.zip ]]; then
-          unzip -j -qq "$ARCHIVE" "*$NAME" -d .
-        elif [[ "$ARCHIVE" == *.tar.gz ]] || [[ "$ARCHIVE" == *.tgz ]]; then
-          tar -xzf "$ARCHIVE" "$NAME"
+    - name: Install binary
+      shell: bash
+      env:
+        BINARY_ARCHIVE: ${{ steps.download.outputs.binary_archive }}
+        BINARY_NAME: ${{ steps.download.outputs.binary_name }}
+      working-directory: ${{ runner.temp }}
+      run: |
+        if [[ "$BINARY_ARCHIVE" == *.zip ]]; then
+          unzip -j -qq "$BINARY_ARCHIVE" "*$BINARY_NAME" -d .
+        elif [[ "$BINARY_ARCHIVE" == *.tar.gz ]] || [[ "$BINARY_ARCHIVE" == *.tgz ]]; then
+          tar -xzf "$BINARY_ARCHIVE" "$BINARY_NAME"
         else
-          mv "$ARCHIVE" "$NAME"
-          chmod +x "$NAME"
+          mv "$BINARY_ARCHIVE" "$BINARY_NAME"
+          chmod +x "$BINARY_NAME"
         fi
 
-        sudo mv $NAME /usr/local/bin/$NAME
-        $NAME ${{ inputs.test_args }}
+        sudo mv $BINARY_NAME /usr/local/bin/$BINARY_NAME
+        $BINARY_NAME ${{ inputs.test_args }}
