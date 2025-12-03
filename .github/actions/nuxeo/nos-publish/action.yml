@@ -103,6 +103,7 @@ runs:
       shell: bash
       if: inputs.skip-verify == 'false'
       run: |
+        sleep 10
         PUBLISHED=$(curl -sX GET \
           -u "${NOS_USERNAME}:${NOS_TOKEN}" \
           -w "%{http_code}" \
