@@ -91,8 +91,6 @@ Here follows the list of GitHub Actions topics available in the current document
     - [maven-update-pom-version](#maven-update-pom-version)
     - [md-toc](#md-toc)
     - [nexus-move-artifacts](#nexus-move-artifacts)
-    - [nuxeo-docker-build](#nuxeo-docker-build)
-    - [nos-publish](#nos-publish)
     - [pre-commit](#pre-commit)
     - [process-coverage-report](#process-coverage-report)
     - [pipenv](#pipenv)
@@ -128,6 +126,10 @@ Here follows the list of GitHub Actions topics available in the current document
     - [update-project-base-tag](#update-project-base-tag)
     - [validate-maven-versions](#validate-maven-versions)
     - [veracode](#veracode)
+    - [Nuxeo related actions](#nuxeo-related-actions)
+      - [nuxeo-docker-build](#nuxeo-docker-build)
+      - [nos-publish](#nos-publish)
+      - [xvfb-record](#xvfb-record)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [branch-promotion-prs](#branch-promotion-prs)
     - [helm-publish-new-package-version](#helm-publish-new-package-version)
@@ -1506,29 +1508,6 @@ Notes:
 - Set `push-image: true` to push the image to the target registry.
 - Provide private yum repo credentials via inputs (`os-packages-user`, `os-packages-token`) if needed (templated by `nuxeo-private.repo`).
 
-### nos-publish
-
-Publish Nuxeo package to Nuxeo Online Services (NOS).
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/nos-publish@v10.1.0
-        with:
-          nos-env: production # Market place target env (either 'production' or 'staging')
-          nos-username: ${{ secrets.NOS_CONNECT_USERNAME }}
-          nos-token: ${{ secrets.NOS_CONNECT_TOKEN }}
-          skip-verify: 'false' # optional, default is 'false'
-          package-path: ./module.zip
-```
-
-Inputs:
-
-Check `action.yml` for the full list of inputs and their description.
-
-Outputs:
-
-- package-url: URL of the published package on NOS Marketplace
-- status: publication status (based either on publish step outcome of verification step outcome)
-
 ### pre-commit
 
 Executes a [pre-commit](https://pre-commit.com/) step.
@@ -2259,6 +2238,97 @@ This way, the agent-based scan results will be added in the latest promoted scan
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
           srcclr-project-ext: '' # optional, allows for directing scan results to Veracode project named: <default project name>/<srcclr-project-ext>
 ```
+
+### Nuxeo related actions
+
+#### nos-publish
+
+Publish Nuxeo package to Nuxeo Online Services (NOS).
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/nos-publish@v10.1.0
+        with:
+          nos-env: production # Market place target env (either 'production' or 'staging')
+          nos-username: ${{ secrets.NOS_CONNECT_USERNAME }}
+          nos-token: ${{ secrets.NOS_CONNECT_TOKEN }}
+          skip-verify: 'false' # optional, default is 'false'
+          package-path: ./module.zip
+```
+
+Inputs:
+
+Check `action.yml` for the full list of inputs and their description.
+
+Outputs:
+
+- package-url: URL of the published package on NOS Marketplace
+- status: publication status (based either on publish step outcome of verification step outcome)
+
+#### nuxeo-docker-build
+
+Build a customized Nuxeo Docker image by layering:
+
+- A chosen base image tag
+- Online Nuxeo Connect marketplace modules (requires `NUXEO_CLID` secret)
+- Offline local addon `.zip`/`.jar` files
+- Optional OS packages installed through the private yum repository
+
+Pushes the resulting image to a target registry (default `ghcr.io`) and outputs the full image URL.
+
+```yaml
+      - name: Build Nuxeo image
+        uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/nuxeo-docker-build@v10.1.0
+        with:
+          base-image-tag: 2023
+          base-registry-username: ${{ secrets.NUXEO_REGISTRY_USERNAME }}
+          base-registry-password: ${{ secrets.NUXEO_REGISTRY_PASSWORD }}
+          nuxeo-connect-modules: "nuxeo-web-ui nuxeo-drive" # optional
+          nuxeo-clid: ${{ secrets.NUXEO_CLID }} # optional if nuxeo-connect-modules is empty
+          nuxeo-local-modules-path: addons # directory with offline addon zips
+          os-packages: "ImageMagick jq" # optional
+          image-name: my-nuxeo-custom
+          image-tag: ${{ github.sha }}
+          registry: ghcr.io
+          registry-username: ${{ secrets.GITHUB_USERNAME }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
+```
+
+Inputs:
+
+Check `action.yml` for the full list of inputs and their descriptions.
+
+Outputs:
+
+- The composite action sets output `image-url` to the fully qualified reference.
+
+Notes:
+
+- If no connect modules are provided, that phase is skipped.
+- If the addons directory does not exist it is created empty (offline install skipped).
+- Set `push-image: true` to push the image to the target registry.
+- Provide private yum repo credentials via inputs (`os-packages-user`, `os-packages-token`) if needed (templated by `nuxeo-private.repo`).
+
+#### xvfb-record
+
+This action sets up an Xvfb server, runs a specified test command, records the
+Xvfb session using ffmpeg, and uploads the recording as an artifact.
+
+```yaml
+      - name: Functional tests
+        env:
+          RUN_ALL: false
+          BAIL: 0
+        uses: ./.github/actions/xvfb-record
+        with:
+          test_command: mvn -ntp install -Pftest -DskipInstall
+          timeout_minutes: 120
+          record_video: "true"
+          max_attempts: 3
+```
+
+Inputs:
+
+Check `action.yml` for the full list of inputs and their descriptions.
 
 ## Reusable workflows provided by us
 
