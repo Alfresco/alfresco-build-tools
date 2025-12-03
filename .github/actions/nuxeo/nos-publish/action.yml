@@ -76,6 +76,7 @@ runs:
             ;;
         esac
         echo "CONNECT_HOST=${CONNECT_HOST}" >> $GITHUB_ENV
+        echo "🎯 Target Nuxeo Online Services environment: '${CONNECT_HOST}'"
 
     - name: Publish package to Nuxeo Online Services
       shell: bash
@@ -84,12 +85,12 @@ runs:
         NOS_USERNAME: ${{ inputs.nos-username }}
         NOS_TOKEN: ${{ inputs.nos-token }}
       run: |
-        echo "📢 Publishing package to Nuxeo Online Services..."
         PUBLISH=$(curl -sX POST \
           -u "${NOS_USERNAME}:${NOS_TOKEN}" \
           -w "%{http_code}" \
           -F "package=@${{ inputs.package-path }}" \
           "https://${CONNECT_HOST}/nuxeo/site/marketplace/upload?batch=true&orgId=${{ inputs.nos-org }}")
+        echo "📢 Publishing package to Nuxeo Online Services..."
         if [[ "${PUBLISH: -3}" != "200" ]]; then
           echo "❌ Failed to publish package. HTTP Status: ${PUBLISH: -3}"
           exit 1
@@ -104,6 +105,7 @@ runs:
       if: inputs.skip-verify == 'false'
       run: |
         sleep 10
+        echo "🔍 Verifying published package on Nuxeo Online Services..."
         PUBLISHED=$(curl -sX GET \
           -u "${NOS_USERNAME}:${NOS_TOKEN}" \
           -w "%{http_code}" \

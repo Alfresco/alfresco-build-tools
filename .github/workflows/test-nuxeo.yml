@@ -1,4 +1,4 @@
-name: Test actions 🟦 Nuxeo
+name: Test actions Nuxeo 🟦
 
 on:
   push:
@@ -21,10 +21,8 @@ jobs:
     steps:
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
-      - name: Build zip package
-        run: |
-          echo "Preparing package file 📦"
-          zip ${{ env.ZIP_PACKAGE_NAME }} package.xml install.xml
+      - name: Build zip package file 📦
+        run: zip ${{ env.ZIP_PACKAGE_NAME }} package.xml install.xml
         working-directory: .github/actions/nuxeo/nos-publish
 
       - name: Publish Nuxeo Package to NOS staging Connect
@@ -37,7 +35,7 @@ jobs:
           nos-env: staging
           nos-org: nuxeo-devops
 
-      - name: Unpublish Module
+      - name: Unpublish Module 🫥
         env:
           PACKAGE_URL: ${{ steps.publish_nos.outputs.package-url }}
         run: |
@@ -46,7 +44,7 @@ jobs:
             -su "${{ secrets.NOS_CONNECT_USER }}:${{ secrets.NOS_CONNECT_TOKEN }}" \
             ${PACKAGE_URL//\?//delete?})
           if [ "$RESPONSE" != "303" ]; then
-            echo "Failed to delete package from NOS. Response code: $RESPONSE"
+            echo "🧟 Failed to unpublish package from NOS Connect. Response code: $RESPONSE"
             exit 1
           fi
 
