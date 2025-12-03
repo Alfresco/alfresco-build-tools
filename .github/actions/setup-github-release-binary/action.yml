@@ -96,16 +96,12 @@ runs:
         if [[ -n "$EXPECTED_CHECKSUM" ]]; then
           echo "Validating checksum for platform ${BINARY_OS}_${BINARY_ARCH}..."
           if [[ "$ACTUAL_CHECKSUM" != "$EXPECTED_CHECKSUM" ]]; then
-            echo "::error::Checksum validation failed!"
-            echo "::error::Expected: $EXPECTED_CHECKSUM"
-            echo "::error::Actual:   $ACTUAL_CHECKSUM"
+            echo "::error::Checksum validation failed! Expected: $EXPECTED_CHECKSUM, Actual: $ACTUAL_CHECKSUM"
             exit 1
           fi
           echo "Checksum validation passed ✓"
         else
-          echo "::warning::No checksum provided for verification. For better security, consider adding the checksums input."
-          echo "::warning::Current platform: ${BINARY_OS}_${BINARY_ARCH}"
-          echo "::warning::Current file checksum (SHA256): $ACTUAL_CHECKSUM"
+          echo "::warning::No checksum provided for verification. Add this to your action inputs for improved security: checksums: '{\"${BINARY_OS}_${BINARY_ARCH}\": \"${ACTUAL_CHECKSUM}\"}'"
         fi
 
     - name: Install binary
