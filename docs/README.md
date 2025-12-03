@@ -92,6 +92,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [md-toc](#md-toc)
     - [nexus-move-artifacts](#nexus-move-artifacts)
     - [nuxeo-docker-build](#nuxeo-docker-build)
+    - [nos-publish](#nos-publish)
     - [pre-commit](#pre-commit)
     - [process-coverage-report](#process-coverage-report)
     - [pipenv](#pipenv)
@@ -1504,6 +1505,29 @@ Notes:
 - If the addons directory does not exist it is created empty (offline install skipped).
 - Set `push-image: true` to push the image to the target registry.
 - Provide private yum repo credentials via inputs (`os-packages-user`, `os-packages-token`) if needed (templated by `nuxeo-private.repo`).
+
+### nos-publish
+
+Publish Nuxeo module packages to Nuxeo Online Services (NOS).
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/nos-publish@v10.1.0
+        with:
+          nos-env: production # or 'staging'
+          nos-username: ${{ secrets.NOS_CONNECT_USERNAME }}
+          nos-token: ${{ secrets.NOS_CONNECT_TOKEN }}
+          skip-verify: 'false' # optional, default is 'false'
+          packages-path: ./module.zip
+```
+
+Inputs:
+
+Check `action.yml` for the full list of inputs and their descriptions.
+
+Outputs:
+
+- package-url: URL of the published package on NOS Marketplace
+- status: publication status (based either on publish step outcome of verification step outcome)
 
 ### pre-commit
 
