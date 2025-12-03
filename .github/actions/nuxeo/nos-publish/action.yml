@@ -16,6 +16,10 @@ inputs:
     description: |
       Nuxeo Online Service target environment (e.g., production, staging).
       If not set, it will be determined based on the branch name.
+  nos-org:
+    description: |
+      Nuxeo Online Service organization name.
+    default: nuxeo
   skip-verify:
     description: Skip verification of the published package.
     default: "false"
@@ -84,7 +88,7 @@ runs:
           -u "${NOS_USERNAME}:${NOS_TOKEN}" \
           -w "%{http_code}" \
           -F "package=@${{ inputs.package-path }}" \
-          "https://${CONNECT_HOST}/nuxeo/site/marketplace/upload?batch=true")
+          "https://${CONNECT_HOST}/nuxeo/site/marketplace/upload?batch=true&orgId=${{ inputs.nos-org }}")
         if [[ "${PUBLISH: -3}" != "200" ]]; then
           echo "❌ Failed to publish package. HTTP Status: ${PUBLISH: -3}"
           exit 1

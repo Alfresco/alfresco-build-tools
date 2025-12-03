@@ -31,6 +31,7 @@ jobs:
           nos-username: ${{ secrets.NOS_CONNECT_USER }}
           nos-token: ${{ secrets.NOS_CONNECT_TOKEN }}
           nos-env: staging
+          nos-org: nuxeo-devops
 
       - name: Unpublish Module
         env:
