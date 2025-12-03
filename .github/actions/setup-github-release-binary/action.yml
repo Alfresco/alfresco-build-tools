@@ -69,6 +69,7 @@ runs:
       shell: bash
       env:
         CHECKSUMS: ${{ inputs.checksums }}
+        BINARY_NAME: ${{ steps.download.outputs.binary_name }}
         BINARY_ARCHIVE: ${{ steps.download.outputs.binary_archive }}
         BINARY_OS: ${{ steps.download.outputs.binary_os }}
         BINARY_ARCH: ${{ steps.download.outputs.binary_arch }}
@@ -87,7 +88,7 @@ runs:
             EXPECTED_CHECKSUM=$(echo "$CHECKSUMS" | jq -r --arg key "$PLATFORM_KEY" '.[$key] // ""' 2>/dev/null || echo "")
 
             if [[ -z "$EXPECTED_CHECKSUM" ]]; then
-              echo "::warning::No checksum found for platform '$PLATFORM_KEY' in checksums JSON, or invalid JSON format provided"
+              echo "::warning::No checksum found for $BINARY_NAME on platform '$PLATFORM_KEY' in checksums JSON, or invalid JSON format provided"
             fi
           fi
         fi
@@ -96,12 +97,12 @@ runs:
         if [[ -n "$EXPECTED_CHECKSUM" ]]; then
           echo "Validating checksum for platform ${BINARY_OS}_${BINARY_ARCH}..."
           if [[ "$ACTUAL_CHECKSUM" != "$EXPECTED_CHECKSUM" ]]; then
-            echo "::error::Checksum validation failed! Expected: $EXPECTED_CHECKSUM, Actual: $ACTUAL_CHECKSUM"
+            echo "::error::Checksum validation failed for $BINARY_NAME! Expected: $EXPECTED_CHECKSUM, Actual: $ACTUAL_CHECKSUM"
             exit 1
           fi
           echo "Checksum validation passed ✓"
         else
-          echo "::warning::No checksum provided for verification. Add this to your action inputs for improved security: checksums: '{\"${BINARY_OS}_${BINARY_ARCH}\": \"${ACTUAL_CHECKSUM}\"}'"
+          echo "::warning::No checksum provided for verification of $BINARY_NAME. Add this to your action inputs for improved security: checksums: '{\"${BINARY_OS}_${BINARY_ARCH}\": \"${ACTUAL_CHECKSUM}\"}'"
         fi
 
     - name: Install binary
