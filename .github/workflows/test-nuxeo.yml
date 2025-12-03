@@ -1,4 +1,4 @@
-name: Test Nuxeo 🟦 actions
+name: Test actions 🟦 Nuxeo
 
 on:
   push:
@@ -8,6 +8,10 @@ on:
     paths:
       - '.github/actions/nuxeo/**'
       - '.github/workflows/test-nuxeo.yml'
+
+concurrency:
+  group: nuxeo-actions-tests
+  cancel-in-progress: true
 
 jobs:
   nos-publish:
