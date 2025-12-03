@@ -126,5 +126,5 @@ runs:
           chmod +x "$BINARY_NAME"
         fi
 
-        sudo mv $BINARY_NAME /usr/local/bin/$BINARY_NAME
-        $BINARY_NAME ${{ inputs.test_args }}
+        sudo mv "$BINARY_NAME" /usr/local/bin/"$BINARY_NAME"
+        "$BINARY_NAME" ${{ inputs.test_args }}
