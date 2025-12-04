@@ -39,10 +39,10 @@ jobs:
         env:
           PACKAGE_URL: ${{ steps.publish_nos.outputs.package-url }}
         run: |
-          RESPONSE=$(curl \
+          RESPONSE="$(curl \
             -w "%{http_code}" \
             -su "${{ secrets.NOS_CONNECT_USER }}:${{ secrets.NOS_CONNECT_TOKEN }}" \
-            ${PACKAGE_URL//\?//delete?})
+            ${PACKAGE_URL//\?//delete?})"
           if [ "$RESPONSE" != "303" ]; then
             echo "🧟 Failed to unpublish package from NOS Connect. Response code: $RESPONSE"
             exit 1
