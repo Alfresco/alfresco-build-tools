@@ -30,6 +30,11 @@ on:
         type: boolean
         required: false
         default: false
+      tfvars_subfolder:
+        description: the subfolder where tfvars files are located (relative to terraform_root_path)
+        type: string
+        required: false
+        default: ''
     secrets:
       AWS_ACCESS_KEY_ID:
         required: false
@@ -54,6 +59,7 @@ jobs:
       - name: Validate inputs
         env:
           TERRAFORM_OPERATION: ${{ inputs.terraform_operation }}
+          TFVARS_SUBFOLDER: ${{ inputs.tfvars_subfolder }}
         run: |
           if [ -z "${TERRAFORM_OPERATION}" ]; then
             echo "terraform_operation is not set, defaulting to github event based handling."
@@ -66,6 +72,10 @@ jobs:
                 exit 1
                 ;;
             esac
+          fi
+
+          if [ -z "${TFVARS_SUBFOLDER}" ]; then
+            echo "::warning::tfvars_subfolder input is not set. Consider organizing your tfvars files in a 'vars' subfolder for better structure. Set tfvars_subfolder: 'vars' in your workflow to use this recommended layout."
           fi
 
       - name: Evaluate branch name
@@ -240,8 +250,8 @@ jobs:
           label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
           path: ${{ inputs.terraform_root_path }}
           var_file: |
-            ${{ inputs.terraform_root_path }}/common.tfvars
-            ${{ inputs.terraform_root_path }}/${{ needs.compute_basic_vars.outputs.environment_name }}.tfvars
+            ${{ inputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}common.tfvars
+            ${{ inputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}${{ needs.compute_basic_vars.outputs.environment_name }}.tfvars
           backend_config: |
             bucket=${{ vars.TERRAFORM_STATE_BUCKET }}
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
@@ -254,8 +264,8 @@ jobs:
           path: ${{ inputs.terraform_root_path }}
           auto_approve: ${{ inputs.terraform_operation == 'apply' }}
           var_file: |
-            ${{ inputs.terraform_root_path }}/common.tfvars
-            ${{ inputs.terraform_root_path }}/${{ needs.compute_basic_vars.outputs.environment_name }}.tfvars
+            ${{ inputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}common.tfvars
+            ${{ inputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}${{ needs.compute_basic_vars.outputs.environment_name }}.tfvars
           backend_config: |
             bucket=${{ vars.TERRAFORM_STATE_BUCKET }}
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
@@ -266,8 +276,8 @@ jobs:
         with:
           path: ${{ inputs.terraform_root_path }}
           var_file: |
-            ${{ inputs.terraform_root_path }}/common.tfvars
-            ${{ inputs.terraform_root_path }}/${{ needs.compute_basic_vars.outputs.environment_name }}.tfvars
+            ${{ inputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}common.tfvars
+            ${{ inputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}${{ needs.compute_basic_vars.outputs.environment_name }}.tfvars
           backend_config: |
             bucket=${{ vars.TERRAFORM_STATE_BUCKET }}
             key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
