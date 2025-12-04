@@ -68,7 +68,7 @@ runs:
             CONNECT_HOST=nos-preprod-connect.nuxeocloud.com
             ;;
           *)
-            if [[ "${BRANCH_NAME}" == ${{ github.event.repository.default_branch }} ]]; then
+            if [[ "${BRANCH_NAME}" == "${{ github.event.repository.default_branch }}" ]]; then
               CONNECT_HOST=connect.nuxeocloud.com
             else
               CONNECT_HOST=nos-preprod-connect.nuxeocloud.com
