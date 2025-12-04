@@ -126,10 +126,10 @@ Here follows the list of GitHub Actions topics available in the current document
     - [update-project-base-tag](#update-project-base-tag)
     - [validate-maven-versions](#validate-maven-versions)
     - [veracode](#veracode)
+    - [xvfb-record](#xvfb-record)
     - [Nuxeo related actions](#nuxeo-related-actions)
       - [nuxeo-docker-build](#nuxeo-docker-build)
       - [nos-publish](#nos-publish)
-      - [xvfb-record](#xvfb-record)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [branch-promotion-prs](#branch-promotion-prs)
     - [helm-publish-new-package-version](#helm-publish-new-package-version)
@@ -2239,6 +2239,28 @@ This way, the agent-based scan results will be added in the latest promoted scan
           srcclr-project-ext: '' # optional, allows for directing scan results to Veracode project named: <default project name>/<srcclr-project-ext>
 ```
 
+### xvfb-record
+
+This action sets up an Xvfb server, runs a specified test command, records the
+Xvfb session using ffmpeg, and uploads the recording as an artifact.
+
+```yaml
+      - name: Functional tests
+        env:
+          RUN_ALL: false
+          BAIL: 0
+        uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/xvfb-record@10.2.0
+        with:
+          test_command: mvn -ntp install -Pftest -DskipInstall
+          timeout_minutes: 120
+          record_video: "true"
+          max_attempts: 3
+```
+
+Inputs:
+
+Check `action.yml` for the full list of inputs and their descriptions.
+
 ### Nuxeo related actions
 
 #### nos-publish
@@ -2307,28 +2329,6 @@ Notes:
 - If the addons directory does not exist it is created empty (offline install skipped).
 - Set `push-image: true` to push the image to the target registry.
 - Provide private yum repo credentials via inputs (`os-packages-user`, `os-packages-token`) if needed (templated by `nuxeo-private.repo`).
-
-#### xvfb-record
-
-This action sets up an Xvfb server, runs a specified test command, records the
-Xvfb session using ffmpeg, and uploads the recording as an artifact.
-
-```yaml
-      - name: Functional tests
-        env:
-          RUN_ALL: false
-          BAIL: 0
-        uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/xvfb-record@10.2.0
-        with:
-          test_command: mvn -ntp install -Pftest -DskipInstall
-          timeout_minutes: 120
-          record_video: "true"
-          max_attempts: 3
-```
-
-Inputs:
-
-Check `action.yml` for the full list of inputs and their descriptions.
 
 ## Reusable workflows provided by us
 
