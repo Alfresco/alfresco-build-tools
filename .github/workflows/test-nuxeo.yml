@@ -48,6 +48,21 @@ jobs:
             exit 1
           fi
 
+  xvfb:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+
+      - name: Run tests with Xvfb recording
+        uses: ./.github/actions/xvfb-record
+        with:
+          test_command: test_command
+          timeout_minutes: 30
+          video_name: "nuxeo_image_test_run"
+          video_extension: "mp4"
+          max_attempts: 1
+          retry_on: error
+
   nuxeo-docker-build:
     runs-on: ubuntu-latest
     env:
