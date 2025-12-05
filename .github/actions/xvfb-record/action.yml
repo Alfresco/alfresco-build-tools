@@ -29,9 +29,9 @@ inputs:
     required: false
     default: "10"
   video_name:
-    description: "The name of the video file to record (without extension), if set it will record video to this file name"
+    description: "The name of the video file to record (without extension)"
     required: false
-    default: ""
+    default: "recording"
   display_number:
     description: "The display number to use for Xvfb (e.g. :99)"
     required: false
@@ -41,7 +41,6 @@ runs:
   using: "composite"
   steps:
     - name: Xvfb setup & record
-      if: inputs.video_name != ''
       id: record
       shell: bash
       run: |
@@ -52,13 +51,13 @@ runs:
         XVFB_PID=$!
         sleep 3
         kill -0 "$XVFB_PID" 2>/dev/null || { echo "Xvfb failed to start"; exit 1; }
-        ffmpeg -y -nostdin -f x11grab -i :${{ inputs.display_number }} -s sxga recording.$VIDEXT > ffmpeg.log 2>&1 & FFMPEG_PID=$!
+        ffmpeg -y -nostdin -f x11grab -i :${{ inputs.display_number }} -s sxga ${{ inputs.video_name }}.$VIDEXT > ffmpeg.log 2>&1 & FFMPEG_PID="$!"
         echo "FFMPEG_PID=$FFMPEG_PID" >> $GITHUB_OUTPUT
       env:
         DEBIAN_FRONTEND: noninteractive
         FFREPORT: file=ffmpeg.log:level=info
         VIDEXT: ${{ inputs.video_extension }}
-      working-directory: /tmp
+      working-directory: ${{ runner.temp }}
 
     - name: Run tests using command ${{ inputs.test_command }}
       uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
@@ -79,10 +78,9 @@ runs:
         kill ${{ env.FFMPEG_PID }}
 
     - name: Archive Xvfb recording
-      if: always() && inputs.video_name != ''
       uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
       with:
         name: xvfbrecording-${{ inputs.video_name }}
         path: |
-          /tmp/${{ inputs.video_name }}.${{ inputs.video_extension }}
-          /tmp/ffmpeg.log
+          ${{ runner.temp }}/${{ inputs.video_name }}.${{ inputs.video_extension }}
+          ${{ runner.temp }}/ffmpeg.log

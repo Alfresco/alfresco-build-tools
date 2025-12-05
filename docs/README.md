@@ -2250,7 +2250,7 @@ Xvfb session using ffmpeg, and uploads the recording as an artifact.
         with:
           test_command: mvn -ntp install -Pftest -DskipInstall
           timeout_minutes: 120 # optional, default is 60
-          video_name: "absolute_cinema" # optional, if not set it will skip recording
+          video_name: "absolute_cinema" # optional
           max_attempts: 3 # optional, default is 1
           video_extension: mp4 # optional, default is mkv
           retry_on: error # optional, comma separated list of outcomes https://github.com/nick-fields/retry?tab=readme-ov-file#retry_on
