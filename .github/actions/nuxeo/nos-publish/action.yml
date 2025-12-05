@@ -1,4 +1,3 @@
-# A github composite action to publish package to Nuxeo Online service using a form post request.
 name: 📦 Publish to Nuxeo Online Services
 description: |
   Publish package to Nuxeo Online service.
@@ -14,8 +13,9 @@ inputs:
     required: true
   nos-env:
     description: |
-      Nuxeo Online Service target environment (e.g., production, staging).
-      If not set, it will be determined based on the branch name.
+      Nuxeo Online Service target environment (production or staging).
+      unrecognized values fallback to 'staging'.
+    required: true
   nos-org:
     description: |
       Nuxeo Online Service organization name.
@@ -34,6 +34,23 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Get Branch name
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v10.2.0
+
+    - name: Evaluate Target env if none has been set
+      shell: bash
+      run: |
+        case "${{ inputs.nos-env }}" in
+          "production")
+            CONNECT_HOST=connect.nuxeocloud.com
+            ;;
+          *)
+            CONNECT_HOST=nos-preprod-connect.nuxeocloud.com
+            ;;
+        esac
+        echo "CONNECT_BASE=https://${CONNECT_HOST}/nuxeo/site/marketplace" >> $GITHUB_ENV
+        echo "🎯 Target Nuxeo Online Services environment: '${CONNECT_HOST}'"
+
     - name: Extract package info
       shell: bash
       env:
@@ -54,30 +71,6 @@ runs:
           exit 1
         fi
 
-    - name: Get Branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v10.1.0
-
-    - name: Evaluate Target env if none has been set
-      shell: bash
-      run: |
-        case "${{ inputs.nos-env }}" in
-          "production")
-            CONNECT_HOST=connect.nuxeocloud.com
-            ;;
-          "staging")
-            CONNECT_HOST=nos-preprod-connect.nuxeocloud.com
-            ;;
-          *)
-            if [[ "${BRANCH_NAME}" == "${{ github.event.repository.default_branch }}" ]]; then
-              CONNECT_HOST=connect.nuxeocloud.com
-            else
-              CONNECT_HOST=nos-preprod-connect.nuxeocloud.com
-            fi
-            ;;
-        esac
-        echo "CONNECT_HOST=${CONNECT_HOST}" >> $GITHUB_ENV
-        echo "🎯 Target Nuxeo Online Services environment: '${CONNECT_HOST}'"
-
     - name: Publish package to Nuxeo Online Services
       shell: bash
       id: publish
@@ -89,7 +82,7 @@ runs:
           -u "${NOS_USERNAME}:${NOS_TOKEN}" \
           -w "%{http_code}" \
           -F "package=@${{ inputs.package-path }}" \
-          "https://${CONNECT_HOST}/nuxeo/site/marketplace/upload?batch=true&orgId=${{ inputs.nos-org }}")
+          "${CONNECT_BASE}/upload?batch=true&orgId=${{ inputs.nos-org }}")
         echo "📢 Publishing package to Nuxeo Online Services..."
         if [[ "${PUBLISH: -3}" != "200" ]]; then
           echo "❌ Failed to publish package. HTTP Status: ${PUBLISH: -3}"
@@ -109,7 +102,7 @@ runs:
         PUBLISHED=$(curl -sX GET \
           -u "${NOS_USERNAME}:${NOS_TOKEN}" \
           -w "%{http_code}" \
-          "https://${CONNECT_HOST}/nuxeo/site/marketplace/package/${PACKAGE_NAME}?version=${PACKAGE_VERSION}")
+          "${CONNECT_BASE}/package/${PACKAGE_NAME}?version=${PACKAGE_VERSION}")
         if [[ "${PUBLISHED: -3}" != "200" ]]; then
           echo "❌ Published package verification failed. HTTP Status: ${PUBLISHED: -3}"
           exit 1
@@ -121,8 +114,8 @@ runs:
       shell: bash
       if: always()
       env:
-        CONNECT_BASE_URL: https://${{ env.CONNECT_HOST }}/nuxeo/site/marketplace/package
+        PACKAGE_URL: ${{ format('{0}/package/{1}?version={2}', env.CONNECT_BASE, env.PACKAGE_NAME, env.PACKAGE_VERSION) }}
         STATUS: ${{ inputs.skip-verify == 'false' && steps.verify.outcome || steps.publish.outcome }}
       run: |
-        echo "url=${CONNECT_BASE_URL}/${PACKAGE_NAME}?version=${PACKAGE_VERSION}" >> $GITHUB_OUTPUT
+        echo "url=${PACKAGE_URL}" >> $GITHUB_OUTPUT
         echo "status=${STATUS}" >> $GITHUB_OUTPUT

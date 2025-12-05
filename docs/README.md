@@ -1513,7 +1513,7 @@ Publish Nuxeo package to Nuxeo Online Services (NOS).
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/nos-publish@v10.1.0
         with:
-          nos-env: production # or 'staging'
+          nos-env: production # Market place target env (either 'production' or 'staging')
           nos-username: ${{ secrets.NOS_CONNECT_USERNAME }}
           nos-token: ${{ secrets.NOS_CONNECT_TOKEN }}
           skip-verify: 'false' # optional, default is 'false'
