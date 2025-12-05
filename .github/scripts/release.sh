@@ -11,17 +11,18 @@ if [ -z "$1" ] || [[ ! "$1" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
   exit 1
 fi
 
-CURRENT_VERSION=$(git tag | sort -r --version-sort | head -n1)
-if [ -z "$CURRENT_VERSION" ]; then
-  echo "Can't retrieve tags"
+if [ -z "$2" ] || [[ ! "$2" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+  echo 'Second argument should be current version already released with a leading v char'
   exit 1
 fi
 
+NEXT_VERSION=$1
+CURRENT_VERSION=$2
+
 echo "Current version is $CURRENT_VERSION"
-echo "Going to flip refs to $1"
+echo "Going to flip refs to $NEXT_VERSION"
 
-grep -Rl "Alfresco/alfresco-build-tools.*@$CURRENT_VERSION" | xargs sed -i -e "s/\(Alfresco\/alfresco-build-tools.*@\)$CURRENT_VERSION/\1$1/g"
-sed -i -e "s/$CURRENT_VERSION/$1/" .pre-commit-config.yaml
-sed -i -e "s/@$CURRENT_VERSION/@$1/" docs/*.md
-
-echo "Bump to $1 completed successfully."
+grep -Rl "Alfresco/alfresco-build-tools.*@$CURRENT_VERSION" | xargs sed -i -e "s/\(Alfresco\/alfresco-build-tools.*@\)$CURRENT_VERSION/\1$NEXT_VERSION/g"
+sed -i -e "s/$CURRENT_VERSION/$NEXT_VERSION/" .pre-commit-config.yaml
+sed -i -e "s/@$CURRENT_VERSION/@$NEXT_VERSION/" docs/*.md
+echo "Bump to $NEXT_VERSION completed successfully."
