@@ -2246,15 +2246,16 @@ Xvfb session using ffmpeg, and uploads the recording as an artifact.
 
 ```yaml
       - name: Functional tests
-        env:
-          RUN_ALL: false
-          BAIL: 0
         uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@v10.2.0
         with:
           test_command: mvn -ntp install -Pftest -DskipInstall
-          timeout_minutes: 120
-          record_video: "true"
-          max_attempts: 3
+          timeout_minutes: 120 # optional, default is 60
+          video_name: "absolute_cinema" # optional, if not set it will skip recording
+          max_attempts: 3 # optional, default is 1
+          video_extension: mp4 # optional, default is mkv
+          retry_on: error # optional, comma separated list of outcomes https://github.com/nick-fields/retry?tab=readme-ov-file#retry_on
+          retry_wait_seconds: 2 # optional, default is 10
+          display_number: 99 # optional, default is 99
 ```
 
 Inputs:
