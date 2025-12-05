@@ -29,6 +29,10 @@ on:
         description: "GitHub token with permissions to create release and push commits"
         required: true
 
+concurrency:
+  group: release-${{ github.event.repository.name }}
+  cancel-in-progress: false
+
 jobs:
     release:
         name: Release
@@ -105,12 +109,14 @@ jobs:
               esac
 
               NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+              echo "::info::Bumping version from $LATEST_TAG to $NEW_VERSION"
               echo "new-version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+              echo "current-version=$LATEST_TAG" >> "$GITHUB_OUTPUT"
 
           - name: Run optional release script
             if: steps.set-release-level.outputs.release-level != '' && inputs.release_script != ''
             run: |
-              ${{ inputs.release_script }} "${{ steps.bump-semver.outputs.new-version }}"
+              ${{ inputs.release_script }} "${{ steps.bump-semver.outputs.new-version }}" "${{ steps.bump-semver.outputs.current-version }}"
 
           - name: Commit back changes from release script
             uses: stefanzweifel/git-auto-commit-action@28e16e81777b558cc906c8750092100bbb34c5e3 # v7.0.0
