@@ -32,6 +32,10 @@ inputs:
     description: "Whether to record video or not (true/false)"
     required: false
     default: "true"
+  display_number:
+    description: "The display number to use for Xvfb (e.g. :99)"
+    required: false
+    default: "99"
 
 runs:
   using: "composite"
@@ -43,15 +47,15 @@ runs:
       run: |
         sudo apt-get update
         sudo apt-get install -y xvfb ffmpeg jwm x11-apps
-        echo "Setting up Xvfb on display ${DISPLAY}"
-        xvfb-run -n ${DISPLAY#:*} -f "${HOME}/.Xauthority" -s "-screen 0 1200x1080x24" jwm &
-        [[ $? -eq 0 ]] && sleep 3 || (echo "Xvfb failed to start"; exit 1)
-        ffmpeg -y -nostdin -f x11grab -i ${{ env.DISPLAY }} -s sxga recording.$VIDEXT > ffmpeg.log 2>&1 & FFMPEG="$!"
+        echo "Setting up Xvfb on display :${{ inputs.display_number }}"
+        xvfb-run -n -brokenparam ${{ inputs.display_number }} -f "${HOME}/.Xauthority" -s "-screen 0 1200x1080x24" jwm &
+        XVFB_PID=$!
+        sleep 3
+        kill -0 "$XVFB_PID" 2>/dev/null || { echo "Xvfb failed to start"; exit 1; }
+        ffmpeg -y -nostdin -f x11grab -i :${{ inputs.display_number }} -s sxga recording.$VIDEXT > ffmpeg.log 2>&1 & FFMPEG="$!"
         echo "FFMPEG=$FFMPEG" >> $GITHUB_OUTPUT
-        echo "DISPLAY=${DISPLAY}" >> $GITHUB_OUTPUT
       env:
         DEBIAN_FRONTEND: noninteractive
-        DISPLAY: :99
         FFREPORT: file=ffmpeg.log:level=info
         VIDEXT: ${{ inputs.video_extension }}
       working-directory: /tmp
@@ -65,7 +69,7 @@ runs:
         retry_wait_seconds: ${{ inputs.retry_wait_seconds }}
         command: ${{ inputs.test_command }}
       env:
-        DISPLAY: ${{ steps.record.outputs.DISPLAY }}
+        DISPLAY: :${{ inputs.display_number }}
 
     - name: Stop recording
       if: always() && steps.record.outcome == 'success'
