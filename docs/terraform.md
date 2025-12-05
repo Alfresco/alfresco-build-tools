@@ -11,6 +11,8 @@ workflow to manage terraform repositories leveraging the
 [dflook/terraform-github-actions](https://github.com/dflook/terraform-github-actions),
 optionally allowing a multi-state approach for managing resources.
 
+### GitHub Environments
+
 You can provide Github environment name with `terraform_env` input. If not set,
 this workflow assumes a GitHub environment named `production` to be present when
 run against the `main` branch, and any other environment when run against
@@ -44,6 +46,8 @@ backend "s3" {
 }
 ```
 
+### GitHub Secrets
+
 The following GitHub secrets (all optional) are also accepted by this workflow:
 
 - `AWS_ACCESS_KEY_ID`: access key to use the AWS terraform provider
@@ -55,6 +59,22 @@ The following GitHub secrets (all optional) are also accepted by this workflow:
   provider
 - `RANCHER2_SECRET_KEY` (optional): secret key to use the rancher terraform
   provider
+
+### Tfvars files
+
+By default, the workflow will look for tfvars files in the root of the
+`terraform_root_path`. You can specify a different subfolder using the
+`tfvars_subfolder` input. It's recommended to use a `vars` subfolder to store
+your tfvars files.
+
+Having a shared `common.tfvars` file is required to define common variables
+across all environments, e.g. tags, resource names, etc. It can be a blank file
+if no common variables are needed.
+
+Any other tfvars file must be named after the GitHub environment name, e.g.
+`production.tfvars`, `develop.tfvars`, etc.
+
+### Example usage
 
 An example workflow using this reusable workflow could look like this:
 
@@ -98,6 +118,7 @@ jobs: # one job for each terraform folder/stack
     with:
       terraform_root_path: infra
       terraform_operation: ${{ inputs.terraform_operation }}
+      tfvars_subfolder: vars
     secrets: inherit
 
   invoke-terraform-k8s:
@@ -106,6 +127,7 @@ jobs: # one job for each terraform folder/stack
     with:
       terraform_root_path: k8s
       terraform_operation: ${{ inputs.terraform_operation }}
+      tfvars_subfolder: vars
       # Optionally make `kubectl` available to terraform
       # install_kubectl: true
     secrets: inherit
