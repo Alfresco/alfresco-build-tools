@@ -51,12 +51,12 @@ runs:
         XVFB_PID=$!
         sleep 3
         kill -0 "$XVFB_PID" 2>/dev/null || { echo "Xvfb failed to start"; exit 1; }
-        ffmpeg -y -nostdin -f x11grab -i :${{ inputs.display_number }} -s sxga ${{ inputs.video_name }}.$VIDEXT > ffmpeg.log 2>&1 & FFMPEG_PID="$!"
+        ffmpeg -y -nostdin -f x11grab -i :${{ inputs.display_number }} -s sxga ${{ inputs.video_name }}.${{ inputs.video_extension }} > ffmpeg.log 2>&1 &
+        FFMPEG_PID=$!
         echo "FFMPEG_PID=$FFMPEG_PID" >> $GITHUB_OUTPUT
       env:
         DEBIAN_FRONTEND: noninteractive
         FFREPORT: file=ffmpeg.log:level=info
-        VIDEXT: ${{ inputs.video_extension }}
       working-directory: ${{ runner.temp }}
 
     - name: Run tests using command ${{ inputs.test_command }}
