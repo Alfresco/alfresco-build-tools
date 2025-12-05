@@ -48,7 +48,7 @@ runs:
         sudo apt-get update
         sudo apt-get install -y xvfb ffmpeg jwm x11-apps
         echo "Setting up Xvfb on display :${{ inputs.display_number }}"
-        xvfb-run -n -brokenparam ${{ inputs.display_number }} -f "${HOME}/.Xauthority" -s "-screen 0 1200x1080x24" jwm &
+        xvfb-run -n ${{ inputs.display_number }} -f "${HOME}/.Xauthority" -s "-screen 0 1200x1080x24" jwm &
         XVFB_PID=$!
         sleep 3
         kill -0 "$XVFB_PID" 2>/dev/null || { echo "Xvfb failed to start"; exit 1; }
