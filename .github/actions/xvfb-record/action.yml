@@ -73,6 +73,8 @@ runs:
     - name: Stop recording
       if: always() && steps.record.outcome == 'success'
       shell: bash
+      env:
+        FFMPEG_PID: ${{ steps.record.outputs.FFMPEG_PID }}
       run: |
         echo "Now killing PID ${{ env.FFMPEG_PID }} ($(ps --no-headers -fp ${{ env.FFMPEG_PID }}))"
         kill ${{ env.FFMPEG_PID }}
