@@ -1508,7 +1508,7 @@ Notes:
 
 ### nos-publish
 
-Publish Nuxeo module packages to Nuxeo Online Services (NOS).
+Publish Nuxeo package to Nuxeo Online Services (NOS).
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/nos-publish@v10.1.0
