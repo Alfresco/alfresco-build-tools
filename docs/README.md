@@ -133,6 +133,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [branch-promotion-prs](#branch-promotion-prs)
     - [helm-publish-new-package-version](#helm-publish-new-package-version)
+    - [reusable-release](#reusable-release)
     - [terraform](#terraform)
   - [Cookbook](#cookbook)
     - [Conditional job/step depending on PR labels](#conditional-jobstep-depending-on-pr-labels)
@@ -2335,6 +2336,45 @@ Calculates the new alpha version, creates new git tag and publishes the new pack
     secrets: inherit
 ```
 
+### reusable-release
+
+Automates the release process by determining the version bump type (major,
+minor, or patch) from PR labels, calculating the new version following Semantic
+Versioning (SemVer) rules, optionally executing a custom release script that can
+modify files with changes automatically committed back to the repository, and
+finally tagging the new version and creating a GitHub Release.
+
+```yaml
+name: Release
+
+on:
+  pull_request:
+    types:
+    - closed
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: "Release type"
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+    release:
+        name: Release
+        if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+        uses: Alfresco/alfresco-build-tools/.github/workflows/reusable-release.yml@v10.3.0
+        with:
+          release_type_override: ${{ inputs.release_type }}
+          commit_username: ${{ vars.BOT_GITHUB_USERNAME }}
+          commit_email: ${{ vars.BOT_GITHUB_EMAIL }}
+        secrets:
+          BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+```
+
 ### terraform
 
 See the dedicated [terraform](terraform.md) for more information on the reusable
@@ -2602,8 +2642,8 @@ brew install coreutils
 
 ## Release
 
-Bump version defined in [version.txt](/version.txt) during a PR, release
-workflow is triggered automatically on PR close.
+Add a label to the PR among `major`, `minor`, or `patch` to trigger a release
+upon merging the PR.
 
 New versions should follow [Semantic versioning](https://semver.org/), so:
 

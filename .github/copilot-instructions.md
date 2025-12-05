@@ -6,21 +6,14 @@ This repository contains shared/reusable CI configurations for GitHub Actions se
 
 ### Version Management (CRITICAL)
 
-**Always bump the version in `version.txt` for every PR that contains functional changes** (not documentation-only changes):
+**Always add a label for every PR that contains functional changes** (not documentation-only changes):
 
-- **Patch version bump (x.y.Z)**: Bug fixes in existing actions
-- **Minor version bump (x.Y.z)**: New actions or backward-compatible improvements
-- **Major version bump (X.y.z)**: Breaking changes requiring users to update their workflows
+- **release/patch**: Bug fixes in existing actions
+- **release/minor**: New actions or backward-compatible improvements
+- **release/major**: Breaking changes requiring users to update their workflows
 
-```bash
-# Example: Update version.txt from v9.0.0 to v9.1.0 for a new action
-echo "v9.1.0" > version.txt
-```
-
-When referencing internal actions in workflow YAML files, **always use the latest released tag** (e.g., `v9.2.0`).
-Do **not** update these references to the next release version (e.g., `v9.3.0`) **in a pull request that is bumping the version** in `version.txt`.
-This is because the new tag (e.g., `v9.3.0`) will only be created and pushed at the end of the release build process.
-If you update the reference before the tag exists, the master build will fail after merging, as the referenced tag does not yet exist.
+When referencing internal actions in workflow YAML files, **always use the latest released tag** (e.g., `v9.2.0`),
+the release workflow will automatically update these references during releases.
 
 ### Documentation Requirements
 
@@ -47,7 +40,7 @@ Brief description of what the action does.
 
 Additional notes or configuration details.
 
-**Note**: Always replace `@ref` with the current version tag (e.g., `@v9.1.0`) found in `version.txt`.
+**Note**: Always replace `@ref` with the most recent released tag (e.g., `@v9.1.0`).
 
 **Run validation script** to ensure all actions are documented:
 
@@ -140,7 +133,7 @@ pre-commit run --all-files
 ### Automated Releases
 
 - Releases are triggered automatically when PRs are merged to master
-- The version in `version.txt` determines the release tag
+- The released version is determined from PR labels (`release/major`, `release/minor`, `release/patch`)
 - Actions will automatically be updated with the release tag by the release workflow itself, no need to do it manually
 - Release notes are auto-generated from PR titles and descriptions
 - The `release.sh` script automatically updates all internal version references that use version tags
