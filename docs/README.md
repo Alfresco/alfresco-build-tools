@@ -2249,7 +2249,7 @@ Xvfb session using ffmpeg, and uploads the recording as an artifact.
         env:
           RUN_ALL: false
           BAIL: 0
-        uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/xvfb-record@10.2.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@v10.2.0
         with:
           test_command: mvn -ntp install -Pftest -DskipInstall
           timeout_minutes: 120
