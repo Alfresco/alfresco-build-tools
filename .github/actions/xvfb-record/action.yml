@@ -52,7 +52,7 @@ runs:
         XVFB_PID=$!
         sleep 3
         kill -0 "$XVFB_PID" 2>/dev/null || { echo "Xvfb failed to start"; exit 1; }
-        ffmpeg -y -nostdin -f x11grab -i :${{ inputs.display_number }} -s sxga recording.$VIDEXT > ffmpeg.log 2>&1 & FFMPEG_PID="$!"
+        ffmpeg -y -nostdin -f x11grab -i :${{ inputs.display_number }} -s sxga recording.$VIDEXT > ffmpeg.log 2>&1 & FFMPEG_PID=$!
         echo "FFMPEG_PID=$FFMPEG_PID" >> $GITHUB_OUTPUT
       env:
         DEBIAN_FRONTEND: noninteractive
