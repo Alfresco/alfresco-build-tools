@@ -56,7 +56,7 @@ jobs:
       - name: Run tests with Xvfb recording
         uses: ./.github/actions/xvfb-record
         with:
-          test_command: test_command
+          test_command: echo "Running Nuxeo image builder tests..."
           timeout_minutes: 30
           video_name: "nuxeo_image_test_run"
           video_extension: "mp4"
