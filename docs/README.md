@@ -1517,12 +1517,12 @@ Publish Nuxeo package to Nuxeo Online Services (NOS).
           nos-username: ${{ secrets.NOS_CONNECT_USERNAME }}
           nos-token: ${{ secrets.NOS_CONNECT_TOKEN }}
           skip-verify: 'false' # optional, default is 'false'
-          packages-path: ./module.zip
+          package-path: ./module.zip
 ```
 
 Inputs:
 
-Check `action.yml` for the full list of inputs and their descriptions.
+Check `action.yml` for the full list of inputs and their description.
 
 Outputs:
 
