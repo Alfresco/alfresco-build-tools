@@ -110,7 +110,7 @@ runs:
 
     - name: Ensure local nuxeo modules directory exists
       env:
-        EMPTY_DIR: /tmp/empty_addons
+        EMPTY_DIR: ${{ runner.temp }}/empty_addons
       shell: bash
       run: |
         ADDONS_DIR='${{ inputs.nuxeo-local-modules-path }}'
@@ -125,7 +125,7 @@ runs:
     - name: Prepare npm directory
       shell: bash
       env:
-        NPM_DIR: /tmp/npmctx
+        NPM_DIR: ${{ runner.temp }}/npmctx
       run: |
         NPM_LOCK_PATH='${{ inputs.npm-package-lock-file-path }}'
         mkdir -p ${{ env.NPM_DIR }}
@@ -188,7 +188,7 @@ runs:
         context: ${{ github.action_path }}
         build-contexts: |
           modules=${{ github.workspace }}/${{ env.NUXEO_LOCAL_MODULES_PATH }}
-          npmctx=${{ github.workspace }}${{ env.NPM_CTX_DIR }}
+          npmctx=${{ env.NPM_CTX_DIR }}
         push: ${{ inputs.push-image }}
         load: ${{ inputs.load-image }}
         platforms: ${{ inputs.platforms }}
