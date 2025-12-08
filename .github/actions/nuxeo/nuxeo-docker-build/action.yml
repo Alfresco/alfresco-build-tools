@@ -188,7 +188,7 @@ runs:
         context: ${{ github.action_path }}
         build-contexts: |
           modules=${{ github.workspace }}/${{ env.NUXEO_LOCAL_MODULES_PATH }}
-          npmctx=${{ github.workspace }}/${{ env.NPM_CTX_DIR }}
+          npmctx=${{ github.workspace }}${{ env.NPM_CTX_DIR }}
         push: ${{ inputs.push-image }}
         load: ${{ inputs.load-image }}
         platforms: ${{ inputs.platforms }}
