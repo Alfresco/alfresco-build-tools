@@ -1,0 +1,98 @@
+name: "Xvfb recorder"
+description: |
+  This action sets up an Xvfb server, runs a specified test command, records the Xvfb session using ffmpeg,
+  and uploads the recording as an artifact.
+inputs:
+  test_command:
+    description: |
+      The command to run your tests. This command should start the tests and exit when
+      they are done. Example: `npm test` or `pytest tests/`
+    required: true
+  video_extension:
+    description: "The video file extension/format to use (e.g. ogv, mp4, mkv)"
+    required: false
+    default: "mkv"
+  timeout_minutes:
+    description: "The maximum time (in minutes) to allow the test command to run"
+    required: false
+    default: "60"
+  max_attempts:
+    description: "The maximum number of attempts to run the test command"
+    required: false
+    default: "1"
+  retry_on:
+    description: "A comma-separated list of exit codes that should trigger a retry (any, error or timeout)"
+    required: false
+    default: "error"
+  retry_wait_seconds:
+    description: "The number of seconds to wait between retry attempts"
+    required: false
+    default: "10"
+  video_name:
+    description: "The name of the video file to record (without extension)"
+    required: false
+    default: ""
+  display_number:
+    description: "The display number to use for Xvfb (e.g. :99)"
+    required: false
+    default: "99"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Xvfb setup & record
+      id: record
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xvfb ffmpeg jwm x11-apps
+        echo "Setting up Xvfb on display :${{ inputs.display_number }}"
+        xvfb-run -n ${{ inputs.display_number }} -f "${HOME}/.Xauthority" -s "-screen 0 1200x1080x24" jwm &
+        XVFB_PID=$!
+        sleep 3
+        kill -0 "$XVFB_PID" 2>/dev/null || { echo "Xvfb failed to start"; exit 1; }
+        if [ -n "${{ inputs.video_name }}" ]; then
+          ffmpeg -y -nostdin -f x11grab -i :${{ inputs.display_number }} -s sxga ${{ inputs.video_name }}.${{ inputs.video_extension }} > ffmpeg.log 2>&1 &
+          FFMPEG_PID=$!
+          echo "FFMPEG_PID=$FFMPEG_PID" >> "$GITHUB_OUTPUT"
+        else
+          echo "Video name not provided; skipping recording."
+          echo "FFMPEG_PID=" >> "$GITHUB_OUTPUT"
+        fi
+      env:
+        DEBIAN_FRONTEND: noninteractive
+        FFREPORT: file=ffmpeg.log:level=info
+      working-directory: ${{ runner.temp }}
+
+    - name: Run tests using command ${{ inputs.test_command }}
+      uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
+      with:
+        timeout_minutes: ${{ inputs.timeout_minutes }}
+        max_attempts: ${{ inputs.max_attempts }}
+        retry_on: ${{ inputs.retry_on }}
+        retry_wait_seconds: ${{ inputs.retry_wait_seconds }}
+        command: ${{ inputs.test_command }}
+      env:
+        DISPLAY: :${{ inputs.display_number }}
+
+    - name: Stop recording
+      if: always() && steps.record.outcome == 'success' && inputs.video_name != ''
+      shell: bash
+      env:
+        FFMPEG_PID: ${{ steps.record.outputs.FFMPEG_PID }}
+      run: |
+        if [ -n "${FFMPEG_PID}" ]; then
+          echo "Now killing PID ${FFMPEG_PID} ($(ps --no-headers -p ${FFMPEG_PID} -o pid,comm,args))"
+          kill ${FFMPEG_PID}
+        else
+          echo "FFMPEG_PID is not set; nothing to kill."
+        fi
+
+    - name: Archive Xvfb recording
+      if: inputs.video_name != ''
+      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+      with:
+        name: xvfbrecording-${{ inputs.video_name }}
+        path: |
+          ${{ runner.temp }}/${{ inputs.video_name }}.${{ inputs.video_extension }}
+          ${{ runner.temp }}/ffmpeg.log
