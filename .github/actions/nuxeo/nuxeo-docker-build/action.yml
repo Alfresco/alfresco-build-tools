@@ -72,7 +72,11 @@ inputs:
     required: false
     default: ""
   npm-package-lock-file-path:
-    description: Path to the npm package lock file. When provided together with node-version, npm packages from the lock file will be installed in the image.
+    description: Path to the npm package lock file. Required if npm-package-file-path is provided.
+    required: false
+    default: ""
+  npm-package-file-path:
+    description: Path to the npm package.json file (optional)
     required: false
     default: ""
 
@@ -99,12 +103,16 @@ runs:
         echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
         echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
 
-    - name: Assert node version when npm lock file is provided
-      if: ${{ inputs.npm-package-lock-file-path != '' }}
+    - name: Assert node version & package lock when npm package file is provided
+      if: ${{ inputs.npm-package-file-path != '' }}
       shell: bash
       run: |
         if [ -z '${{ inputs.node-version }}' ]; then
-          echo "Error: node-version input is required when npm-package-lock-file-path is provided." >&2
+          echo "Error: node-version input is required when npm-package-file-path is provided." >&2
+          exit 1
+        fi
+        if [ -z '${{ inputs.npm-package-file-path }}' ]; then
+          echo "Error: npm-package-file-path input is required when npm-package-file-path is provided." >&2
           exit 1
         fi
 
@@ -128,11 +136,13 @@ runs:
         NPM_DIR: ${{ runner.temp }}/npmctx
       run: |
         NPM_LOCK_PATH='${{ inputs.npm-package-lock-file-path }}'
+        NPM_JSON_PATH='${{ inputs.npm-package-file-path }}'
         mkdir -p ${{ env.NPM_DIR }}
-        if [ -n "$NPM_LOCK_PATH" ] && [ -f "$NPM_LOCK_PATH" ]; then
+        if [ -n "$NPM_LOCK_PATH" ] && [ -f "$NPM_LOCK_PATH" ] && [ -n "$NPM_JSON_PATH" ] && [ -f "$NPM_JSON_PATH" ]; then
           cp "$NPM_LOCK_PATH" ${{ env.NPM_DIR }}/package-lock.json
+          cp "$NPM_JSON_PATH" ${{ env.NPM_DIR }}/package.json
         else
-          echo "NPM package lock file not found at '$NPM_LOCK_PATH'. Using empty npm context directory at ${{ env.NPM_DIR }}." >&2
+          echo "NPM package files not found (lock: '$NPM_LOCK_PATH', json: '$NPM_JSON_PATH'). Using empty npm context directory at ${{ env.NPM_DIR }}." >&2
         fi
         echo "NPM_CTX_DIR=${{ env.NPM_DIR }}" >> $GITHUB_ENV
 

@@ -87,6 +87,7 @@ jobs:
           os-packages-token: ${{ secrets.NUXEO_NEXUS_PASSWORD }}
           node-version: 20
           npm-package-lock-file-path: .github/actions/nuxeo/nuxeo-docker-build/package-lock.json
+          npm-package-file-path: .github/actions/nuxeo/nuxeo-docker-build/package.json
           image-name: nuxeo/nuxeo-ci-builder-test
           image-tag: ${{ github.run_id }}
           image-title: "Nuxeo CI Builder Test"
