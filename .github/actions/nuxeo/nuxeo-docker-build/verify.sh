@@ -47,8 +47,8 @@ for pkg in $EXPECTED_PACKAGES; do
   fi
 done
 
-echo "Listing installed npm packages via npm list -g --depth=0"
-INSTALLED_NPM_PACKAGES_OUTPUT=$(docker run --rm "$IMAGE_URL" bash -lc 'npm list -g --depth=0')
+echo "Listing installed npm packages via npm ls -g --depth=0"
+INSTALLED_NPM_PACKAGES_OUTPUT=$(docker run --rm "$IMAGE_URL" bash -lc 'npm ls -g --depth=0' || true)
 echo "--- Installed npm packages ---"
 echo "$INSTALLED_NPM_PACKAGES_OUTPUT" | head -n 200 || true
 echo "--------------------------------"
