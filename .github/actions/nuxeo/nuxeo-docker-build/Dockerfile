@@ -54,10 +54,14 @@ RUN if [ -n "$NODE_VERSION" ]; then \
 # Install npm packages if a lock file is provided (requires Node.js)
 RUN --mount=type=bind,from=npmctx,target=/npmctx \
     if [ -f "/npmctx/package-lock.json" ] && [ -f "/npmctx/package.json" ] && command -v npm >/dev/null 2>&1; then \
-        cd /npmctx && \
-        npm ci \
+        mkdir -p /opt/npm && \
+        cp /npmctx/package.json /opt/npm/package.json && \
+        cp /npmctx/package-lock.json /opt/npm/package-lock.json && \
+        cd /opt/npm && \
+        npm ci && \
+        npm cache clean --force; \
     else \
-        echo "No package-lock.json or package.json found or npm not installed - skipping npm packages installation"; \
+        echo "No package-lock.json or package.json found, or npm not installed - skipping npm packages installation"; \
     fi
 
 USER nuxeo
