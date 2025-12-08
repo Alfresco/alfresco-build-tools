@@ -11,6 +11,7 @@ ARG PACKAGES_AUTH_USER
 ARG PACKAGES_AUTH_TOKEN
 ARG PACKAGES_LIST
 ARG NUXEO_CONNECT_MODULES
+ARG NODE_VERSION
 ARG IMAGE_TITLE="Nuxeo Server"
 ARG IMAGE_LICENSE="Apache 2.0"
 
@@ -39,6 +40,25 @@ RUN --mount=type=secret,id=nuxeo-private,target=/tmp/nuxeo-private.repo \
     rm /etc/yum.repos.d/nuxeo-private.repo && \
     dnf clean all && \
     rm -rf /var/cache/dnf
+
+# Install Node.js if NODE_VERSION is provided
+RUN if [ -n "$NODE_VERSION" ]; then \
+        curl -fsSL https://rpm.nodesource.com/setup_"$NODE_VERSION".x | bash - && \
+        dnf install -y nodejs && \
+        dnf clean all && \
+        rm -rf /var/cache/dnf; \
+    else \
+        echo "No Node.js version specified - skipping Node.js installation"; \
+    fi
+
+# Install npm packages if a lock file is provided (requires Node.js)
+RUN --mount=type=bind,from=npmctx,target=/npmctx \
+    if [ -f "/npmctx/package-lock.json" ] && command -v npm >/dev/null 2>&1; then \
+        cd /npmctx && \
+        npm ci \
+    else \
+        echo "No package-lock.json found or npm not installed - skipping npm packages installation"; \
+    fi
 
 USER nuxeo
 

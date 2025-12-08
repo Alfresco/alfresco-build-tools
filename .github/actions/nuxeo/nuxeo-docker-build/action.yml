@@ -67,6 +67,14 @@ inputs:
     description: Whether to load the built image into local docker daemon (true/false). When set to true, only a single platform can be specified.
     required: false
     default: "false"
+  node-version:
+    description: Node.js version to install in the image (optional)
+    required: false
+    default: ""
+  npm-package-lock-file-path:
+    description: Path to the npm package lock file. When provided together with node-version, npm packages from the lock file will be installed in the image.
+    required: false
+    default: ""
 
 outputs:
   image-url:
@@ -91,6 +99,15 @@ runs:
         echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
         echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
 
+    - name: Assert node version when npm lock file is provided
+      if: ${{ inputs.npm-package-lock-file-path != '' }}
+      shell: bash
+      run: |
+        if [ -z '${{ inputs.node-version }}' ]; then
+          echo "Error: node-version input is required when npm-package-lock-file-path is provided." >&2
+          exit 1
+        fi
+
     - name: Ensure local nuxeo modules directory exists
       env:
         EMPTY_DIR: /tmp/empty_addons
@@ -104,6 +121,20 @@ runs:
         else
           echo "NUXEO_LOCAL_MODULES_PATH=$ADDONS_DIR" >> $GITHUB_ENV
         fi
+
+    - name: Prepare npm directory
+      shell: bash
+      env:
+        NPM_DIR: /tmp/npmctx
+      run: |
+        NPM_LOCK_PATH='${{ inputs.npm-package-lock-file-path }}'
+        mkdir -p ${{ env.NPM_DIR }}
+        if [ -n "$NPM_LOCK_PATH" ] && [ -f "$NPM_LOCK_PATH" ]; then
+          cp "$NPM_LOCK_PATH" ${{ env.NPM_DIR }}/package-lock.json
+        else
+          echo "NPM package lock file not found at '$NPM_LOCK_PATH'. Using empty npm context directory at ${{ env.NPM_DIR }}." >&2
+        fi
+        echo "NPM_CTX_DIR=${{ env.NPM_DIR }}" >> $GITHUB_ENV
 
     - name: Login to base image registry
       uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
@@ -157,6 +188,7 @@ runs:
         context: ${{ github.action_path }}
         build-contexts: |
           modules=${{ github.workspace }}/${{ env.NUXEO_LOCAL_MODULES_PATH }}
+          npmctx=${{ github.workspace }}/${{ env.NPM_CTX_DIR }}
         push: ${{ inputs.push-image }}
         load: ${{ inputs.load-image }}
         platforms: ${{ inputs.platforms }}
@@ -173,6 +205,7 @@ runs:
           PACKAGES_LIST=${{ env.SANITIZED_PACKAGES }}
           PACKAGES_AUTH_USER=${{ inputs.os-packages-user }}
           PACKAGES_AUTH_TOKEN=${{ inputs.os-packages-token }}
+          NODE_VERSION=${{ inputs.node-version }}
         secret-envs: |
           NUXEO_CLID=NUXEO_CLID
         secret-files: |

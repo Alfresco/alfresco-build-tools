@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@gltf-transform/cli": "^4.2.1",
+    "gltf-pipeline": "^4.3.0",
+    "obj2gltf": "^3.2.0"
+  }
+}

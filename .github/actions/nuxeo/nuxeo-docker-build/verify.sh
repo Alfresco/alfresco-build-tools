@@ -4,6 +4,7 @@ set -euo pipefail
 IMAGE_URL=${IMAGE_URL:-}
 EXPECTED_MODULES=${EXPECTED_MODULES:-}
 EXPECTED_PACKAGES=${EXPECTED_PACKAGES:-}
+EXPECTED_NPM_PACKAGES=${EXPECTED_NPM_PACKAGES:-}
 
 if [[ -z "$IMAGE_URL" ]]; then
   echo "Image URL not provided" >&2
@@ -42,6 +43,22 @@ for pkg in $EXPECTED_PACKAGES; do
     echo "✅ OS package '$pkg' found"
   else
     echo "❌ OS package '$pkg' NOT found"
+    missing=1
+  fi
+done
+
+echo "Listing installed npm packages via npm list -g --depth=0"
+INSTALLED_NPM_PACKAGES_OUTPUT=$(docker run --rm "$IMAGE_URL" bash -lc 'npm list -g --depth=0')
+echo "--- Installed npm packages ---"
+echo "$INSTALLED_NPM_PACKAGES_OUTPUT" | head -n 200 || true
+echo "--------------------------------"
+
+for npkg in $EXPECTED_NPM_PACKAGES; do
+  [[ -z "$npkg" ]] && continue
+  if echo "$INSTALLED_NPM_PACKAGES_OUTPUT" | grep -q " ${npkg}@"; then
+    echo "✅ npm package '$npkg' found"
+  else
+    echo "❌ npm package '$npkg' NOT found"
     missing=1
   fi
 done
