@@ -58,7 +58,7 @@ RUN --mount=type=bind,from=npmctx,target=/npmctx \
         cp /npmctx/package.json /opt/npm/package.json && \
         cp /npmctx/package-lock.json /opt/npm/package-lock.json && \
         cd /opt/npm && \
-        npm ci --global && \
+        npm install --global && \
         npm cache clean --force; \
     else \
         echo "No package-lock.json or package.json found, or npm not installed - skipping npm packages installation"; \
