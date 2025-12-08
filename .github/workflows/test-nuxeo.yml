@@ -58,6 +58,7 @@ jobs:
         with:
           test_command: echo "Running Nuxeo image builder tests..."
           timeout_minutes: 30
+          video_name: "nuxeo_image_test_run"
           video_extension: "mp4"
           max_attempts: 1
           retry_on: error
