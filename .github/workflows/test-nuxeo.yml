@@ -85,6 +85,8 @@ jobs:
           os-packages: ${{ env.NUXEO_OS_PACKAGES }}
           os-packages-user: ${{ secrets.NUXEO_NEXUS_USER }}
           os-packages-token: ${{ secrets.NUXEO_NEXUS_PASSWORD }}
+          node-version: 20
+          npm-package-lock-file-path: .github/actions/nuxeo/nuxeo-docker-build/package-lock.json
           image-name: nuxeo/nuxeo-ci-builder-test
           image-tag: ${{ github.run_id }}
           image-title: "Nuxeo CI Builder Test"
@@ -97,4 +99,5 @@ jobs:
           IMAGE_URL: ${{ steps.build_nuxeo_image.outputs.image-url }}
           EXPECTED_MODULES: ${{ env.NUXEO_CONNECT_MODULE }} ${{ env.NUXEO_LOCAL_MODULE }}
           EXPECTED_PACKAGES: ${{ env.NUXEO_OS_PACKAGES }}
+          EXPECTED_NPM_PACKAGES: "@gltf-transform/cli gltf-pipeline obj2gltf"
         run: .github/actions/nuxeo/nuxeo-docker-build/verify.sh
