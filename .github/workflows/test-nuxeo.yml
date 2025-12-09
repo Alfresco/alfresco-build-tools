@@ -8,13 +8,14 @@ on:
     paths:
       - '.github/actions/nuxeo/**'
       - '.github/workflows/test-nuxeo.yml'
-
-concurrency:
-  group: nuxeo-actions-tests
-  cancel-in-progress: true
+  pull_request_review:
+    types: [ submitted ]
 
 jobs:
   nos-publish:
+    if: >-
+      (github.event.review.state == 'approved' && contains(fromJSON('["dependabot[bot]", "github-actions[bot]"]'), github.event.pull_request.user.login)) ||
+      (github.actor != 'dependabot[bot]' && github.event_name != 'pull_request_review')
     runs-on: ubuntu-latest
     env:
       ZIP_PACKAGE_NAME: dummy.zip
@@ -36,6 +37,7 @@ jobs:
           nos-org: nuxeo-devops
 
       - name: Unpublish Module 🫥
+        if: always() && steps.publish_nos.outcome != 'skipped'
         env:
           PACKAGE_URL: ${{ steps.publish_nos.outputs.package-url }}
         run: |
@@ -49,6 +51,9 @@ jobs:
           fi
 
   nuxeo-docker-build:
+    if: >-
+      (github.event.review.state == 'approved' && contains(fromJSON('["dependabot[bot]", "github-actions[bot]"]'), github.event.pull_request.user.login)) ||
+      (github.actor != 'dependabot[bot]' && github.event_name != 'pull_request_review')
     runs-on: ubuntu-latest
     env:
       NUXEO_CONNECT_MODULE: nuxeo-web-ui
