@@ -2377,7 +2377,7 @@ jobs:
           BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
 ```
 
-Release command have access to the following environment variables:
+Release command has access to the following environment variables:
 
 - RELEASE_VERSION: the new version calculated
 - CURRENT_VERSION: the previous version
