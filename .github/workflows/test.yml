@@ -16,7 +16,7 @@ jobs:
       (github.actor != 'dependabot[bot]' && github.event_name != 'pull_request_review')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: pre-commit checks
         uses: ./.github/actions/pre-commit
       - name: Ensure SHA pinned actions
@@ -34,7 +34,7 @@ jobs:
           - ubuntu-latest
           - ubuntu-24.04-arm
     steps:
-      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: Switch to local actions when requested
         if: contains(github.event.pull_request.labels.*.name, 'test/local-actions')
         run: |
@@ -119,3 +119,12 @@ jobs:
           url_template: 'v${VERSION}/${NAME}_${OS}_${ARCH}.tar.gz'
           test_args: 'version'
           x86_64_arch: 'x86_64'
+
+      - uses: ./.github/actions/xvfb-record
+        with:
+          test_command: echo "Running Nuxeo image builder tests..."
+          timeout_minutes: 30
+          video_name: "nuxeo_image_test_run-${{ matrix.os }}"
+          video_extension: "mp4"
+          max_attempts: 1
+          retry_on: error
