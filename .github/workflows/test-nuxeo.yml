@@ -11,12 +11,11 @@ on:
   pull_request_review:
       types: [ submitted ]
 
-concurrency:
-  group: nuxeo-actions-tests
-  cancel-in-progress: false
-
 jobs:
   nos-publish:
+    concurrency:
+      group: nuxeo-nos-publish-tests
+      cancel-in-progress: false
     if: >-
       (github.event.review.state == 'approved' && contains(fromJSON('["dependabot[bot]", "github-actions[bot]"]'), github.event.pull_request.user.login)) ||
       (github.actor != 'dependabot[bot]' && github.event_name != 'pull_request_review')
