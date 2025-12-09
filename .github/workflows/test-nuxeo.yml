@@ -29,7 +29,7 @@ jobs:
       - name: Update package.xml version
         run: |
           sudo apt-get update && sudo apt-get install -y xmlstarlet
-          xmlstarlet ed -L -u "/package/@version" -v "0.1.1" package.xml
+          xmlstarlet ed -L -u "/package/@version" -v "0.1.${{ github.run_id }}" package.xml
         working-directory: .github/actions/nuxeo/nos-publish
 
       - name: Build zip package file 📦
