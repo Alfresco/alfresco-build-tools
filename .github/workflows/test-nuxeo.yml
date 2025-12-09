@@ -8,6 +8,8 @@ on:
     paths:
       - '.github/actions/nuxeo/**'
       - '.github/workflows/test-nuxeo.yml'
+  pull_request_review:
+      types: [ submitted ]
 
 concurrency:
   group: nuxeo-actions-tests
@@ -15,11 +17,20 @@ concurrency:
 
 jobs:
   nos-publish:
+    if: >-
+      (github.event.review.state == 'approved' && contains(fromJSON('["dependabot[bot]", "github-actions[bot]"]'), github.event.pull_request.user.login)) ||
+      (github.actor != 'dependabot[bot]' && github.event_name != 'pull_request_review')
     runs-on: ubuntu-latest
     env:
       ZIP_PACKAGE_NAME: dummy.zip
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Update package.xml version
+        run: |
+          sudo apt-get update && sudo apt-get install -y xmlstarlet
+          xmlstarlet ed -L -u "/package/@version" -v "1.0.${{ github.run_id }}" package.xml
+        working-directory: .github/actions/nuxeo/nos-publish
 
       - name: Build zip package file 📦
         run: zip ${{ env.ZIP_PACKAGE_NAME }} package.xml install.xml
@@ -49,6 +60,9 @@ jobs:
           fi
 
   nuxeo-docker-build:
+    if: >-
+      (github.event.review.state == 'approved' && contains(fromJSON('["dependabot[bot]", "github-actions[bot]"]'), github.event.pull_request.user.login)) ||
+      (github.actor != 'dependabot[bot]' && github.event_name != 'pull_request_review')
     runs-on: ubuntu-latest
     env:
       NUXEO_CONNECT_MODULE: nuxeo-web-ui
