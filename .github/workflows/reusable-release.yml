@@ -12,7 +12,7 @@ on:
         required: false
         type: string
         default: ${{ github.event.repository.default_branch }}
-      release_script:
+      release_command:
         description: "Path to the release script to execute"
         required: false
         type: string
@@ -113,14 +113,17 @@ jobs:
               echo "new-version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
               echo "current-version=$LATEST_TAG" >> "$GITHUB_OUTPUT"
 
-          - name: Run optional release script
-            if: steps.set-release-level.outputs.release-level != '' && inputs.release_script != ''
+          - name: Run optional release command
+            if: steps.set-release-level.outputs.release-level != '' && inputs.release_command != ''
+            env:
+              RELEASE_VERSION: ${{ steps.bump-semver.outputs.new-version }}
+              CURRENT_VERSION: ${{ steps.bump-semver.outputs.current-version }}
             run: |
-              ${{ inputs.release_script }} "${{ steps.bump-semver.outputs.new-version }}" "${{ steps.bump-semver.outputs.current-version }}"
+              ${{ inputs.release_command }}
 
           - name: Commit back changes from release script
             uses: stefanzweifel/git-auto-commit-action@28e16e81777b558cc906c8750092100bbb34c5e3 # v7.0.0
-            if: steps.set-release-level.outputs.release-level != '' && inputs.release_script != ''
+            if: steps.set-release-level.outputs.release-level != '' && inputs.release_command != ''
             with:
               branch: ${{ inputs.target_branch }}
               commit_message: Release ${{ steps.bump-semver.outputs.new-version }}

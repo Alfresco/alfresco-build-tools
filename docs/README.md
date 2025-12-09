@@ -128,8 +128,8 @@ Here follows the list of GitHub Actions topics available in the current document
     - [veracode](#veracode)
     - [xvfb-record](#xvfb-record)
     - [Nuxeo related actions](#nuxeo-related-actions)
-      - [nuxeo-docker-build](#nuxeo-docker-build)
       - [nos-publish](#nos-publish)
+      - [nuxeo-docker-build](#nuxeo-docker-build)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [branch-promotion-prs](#branch-promotion-prs)
     - [helm-publish-new-package-version](#helm-publish-new-package-version)
@@ -2340,9 +2340,9 @@ Calculates the new alpha version, creates new git tag and publishes the new pack
 
 Automates the release process by determining the version bump type (major,
 minor, or patch) from PR labels, calculating the new version following Semantic
-Versioning (SemVer) rules, optionally executing a custom release script that can
-modify files with changes automatically committed back to the repository, and
-finally tagging the new version and creating a GitHub Release.
+Versioning (SemVer) rules, optionally executing a custom release command that
+can modify files with changes automatically committed back to the repository,
+and finally tagging the new version and creating a GitHub Release.
 
 ```yaml
 name: Release
@@ -2371,9 +2371,16 @@ jobs:
           release_type_override: ${{ inputs.release_type }}
           commit_username: ${{ vars.BOT_GITHUB_USERNAME }}
           commit_email: ${{ vars.BOT_GITHUB_EMAIL }}
+          # release_command: ./release.sh # optional, command to run for custom release steps before tagging
+          # target_branch: custom-branch # optional, defaults to the default branch
         secrets:
           BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
 ```
+
+Release command have access to the following environment variables:
+
+- RELEASE_VERSION: the new version calculated
+- CURRENT_VERSION: the previous version
 
 ### terraform
 
@@ -2642,8 +2649,8 @@ brew install coreutils
 
 ## Release
 
-Add a label to the PR among `major`, `minor`, or `patch` to trigger a release
-upon merging the PR.
+Add a label to the PR among `release/major`, `release/minor`, or `release/patch`
+to trigger a release upon merging the PR.
 
 New versions should follow [Semantic versioning](https://semver.org/), so:
 
