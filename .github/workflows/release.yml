@@ -24,6 +24,6 @@ jobs:
           release_type_override: ${{ inputs.release_type }}
           commit_username: ${{ vars.BOT_GITHUB_USERNAME }}
           commit_email: ${{ vars.BOT_GITHUB_EMAIL }}
-          release_command: ./.github/scripts/release.sh $RELEASE_VERSION
+          release_command: ./.github/scripts/release.sh
         secrets:
           BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}

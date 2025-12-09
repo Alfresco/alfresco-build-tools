@@ -6,14 +6,12 @@ if [ -z "$GITHUB_WORKSPACE" ]; then
   exit 1
 fi
 
-if [ -z "$1" ] || [[ ! "$1" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
-  echo 'First argument should be next version to release with a leading v char'
+if [ -z "$RELEASE_VERSION" ] || [[ ! "$RELEASE_VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+  echo "RELEASE_VERSION must start with a leading v char, current value: '$RELEASE_VERSION'"
   exit 1
 fi
 
-NEXT_VERSION=$1
+echo "Going to flip Alfresco-build-tools refs in actions and docs to $RELEASE_VERSION"
 
-echo "Going to flip Alfresco-build-tools refs in actions and docs to $NEXT_VERSION"
-
-grep -Rl "Alfresco/alfresco-build-tools.*@v" | xargs sed -i -e "s/\(Alfresco\/alfresco-build-tools.*@\)v[0-9]\+\.[0-9]\+\.[0-9]\+/\1$NEXT_VERSION/g"
-echo "Bump to $NEXT_VERSION completed successfully."
+grep -Rl "Alfresco/alfresco-build-tools.*@v" | xargs sed -i -e "s/\(Alfresco\/alfresco-build-tools.*@\)v[0-9]\+\.[0-9]\+\.[0-9]\+/\1$RELEASE_VERSION/g"
+echo "Bump to $RELEASE_VERSION completed successfully."
