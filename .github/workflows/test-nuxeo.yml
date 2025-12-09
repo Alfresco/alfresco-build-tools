@@ -9,7 +9,7 @@ on:
       - '.github/actions/nuxeo/**'
       - '.github/workflows/test-nuxeo.yml'
   pull_request_review:
-      types: [ submitted ]
+    types: [ submitted ]
 
 jobs:
   nos-publish:
