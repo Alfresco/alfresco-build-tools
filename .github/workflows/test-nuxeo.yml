@@ -22,10 +22,6 @@ jobs:
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
-      - name: Update package.xml version
-        run: yq -i -p xml -o xml --xml-attribute-prefix "+" '.package.+version = "0.1.${{ github.run_number }}"' package.xml
-        working-directory: .github/actions/nuxeo/nos-publish
-
       - name: Build zip package file 📦
         run: zip ${{ env.ZIP_PACKAGE_NAME }} package.xml install.xml
         working-directory: .github/actions/nuxeo/nos-publish
@@ -41,6 +37,7 @@ jobs:
           nos-org: nuxeo-devops
 
       - name: Unpublish Module 🫥
+        if: always() && steps.publish_nos.outcome != 'skipped'
         env:
           PACKAGE_URL: ${{ steps.publish_nos.outputs.package-url }}
         run: |
