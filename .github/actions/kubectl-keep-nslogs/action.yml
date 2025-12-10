@@ -30,8 +30,8 @@ runs:
       working-directory: ${{ steps.artifactdir.outputs.ARTIFACTS_DIR }}
       run: |
         kubectl config set-context --current --namespace=${{ inputs.namespace }}
-        for type in deployment.apps statefulset.apps jobs; do
-          [ -d "${type}" ] || mkdir "${type}"
+        for type in deployment.apps statefulset.apps job.batch; do
+          mkdir -p "${type}"
           for i in $(kubectl get "$type" -o name); do \
             kubectl logs "$i" --all-containers=true > ${i}.log
           done
