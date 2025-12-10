@@ -61,7 +61,7 @@ Additional notes or configuration details.
 
 **For reusable workflows and composite actions referencing actions within this repository:**
 
-- **MUST** use version tags: `Alfresco/alfresco-build-tools/.github/actions/action-name@v11.0.0`
+- **MUST** use version tags: `Alfresco/alfresco-build-tools/.github/actions/action-name@v11.0.1`
 - **NEVER** use SHA pins: `Alfresco/alfresco-build-tools/.github/actions/action-name@abc123def456`
 - This ensures the `release.sh` script can automatically update all internal references during releases
 
@@ -70,7 +70,7 @@ Additional notes or configuration details.
 ✅ **Correct (version tag):**
 
 ```yaml
-- uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v11.0.0
+- uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v11.0.1
 ```
 
 ❌ **Incorrect (SHA pin):**
