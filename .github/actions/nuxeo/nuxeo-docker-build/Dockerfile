@@ -44,8 +44,13 @@ USER nuxeo
 
 RUN --mount=type=bind,from=modules,target=/modules \
     --mount=type=secret,id=NUXEO_CLID,env=NUXEO_CLID \
+    --mount=type=secret,id=NUXEO_CONNECT_URL,env=NUXEO_CONNECT_URL \
     if [ -n "${NUXEO_CONNECT_MODULES}" ]; then \
-        /install-packages.sh --clid ${NUXEO_CLID} ${NUXEO_CONNECT_MODULES}; \
+        OPT_CONNECT_URL=""; \
+        if [ -n "${NUXEO_CONNECT_URL}" ]; then \
+            OPT_CONNECT_URL="--connect-url ${NUXEO_CONNECT_URL}"; \
+        fi; \
+        /install-packages.sh --clid ${NUXEO_CLID} ${OPT_CONNECT_URL} ${NUXEO_CONNECT_MODULES}; \
     else \
         echo "No Nuxeo Connect modules specified - skipping connect installation"; \
     fi && \
