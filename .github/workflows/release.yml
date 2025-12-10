@@ -5,46 +5,25 @@ on:
     types:
     - closed
   workflow_dispatch:
+    inputs:
+      release_type:
+        description: "Release type"
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 jobs:
     release:
         name: Release
-        runs-on: ubuntu-latest
-        if: github.event.pull_request.merged == true
-        steps:
-          - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-            with:
-              fetch-depth: 0
-              ref: master
-              token: ${{ secrets.BOT_GITHUB_TOKEN }}
-
-          - name: Fetch next version
-            run: |
-              echo "VERSION=$(cat version.txt)" >> "$GITHUB_ENV"
-
-          - name: Check if release is necessary
-            id: release_guard
-            run: |
-              if git tag | grep -q "^${VERSION}$"; then
-                echo "do_release=false" >> "$GITHUB_OUTPUT"
-              else
-                echo "do_release=true" >> "$GITHUB_OUTPUT"
-              fi
-
-          - name: Apply release changes
-            if: steps.release_guard.outputs.do_release == 'true'
-            run: |
-              ./release.sh "$VERSION"
-
-          - uses: stefanzweifel/git-auto-commit-action@28e16e81777b558cc906c8750092100bbb34c5e3 # v7.0.0
-            with:
-              branch: master
-              commit_message: Release ${{ env.VERSION }}
-              commit_user_name: ${{ vars.BOT_GITHUB_USERNAME }}
-              commit_user_email: ${{ vars.BOT_GITHUB_EMAIL }}
-
-          - name: Generate release notes
-            if: steps.release_guard.outputs.do_release == 'true'
-            env:
-              GH_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
-            run: gh release create "$VERSION" --generate-notes -t "$VERSION"
+        if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+        uses: ./.github/workflows/reusable-release.yml
+        with:
+          release_type_override: ${{ inputs.release_type }}
+          commit_username: ${{ vars.BOT_GITHUB_USERNAME }}
+          commit_email: ${{ vars.BOT_GITHUB_EMAIL }}
+          release_command: ./.github/scripts/release.sh
+        secrets:
+          BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}

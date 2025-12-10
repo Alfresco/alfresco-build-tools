@@ -1,0 +1,137 @@
+name: Reusable Release
+
+on:
+  workflow_call:
+    inputs:
+      release_type_override:
+        description: "Override release type instead of using PR labels (patch, minor, major)"
+        required: false
+        type: string
+      target_branch:
+        description: "Branch to create the release from"
+        required: false
+        type: string
+        default: ${{ github.event.repository.default_branch }}
+      release_command:
+        description: "Path to the release script to execute"
+        required: false
+        type: string
+      commit_username:
+        description: "Username for committing"
+        required: false
+        type: string
+      commit_email:
+        description: "Email for committing"
+        required: false
+        type: string
+    secrets:
+      BOT_GITHUB_TOKEN:
+        description: "GitHub token with permissions to create release and push commits"
+        required: true
+
+concurrency:
+  group: release-${{ github.event.repository.name }}
+  cancel-in-progress: false
+
+jobs:
+    release:
+        name: Release
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+            with:
+              fetch-depth: 0
+              ref: ${{ inputs.target_branch }}
+              token: ${{ secrets.BOT_GITHUB_TOKEN }}
+
+          - name: Get release type from PR label or input
+            id: set-release-level
+            env:
+              PR_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+              RELEASE_TYPE_INPUT: ${{ inputs.release_type_override }}
+            run: |
+              RELEASE_LEVEL=""
+
+              # Check PR labels if this is a pull request event
+              if [[ "$GITHUB_EVENT_NAME" == "pull_request" && -n "$PR_LABELS" ]]; then
+                if echo "$PR_LABELS" | grep -q "release/major"; then
+                  RELEASE_LEVEL="major"
+                elif echo "$PR_LABELS" | grep -q "release/minor"; then
+                  RELEASE_LEVEL="minor"
+                elif echo "$PR_LABELS" | grep -q "release/patch"; then
+                  RELEASE_LEVEL="patch"
+                else
+                  echo "::info::No release label found on PR, not creating a release."
+                fi
+              fi
+
+              # Fall back to input if no label was found
+              if [[ -z "$RELEASE_LEVEL" && -n "$RELEASE_TYPE_INPUT" ]]; then
+                if [[ "$RELEASE_TYPE_INPUT" =~ ^(major|minor|patch)$ ]]; then
+                  RELEASE_LEVEL="$RELEASE_TYPE_INPUT"
+                else
+                  echo "::error::Invalid release_type_override: '$RELEASE_TYPE_INPUT'. Must be 'major', 'minor', or 'patch'."
+                  exit 1
+                fi
+              fi
+
+              echo "release-level=$RELEASE_LEVEL" >> "$GITHUB_OUTPUT"
+
+          - name: Get latest tag and bump version
+            id: bump-semver
+            if: steps.set-release-level.outputs.release-level != ''
+            run: |
+              LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+              if [[ "$LATEST_TAG" =~ ^v?([0-9]+)\.([0-9]+)\.([0-9]+)(-.+)?$ ]]; then
+                MAJOR="${BASH_REMATCH[1]}"
+                MINOR="${BASH_REMATCH[2]}"
+                PATCH="${BASH_REMATCH[3]}"
+              else
+                MAJOR=0
+                MINOR=0
+                PATCH=0
+              fi
+
+              # Bump version based on release level
+              case "${{ steps.set-release-level.outputs.release-level }}" in
+                major)
+                  MAJOR=$((MAJOR + 1))
+                  MINOR=0
+                  PATCH=0
+                  ;;
+                minor)
+                  MINOR=$((MINOR + 1))
+                  PATCH=0
+                  ;;
+                patch)
+                  PATCH=$((PATCH + 1))
+                  ;;
+              esac
+
+              NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+              echo "::info::Bumping version from $LATEST_TAG to $NEW_VERSION"
+              echo "new-version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+              echo "current-version=$LATEST_TAG" >> "$GITHUB_OUTPUT"
+
+          - name: Run optional release command
+            if: steps.set-release-level.outputs.release-level != '' && inputs.release_command != ''
+            env:
+              RELEASE_VERSION: ${{ steps.bump-semver.outputs.new-version }}
+              CURRENT_VERSION: ${{ steps.bump-semver.outputs.current-version }}
+            run: |
+              ${{ inputs.release_command }}
+
+          - name: Commit back changes from release script
+            uses: stefanzweifel/git-auto-commit-action@28e16e81777b558cc906c8750092100bbb34c5e3 # v7.0.0
+            if: steps.set-release-level.outputs.release-level != '' && inputs.release_command != ''
+            with:
+              branch: ${{ inputs.target_branch }}
+              commit_message: Release ${{ steps.bump-semver.outputs.new-version }}
+              commit_user_name: ${{ inputs.commit_username }}
+              commit_user_email: ${{ inputs.commit_email }}
+
+          - name: Generate release notes and git tag
+            if: steps.set-release-level.outputs.release-level != ''
+            env:
+              GH_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+            run: gh release create "${{ steps.bump-semver.outputs.new-version }}" --generate-notes -t "${{ steps.bump-semver.outputs.new-version }}"
