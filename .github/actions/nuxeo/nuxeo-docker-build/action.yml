@@ -15,6 +15,10 @@ inputs:
     description: Space or comma separated list of Nuxeo Connect marketplace packages to install online
     required: false
     default: ""
+  nuxeo-connect-url:
+    description: URL of Nuxeo Connect server to use for installing Nuxeo Connect packages
+    required: false
+    default: ""
   nuxeo-clid:
     description: Nuxeo Connect License ID (CLID) to use for installing Nuxeo Connect packages. Required for nuxeo connect modules.
     required: false
@@ -153,6 +157,7 @@ runs:
       uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
       env:
         NUXEO_CLID: ${{ inputs.nuxeo-clid }}
+        NUXEO_CONNECT_URL: ${{ inputs.nuxeo-connect-url }}
       with:
         context: ${{ github.action_path }}
         build-contexts: |
@@ -175,6 +180,7 @@ runs:
           PACKAGES_AUTH_TOKEN=${{ inputs.os-packages-token }}
         secret-envs: |
           NUXEO_CLID=NUXEO_CLID
+          NUXEO_CONNECT_URL=NUXEO_CONNECT_URL
         secret-files: |
           nuxeo-private=${{ github.action_path }}/nuxeo-private.repo
 
