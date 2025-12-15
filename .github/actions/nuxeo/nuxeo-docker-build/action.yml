@@ -188,6 +188,8 @@ runs:
         secret-files: |
           nuxeo-private=${{ github.action_path }}/nuxeo-private.repo
         outputs: ${{ inputs.outputs-image }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
     - name: Summary
       shell: bash
