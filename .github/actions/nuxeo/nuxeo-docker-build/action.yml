@@ -79,6 +79,10 @@ inputs:
     description: Additional buildx driver options
     required: false
     default: ""
+  local-registry:
+    description: Set to tru if you use a local registry which does not require authentication
+    required: false
+    default: "false"
 
 outputs:
   image-url:
@@ -124,8 +128,8 @@ runs:
         username: ${{ inputs.base-registry-username }}
         password: ${{ inputs.base-registry-password }}
 
-    - name: Check if credentials to target registry are provided when pushing image
-      if: ${{ inputs.push-image == 'true' }}
+    - name: Check if credentials to target registry are provided when pushing image to non-local registry
+      if: ${{ inputs.push-image == 'true' && inputs.local-registry == 'false'}}
       shell: bash
       run: |
         if [ -z "${{ inputs.registry-username }}" ] || [ -z "${{ inputs.registry-password }}" ]; then
@@ -140,8 +144,9 @@ runs:
           echo "Error: nuxeo-clid input is required when nuxeo-connect-modules is provided." >&2
           exit 1
         fi
+
     - name: Login to target registry
-      if: ${{ inputs.push-image == 'true' }}
+      if: ${{ inputs.push-image == 'true' && inputs.local-registry == 'false' }}
       uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
       with:
         registry: ${{ inputs.registry }}
