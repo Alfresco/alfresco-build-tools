@@ -196,7 +196,7 @@ runs:
 
     - name: Upload target folders
       if: inputs.target-folder-upload-name != ''
-      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
       with:
         name: ${{ inputs.target-folder-upload-name }}
         path: |
@@ -218,7 +218,7 @@ runs:
         echo "pattern=$INCLUSION_PATTERN" >> $GITHUB_OUTPUT
 
     - name: Upload M2 Build artifacts
-      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+      uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
       if: inputs.m2-current-build-upload-name!= ''
       with:
         name: ${{ inputs.m2-current-build-upload-name}}
@@ -240,7 +240,7 @@ runs:
         fi
 
     - name: Save maven cache
-      uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      uses: actions/cache/save@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
       if: github.event_name == 'push' || env.IS_PREVIEW == 'true'
       with:
         path: ~/.m2/repository
