@@ -71,6 +71,10 @@ inputs:
     description: Whether to load the built image into local docker daemon (true/false). When set to true, only a single platform can be specified.
     required: false
     default: "false"
+  outputs-image:
+    description: List of output destinations
+    required: false
+    default: ""
 
 outputs:
   image-url:
@@ -183,6 +187,7 @@ runs:
           NUXEO_CONNECT_URL=NUXEO_CONNECT_URL
         secret-files: |
           nuxeo-private=${{ github.action_path }}/nuxeo-private.repo
+        outputs: ${{ inputs.outputs-image }}
 
     - name: Summary
       shell: bash
