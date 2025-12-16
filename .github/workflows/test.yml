@@ -51,7 +51,6 @@ jobs:
         with:
           diagnose-top-offenders-enabled: 'true'
       - name: Assert that space available on the runner has increased
-        if: matrix.os == 'ubuntu-latest'
         env:
           TOTAL_SIZE_BEFORE: ${{ steps.free-hosted-runner-disk-space.outputs.total_size_before }}
         run: test "$TOTAL_SIZE_BEFORE" -lt "$(df --total --output=avail | tail -1)"
