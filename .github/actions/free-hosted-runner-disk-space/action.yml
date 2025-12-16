@@ -1,20 +1,20 @@
-name: "Free GHA runner disk space"
-description: "Frees up disk space on GitHub Actions hosted runners by removing unneeded software and optionally merging disk volumes to maximize build space."
+name: Free GHA runner disk space
+description: Frees up disk space on GitHub Actions hosted runners by removing unneeded software and optionally merging disk volumes to maximize build space.
 inputs:
   merge-disk-volumes:
-    description: 'Triggers usage of maximize-build-space action to take advantage of unused disk space. Disabled by default due to long duration.'
+    description: Triggers usage of maximize-build-space action to take advantage of unused disk space. Disabled by default due to long duration.
     required: false
     default: 'false'
   root-reserve-mb:
-    description: 'Space to be left free on the root filesystem, in Megabytes. Only applicable if merge-disk-volumes is set to true.'
+    description: Space to be left free on the root filesystem, in Megabytes. Only applicable if merge-disk-volumes is set to true.
     required: false
     default: '12288'
   temp-reserve-mb:
-    description: 'Space to be left free on the temp filesystem (/mnt), in Megabytes. Only applicable if merge-disk-volumes is set to true.'
+    description: Space to be left free on the temp filesystem (/mnt), in Megabytes. Only applicable if merge-disk-volumes is set to true.
     required: false
     default: '100'
   swap-size-mb:
-    description: 'Swap space to create, in Megabytes. Only applicable if merge-disk-volumes is set to true.'
+    description: Swap space to create, in Megabytes. Only applicable if merge-disk-volumes is set to true.
     required: false
     default: '1024'
   overprovision-lvm:
@@ -25,72 +25,70 @@ inputs:
     required: false
     default: 'false'
   build-mount-path:
-    description: 'Absolute path to the mount point where the build space will be available, defaults to /var/lib/docker/ if unset. Only applicable if merge-disk-volumes is set to true.'
+    description: Absolute path to the mount point where the build space will be available, defaults to /var/lib/docker/ if unset. Only applicable if merge-disk-volumes is set to true.
     required: false
     default: '/var/lib/docker/'
   build-mount-path-ownership:
-    description: 'Ownership of the mount point path, defaults to standard "runner" user and group. Only applicable if merge-disk-volumes is set to true.'
+    description: Ownership of the mount point path, defaults to standard "runner" user and group. Only applicable if merge-disk-volumes is set to true.
     required: false
     default: 'runner:runner'
   pv-loop-path:
-    description: 'Absolute file path for the LVM image created on the root filesystem, the default is usually fine. Only applicable if merge-disk-volumes is set to true.'
+    description: Absolute file path for the LVM image created on the root filesystem, the default is usually fine. Only applicable if merge-disk-volumes is set to true.
     required: false
     default: '/pv.img'
   tmp-pv-loop-path:
-    description: 'Absolute file path for the LVM image created on the temp filesystem, the default is usually fine. Must reside on /mnt . Only applicable if merge-disk-volumes is set to true.'
+    description: Absolute file path for the LVM image created on the temp filesystem, the default is usually fine. Must reside on /mnt . Only applicable if merge-disk-volumes is set to true.
     required: false
     default: '/mnt/tmp-pv.img'
   remove-dotnet:
-    description: 'Removes .NET runtime and libraries'
+    description: Removes .NET runtime and libraries
     required: false
     default: 'true'
   remove-haskell:
-    description: 'Removes GHC (Haskell) artifacts'
+    description: Removes GHC (Haskell) artifacts
     required: false
     default: 'true'
   remove-tools-cache:
-    description: 'Removes tools and dependencies cached'
+    description: Removes tools and dependencies cached
     required: false
     default: 'true'
   remove-android:
-    description: 'Removes Android SDKs and Tools'
+    description: Removes Android SDKs and Tools
     required: false
     default: 'true'
   remove-codeql:
-    description: 'Removes CodeQL Action Bundles'
+    description: Removes CodeQL Action Bundles
     required: false
     default: 'true'
   remove-swift:
-    description: 'Removes Swift toolchain and libraries'
+    description: Removes Swift toolchain and libraries
     required: false
     default: 'true'
   remove-docker-images:
-    description: 'Removes cached Docker images'
+    description: Removes cached Docker images
     required: false
     default: 'false'
   remove-paths:
-    description: Additional collection of files/folders to be removed, separated by spaces.
+    description: Additional collection of files/folders to be removed, separated by spaces
     default: ''
     required: false
   diagnose-top-offenders-enabled:
-    description: 'Runs a diagnostic step to list top disk space offenders before cleanup.'
+    description: Runs diagnostic steps to list top disk space offenders before and after cleanup
     required: false
     default: 'false'
 
 runs:
-  using: "composite"
+  using: composite
   steps:
     - name: Runner system report before modification
       shell: bash
       run: |
         echo "Memory and swap:"
-        sudo free -m
-        echo
-        sudo swapon --show
+        free -m
         echo
 
         echo "Available storage:"
-        sudo df -h
+        df -h
         echo
 
     - name: Move /var/lib/docker/
@@ -208,11 +206,9 @@ runs:
     - name: Runner system report after cleanup
       run: |
         echo "Memory and swap:"
-        sudo free -m
-        echo
-        sudo swapon --show
+        free -m
         echo
 
         echo "Available storage:"
-        sudo df -h
+        df -h
       shell: bash
