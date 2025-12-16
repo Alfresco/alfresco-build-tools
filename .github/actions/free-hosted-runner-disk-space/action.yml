@@ -2,7 +2,7 @@ name: Free GHA runner disk space
 description: Frees up disk space on GitHub Actions hosted runners by removing unneeded software and optionally merging disk volumes to maximize build space.
 inputs:
   merge-disk-volumes:
-    description: Triggers usage of maximize-build-space action to take advantage of unused disk space. Disabled by default due to long duration.
+    description: Maximize build space by leveraging local disk volume /mnt. Disabled by default due to long duration.
     required: false
     default: 'false'
   root-reserve-mb:
