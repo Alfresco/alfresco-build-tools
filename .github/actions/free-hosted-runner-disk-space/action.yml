@@ -64,6 +64,10 @@ inputs:
     description: Removes Swift toolchain and libraries
     required: false
     default: 'true'
+  remove-powershell:
+    description: Removes PowerShell Core installation
+    required: false
+    default: 'true'
   remove-docker-images:
     description: Removes cached Docker images
     required: false
@@ -154,6 +158,15 @@ runs:
           du -sh /usr/share/swift 2>/dev/null || echo "/usr/share/swift not found"
           start_time=$(date +%s)
           sudo rm -rf /usr/share/swift
+          end_time=$(date +%s)
+          echo "Removed in $((end_time - start_time)) seconds"
+        fi
+
+        if [[ ${{ inputs.remove-powershell }} == 'true' ]]; then
+          echo "Removing PowerShell Core installation..."
+          du -sh /usr/local/share/powershell 2>/dev/null || echo "/usr/local/share/powershell not found"
+          start_time=$(date +%s)
+          sudo rm -rf /usr/local/share/powershell
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
         fi
