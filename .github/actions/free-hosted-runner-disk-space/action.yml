@@ -44,10 +44,6 @@ inputs:
     description: 'Removes .NET runtime and libraries'
     required: false
     default: 'true'
-  remove-boost:
-    description: 'Removes Boost C++ libraries'
-    required: false
-    default: 'true'
   remove-haskell:
     description: 'Removes GHC (Haskell) artifacts'
     required: false
@@ -142,15 +138,6 @@ runs:
           du -sh /opt/hostedtoolcache/CodeQL 2>/dev/null || echo "/opt/hostedtoolcache/CodeQL not found"
           start_time=$(date +%s)
           sudo rm -rf /opt/hostedtoolcache/CodeQL
-          end_time=$(date +%s)
-          echo "Removed in $((end_time - start_time)) seconds"
-        fi
-
-        if [[ ${{ inputs.remove-boost }} == 'true' ]]; then
-          echo "Removing Boost C++ libraries..."
-          du -sh /usr/local/share/boost 2>/dev/null || echo "/usr/local/share/boost not found"
-          start_time=$(date +%s)
-          sudo rm -rf /usr/local/share/boost
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
         fi
