@@ -41,31 +41,35 @@ inputs:
     required: false
     default: '/mnt/tmp-pv.img'
   remove-dotnet:
-    description: 'Removes .NET runtime and libraries. (frees ~17 GB)'
+    description: 'Removes .NET runtime and libraries'
     required: false
     default: 'true'
   remove-boost:
-    description: 'Removes Boost C++ libraries. (frees ~1 GB)'
+    description: 'Removes Boost C++ libraries'
     required: false
     default: 'true'
   remove-haskell:
-    description: 'Removes GHC (Haskell) artifacts. (frees ~2.7 GB)'
+    description: 'Removes GHC (Haskell) artifacts'
     required: false
     default: 'true'
   remove-tools-cache:
-    description: 'Removes tools and dependencies cached. (frees ~3 GB)'
+    description: 'Removes tools and dependencies cached'
     required: false
     default: 'true'
   remove-android:
-    description: 'Removes Android SDKs and Tools. (frees ~11 GB)'
+    description: 'Removes Android SDKs and Tools'
     required: false
     default: 'true'
   remove-codeql:
-    description: 'Removes CodeQL Action Bundles. (frees ~5.4 GB)'
+    description: 'Removes CodeQL Action Bundles'
     required: false
     default: 'true'
+  remove-swift:
+    description: 'Removes Swift toolchain and libraries'
+    required: false
+    default: 'false'
   remove-docker-images:
-    description: 'Removes cached Docker images. (frees ~3 GB)'
+    description: 'Removes cached Docker images'
     required: false
     default: 'false'
   remove-paths:
@@ -150,11 +154,21 @@ runs:
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
         fi
+
         if [[ ${{ inputs.remove-tools-cache }} == 'true' ]]; then
           echo "Removing tools and dependencies cache..."
           du -sh $AGENT_TOOLSDIRECTORY 2>/dev/null || echo "$AGENT_TOOLSDIRECTORY not found"
           start_time=$(date +%s)
           sudo rm -rf $AGENT_TOOLSDIRECTORY
+          end_time=$(date +%s)
+          echo "Removed in $((end_time - start_time)) seconds"
+        fi
+
+        if [[ ${{ inputs.remove-swift }} == 'true' ]]; then
+          echo "Removing Swift toolchain and libraries..."
+          du -sh /usr/share/swift 2>/dev/null || echo "/usr/share/swift not found"
+          start_time=$(date +%s)
+          sudo rm -rf /usr/share/swift
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
         fi
