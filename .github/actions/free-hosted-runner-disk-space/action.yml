@@ -111,8 +111,8 @@ runs:
         DOTNET_ROOT=/usr/share/dotnet
         if [[ ${{ inputs.remove-dotnet }} == 'true' && -d $DOTNET_ROOT ]]; then
           echo "Removing .NET runtime and libraries..."
-          du -sh $DOTNET_ROOT
           start_time=$(date +%s)
+          du -sh $DOTNET_ROOT
           sudo rm -rf $DOTNET_ROOT
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
@@ -123,8 +123,8 @@ runs:
         ANDROID_ROOT=/usr/local/lib/android
         if [[ ${{ inputs.remove-android }} == 'true' && -d $ANDROID_ROOT ]]; then
           echo "Removing Android SDKs and Tools..."
-          du -sh $ANDROID_ROOT
           start_time=$(date +%s)
+          du -sh $ANDROID_ROOT
           sudo rm -rf $ANDROID_ROOT
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
@@ -135,8 +135,8 @@ runs:
         HASKELL_ROOT=/usr/local/.ghcup
         if [[ ${{ inputs.remove-haskell }} == 'true' && -d $HASKELL_ROOT ]]; then
           echo "Removing GHC (Haskell) artifacts..."
-          du -sh $HASKELL_ROOT
           start_time=$(date +%s)
+          du -sh $HASKELL_ROOT
           sudo rm -rf $HASKELL_ROOT
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
@@ -147,8 +147,8 @@ runs:
         CODEQL_ROOT=/opt/hostedtoolcache/CodeQL
         if [[ ${{ inputs.remove-codeql }} == 'true' && -d $CODEQL_ROOT ]]; then
           echo "Removing CodeQL Action Bundles..."
-          du -sh $CODEQL_ROOT
           start_time=$(date +%s)
+          du -sh $CODEQL_ROOT
           sudo rm -rf $CODEQL_ROOT
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
@@ -158,8 +158,8 @@ runs:
 
         if [[ ${{ inputs.remove-tools-cache }} == 'true' && -d $AGENT_TOOLSDIRECTORY ]]; then
           echo "Removing tools and dependencies cache..."
-          du -sh $AGENT_TOOLSDIRECTORY
           start_time=$(date +%s)
+          du -sh $AGENT_TOOLSDIRECTORY
           sudo rm -rf $AGENT_TOOLSDIRECTORY/*
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
@@ -170,8 +170,8 @@ runs:
         SWIFT_ROOT=/usr/share/swift
         if [[ ${{ inputs.remove-swift }} == 'true' && -d $SWIFT_ROOT ]]; then
           echo "Removing Swift toolchain and libraries..."
-          du -sh $SWIFT_ROOT
           start_time=$(date +%s)
+          du -sh $SWIFT_ROOT
           sudo rm -rf $SWIFT_ROOT
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
@@ -182,8 +182,8 @@ runs:
         POWERSHELL_ROOT=/usr/local/share/powershell
         if [[ ${{ inputs.remove-powershell }} == 'true' && -d $POWERSHELL_ROOT ]]; then
           echo "Removing PowerShell Core installation..."
-          du -sh $POWERSHELL_ROOT
           start_time=$(date +%s)
+          du -sh $POWERSHELL_ROOT
           sudo rm -rf $POWERSHELL_ROOT
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
