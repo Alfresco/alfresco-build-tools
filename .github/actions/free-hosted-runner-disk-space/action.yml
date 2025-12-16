@@ -126,9 +126,9 @@ runs:
 
         if [[ ${{ inputs.remove-haskell }} == 'true' ]]; then
           echo "Removing GHC (Haskell) artifacts..."
-          du -sh /opt/ghc 2>/dev/null || echo "/opt/ghc not found"
+          du -sh /usr/local/.ghcup 2>/dev/null || echo "/usr/local/.ghcup not found"
           start_time=$(date +%s)
-          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/.ghcup
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
         fi
