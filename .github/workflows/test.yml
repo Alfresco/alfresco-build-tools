@@ -48,6 +48,8 @@ jobs:
         run: echo "total_size_before=$(df --total --output=avail | tail -1)" >> "$GITHUB_OUTPUT"
       - name: Free up disk space on the runner
         uses: ./.github/actions/free-hosted-runner-disk-space
+        with:
+          diagnose-top-offenders-enabled: 'true'
       - name: Assert that space available on the runner has increased
         if: matrix.os == 'ubuntu-latest'
         env:

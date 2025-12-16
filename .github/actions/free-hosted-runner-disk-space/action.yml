@@ -59,11 +59,11 @@ inputs:
   remove-android:
     description: 'Removes Android SDKs and Tools. (frees ~11 GB)'
     required: false
-    default: 'false'
+    default: 'true'
   remove-codeql:
     description: 'Removes CodeQL Action Bundles. (frees ~5.4 GB)'
     required: false
-    default: 'false'
+    default: 'true'
   remove-docker-images:
     description: 'Removes cached Docker images. (frees ~3 GB)'
     required: false
@@ -72,6 +72,10 @@ inputs:
     description: Additional collection of files/folders to be removed, separated by spaces.
     default: ''
     required: false
+  diagnose-top-offenders-enabled:
+    description: 'Runs a diagnostic step to list top disk space offenders before cleanup.'
+    required: false
+    default: 'false'
 
 runs:
   using: "composite"
@@ -92,6 +96,12 @@ runs:
     - name: Move /var/lib/docker/
       if: inputs.merge-disk-volumes == 'true'
       run: sudo mv /var/lib/docker/ "${GITHUB_WORKSPACE}/docker"
+      shell: bash
+
+    - name: Run optional diagnostic of top offenders
+      if: inputs.diagnose-top-offenders-enabled == 'true'
+      run: |
+        sudo du -h --max-depth=4 /usr /opt | sort -hr 2>/dev/null | head -n 20 || true
       shell: bash
 
     - name: Remove unwanted software
