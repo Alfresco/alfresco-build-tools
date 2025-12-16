@@ -108,67 +108,87 @@ runs:
 
     - name: Remove unwanted software
       run: |
-        if [[ ${{ inputs.remove-dotnet }} == 'true' ]]; then
+        DOTNET_ROOT=/usr/share/dotnet
+        if [[ ${{ inputs.remove-dotnet }} == 'true' && -d $DOTNET_ROOT ]]; then
           echo "Removing .NET runtime and libraries..."
-          du -sh /usr/share/dotnet 2>/dev/null || echo "/usr/share/dotnet not found"
+          du -sh $DOTNET_ROOT
           start_time=$(date +%s)
-          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf $DOTNET_ROOT
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
+        else
+          echo "$DOTNET_ROOT not found"
         fi
 
-        if [[ ${{ inputs.remove-android }} == 'true' ]]; then
+        ANDROID_ROOT=/usr/local/lib/android
+        if [[ ${{ inputs.remove-android }} == 'true' && -d $ANDROID_ROOT ]]; then
           echo "Removing Android SDKs and Tools..."
-          du -sh /usr/local/lib/android 2>/dev/null || echo "/usr/local/lib/android not found"
+          du -sh $ANDROID_ROOT
           start_time=$(date +%s)
-          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf $ANDROID_ROOT
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
+        else
+          echo "$ANDROID_ROOT not found"
         fi
 
-        if [[ ${{ inputs.remove-haskell }} == 'true' ]]; then
+        HASKELL_ROOT=/usr/local/.ghcup
+        if [[ ${{ inputs.remove-haskell }} == 'true' && -d $HASKELL_ROOT ]]; then
           echo "Removing GHC (Haskell) artifacts..."
-          du -sh /usr/local/.ghcup 2>/dev/null || echo "/usr/local/.ghcup not found"
+          du -sh $HASKELL_ROOT
           start_time=$(date +%s)
-          sudo rm -rf /usr/local/.ghcup
+          sudo rm -rf $HASKELL_ROOT
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
+        else
+          echo "$HASKELL_ROOT not found"
         fi
 
-        if [[ ${{ inputs.remove-codeql }} == 'true' ]]; then
+        CODEQL_ROOT=/opt/hostedtoolcache/CodeQL
+        if [[ ${{ inputs.remove-codeql }} == 'true' && -d $CODEQL_ROOT ]]; then
           echo "Removing CodeQL Action Bundles..."
-          du -sh /opt/hostedtoolcache/CodeQL 2>/dev/null || echo "/opt/hostedtoolcache/CodeQL not found"
+          du -sh $CODEQL_ROOT
           start_time=$(date +%s)
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf $CODEQL_ROOT
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
+        else
+          echo "$CODEQL_ROOT not found"
         fi
 
-        if [[ ${{ inputs.remove-tools-cache }} == 'true' ]]; then
+        if [[ ${{ inputs.remove-tools-cache }} == 'true' && -d $AGENT_TOOLSDIRECTORY ]]; then
           echo "Removing tools and dependencies cache..."
-          du -sh $AGENT_TOOLSDIRECTORY 2>/dev/null || echo "$AGENT_TOOLSDIRECTORY not found"
+          du -sh $AGENT_TOOLSDIRECTORY
           start_time=$(date +%s)
           sudo rm -rf $AGENT_TOOLSDIRECTORY/*
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
+        else
+          echo "$AGENT_TOOLSDIRECTORY not found"
         fi
 
-        if [[ ${{ inputs.remove-swift }} == 'true' ]]; then
+        SWIFT_ROOT=/usr/share/swift
+        if [[ ${{ inputs.remove-swift }} == 'true' && -d $SWIFT_ROOT ]]; then
           echo "Removing Swift toolchain and libraries..."
-          du -sh /usr/share/swift 2>/dev/null || echo "/usr/share/swift not found"
+          du -sh $SWIFT_ROOT
           start_time=$(date +%s)
-          sudo rm -rf /usr/share/swift
+          sudo rm -rf $SWIFT_ROOT
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
+        else
+          echo "$SWIFT_ROOT not found"
         fi
 
-        if [[ ${{ inputs.remove-powershell }} == 'true' ]]; then
+        POWERSHELL_ROOT=/usr/local/share/powershell
+        if [[ ${{ inputs.remove-powershell }} == 'true' && -d $POWERSHELL_ROOT ]]; then
           echo "Removing PowerShell Core installation..."
-          du -sh /usr/local/share/powershell 2>/dev/null || echo "/usr/local/share/powershell not found"
+          du -sh $POWERSHELL_ROOT
           start_time=$(date +%s)
-          sudo rm -rf /usr/local/share/powershell
+          sudo rm -rf $POWERSHELL_ROOT
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
+        else
+          echo "$POWERSHELL_ROOT not found"
         fi
 
         if [[ ${{ inputs.remove-docker-images }} == 'true' ]]; then
@@ -182,9 +202,14 @@ runs:
         to_remove="${{ inputs.remove-paths }}"
         if [[ -n "$to_remove" ]]; then
           echo "Removing additional files/folders..."
-          du -sh $to_remove 2>/dev/null || echo "$to_remove not found"
           start_time=$(date +%s)
-          sudo rm -rf $to_remove
+
+          for item in $to_remove; do
+            echo "Removing $item ..."
+            du -sh "$item"
+            sudo rm -rf "$item"
+          done
+
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
         fi
