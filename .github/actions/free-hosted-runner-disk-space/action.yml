@@ -1,5 +1,5 @@
 name: "Free GHA runner disk space"
-description: "Removes unnecessary files from the runner."
+description: "Frees up disk space on GitHub Actions hosted runners by removing unneeded software and optionally merging disk volumes to maximize build space."
 inputs:
   merge-disk-volumes:
     description: 'Triggers usage of maximize-build-space action to take advantage of unused disk space. Disabled by default due to long duration.'
@@ -68,19 +68,19 @@ inputs:
     description: 'Removes cached Docker images. (frees ~3 GB)'
     required: false
     default: 'false'
-  to-remove:
-    description: 'Additional collection of files/folders to be removed'
+  remove-paths:
+    description: Additional collection of files/folders to be removed, separated by spaces.
     default: ''
     required: false
 
 runs:
   using: "composite"
   steps:
-    - name: Disk space report before modification
+    - name: Runner system report before modification
       shell: bash
       run: |
         echo "Memory and swap:"
-        sudo free
+        sudo free -m
         echo
         sudo swapon --show
         echo
@@ -94,35 +94,80 @@ runs:
       run: sudo mv /var/lib/docker/ "${GITHUB_WORKSPACE}/docker"
       shell: bash
 
-    - name: Remove unnecessary files
+    - name: Remove unwanted software
       run: |
-        echo "Removing unwanted software... "
-        to_remove="${{ inputs.to-remove }}"
         if [[ ${{ inputs.remove-dotnet }} == 'true' ]]; then
+          echo "Removing .NET runtime and libraries..."
+          du -sh /usr/share/dotnet 2>/dev/null || echo "/usr/share/dotnet not found"
+          start_time=$(date +%s)
           sudo rm -rf /usr/share/dotnet
+          end_time=$(date +%s)
+          echo "Removed in $((end_time - start_time)) seconds"
         fi
+
         if [[ ${{ inputs.remove-android }} == 'true' ]]; then
+          echo "Removing Android SDKs and Tools..."
+          du -sh /usr/local/lib/android 2>/dev/null || echo "/usr/local/lib/android not found"
+          start_time=$(date +%s)
           sudo rm -rf /usr/local/lib/android
+          end_time=$(date +%s)
+          echo "Removed in $((end_time - start_time)) seconds"
         fi
+
         if [[ ${{ inputs.remove-haskell }} == 'true' ]]; then
+          echo "Removing GHC (Haskell) artifacts..."
+          du -sh /opt/ghc 2>/dev/null || echo "/opt/ghc not found"
+          start_time=$(date +%s)
           sudo rm -rf /opt/ghc
+          end_time=$(date +%s)
+          echo "Removed in $((end_time - start_time)) seconds"
         fi
+
         if [[ ${{ inputs.remove-codeql }} == 'true' ]]; then
+          echo "Removing CodeQL Action Bundles..."
+          du -sh /opt/hostedtoolcache/CodeQL 2>/dev/null || echo "/opt/hostedtoolcache/CodeQL not found"
+          start_time=$(date +%s)
           sudo rm -rf /opt/hostedtoolcache/CodeQL
+          end_time=$(date +%s)
+          echo "Removed in $((end_time - start_time)) seconds"
         fi
-        if [[ ${{ inputs.remove-docker-images }} == 'true' ]]; then
-          sudo docker image prune --all --force
-        fi
+
         if [[ ${{ inputs.remove-boost }} == 'true' ]]; then
+          echo "Removing Boost C++ libraries..."
+          du -sh /usr/local/share/boost 2>/dev/null || echo "/usr/local/share/boost not found"
+          start_time=$(date +%s)
           sudo rm -rf /usr/local/share/boost
+          end_time=$(date +%s)
+          echo "Removed in $((end_time - start_time)) seconds"
         fi
         if [[ ${{ inputs.remove-tools-cache }} == 'true' ]]; then
+          echo "Removing tools and dependencies cache..."
+          du -sh $AGENT_TOOLSDIRECTORY 2>/dev/null || echo "$AGENT_TOOLSDIRECTORY not found"
+          start_time=$(date +%s)
           sudo rm -rf $AGENT_TOOLSDIRECTORY
+          end_time=$(date +%s)
+          echo "Removed in $((end_time - start_time)) seconds"
         fi
+
+        if [[ ${{ inputs.remove-docker-images }} == 'true' ]]; then
+          echo "Removing cached Docker images..."
+          start_time=$(date +%s)
+          sudo docker image prune --all --force
+          end_time=$(date +%s)
+          echo "Removed in $((end_time - start_time)) seconds"
+        fi
+
+        to_remove="${{ inputs.remove-paths }}"
         if [[ -n "$to_remove" ]]; then
+          echo "Removing additional files/folders..."
+          du -sh $to_remove 2>/dev/null || echo "$to_remove not found"
+          start_time=$(date +%s)
           sudo rm -rf $to_remove
+          end_time=$(date +%s)
+          echo "Removed in $((end_time - start_time)) seconds"
         fi
-        echo "... done"
+
+        echo "Done removing unwanted software."
       shell: bash
 
     - name: Maximize build space
@@ -143,10 +188,10 @@ runs:
       run: sudo sh -c "mv ${GITHUB_WORKSPACE}/docker/* /var/lib/docker"
       shell: bash
 
-    - name: Disk space report after modification
+    - name: Runner system report after cleanup
       run: |
         echo "Memory and swap:"
-        sudo free
+        sudo free -m
         echo
         sudo swapon --show
         echo
