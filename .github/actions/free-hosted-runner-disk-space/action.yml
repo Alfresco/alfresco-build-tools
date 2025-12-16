@@ -146,7 +146,7 @@ runs:
           echo "Removing tools and dependencies cache..."
           du -sh $AGENT_TOOLSDIRECTORY 2>/dev/null || echo "$AGENT_TOOLSDIRECTORY not found"
           start_time=$(date +%s)
-          sudo rm -rf $AGENT_TOOLSDIRECTORY
+          sudo rm -rf $AGENT_TOOLSDIRECTORY/*
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
         fi
