@@ -42,6 +42,19 @@ jobs:
             -exec sed -i 's|uses: Alfresco/alfresco-build-tools/\.github/actions/\([^@]*\)@v[0-9]\+\.[0-9]\+\.[0-9]\+|uses: ./.github/actions/\1|g' {} \;
           git diff
 
+      # free-hosted-runner-disk-space action usage and test
+      - name: Check available disk space before running free-hosted-runner-disk-space action
+        id: free-hosted-runner-disk-space
+        run: echo "total_size_before=$(df --total --output=avail | tail -1)" >> "$GITHUB_OUTPUT"
+      - name: Free up disk space on the runner
+        uses: ./.github/actions/free-hosted-runner-disk-space
+        with:
+          diagnose-top-offenders-enabled: 'true'
+      - name: Assert that space available on the runner has increased
+        env:
+          TOTAL_SIZE_BEFORE: ${{ steps.free-hosted-runner-disk-space.outputs.total_size_before }}
+        run: test "$TOTAL_SIZE_BEFORE" -lt "$(df --total --output=avail | tail -1)"
+
       #region Test setup-helm-docs
       - uses: ./.github/actions/setup-helm-docs
         id: setup-helm-docs-latest
@@ -100,16 +113,6 @@ jobs:
       - uses: ./.github/actions/setup-checkov
       - uses: ./.github/actions/setup-fluxcli
       - uses: ./.github/actions/setup-kind
-
-      - name: Preserve available disk size before cleanup
-        id: free-hosted-runner-disk-space
-        run: echo "total_size_before=$(df --total --output=avail | tail -1)" >> "$GITHUB_OUTPUT"
-      - uses: ./.github/actions/free-hosted-runner-disk-space
-      - name: Assert that space available on the runner has increased
-        if: matrix.os == 'ubuntu-latest'
-        env:
-          TOTAL_SIZE_BEFORE: ${{ steps.free-hosted-runner-disk-space.outputs.total_size_before }}
-        run: test "$TOTAL_SIZE_BEFORE" -lt "$(df --total --output=avail | tail -1)"
 
       - uses: ./.github/actions/setup-updatecli
       - uses: ./.github/actions/setup-github-release-binary
