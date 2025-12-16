@@ -102,7 +102,7 @@ runs:
       run: sudo mv /var/lib/docker/ "${GITHUB_WORKSPACE}/docker"
       shell: bash
 
-    - name: Run optional diagnostic of top offenders
+    - name: Run optional diagnostic of top offenders before cleanup
       if: inputs.diagnose-top-offenders-enabled == 'true'
       run: |
         sudo du -h --max-depth=4 /usr /opt | sort -hr 2>/dev/null | head -n 20 || true
@@ -192,6 +192,12 @@ runs:
         fi
 
         echo "Done removing unwanted software."
+      shell: bash
+
+    - name: Run optional diagnostic of top offenders after cleanup
+      if: inputs.diagnose-top-offenders-enabled == 'true'
+      run: |
+        sudo du -h --max-depth=4 /usr /opt | sort -hr 2>/dev/null | head -n 20 || true
       shell: bash
 
     - name: Maximize build space
