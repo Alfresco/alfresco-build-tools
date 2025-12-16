@@ -107,8 +107,14 @@ runs:
       shell: bash
 
     - name: Remove unwanted software
+      env:
+        DOTNET_ROOT: /usr/share/dotnet
+        ANDROID_ROOT: /usr/local/lib/android
+        HASKELL_ROOT: /usr/local/.ghcup
+        CODEQL_ROOT: /opt/hostedtoolcache/CodeQL
+        SWIFT_ROOT: /usr/share/swift
+        POWERSHELL_ROOT: /usr/local/share/powershell
       run: |
-        DOTNET_ROOT=/usr/share/dotnet
         if [[ ${{ inputs.remove-dotnet }} == 'true' && -d $DOTNET_ROOT ]]; then
           echo "Removing .NET runtime and libraries..."
           start_time=$(date +%s)
@@ -120,7 +126,6 @@ runs:
           echo "$DOTNET_ROOT not found"
         fi
 
-        ANDROID_ROOT=/usr/local/lib/android
         if [[ ${{ inputs.remove-android }} == 'true' && -d $ANDROID_ROOT ]]; then
           echo "Removing Android SDKs and Tools..."
           start_time=$(date +%s)
@@ -132,7 +137,6 @@ runs:
           echo "$ANDROID_ROOT not found"
         fi
 
-        HASKELL_ROOT=/usr/local/.ghcup
         if [[ ${{ inputs.remove-haskell }} == 'true' && -d $HASKELL_ROOT ]]; then
           echo "Removing GHC (Haskell) artifacts..."
           start_time=$(date +%s)
@@ -144,7 +148,6 @@ runs:
           echo "$HASKELL_ROOT not found"
         fi
 
-        CODEQL_ROOT=/opt/hostedtoolcache/CodeQL
         if [[ ${{ inputs.remove-codeql }} == 'true' && -d $CODEQL_ROOT ]]; then
           echo "Removing CodeQL Action Bundles..."
           start_time=$(date +%s)
@@ -167,7 +170,6 @@ runs:
           echo "$AGENT_TOOLSDIRECTORY not found"
         fi
 
-        SWIFT_ROOT=/usr/share/swift
         if [[ ${{ inputs.remove-swift }} == 'true' && -d $SWIFT_ROOT ]]; then
           echo "Removing Swift toolchain and libraries..."
           start_time=$(date +%s)
@@ -179,7 +181,6 @@ runs:
           echo "$SWIFT_ROOT not found"
         fi
 
-        POWERSHELL_ROOT=/usr/local/share/powershell
         if [[ ${{ inputs.remove-powershell }} == 'true' && -d $POWERSHELL_ROOT ]]; then
           echo "Removing PowerShell Core installation..."
           start_time=$(date +%s)
