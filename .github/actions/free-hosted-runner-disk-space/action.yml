@@ -63,7 +63,7 @@ inputs:
   remove-swift:
     description: 'Removes Swift toolchain and libraries'
     required: false
-    default: 'false'
+    default: 'true'
   remove-docker-images:
     description: 'Removes cached Docker images'
     required: false
