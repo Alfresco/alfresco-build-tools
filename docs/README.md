@@ -2343,6 +2343,13 @@ jobs:
           platforms: linux/amd64
 ```
 
+Then image can be reused in subsequent steps like a part of multi-stage
+Dockerfile build later:
+
+```Dockerfile
+FROM localhost:5000/example-nuxeo:main AS nuxeo-base
+```
+
 Inputs:
 
 Check `action.yml` for the full list of inputs and their descriptions.
