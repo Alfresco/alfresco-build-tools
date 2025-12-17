@@ -80,7 +80,7 @@ inputs:
     required: false
     default: ""
   local-registry:
-    description: Set to true if you use a local registry which does not require authentication
+    description: Set to true if you use a local registry. registry-username and registry-password will be ignored.
     required: false
     default: "false"
 
