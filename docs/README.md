@@ -657,12 +657,12 @@ You can override the default behavior by adding one or more of the following inp
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v12.0.0
         with:
           remove-android: false
-          remove-dotnet: true
-          remove-haskell: true
+          remove-dotnet: false
+          remove-haskell: false
           remove-codeql: false
-          remove-swift: true
-          remove-powershell: true
-          remove-tools-cache: true
+          remove-swift: false
+          remove-powershell: false
+          remove-tools-cache: false
 ```
 
 Since GitHub hosted runners use Azure VMs which provide a local SSD mount under
@@ -675,10 +675,10 @@ will expand the root filesystem leveraging the extra space available under `/mnt
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v12.0.0
         with:
           merge-disk-volumes: true
+          build-mount-path: '/var/lib/docker/' # optional - default to GITHUB_WORKSPACE
           root-reserve-mb: 12288  # optional
           temp-reserve-mb: 100  # optional
           swap-size-mb: 1024  # optional
-          build-mount-path: '/var/lib/docker/'  # optional
 ```
 
 There is an additional input `diagnose-top-offenders-enabled` which when set to `true` will
