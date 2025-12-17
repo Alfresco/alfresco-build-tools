@@ -630,7 +630,7 @@ Load environment variables from a yaml file
 ### free-hosted-runner-disk-space
 
 Frees up disk space on GitHub hosted runners by removing unnecessary files and
-directories. Hosted runners bundles a lot of [pre-installed
+directories. Hosted runners bundle a lot of [pre-installed
 software](https://github.com/actions/runner-images), some of which may not be
 needed for your specific workflow.
 
