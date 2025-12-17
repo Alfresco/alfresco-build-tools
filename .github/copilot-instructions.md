@@ -15,14 +15,22 @@ This repository contains shared/reusable CI configurations for GitHub Actions se
 When referencing internal actions in workflow YAML files, **always use the latest released tag** (e.g., `v9.2.0`),
 the release workflow will automatically update these references during releases.
 
-### Documentation Requirements
+### Documentation Requirements (CRITICAL)
 
-**Always update `docs/README.md`** when adding or modifying GitHub Actions:
+**MANDATORY: Always update `docs/README.md` when adding or modifying GitHub Actions.**
 
-- Add new action to table of contents
-- Include usage example with proper YAML syntax
-- Document all input parameters and outputs
-- Follow existing documentation patterns
+This is required for ANY change to actions, including:
+
+- New actions or workflows
+- Modified inputs/outputs in existing actions
+- Changed action behavior or functionality
+- Updated usage patterns or examples
+
+**Before opening a PR, you MUST:**
+
+1. Update `docs/README.md` with the changes
+2. Run `./check_readme.sh` to validate all actions are documented
+3. Verify the documentation accurately reflects the current state
 
 **Action Documentation Pattern**:
 
@@ -184,6 +192,18 @@ For common operations:
 - **Don't** merge PRs without updating documentation
 - **Never** commit secrets or sensitive information
 - **Avoid** breaking backward compatibility without major version bump
+
+## Pull Request Checklist
+
+Before opening or reviewing a PR, verify:
+
+1. ✅ **Documentation updated**: `docs/README.md` reflects all action changes
+2. ✅ **Validation passed**: `./check_readme.sh` runs successfully
+3. ✅ **Version label**: Appropriate `release/patch|minor|major` label added
+4. ✅ **Pre-commit hooks**: All checks pass
+5. ✅ **Internal references**: Use version tags, not SHA pins
+
+**When reviewing PRs that modify actions, ALWAYS check if `docs/README.md` was updated.**
 
 ## Useful Commands
 
