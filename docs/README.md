@@ -654,7 +654,7 @@ By default, it will remove the following SDKs and tools:
 You can override the default behavior by adding one or more of the following inputs:
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v11.1.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v12.0.0
         with:
           remove-android: false
           remove-dotnet: true
@@ -685,7 +685,7 @@ There is an additional input `diagnose-top-offenders-enabled` which when set to 
 run a disk usage analysis and print the top offenders before and after the cleanup.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v11.1.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v12.0.0
         with:
           diagnose-top-offenders-enabled: true
 ```
