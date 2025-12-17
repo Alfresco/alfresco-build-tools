@@ -115,7 +115,7 @@ runs:
         ADDONS_DIR='${{ inputs.nuxeo-local-modules-path }}'
         if [ ! -d "$ADDONS_DIR" ]; then
           echo "Local addons directory '$ADDONS_DIR' not found. Creating empty directory at ${{ env.EMPTY_DIR }}." >&2
-          mkdir -p ${{ env.EMPTY_DIR }}
+          mkdir -p ${{ github.workspace }}/${{ env.EMPTY_DIR }}
           echo "NUXEO_LOCAL_MODULES_PATH=${{ env.EMPTY_DIR }}" >> $GITHUB_ENV
         else
           echo "NUXEO_LOCAL_MODULES_PATH=$ADDONS_DIR" >> $GITHUB_ENV
