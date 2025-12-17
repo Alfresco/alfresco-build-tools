@@ -129,7 +129,7 @@ runs:
         password: ${{ inputs.base-registry-password }}
 
     - name: Check if credentials to target registry are provided when pushing image to non-local registry
-      if: ${{ inputs.push-image == 'true' && inputs.local-registry == 'false'}}
+      if: ${{ inputs.push-image == 'true' && inputs.local-registry == 'false' }}
       shell: bash
       run: |
         if [ -z "${{ inputs.registry-username }}" ] || [ -z "${{ inputs.registry-password }}" ]; then
