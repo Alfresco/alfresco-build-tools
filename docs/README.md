@@ -665,7 +665,7 @@ You can override the default behavior by adding one or more of the following inp
           remove-tools-cache: true
 ```
 
-Since GitHub hosted runners use Azure VM which provide a local SSD mount under
+Since GitHub hosted runners use Azure VMs which provide a local SSD mount under
 `/mnt` by default, you can get additional space by enabling the optional
 `merge-disk-volumes` input. This feature is brought by the community action
 [maximize-build-space](https://github.com/easimon/maximize-build-space). This
