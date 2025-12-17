@@ -629,23 +629,47 @@ Load environment variables from a yaml file
 
 ### free-hosted-runner-disk-space
 
-Removes unnecessary folders and files from a GHA [hosted runner](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners), and if that is not enough, allows to manipulate and utilize unused memory partitions. This action might be useful when we run jobs which require a lot of disk space.
+Frees up disk space on GitHub hosted runners by removing unnecessary files and
+directories. Hosted runners bundles a lot of [pre-installed
+software](https://github.com/actions/runner-images), some of which may not be
+needed for your specific workflow.
+
+It's usually a good idea to run this action at the very beginning of your job to
+maximize the amount of freed up space for the rest of your workflow steps.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v12.0.0
 ```
 
-By default, it removes following directories:
+By default, it will remove the following SDKs and tools:
 
-- `/usr/share/dotnet`
-- `/opt/ghc`
-- `/usr/local/share/boost`
-- `$AGENT_TOOLSDIRECTORY`
+- Android
+- Dotnet
+- Haskell
+- CodeQL
+- Swift
+- Powershell
+- Tools cache (most common versions of setup-something actions)
 
-You can override the default behavior by specifying your own collection of files and directories using `to-remove` input parameter, or by setting `remove-android` and `remove-codeql` to true.
+You can override the default behavior by adding one or more of the following inputs:
 
-By default, this action only deletes folders and files, but if you want to use the action to utilize the unused memory, you need to set `merge-disk-volumes` to true. By doing this, a community action [maximize-build-space](https://github.com/easimon/maximize-build-space) will be called.
-This will allow to determine how much memory to allocate to filesystems, and where to mount the build volume, as shown in the example below.
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v11.1.0
+        with:
+          remove-android: false
+          remove-dotnet: true
+          remove-haskell: true
+          remove-codeql: false
+          remove-swift: true
+          remove-powershell: true
+          remove-tools-cache: true
+```
+
+Since GitHub hosted runners use Azure VM which provide a local SSD mount under
+`/mnt` by default, you can get additional space by enabling the optional
+`merge-disk-volumes` input. This feature is brought by the community action
+[maximize-build-space](https://github.com/easimon/maximize-build-space). This
+will expand the root filesystem leveraging the extra space available under `/mnt`.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v12.0.0
@@ -657,7 +681,14 @@ This will allow to determine how much memory to allocate to filesystems, and whe
           build-mount-path: '/var/lib/docker/'  # optional
 ```
 
-> **NOTE:** when enabling [maximize-build-space](https://github.com/easimon/maximize-build-space) by setting `merge-disk-volumes` to `true`, this action should be used as the FIRST step, even before `actions/checkout`.
+There is an additional input `diagnose-top-offenders-enabled` which when set to `true` will
+run a disk usage analysis and print the top offenders before and after the cleanup.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v11.1.0
+        with:
+          diagnose-top-offenders-enabled: true
+```
 
 ### get-branch-name
 
