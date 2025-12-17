@@ -71,8 +71,8 @@ inputs:
     description: Whether to load the built image into local docker daemon (true/false). When set to true, only a single platform can be specified.
     required: false
     default: "false"
-  outputs-image:
-    description: List of output destinations
+  image-outputs:
+    description: List of output destinations. Check https://docs.docker.com/reference/cli/docker/buildx/build/#output
     required: false
     default: ""
   buildx-driver-opts:
@@ -198,7 +198,7 @@ runs:
           NUXEO_CONNECT_URL=NUXEO_CONNECT_URL
         secret-files: |
           nuxeo-private=${{ github.action_path }}/nuxeo-private.repo
-        outputs: ${{ inputs.outputs-image }}
+        outputs: ${{ inputs.image-outputs }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
