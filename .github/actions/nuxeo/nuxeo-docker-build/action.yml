@@ -106,10 +106,11 @@ runs:
         echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
         echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
         echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
+        echo "FORMATED_REGISTRY=${{ inputs.registry && format('{0}/', inputs.registry) || '' }}" >> $GITHUB_ENV
 
     - name: Ensure local nuxeo modules directory exists
       env:
-        EMPTY_DIR: /tmp/empty_addons
+        EMPTY_DIR: empty_addons
       shell: bash
       run: |
         ADDONS_DIR='${{ inputs.nuxeo-local-modules-path }}'
@@ -181,7 +182,7 @@ runs:
         load: ${{ inputs.load-image }}
         platforms: ${{ inputs.platforms }}
         provenance: false
-        tags: ${{ (inputs.registry && format('{0}/', inputs.registry)) || '' }}${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+        tags: ${{ env.FORMATED_REGISTRY }}${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
         build-args: |
           BASE_IMAGE_TAG=${{ inputs.base-image-tag }}
           BUILD_TAG=${{ github.run_id }}
@@ -206,10 +207,10 @@ runs:
       shell: bash
       run: |
         echo "### :package: Nuxeo image build" >> $GITHUB_STEP_SUMMARY
-        echo "Registry: ${{ (inputs.registry && format('{0}/', inputs.registry)) || '' }}" >> $GITHUB_STEP_SUMMARY
-        echo "Image: ${{ (inputs.registry && format('{0}/', inputs.registry)) || '' }}${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
+        echo "Registry: ${{ env.FORMATED_REGISTRY }}" >> $GITHUB_STEP_SUMMARY
+        echo "Image: ${{ env.FORMATED_REGISTRY }}${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
 
     - name: Compute output image URL
       id: compute-output
       shell: bash
-      run: echo "image_url=${{ (inputs.registry && format('{0}/', inputs.registry)) || '' }}${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
+      run: echo "image_url=${{ env.FORMATED_REGISTRY }}${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT

@@ -2321,7 +2321,7 @@ jobs:
           - 5000:5000
     steps:
       - name: Build base docker image
-        uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/nuxeo-docker-build@OPSEXP-3715-connect-url
+        uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/nuxeo-docker-build@v12.0.0
         with:
           buildx-driver-opts: network=host # to access local registry
           base-image-tag: ${{ env.NUXEO_VERSION }}
