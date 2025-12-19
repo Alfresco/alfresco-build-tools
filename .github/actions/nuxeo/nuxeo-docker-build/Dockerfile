@@ -32,20 +32,20 @@ USER root
 
 # Combined system dependencies and secure private repo installation into a single RUN to reduce image layers
 # --- Install system dependencies and secure private repo ---
-RUN --mount=type=secret,id=nuxeo-private,target=/tmp/nuxeo-private.repo <<EOF
+RUN --mount=type=secret,id=nuxeo-private,target=/tmp/nuxeo-private.repo <<EOC
 dnf -y install gettext
 envsubst </tmp/nuxeo-private.repo >/etc/yum.repos.d/nuxeo-private.repo
 dnf -y install --skip-broken $PACKAGES_LIST
 rm /etc/yum.repos.d/nuxeo-private.repo
 dnf clean all
 rm -rf /var/cache/dnf
-EOF
+EOC
 
 USER nuxeo
 
 RUN --mount=type=bind,from=modules,target=/modules \
     --mount=type=secret,id=NUXEO_CLID,env=NUXEO_CLID \
-    --mount=type=secret,id=NUXEO_CONNECT_URL,env=NUXEO_CONNECT_URL <<EOF
+    --mount=type=secret,id=NUXEO_CONNECT_URL,env=NUXEO_CONNECT_URL <<EOC
 if [ -n "${NUXEO_CONNECT_MODULES}" ]; then
     OPT_CONNECT_URL=""
     if [ -n "${NUXEO_CONNECT_URL}" ]; then
@@ -62,4 +62,4 @@ if [ -n "${mods}" ]; then
 else
     echo "No offline package files (*.zip/*.jar) found in /modules - skipping offline installation"
 fi
-EOF
+EOC
