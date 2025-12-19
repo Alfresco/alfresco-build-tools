@@ -51,7 +51,7 @@ if [ -n "${NUXEO_CONNECT_MODULES}" ]; then
     if [ -n "${NUXEO_CONNECT_URL}" ]; then
         OPT_CONNECT_URL="--connect-url ${NUXEO_CONNECT_URL}"
     fi
-    /install-packages.sh --clid ${NUXEO_CLID} ${OPT_CONNECT_URL} ${NUXEO_CONNECT_MODULES}
+    /install-packages.sh --clid ${NUXEO_CLID} "${OPT_CONNECT_URL}" ${NUXEO_CONNECT_MODULES}
 else
     echo "No Nuxeo Connect modules specified - skipping connect installation"
 fi
