@@ -32,31 +32,34 @@ USER root
 
 # Combined system dependencies and secure private repo installation into a single RUN to reduce image layers
 # --- Install system dependencies and secure private repo ---
-RUN --mount=type=secret,id=nuxeo-private,target=/tmp/nuxeo-private.repo \
-    dnf -y install gettext && \
-    envsubst </tmp/nuxeo-private.repo >/etc/yum.repos.d/nuxeo-private.repo && \
-    dnf -y install --skip-broken $PACKAGES_LIST && \
-    rm /etc/yum.repos.d/nuxeo-private.repo && \
-    dnf clean all && \
-    rm -rf /var/cache/dnf
+RUN --mount=type=secret,id=nuxeo-private,target=/tmp/nuxeo-private.repo <<EOF
+dnf -y install gettext
+envsubst </tmp/nuxeo-private.repo >/etc/yum.repos.d/nuxeo-private.repo
+dnf -y install --skip-broken $PACKAGES_LIST
+rm /etc/yum.repos.d/nuxeo-private.repo
+dnf clean all
+rm -rf /var/cache/dnf
+EOF
 
 USER nuxeo
 
 RUN --mount=type=bind,from=modules,target=/modules \
     --mount=type=secret,id=NUXEO_CLID,env=NUXEO_CLID \
-    --mount=type=secret,id=NUXEO_CONNECT_URL,env=NUXEO_CONNECT_URL \
-    if [ -n "${NUXEO_CONNECT_MODULES}" ]; then \
-        OPT_CONNECT_URL=""; \
-        if [ -n "${NUXEO_CONNECT_URL}" ]; then \
-            OPT_CONNECT_URL="--connect-url ${NUXEO_CONNECT_URL}"; \
-        fi; \
-        /install-packages.sh --clid ${NUXEO_CLID} ${OPT_CONNECT_URL} ${NUXEO_CONNECT_MODULES}; \
-    else \
-        echo "No Nuxeo Connect modules specified - skipping connect installation"; \
-    fi && \
-    mods=$(find /modules -maxdepth 1 -type f \( -name '*.zip' -o -name '*.jar' \) -print) && \
-    if [ -n "${mods}" ]; then \
-        /install-packages.sh --offline ${mods}; \
-    else \
-        echo "No offline package files (*.zip/*.jar) found in /modules - skipping offline installation"; \
+    --mount=type=secret,id=NUXEO_CONNECT_URL,env=NUXEO_CONNECT_URL <<EOF
+if [ -n "${NUXEO_CONNECT_MODULES}" ]; then
+    OPT_CONNECT_URL=""
+    if [ -n "${NUXEO_CONNECT_URL}" ]; then
+        OPT_CONNECT_URL="--connect-url ${NUXEO_CONNECT_URL}"
     fi
+    /install-packages.sh --clid ${NUXEO_CLID} ${OPT_CONNECT_URL} ${NUXEO_CONNECT_MODULES}
+else
+    echo "No Nuxeo Connect modules specified - skipping connect installation"
+fi
+
+mods=$(find /modules -maxdepth 1 -type f \( -name '*.zip' -o -name '*.jar' \) -print)
+if [ -n "${mods}" ]; then
+    /install-packages.sh --offline ${mods}
+else
+    echo "No offline package files (*.zip/*.jar) found in /modules - skipping offline installation"
+fi
+EOF
