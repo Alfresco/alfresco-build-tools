@@ -177,7 +177,7 @@ runs:
       with:
         context: ${{ github.action_path }}
         build-contexts: |
-          modules=${{ github.workspace }}/${{ env.NUXEO_LOCAL_MODULES_PATH }}
+          modules=${{ github.workspace }}/${{ inputs.nuxeo-local-modules-path }}
         push: ${{ inputs.push-image }}
         load: ${{ inputs.load-image }}
         platforms: ${{ inputs.platforms }}
