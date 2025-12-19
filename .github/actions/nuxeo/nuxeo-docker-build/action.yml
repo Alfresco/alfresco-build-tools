@@ -25,6 +25,7 @@ inputs:
   nuxeo-local-modules-path:
     description: Path (directory) containing offline addon .zip/.jar files to install (relative to repository root)
     required: false
+    default: "empty_addons"
   os-packages:
     description: Space separated list of OS packages to install via private yum repo (optional)
     required: false
@@ -83,6 +84,14 @@ inputs:
     description: Set to true if you use a local registry. registry-username and registry-password will be ignored.
     required: false
     default: "false"
+  image-cache-from:
+    description: Cache settings for the image build
+    required: false
+    default: "type=gha"
+  image-cache-to:
+    description: Cache settings for the image build
+    required: false
+    default: "type=gha,mode=max"
 
 outputs:
   image-url:
@@ -106,21 +115,12 @@ runs:
         echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
         echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
         echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
-        echo "FORMATED_REGISTRY=${{ inputs.registry && format('{0}/', inputs.registry) || '' }}" >> $GITHUB_ENV
+        echo "FORMATTED_REGISTRY=${{ inputs.registry && format('{0}/', inputs.registry) || '' }}" >> $GITHUB_ENV
 
     - name: Ensure local nuxeo modules directory exists
-      env:
-        EMPTY_DIR: empty_addons
       shell: bash
       run: |
-        ADDONS_DIR='${{ inputs.nuxeo-local-modules-path }}'
-        if [ ! -d "$ADDONS_DIR" ]; then
-          echo "Local addons directory '$ADDONS_DIR' not found. Creating empty directory at ${{ env.EMPTY_DIR }}." >&2
-          mkdir -p ${{ github.workspace }}/${{ env.EMPTY_DIR }}
-          echo "NUXEO_LOCAL_MODULES_PATH=${{ env.EMPTY_DIR }}" >> $GITHUB_ENV
-        else
-          echo "NUXEO_LOCAL_MODULES_PATH=$ADDONS_DIR" >> $GITHUB_ENV
-        fi
+        mkdir -p ${{ github.workspace }}/${{ inputs.nuxeo-local-modules-path }}
 
     - name: Login to base image registry
       uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
@@ -182,7 +182,7 @@ runs:
         load: ${{ inputs.load-image }}
         platforms: ${{ inputs.platforms }}
         provenance: false
-        tags: ${{ env.FORMATED_REGISTRY }}${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+        tags: ${{ env.FORMATTED_REGISTRY }}${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
         build-args: |
           BASE_IMAGE_TAG=${{ inputs.base-image-tag }}
           BUILD_TAG=${{ github.run_id }}
@@ -200,17 +200,17 @@ runs:
         secret-files: |
           nuxeo-private=${{ github.action_path }}/nuxeo-private.repo
         outputs: ${{ inputs.image-outputs }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-from: ${{ inputs.image-cache-from }}
+        cache-to: ${{ inputs.image-cache-to }}
 
     - name: Summary
       shell: bash
       run: |
         echo "### :package: Nuxeo image build" >> $GITHUB_STEP_SUMMARY
-        echo "Registry: ${{ env.FORMATED_REGISTRY }}" >> $GITHUB_STEP_SUMMARY
-        echo "Image: ${{ env.FORMATED_REGISTRY }}${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
+        echo "Registry: ${{ env.FORMATTED_REGISTRY }}" >> $GITHUB_STEP_SUMMARY
+        echo "Image: ${{ env.FORMATTED_REGISTRY }}${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
 
     - name: Compute output image URL
       id: compute-output
       shell: bash
-      run: echo "image_url=${{ env.FORMATED_REGISTRY }}${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
+      run: echo "image_url=${{ env.FORMATTED_REGISTRY }}${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
