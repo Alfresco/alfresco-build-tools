@@ -2343,8 +2343,8 @@ jobs:
           platforms: linux/amd64
 ```
 
-Then image can be reused in subsequent steps like a part of multi-stage
-Dockerfile build later:
+The image can then be reused in subsequent steps as part of a multi-stage
+Dockerfile build:
 
 ```Dockerfile
 FROM localhost:5000/example-nuxeo:main AS nuxeo-base
