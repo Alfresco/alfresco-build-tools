@@ -2304,6 +2304,52 @@ Pushes the resulting image to a target registry (default `ghcr.io`) and outputs 
           registry-password: ${{ secrets.GITHUB_TOKEN }}
 ```
 
+Example with local action registry:
+
+```yaml
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      registry:
+        image: registry:3
+        ports:
+          - 5000:5000
+    steps:
+      - name: Build base docker image
+        uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/nuxeo-docker-build@v12.0.0
+        with:
+          buildx-driver-opts: network=host # to access local registry
+          base-image-tag: ${{ env.NUXEO_VERSION }}
+          base-registry-username: ${{ secrets.NUXEO_DOCKER_USERNAME }}
+          base-registry-password: ${{ secrets.NUXEO_DOCKER_TOKEN }}
+          nuxeo-connect-modules: example-module
+          nuxeo-clid: ${{ secrets.CONNECT_CLID }}
+          os-packages: |
+            ffmpeg-nuxeo
+            ccextractor
+          os-packages-user: ${{ secrets.NUXEO_DOCKER_USERNAME }}
+          os-packages-token: ${{ secrets.NUXEO_DOCKER_TOKEN }}
+          image-name: example-nuxeo
+          image-tag: main
+          image-title: "Nuxeo AI Core"
+          local-registry: true # use local registry service
+          registry: localhost:5000 # local registry address
+          push-image: true
+          platforms: linux/amd64
+```
+
+The image can then be reused in subsequent steps as part of a multi-stage
+Dockerfile build:
+
+```Dockerfile
+FROM localhost:5000/example-nuxeo:main AS nuxeo-base
+```
+
 Inputs:
 
 Check `action.yml` for the full list of inputs and their descriptions.

@@ -15,12 +15,17 @@ inputs:
     description: Space or comma separated list of Nuxeo Connect marketplace packages to install online
     required: false
     default: ""
+  nuxeo-connect-url:
+    description: URL of Nuxeo Connect server to use for installing Nuxeo Connect packages
+    required: false
+    default: ""
   nuxeo-clid:
     description: Nuxeo Connect License ID (CLID) to use for installing Nuxeo Connect packages. Required for nuxeo connect modules.
     required: false
   nuxeo-local-modules-path:
     description: Path (directory) containing offline addon .zip/.jar files to install (relative to repository root)
     required: false
+    default: "empty_addons"
   os-packages:
     description: Space separated list of OS packages to install via private yum repo (optional)
     required: false
@@ -67,6 +72,26 @@ inputs:
     description: Whether to load the built image into local docker daemon (true/false). When set to true, only a single platform can be specified.
     required: false
     default: "false"
+  image-outputs:
+    description: List of output destinations. Check https://docs.docker.com/reference/cli/docker/buildx/build/#output
+    required: false
+    default: ""
+  buildx-driver-opts:
+    description: Additional buildx driver options
+    required: false
+    default: ""
+  local-registry:
+    description: Set to true if you use a local registry. registry-username and registry-password will be ignored.
+    required: false
+    default: "false"
+  image-cache-from:
+    description: Cache settings for the image build
+    required: false
+    default: "type=gha"
+  image-cache-to:
+    description: Cache settings for the image build
+    required: false
+    default: "type=gha,mode=max"
 
 outputs:
   image-url:
@@ -90,20 +115,12 @@ runs:
         echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
         echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
         echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
+        echo "FORMATTED_REGISTRY=${{ inputs.registry && format('{0}/', inputs.registry) || '' }}" >> $GITHUB_ENV
 
     - name: Ensure local nuxeo modules directory exists
-      env:
-        EMPTY_DIR: /tmp/empty_addons
       shell: bash
       run: |
-        ADDONS_DIR='${{ inputs.nuxeo-local-modules-path }}'
-        if [ ! -d "$ADDONS_DIR" ]; then
-          echo "Local addons directory '$ADDONS_DIR' not found. Creating empty directory at ${{ env.EMPTY_DIR }}." >&2
-          mkdir -p ${{ env.EMPTY_DIR }}
-          echo "NUXEO_LOCAL_MODULES_PATH=${{ env.EMPTY_DIR }}" >> $GITHUB_ENV
-        else
-          echo "NUXEO_LOCAL_MODULES_PATH=$ADDONS_DIR" >> $GITHUB_ENV
-        fi
+        mkdir -p ${{ github.workspace }}/${{ inputs.nuxeo-local-modules-path }}
 
     - name: Login to base image registry
       uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
@@ -112,8 +129,8 @@ runs:
         username: ${{ inputs.base-registry-username }}
         password: ${{ inputs.base-registry-password }}
 
-    - name: Check if credentials to target registry are provided when pushing image
-      if: ${{ inputs.push-image == 'true' }}
+    - name: Check if credentials to target registry are provided when pushing image to non-local registry
+      if: ${{ inputs.push-image == 'true' && inputs.local-registry == 'false' }}
       shell: bash
       run: |
         if [ -z "${{ inputs.registry-username }}" ] || [ -z "${{ inputs.registry-password }}" ]; then
@@ -128,8 +145,9 @@ runs:
           echo "Error: nuxeo-clid input is required when nuxeo-connect-modules is provided." >&2
           exit 1
         fi
+
     - name: Login to target registry
-      if: ${{ inputs.push-image == 'true' }}
+      if: ${{ inputs.push-image == 'true' && inputs.local-registry == 'false' }}
       uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
       with:
         registry: ${{ inputs.registry }}
@@ -139,6 +157,8 @@ runs:
     - uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3.7.0
 
     - uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3.11.1
+      with:
+        driver-opts: ${{ inputs.buildx-driver-opts }}
 
     - name: Normalize module and package lists
       shell: bash
@@ -153,15 +173,16 @@ runs:
       uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
       env:
         NUXEO_CLID: ${{ inputs.nuxeo-clid }}
+        NUXEO_CONNECT_URL: ${{ inputs.nuxeo-connect-url }}
       with:
         context: ${{ github.action_path }}
         build-contexts: |
-          modules=${{ github.workspace }}/${{ env.NUXEO_LOCAL_MODULES_PATH }}
+          modules=${{ github.workspace }}/${{ inputs.nuxeo-local-modules-path }}
         push: ${{ inputs.push-image }}
         load: ${{ inputs.load-image }}
         platforms: ${{ inputs.platforms }}
         provenance: false
-        tags: ${{ inputs.registry }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+        tags: ${{ env.FORMATTED_REGISTRY }}${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
         build-args: |
           BASE_IMAGE_TAG=${{ inputs.base-image-tag }}
           BUILD_TAG=${{ github.run_id }}
@@ -175,17 +196,21 @@ runs:
           PACKAGES_AUTH_TOKEN=${{ inputs.os-packages-token }}
         secret-envs: |
           NUXEO_CLID=NUXEO_CLID
+          NUXEO_CONNECT_URL=NUXEO_CONNECT_URL
         secret-files: |
           nuxeo-private=${{ github.action_path }}/nuxeo-private.repo
+        outputs: ${{ inputs.image-outputs }}
+        cache-from: ${{ inputs.image-cache-from }}
+        cache-to: ${{ inputs.image-cache-to }}
 
     - name: Summary
       shell: bash
       run: |
         echo "### :package: Nuxeo image build" >> $GITHUB_STEP_SUMMARY
-        echo "Registry: ${{ inputs.registry }}" >> $GITHUB_STEP_SUMMARY
-        echo "Image: ${{ inputs.registry }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
+        echo "Registry: ${{ env.FORMATTED_REGISTRY }}" >> $GITHUB_STEP_SUMMARY
+        echo "Image: ${{ env.FORMATTED_REGISTRY }}${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_STEP_SUMMARY
 
     - name: Compute output image URL
       id: compute-output
       shell: bash
-      run: echo "image_url=${{ inputs.registry }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
+      run: echo "image_url=${{ env.FORMATTED_REGISTRY }}${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" >> $GITHUB_OUTPUT
