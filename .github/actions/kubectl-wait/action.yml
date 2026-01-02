@@ -1,7 +1,8 @@
 ---
 name: Kubectl wait
-description: >
-  Wait for all resources inside a namespace to be ready
+description: |
+  Wait for all resources inside a namespace to match a given condition.
+  Useful for waiting for all pods to be ready before proceeding.
 inputs:
   namespace:
     description: Namespace to wait for
@@ -26,7 +27,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Wait for namespace for no more than 1 minute
+    - name: Wait a bit in case of brand new namespace
       shell: bash
       run: |
         timeout 60s bash -c '
@@ -34,20 +35,29 @@ runs:
           echo "Waiting for namespace ${{ inputs.namespace }} to be created..."
           sleep 2
         done'
+        NS_LIFETIME=$(kubectl get namespace ${{ inputs.namespace }} \
+            -o jsonpath="{.metadata.creationTimestamp}")
+        NOW_SECS=$(date +%s)
+        NS_SECS=$(date -d $NS_LIFETIME +%s)
+        if [ $((NOW_SECS - NS_SECS)) -lt 10 ]; then
+          echo "Namespace ${{ inputs.namespace }} created. Giving other resources some more time to catch up..."
+          sleep 10
+        fi
 
     - name: Watch resources
       shell: bash
       run: |
-        kubectl get ${{ inputs.wait-resource }} --watch ${{ inputs.namespace }} &
+        kubectl get ${{ inputs.wait-resource }} --watch -n ${{ inputs.namespace }} &
         kubectl wait \
+          -n ${{ inputs.namespace }} \
           --timeout=${{ inputs.wait-timeout }} \
           --all=true \
           --for=${{ inputs.wait-for-what }}=${{ inputs.wait-condition }} \
-          ${{ inputs.wait-resource }} ${{ inputs.namespace }}
+          ${{ inputs.wait-resource }}
 
     - name: Spit resources status after wait
       shell: bash
       if: always()
       run: |
-        kubectl get ${{ inputs.wait-resource }} ${{ inputs.namespace }}
-        kubectl describe ${{ inputs.wait-resource }} ${{ inputs.namespace }}
+        kubectl get ${{ inputs.wait-resource }} -n ${{ inputs.namespace }}
+        kubectl describe ${{ inputs.wait-resource }} -n ${{ inputs.namespace }}
