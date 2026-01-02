@@ -26,16 +26,24 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Set vars
+    - name: Wait for namespace for no more than 1 minute
       shell: bash
       run: |
-        echo "NAMESPACE_PARAM=${{ inputs.namespace != '' && format('-n {0}', inputs.namespace) || '' }}" >> $GITHUB_ENV
+        timeout 60s bash -c '
+        until kubectl get namespace ${{ inputs.namespace }} ; do
+          echo "Waiting for namespace ${{ inputs.namespace }} to be created..."
+          sleep 2
+        done'
 
     - name: Watch resources
       shell: bash
       run: |
         kubectl get ${{ inputs.wait-resource }} --watch ${{ inputs.namespace }} &
-        kubectl wait --timeout=${{ inputs.wait-timeout }} --all=true --for=${{ inputs.wait-for-what }}=${{ inputs.wait-condition }} ${{ inputs.wait-resource }} ${{ inputs.namespace }}
+        kubectl wait \
+          --timeout=${{ inputs.wait-timeout }} \
+          --all=true \
+          --for=${{ inputs.wait-for-what }}=${{ inputs.wait-condition }} \
+          ${{ inputs.wait-resource }} ${{ inputs.namespace }}
 
     - name: Spit resources status after wait
       shell: bash
