@@ -38,7 +38,7 @@ runs:
         NS_LIFETIME=$(kubectl get namespace ${{ inputs.namespace }} \
             -o jsonpath="{.metadata.creationTimestamp}")
         NOW_SECS=$(date +%s)
-        NS_SECS=$(date -d $NS_LIFETIME +%s)
+        NS_SECS=$(date -d "$NS_LIFETIME" +%s)
         if [ $((NOW_SECS - NS_SECS)) -lt 10 ]; then
           echo "Namespace ${{ inputs.namespace }} created. Giving other resources some more time to catch up..."
           sleep 10
