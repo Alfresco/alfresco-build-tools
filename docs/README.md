@@ -2368,7 +2368,7 @@ Notes:
 
 ### nuxeo-helmfile-install
 
-Install nuxeo workloads using helmfile. Portforward discovered services to
+Install nuxeo workloads using helmfile. Port forward discovered services to
 localhost.
 
 Example usage (in below example, we need a kind config file with additional node label):
