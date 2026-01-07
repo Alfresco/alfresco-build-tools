@@ -86,8 +86,10 @@ runs:
 
     - name: Port forward services discovered services
       shell: bash
+      env:
+        SERVICES_MAP: ${{ steps.services.outputs.map }}
       run: |
-        for service in $(echo "${{ steps.services.outputs.map }}" | jq -r 'keys[]'); do
-          port=$(echo "${{ steps.services.outputs.map }}" | jq -r --arg svc "$service" '.[$svc]')
+        for service in $(echo "$SERVICES_MAP" | jq -r 'keys[]'); do
+          port=$(echo "$SERVICES_MAP" | jq -r --arg svc "$service" '.[$svc]')
           kubectl port-forward svc/"$service" "$port":"$port" --namespace ${{ inputs.namespace }} &
         done
