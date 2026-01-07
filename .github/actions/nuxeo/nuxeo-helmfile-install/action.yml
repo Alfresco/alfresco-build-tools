@@ -19,8 +19,7 @@ inputs:
     default: ""
   docker-registry-password:
     description: Password to connect to the Docker registry
-    required: false
-    default: ""
+    required: true
   github-username:
     description: GitHub username to access private Nuxeo Helm charts repository
     required: true
@@ -62,7 +61,7 @@ runs:
       with:
         registry: ${{ inputs.docker-registry }}
         username: ${{ inputs.docker-registry-username || github.actor }}
-        password: ${{ inputs.docker-registry-password || secrets.GITHUB_TOKEN }}
+        password: ${{ inputs.docker-registry-password }}
 
     - name: Install helmfile
       uses: helmfile/helmfile-action@f64d5db9f8660aae0205b5fcfc56577d44acefab # 2.1.0
