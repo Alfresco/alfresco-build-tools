@@ -2365,6 +2365,44 @@ Notes:
 - Set `push-image: true` to push the image to the target registry.
 - Provide private yum repo credentials via inputs (`os-packages-user`, `os-packages-token`) if needed (templated by `nuxeo-private.repo`).
 
+### nuxeo-helmfile-install
+
+Create kind cluster and install nuxeo workloads using helmfile. Portforward
+discovered services to localhost.
+
+```yaml
+      - name: Install helmfile workloads
+        id: helmfile-install
+        uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/nuxeo-helmfile-install@12.2.0
+        with:
+          docker-registry: ${{ env.DOCKER_REGISTRY }}
+          docker-registry-username: ${{ github.actor }}
+          docker-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          github-username: ${{ secrets.PLATFORM_BOT_USERNAME }}
+          github-token: ${{ secrets.PLATFORM_BOT_TOKEN }}
+          helmfile-workdirectory: ci/helm-GHA
+          helmfile-environment: mongodbUnitTests
+
+      - name: Create project properties file based on discovered services
+        run: |
+          MONGODB_PORT=$(echo '${{ steps.helmfile-install.outputs.map }}' | jq -r '.mongodb')
+          KAFKA_PORT=$(echo '${{ steps.helmfile-install.outputs.map }}' | jq -r '.kafka')
+          cat <<EOF > "$HOME/nuxeo-test-mongodb.properties"
+          nuxeo.test.stream=kafka
+          nuxeo.test.kafka.servers=localhost:$KAFKA_PORT
+          nuxeo.test.mongodb.dbname=nuxeo
+          nuxeo.test.mongodb.server=mongodb://localhost:$MONGODB_PORT
+          EOF
+```
+
+Inputs:
+
+Check `action.yml` for the full list of inputs and their description.
+
+Outputs:
+
+- map: JSON object mapping service names to their forwarded localhost ports
+
 ## Reusable workflows provided by us
 
 ### branch-promotion-prs
