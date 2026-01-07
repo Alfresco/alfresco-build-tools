@@ -30,11 +30,7 @@ runs:
     - name: Wait a bit in case of brand new namespace
       shell: bash
       run: |
-        timeout 60s bash -c '
-        until kubectl get namespace ${{ inputs.namespace }} ; do
-          echo "Waiting for namespace ${{ inputs.namespace }} to be created..."
-          sleep 2
-        done'
+        kubectl wait --for=create namespace/${{ inputs.namespace }} --timeout=10s
         NS_LIFETIME=$(kubectl get namespace ${{ inputs.namespace }} \
             -o jsonpath="{.metadata.creationTimestamp}")
         NOW_SECS=$(date +%s)
