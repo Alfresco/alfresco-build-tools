@@ -84,7 +84,7 @@ runs:
         echo "Discovered services: $SERVICES_JSON"
         echo "map=$SERVICES_JSON" >> $GITHUB_OUTPUT
 
-    - name: Port forward services discovered services
+    - name: Port forward discovered services
       shell: bash
       env:
         SERVICES_MAP: ${{ steps.services.outputs.map }}
