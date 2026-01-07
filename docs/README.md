@@ -130,6 +130,7 @@ Here follows the list of GitHub Actions topics available in the current document
     - [Nuxeo related actions](#nuxeo-related-actions)
       - [nos-publish](#nos-publish)
       - [nuxeo-docker-build](#nuxeo-docker-build)
+      - [nuxeo-helmfile-install](#nuxeo-helmfile-install)
   - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
     - [branch-promotion-prs](#branch-promotion-prs)
     - [helm-publish-new-package-version](#helm-publish-new-package-version)
