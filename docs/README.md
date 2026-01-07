@@ -2383,7 +2383,7 @@ Example usage (in below example, we need a kind config file with additional node
 
       - name: Install helmfile workloads
         id: helmfile-install
-        uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/nuxeo-helmfile-install@12.2.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/nuxeo-helmfile-install@v12.2.0
         with:
           docker-registry: ${{ env.DOCKER_REGISTRY }}
           docker-registry-username: ${{ github.actor }}
