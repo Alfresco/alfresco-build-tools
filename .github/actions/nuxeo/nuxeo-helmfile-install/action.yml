@@ -1,14 +1,6 @@
 name: nuxeo-helmfile-install
 description: Install Nuxeo Helm charts using Helmfile and port-forward services.
 inputs:
-  ingress-nginx-ref:
-    description: Reference for the ingress-nginx controller
-    required: false
-    default: "controller-v1.12.1"
-  metrics:
-    description: Whether to enable metrics for the kind cluster (true/false)
-    required: false
-    default: "true"
   docker-registry:
     description: Docker registry to pull Nuxeo images from
     required: false
@@ -49,13 +41,6 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Setup cluster
-      uses: Alfresco/alfresco-build-tools/.github/actions/setup-kind@v12.1.0
-      with:
-        ingress-nginx-ref: ${{ inputs.ingress-nginx-ref }}
-        metrics: ${{ inputs.metrics }}
-        kind-config-path: ${{ github.action_path }}/kind.yml
-
     - name: Login to registry with nuxeo image
       uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
       with:

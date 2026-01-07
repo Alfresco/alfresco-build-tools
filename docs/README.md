@@ -2368,10 +2368,19 @@ Notes:
 
 ### nuxeo-helmfile-install
 
-Create kind cluster and install nuxeo workloads using helmfile. Portforward
-discovered services to localhost.
+Install nuxeo workloads using helmfile. Portforward discovered services to
+localhost.
+
+Example usage (in below example, we need a kind config file with additional node label):
 
 ```yaml
+      - name: Setup cluster
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-kind@v12.0.0
+        with:
+          ingress-nginx-ref: controller-v1.12.1
+          metrics: "true"
+          kind-config-path: .github/kind.yml
+
       - name: Install helmfile workloads
         id: helmfile-install
         uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/nuxeo-helmfile-install@12.2.0
