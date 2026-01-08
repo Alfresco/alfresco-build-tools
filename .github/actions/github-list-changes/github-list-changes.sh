@@ -11,14 +11,23 @@ elif [[ $GITHUB_EVENT_NAME == "push" ]]; then
     # Get the list of changed files from the pushed commits.
     git diff --name-only $old_commit $AFTER_COMMIT > all-changed-files.txt
 elif [[ $GITHUB_EVENT_NAME == "issue_comment" ]]; then
-    cat $GITHUB_EVENT_PATH | jq -r '.issue.pull_request.url' > /dev/null 2>&1 || {
+    if [[ -z "$GH_TOKEN" ]]; then
+        echo "github-token not provided, cannot proceed with issue_comment event."
+        exit 1
+    fi
+    if [[ $(cat "$GITHUB_EVENT_PATH" | jq -r '.issue.pull_request.url // empty') == "" ]]; then
         echo "The issue comment is not on a pull request, can't do anything."
         exit 0
-    }
-    PR_URL=$(cat $GITHUB_EVENT_PATH | jq -r '.issue.pull_request.html_url')
-    PULL_REQUEST_NUMBER=$(cat $GITHUB_EVENT_PATH | jq -r '.issue.number')
-    GITHUB_BASE_REF=$(gh pr view $PR_URL --json baseRefName --jq '.baseRefName' 2>/dev/null)
-    git diff --name-only origin/$GITHUB_BASE_REF refs/remotes/pull/$PULL_REQUEST_NUMBER/merge > all-changed-files.txt
+    fi
+
+    PR_URL=$(cat "$GITHUB_EVENT_PATH" | jq -r '.issue.pull_request.html_url')
+    PULL_REQUEST_NUMBER=$(cat "$GITHUB_EVENT_PATH" | jq -r '.issue.number')
+    GITHUB_BASE_REF=$(gh pr view "$PR_URL" --json baseRefName --jq '.baseRefName')
+    if [[ -z "$GITHUB_BASE_REF" ]]; then
+        echo "Failed to get base ref for PR, invalid github token?"
+        exit 1
+    fi
+    git diff --name-only "origin/$GITHUB_BASE_REF" "refs/remotes/pull/$PULL_REQUEST_NUMBER/merge" > all-changed-files.txt
 else
     echo "Unsupported event type: $GITHUB_EVENT_NAME"
     exit 1
