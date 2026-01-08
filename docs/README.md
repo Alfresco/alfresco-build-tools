@@ -901,7 +901,8 @@ The action outputs the list of changed files (one path per line) using the
 output `all_changed_files` and optionally to the env variable
 `GITHUB_MODIFIED_FILES`.
 
-Optionally, it can also support `issue_comment` event for PRs, but it requires providing a github token and checking out the merge commit:
+Optionally, it can also support `issue_comment` event for PRs, but it requires
+providing a github token and checking out the merge commit:
 
 ```yaml
       - uses: actions/checkout@v3
