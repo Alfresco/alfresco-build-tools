@@ -2041,7 +2041,7 @@ Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
         with:
           # Specify kind and k8s version to use.
           # see https://github.com/kubernetes-sigs/kind/releases
-          kind-version: v0.30.0
+          kind-version: v0.31.0
           kind-node-image: kindest/node:v1.33.7@sha256:d26ef333bdb2cbe9862a0f7c3803ecc7b4303d8cea8e814b481b09949d353040
           # Optional but ensure repeatable builds (defaults to latest nginx ingress version otherwise).
           # see https://github.com/kubernetes/ingress-nginx
