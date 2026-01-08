@@ -19,4 +19,5 @@ runs:
         AFTER_COMMIT: ${{ github.event.after }}
         PULL_REQUEST_NUMBER: ${{ github.event.number }}
         WRITE_LIST_TO_ENV: ${{ inputs.write-list-to-env }}
+        GH_TOKEN: ${{ github.token }}
       run: ${{ github.action_path }}/github-list-changes.sh
