@@ -10,6 +10,9 @@ elif [[ $GITHUB_EVENT_NAME == "push" ]]; then
     git log -1 $old_commit > /dev/null 2>&1 || old_commit="$AFTER_COMMIT~"
     # Get the list of changed files from the pushed commits.
     git diff --name-only $old_commit $AFTER_COMMIT > all-changed-files.txt
+elif [[ $GITHUB_EVENT_NAME == "issue_comment" ]]; then
+    echo git diff --name-only origin/$GITHUB_BASE_REF refs/remotes/pull/$PULL_REQUEST_NUMBER/merge
+    git diff --name-only origin/$GITHUB_BASE_REF refs/remotes/pull/$PULL_REQUEST_NUMBER/merge > all-changed-files.txt
 else
     echo "Unsupported event type: $GITHUB_EVENT_NAME"
     exit 1
