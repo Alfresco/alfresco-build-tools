@@ -4,6 +4,9 @@ inputs:
   write-list-to-env:
     description: "If set to true then write the list of changed files to the environment variable GITHUB_MODIFIED_FILES"
     default: "false"
+  github-token:
+    description: "GitHub token to use for interacting with the GitHub API (for handling issue_comment events)"
+    required: false
 outputs:
   all_changed_files:
     description: The list of changed files (one per line)
@@ -19,5 +22,5 @@ runs:
         AFTER_COMMIT: ${{ github.event.after }}
         PULL_REQUEST_NUMBER: ${{ github.event.number }}
         WRITE_LIST_TO_ENV: ${{ inputs.write-list-to-env }}
-        GH_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ inputs.github-token }}
       run: ${{ github.action_path }}/github-list-changes.sh
