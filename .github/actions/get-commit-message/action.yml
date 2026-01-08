@@ -1,10 +1,30 @@
 name: "Get commit message"
 description: "Get commit message from GitHub and load it as a variable to the runner env"
+
+inputs:
+  header-only:
+    description: "If true, only the commit message header (first line) will be retrieved"
+    required: false
+    default: "false"
+
+outputs:
+  COMMIT_MESSAGE:
+    description: "The commit message retrieved"
+    value: ${{ steps.get-commit-message.outputs.COMMIT_MESSAGE }}
+
 runs:
   using: composite
   steps:
     - name: Get commit msg
+      id: get-commit-message
+      env:
+        CURRENT_SHA: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.sha) || github.event.after || github.sha }}
       run: |
-        MSG=$(git log --format=%B -n 1 ${{github.event.after}})
+        MSG=$(git log --format=%B -n 1 "$CURRENT_SHA")
+        if [ "${{ inputs.header-only }}" = "true" ]; then
+          MSG=$(echo "$MSG" | head -n 1)
+        fi
         echo COMMIT_MESSAGE=\"$MSG\" >> $GITHUB_ENV
+        echo COMMIT_MESSAGE=\"$MSG\" >> $GITHUB_OUTPUT
+        echo "Commit message: $MSG"
       shell: bash
