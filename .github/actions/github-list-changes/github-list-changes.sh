@@ -15,12 +15,9 @@ elif [[ $GITHUB_EVENT_NAME == "issue_comment" ]]; then
         echo "The issue comment is not on a pull request, can't do anything."
         exit 0
     }
-    cat $GITHUB_EVENT_PATH
     PR_URL=$(cat $GITHUB_EVENT_PATH | jq -r '.issue.pull_request.html_url')
     PULL_REQUEST_NUMBER=$(cat $GITHUB_EVENT_PATH | jq -r '.issue.number')
-    gh pr view $PR_URL --json baseRefName --jq '.baseRefName'
     GITHUB_BASE_REF=$(gh pr view $PR_URL --json baseRefName --jq '.baseRefName' 2>/dev/null)
-    echo "Base Branch: $GITHUB_BASE_REF"
     git diff --name-only origin/$GITHUB_BASE_REF refs/remotes/pull/$PULL_REQUEST_NUMBER/merge > all-changed-files.txt
 else
     echo "Unsupported event type: $GITHUB_EVENT_NAME"
