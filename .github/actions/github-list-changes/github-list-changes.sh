@@ -16,7 +16,7 @@ elif [[ $GITHUB_EVENT_NAME == "issue_comment" ]]; then
         exit 0
     }
     cat $GITHUB_EVENT_PATH
-    PR_URL=$(cat $GITHUB_EVENT_PATH | jq -r '.issue.pull_request.url')
+    PR_URL=$(cat $GITHUB_EVENT_PATH | jq -r '.issue.pull_request.html_url')
     PULL_REQUEST_NUMBER=$(cat $GITHUB_EVENT_PATH | jq -r '.issue.number')
     gh pr view $PR_URL --json baseRefName --jq '.baseRefName'
     GITHUB_BASE_REF=$(gh pr view $PR_URL --json baseRefName --jq '.baseRefName' 2>/dev/null)
