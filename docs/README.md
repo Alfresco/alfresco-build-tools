@@ -891,7 +891,8 @@ Use this action when running a workflow which clone a private repository over ht
 
 ### github-list-changes
 
-List the changes in a pull request (`pull-request` event) or that were pushed to a branch (`push` event).
+List the changes in a pull request (`pull-request` event) or that were pushed to
+a branch (`push` event).
 
 This action requires a checkout with `fetch-depth: 0` option as follow:
 
@@ -904,7 +905,22 @@ This action requires a checkout with `fetch-depth: 0` option as follow:
           write-list-to-env: "true" # default "false"
 ```
 
-The action outputs the list of changed files (one path per line) using the output `all_changed_files` and optionally to the env variable `GITHUB_MODIFIED_FILES`.
+The action outputs the list of changed files (one path per line) using the
+output `all_changed_files` and optionally to the env variable
+`GITHUB_MODIFIED_FILES`.
+
+Optionally, it can also support `issue_comment` event for PRs, but it requires
+providing a github token and checking out the merge commit:
+
+```yaml
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/merge', github.event.issue.number) || '' }}
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v12.1.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+```
 
 ### github-pr-check-metadata
 
