@@ -749,6 +749,14 @@ This action requires a checkout with fetch-depth option as follow:
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@v12.2.0
 ```
 
+If you only need the commit header (first line), you can set the `header-only` input to `true`:
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@v12.1.0
+        with:
+          header-only: true
+```
+
 ### git-commit-changes
 
 Commits local changes after configuring git user and showing the status of what is going be committed.
