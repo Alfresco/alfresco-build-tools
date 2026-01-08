@@ -10,7 +10,7 @@ inputs:
     description: |
       The Kind docker node image to use. Should match the same kind version at:
       https://github.com/kubernetes-sigs/kind/releases
-    default: kindest/node:v1.32.8@sha256:abd489f042d2b644e2d033f5c2d900bc707798d075e8186cb65e3f1367a9d5a1
+    default: kindest/node:v1.33.7@sha256:d26ef333bdb2cbe9862a0f7c3803ecc7b4303d8cea8e814b481b09949d353040
   kind-wait:
     description: The duration to wait for the control plane to become ready
     default: 60s
