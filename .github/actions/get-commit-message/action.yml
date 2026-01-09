@@ -18,7 +18,7 @@ runs:
     - name: Get commit msg
       id: get-commit-message
       env:
-        CURRENT_SHA: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.sha) || github.event.after || github.sha }}
+        CURRENT_SHA: ${{ (startsWith(github.event_name, 'pull_request') && github.event.pull_request.head.sha) || github.event.after || github.sha }}
       run: |
         MSG=$(git log --format=%B -n 1 "$CURRENT_SHA")
         if [ "${{ inputs.header-only }}" = "true" ]; then
