@@ -1,4 +1,6 @@
-# Security best practices
+---
+title: Security best practices
+---
 
 Before creating / modifying any GitHub Actions workflow make sure you're familiar with . Pay special attention to:
 
@@ -10,11 +12,10 @@ Before creating / modifying any GitHub Actions workflow make sure you're familia
 
 In this page we are also providing guidance on how to setup common tooling related to security.
 
-- [Security best practices](#security-best-practices)
-  - [Secrets detection](#secrets-detection)
-    - [First setup](#first-setup)
-    - [Updating new/old secrets to the baseline](#updating-newold-secrets-to-the-baseline)
-      - [Excluding multiple secrets via regex](#excluding-multiple-secrets-via-regex)
+- [Secrets detection](#secrets-detection)
+  - [First setup](#first-setup)
+  - [Updating new/old secrets to the baseline](#updating-newold-secrets-to-the-baseline)
+    - [Excluding multiple secrets via regex](#excluding-multiple-secrets-via-regex)
 
 ## Secrets detection
 

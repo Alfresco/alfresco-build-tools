@@ -1,4 +1,6 @@
-# Pre-commit Hooks
+---
+title: Pre-commit Hooks
+---
 
 Git hooks are scripts that run automatically every time a particular event
 occurs in a Git repository. They let you customize Git’s internal behavior and
