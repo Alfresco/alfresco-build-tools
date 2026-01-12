@@ -21,7 +21,7 @@ pre-commit runs locally while performing a commit, but with a small effort, it
 is possible to run it in CI too, during the CI build.
 
 Below are the hooks available in this repository and defined in
-[.pre-commit-hooks.yaml](../.pre-commit-hooks.yaml)
+[.pre-commit-hooks.yaml](https://github.com/Alfresco/alfresco-build-tools/blob/master/.pre-commit-hooks.yaml)
 
 ## Helm-deps (Helm Dependency Update)
 

@@ -482,7 +482,7 @@ Nowdays, dependabot supports glob patterns, so this action is not strictly neces
 
 A collection of actions used in Alfresco acs-deployment repository to manage Helm charts (mostly deprecated).
 
-See [dbp-charts](../.github/actions/dbp-charts/) for more details.
+See [dbp-charts](https://github.com/Alfresco/alfresco-build-tools/tree/master/.github/actions/dbp-charts) for more details.
 
 ### dispatch-resume-workflow
 
@@ -1133,7 +1133,7 @@ Releases a new version of a helm chart and publishes it to a helm repository
 Render Helm chart templates and pipe into yamllint, that can check for
 duplicated keys and other inconsistencies that helm itself doesn't care of. The
 action embed a
-[yamllint](.github/actions/../../../.github/actions/helm-template-yamllint/.yamllint.yml)
+[yamllint](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/helm-template-yamllint/.yamllint.yml)
 configuration files that should be suitable for most use cases.
 
 ```yaml
@@ -2236,7 +2236,7 @@ Validates Maven dependency graph versions to ensure all target includes artifact
 
 Runs Veracode Source Clear Scan
 
-To add custom maven execution instructions, for skipping test modules etc., use [custom_maven_command](https://docs.veracode.com/r/Java_Scan_Directives#custom_maven_command)
+To add custom maven execution instructions, for skipping test modules etc., use [custom_maven_command](https://docs.veracode.com/r/Java_Scan_Directives)
 scan directive in srcclr.yml file of the scanned repository.
 
 When monitoring multiple versions of the same project in Veracode, optional input srcclr-project-ext can be used to direct scan results to a specific Veracode project instead of the default one.
