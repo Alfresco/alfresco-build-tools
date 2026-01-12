@@ -1,4 +1,7 @@
-# alfresco-build-tools
+---
+title: alfresco-build-tools
+permalink: /index.html
+---
 
 [![Last release](https://img.shields.io/github/v/release/alfresco/alfresco-build-tools)](https://github.com/Alfresco/alfresco-build-tools/releases/latest)
 [![CI](https://github.com/Alfresco/alfresco-build-tools/actions/workflows/test.yml/badge.svg)](https://github.com/Alfresco/alfresco-build-tools/actions/workflows/test.yml)
@@ -14,138 +17,137 @@ For terraform-related topics of GitHub Actions, see the [Terraform section](terr
 
 Here follows the list of GitHub Actions topics available in the current document:
 
-- [alfresco-build-tools](#alfresco-build-tools)
-  - [GitHub Actions](#github-actions)
-    - [Java setup](#java-setup)
-      - [Setup JDK](#setup-jdk)
-      - [Setup Maven Credentials](#setup-maven-credentials)
-      - [Setup Maven Build Options](#setup-maven-build-options)
-  - [GitHub Actions provided by community](#github-actions-provided-by-community)
-    - [Comment a PR](#comment-a-pr)
-    - [Docker build and push](#docker-build-and-push)
-    - [Docker login](#docker-login)
-    - [EC2 GitHub runner](#ec2-github-runner)
-    - [Generate Dependabot Glob Action](#generate-dependabot-glob-action)
-    - [Git commit and push](#git-commit-and-push)
-    - [pmd](#pmd)
-    - [Retry failing step](#retry-failing-step)
-    - [SSH debug](#ssh-debug)
-    - [Triggering a workflow in another repository](#triggering-a-workflow-in-another-repository)
-  - [GitHub Actions provided by us](#github-actions-provided-by-us)
-    - [automate-propagation](#automate-propagation)
-    - [calculate-next-internal-version](#calculate-next-internal-version)
-    - [configure-git-author](#configure-git-author)
-    - [dependabot-missing-actions-check](#dependabot-missing-actions-check)
-    - [dbp-charts](#dbp-charts)
-    - [dispatch-resume-workflow](#dispatch-resume-workflow)
-    - [docker-build-image](#docker-build-image)
-    - [docker-dump-containers-logs](#docker-dump-containers-logs)
-    - [docker-scan-image-dirs](#docker-scan-image-dirs)
-    - [enforce-pr-conventions](#enforce-pr-conventions)
-    - [env-load-from-yaml](#env-load-from-yaml)
-    - [free-hosted-runner-disk-space](#free-hosted-runner-disk-space)
-    - [get-branch-name](#get-branch-name)
-    - [get-build-info](#get-build-info)
-    - [gh-cache-cleanup-on-merge](#gh-cache-cleanup-on-merge)
-    - [git-check-existing-tag](#git-check-existing-tag)
-    - [get-commit-message](#get-commit-message)
-    - [git-commit-changes](#git-commit-changes)
-    - [git-latest-tag](#git-latest-tag)
-    - [github-check-upcoming-runs](#github-check-upcoming-runs)
-    - [github-deployment-create](#github-deployment-create)
-    - [github-deployment-status-update](#github-deployment-status-update)
-    - [github-deployments-delete](#github-deployments-delete)
-    - [github-download-file](#github-download-file)
-    - [github-https-auth](#github-https-auth)
-    - [github-list-changes](#github-list-changes)
-    - [github-pr-check-metadata](#github-pr-check-metadata)
-    - [github-require-secrets](#github-require-secrets)
-    - [github-trigger-approved-pr](#github-trigger-approved-pr)
-    - [github-trigger-labeled-pr](#github-trigger-labeled-pr)
-    - [helm-build-chart](#helm-build-chart)
-    - [helm-integration-tests](#helm-integration-tests)
-    - [helm-package-chart](#helm-package-chart)
-    - [helm-parse-next-release](#helm-parse-next-release)
-    - [helm-publish-chart](#helm-publish-chart)
-    - [helm-release-and-publish](#helm-release-and-publish)
-    - [helm-template-yamllint](#helm-template-yamllint)
-    - [helm-plugin](#helm-plugin)
-    - [helm-update-chart-version](#helm-update-chart-version)
-    - [install-galaxy-deps](#install-galaxy-deps)
-    - [install-ubuntu-default-tools](#install-ubuntu-default-tools)
-    - [jx-updatebot-pr](#jx-updatebot-pr)
-    - [kubectl-keep-nslogs](#kubectl-keep-nslogs)
-    - [kubectl-wait](#kubectl-wait)
-    - [load-release-descriptor](#load-release-descriptor)
-    - [maven-configure](#maven-configure)
-    - [maven-dependency-scan](#maven-dependency-scan)
-      - [`restore-artifact-pattern` option](#restore-artifact-pattern-option)
-    - [maven-build](#maven-build)
-      - [Jacoco report options](#jacoco-report-options)
-    - [maven-build-and-tag](#maven-build-and-tag)
-      - [Preview option for maven-build-and-tag](#preview-option-for-maven-build-and-tag)
-      - [Option to skip tests for maven-build-and-tag](#option-to-skip-tests-for-maven-build-and-tag)
-    - [maven-deploy-file](#maven-deploy-file)
-    - [maven-release](#maven-release)
-    - [maven-tag](#maven-tag)
-    - [maven-update-pom-version](#maven-update-pom-version)
-    - [md-toc](#md-toc)
-    - [nexus-move-artifacts](#nexus-move-artifacts)
-    - [pre-commit](#pre-commit)
-    - [process-coverage-report](#process-coverage-report)
-    - [pipenv](#pipenv)
-    - [rancher](#rancher)
-    - [release-notes-aggregator](#release-notes-aggregator)
-    - [reportportal-prepare](#reportportal-prepare)
-    - [reportportal-summarize](#reportportal-summarize)
-    - [resolve-preview-name](#resolve-preview-name)
-    - [send-slack-notification-slow-job](#send-slack-notification-slow-job)
-    - [send-slack-notification](#send-slack-notification)
-    - [send-teams-notification](#send-teams-notification)
-      - [Mentions](#mentions)
-    - [setup-checkov](#setup-checkov)
-    - [setup-docker](#setup-docker)
-    - [setup-fluxcli](#setup-fluxcli)
-    - [setup-github-release-binary](#setup-github-release-binary)
-    - [setup-helm-docs](#setup-helm-docs)
-    - [setup-java-build](#setup-java-build)
-    - [setup-jx-release-version](#setup-jx-release-version)
-    - [setup-kcadm](#setup-kcadm)
-    - [setup-kind](#setup-kind)
-    - [setup-kubepug](#setup-kubepug)
-    - [setup-pysemver](#setup-pysemver)
-    - [setup-rancher-cli](#setup-rancher-cli)
-    - [setup-terraform-docs](#setup-terraform-docs)
-    - [setup-updatebot](#setup-updatebot)
-    - [setup-updatecli](#setup-updatecli)
-    - [slack-file-upload](#slack-file-upload)
-    - [sonar-scan-on-built-project](#sonar-scan-on-built-project)
-    - [sonar-scanner](#sonar-scanner)
-    - [update-deployment-runtime-versions](#update-deployment-runtime-versions)
-    - [update-pom-to-next-pre-release](#update-pom-to-next-pre-release)
-    - [update-project-base-tag](#update-project-base-tag)
-    - [validate-maven-versions](#validate-maven-versions)
-    - [veracode](#veracode)
-    - [xvfb-record](#xvfb-record)
-    - [Nuxeo related actions](#nuxeo-related-actions)
-      - [nos-publish](#nos-publish)
-      - [nuxeo-docker-build](#nuxeo-docker-build)
-  - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
-    - [branch-promotion-prs](#branch-promotion-prs)
-    - [helm-publish-new-package-version](#helm-publish-new-package-version)
-    - [reusable-release](#reusable-release)
-    - [terraform](#terraform)
-  - [Cookbook](#cookbook)
-    - [Conditional job/step depending on PR labels](#conditional-jobstep-depending-on-pr-labels)
-    - [Serialize pull request builds](#serialize-pull-request-builds)
-    - [Expiring tags for quay.io images](#expiring-tags-for-quayio-images)
-    - [Running a dependabot PR workflow only when pull request is approved](#running-a-dependabot-pr-workflow-only-when-pull-request-is-approved)
-      - [Using the pr-review-check reusable workflow](#using-the-pr-review-check-reusable-workflow)
-      - [Manual job condition approach](#manual-job-condition-approach)
-    - [Automating github-actions updates](#automating-github-actions-updates)
-  - [Known issues](#known-issues)
-    - [realpath not available under macosx](#realpath-not-available-under-macosx)
-  - [Release](#release)
+- [GitHub Actions](#github-actions)
+  - [Java setup](#java-setup)
+    - [Setup JDK](#setup-jdk)
+    - [Setup Maven Credentials](#setup-maven-credentials)
+    - [Setup Maven Build Options](#setup-maven-build-options)
+- [GitHub Actions provided by community](#github-actions-provided-by-community)
+  - [Comment a PR](#comment-a-pr)
+  - [Docker build and push](#docker-build-and-push)
+  - [Docker login](#docker-login)
+  - [EC2 GitHub runner](#ec2-github-runner)
+  - [Generate Dependabot Glob Action](#generate-dependabot-glob-action)
+  - [Git commit and push](#git-commit-and-push)
+  - [pmd](#pmd)
+  - [Retry failing step](#retry-failing-step)
+  - [SSH debug](#ssh-debug)
+  - [Triggering a workflow in another repository](#triggering-a-workflow-in-another-repository)
+- [GitHub Actions provided by us](#github-actions-provided-by-us)
+  - [automate-propagation](#automate-propagation)
+  - [calculate-next-internal-version](#calculate-next-internal-version)
+  - [configure-git-author](#configure-git-author)
+  - [dependabot-missing-actions-check](#dependabot-missing-actions-check)
+  - [dbp-charts](#dbp-charts)
+  - [dispatch-resume-workflow](#dispatch-resume-workflow)
+  - [docker-build-image](#docker-build-image)
+  - [docker-dump-containers-logs](#docker-dump-containers-logs)
+  - [docker-scan-image-dirs](#docker-scan-image-dirs)
+  - [enforce-pr-conventions](#enforce-pr-conventions)
+  - [env-load-from-yaml](#env-load-from-yaml)
+  - [free-hosted-runner-disk-space](#free-hosted-runner-disk-space)
+  - [get-branch-name](#get-branch-name)
+  - [get-build-info](#get-build-info)
+  - [gh-cache-cleanup-on-merge](#gh-cache-cleanup-on-merge)
+  - [git-check-existing-tag](#git-check-existing-tag)
+  - [get-commit-message](#get-commit-message)
+  - [git-commit-changes](#git-commit-changes)
+  - [git-latest-tag](#git-latest-tag)
+  - [github-check-upcoming-runs](#github-check-upcoming-runs)
+  - [github-deployment-create](#github-deployment-create)
+  - [github-deployment-status-update](#github-deployment-status-update)
+  - [github-deployments-delete](#github-deployments-delete)
+  - [github-download-file](#github-download-file)
+  - [github-https-auth](#github-https-auth)
+  - [github-list-changes](#github-list-changes)
+  - [github-pr-check-metadata](#github-pr-check-metadata)
+  - [github-require-secrets](#github-require-secrets)
+  - [github-trigger-approved-pr](#github-trigger-approved-pr)
+  - [github-trigger-labeled-pr](#github-trigger-labeled-pr)
+  - [helm-build-chart](#helm-build-chart)
+  - [helm-integration-tests](#helm-integration-tests)
+  - [helm-package-chart](#helm-package-chart)
+  - [helm-parse-next-release](#helm-parse-next-release)
+  - [helm-publish-chart](#helm-publish-chart)
+  - [helm-release-and-publish](#helm-release-and-publish)
+  - [helm-template-yamllint](#helm-template-yamllint)
+  - [helm-plugin](#helm-plugin)
+  - [helm-update-chart-version](#helm-update-chart-version)
+  - [install-galaxy-deps](#install-galaxy-deps)
+  - [install-ubuntu-default-tools](#install-ubuntu-default-tools)
+  - [jx-updatebot-pr](#jx-updatebot-pr)
+  - [kubectl-keep-nslogs](#kubectl-keep-nslogs)
+  - [kubectl-wait](#kubectl-wait)
+  - [load-release-descriptor](#load-release-descriptor)
+  - [maven-configure](#maven-configure)
+  - [maven-dependency-scan](#maven-dependency-scan)
+    - [`restore-artifact-pattern` option](#restore-artifact-pattern-option)
+  - [maven-build](#maven-build)
+    - [Jacoco report options](#jacoco-report-options)
+  - [maven-build-and-tag](#maven-build-and-tag)
+    - [Preview option for maven-build-and-tag](#preview-option-for-maven-build-and-tag)
+    - [Option to skip tests for maven-build-and-tag](#option-to-skip-tests-for-maven-build-and-tag)
+  - [maven-deploy-file](#maven-deploy-file)
+  - [maven-release](#maven-release)
+  - [maven-tag](#maven-tag)
+  - [maven-update-pom-version](#maven-update-pom-version)
+  - [md-toc](#md-toc)
+  - [nexus-move-artifacts](#nexus-move-artifacts)
+  - [pre-commit](#pre-commit)
+  - [process-coverage-report](#process-coverage-report)
+  - [pipenv](#pipenv)
+  - [rancher](#rancher)
+  - [release-notes-aggregator](#release-notes-aggregator)
+  - [reportportal-prepare](#reportportal-prepare)
+  - [reportportal-summarize](#reportportal-summarize)
+  - [resolve-preview-name](#resolve-preview-name)
+  - [send-slack-notification-slow-job](#send-slack-notification-slow-job)
+  - [send-slack-notification](#send-slack-notification)
+  - [send-teams-notification](#send-teams-notification)
+    - [Mentions](#mentions)
+  - [setup-checkov](#setup-checkov)
+  - [setup-docker](#setup-docker)
+  - [setup-fluxcli](#setup-fluxcli)
+  - [setup-github-release-binary](#setup-github-release-binary)
+  - [setup-helm-docs](#setup-helm-docs)
+  - [setup-java-build](#setup-java-build)
+  - [setup-jx-release-version](#setup-jx-release-version)
+  - [setup-kcadm](#setup-kcadm)
+  - [setup-kind](#setup-kind)
+  - [setup-kubepug](#setup-kubepug)
+  - [setup-pysemver](#setup-pysemver)
+  - [setup-rancher-cli](#setup-rancher-cli)
+  - [setup-terraform-docs](#setup-terraform-docs)
+  - [setup-updatebot](#setup-updatebot)
+  - [setup-updatecli](#setup-updatecli)
+  - [slack-file-upload](#slack-file-upload)
+  - [sonar-scan-on-built-project](#sonar-scan-on-built-project)
+  - [sonar-scanner](#sonar-scanner)
+  - [update-deployment-runtime-versions](#update-deployment-runtime-versions)
+  - [update-pom-to-next-pre-release](#update-pom-to-next-pre-release)
+  - [update-project-base-tag](#update-project-base-tag)
+  - [validate-maven-versions](#validate-maven-versions)
+  - [veracode](#veracode)
+  - [xvfb-record](#xvfb-record)
+  - [Nuxeo related actions](#nuxeo-related-actions)
+    - [nos-publish](#nos-publish)
+    - [nuxeo-docker-build](#nuxeo-docker-build)
+- [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
+  - [branch-promotion-prs](#branch-promotion-prs)
+  - [helm-publish-new-package-version](#helm-publish-new-package-version)
+  - [reusable-release](#reusable-release)
+  - [terraform](#terraform)
+- [Cookbook](#cookbook)
+  - [Conditional job/step depending on PR labels](#conditional-jobstep-depending-on-pr-labels)
+  - [Serialize pull request builds](#serialize-pull-request-builds)
+  - [Expiring tags for quay.io images](#expiring-tags-for-quayio-images)
+  - [Running a dependabot PR workflow only when pull request is approved](#running-a-dependabot-pr-workflow-only-when-pull-request-is-approved)
+    - [Using the pr-review-check reusable workflow](#using-the-pr-review-check-reusable-workflow)
+    - [Manual job condition approach](#manual-job-condition-approach)
+  - [Automating github-actions updates](#automating-github-actions-updates)
+- [Known issues](#known-issues)
+  - [realpath not available under macosx](#realpath-not-available-under-macosx)
+- [Release](#release)
 
 ## GitHub Actions
 
@@ -480,7 +482,7 @@ Nowdays, dependabot supports glob patterns, so this action is not strictly neces
 
 A collection of actions used in Alfresco acs-deployment repository to manage Helm charts (mostly deprecated).
 
-See [dbp-charts](../.github/actions/dbp-charts/) for more details.
+See [dbp-charts](https://github.com/Alfresco/alfresco-build-tools/tree/master/.github/actions/dbp-charts) for more details.
 
 ### dispatch-resume-workflow
 
@@ -700,7 +702,7 @@ Loads the name of the branch on which the action was called into `BRANCH_NAME` e
 
 ### get-build-info
 
-[get-build-info](../.github/actions/get-build-info/action.yml) loads build-related info into the runner env, in the form of generically named variables that are not necessarily specific to GitHub.
+[get-build-info](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/get-build-info/action.yml) loads build-related info into the runner env, in the form of generically named variables that are not necessarily specific to GitHub.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v12.4.1
@@ -1131,7 +1133,7 @@ Releases a new version of a helm chart and publishes it to a helm repository
 Render Helm chart templates and pipe into yamllint, that can check for
 duplicated keys and other inconsistencies that helm itself doesn't care of. The
 action embed a
-[yamllint](.github/actions/../../../.github/actions/helm-template-yamllint/.yamllint.yml)
+[yamllint](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/helm-template-yamllint/.yamllint.yml)
 configuration files that should be suitable for most use cases.
 
 ```yaml
@@ -1954,7 +1956,7 @@ Set up a specific version of Checkov and add it to the PATH.
 
 When using a runner which is not a default hosted runner, all the default
 tooling may not be available, including Docker. Use [setup-docker
-action](../.github/actions/setup-docker/action.yml) to install and configure
+action](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/setup-docker/action.yml) to install and configure
 Docker Engine for the current runner. Required for the ARM64 GitHub Action
 Hosted runners.
 
@@ -1975,9 +1977,9 @@ Set up a specific version of Flux CLI and add it to the PATH.
 
 ### setup-github-release-binary
 
-[setup-github-release-binary](../.github/actions/setup-github-release-binary/action.yml)
+[setup-github-release-binary](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/setup-github-release-binary/action.yml)
 Allows the installation of a generic binary from GitHub Releases and add it to the PATH.
-See [setup-helm-docs](../.github/actions/setup-helm-docs/action.yml) for a usage example.
+See [setup-helm-docs](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/setup-helm-docs/action.yml) for a usage example.
 
 Optionally provide checksums to verify the downloaded binary integrity. Can be a
 single string or a JSON object mapping OS_ARCH to checksums (e.g.,
@@ -2018,7 +2020,7 @@ Install the helm-docs binary from GitHub Releases and add it to the PATH.
 
 ### setup-java-build
 
-[setup-java-build](../.github/actions/setup-java-build/action.yml) performs the setup of required build tools such as Java and Maven.
+[setup-java-build](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/setup-java-build/action.yml) performs the setup of required build tools such as Java and Maven.
 The Maven settings file can either be placed in the repository's root folder as `.ci.settings.xml`, or in a different location. In the latter case, the full path to the settings file should be provided via the `maven-settings` input parameter.
 If the Maven settings file is not provided at all, then a default settings file will be installed. The default settings file requires the following environment variables to be appropriately set with valid credentials: `MAVEN_USERNAME` and `MAVEN_PASSWORD`.
 
@@ -2199,11 +2201,11 @@ sonar-host-url and sonar-organization are optional inputs. If not provided, the 
 
 ### update-deployment-runtime-versions
 
-For more information, see [update-deployment-runtime-versions](../.github/actions/update-deployment-runtime-versions/action.yml).
+For more information, see [update-deployment-runtime-versions](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/update-deployment-runtime-versions/action.yml).
 
 ### update-pom-to-next-pre-release
 
-For more information see [update-pom-to-next-pre-release](../.github/actions/update-pom-to-next-pre-release/action.yml).
+For more information see [update-pom-to-next-pre-release](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/update-pom-to-next-pre-release/action.yml).
 
 ### update-project-base-tag
 
@@ -2234,7 +2236,7 @@ Validates Maven dependency graph versions to ensure all target includes artifact
 
 Runs Veracode Source Clear Scan
 
-To add custom maven execution instructions, for skipping test modules etc., use [custom_maven_command](https://docs.veracode.com/r/Java_Scan_Directives#custom_maven_command)
+To add custom maven execution instructions, for skipping test modules etc., use [custom_maven_command](https://docs.veracode.com/r/Java_Scan_Directives)
 scan directive in srcclr.yml file of the scanned repository.
 
 When monitoring multiple versions of the same project in Veracode, optional input srcclr-project-ext can be used to direct scan results to a specific Veracode project instead of the default one.
