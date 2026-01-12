@@ -1,5 +1,6 @@
 ---
 title: alfresco-build-tools
+permalink: /index.html
 ---
 
 [![Last release](https://img.shields.io/github/v/release/alfresco/alfresco-build-tools)](https://github.com/Alfresco/alfresco-build-tools/releases/latest)
