@@ -701,7 +701,7 @@ Loads the name of the branch on which the action was called into `BRANCH_NAME` e
 
 ### get-build-info
 
-[get-build-info](../.github/actions/get-build-info/action.yml) loads build-related info into the runner env, in the form of generically named variables that are not necessarily specific to GitHub.
+[get-build-info](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/get-build-info/action.yml) loads build-related info into the runner env, in the form of generically named variables that are not necessarily specific to GitHub.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v12.4.1
@@ -1955,7 +1955,7 @@ Set up a specific version of Checkov and add it to the PATH.
 
 When using a runner which is not a default hosted runner, all the default
 tooling may not be available, including Docker. Use [setup-docker
-action](../.github/actions/setup-docker/action.yml) to install and configure
+action](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/setup-docker/action.yml) to install and configure
 Docker Engine for the current runner. Required for the ARM64 GitHub Action
 Hosted runners.
 
@@ -1976,9 +1976,9 @@ Set up a specific version of Flux CLI and add it to the PATH.
 
 ### setup-github-release-binary
 
-[setup-github-release-binary](../.github/actions/setup-github-release-binary/action.yml)
+[setup-github-release-binary](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/setup-github-release-binary/action.yml)
 Allows the installation of a generic binary from GitHub Releases and add it to the PATH.
-See [setup-helm-docs](../.github/actions/setup-helm-docs/action.yml) for a usage example.
+See [setup-helm-docs](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/setup-helm-docs/action.yml) for a usage example.
 
 Optionally provide checksums to verify the downloaded binary integrity. Can be a
 single string or a JSON object mapping OS_ARCH to checksums (e.g.,
@@ -2019,7 +2019,7 @@ Install the helm-docs binary from GitHub Releases and add it to the PATH.
 
 ### setup-java-build
 
-[setup-java-build](../.github/actions/setup-java-build/action.yml) performs the setup of required build tools such as Java and Maven.
+[setup-java-build](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/setup-java-build/action.yml) performs the setup of required build tools such as Java and Maven.
 The Maven settings file can either be placed in the repository's root folder as `.ci.settings.xml`, or in a different location. In the latter case, the full path to the settings file should be provided via the `maven-settings` input parameter.
 If the Maven settings file is not provided at all, then a default settings file will be installed. The default settings file requires the following environment variables to be appropriately set with valid credentials: `MAVEN_USERNAME` and `MAVEN_PASSWORD`.
 
@@ -2200,11 +2200,11 @@ sonar-host-url and sonar-organization are optional inputs. If not provided, the 
 
 ### update-deployment-runtime-versions
 
-For more information, see [update-deployment-runtime-versions](../.github/actions/update-deployment-runtime-versions/action.yml).
+For more information, see [update-deployment-runtime-versions](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/update-deployment-runtime-versions/action.yml).
 
 ### update-pom-to-next-pre-release
 
-For more information see [update-pom-to-next-pre-release](../.github/actions/update-pom-to-next-pre-release/action.yml).
+For more information see [update-pom-to-next-pre-release](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/update-pom-to-next-pre-release/action.yml).
 
 ### update-project-base-tag
 
