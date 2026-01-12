@@ -1,0 +1,28 @@
+name: Publish docs
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - docs/**
+      - .github/workflows/docs.yml
+  pull_request:
+    branches:
+      - master
+    paths:
+      - docs/**
+      - .github/workflows/docs.yml
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  publish:
+    uses: Alfresco/jekyll-build-tools/.github/workflows/jekyll-publish.yml@bcb64919661442651e2d0dbde8ca09443694d71a
+    with:
+      working-directory: docs
+      publish: ${{ github.event_name == 'push' && github.ref_name == 'master' }}
+      validate-html: true
