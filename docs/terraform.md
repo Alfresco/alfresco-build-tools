@@ -1,4 +1,6 @@
-# Terraform in Alfresco CI
+---
+title: Terraform in Alfresco CI
+---
 
 This document describes the Terraform approach to managing infrastructure as
 code (IaC) using Terraform. It outlines best practices, directory structure, and

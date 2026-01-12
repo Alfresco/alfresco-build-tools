@@ -1,20 +1,21 @@
-# Security best practices
+---
+title: Security best practices
+---
 
 Before creating / modifying any GitHub Actions workflow make sure you're familiar with . Pay special attention to:
 
 - [Security hardening for GitHub Actions](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions)
-  - [Script injections](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#understanding-the-risk-of-script-injections)
+  - [Script injections](https://docs.github.com/en/actions/reference/security/secure-use#good-practices-for-mitigating-script-injection-attacks)
   - [third-party/community actions](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-third-party-actions)
 - [Keeping your GitHub Actions and workflows secure](https://securitylab.github.com/research/github-actions-preventing-pwn-requests/)
   - [Part 2: Untrusted input](https://securitylab.github.com/research/github-actions-untrusted-input/)
 
 In this page we are also providing guidance on how to setup common tooling related to security.
 
-- [Security best practices](#security-best-practices)
-  - [Secrets detection](#secrets-detection)
-    - [First setup](#first-setup)
-    - [Updating new/old secrets to the baseline](#updating-newold-secrets-to-the-baseline)
-      - [Excluding multiple secrets via regex](#excluding-multiple-secrets-via-regex)
+- [Secrets detection](#secrets-detection)
+  - [First setup](#first-setup)
+  - [Updating new/old secrets to the baseline](#updating-newold-secrets-to-the-baseline)
+    - [Excluding multiple secrets via regex](#excluding-multiple-secrets-via-regex)
 
 ## Secrets detection
 

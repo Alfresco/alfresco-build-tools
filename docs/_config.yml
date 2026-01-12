@@ -1,0 +1,44 @@
+title: Alfresco Build tools
+description: Documentation for Alfresco Build tools, a collections of reusable github actions and workflows.
+theme: just-the-docs
+color_scheme: alfresco
+
+# Do not add path with the repository name here
+# A dynamic baseurl is being passed in the workflow
+url: https://alfresco.github.io/
+
+aux_links:
+  Sources: https://github.com/Alfresco/alfresco-build-tools
+
+aux_links_new_tab: true
+
+gh_edit_link: true
+gh_edit_link_text: "Improve this page on GitHub"
+gh_edit_repository: https://github.com/Alfresco/alfresco-build-tools
+gh_edit_branch: master
+gh_edit_source: docs
+gh_edit_view_mode: edit
+
+logo: "images/hyland-alfresco-logos.png"
+favicon_ico: "images/favicon.ico"
+
+# These configurations are applied to all pages unless overridden by the page front matter
+# https://jekyllrb.com/docs/front-matter/
+defaults:
+  - scope:
+      path: "*"
+    values:
+      # apply the default layout to all markdown pages
+      layout: "default"
+      # prevent curly braces (e.g. helm, ansible code) from being parsed
+      render_with_liquid: false
+
+# Prevent repository files from being included in the destination site
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - LICENSE
+
+# Check Gemfile for the plugins available
+plugins:
+  - jekyll-relative-links
