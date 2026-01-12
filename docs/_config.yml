@@ -1,5 +1,5 @@
-title: Alfresco Jekyll Build tools
-description: Documentation generator
+title: Alfresco Build tools
+description: Documentation for Alfresco Build tools, a collections of reusable github actions and workflows.
 theme: just-the-docs
 color_scheme: alfresco
 
@@ -9,13 +9,13 @@ url: https://alfresco.github.io/
 
 aux_links:
   Docs: https://docs.alfresco.com/
-  GitHub Repository: https://github.com/Alfresco/jekyll-build-tools
+  GitHub Repository: https://github.com/Alfresco/alfresco-build-tools
 
 aux_links_new_tab: true
 
 gh_edit_link: true
 gh_edit_link_text: "Improve this page on GitHub"
-gh_edit_repository: https://github.com/Alfresco/jekyll-build-tools
+gh_edit_repository: https://github.com/Alfresco/alfresco-build-tools
 gh_edit_branch: master
 gh_edit_source: docs
 gh_edit_view_mode: edit
