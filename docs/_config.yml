@@ -8,8 +8,7 @@ color_scheme: alfresco
 url: https://alfresco.github.io/
 
 aux_links:
-  Docs: https://docs.alfresco.com/
-  GitHub Repository: https://github.com/Alfresco/alfresco-build-tools
+  Sources: https://github.com/Alfresco/alfresco-build-tools
 
 aux_links_new_tab: true
 
