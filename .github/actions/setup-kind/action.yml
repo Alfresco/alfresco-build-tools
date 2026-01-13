@@ -145,6 +145,7 @@ runs:
         binary_name: cloud-provider-kind
         repo: kubernetes-sigs/cloud-provider-kind
         version: ${{ inputs.cloud-provider-kind-version }}
+        test_args: --help
 
     - name: Run cloud-provider-kind
       shell: bash
