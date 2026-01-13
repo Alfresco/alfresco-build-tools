@@ -152,7 +152,7 @@ runs:
       if: >-
         !contains(fromJson('["skip", "none"]'), inputs.ingress-traefik-version)
       run: |
-        cloud-provider-kind &
+        sudo -E cloud-provider-kind > cloud-provider.log 2>&1 &
 
     - name: Return the HTTP endpoint of Traefik
       id: get-traefik-endpoint
