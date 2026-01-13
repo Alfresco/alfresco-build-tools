@@ -176,7 +176,7 @@ runs:
           exit 1
         fi
 
-        ENDPOINT=$(kubectl -n traefik get svc traefik -o jsonpath='{.status.loadBalancer.ingress[0].ip}:{.spec.ports[0].port}' | awk '{print "http://"$0}')
+        ENDPOINT=$(kubectl -n traefik get svc traefik -o jsonpath='{.status.loadBalancer.ingress[0].ip}:{.spec.ports[0].port}' | awk '{print $0}')
         echo "endpoint=$ENDPOINT" >> $GITHUB_OUTPUT
 
     - name: Create registries auth secret
