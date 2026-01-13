@@ -154,12 +154,28 @@ runs:
       run: |
         sudo -E cloud-provider-kind > cloud-provider.log 2>&1 &
 
-    - name: Return the HTTP endpoint of Traefik
+    - name: Wait and return the HTTP endpoint of Traefik
       id: get-traefik-endpoint
       shell: bash
       if: >-
         !contains(fromJson('["skip", "none"]'), inputs.ingress-traefik-version)
       run: |
+        # Retry loop to wait for LoadBalancer IP
+        for i in {1..30}; do
+          EXTERNAL_IP=$(kubectl -n traefik get svc traefik -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          if [ -n "$EXTERNAL_IP" ]; then
+            echo "LoadBalancer IP assigned: $EXTERNAL_IP"
+            break
+          fi
+          echo "Waiting for LoadBalancer IP... ($i/30)"
+          sleep 2
+        done
+
+        if [ -z "$EXTERNAL_IP" ]; then
+          echo "Error: Timed out waiting for LoadBalancer IP."
+          exit 1
+        fi
+
         ENDPOINT=$(kubectl -n traefik get svc traefik -o jsonpath='{.status.loadBalancer.ingress[0].ip}:{.spec.ports[0].port}' | awk '{print "http://"$0}')
         echo "endpoint=$ENDPOINT" >> $GITHUB_OUTPUT
 
