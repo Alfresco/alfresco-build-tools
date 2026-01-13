@@ -116,7 +116,8 @@ runs:
       if: >-
         !contains(fromJson('["skip", "none"]'), inputs.ingress-traefik-version)
       run: |
-        kubectl label node kind-chart-testing node.kubernetes.io/exclude-from-external-load-balancers-
+        NODE=$(kubectl get nodes -o name | head -n 1)
+        kubectl label node $NODE node.kubernetes.io/exclude-from-external-load-balancers-
         helm repo add traefik https://traefik.github.io/charts
         kubectl create namespace traefik
         helm upgrade --install traefik traefik/traefik --version ${{ inputs.ingress-traefik-version }} -n traefik --set providers.kubernetesIngressNginx.enabled=true
