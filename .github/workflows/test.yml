@@ -136,16 +136,8 @@ jobs:
       - uses: ./.github/actions/get-commit-message
         id: get-full-commit-message
 
-      - run: |
-          echo "Full commit message (output): '${{ steps.get-full-commit-message.outputs.COMMIT_MESSAGE }}'"
-          echo "Full commit message (env): '${{ env.COMMIT_MESSAGE }}'"
-
       - uses: ./.github/actions/get-commit-message
         id: get-commit-message-header-only
         with:
           header-only: true
-
-      - run: |
-          echo "Full commit message header (output): '${{ steps.get-commit-message-header-only.outputs.COMMIT_MESSAGE }}'"
-          echo "Full commit message header (env): '${{ env.COMMIT_MESSAGE }}'"
       # endregion
