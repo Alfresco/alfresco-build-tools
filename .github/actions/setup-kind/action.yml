@@ -120,7 +120,7 @@ runs:
         kubectl label $NODE node.kubernetes.io/exclude-from-external-load-balancers-
         helm repo add traefik https://traefik.github.io/charts
         kubectl create namespace traefik
-        helm upgrade --install traefik traefik/traefik --version ${{ inputs.ingress-traefik-version }} -n traefik --set providers.kubernetesIngressNginx.enabled=true
+        helm upgrade --install traefik traefik/traefik --version ${{ inputs.ingress-traefik-version }} -n traefik --set providers.kubernetesIngressNginx.enabled=true --set providers.kubernetesIngressNginx.watchIngressWithoutClass=true
 
     - name: Wait for traefik ingress ready
       shell: bash
@@ -178,7 +178,7 @@ runs:
           exit 1
         fi
 
-        ENDPOINT=$(kubectl -n traefik get svc traefik -o jsonpath='{.status.loadBalancer.ingress[0].ip}:{.spec.ports[0].port}' | awk '{print $0}')
+        ENDPOINT=$(kubectl -n traefik get svc traefik -o jsonpath='{.status.loadBalancer.ingress[0].ip}:{.spec.ports[0].port}' | awk '{print "http://"$0}')
         echo "endpoint=$ENDPOINT" >> $GITHUB_OUTPUT
 
     - name: Create registries auth secret
