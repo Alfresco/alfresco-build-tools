@@ -154,7 +154,7 @@ runs:
       if: >-
         !contains(fromJson('["skip", "none"]'), inputs.ingress-traefik-version)
       run: |
-        sudo -E cloud-provider-kind > cloud-provider.log 2>&1 &
+        cloud-provider-kind &
 
     - name: Wait and return the HTTP endpoint of Traefik
       id: get-traefik-endpoint
