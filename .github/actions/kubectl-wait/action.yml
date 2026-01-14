@@ -27,22 +27,12 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Wait a bit in case of brand new namespace
-      shell: bash
-      run: |
-        kubectl wait --for=create namespace/${{ inputs.namespace }} --timeout=10s
-        NS_LIFETIME=$(kubectl get namespace ${{ inputs.namespace }} \
-            -o jsonpath="{.metadata.creationTimestamp}")
-        NOW_SECS=$(date +%s)
-        NS_SECS=$(date -d "$NS_LIFETIME" +%s)
-        if [ $((NOW_SECS - NS_SECS)) -lt 10 ]; then
-          echo "Namespace ${{ inputs.namespace }} created. Giving other resources some more time to catch up..."
-          sleep 10
-        fi
 
     - name: Watch resources
       shell: bash
       run: |
+        kubectl wait --for=create namespace/${{ inputs.namespace }} --timeout=5s
+        kubectl wait --for=create ${{ inputs.wait-resource }} -n ${{ inputs.namespace }} --timeout=5s
         kubectl get ${{ inputs.wait-resource }} --watch -n ${{ inputs.namespace }} &
         kubectl wait \
           -n ${{ inputs.namespace }} \
