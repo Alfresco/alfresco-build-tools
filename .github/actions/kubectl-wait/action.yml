@@ -32,7 +32,7 @@ runs:
       shell: bash
       run: |
         kubectl wait --for=create namespace/${{ inputs.namespace }} --timeout=5s
-        kubectl wait --for=create ${{ inputs.wait-resource }} -n ${{ inputs.namespace }} --timeout=5s
+        kubectl wait --for=create ${{ inputs.wait-resource }} -n ${{ inputs.namespace }} --timeout=5s > /dev/null
         kubectl get ${{ inputs.wait-resource }} --watch -n ${{ inputs.namespace }} &
         kubectl wait \
           -n ${{ inputs.namespace }} \
