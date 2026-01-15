@@ -19,11 +19,13 @@ runs:
       uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
       env:
         GITHUB_ACTION_PATH: ${{ github.action_path }}
+        INPUT_BRANCH_NAME: ${{ inputs.branch-name }}
+        INPUT_ENVIRONMENT: ${{ inputs.environment }}
       with:
         script: |
           const options={
-            ref:'${{ inputs.branch-name }}',
-            environment:'${{ inputs.environment }}'
+            ref: process.env.INPUT_BRANCH_NAME,
+            environment: process.env.INPUT_ENVIRONMENT
           };
           const githubActionPath = process.env.GITHUB_ACTION_PATH;
           const script = require(`${githubActionPath}/deleteDeploymentScript.js`);
