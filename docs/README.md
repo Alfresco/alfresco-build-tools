@@ -433,7 +433,7 @@ This action requires a dedicated secret (named `BOT_GITHUB_TOKEN` in the sample)
 Another token is also needed to handled approval. It can be the default `GITHUB_TOKEN`, but it cannot be the same one that is used for auto-merge behavior as the user might match the creator of the PR (and auto-approval of a PR is not allowed).
 
 ```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/automate-propagation@v12.4.3
+    - uses: Alfresco/alfresco-build-tools/.github/actions/automate-propagation@v12.5.0
       with:
         auto-merge-token: ${{ secrets.BOT_GITHUB_TOKEN }}
         approval-token: ${{ secrets.GITHUB_TOKEN }}
@@ -444,7 +444,7 @@ Another token is also needed to handled approval. It can be the default `GITHUB_
 Calculate next internal version based on existing tags
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/calculate-next-internal-version@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/calculate-next-internal-version@v12.5.0
         with:
           next-version: 1.2.3
 ```
@@ -454,7 +454,7 @@ Calculate next internal version based on existing tags
 Configures the git username and email to associate commits with the provided identity
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v12.5.0
         with:
           username: ${{ vars.BOT_GITHUB_USERNAME }}
           email: ${{ vars.BOT_GITHUB_EMAIL }}
@@ -475,7 +475,7 @@ actions were needed to be listed explicitly to be updated.
 Nowdays, dependabot supports glob patterns, so this action is not strictly necessary anymore, see [Automating github-actions updates](#automating-github-actions-updates) in the [Cookbook](#cookbook) section for more details.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/dependabot-missing-actions-check@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/dependabot-missing-actions-check@v12.5.0
 ```
 
 ### dbp-charts
@@ -489,7 +489,7 @@ See [dbp-charts](https://github.com/Alfresco/alfresco-build-tools/tree/master/.g
 Ability to dispatch or resume an existing workflow and wait for its completion.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/dispatch-resume-workflow@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/dispatch-resume-workflow@v12.5.0
         with:
           workflow: workflow-name.yml
           run-id: existing_run_number (optional)
@@ -511,7 +511,7 @@ Finally, it pushes the created image into:
 When using OIDC on AWS, inputs `aws-access-key-id` and `aws-secret-access-key` can be omitted: the `aws-role-name` input should be used instead.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/docker-build-image@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/docker-build-image@v12.5.0
         with:
           image-tag: ${{ needs.build.outputs.version }}
           image-dir: ${{ matrix.image-dir }}
@@ -536,7 +536,7 @@ Dumps Docker containers logs. Each container's log will be stored in a separate 
 It is also possible to specify the output archive name when providing the `output-archive-name` parameter.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/docker-dump-containers-logs@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/docker-dump-containers-logs@v12.5.0
 ```
 
 ### docker-scan-image-dirs
@@ -544,7 +544,7 @@ It is also possible to specify the output archive name when providing the `outpu
 Scan the directories were the Dockerfiles are to feed the scanner.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/docker-scan-image-dirs@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/docker-scan-image-dirs@v12.5.0
 ```
 
 ### enforce-pr-conventions
@@ -556,7 +556,7 @@ This action is only valid for workflows triggered by the `pull_request` event.
 Enforce PR conventions with a Jira ticket reference, assuming the Jira project key is `JKEY`:
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/enforce-pr-conventions@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/enforce-pr-conventions@v12.5.0
         with:
           jira-project-key: JKEY
 ```
@@ -567,7 +567,7 @@ Multiple project keys can be defined, separated by "|".
 If default regular expressions do not match the need, they can also be defined:
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/enforce-pr-conventions@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/enforce-pr-conventions@v12.5.0
         with:
           valid-branch-regex: "^(feature|test|tmp)\/JKEY-[0-9]+-[A-Za-z0-9._-]+$"
           valid-pr-title-regex: "^JKEY-[0-9]+ [A-Za-z]{1}.*$"
@@ -576,7 +576,7 @@ If default regular expressions do not match the need, they can also be defined:
 To exempt specific branch names from *both* checks, the optional input parameter called `whitelist-branches` can be utilized. If there are multiple branches to be excluded, they can be written as one branch name per line.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/enforce-pr-conventions@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/enforce-pr-conventions@v12.5.0
         with:
           jira-project-key: JKEY
           whitelist-branches: |-
@@ -623,7 +623,7 @@ Examples:
 Load environment variables from a yaml file
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v12.5.0
         with:
           ignore_regex: ^BRANCH_NAME=.*
           yml_path: .travis/env.yml
@@ -640,7 +640,7 @@ It's usually a good idea to run this action at the very beginning of your job to
 maximize the amount of freed up space for the rest of your workflow steps.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v12.5.0
 ```
 
 By default, it will remove the following SDKs and tools:
@@ -656,7 +656,7 @@ By default, it will remove the following SDKs and tools:
 You can override the default behavior by adding one or more of the following inputs:
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v12.5.0
         with:
           remove-android: false
           remove-dotnet: false
@@ -674,7 +674,7 @@ Since GitHub hosted runners use Azure VMs which provide a local SSD mount under
 will expand the root filesystem leveraging the extra space available under `/mnt`.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v12.5.0
         with:
           merge-disk-volumes: true
           build-mount-path: '/var/lib/docker/' # optional - default to GITHUB_WORKSPACE
@@ -687,7 +687,7 @@ There is an additional input `diagnose-top-offenders-enabled` which when set to 
 run a disk usage analysis and print the top offenders before and after the cleanup.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v12.5.0
         with:
           diagnose-top-offenders-enabled: true
 ```
@@ -697,7 +697,7 @@ run a disk usage analysis and print the top offenders before and after the clean
 Loads the name of the branch on which the action was called into `BRANCH_NAME` environment variable
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v12.5.0
 ```
 
 ### get-build-info
@@ -705,7 +705,7 @@ Loads the name of the branch on which the action was called into `BRANCH_NAME` e
 [get-build-info](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/get-build-info/action.yml) loads build-related info into the runner env, in the form of generically named variables that are not necessarily specific to GitHub.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v12.5.0
 ```
 
 ### gh-cache-cleanup-on-merge
@@ -723,7 +723,7 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/gh-cache-cleanup-on-merge@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/gh-cache-cleanup-on-merge@v12.5.0
         with:
           token: ${{ secrets.GH_TOKEN }}
 ```
@@ -733,7 +733,7 @@ jobs:
 Checks if a tag with the given name already exists for this remote repository. Returns the output named `exists` with value `'true'` or `'false'`.
 
 ```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/git-check-existing-tag@v12.4.3
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-check-existing-tag@v12.5.0
       with:
         tag: 1.0.0
 ```
@@ -748,13 +748,13 @@ This action requires a checkout with fetch-depth option as follow:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@v12.5.0
 ```
 
 If you only need the commit header (first line), you can set the `header-only` input to `true`:
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@v12.5.0
         with:
           header-only: true
 ```
@@ -765,7 +765,7 @@ Commits local changes after configuring git user and showing the status of what 
 If `skip-if-no-changes` input is set to `true` then an empty commit will not be committed at all.
 
 ```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v12.4.3
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v12.5.0
       with:
         username: ${{ secrets.BOT_GITHUB_USERNAME }}
         add-options: -u
@@ -780,7 +780,7 @@ If `skip-if-no-changes` input is set to `true` then an empty commit will not be 
 Gets the latest tag and commit sha for the given pattern. The result is returned in the output named `tag` and `tag_long_sha`.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-latest-tag@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-latest-tag@v12.5.0
         with:
           pattern: 1.0.0-alpha*
 ```
@@ -800,7 +800,7 @@ Checking upcoming runs before running them, eventually favoring the latest run t
 With proper concurrency logic in place, the latest run might have been cancelled: this action also triggers a rerun before exiting in failure. The outcome `exit` can help determining if exit on error was thrown.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/github-check-upcoming-runs@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-check-upcoming-runs@v12.5.0
         with:
           github-token: ${{ secrets.MY_GITHUB_TOKEN }}
           workflow: my-workflow.yml
@@ -826,7 +826,7 @@ jobs:
     steps:
       - name: Create Deployment
         id: create-deployment
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-deployment-create@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-deployment-create@v12.5.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           environment: my_gh_environment
@@ -836,14 +836,14 @@ jobs:
 
       - name: Update Deployment State to failure
         if: failure() && steps.create-deployment.outcome == 'success'
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-deployment-status-update@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-deployment-status-update@v12.5.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           deployment-id: ${{ steps.create-deployment.outputs.id }}
           state: failure
 
       - name: Update Deployment State to success
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-deployment-status-update@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-deployment-status-update@v12.5.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           deployment-id: ${{ steps.create-deployment.outputs.id }}
@@ -862,7 +862,7 @@ Sample usage:
       deployments: write # This is required for deployment statuses management
 
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/github-deployments-delete@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-deployments-delete@v12.5.0
         with:
           branch-name: ${{ github.head_ref }}
 ```
@@ -872,7 +872,7 @@ Sample usage:
 Download a file from another repository.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/download-file@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/download-file@v12.5.0
         with:
           github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           repository: "owner/repository"
@@ -885,7 +885,7 @@ Download a file from another repository.
 Use this action when running a workflow which clone a private repository over https.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/github-https-auth@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-https-auth@v12.5.0
         with:
           username: ${{ vars.BOT_GITHUB_USERNAME }}
           pat: ${{ secrets.BOT_GITHUB_TOKEN }}
@@ -902,7 +902,7 @@ This action requires a checkout with `fetch-depth: 0` option as follow:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v12.5.0
         with:
           write-list-to-env: "true" # default "false"
 ```
@@ -919,7 +919,7 @@ providing a github token and checking out the merge commit:
         with:
           fetch-depth: 0
           ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/merge', github.event.issue.number) || '' }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v12.5.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -943,7 +943,7 @@ jobs:
     steps:
       - name: dependabot check
         id: dependabot
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-check-metadata@v12.5.0
         with:
           gh-token: ${{ secrets.GITHUB_TOKEN }}
           actor: 'dependabot[bot]'
@@ -987,7 +987,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@v12.5.0
         with:
           dependabot-error-message: "This PR requires additional validation, please set the milestone to 'Validating' or ask a reviewer to approve it."
 ```
@@ -1015,7 +1015,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/github-trigger-approved-pr@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-trigger-approved-pr@v12.5.0
         with:
           github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           creator: dependabot[bot]
@@ -1042,7 +1042,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/github-trigger-labeled-pr@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-trigger-labeled-pr@v12.5.0
         with:
           github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           labels: ${{ env.TRIGGER_LABELS }}
@@ -1054,7 +1054,7 @@ jobs:
 Run `helm dep up` and `helm lint` on the specified chart
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-build-chart@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-build-chart@v12.5.0
         with:
           chart-dir: charts/common
 ```
@@ -1065,7 +1065,7 @@ Run `helm upgrade --dryn-run` on the specified chart
 
 ```yaml
       - name: Execute dry run
-        uses: Alfresco/alfresco-build-tools/.github/actions/helm-integration-tests@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/helm-integration-tests@v12.5.0
         with:
           chart-dir: ${{ env.CHART_DIR }}
           test-rancher-url: ${{ secrets.RANCHER2_URL }}
@@ -1081,7 +1081,7 @@ Packages a helm chart into a `.tgz` file and provides the name of the file produ
 The packaged file is also uploaded as an artifact and can be downloaded using `actions/download-artifact`.
 
 ```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/helm-package-chart@v12.4.3
+    - uses: Alfresco/alfresco-build-tools/.github/actions/helm-package-chart@v12.5.0
       id: package-helm-chart
       with:
         chart-dir: charts/common
@@ -1093,7 +1093,7 @@ Parses the next main release version based on the content of Chart.yaml file. Th
 The suffix `-SNAPSHOT` is removed. For instance, if the version attribute in the Chart.yaml file is `1.0.0-SNAPSHOT`, the result will be `1.0.0`
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-parse-next-release@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-parse-next-release@v12.5.0
         id: parse-next-release
         with:
           chart-dir: charts/common
@@ -1104,7 +1104,7 @@ The suffix `-SNAPSHOT` is removed. For instance, if the version attribute in the
 Publishes a new helm chart package (`.tgz`) to a helm chart repository
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-publish-chart@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-publish-chart@v12.5.0
         with:
           helm-charts-repo: Activiti/activiti-cloud-helm-charts
           helm-charts-repo-branch: gh-pages
@@ -1117,7 +1117,7 @@ Publishes a new helm chart package (`.tgz`) to a helm chart repository
 Releases a new version of a helm chart and publishes it to a helm repository
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-release-and-publish@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-release-and-publish@v12.5.0
         with:
           version: 1.0.0
           chart-dir: charts/common
@@ -1137,7 +1137,7 @@ action embed a
 configuration files that should be suitable for most use cases.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-template-yamllint@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-template-yamllint@v12.5.0
         with:
           chart-dir: helm/my-chart # defaults to current working directory
           helm-options: --values tests/values/test_values.yaml --set persistence.enabled=false # to handle mandatory values or test different rendering
@@ -1150,7 +1150,7 @@ Install requested Helm plugin
 
 ```yaml
      - uses: >-
-         Alfresco/alfresco-build-tools/.github/actions/helm-plugin@v12.4.3
+         Alfresco/alfresco-build-tools/.github/actions/helm-plugin@v12.5.0
        with:
          plugin_url: https://domain/path/to/
          plugin_version: v1.0.0
@@ -1163,7 +1163,7 @@ Install requested Helm plugin
 Updates `version` attribute inside `Chart.yaml` file:
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-update-chart-version@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/helm-update-chart-version@v12.5.0
         with:
           new-version: 1.0.0
 ```
@@ -1173,7 +1173,7 @@ Updates `version` attribute inside `Chart.yaml` file:
 Installs and cache ansible galaxy dependencies. When `pipenv` binary exists, installation command is prefixed with `pipenv run`.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/install-galaxy-deps@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/install-galaxy-deps@v12.5.0
         with:
           cache-name: cache-name-default
           cache-version: 1
@@ -1185,7 +1185,7 @@ Install common Ubuntu tools such as docker, git, zip, unzip. Meant to be used on
 top of self-hosted runners coming with vanilla ubuntu images or the latest arm64 runners.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/install-ubuntu-default-tools@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/install-ubuntu-default-tools@v12.5.0
         with:
           package-names-list: "postgresql-client" # optional packages to install
 ```
@@ -1219,7 +1219,7 @@ This action will promote alpha version to `alfresco-process-releases` repository
 
 ```yaml
       - name: Promote version
-        uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/jx-updatebot-pr@v12.5.0
         with:
           version: ${{ steps.tag.outputs.version }}
           labels: develop
@@ -1240,7 +1240,7 @@ This action allow to collect logs from pods if they are referenced in a deployme
     - name: Upload pods logs
       if: always()
       uses: >-
-        Alfresco/alfresco-build-tools/.github/actions/kubectl-keep-nslogs@v12.4.3
+        Alfresco/alfresco-build-tools/.github/actions/kubectl-keep-nslogs@v12.5.0
       with:
         namespace: mynsapp
         log_retention: 7
@@ -1253,7 +1253,7 @@ Wait for k8s resources (usually pods) to be ready.
 
 ```yaml
     - name: Wait for pods to be ready
-      uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@v12.4.3
+      uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@v12.5.0
       # with:
         # wait-timeout: 10m
         # wait-for-what: condition
@@ -1269,20 +1269,20 @@ method is shown in the example below:
 
 ```yaml
       - name: Wait for deployments to be ready
-        uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@v12.5.0
         with:
           wait-resource: deployments
           wait-condition: Available
 
       - name: Wait for statefulsets to be ready
-        uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@v12.5.0
         with:
           wait-resource: sts
           wait-for-what: jsonpath
           wait-condition: "'{.status.readyReplicas}'=1"
 
       - name: Wait for jobs to be completed
-        uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/kubectl-wait@v12.5.0
         with:
           wait-resource: jobs
           wait-condition: complete
@@ -1293,7 +1293,7 @@ method is shown in the example below:
 Used to release Activiti Projects. Load release information from release.yaml file.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/load-release-descriptor@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/load-release-descriptor@v12.5.0
         id: load-descriptor
         with:
           release-descriptor: release.yaml
@@ -1304,7 +1304,7 @@ Used to release Activiti Projects. Load release information from release.yaml fi
 Set up Java and Maven version and compute common maven options including settings.xml to be used. It also restores Maven cache.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@v12.5.0
         with:
           java-version: '21'
           maven-version: '3.8.8'
@@ -1315,7 +1315,7 @@ Set up Java and Maven version and compute common maven options including setting
 Create the project Dependency Graph
 
 ```yaml
-- uses: Alfresco/alfresco-build-tools/.github/actions/maven-dependency-scan@v12.4.3
+- uses: Alfresco/alfresco-build-tools/.github/actions/maven-dependency-scan@v12.5.0
   with:
     restore-artifact-pattern: 'm2*'
     restore-artifact-path: '~./m2/com/groupId'
@@ -1338,7 +1338,7 @@ to specify the path where the artifacts are stored.
 Builds a maven project using the provided command.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@v12.5.0
         with:
           java-version: '21'
           maven-command: 'verify'
@@ -1376,7 +1376,7 @@ Check out, builds a maven project and docker images, generating a new alpha vers
       version: ${{ steps.build-and-tag.outputs.version }}
       skip-tests: ${{ steps.build-and-tag.outputs.skip-tests }}
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build-and-tag@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-build-and-tag@v12.5.0
         id: build-and-tag
         with:
           maven-username: ${{ secrets.NEXUS_USERNAME }}
@@ -1423,7 +1423,7 @@ using a custom settings.xml, you probably want to provide also
 
 ```yaml
       - name: Deploy to Nexus
-        uses: Alfresco/alfresco-build-tools/.github/actions/maven-deploy-file@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/maven-deploy-file@v12.5.0
         with:
           group-id: org.alfresco
           artifact-id: custom-alfresco-distribution
@@ -1443,7 +1443,7 @@ using a custom settings.xml, you probably want to provide also
 Used to release Activiti projects. Update versions in POM files, create git tags and publish Maven artifacts to staging repository.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-release@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-release@v12.5.0
         with:
           repo: Activiti/Activiti
           base-ref: ${{  needs.load-release-info.outputs.activiti-tag }}
@@ -1479,7 +1479,7 @@ Updates POM files to the next pre-release, commits changes and creates a Git tag
 Updates pom files to the provided version
 
 ```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@v12.4.3
+    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@v12.5.0
       with:
         version: 1.0.0-alpha.1
 ```
@@ -1489,7 +1489,7 @@ Updates pom files to the provided version
 Generates a Markdown table of contents for a file.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/md-toc@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/md-toc@v12.5.0
         with:
           md_src: 'LICENSE.md README.md docs/*.md'
           bullets: '-'
@@ -1511,7 +1511,7 @@ For ToC to be inserted in your file, it needs to contain the HTML comment below:
 Moves artifacts from one repository to another on Nexus 3, identified by a particular group and version.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-move-artifacts@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/nexus-move-artifacts@v12.5.0
         with:
           destination-repository: destination-repository
           source-repository: source-repository
@@ -1543,7 +1543,7 @@ jobs:
     permissions:
       contents: write # required only when auto-commit is enabled
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v12.5.0
         with:
           auto-commit: "true" # optionally commit automated fix changes back
 ```
@@ -1557,7 +1557,7 @@ usually helps when running this step as the first step in a job and is mandatory
 for the proper handling of auto-commit feature, unless you specify:
 
 ```yml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v12.5.0
         with:
           skip_checkout: "true"
 ```
@@ -1568,7 +1568,7 @@ This workflow processes the coverage report to add the total coverage percentage
 
 ```yml
         id: process-coverage-report
-        uses: Alfresco/alfresco-build-tools/.github/actions/process-coverage-report@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/process-coverage-report@v12.5.0
         with:
           paths: |
             ${{ github.workspace }}/**/build/reports/jacoco/prodNormalDebugCoverage/prodNormalDebugCoverage.xml,
@@ -1588,7 +1588,7 @@ This workflow sets up a Python environment using the standard setup-python actio
         id: setup-python
         with:
           python-version: "3.9"
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pipenv@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pipenv@v12.5.0
         with:
           python-version: ${{ steps.setup-python.outputs.python-version }}
 ```
@@ -1602,7 +1602,7 @@ AWS credentials are required only when registering the cluster.
 
 ```yaml
       - name: Register Cluster
-        uses: Alfresco/alfresco-build-tools/.github/actions/rancher@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/rancher@v12.5.0
         with:
           rancher-url: ${{ env.RANCHER2_URL }}
           rancher-access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
@@ -1620,7 +1620,7 @@ The action allows to aggregate an external release note into the current one
 
 ```yaml
       - name: Release Notes Aggregate
-        uses: Alfresco/alfresco-build-tools/.github/actions/release-notes-aggregator@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/release-notes-aggregator@v12.5.0
         with:
           external-repo: 'external-repo'
           from-external-version: ${{ env.FROM_EXTERNAL_RELEASE_TAG }}
@@ -1669,7 +1669,7 @@ env:
 [...]
 
     - name: Prepare Report Portal
-      uses: Alfresco/alfresco-build-tools/.github/actions/reportportal-prepare@v12.4.3
+      uses: Alfresco/alfresco-build-tools/.github/actions/reportportal-prepare@v12.5.0
       id: rp-prepare
       with:
         rp-launch-prefix: ${{ env.RP_LAUNCH_PREFIX }}
@@ -1710,7 +1710,7 @@ env:
         echo "#### ⏱ After Tests: $(date -u +'%Y-%m-%d %H:%M:%S%:z')" >> $GITHUB_STEP_SUMMARY
 
     - name: Summarize Report Portal
-      uses: Alfresco/alfresco-build-tools/.github/actions/reportportal-summarize@v12.4.3
+      uses: Alfresco/alfresco-build-tools/.github/actions/reportportal-summarize@v12.5.0
       id: rp-summarize
       with:
         tests-outcome: ${{ steps.run-tests.outcome }}
@@ -1740,7 +1740,7 @@ Sample usage (as follow-up of above sample):
 
 ```yaml
     - name: Summarize Report Portal
-      uses: Alfresco/alfresco-build-tools/.github/actions/reportportal-summarize@v12.4.3
+      uses: Alfresco/alfresco-build-tools/.github/actions/reportportal-summarize@v12.5.0
       id: rp-summarize
       with:
         tests-outcome: ${{ steps.run-tests.outcome }}
@@ -1757,7 +1757,7 @@ Sample usage (as follow-up of above sample):
 
     - name: Notify Slack on failure
       if: always() && failure()
-      uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v12.4.3
+      uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v12.5.0
       with:
         channel-id: "channel-id"
         token: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -1784,7 +1784,7 @@ The equivalent output "teams-message" (using standard markdown format) is availa
 Resolve preview name based on the PR number and run number:
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/resolve-preview-name@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/resolve-preview-name@v12.5.0
         id: resolve-preview-name
       - run: |
           echo ${{ steps.resolve-preview-name.outputs.preview-name }}
@@ -1796,7 +1796,7 @@ Sends a slack notification when current run took more time than specified via `m
 This action should be added at the end to correctly measure the time.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification-slow-job@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification-slow-job@v12.5.0
         with:
           channel-id: 'channel-id'
           token: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -1808,7 +1808,7 @@ This action should be added at the end to correctly measure the time.
 Sends a slack notification with a pre-defined payload, relying on the [slackapi/slack-github-action](https://github.com/slackapi/slack-github-action) official action.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v12.5.0
         with:
           channel-id: 'channel-id'
           token: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -1830,7 +1830,7 @@ Sample notification on `pull_request` event:
 An optional message can be given instead of the default one:
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v12.5.0
         with:
           channel-id: 'channel-id'
           token: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -1842,7 +1842,7 @@ An optional message can be given instead of the default one:
 This message can also be appended to the default message:
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v12.5.0
         with:
           channel-id: "channel-id"
           token: ${{ secrets.SLACK_BOT_TOKEN }}
@@ -1853,7 +1853,7 @@ This message can also be appended to the default message:
 The action also outputs the id of the Slack thread (`thread-id`) that is being created or replied to when sending the message:
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v12.5.0
         id: slack
         with:
           channel-id: 'channel-id'
@@ -1865,7 +1865,7 @@ The action also outputs the id of the Slack thread (`thread-id`) that is being c
 If you want the message to be posted as a reply to an existing thread rather than starting its own, make sure to specify the optional `thread-id` input:
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v12.5.0
         id: slack
         with:
           channel-id: 'channel-id'
@@ -1878,7 +1878,7 @@ If you want the message to be posted as a reply to an existing thread rather tha
 Sends a teams notification with a pre-defined payload.
 
 ```yml
-      uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v12.4.3
+      uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v12.5.0
       with:
         webhook-url: ${{ secrets.MSTEAMS_WEBHOOK }}
 ```
@@ -1912,7 +1912,7 @@ The mentionable entities defined via the aforementioned properties **need** to b
 Sample usage with mentions:
 
 ```yml
-      uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v12.4.3
+      uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v12.5.0
       with:
         webhook-url: ${{ secrets.MSTEAMS_WEBHOOK }}
         message: "<at>John Doe</at>, <at>Jane Doe</at>, <at>Security Champions</at>, please review the failure logs."
@@ -1947,7 +1947,7 @@ To get the necessary data for mentions:
 Set up a specific version of Checkov and add it to the PATH.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-checkov@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-checkov@v12.5.0
         with:
           version: '3.2.0'
 ```
@@ -1962,7 +1962,7 @@ Hosted runners.
 
 ```yaml
       - name: Setup Docker Engine
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-docker@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-docker@v12.5.0
 ```
 
 ### setup-fluxcli
@@ -1970,7 +1970,7 @@ Hosted runners.
 Set up a specific version of Flux CLI and add it to the PATH.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-fluxcli@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-fluxcli@v12.5.0
         with:
           version: '2.6.4'
 ```
@@ -1987,7 +1987,7 @@ single string or a JSON object mapping OS_ARCH to checksums (e.g.,
 checksum verification is performed but warning is emitted to ease configuration.
 
 ```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v12.4.3
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v12.5.0
       with:
         repo: org/repo-name
         version: '1.2.3'
@@ -2013,7 +2013,7 @@ checksum verification is performed but warning is emitted to ease configuration.
 Install the helm-docs binary from GitHub Releases and add it to the PATH.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@v12.5.0
         with:
           version: "1.14.2"
 ```
@@ -2029,7 +2029,7 @@ Optionally, the custom `cache-key-prefix` can be provided. It will override the 
 
 ```yaml
       - name: Setup Java build
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v12.5.0
         with:
           java-version: "17" # optional
           java-distribution: "temurin" # optional
@@ -2042,7 +2042,7 @@ Optionally, the custom `cache-key-prefix` can be provided. It will override the 
 Set up a specific version of jx-release-version and add it to the PATH.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-jx-release-version@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-jx-release-version@v12.5.0
         with:
           version: "2.2.3"
 ```
@@ -2052,7 +2052,7 @@ Set up a specific version of jx-release-version and add it to the PATH.
 Setup the `kcadm` binary from Keycloak distribution and add it to the PATH.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-kcadm@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-kcadm@v12.5.0
         with:
           version: "24.0.5"
 ```
@@ -2063,7 +2063,7 @@ Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
 
 ```yaml
       - name: Setup cluster
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-kind@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-kind@v12.5.0
         with:
           # Specify kind and k8s version to use.
           # see https://github.com/kubernetes-sigs/kind/releases
@@ -2092,7 +2092,7 @@ Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
 Install the Kubernetes preupgrade checker and add it to the PATH.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-kubepug@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-kubepug@v12.5.0
         with:
           version: "1.3.2"
 ```
@@ -2102,7 +2102,7 @@ Install the Kubernetes preupgrade checker and add it to the PATH.
 Install the pysemver binary from GitHub Releases and add it to the PATH.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-pysemver@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-pysemver@v12.5.0
         with:
           version: "2.13.0"
 ```
@@ -2112,7 +2112,7 @@ Install the pysemver binary from GitHub Releases and add it to the PATH.
 Install the Rancher CLI binary from GitHub Releases and add it to the PATH.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@v12.5.0
         with:
           version: "2.9.2"
 ```
@@ -2122,7 +2122,7 @@ Install the Rancher CLI binary from GitHub Releases and add it to the PATH.
 Install the terraform-docs binary from GitHub Releases and add it to the PATH.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-terraform-docs@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-terraform-docs@v12.5.0
         with:
           version: "0.16.0"
 ```
@@ -2135,7 +2135,7 @@ For more details on terraform related workflows, see the dedicated
 Install the updatebot binary from GitHub Releases and add it to the PATH.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatebot@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatebot@v12.5.0
         with:
           version: "1.1.60"
 ```
@@ -2145,7 +2145,7 @@ Install the updatebot binary from GitHub Releases and add it to the PATH.
 Install the updatecli binary from GitHub Releases and add it to the PATH.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatecli@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatecli@v12.5.0
         with:
           version: "0.93.0" # omit to use the default version provided by the action
 ```
@@ -2155,7 +2155,7 @@ Install the updatecli binary from GitHub Releases and add it to the PATH.
 Uploads a file to a Slack channel.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/slack-file-upload@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/slack-file-upload@v12.5.0
         with:
           slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
           slack-channel-id: 'channel-id' # not the channel name
@@ -2168,7 +2168,7 @@ Uploads a file to a Slack channel.
 Run Sonar Scanner to load JaCoCo report on SonarCloud.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scan-on-built-project@v12.5.0
         with:
           sonar-token: ${{ secrets.SONAR_TOKEN }}
           sonar-project: 'example-project-key'
@@ -2189,7 +2189,7 @@ Run Sonar Scanner to load JaCoCo report on SonarCloud.
 Run Sonar Scanner to load JaCoCo report on SonarCloud.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scanner@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/sonar-scanner@v12.5.0
         with:
           sonar-token: ${{ secrets.SONAR_TOKEN }}
           aggregate-report-path: ${{ github.workspace }}/coverage-folder/target/site/jacoco-aggregate/jacoco.xml
@@ -2213,7 +2213,7 @@ Used to update a base tag in the release descriptor. It will add or update the
 entry `release.baseTag.$PROJECT` with the value specified in the input `tag`.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/update-project-base-tag@v12.5.0
         with:
           release-descriptor: release.yaml
           project: activiti
@@ -2225,7 +2225,7 @@ entry `release.baseTag.$PROJECT` with the value specified in the input `tag`.
 Validates Maven dependency graph versions to ensure all target includes artifacts versions align
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/validate-maven-versions@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/validate-maven-versions@v12.5.0
         with:
           maven-username: ${{ secrets.NEXUS_USERNAME }}
           maven-password: ${{ secrets.NEXUS_PASSWORD }}
@@ -2246,7 +2246,7 @@ If that project doesn't exist, it will be created automatically. You can then se
 This way, the agent-based scan results will be added in the latest promoted scan of ACS_EXT_MASTER_7_4 Veracode application.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v12.5.0
         #continue-on-error: true # uncomment this line to prevent the Veracode scan step from failing the whole build
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
@@ -2260,7 +2260,7 @@ Xvfb session using ffmpeg, and uploads the recording as an artifact.
 
 ```yaml
       - name: Functional tests
-        uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/xvfb-record@v12.5.0
         with:
           test_command: mvn -ntp install -Pftest -DskipInstall
           timeout_minutes: 120 # optional, default is 60
@@ -2283,7 +2283,7 @@ Check `action.yml` for the full list of inputs and their descriptions.
 Publish Nuxeo package to Nuxeo Online Services (NOS).
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/nos-publish@v12.4.3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/nos-publish@v12.5.0
         with:
           nos-env: production # Market place target env (either 'production' or 'staging')
           nos-username: ${{ secrets.NOS_CONNECT_USERNAME }}
@@ -2314,7 +2314,7 @@ Pushes the resulting image to a target registry (default `ghcr.io`) and outputs 
 
 ```yaml
       - name: Build Nuxeo image
-        uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/nuxeo-docker-build@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/nuxeo-docker-build@v12.5.0
         with:
           base-image-tag: 2023
           base-registry-username: ${{ secrets.NUXEO_REGISTRY_USERNAME }}
@@ -2347,7 +2347,7 @@ jobs:
           - 5000:5000
     steps:
       - name: Build base docker image
-        uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/nuxeo-docker-build@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/nuxeo-docker-build@v12.5.0
         with:
           buildx-driver-opts: network=host # to access local registry
           base-image-tag: ${{ env.NUXEO_VERSION }}
@@ -2410,7 +2410,7 @@ permissions:
 
 jobs:
   promote:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/branch-promotion-prs.yml@v12.4.3
+    uses: Alfresco/alfresco-build-tools/.github/workflows/branch-promotion-prs.yml@v12.5.0
     with:
       source-branch: 'develop' # default branch to promote from
       target-branches: '["staging", "production"]' # JSON array of branches to promote to
@@ -2429,7 +2429,7 @@ Calculates the new alpha version, creates new git tag and publishes the new pack
 
 ```yaml
   publish:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/helm-publish-new-package-version.yml@v12.4.3
+    uses: Alfresco/alfresco-build-tools/.github/workflows/helm-publish-new-package-version.yml@v12.5.0
     needs: build
     with:
       next-version: 7.4.0
@@ -2469,7 +2469,7 @@ jobs:
     release:
         name: Release
         if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
-        uses: Alfresco/alfresco-build-tools/.github/workflows/reusable-release.yml@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/workflows/reusable-release.yml@v12.5.0
         with:
           release_type_override: ${{ inputs.release_type }}
           commit_username: ${{ vars.BOT_GITHUB_USERNAME }}
@@ -2625,7 +2625,7 @@ on:
 
 jobs:
   check:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/pr-review-check.yml@v12.4.3
+    uses: Alfresco/alfresco-build-tools/.github/workflows/pr-review-check.yml@v12.5.0
     with:
       trigger-labels: '["CI", "preview", "skip-tests"]'
       milestone-name: 'Validating'
@@ -2658,7 +2658,7 @@ jobs:
       - name: Check dependabot/fork build
         # Require secrets if triggered by dependabot, or if this is a fork PR not being validated through milestone setup
         if: github.secret_source == 'Dependabot' || (github.secret_source == 'None' && github.event.action != 'milestoned')
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@v12.4.3
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-require-secrets@v12.5.0
         with:
           dependabot-error-message: "This PR requires additional validation, please set the milestone to 'Validating' or ask a reviewer to approve it."
           none-error-message: "This PR requires additional validation, please set the milestone to 'Validating'."
