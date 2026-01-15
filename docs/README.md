@@ -602,7 +602,7 @@ Examples:
 
 ❌ dev-uname-jkey-12345
 
-**Default regex for PR title:**: `"^([Rr]evert*)|^($JIRA_KEY)-[0-9]+ [A-Z]{1}.*$"`
+**Default regex for PR title:**: `"^([Rr]evert.*)|^($JIRA_KEY)-[0-9]+ [A-Z]{1}.*$"`
 
 If the PR title starts with "Revert", it will be considered valid.
 
