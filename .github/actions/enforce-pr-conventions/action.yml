@@ -57,7 +57,7 @@ runs:
         fi
 
         if [[ -z "$PR_REGEX" ]]; then
-          echo "valid-pr-title-regex=^(Revert*)|^($JIRA_KEY)-[0-9]+ [A-Z]{1}.*$" >> $GITHUB_OUTPUT
+          echo "valid-pr-title-regex=^([Rr]evert.*)|^($JIRA_KEY)-[0-9]+ [A-Z]{1}.*$" >> $GITHUB_OUTPUT
         else
           echo "valid-pr-title-regex=$PR_REGEX" >> $GITHUB_OUTPUT
         fi
