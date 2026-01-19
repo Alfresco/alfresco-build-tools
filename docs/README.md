@@ -423,7 +423,7 @@ on:
   workflow_dispatch:
 ```
 
-### Retry an action.
+### Retry an action
 
 To retry a github action step or command on failure, here is an example -
 
@@ -437,9 +437,8 @@ To retry a github action step or command on failure, here is an example -
         attempt_limit: 3
         attempt_delay: 2000
 ```
+
 Please visit [wretry.action](https://github.com/Wandalen/wretry.action) for more examples of how to use this action
-
-
 
 ## GitHub Actions provided by us
 
