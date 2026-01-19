@@ -1328,6 +1328,8 @@ Create the project Dependency Graph
     ghcr-password: ${{ secrets.GHCR_PASSWORD }}
 ```
 
+This action automatically retries the dependency submission up to 3 times on failure with a 2-second delay between attempts to handle transient errors.
+
 #### `restore-artifact-pattern` option
 
 Allow restoring artifacts from an earlier job to avoid attempts to download them from remote. To be used alongside with the option `restore-artifact-path`
