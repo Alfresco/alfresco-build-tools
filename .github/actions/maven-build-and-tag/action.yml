@@ -255,7 +255,7 @@ runs:
         rm -fr ~/.m2/repository/com/alfresco
 
     - name: Save maven cache
-      uses: actions/cache/save@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
+      uses: actions/cache/save@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
       if: github.event_name == 'push' || env.IS_PREVIEW == 'true'
       with:
         path: ~/.m2/repository
