@@ -79,7 +79,7 @@ Any other tfvars file must be named after the GitHub environment name, e.g.
 You can provide additional environment variables to the terraform execution by
 creating a file named `tfenv.yml` in the root of your terraform workspace,
 following the syntax supported by [env-load-from-yaml
-action](https://alfresco.github.io/alfresco-build-tools/#env-load-from-yaml)
+action](README.md#env-load-from-yaml)
 
 ### Example usage
 
