@@ -75,17 +75,17 @@ jobs:
       - uses: ./.github/actions/rancher
         if: ${{ ! github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' && matrix.os == 'ubuntu-latest' }}
         with:
-          rancher-url: 'https://rancher2.envalfresco.com'
-          rancher-access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
-          rancher-secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
+          rancher-url: ${{ vars.RANCHER_OPSEXP_URL }}
+          rancher-access-key: ${{ secrets.RANCHER_OPSEXP_ACCESS_KEY }}
+          rancher-secret-key: ${{ secrets.RANCHER_OPSEXP_SECRET_KEY }}
           cluster-name: "fake_cluster"
           action: "detach"
       - uses: ./.github/actions/setup-rancher-cli
         if: ${{ ! github.event.pull_request.head.repo.fork && github.actor != 'dependabot[bot]' && matrix.os == 'ubuntu-latest' }}
         with:
-          url: ${{ secrets.RANCHER2_URL }}
-          access-key: ${{ secrets.RANCHER2_ACCESS_KEY }}
-          secret-key: ${{ secrets.RANCHER2_SECRET_KEY }}
+          url: ${{ vars.RANCHER_OPSEXP_URL }}
+          access-key: ${{ secrets.RANCHER_OPSEXP_ACCESS_KEY }}
+          secret-key: ${{ secrets.RANCHER_OPSEXP_SECRET_KEY }}
           context: local
       - uses: ./.github/actions/setup-updatebot
       - uses: ./.github/actions/setup-pysemver
