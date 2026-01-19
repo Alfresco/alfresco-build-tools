@@ -26,8 +26,6 @@ GitHub Environments must be configured with the following GitHub variables
 - `AWS_DEFAULT_REGION`: where the AWS resources will be created
 - `AWS_ROLE_ARN` (optional): the ARN of the role to assume in case OIDC
   authentication is available
-- `RANCHER2_URL` (optional): automatically register EKS cluster on a given rancher
-  instance
 - `RESOURCE_NAME`: used to namespace every resource created, e.g. State file in
   the S3 bucket. You can use it as well inside Terraform by defining a variable
   `resource_name` in your Terraform code.
@@ -75,6 +73,13 @@ if no common variables are needed.
 
 Any other tfvars file must be named after the GitHub environment name, e.g.
 `production.tfvars`, `develop.tfvars`, etc.
+
+### Environment variables
+
+You can provide additional environment variables to the terraform execution by
+creating a file named `tfenv.yml` in the root of your terraform workspace,
+following the syntax supported by [env-load-from-yaml
+action](https://alfresco.github.io/alfresco-build-tools/#env-load-from-yaml)
 
 ### Example usage
 
