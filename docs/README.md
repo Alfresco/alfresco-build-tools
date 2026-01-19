@@ -33,6 +33,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [Retry failing step](#retry-failing-step)
   - [SSH debug](#ssh-debug)
   - [Triggering a workflow in another repository](#triggering-a-workflow-in-another-repository)
+  - [Retry action](#retry-an-action)
 - [GitHub Actions provided by us](#github-actions-provided-by-us)
   - [automate-propagation](#automate-propagation)
   - [calculate-next-internal-version](#calculate-next-internal-version)
@@ -421,6 +422,24 @@ on:
   # allows triggering workflow manually or from other jobs
   workflow_dispatch:
 ```
+
+### Retry an action.
+
+To retry a github action step or command on failure, here is an example -
+
+```yml
+      - uses: Wandalen/wretry.action@master
+        with:
+        action: action/setup-node@2.3.0
+        with: |
+          node-version: 14.x
+          architecture: x64
+        attempt_limit: 3
+        attempt_delay: 2000
+```
+Please visit [wretry.action](https://github.com/Wandalen/wretry.action) for more examples of how to use this action
+
+
 
 ## GitHub Actions provided by us
 
