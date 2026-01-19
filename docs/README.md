@@ -1330,7 +1330,7 @@ Set up Java and Maven version and compute common maven options including setting
 
 ### maven-dependency-scan
 
-Create the project Dependency Graph.This action automatically retries the dependency submission up to 3 times on failure with a 2-second delay between attempts to handle transient errors.
+Create the project Dependency Graph. This action automatically retries the dependency submission up to 3 times on failure with a 2-second delay between attempts to handle transient errors.
 
 ```yaml
 - uses: Alfresco/alfresco-build-tools/.github/actions/maven-dependency-scan@v12.5.1
