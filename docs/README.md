@@ -428,9 +428,9 @@ on:
 To retry a github action step or command on failure, here is an example -
 
 ```yml
-      - uses: Wandalen/wretry.action@master
+      - uses: Wandalen/wretry.action@e68c23e6309f2871ca8ae4763e7629b9c258e1ea # v3.8.0
         with:
-        action: action/setup-node@2.3.0
+        action: actions/setup-node@2.3.0
         with: |
           node-version: 14.x
           architecture: x64
