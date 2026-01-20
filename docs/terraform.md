@@ -26,8 +26,6 @@ GitHub Environments must be configured with the following GitHub variables
 - `AWS_DEFAULT_REGION`: where the AWS resources will be created
 - `AWS_ROLE_ARN` (optional): the ARN of the role to assume in case OIDC
   authentication is available
-- `RANCHER2_URL` (optional): automatically register EKS cluster on a given rancher
-  instance
 - `RESOURCE_NAME`: used to namespace every resource created, e.g. State file in
   the S3 bucket. You can use it as well inside Terraform by defining a variable
   `resource_name` in your Terraform code.
@@ -76,6 +74,12 @@ if no common variables are needed.
 Any other tfvars file must be named after the GitHub environment name, e.g.
 `production.tfvars`, `develop.tfvars`, etc.
 
+### Environment variables
+
+You can provide additional environment variables to the terraform execution by
+creating a file named `tfenv.yml` in the root of your terraform workspace,
+following the syntax supported by [env-load-from-yaml action](README.md#env-load-from-yaml)
+
 ### Example usage
 
 An example workflow using this reusable workflow could look like this:
@@ -116,7 +120,7 @@ permissions:
 
 jobs: # one job for each terraform folder/stack
   invoke-terraform-infra:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v12.5.1
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v12.6.0
     with:
       terraform_root_path: infra
       terraform_operation: ${{ inputs.terraform_operation }}
@@ -125,7 +129,7 @@ jobs: # one job for each terraform folder/stack
 
   invoke-terraform-k8s:
     needs: invoke-terraform-infra
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v12.5.1
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v12.6.0
     with:
       terraform_root_path: k8s
       terraform_operation: ${{ inputs.terraform_operation }}
@@ -191,7 +195,7 @@ permissions:
 
 jobs:
   pre-commit:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v12.5.1
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v12.6.0
     with:
       BOT_GITHUB_USERNAME: ${{ vars.BOT_GITHUB_USERNAME }}
     secrets: inherit
