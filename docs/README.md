@@ -33,6 +33,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [Retry failing step](#retry-failing-step)
   - [SSH debug](#ssh-debug)
   - [Triggering a workflow in another repository](#triggering-a-workflow-in-another-repository)
+  - [Retry action](#retry-an-action)
 - [GitHub Actions provided by us](#github-actions-provided-by-us)
   - [automate-propagation](#automate-propagation)
   - [calculate-next-internal-version](#calculate-next-internal-version)
@@ -421,6 +422,23 @@ on:
   # allows triggering workflow manually or from other jobs
   workflow_dispatch:
 ```
+
+### Retry an action
+
+To retry a github action step or command on failure, here is an example -
+
+```yml
+      - uses: Wandalen/wretry.action@e68c23e6309f2871ca8ae4763e7629b9c258e1ea # v3.8.0
+        with:
+        action: actions/setup-node@2.3.0
+        with: |
+          node-version: 14.x
+          architecture: x64
+        attempt_limit: 3
+        attempt_delay: 2000
+```
+
+Please visit [wretry.action](https://github.com/Wandalen/wretry.action) for more examples of how to use this action
 
 ## GitHub Actions provided by us
 
@@ -1312,7 +1330,7 @@ Set up Java and Maven version and compute common maven options including setting
 
 ### maven-dependency-scan
 
-Create the project Dependency Graph
+Create the project Dependency Graph. This action automatically retries the dependency submission up to 3 times on failure with a 2-second delay between attempts to handle transient errors.
 
 ```yaml
 - uses: Alfresco/alfresco-build-tools/.github/actions/maven-dependency-scan@v12.6.0
