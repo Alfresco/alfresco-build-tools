@@ -48,14 +48,9 @@ runs:
         maven-version: ${{ inputs.maven-version }}
 
     - name: Submit Dependency Graph
-      uses: Wandalen/wretry.action@e68c23e6309f2871ca8ae4763e7629b9c258e1ea # v3.8.0
+      uses: advanced-security/maven-dependency-submission-action@b275d12641ac2d2108b2cbb7598b154ad2f2cee8 # v5.0.0
       with:
-        attempt_limit: 3
-        attempt_delay: 2000
-        retry_condition: github.ref_name == github.event.repository.default_branch
-        action: advanced-security/maven-dependency-submission-action@b275d12641ac2d2108b2cbb7598b154ad2f2cee8 # v5.0.0
-        with: |
-          maven-args: ${{ steps.maven-configure.outputs.maven-options }} ${{ inputs.maven-args }}
+        maven-args: ${{ steps.maven-configure.outputs.maven-options }} ${{ inputs.maven-args }}
       env:
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
