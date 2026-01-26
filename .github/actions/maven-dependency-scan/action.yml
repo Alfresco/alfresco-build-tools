@@ -55,7 +55,7 @@ runs:
         retry_condition: github.ref_name == github.event.repository.default_branch
         action: advanced-security/maven-dependency-submission-action@b275d12641ac2d2108b2cbb7598b154ad2f2cee8 # v5.0.0
         with: |
-          maven-args: ${{ steps.maven-configure.outputs.maven-options }} ${{ inputs.maven-args }}
+          maven-args: -B -ntp ${{ steps.maven-configure.outputs.maven-options }} ${{ inputs.maven-args }}
       env:
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
