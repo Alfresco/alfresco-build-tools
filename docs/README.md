@@ -422,6 +422,7 @@ on:
   # allows triggering workflow manually or from other jobs
   workflow_dispatch:
 ```
+
 ### Retry an action
 
 To retry a github action step or command on failure, here is an example -
