@@ -33,7 +33,8 @@ Here follows the list of GitHub Actions topics available in the current document
   - [Retry failing step](#retry-failing-step)
   - [SSH debug](#ssh-debug)
   - [Triggering a workflow in another repository](#triggering-a-workflow-in-another-repository)
-  - [Retry action](#retry-an-action)
+  - [Retry an action](#retry-an-action)
+  - [Actions SHA pinning](#actions-sha-pinning)
 - [GitHub Actions provided by us](#github-actions-provided-by-us)
   - [automate-propagation](#automate-propagation)
   - [calculate-next-internal-version](#calculate-next-internal-version)
@@ -439,6 +440,16 @@ To retry a github action step or command on failure, here is an example -
 ```
 
 Please visit [wretry.action](https://github.com/Wandalen/wretry.action) for more examples of how to use this action
+
+### Actions SHA pinning
+
+To ensure the security and integrity of your GitHub Actions workflows, it's
+recommended to pin third-party actions to a specific commit SHA. This prevents unexpected
+changes in the action's code from affecting your workflows, until the upstream project
+starts using [Immutable releases](https://docs.github.com/en/code-security/concepts/supply-chain-security/immutable-releases).
+
+See [github-actions-ensure-sha-pinned-actions](https://github.com/hyland/github-actions-ensure-sha-pinned-actions),
+available via pre-commit as well.
 
 ## GitHub Actions provided by us
 

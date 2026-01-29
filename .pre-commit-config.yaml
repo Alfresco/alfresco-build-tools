@@ -30,6 +30,10 @@ repos:
     rev: v1.7.9
     hooks:
       - id: actionlint
+  - repo: https://github.com/hyland/github-actions-ensure-sha-pinned-actions
+    rev: v1.1.0
+    hooks:
+      - id: gha-sha-convert
   - repo: local
     hooks:
       - id: check-readme
