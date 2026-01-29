@@ -446,7 +446,7 @@ Please visit [wretry.action](https://github.com/Wandalen/wretry.action) for more
 To ensure the security and integrity of your GitHub Actions workflows, it's
 recommended to pin third-party actions to a specific commit SHA. This prevents unexpected
 changes in the action's code from affecting your workflows, until the upstream project
-doesn't start using [Immutable releases](https://docs.github.com/en/code-security/concepts/supply-chain-security/immutable-releases).
+starts using [Immutable releases](https://docs.github.com/en/code-security/concepts/supply-chain-security/immutable-releases).
 
 See [github-actions-ensure-sha-pinned-actions](https://github.com/hyland/github-actions-ensure-sha-pinned-actions),
 available via pre-commit as well.
