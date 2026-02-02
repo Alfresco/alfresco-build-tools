@@ -6,7 +6,7 @@ updates:
   - package-ecosystem: "github-actions"
     directories:
       - "/"
-      - "/.github/actions/**"
+      - "/.github/actions/**/*"
     exclude-paths:
       - "setup-kind/kind.yml"
     schedule:
