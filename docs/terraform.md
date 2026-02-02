@@ -120,7 +120,7 @@ permissions:
 
 jobs: # one job for each terraform folder/stack
   invoke-terraform-infra:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v12.10.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v12.10.1
     with:
       terraform_root_path: infra
       terraform_operation: ${{ inputs.terraform_operation }}
@@ -129,7 +129,7 @@ jobs: # one job for each terraform folder/stack
 
   invoke-terraform-k8s:
     needs: invoke-terraform-infra
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v12.10.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v12.10.1
     with:
       terraform_root_path: k8s
       terraform_operation: ${{ inputs.terraform_operation }}
@@ -195,7 +195,7 @@ permissions:
 
 jobs:
   pre-commit:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v12.10.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v12.10.1
     with:
       BOT_GITHUB_USERNAME: ${{ vars.BOT_GITHUB_USERNAME }}
     secrets: inherit
