@@ -31,14 +31,23 @@ runs:
     - name: Watch resources
       shell: bash
       run: |
-        kubectl wait --for=create namespace/${{ inputs.namespace }} --timeout=5s
-        kubectl wait --for=create ${{ inputs.wait-resource }} -n ${{ inputs.namespace }} --timeout=5s > /dev/null
+        kubectl wait --for=create namespace/${{ inputs.namespace }} --timeout=5s > /dev/null
+        echo "Namespace ${{ inputs.namespace }} is created."
+
+        kubectl wait \
+          --for=create ${{ inputs.wait-resource }} \
+          -n ${{ inputs.namespace }} \
+          --timeout=5s \
+          --all=true > /dev/null
+        echo "All resources ${{ inputs.wait-resource }} are created in namespace ${{ inputs.namespace }}."
+
+        echo "Starting to watch resources..."
         kubectl get ${{ inputs.wait-resource }} --watch -n ${{ inputs.namespace }} &
         kubectl wait \
+          --for=${{ inputs.wait-for-what }}=${{ inputs.wait-condition }} \
           -n ${{ inputs.namespace }} \
           --timeout=${{ inputs.wait-timeout }} \
           --all=true \
-          --for=${{ inputs.wait-for-what }}=${{ inputs.wait-condition }} \
           ${{ inputs.wait-resource }}
 
     - name: Spit resources status after wait
