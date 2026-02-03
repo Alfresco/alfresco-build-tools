@@ -42,7 +42,7 @@ runs:
       run: |
         case "${{ inputs.nos-env }}" in
           "production")
-            CONNECT_HOST=connect.nuxeocloud.com
+            CONNECT_HOST=connect.nuxeo.com
             ;;
           *)
             CONNECT_HOST=nos-preprod-connect.nuxeocloud.com

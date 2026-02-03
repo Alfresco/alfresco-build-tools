@@ -2312,7 +2312,7 @@ Check `action.yml` for the full list of inputs and their descriptions.
 Publish Nuxeo package to Nuxeo Online Services (NOS).
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/nos-publish@v12.10.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/nuxeo/nos-publish@v12.10.2
         with:
           nos-env: production # Market place target env (either 'production' or 'staging')
           nos-username: ${{ secrets.NOS_CONNECT_USERNAME }}
