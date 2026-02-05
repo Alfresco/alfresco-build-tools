@@ -15,6 +15,10 @@ For security-related topics of GitHub Actions, see the [Security section](securi
 
 For terraform-related topics of GitHub Actions, see the [Terraform section](terraform.md).
 
+For pre-commit hooks documentation, see the [Pre-commit Hooks section](pre-commit-hooks.md).
+
+For GitHub Copilot instructions and development guidelines, see [`.github/copilot-instructions.md`](../.github/copilot-instructions.md).
+
 Here follows the list of GitHub Actions topics available in the current document:
 
 - [GitHub Actions](#github-actions)
