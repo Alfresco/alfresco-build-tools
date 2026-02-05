@@ -18,7 +18,7 @@ For terraform-related topics of GitHub Actions, see the [Terraform section](docs
 
 For pre-commit hooks documentation, see the [Pre-commit Hooks section](docs/pre-commit-hooks.md).
 
-For GitHub Copilot instructions and development guidelines, see [`.github/copilot-instructions.md`](../.github/copilot-instructions.md).
+For GitHub Copilot instructions and development guidelines, see [`.github/copilot-instructions.md`](.github/copilot-instructions.md).
 
 ## Release
 
