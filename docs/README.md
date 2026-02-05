@@ -11,6 +11,7 @@ This repository contains shared/reusable CI configurations for GitHub Actions to
 For security-related topics of GitHub Actions, see the [Security section](security.md).
 
 For terraform-related topics of GitHub Actions, see the [Terraform section](terraform.md).
+
 For pre-commit hooks documentation, see the [Pre-commit Hooks section](pre-commit-hooks.md).
 
 Here follows the list of GitHub Actions topics available in the current document:
