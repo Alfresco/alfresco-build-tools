@@ -140,7 +140,6 @@ jobs: # one job for each terraform folder/stack
     secrets: inherit
 ```
 
-
 ### kubectl support
 
 The terraform workflow can optionally install `kubectl` CLI tool to make it
