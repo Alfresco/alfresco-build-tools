@@ -74,31 +74,6 @@ if no common variables are needed.
 Any other tfvars file must be named after the GitHub environment name, e.g.
 `production.tfvars`, `develop.tfvars`, etc.
 
-### kubectl support
-
-The terraform workflow can optionally install `kubectl` CLI tool to make it
-available during terraform execution. This is useful when you need to interact
-with Kubernetes clusters as part of your terraform provisioning.
-
-You can enable kubectl installation by setting the `install_kubectl` input to
-`true`. By default, this will install the latest stable version of kubectl.
-
-If you need a specific version, you can specify it using the `kubectl_version`
-input. The version should be provided in the format `vX.Y.Z` (e.g., `v1.28.0`).
-
-Example:
-
-```yaml
-jobs:
-  invoke-terraform-k8s:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v12.11.0
-    with:
-      terraform_root_path: k8s
-      install_kubectl: true
-      kubectl_version: v1.28.0  # optional - defaults to latest stable
-    secrets: inherit
-```
-
 ### Environment variables
 
 You can provide additional environment variables to the terraform execution by
@@ -162,6 +137,33 @@ jobs: # one job for each terraform folder/stack
       # Optionally install kubectl (see kubectl support section below)
       # install_kubectl: true
       # kubectl_version: v1.28.0  # optional - defaults to latest stable
+    secrets: inherit
+```
+
+
+### kubectl support
+
+The terraform workflow can optionally install `kubectl` CLI tool to make it
+available during terraform execution. This is useful when you need to interact
+with Kubernetes clusters as part of your terraform provisioning
+e.g. in a `null_resource`.
+
+You can enable kubectl installation by setting the `install_kubectl` input to
+`true`. By default, this will install the latest stable version of kubectl.
+
+If you need a specific version, you can specify it using the `kubectl_version`
+input. The version should be provided in the format `vX.Y.Z` (e.g., `v1.28.0`).
+
+Example:
+
+```yaml
+jobs:
+  invoke-terraform-k8s:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v12.11.0
+    with:
+      terraform_root_path: k8s
+      install_kubectl: true
+      kubectl_version: v1.28.0  # optional - defaults to latest stable
     secrets: inherit
 ```
 
