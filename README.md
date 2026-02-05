@@ -10,11 +10,13 @@ This repository contains shared/reusable CI configurations for GitHub Actions to
 
 For reading the docs, please browse the [web version](https://alfresco.github.io/alfresco-build-tools/).
 
-For security-related topics of GitHub Actions, see the [Security section](security.md).
+For the index of the docs, see the [docs README.md](docs/README.md)
 
-For terraform-related topics of GitHub Actions, see the [Terraform section](terraform.md).
+For security-related topics of GitHub Actions, see the [Security section](docs/security.md).
 
-For pre-commit hooks documentation, see the [Pre-commit Hooks section](pre-commit-hooks.md).
+For terraform-related topics of GitHub Actions, see the [Terraform section](docs/terraform.md).
+
+For pre-commit hooks documentation, see the [Pre-commit Hooks section](docs/pre-commit-hooks.md).
 
 For GitHub Copilot instructions and development guidelines, see [`.github/copilot-instructions.md`](../.github/copilot-instructions.md).
 
