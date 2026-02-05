@@ -34,6 +34,7 @@ repos:
     rev: v1.1.0
     hooks:
       - id: gha-sha-convert
+        args: [--allowlist, 'Alfresco/alfresco-build-tools/*']
   - repo: local
     hooks:
       - id: check-readme

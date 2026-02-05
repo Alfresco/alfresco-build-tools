@@ -30,6 +30,10 @@ on:
         type: boolean
         required: false
         default: false
+      kubectl_version:
+        description: the version of kubectl to install (if install_kubectl is true). If not set, the latest stable version will be installed.
+        type: string
+        required: false
       tfvars_subfolder:
         description: the subfolder where tfvars files are located (relative to terraform_root_path)
         type: string
@@ -162,10 +166,18 @@ jobs:
         fi
         ./aws/install
         if [ "${{ inputs.install_kubectl }}" == "true" ]; then
-          echo "📦 Downloading latest stable kubectl..."
-          KUBECTL_VERSION=$(curl -sSL https://dl.k8s.io/release/stable.txt)
-          curl -sSL --max-time 60 --retry 3 -o kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
-          curl -sSL --max-time 60 --retry 3 -o kubectl.sha256 "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256"
+          if [ -z "${{ inputs.kubectl_version }}" ]; then
+            echo "⚙️ Will install latest stable kubectl..."
+            KUBECTL_VERSION=$(curl -sSL --max-time 10 --retry 3 https://dl.k8s.io/release/stable.txt)
+            echo "✅ Latest stable kubectl version resolved to ${KUBECTL_VERSION}"
+          else
+            echo "⚙️ Will install kubectl version ${{ inputs.kubectl_version }}"
+            KUBECTL_VERSION="${{ inputs.kubectl_version }}"
+          fi
+
+          echo "📦 Downloading kubectl version ${KUBECTL_VERSION}..."
+          curl -sSL --max-time 30 --retry 3 -o kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+          curl -sSL --max-time 10 --retry 3 -o kubectl.sha256 "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256"
 
           echo "🔍 Verifying kubectl checksum..."
           if ! echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check --status; then
