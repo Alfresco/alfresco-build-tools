@@ -159,7 +159,7 @@ jobs:
       TERRAFORM_HTTP_CREDENTIALS: |
         github.com/Alfresco=alfresco-build:${{ secrets.BOT_GITHUB_TOKEN }}
       TERRAFORM_PRE_RUN: |
-        set -euo pipefail
+        set +x -euo pipefail
         if [ ! -x ./aws/install ]; then
           curl -sSf https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip
           unzip -q awscliv2.zip
