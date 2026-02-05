@@ -165,7 +165,7 @@ jobs:
           unzip -q awscliv2.zip
         fi
         ./aws/install
-        if [ "${{ inputs.install_kubectl }}" == "true" ]; then
+        if ! command -v kubectl &> /dev/null && [ "${{ inputs.install_kubectl }}" == "true" ]; then
           if [ -z "${{ inputs.kubectl_version }}" ]; then
             echo "⚙️ Will install latest stable kubectl..."
             KUBECTL_VERSION=$(curl -sSL --max-time 10 --retry 3 https://dl.k8s.io/release/stable.txt)
@@ -191,8 +191,6 @@ jobs:
 
           echo "✅ kubectl installed:"
           kubectl version --client
-        else
-          echo "⚙️ Skipping kubectl installation"
         fi
 
       # https://github.com/dflook/terraform-github-actions/tree/main/terraform-apply#applying-a-plan-using-a-comment
