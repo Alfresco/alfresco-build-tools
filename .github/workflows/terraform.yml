@@ -165,13 +165,13 @@ jobs:
           unzip -q awscliv2.zip
         fi
         ./aws/install
-        if ! command -v kubectl &> /dev/null && [ "${{ inputs.install_kubectl }}" == "true" ]; then
+        if [ "${{ inputs.install_kubectl }}" == "true" ]; then
           if [ -z "${{ inputs.kubectl_version }}" ]; then
             echo "⚙️ Will install latest stable kubectl..."
             KUBECTL_VERSION=$(curl -sSfL --max-time 10 --retry 3 https://dl.k8s.io/release/stable.txt)
             echo "✅ Latest stable kubectl version resolved to ${KUBECTL_VERSION}"
           else
-            echo "⚙️ Will install kubectl version ${{ inputs.kubectl_version }}"
+            echo "⚙️ Will install kubectl version ${{ inputs.kubectl_version }}..."
             KUBECTL_VERSION="${{ inputs.kubectl_version }}"
           fi
 
@@ -185,11 +185,9 @@ jobs:
             exit 1
           fi
 
-          echo "🔐 Installing kubectl to /usr/local/bin..."
           install -m 0755 kubectl /usr/local/bin/kubectl
           rm -f kubectl kubectl.sha256
-
-          echo "✅ kubectl installed:"
+          echo "✅ kubectl installed successfully:"
           kubectl version --client
         fi
 
