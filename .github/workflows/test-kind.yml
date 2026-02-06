@@ -21,8 +21,10 @@ jobs:
           - ingress-nginx
           - traefik
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - uses: ./.github/actions/setup-kind
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Setup Kind with ${{ matrix.ingress }} ingress
+        uses: ./.github/actions/setup-kind
         id: setup-kind
         with:
           ingress-nginx-ref: ${{ matrix.ingress == 'ingress-nginx' && 'main' || 'skip' }}
@@ -39,13 +41,16 @@ jobs:
           fi
           echo "✅ Ingress endpoint: $INGRESS_ENDPOINT"
 
-      - uses: ./.github/actions/kubectl-wait
+      - name: Test waiting for single deployment to be available
+        uses: ./.github/actions/kubectl-wait
         with:
           namespace: kube-system
           wait-timeout: 5s
           wait-resource: deployment/coredns
           wait-condition: Available
-      - uses: ./.github/actions/kubectl-wait
+
+      - name: Test waiting for multiple deployments to be available
+        uses: ./.github/actions/kubectl-wait
         with:
           namespace: kube-system
           wait-timeout: 5s
