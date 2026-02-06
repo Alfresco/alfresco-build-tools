@@ -108,7 +108,7 @@ runs:
       run: |
         kubectl apply -f "${NGINX_MANIFEST_URL}"
 
-    - name: Wait for nginx ingress ready
+    - name: Wait for nginx ingress to be ready
       shell: bash
       if: >-
         !contains(fromJson('["skip", "none"]'), inputs.ingress-nginx-ref)
