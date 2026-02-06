@@ -2086,7 +2086,9 @@ Setup the `kcadm` binary from Keycloak distribution and add it to the PATH.
 
 ### setup-kind
 
-Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
+Spin up a local kubernetes cluster with an ingress controller (ingress-nginx or Traefik) exposing http/https ports.
+
+**With ingress-nginx (default):**
 
 ```yaml
       - name: Setup cluster
@@ -2113,6 +2115,36 @@ Spin up a local kubernetes cluster with nginx ingress exposing http/https ports.
           helm dep up ./helm/chart
           helm install acs ./helm/chart
 ```
+
+**With Traefik ingress controller:**
+
+```yaml
+      - name: Setup cluster
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-kind@v12.11.0
+        with:
+          # Specify kind and k8s version to use.
+          kind-version: v0.31.0
+          kind-node-image: kindest/node:v1.33.7@sha256:d26ef333bdb2cbe9862a0f7c3803ecc7b4303d8cea8e814b481b09949d353040
+          # Disable ingress-nginx (mutually exclusive with Traefik)
+          ingress-nginx-ref: skip
+          # Specify Traefik helm chart version to install
+          # see https://artifacthub.io/packages/helm/traefik/traefik
+          ingress-traefik-version: 33.2.1
+          # Optional: Enable cloud-provider-kind for LoadBalancer support
+          cloud-provider-kind-version: v0.5.0
+          # Enable deploying Metrics server with KinD
+          metrics: true
+          # Enable creating docker registry secret using given name
+          import-docker-credentials-secret-name: regcred
+          # optional, default is 90s
+          ingress-creation-timeout: 120s
+      - name: Helm deploy
+        run: |
+          helm dep up ./helm/chart
+          helm install acs ./helm/chart
+```
+
+**Note**: You cannot install both ingress-nginx and Traefik at the same time. Choose one by setting the other to `skip` or `none`.
 
 ### setup-kubepug
 
