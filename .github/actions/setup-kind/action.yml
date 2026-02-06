@@ -50,9 +50,9 @@ inputs:
     required: false
 
 outputs:
-  traefik-endpoint:
-    description: "The HTTP endpoint of the Traefik ingress controller (if installed)"
-    value: ${{ steps.get-traefik-endpoint.outputs.endpoint }}
+  ingress-endpoint:
+    description: "The HTTP endpoint of the ingress controller (if installed)"
+    value: ${{ steps.get-ingress-endpoint.outputs.endpoint }}
 
 runs:
   using: "composite"
@@ -173,7 +173,7 @@ runs:
           }
 
     - name: Wait and return the HTTP endpoint of the ingress controller
-      id: get-traefik-endpoint
+      id: get-ingress-endpoint
       shell: bash
       if: steps.set-ingress.outputs.ingress != 'none'
       env:
