@@ -21,6 +21,17 @@ inputs:
       deploying any version (including betas) and non repeatable builds.
       Set to "skip" or "none" to NOT install ingress-nginx.
     default: main
+  ingress-traefik-version:
+    description: |
+      The Traefik helm chart version to install from the official helm repo
+      https://traefik.github.io/charts. Check the version on
+      https://artifacthub.io/packages/helm/traefik/traefik. Set to "skip" or
+      "none" to NOT install Traefik.
+    default: skip
+  cloud-provider-kind-version:
+    description: |
+      The cloud-provider-kind version to use.
+    default: 0.10.0
   metrics:
     description: Whether Metrics Server should be installed upon cluster creation
     default: "false"
@@ -38,6 +49,12 @@ inputs:
       Path to a custom kind configuration file. If not provided, the action will use the default configuration
       located at `./kind.yml` relative to the action.yml file.
     required: false
+
+outputs:
+  traefik-endpoint:
+    description: "The HTTP endpoint of the Traefik ingress controller (if installed)"
+    value: ${{ steps.get-traefik-endpoint.outputs.endpoint }}
+
 runs:
   using: "composite"
   steps:
@@ -58,6 +75,15 @@ runs:
         metrics-server metrics-server
         --namespace kube-system
 
+    - name: Fail on conflicting ingress inputs
+      shell: bash
+      if: >-
+        !contains(fromJson('["skip", "none"]'), inputs.ingress-nginx-ref) &&
+        !contains(fromJson('["skip", "none"]'), inputs.ingress-traefik-version)
+      run: |
+        echo "Error: Cannot install both ingress-nginx and Traefik at the same time. Please choose only one ingress controller to install."
+        exit 1
+
     - name: Install ingress-nginx
       shell: bash
       if: >-
@@ -68,7 +94,7 @@ runs:
       run: |
         kubectl apply -f "${NGINX_MANIFEST_URL}"
 
-    - name: Wait for ingress ready
+    - name: Wait for nginx ingress ready
       shell: bash
       if: >-
         !contains(fromJson('["skip", "none"]'), inputs.ingress-nginx-ref)
@@ -84,6 +110,76 @@ runs:
             kubectl logs -n ingress-nginx -l app.kubernetes.io/component=controller --tail=100
             exit 1
           }
+
+    - name: Install Traefik ingress controller
+      shell: bash
+      if: >-
+        !contains(fromJson('["skip", "none"]'), inputs.ingress-traefik-version)
+      run: |
+        NODE=$(kubectl get nodes -o name | head -n 1)
+        kubectl label $NODE node.kubernetes.io/exclude-from-external-load-balancers-
+        helm repo add traefik https://traefik.github.io/charts
+        kubectl create namespace traefik
+        helm upgrade --install traefik traefik/traefik --version ${{ inputs.ingress-traefik-version }} -n traefik --set providers.kubernetesIngressNginx.enabled=true --set providers.kubernetesIngressNginx.watchIngressWithoutClass=true
+
+    - name: Wait for traefik ingress ready
+      shell: bash
+      if: >-
+        !contains(fromJson('["skip", "none"]'), inputs.ingress-traefik-version)
+      run: |
+        kubectl wait --namespace traefik \
+          --for=condition=ready pod \
+          --selector=app.kubernetes.io/name=traefik \
+          --timeout=${{ inputs.ingress-creation-timeout }} || {
+            echo "Traefik ingress controller failed to become ready. Debugging information:"
+            echo "=== Pod Description ==="
+            kubectl describe pods -n traefik -l app.kubernetes.io/name=traefik
+            echo "=== Pod Logs ==="
+            kubectl logs -n traefik -l app.kubernetes.io/name=traefik --tail=100
+            exit 1
+          }
+
+    - name: Setup cloud-provider-kind
+      if: >-
+        !contains(fromJson('["skip", "none"]'), inputs.ingress-traefik-version)
+      uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v12.4.3
+      with:
+        binary_name: cloud-provider-kind
+        repo: kubernetes-sigs/cloud-provider-kind
+        version: ${{ inputs.cloud-provider-kind-version }}
+        test_args: --help
+
+    - name: Run cloud-provider-kind
+      shell: bash
+      if: >-
+        !contains(fromJson('["skip", "none"]'), inputs.ingress-traefik-version)
+      run: |
+        cloud-provider-kind &
+
+    - name: Wait and return the HTTP endpoint of Traefik
+      id: get-traefik-endpoint
+      shell: bash
+      if: >-
+        !contains(fromJson('["skip", "none"]'), inputs.ingress-traefik-version)
+      run: |
+        # Retry loop to wait for LoadBalancer IP
+        for i in {1..30}; do
+          EXTERNAL_IP=$(kubectl -n traefik get svc traefik -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          if [ -n "$EXTERNAL_IP" ]; then
+            echo "LoadBalancer IP assigned: $EXTERNAL_IP"
+            break
+          fi
+          echo "Waiting for LoadBalancer IP... ($i/30)"
+          sleep 2
+        done
+
+        if [ -z "$EXTERNAL_IP" ]; then
+          echo "Error: Timed out waiting for LoadBalancer IP."
+          exit 1
+        fi
+
+        ENDPOINT=$(kubectl -n traefik get svc traefik -o jsonpath='{.status.loadBalancer.ingress[0].ip}:{.spec.ports[0].port}' | awk '{print $0}')
+        echo "endpoint=$ENDPOINT" >> $GITHUB_OUTPUT
 
     - name: Create registries auth secret
       shell: bash
