@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  pull_request_review:
+      types: [ submitted ]
+
+jobs:
+  kind:
+    runs-on: ubuntu-latest
+    if: >-
+      (github.event.review.state == 'approved' && contains(fromJSON('["dependabot[bot]", "github-actions[bot]"]'), github.event.pull_request.user.login)) ||
+      (github.actor != 'dependabot[bot]' && github.event_name != 'pull_request_review')
+    strategy:
+      fail-fast: false
+      matrix:
+        ingress:
+          - ingress-nginx
+          - traefik
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: ./.github/actions/setup-kind
+        with:
+          ingress-nginx-ref: ${{ matrix.ingress == 'ingress-nginx' && 'main' || 'skip' }}
+          ingress-traefik-version: ${{ matrix.ingress == 'traefik' && '39.0.0' || 'skip' }}
+      - uses: ./.github/actions/kubectl-wait
+        with:
+          namespace: kube-system
+          wait-timeout: 5s
+          wait-resource: deployment/coredns
+          wait-condition: Available
+      - uses: ./.github/actions/kubectl-wait
+        with:
+          namespace: kube-system
+          wait-timeout: 5s
+          wait-resource: deployments
+          wait-condition: Available
