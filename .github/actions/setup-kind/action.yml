@@ -30,7 +30,7 @@ inputs:
     default: skip
   cloud-provider-kind-version:
     description: |
-      The cloud-provider-kind version to use.
+      The cloud-provider-kind version to install and run, if provided.
   metrics:
     description: Whether Metrics Server should be installed upon cluster creation
     default: "false"
@@ -89,19 +89,41 @@ runs:
       run: |
         cloud-provider-kind &
 
+    - name: Create registries auth secret
+      shell: bash
+      if: inputs.import-docker-credentials-secret-name != ''
+      run: |
+        kubectl create secret generic ${{ inputs.import-docker-credentials-secret-name }} \
+          --from-file=.dockerconfigjson=$HOME/.docker/config.json \
+          --type=kubernetes.io/dockerconfigjson
+
     - name: Fail on conflicting ingress inputs
       shell: bash
       if: >-
         !contains(fromJson('["skip", "none"]'), inputs.ingress-nginx-ref) &&
         !contains(fromJson('["skip", "none"]'), inputs.ingress-traefik-version)
       run: |
-        echo "Error: Cannot install both ingress-nginx and Traefik at the same time. Please choose only one ingress controller to install."
+        echo "Error: Cannot install both ingress-nginx and traefik at the same time. Please choose only one ingress controller to install."
         exit 1
+
+    - name: Set the chosen ingress controller
+      shell: bash
+      id: set-ingress
+      run: >-
+        if ${{ !contains(fromJson('["skip", "none"]'), inputs.ingress-nginx-ref) }}; then
+          echo "Chosen ingress controller: nginx"
+          echo "ingress=nginx" >> $GITHUB_OUTPUT
+        elif ${{ !contains(fromJson('["skip", "none"]'), inputs.ingress-traefik-version) }}; then
+          echo "Chosen ingress controller: traefik"
+          echo "ingress=traefik" >> $GITHUB_OUTPUT
+        else
+          echo "No ingress controller will be installed"
+          echo "ingress=none" >> $GITHUB_OUTPUT
+        fi
 
     - name: Install ingress-nginx
       shell: bash
-      if: >-
-        !contains(fromJson('["skip", "none"]'), inputs.ingress-nginx-ref)
+      if: steps.set-ingress.outputs.ingress == 'nginx'
       env:
         NGINX_MANIFEST_URL: >-
           https://raw.githubusercontent.com/kubernetes/ingress-nginx/${{ inputs.ingress-nginx-ref }}/deploy/static/provider/kind/deploy.yaml
@@ -110,8 +132,7 @@ runs:
 
     - name: Wait for nginx ingress to be ready
       shell: bash
-      if: >-
-        !contains(fromJson('["skip", "none"]'), inputs.ingress-nginx-ref)
+      if: steps.set-ingress.outputs.ingress == 'nginx'
       run: |
         kubectl wait --namespace ingress-nginx \
           --for=condition=ready pod \
@@ -127,8 +148,7 @@ runs:
 
     - name: Install Traefik ingress controller
       shell: bash
-      if: >-
-        !contains(fromJson('["skip", "none"]'), inputs.ingress-traefik-version)
+      if: steps.set-ingress.outputs.ingress == 'traefik'
       run: |
         NODE=$(kubectl get nodes -o name | head -n 1)
         kubectl label $NODE node.kubernetes.io/exclude-from-external-load-balancers-
@@ -138,8 +158,7 @@ runs:
 
     - name: Wait for traefik ingress ready
       shell: bash
-      if: >-
-        !contains(fromJson('["skip", "none"]'), inputs.ingress-traefik-version)
+      if: steps.set-ingress.outputs.ingress == 'traefik'
       run: |
         kubectl wait --namespace traefik \
           --for=condition=ready pod \
@@ -153,15 +172,17 @@ runs:
             exit 1
           }
 
-    - name: Wait and return the HTTP endpoint of Traefik
+    - name: Wait and return the HTTP endpoint of the ingress controller
       id: get-traefik-endpoint
       shell: bash
-      if: >-
-        !contains(fromJson('["skip", "none"]'), inputs.ingress-traefik-version)
+      if: steps.set-ingress.outputs.ingress != 'none'
+      env:
+        INGRESS_NAMESPACE: ${{ steps.set-ingress.outputs.ingress == 'nginx' && 'ingress-nginx' || 'traefik' }}
+        INGRESS_SERVICE_NAME: ${{ steps.set-ingress.outputs.ingress == 'nginx' && 'ingress-nginx-controller' || 'traefik' }}
       run: |
         # Retry loop to wait for LoadBalancer IP
         for i in {1..30}; do
-          EXTERNAL_IP=$(kubectl -n traefik get svc traefik -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          EXTERNAL_IP=$(kubectl -n $INGRESS_NAMESPACE get svc $INGRESS_SERVICE_NAME -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
           if [ -n "$EXTERNAL_IP" ]; then
             echo "LoadBalancer IP assigned: $EXTERNAL_IP"
             break
@@ -175,13 +196,5 @@ runs:
           exit 1
         fi
 
-        ENDPOINT=$(kubectl -n traefik get svc traefik -o jsonpath='{.status.loadBalancer.ingress[0].ip}:{.spec.ports[0].port}' | awk '{print $0}')
+        ENDPOINT=$(kubectl -n $INGRESS_NAMESPACE get svc $INGRESS_SERVICE_NAME -o jsonpath='{.status.loadBalancer.ingress[0].ip}:{.spec.ports[0].port}' | awk '{print $0}')
         echo "endpoint=$ENDPOINT" >> $GITHUB_OUTPUT
-
-    - name: Create registries auth secret
-      shell: bash
-      if: inputs.import-docker-credentials-secret-name != ''
-      run: |
-        kubectl create secret generic ${{ inputs.import-docker-credentials-secret-name }} \
-          --from-file=.dockerconfigjson=$HOME/.docker/config.json \
-          --type=kubernetes.io/dockerconfigjson
