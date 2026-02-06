@@ -31,6 +31,7 @@ inputs:
   cloud-provider-kind-version:
     description: |
       The cloud-provider-kind version to install and run, if provided.
+    required: false
   metrics:
     description: Whether Metrics Server should be installed upon cluster creation
     default: "false"
