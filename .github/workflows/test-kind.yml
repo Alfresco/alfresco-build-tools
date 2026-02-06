@@ -1,0 +1,58 @@
+name: KinD tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  pull_request_review:
+      types: [ submitted ]
+
+jobs:
+  kind:
+    runs-on: ubuntu-latest
+    if: >-
+      (github.event.review.state == 'approved' && contains(fromJSON('["dependabot[bot]", "github-actions[bot]"]'), github.event.pull_request.user.login)) ||
+      (github.actor != 'dependabot[bot]' && github.event_name != 'pull_request_review')
+    strategy:
+      fail-fast: false
+      matrix:
+        ingress:
+          - ingress-nginx
+          - traefik
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Setup Kind with ${{ matrix.ingress }} ingress
+        uses: ./.github/actions/setup-kind
+        id: setup-kind
+        with:
+          ingress-nginx-ref: ${{ matrix.ingress == 'ingress-nginx' && 'main' || 'skip' }}
+          ingress-traefik-version: ${{ matrix.ingress == 'traefik' && '39.0.0' || 'skip' }}
+          cloud-provider-kind-version: 0.10.0
+
+      - name: Verify ingress endpoint output
+        env:
+          INGRESS_ENDPOINT: ${{ steps.setup-kind.outputs.ingress-endpoint }}
+        run: |
+          if [ -z "$INGRESS_ENDPOINT" ]; then
+            echo "❌ Error: ingress-endpoint should not be empty when an ingress controller is installed"
+            exit 1
+          fi
+          echo "✅ Ingress endpoint: $INGRESS_ENDPOINT"
+
+      - name: Test waiting for single deployment to be available
+        uses: ./.github/actions/kubectl-wait
+        with:
+          namespace: kube-system
+          wait-timeout: 5s
+          wait-resource: deployment/coredns
+          wait-condition: Available
+
+      - name: Test waiting for multiple deployments to be available
+        uses: ./.github/actions/kubectl-wait
+        with:
+          namespace: kube-system
+          wait-timeout: 5s
+          wait-resource: deployments
+          wait-condition: Available
