@@ -51,12 +51,41 @@ inputs:
 
 outputs:
   ingress-endpoint:
-    description: "The HTTP endpoint of the ingress controller (if installed)"
+    description: "The endpoint (hostname:port) of the ingress controller (if installed)"
     value: ${{ steps.get-ingress-endpoint.outputs.endpoint }}
 
 runs:
   using: "composite"
   steps:
+    - name: Validate inputs and set reusable outputs
+      shell: bash
+      id: set-ingress
+      run: |
+        NGINX_ENABLED=${{ !contains(fromJson('["skip", "none"]'), inputs.ingress-nginx-ref) }}
+        TRAEFIK_ENABLED=${{ !contains(fromJson('["skip", "none"]'), inputs.ingress-traefik-version) }}
+        CLOUD_PROVIDER_KIND_VERSION="${{ inputs.cloud-provider-kind-version }}"
+
+        if [ "$NGINX_ENABLED" == "true" ] && [ "$TRAEFIK_ENABLED" == "true" ]; then
+          echo "Error: Cannot install both ingress-nginx and traefik at the same time. Please choose only one ingress controller to install."
+          exit 1
+        fi
+
+        if [ "$TRAEFIK_ENABLED" == "true" ] && [ -z "$CLOUD_PROVIDER_KIND_VERSION" ]; then
+          echo "Error: cloud-provider-kind-version is required when installing Traefik ingress controller."
+          exit 1
+        fi
+
+        if [ "$NGINX_ENABLED" == "true" ]; then
+          echo "Chosen ingress controller: nginx"
+          echo "ingress=nginx" >> $GITHUB_OUTPUT
+        elif [ "$TRAEFIK_ENABLED" == "true" ]; then
+          echo "Chosen ingress controller: traefik"
+          echo "ingress=traefik" >> $GITHUB_OUTPUT
+        else
+          echo "No ingress controller will be installed"
+          echo "ingress=none" >> $GITHUB_OUTPUT
+        fi
+
     - name: Create cluster
       uses: helm/kind-action@92086f6be054225fa813e0a4b13787fc9088faab # v1.13.0
       with:
@@ -97,31 +126,7 @@ runs:
           --from-file=.dockerconfigjson=$HOME/.docker/config.json \
           --type=kubernetes.io/dockerconfigjson
 
-    - name: Fail on conflicting ingress inputs
-      shell: bash
-      if: >-
-        !contains(fromJson('["skip", "none"]'), inputs.ingress-nginx-ref) &&
-        !contains(fromJson('["skip", "none"]'), inputs.ingress-traefik-version)
-      run: |
-        echo "Error: Cannot install both ingress-nginx and traefik at the same time. Please choose only one ingress controller to install."
-        exit 1
-
-    - name: Set the chosen ingress controller
-      shell: bash
-      id: set-ingress
-      run: >-
-        if ${{ !contains(fromJson('["skip", "none"]'), inputs.ingress-nginx-ref) }}; then
-          echo "Chosen ingress controller: nginx"
-          echo "ingress=nginx" >> $GITHUB_OUTPUT
-        elif ${{ !contains(fromJson('["skip", "none"]'), inputs.ingress-traefik-version) }}; then
-          echo "Chosen ingress controller: traefik"
-          echo "ingress=traefik" >> $GITHUB_OUTPUT
-        else
-          echo "No ingress controller will be installed"
-          echo "ingress=none" >> $GITHUB_OUTPUT
-        fi
-
-    - name: Install ingress-nginx
+    - name: Install ingress-nginx controller
       shell: bash
       if: steps.set-ingress.outputs.ingress == 'nginx'
       env:
@@ -130,7 +135,7 @@ runs:
       run: |
         kubectl apply -f "${NGINX_MANIFEST_URL}"
 
-    - name: Wait for nginx ingress to be ready
+    - name: Wait for ingress-nginx to be ready
       shell: bash
       if: steps.set-ingress.outputs.ingress == 'nginx'
       run: |
@@ -156,7 +161,7 @@ runs:
         kubectl create namespace traefik
         helm upgrade --install traefik traefik/traefik --version ${{ inputs.ingress-traefik-version }} -n traefik --set providers.kubernetesIngressNginx.enabled=true --set providers.kubernetesIngressNginx.watchIngressWithoutClass=true
 
-    - name: Wait for traefik ingress ready
+    - name: Wait for Traefik ingress to be ready
       shell: bash
       if: steps.set-ingress.outputs.ingress == 'traefik'
       run: |
@@ -175,7 +180,7 @@ runs:
     - name: Wait and return the HTTP endpoint of the ingress controller
       id: get-ingress-endpoint
       shell: bash
-      if: steps.set-ingress.outputs.ingress != 'none'
+      if: steps.set-ingress.outputs.ingress != 'none' && inputs.cloud-provider-kind-version != ''
       env:
         INGRESS_NAMESPACE: ${{ steps.set-ingress.outputs.ingress == 'nginx' && 'ingress-nginx' || 'traefik' }}
         INGRESS_SERVICE_NAME: ${{ steps.set-ingress.outputs.ingress == 'nginx' && 'ingress-nginx-controller' || 'traefik' }}
