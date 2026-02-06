@@ -202,5 +202,5 @@ runs:
           exit 1
         fi
 
-        ENDPOINT=$(kubectl -n $INGRESS_NAMESPACE get svc $INGRESS_SERVICE_NAME -o jsonpath='{.status.loadBalancer.ingress[0].ip}:{.spec.ports[0].port}' | awk '{print $0}')
-        echo "endpoint=$ENDPOINT" >> $GITHUB_OUTPUT
+        PORT=$(kubectl -n $INGRESS_NAMESPACE get svc $INGRESS_SERVICE_NAME -o jsonpath='{.spec.ports[0].port}')
+        echo "endpoint=${EXTERNAL_IP}:${PORT}" >> $GITHUB_OUTPUT
