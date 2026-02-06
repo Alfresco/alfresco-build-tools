@@ -2131,7 +2131,7 @@ Spin up a local kubernetes cluster with an ingress controller (ingress-nginx or 
           # see https://artifacthub.io/packages/helm/traefik/traefik
           ingress-traefik-version: 33.2.1
           # Optional: Enable cloud-provider-kind for LoadBalancer support
-          cloud-provider-kind-version: v0.5.0
+          cloud-provider-kind-version: v0.10.0
           # Enable deploying Metrics server with KinD
           metrics: true
           # Enable creating docker registry secret using given name
