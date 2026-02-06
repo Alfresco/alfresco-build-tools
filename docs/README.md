@@ -2129,7 +2129,7 @@ Spin up a local kubernetes cluster with an ingress controller (ingress-nginx or 
           ingress-nginx-ref: skip
           # Specify Traefik helm chart version to install
           # see https://artifacthub.io/packages/helm/traefik/traefik
-          ingress-traefik-version: 33.2.1
+          ingress-traefik-version: 39.0.0
           # Optional: Enable cloud-provider-kind for LoadBalancer support
           cloud-provider-kind-version: v0.10.0
           # Enable deploying Metrics server with KinD
