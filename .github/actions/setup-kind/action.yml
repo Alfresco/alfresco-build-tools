@@ -31,7 +31,6 @@ inputs:
   cloud-provider-kind-version:
     description: |
       The cloud-provider-kind version to use.
-    default: 0.10.0
   metrics:
     description: Whether Metrics Server should be installed upon cluster creation
     default: "false"
@@ -74,6 +73,21 @@ runs:
         --set args={--kubelet-insecure-tls}
         metrics-server metrics-server
         --namespace kube-system
+
+    - name: Setup cloud-provider-kind
+      if: inputs.cloud-provider-kind-version != ''
+      uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v12.4.3
+      with:
+        binary_name: cloud-provider-kind
+        repo: kubernetes-sigs/cloud-provider-kind
+        version: ${{ inputs.cloud-provider-kind-version }}
+        test_args: --help
+
+    - name: Run cloud-provider-kind
+      shell: bash
+      if: inputs.cloud-provider-kind-version != ''
+      run: |
+        cloud-provider-kind &
 
     - name: Fail on conflicting ingress inputs
       shell: bash
@@ -138,23 +152,6 @@ runs:
             kubectl logs -n traefik -l app.kubernetes.io/name=traefik --tail=100
             exit 1
           }
-
-    - name: Setup cloud-provider-kind
-      if: >-
-        !contains(fromJson('["skip", "none"]'), inputs.ingress-traefik-version)
-      uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@v12.4.3
-      with:
-        binary_name: cloud-provider-kind
-        repo: kubernetes-sigs/cloud-provider-kind
-        version: ${{ inputs.cloud-provider-kind-version }}
-        test_args: --help
-
-    - name: Run cloud-provider-kind
-      shell: bash
-      if: >-
-        !contains(fromJson('["skip", "none"]'), inputs.ingress-traefik-version)
-      run: |
-        cloud-provider-kind &
 
     - name: Wait and return the HTTP endpoint of Traefik
       id: get-traefik-endpoint

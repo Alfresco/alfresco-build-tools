@@ -26,6 +26,7 @@ jobs:
         with:
           ingress-nginx-ref: ${{ matrix.ingress == 'ingress-nginx' && 'main' || 'skip' }}
           ingress-traefik-version: ${{ matrix.ingress == 'traefik' && '39.0.0' || 'skip' }}
+          cloud-provider-kind-version: 0.10.0
       - uses: ./.github/actions/kubectl-wait
         with:
           namespace: kube-system
