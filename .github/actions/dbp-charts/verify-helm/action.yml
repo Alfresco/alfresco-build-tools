@@ -85,14 +85,14 @@ runs:
         password: ${{ inputs.docker_password }}
     - name: Get branch name
       uses: >-
-        Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v12.11.0
+        Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v12.12.0
     - name: Get commit msg
       uses: >-
-        Alfresco/alfresco-build-tools/.github/actions/get-commit-message@v12.11.0
+        Alfresco/alfresco-build-tools/.github/actions/get-commit-message@v12.12.0
     - name: Get a namespace to deploy on
       id: k8sns
       uses: >-
-        Alfresco/alfresco-build-tools/.github/actions/dbp-charts/kubernetes-valid-ns@v12.11.0
+        Alfresco/alfresco-build-tools/.github/actions/dbp-charts/kubernetes-valid-ns@v12.12.0
       with:
         branch_name: ${{ env.BRANCH_NAME }}
         release_prefix: ${{ inputs.release_prefix }}
@@ -111,7 +111,7 @@ runs:
     - name: Upload helm deployments logs as artifacts
       if: always()
       uses: >-
-        Alfresco/alfresco-build-tools/.github/actions/kubectl-keep-nslogs@v12.11.0
+        Alfresco/alfresco-build-tools/.github/actions/kubectl-keep-nslogs@v12.12.0
       with:
         namespace: ${{ steps.k8sns.outputs.namespace }}
     - name: Uninstall Helm releases

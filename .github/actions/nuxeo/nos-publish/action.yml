@@ -35,7 +35,7 @@ runs:
   using: "composite"
   steps:
     - name: Get Branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v12.11.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v12.12.0
 
     - name: Evaluate Target env if none has been set
       shell: bash
