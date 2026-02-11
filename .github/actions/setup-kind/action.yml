@@ -46,8 +46,8 @@ inputs:
     default: 90s
   kind-config-path:
     description: |
-      Path to a custom kind configuration file. If not provided, the action will use the default configuration
-      located at `./kind.yml` relative to the action.yml file.
+      Path to a custom kind configuration file. If not provided and ingress-nginx is being installed,
+      the action will use the default configuration located at `./kind-ingress-nginx.yml` relative to the action.yml file.
     required: false
 
 outputs:
@@ -90,7 +90,7 @@ runs:
     - name: Create cluster
       uses: helm/kind-action@92086f6be054225fa813e0a4b13787fc9088faab # v1.13.0
       with:
-        config: ${{ inputs.kind-config-path == '' && format('{0}/kind.yml', github.action_path) || inputs.kind-config-path }}
+        config: ${{ inputs.kind-config-path != '' && inputs.kind-config-path || (steps.set-ingress.outputs.ingress == 'nginx' && format('{0}/kind-ingress-nginx.yml', github.action_path) || '') }}
         version: ${{ inputs.kind-version }}
         node_image: ${{ inputs.kind-node-image }}
         wait: ${{ inputs.kind-wait }}
@@ -117,7 +117,7 @@ runs:
       shell: bash
       if: inputs.cloud-provider-kind-version != ''
       run: |
-        cloud-provider-kind &
+        cloud-provider-kind --enable-lb-port-mapping &
 
     - name: Create registries auth secret
       shell: bash
@@ -156,11 +156,13 @@ runs:
       shell: bash
       if: steps.set-ingress.outputs.ingress == 'traefik'
       run: |
-        NODE=$(kubectl get nodes -o name | head -n 1)
-        kubectl label $NODE node.kubernetes.io/exclude-from-external-load-balancers-
         helm repo add traefik https://traefik.github.io/charts
-        kubectl create namespace traefik
-        helm upgrade --install traefik traefik/traefik --version ${{ inputs.ingress-traefik-version }} -n traefik --set providers.kubernetesIngressNginx.enabled=true --set providers.kubernetesIngressNginx.watchIngressWithoutClass=true
+        helm upgrade --install traefik traefik/traefik \
+          --version ${{ inputs.ingress-traefik-version }} \
+          --set providers.kubernetesIngressNginx.enabled=true \
+          --set providers.kubernetesIngressNginx.watchIngressWithoutClass=true \
+          -n traefik \
+          --create-namespace
 
     - name: Wait for Traefik ingress to be ready
       shell: bash
