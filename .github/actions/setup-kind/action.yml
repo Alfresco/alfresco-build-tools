@@ -32,6 +32,11 @@ inputs:
     description: |
       The cloud-provider-kind version to install and run, if provided.
     required: false
+  cloud-provider-kind-enable-lb-port-mapping:
+    description: |
+      Whether to enable the cloud-provider-kind feature to map LoadBalancer ports to localhost.
+      This simplifies access to the ingress controller when using cloud-provider-kind.
+    default: "true"
   metrics:
     description: Whether Metrics Server should be installed upon cluster creation
     default: "false"
@@ -117,7 +122,7 @@ runs:
       shell: bash
       if: inputs.cloud-provider-kind-version != ''
       run: |
-        cloud-provider-kind --enable-lb-port-mapping &
+        cloud-provider-kind --enable-lb-port-mapping=${{ inputs.cloud-provider-kind-enable-lb-port-mapping }} &
 
     - name: Create registries auth secret
       shell: bash
@@ -205,7 +210,8 @@ runs:
         for i in {1..30}; do
           EXTERNAL_IP=$(kubectl -n $INGRESS_NAMESPACE get svc $INGRESS_SERVICE_NAME -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
           if [ -n "$EXTERNAL_IP" ]; then
-            echo "LoadBalancer IP assigned: $EXTERNAL_IP"
+            PORT=$(kubectl -n $INGRESS_NAMESPACE get svc $INGRESS_SERVICE_NAME -o jsonpath='{.spec.ports[0].port}')
+            echo "Endpoint for LoadBalancer: ${EXTERNAL_IP}:${PORT}"
             break
           fi
           echo "Waiting for LoadBalancer IP... ($i/30)"
@@ -217,5 +223,21 @@ runs:
           exit 1
         fi
 
-        PORT=$(kubectl -n $INGRESS_NAMESPACE get svc $INGRESS_SERVICE_NAME -o jsonpath='{.spec.ports[0].port}')
+        if [ "${{ inputs.cloud-provider-kind-enable-lb-port-mapping }}" == "true" ]; then
+          EXTERNAL_IP="localhost"
+
+          echo "cloud-provider-kind LB port mapping enabled, retrieving mapped port from docker..."
+          CID="$(docker ps --filter 'name=^/kindccm-' --format '{{.ID}}' | head -n 1)"
+          DOCKER_PORT_OUTPUT=$(docker port $CID 80/tcp | head -n 1)
+          PORT=$(echo $DOCKER_PORT_OUTPUT | awk -F: '{print $NF}')
+          if [ -z "$PORT" ]; then
+            echo "Error: Failed to retrieve mapped port from docker."
+            echo "Docker port output: $DOCKER_PORT_OUTPUT"
+            echo "Full docker ps output for debugging:"
+            docker ps -a
+            exit 1
+          fi
+          echo "Endpoint for LoadBalancer: ${EXTERNAL_IP}:${PORT}"
+        fi
+
         echo "endpoint=${EXTERNAL_IP}:${PORT}" >> $GITHUB_OUTPUT
