@@ -152,6 +152,19 @@ runs:
             exit 1
           }
 
+    - name: Apply nginx ingress class for traefik retrocompat
+      shell: bash
+      if: steps.set-ingress.outputs.ingress == 'traefik'
+      run: |
+        kubectl apply -f - <<EOF
+        apiVersion: networking.k8s.io/v1
+        kind: IngressClass
+        metadata:
+          name: nginx
+        spec:
+          controller: k8s.io/ingress-nginx
+        EOF
+
     - name: Install Traefik ingress controller
       shell: bash
       if: steps.set-ingress.outputs.ingress == 'traefik'
