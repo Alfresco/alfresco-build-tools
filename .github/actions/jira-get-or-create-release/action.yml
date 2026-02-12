@@ -1,0 +1,12 @@
+name: "jira-get-or-create-release"
+description: "Retrieve a JIRA release or create it if it does not exist"
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      with:
+        python-version: "3.11"
+        cache: "pip"
+    - name: Install python dependencies
+      run: pip install -r requirements.txt
+      shell: bash
