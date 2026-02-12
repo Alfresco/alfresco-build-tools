@@ -2111,7 +2111,7 @@ LoadBalancer support.
           # ingress-nginx (default):
           ingress-nginx-ref: controller-v1.8.2
 
-          # Traefik (require cloud-provider-kind):
+          # Traefik (requires cloud-provider-kind):
           #   traefik-enabled: 'true'
           #   traefik-version: 39.0.0
           traefik-enabled: 'true'
