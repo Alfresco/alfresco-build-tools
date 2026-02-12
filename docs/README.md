@@ -2086,9 +2086,12 @@ Setup the `kcadm` binary from Keycloak distribution and add it to the PATH.
 
 ### setup-kind
 
-Spin up a local kubernetes cluster with an ingress controller (ingress-nginx or Traefik) exposing http/https ports.
+Spin up a local kubernetes cluster with an ingress controller (ingress-nginx or
+Traefik), exposing http/https ports.
 
-**With ingress-nginx (default):**
+By default `ingress-nginx` is installed, but you can easily switch to Traefik by
+setting `traefik-enabled` to `true` and `cloud-provider-kind` to `true` for
+LoadBalancer support.
 
 ```yaml
       - name: Setup cluster
@@ -2098,53 +2101,37 @@ Spin up a local kubernetes cluster with an ingress controller (ingress-nginx or 
           # see https://github.com/kubernetes-sigs/kind/releases
           kind-version: v0.31.0
           kind-node-image: kindest/node:v1.33.7@sha256:d26ef333bdb2cbe9862a0f7c3803ecc7b4303d8cea8e814b481b09949d353040
-          # Optional but ensure repeatable builds (defaults to latest nginx ingress version otherwise).
-          # see https://github.com/kubernetes/ingress-nginx
-          # can be skipped using "skip" or "none"
+
+          # Choose ingress controller:
+          # - To install ingress-nginx (default): optionally set `ingress-nginx-ref` to a tag.
+          # - To install Traefik instead: set `traefik-enabled: 'true'`
+          #   and optionally provide `traefik-version`.
+
+          # Examples:
+          # ingress-nginx (default):
           ingress-nginx-ref: controller-v1.8.2
+
+          # Traefik (require cloud-provider-kind):
+          #   traefik-enabled: 'true'
+          #   traefik-version: 39.0.0
+          traefik-enabled: 'true'
+          traefik-version: 39.0.0 # optional
+          cloud-provider-kind-enabled: 'true'
+          cloud-provider-kind-version: 0.10.0 # optional
+
+          # optional, default is 90s
+          ingress-creation-timeout: 120s
+
           # Use your own config file provided as YAML string.
           kind-config-path: /path/to/file.yml
+
           # Enable deploying Metrics server with KinD
           metrics: true
-          # Enable creating docker registry secret using given name
+
+          # Enable creating docker registry secret using given name,
+          # reusing credentials already configured in the local docker daemon.
           import-docker-credentials-secret-name: regcred
-          # optional, default is 90s
-          ingress-creation-timeout: 120s
-      - name: Helm deploy
-        run: |
-          helm dep up ./helm/chart
-          helm install acs ./helm/chart
 ```
-
-**With Traefik ingress controller:**
-
-```yaml
-      - name: Setup cluster
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-kind@v12.12.0
-        with:
-          # Specify kind and k8s version to use.
-          kind-version: v0.31.0
-          kind-node-image: kindest/node:v1.33.7@sha256:d26ef333bdb2cbe9862a0f7c3803ecc7b4303d8cea8e814b481b09949d353040
-          # Disable ingress-nginx (mutually exclusive with Traefik)
-          ingress-nginx-ref: skip
-          # Specify Traefik helm chart version to install
-          # see https://artifacthub.io/packages/helm/traefik/traefik
-          ingress-traefik-version: 39.0.0
-          # Optional: Enable cloud-provider-kind for LoadBalancer support
-          cloud-provider-kind-version: v0.10.0
-          # Enable deploying Metrics server with KinD
-          metrics: true
-          # Enable creating docker registry secret using given name
-          import-docker-credentials-secret-name: regcred
-          # optional, default is 90s
-          ingress-creation-timeout: 120s
-      - name: Helm deploy
-        run: |
-          helm dep up ./helm/chart
-          helm install acs ./helm/chart
-```
-
-**Note**: You cannot install both ingress-nginx and Traefik at the same time. Choose one by setting the other to `skip` or `none`.
 
 ### setup-kubepug
 
