@@ -16,4 +16,5 @@ runs:
 
     - name: Run action script
       shell: bash
+      working-directory: ${{ github.action_path }}
       run: python action.py
