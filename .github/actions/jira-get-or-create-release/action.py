@@ -25,29 +25,50 @@ def get_version(jira: Jira, project_key: str, version_name: str) -> Optional[Dic
   return None
 
 
+def get_project_id(jira: Jira, project_key: str) -> str:
+  """
+  Returns the Jira project id as string.
+  Needs jira.get_project() which exists on Jira client.
+  """
+  project = jira.get_project(project_key)
+  if not isinstance(project, dict):
+    raise RuntimeError(f"Unexpected get_project response type: {project!r}")
+
+  pid = str(project.get("id", "")).strip()
+  if not pid:
+    raise RuntimeError(f"Could not extract project id from get_project response: {project!r}")
+  return pid
+
+
 def create_version(
   jira: Jira, project_key: str, version_name: str, description: Optional[str]
 ) -> Dict[str, Any]:
-  payload: Dict[str, Any] = {"project": project_key, "name": version_name}
+  """
+  Creates a Jira version using jira.add_version(...) (supported by this client).
+  Note: add_version() does NOT include description in the payload in your client snippet,
+        so description is ignored unless you later add an update call.
+  """
+  project_id = get_project_id(jira, project_key)
 
-  if description:
-    payload["description"] = description
-
-  created = jira.create_version(data=payload)
+  # Your client signature: add_version(project_key, project_id, version, is_archived=False, is_released=False)
+  created = jira.add_version(
+    project_key=project_key,
+    project_id=project_id,
+    version=version_name,
+    is_archived=False,
+    is_released=False,
+  )
 
   if not isinstance(created, dict):
-    raise RuntimeError(f"Unexpected create_version response type: {created!r}")
+    raise RuntimeError(f"Unexpected add_version response type: {created!r}")
 
+  # Jira typically returns {"self": "...", "id": "...", "name": "...", ...}
   return created
 
 
 def ensure_version(
   jira: Jira, project_key: str, version_name: str, description: Optional[str]
 ) -> str:
-  """
-  Ensures the version exists.
-  Returns (version_id, existed).
-  """
   existing = get_version(jira, project_key, version_name)
 
   if existing:
@@ -69,8 +90,10 @@ def ensure_version(
 
 def write_github_output(key: str, value: str) -> None:
   out_path = os.getenv("GITHUB_OUTPUT")
+
   if not out_path:
     return
+
   with open(out_path, "a", encoding="utf-8") as f:
     f.write(f"{key}={value}\n")
 
