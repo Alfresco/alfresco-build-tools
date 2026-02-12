@@ -86,8 +86,8 @@ runs:
         KIND_CONFIG_PATH=${{ inputs.kind-config-path != '' && inputs.kind-config-path || '' }}
 
         if [ "$NGINX_ENABLED" == "true" ] && [ "$TRAEFIK_ENABLED" == "true" ]; then
-          echo "Error: Cannot install both ingress-nginx and traefik at the same time. Please choose only one ingress controller to install."
-          exit 1
+          echo "Traefik enabled takes precedence over ingress-nginx, disabling ingress-nginx..."
+          NGINX_ENABLED=false
         fi
 
         if [ "$TRAEFIK_ENABLED" == "true" ] && [ "$CLOUD_PROVIDER_KIND_ENABLED" != "true" ]; then
