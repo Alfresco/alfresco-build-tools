@@ -2105,7 +2105,7 @@ LoadBalancer support.
           # Choose ingress controller:
           # - To install ingress-nginx (default): optionally set `ingress-nginx-ref` to a tag.
           # - To install Traefik instead: set `traefik-enabled: 'true'`
-          #   and optionally provide `traefik-version`.
+          #   and optionally provide `traefik-chart-version`.
 
           # Examples:
           # ingress-nginx (default):
@@ -2113,9 +2113,9 @@ LoadBalancer support.
 
           # Traefik (requires cloud-provider-kind):
           #   traefik-enabled: 'true'
-          #   traefik-version: 39.0.0
+          #   traefik-chart-version: 39.0.0
           traefik-enabled: 'true'
-          traefik-version: 39.0.0 # optional
+          traefik-chart-version: 39.0.0 # optional
           cloud-provider-kind-enabled: 'true'
           cloud-provider-kind-version: 0.10.0 # optional
 

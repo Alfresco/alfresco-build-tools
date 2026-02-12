@@ -25,9 +25,9 @@ inputs:
     description: |
       Whether to install Traefik ingress controller instead of ingress-nginx. If
       set to true, the action will ignore the `ingress-nginx-ref` input and
-      install Traefik using the version specified in `traefik-version`.
+      install Traefik using the version specified in `traefik-chart-version`.
     default: "false"
-  traefik-version:
+  traefik-chart-version:
     description: |
       The Traefik helm chart version to install. Check available versions on
       https://artifacthub.io/packages/helm/traefik/traefik
@@ -196,7 +196,7 @@ runs:
       run: |
         helm repo add traefik https://traefik.github.io/charts
         helm upgrade --install traefik traefik/traefik \
-          --version ${{ inputs.traefik-version }} \
+          --version ${{ inputs.traefik-chart-version }} \
           --set providers.kubernetesIngressNginx.enabled=true \
           --set providers.kubernetesIngressNginx.watchIngressWithoutClass=true \
           -n traefik \
