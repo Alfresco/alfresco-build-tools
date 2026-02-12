@@ -121,7 +121,7 @@ runs:
 
     - name: Build image ${{ env.IMAGE_NAME }} and export to docker
       if: inputs.grype-scan-enabled == 'true'
-      uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+      uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
       with:
         context: ${{ inputs.base-directory }}/${{ inputs.image-dir }}
         tags: test-${{ env.IMAGE_NAME }}
@@ -203,7 +203,7 @@ runs:
     - name: Build and Push image ${{ env.IMAGE_NAME }}
       id: build-and-push
       if: env.PUSH_IMAGE == 'true'
-      uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
+      uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
       with:
         context: ${{ inputs.base-directory }}/${{ inputs.image-dir }}
         platforms: linux/amd64,linux/arm64/v8
