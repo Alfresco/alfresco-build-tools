@@ -1,12 +1,30 @@
 name: "jira-get-or-create-release"
 description: "Retrieve a JIRA release or create it if it does not exist"
+
 inputs:
+  jira-url:
+    description: "Jira base URL (e.g. https://your-domain.atlassian.net)"
+    required: true
+  jira-project-key:
+    description: "Jira project key (e.g. ABC)"
+    required: true
+  jira-version-name:
+    description: "Jira version/release name to get or create"
+    required: true
+  jira-version-description:
+    description: "Optional Jira version description"
+    required: false
   jira-user:
     description: "Jira user name (should come from secrets)"
     required: true
   jira-token:
     description: "Jira user token (should come from secrets)"
     required: true
+
+outputs:
+  version-id:
+    description: "The Jira version id (existing or newly created)"
+    value: ${{ steps.jira_release.outputs.version_id }}
 
 runs:
   using: "composite"
@@ -18,14 +36,20 @@ runs:
 
     - name: Install python dependencies
       shell: bash
+      working-directory: ${{ github.action_path }}
       run: |
         python -m pip install --upgrade pip
         python -m pip install -r requirements.txt
 
     - name: Run action script
+      id: jira_release
       shell: bash
       working-directory: ${{ github.action_path }}
       env:
+        JIRA_URL: ${{ inputs['jira-url'] }}
+        JIRA_PROJECT_KEY: ${{ inputs['jira-project-key'] }}
+        JIRA_VERSION_NAME: ${{ inputs['jira-version-name'] }}
+        JIRA_VERSION_DESCRIPTION: ${{ inputs['jira-version-description'] }}
         JIRA_USER: ${{ inputs['jira-user'] }}
         JIRA_TOKEN: ${{ inputs['jira-token'] }}
       run: python action.py
