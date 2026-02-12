@@ -16,5 +16,4 @@ runs:
 
     - name: Run action script
       shell: bash
-      run: ./action.py
-
+      run: python action.py
