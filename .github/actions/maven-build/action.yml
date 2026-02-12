@@ -92,7 +92,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@v12.12.0
+    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@v12.13.0
       id: maven-configure
       with:
         java-version: ${{ inputs.java-version }}
@@ -104,7 +104,7 @@ runs:
 
     - name: Update pom files to the preview version
       if: steps.maven-configure.outputs.preview-version != ''
-      uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@v12.12.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@v12.13.0
 
       with:
         version: ${{ steps.maven-configure.outputs.preview-version }}
