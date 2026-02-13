@@ -26,10 +26,6 @@ def get_version(jira: Jira, project_key: str, version_name: str) -> Optional[Dic
 
 
 def get_project_id(jira: Jira, project_key: str) -> str:
-  """
-  Returns the Jira project id as string.
-  Needs jira.get_project() which exists on Jira client.
-  """
   project = jira.get_project(project_key)
   if not isinstance(project, dict):
     raise RuntimeError(f"Unexpected get_project response type: {project!r}")
@@ -43,14 +39,8 @@ def get_project_id(jira: Jira, project_key: str) -> str:
 def create_version(
   jira: Jira, project_key: str, version_name: str, description: Optional[str]
 ) -> Dict[str, Any]:
-  """
-  Creates a Jira version using jira.add_version(...) (supported by this client).
-  Note: add_version() does NOT include description in the payload in your client snippet,
-        so description is ignored unless you later add an update call.
-  """
   project_id = get_project_id(jira, project_key)
 
-  # Your client signature: add_version(project_key, project_id, version, is_archived=False, is_released=False)
   created = jira.add_version(
     project_key=project_key,
     project_id=project_id,
@@ -62,30 +52,20 @@ def create_version(
   if not isinstance(created, dict):
     raise RuntimeError(f"Unexpected add_version response type: {created!r}")
 
-  # Jira typically returns {"self": "...", "id": "...", "name": "...", ...}
   return created
 
 
 def ensure_version(
   jira: Jira, project_key: str, version_name: str, description: Optional[str]
 ) -> str:
-  existing = get_version(jira, project_key, version_name)
+  version = get_version(jira, project_key, version_name)
 
-  if existing:
-    vid = str(existing.get("id", "")).strip()
+  if version:
+    print(f"Version {version['name']} found with id {version['id']}.")
+  else:
+    version = create_version(jira, project_key, version_name, description)
 
-    if not vid:
-      raise RuntimeError("Version exists but missing id in Jira response.")
-
-    return vid
-
-  created = create_version(jira, project_key, version_name, description)
-  vid = str(created.get("id", "")).strip()
-
-  if not vid:
-    raise RuntimeError(f"Version created but missing id. Response: {created!r}")
-
-  return vid
+  return version['id']
 
 
 def write_github_output(key: str, value: str) -> None:
@@ -122,6 +102,7 @@ def main() -> None:
     project_key = get_required_env("JIRA_PROJECT_KEY")
     version_name = get_required_env("JIRA_VERSION_NAME")
     description = os.getenv("JIRA_VERSION_DESCRIPTION")
+
     if description is not None:
       description = description.strip() or None
   except ValueError as e:
@@ -136,10 +117,8 @@ def main() -> None:
   )
 
   try:
-    version_id, existed = ensure_version(jira, project_key, version_name, description)
+    version_id = ensure_version(jira, project_key, version_name, description)
 
-    if existed:
-      print("Nothing to do, release already exists.")
     print(version_id)  # last stdout line = id
     write_github_output("version_id", version_id)
 
@@ -147,7 +126,7 @@ def main() -> None:
     print_api_error(e)
     sys.exit(1)
   except Exception as e:
-    print("❌ Unknown error occurred.", file=sys.stderr)
+    print("❌ Unexpected error occurred.", file=sys.stderr)
     print(str(e), file=sys.stderr)
     sys.exit(1)
 
