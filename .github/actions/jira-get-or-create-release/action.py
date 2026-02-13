@@ -4,6 +4,8 @@ from typing import Optional, Dict, Any
 
 from atlassian import Jira
 from atlassian.errors import ApiError
+from requests import HTTPError
+
 
 def get_required_env(var_name: str) -> str:
   value = os.getenv(var_name)
@@ -27,14 +29,8 @@ def get_version(jira: Jira, project_key: str, version_name: str) -> Optional[Dic
 
 def get_project_id(jira: Jira, project_key: str) -> str:
   project = jira.get_project(project_key)
-  if not isinstance(project, dict):
-    raise RuntimeError(f"Unexpected get_project response type: {project!r}")
 
-  pid = str(project.get("id", "")).strip()
-  if not pid:
-    raise RuntimeError(f"Could not extract project id from get_project response: {project!r}")
-  return pid
-
+  return str(project["id"]).strip()
 
 def create_version(
   jira: Jira, project_key: str, version_name: str, description: Optional[str]
@@ -48,9 +44,6 @@ def create_version(
     is_archived=False,
     is_released=False,
   )
-
-  if not isinstance(created, dict):
-    raise RuntimeError(f"Unexpected add_version response type: {created!r}")
 
   print(f"Version {created['name']} created successfully with id {created['id']}.")
 
@@ -121,14 +114,10 @@ def main() -> None:
   try:
     version_id = ensure_version(jira, project_key, version_name, description)
 
-    print(version_id)  # last stdout line = id
+    # print(version_id)  # last stdout line = id
     write_github_output("version_id", version_id)
-
-  except ApiError as e:
-    print_api_error(e)
-    sys.exit(1)
-  except Exception as e:
-    print("❌ Unexpected error occurred.", file=sys.stderr)
+  except HTTPError as e:
+    print("❌ HTTP error occurred.", file=sys.stderr)
     print(str(e), file=sys.stderr)
     sys.exit(1)
 
