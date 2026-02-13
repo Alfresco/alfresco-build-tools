@@ -1,0 +1,43 @@
+[tool.black]
+line-length = 120
+force-exclude = '''
+.git
+.pytest_cache
+.coverage
+.tox
+.venv
+_build
+buck-out
+build
+dist
+venv
+'''
+
+[tool.flake8]
+ignore = ['W503'] # W503 line break before binary operator, but W503 is not PEP 8 compliant
+max-line-length = 120
+max-complexity = 18
+count = true
+exclude = ['venv']
+inline-quotes = "double"
+
+[tool.isort]
+profile="black"
+
+[tool.pytest.ini_options]
+#addopts = "-ra --strict-markers --import-mode=importlib"
+testpaths = ["unit"]
+python_files = ["test_*.py"]
+pythonpath = ["../../../actions/jira-get-or-create-release"]
+addopts = '''
+    -vvv
+    -ra
+    --strict-markers
+    --import-mode=importlib
+    --color=yes
+    --random-order
+    -o junit_family=xunit2
+    --cov=../../../actions/jira-get-or-create-release
+    --cov-report=term-missing
+    --cov-report=xml
+'''
