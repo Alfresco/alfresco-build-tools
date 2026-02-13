@@ -52,6 +52,8 @@ def create_version(
   if not isinstance(created, dict):
     raise RuntimeError(f"Unexpected add_version response type: {created!r}")
 
+  print(f"Version {created['name']} created successfully with id {created['id']}.")
+
   return created
 
 
