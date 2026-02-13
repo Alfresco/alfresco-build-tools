@@ -41,7 +41,6 @@ Here follows the list of GitHub Actions topics available in the current document
   - [dependabot-missing-actions-check](#dependabot-missing-actions-check)
   - [dbp-charts](#dbp-charts)
   - [dispatch-resume-workflow](#dispatch-resume-workflow)
-  - [docker-build-image](#docker-build-image)
   - [docker-dump-containers-logs](#docker-dump-containers-logs)
   - [docker-scan-image-dirs](#docker-scan-image-dirs)
   - [enforce-pr-conventions](#enforce-pr-conventions)
@@ -521,41 +520,6 @@ Ability to dispatch or resume an existing workflow and wait for its completion.
           workflow: workflow-name.yml
           run-id: existing_run_number (optional)
 ```
-
-### docker-build-image
-
-Build docker image based on supplied jar files. It replaces `image-dir` and `image-tag` in the
-docker file and builds it.
-
-After the build, if `grype-scan-enabled` is `true`, it scans the image using grype and uploads the result in GitHub security.
-
-Finally, it pushes the created image into:
-
-- RedHat quay.io
-- GitHub ghcr
-- AWS ECR
-
-When using OIDC on AWS, inputs `aws-access-key-id` and `aws-secret-access-key` can be omitted: the `aws-role-name` input should be used instead.
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/docker-build-image@v12.13.0
-        with:
-          image-tag: ${{ needs.build.outputs.version }}
-          image-dir: ${{ matrix.image-dir }}
-          docker-username: ${{ secrets.DOCKER_USERNAME }}
-          docker-password: ${{ secrets.DOCKER_PASSWORD }}
-          quay-username: ${{ secrets.QUAY_USERNAME }}
-          quay-password: ${{ secrets.QUAY_PASSWORD }}
-          ghcr-token: ${{ secrets.GITHUB_TOKEN }}
-          aws-account-id: ${{ vars.ACCOUNT_ID }}
-          # aws-region: ${{ vars.AWS_REGION }} # optional
-          # aws-role-name: ${{ vars.AWS_ROLE_NAME }} # optional
-          # grype-scan-enabled: true # optional
-          # grype-fail-build: true # optional
-          # preview-label: ${{ vars.PREVIEW_LABEL }} # optional
-```
-
-The returned output is the ECR image digest.
 
 ### docker-dump-containers-logs
 
