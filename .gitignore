@@ -62,3 +62,4 @@ __pycache__
 coverage.xml
 .coverage
 nosetests.xml
+report.xml

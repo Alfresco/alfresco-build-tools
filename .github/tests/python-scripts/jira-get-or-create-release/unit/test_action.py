@@ -12,6 +12,7 @@ PROJECT_ID = "12345"
 PROJECT_URL = f"{BASE_URL}/rest/api/2/project/{PROJECT_KEY}"
 CREATE_VERSION_URL = f"{BASE_URL}/rest/api/2/version"
 VERSION_ID = "10078"
+VERSION_NAME = "3.0.0"
 VERSION_DESCRIPTION = "Major release with breaking changes"
 UPDATE_VERSION_URL = f"{BASE_URL}/rest/api/2/version/{VERSION_ID}"
 
@@ -205,12 +206,12 @@ def test_get_project_id_propagates_exception_from_jira_client(action_module):
 @responses.activate
 def test_create_version_without_description_does_not_send_description(jira, action_module):
     responses.add(responses.GET, PROJECT_URL, json={"id": PROJECT_ID}, status=200)
-    responses.add(responses.POST, CREATE_VERSION_URL, json={"id": "10077", "name": "1.2.3"}, status=201)
+    responses.add(responses.POST, CREATE_VERSION_URL, json={"id": "10077", "name": VERSION_NAME}, status=201)
 
-    created = action_module.create_version(jira, PROJECT_KEY, "1.2.3", description=None)
+    created = action_module.create_version(jira, PROJECT_KEY, VERSION_NAME, description=None)
 
     assert created["id"] == "10077"
-    assert created["name"] == "1.2.3"
+    assert created["name"] == VERSION_NAME
     assert len(responses.calls) == 2
 
     body = responses.calls[1].request.body
@@ -218,7 +219,7 @@ def test_create_version_without_description_does_not_send_description(jira, acti
         body = body.decode("utf-8")
     payload = json.loads(body)
 
-    assert payload["name"] == "1.2.3"
+    assert payload["name"] == VERSION_NAME
     assert str(payload["projectId"]) == PROJECT_ID
     assert payload["released"] is False
     assert payload["archived"] is False
@@ -228,19 +229,19 @@ def test_create_version_without_description_does_not_send_description(jira, acti
 @responses.activate
 def test_create_version_with_description_updates_version_after_create(jira, action_module):
     responses.add(responses.GET, PROJECT_URL, json={"id": PROJECT_ID}, status=200)
-    responses.add(responses.POST, CREATE_VERSION_URL, json={"id": VERSION_ID, "name": "2.0.0"}, status=201)
+    responses.add(responses.POST, CREATE_VERSION_URL, json={"id": VERSION_ID, "name": VERSION_NAME}, status=201)
     responses.add(
         responses.PUT,
         UPDATE_VERSION_URL,
-        json={"id": VERSION_ID, "name": "2.0.0", "description": VERSION_DESCRIPTION},
+        json={"id": VERSION_ID, "name": VERSION_NAME, "description": VERSION_DESCRIPTION},
         status=200,
     )
 
-    created = action_module.create_version(jira, PROJECT_KEY, "2.0.0", description=VERSION_DESCRIPTION)
+    created = action_module.create_version(jira, PROJECT_KEY, VERSION_NAME, description=VERSION_DESCRIPTION)
 
     # Assert function result includes description (merged from update response)
     assert created["id"] == VERSION_ID
-    assert created["name"] == "2.0.0"
+    assert created["name"] == VERSION_NAME
     assert created["description"] == VERSION_DESCRIPTION
 
     # Assert HTTP calls: GET project, POST create, PUT update
@@ -255,7 +256,7 @@ def test_create_version_with_description_updates_version_after_create(jira, acti
     if isinstance(body, bytes):
         body = body.decode("utf-8")
     payload = json.loads(body)
-    assert payload["name"] == "2.0.0"
+    assert payload["name"] == VERSION_NAME
     assert str(payload["projectId"]) == PROJECT_ID
     assert payload["released"] is False
     assert payload["archived"] is False
@@ -307,13 +308,13 @@ def test_ensure_version_creates_when_missing_without_description(jira, capsys, a
         status=200,
     )
     responses.add(responses.GET, PROJECT_URL, json={"id": "12345"}, status=200)
-    responses.add(responses.POST, CREATE_VERSION_URL, json={"id": VERSION_ID, "name": "2.0.0"}, status=201)
+    responses.add(responses.POST, CREATE_VERSION_URL, json={"id": VERSION_ID, "name": VERSION_NAME}, status=201)
 
-    version_id = action_module.ensure_version(jira, PROJECT_KEY, "2.0.0", description=None)
+    version_id = action_module.ensure_version(jira, PROJECT_KEY, VERSION_NAME, description=None)
 
     assert version_id == VERSION_ID
     out = capsys.readouterr().out
-    assert f"Version 2.0.0 created successfully with id {VERSION_ID}." in out
+    assert f"Version {VERSION_NAME} created successfully with id {VERSION_ID}." in out
 
     # HTTP calls: GET versions, GET project, POST create version
     assert len(responses.calls) == 3
@@ -330,7 +331,7 @@ def test_ensure_version_creates_when_missing_without_description(jira, capsys, a
         body = body.decode("utf-8")
     payload = json.loads(body)
 
-    assert payload["name"] == "2.0.0"
+    assert payload["name"] == VERSION_NAME
     assert str(payload["projectId"]) == "12345"
     assert payload["released"] is False
     assert payload["archived"] is False
@@ -341,24 +342,24 @@ def test_ensure_version_creates_when_missing_without_description(jira, capsys, a
 def test_ensure_version_creates_then_updates_description_when_provided(jira, capsys, action_module):
     responses.add(responses.GET, VERSIONS_URL, json=[], status=200)
     responses.add(responses.GET, PROJECT_URL, json={"id": "12345"}, status=200)
-    responses.add(responses.POST, CREATE_VERSION_URL, json={"id": VERSION_ID, "name": "3.0.0"}, status=201)
+    responses.add(responses.POST, CREATE_VERSION_URL, json={"id": VERSION_ID, "name": VERSION_NAME}, status=201)
     responses.add(
         responses.PUT,
         UPDATE_VERSION_URL,
-        json={"id": VERSION_ID, "name": "3.0.0", "description": "Major release"},
+        json={"id": VERSION_ID, "name": VERSION_NAME, "description": VERSION_DESCRIPTION},
         status=200,
     )
 
     version_id = action_module.ensure_version(
         jira,
         PROJECT_KEY,
-        "3.0.0",
-        description="Major release",
+        VERSION_NAME,
+        description=VERSION_DESCRIPTION,
     )
 
     assert version_id == VERSION_ID
     out = capsys.readouterr().out
-    assert f"Version 3.0.0 created successfully with id {VERSION_ID}." in out
+    assert f"Version {VERSION_NAME} created successfully with id {VERSION_ID}." in out
 
     # HTTP calls: GET versions, GET project, POST create, PUT update
     assert len(responses.calls) == 4
@@ -374,7 +375,7 @@ def test_ensure_version_creates_then_updates_description_when_provided(jira, cap
     if isinstance(body, bytes):
         body = body.decode("utf-8")
     payload = json.loads(body)
-    assert payload["name"] == "3.0.0"
+    assert payload["name"] == VERSION_NAME
     assert "description" not in payload
     assert responses.calls[3].request.method == "PUT"
     assert responses.calls[3].request.url == UPDATE_VERSION_URL
@@ -384,4 +385,4 @@ def test_ensure_version_creates_then_updates_description_when_provided(jira, cap
     if isinstance(body, bytes):
         body = body.decode("utf-8")
     payload = json.loads(body)
-    assert payload["description"] == "Major release"
+    assert payload["description"] == VERSION_DESCRIPTION
