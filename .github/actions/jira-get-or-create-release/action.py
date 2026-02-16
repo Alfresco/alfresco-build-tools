@@ -32,6 +32,7 @@ def get_project_id(jira: Jira, project_key: str) -> str:
 
   return str(project["id"]).strip()
 
+
 def create_version(
   jira: Jira, project_key: str, version_name: str, description: Optional[str]
 ) -> Dict[str, Any]:
@@ -45,9 +46,17 @@ def create_version(
     is_released=False,
   )
 
+  # add_version() does not support description; use update_version() when needed.
+  if description is not None:
+    updated = jira.update_version(created["id"], description=description)
+    # In case update_version returns a partial payload, keep created fields.
+    if isinstance(updated, dict):
+      created = {**created, **updated}
+
   print(f"Version {created['name']} created successfully with id {created['id']}.")
 
   return created
+
 
 
 def ensure_version(
@@ -114,7 +123,7 @@ def main() -> None:
   try:
     version_id = ensure_version(jira, project_key, version_name, description)
 
-    # print(version_id)  # last stdout line = id
+    print(f"{version_id = }")
     write_github_output("version_id", version_id)
   except HTTPError as e:
     print("❌ HTTP error occurred.", file=sys.stderr)
