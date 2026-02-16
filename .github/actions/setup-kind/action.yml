@@ -126,7 +126,22 @@ runs:
         --repo https://kubernetes-sigs.github.io/metrics-server/
         --set args={--kubelet-insecure-tls}
         --namespace kube-system
-        --wait
+
+    - name: Wait for Metrics Server to be ready
+      shell: bash
+      if: inputs.metrics == 'true'
+      run: |
+        kubectl wait --namespace kube-system \
+          --for=condition=ready pod \
+          --selector=app.kubernetes.io/name=metrics-server \
+          --timeout=120s || {
+            echo "Metrics Server failed to become ready. Debugging information:"
+            echo "=== Pod Description ==="
+            kubectl describe pods -n kube-system -l app.kubernetes.io/name=metrics-server
+            echo "=== Pod Logs ==="
+            kubectl logs -n kube-system -l app.kubernetes.io/name=metrics-server --tail=100
+            exit 1
+          }
 
     - name: Setup cloud-provider-kind
       if: inputs.cloud-provider-kind-enabled == 'true'
