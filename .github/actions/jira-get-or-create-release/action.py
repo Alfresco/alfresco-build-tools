@@ -58,7 +58,6 @@ def create_version(
   return created
 
 
-
 def ensure_version(
   jira: Jira, project_key: str, version_name: str, description: Optional[str]
 ) -> str:
