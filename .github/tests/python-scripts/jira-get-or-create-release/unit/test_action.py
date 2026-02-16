@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 import responses
+from requests import HTTPError
 
 BASE_URL = "https://example.atlassian.net"
 PROJECT_KEY = "OPSEXP"
@@ -49,6 +50,24 @@ def jira():
         password="token",
         cloud=True,
     )
+
+
+@pytest.fixture
+def required_env(monkeypatch):
+    def _apply(**overrides):
+        env = {
+            "JIRA_URL": BASE_URL,
+            "JIRA_USER": "user",
+            "JIRA_TOKEN": "token",
+            "JIRA_PROJECT_KEY": "PRJ",
+            "JIRA_VERSION_NAME": VERSION_NAME,
+        }
+        env.update(overrides)
+
+        for k, v in env.items():
+            monkeypatch.setenv(k, v)
+
+    return _apply
 
 
 def test_get_required_env_returns_value(monkeypatch, action_module):
@@ -274,119 +293,206 @@ def test_create_version_with_description_updates_version_after_create(jira, acti
 
 @responses.activate
 def test_ensure_version_returns_existing_without_creating(jira, action_module, capsys):
-  responses.add(responses.GET, VERSIONS_URL, json=[{"id": VERSION_ID, "name": VERSION_NAME}], status=200)
+    responses.add(responses.GET, VERSIONS_URL, json=[{"id": VERSION_ID, "name": VERSION_NAME}], status=200)
 
-  vid = action_module.ensure_version(jira, PROJECT_KEY, VERSION_NAME, description="ignored")
-  assert vid == VERSION_ID
-  assert len(responses.calls) == 1
+    vid = action_module.ensure_version(jira, PROJECT_KEY, VERSION_NAME, description="ignored")
+    assert vid == VERSION_ID
+    assert len(responses.calls) == 1
 
-  out = capsys.readouterr().out
-  assert f"Version {VERSION_NAME} found with id {VERSION_ID}." in out
+    out = capsys.readouterr().out
+    assert f"Version {VERSION_NAME} found with id {VERSION_ID}." in out
 
 
 @pytest.mark.parametrize(
-  "versions_list, description, expect_update",
-  [
-    # missing version; no description
-    ([{"id": "10001", "name": "1.0.0"}], None, False),
-    # missing version; description provided
-    ([], VERSION_DESCRIPTION, True),
-  ],
+    "versions_list, description, expect_update",
+    [
+        # missing version; no description
+        ([{"id": "10001", "name": "1.0.0"}], None, False),
+        # missing version; description provided
+        ([], VERSION_DESCRIPTION, True),
+    ],
 )
 @responses.activate
 def test_ensure_version_creates_when_missing_parametric(
-  jira, capsys, action_module, versions_list, description, expect_update
+    jira, capsys, action_module, versions_list, description, expect_update
 ):
-  responses.add(responses.GET, VERSIONS_URL, json=versions_list, status=200)
-  responses.add(responses.GET, PROJECT_URL, json={"id": "12345"}, status=200)
-  responses.add(
-    responses.POST,
-    CREATE_VERSION_URL,
-    json={"id": VERSION_ID, "name": VERSION_NAME},
-    status=201,
-  )
-  if expect_update:
+    responses.add(responses.GET, VERSIONS_URL, json=versions_list, status=200)
+    responses.add(responses.GET, PROJECT_URL, json={"id": "12345"}, status=200)
     responses.add(
-      responses.PUT,
-      UPDATE_VERSION_URL,
-      json={"id": VERSION_ID, "name": VERSION_NAME, "description": VERSION_DESCRIPTION},
-      status=200,
+        responses.POST,
+        CREATE_VERSION_URL,
+        json={"id": VERSION_ID, "name": VERSION_NAME},
+        status=201,
+    )
+    if expect_update:
+        responses.add(
+            responses.PUT,
+            UPDATE_VERSION_URL,
+            json={"id": VERSION_ID, "name": VERSION_NAME, "description": VERSION_DESCRIPTION},
+            status=200,
+        )
+
+    version_id = action_module.ensure_version(
+        jira,
+        PROJECT_KEY,
+        VERSION_NAME,
+        description=description,
     )
 
-  version_id = action_module.ensure_version(
-    jira,
-    PROJECT_KEY,
-    VERSION_NAME,
-    description=description,
-  )
+    assert version_id == VERSION_ID
+    out = capsys.readouterr().out
+    assert f"Version {VERSION_NAME} created successfully with id {VERSION_ID}." in out
 
-  assert version_id == VERSION_ID
-  out = capsys.readouterr().out
-  assert f"Version {VERSION_NAME} created successfully with id {VERSION_ID}." in out
+    # HTTP calls: GET versions, GET project, POST create (+ optional PUT update)
+    expected_calls = 4 if expect_update else 3
+    assert len(responses.calls) == expected_calls
+    assert responses.calls[0].request.method == "GET"
+    assert responses.calls[0].request.url == VERSIONS_URL
+    assert responses.calls[1].request.method == "GET"
+    assert responses.calls[1].request.url == PROJECT_URL
+    assert responses.calls[2].request.method == "POST"
+    assert responses.calls[2].request.url == CREATE_VERSION_URL
 
-  # HTTP calls: GET versions, GET project, POST create (+ optional PUT update)
-  expected_calls = 4 if expect_update else 3
-  assert len(responses.calls) == expected_calls
-  assert responses.calls[0].request.method == "GET"
-  assert responses.calls[0].request.url == VERSIONS_URL
-  assert responses.calls[1].request.method == "GET"
-  assert responses.calls[1].request.url == PROJECT_URL
-  assert responses.calls[2].request.method == "POST"
-  assert responses.calls[2].request.url == CREATE_VERSION_URL
-
-  # Validate POST payload (never includes description)
-  body = responses.calls[2].request.body
-  if isinstance(body, bytes):
-    body = body.decode("utf-8")
-  payload = json.loads(body)
-
-  assert payload["name"] == VERSION_NAME
-  assert str(payload["projectId"]) == "12345"
-  assert payload["released"] is False
-  assert payload["archived"] is False
-  assert "description" not in payload
-
-  if expect_update:
-    assert responses.calls[3].request.method == "PUT"
-    assert responses.calls[3].request.url == UPDATE_VERSION_URL
-
-    body = responses.calls[3].request.body
+    # Validate POST payload (never includes description)
+    body = responses.calls[2].request.body
     if isinstance(body, bytes):
-      body = body.decode("utf-8")
+        body = body.decode("utf-8")
     payload = json.loads(body)
-    assert payload["description"] == VERSION_DESCRIPTION
+
+    assert payload["name"] == VERSION_NAME
+    assert str(payload["projectId"]) == "12345"
+    assert payload["released"] is False
+    assert payload["archived"] is False
+    assert "description" not in payload
+
+    if expect_update:
+        assert responses.calls[3].request.method == "PUT"
+        assert responses.calls[3].request.url == UPDATE_VERSION_URL
+
+        body = responses.calls[3].request.body
+        if isinstance(body, bytes):
+            body = body.decode("utf-8")
+        payload = json.loads(body)
+        assert payload["description"] == VERSION_DESCRIPTION
 
 
 def test_write_github_output_noop_when_env_missing(monkeypatch, tmp_path, action_module):
-  monkeypatch.delenv("GITHUB_OUTPUT", raising=False)
-  out_file = tmp_path / "github_output.txt"
+    monkeypatch.delenv("GITHUB_OUTPUT", raising=False)
+    out_file = tmp_path / "github_output.txt"
 
-  action_module.write_github_output("version_id", VERSION_ID)
+    action_module.write_github_output("version_id", VERSION_ID)
 
-  assert not out_file.exists()
+    assert not out_file.exists()
 
 
 @pytest.mark.parametrize("value", ["", "   "])
 def test_write_github_output_noop_when_env_blank(monkeypatch, tmp_path, action_module, value):
-  monkeypatch.setenv("GITHUB_OUTPUT", value)
+    monkeypatch.setenv("GITHUB_OUTPUT", value)
 
-  action_module.write_github_output("version_id", VERSION_ID)
+    action_module.write_github_output("version_id", VERSION_ID)
 
 
 def test_write_github_output_writes_key_value_line(monkeypatch, tmp_path, action_module):
-  out_file = tmp_path / "github_output.txt"
-  monkeypatch.setenv("GITHUB_OUTPUT", str(out_file))
+    out_file = tmp_path / "github_output.txt"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(out_file))
 
-  action_module.write_github_output("version_id", VERSION_ID)
+    action_module.write_github_output("version_id", VERSION_ID)
 
-  assert out_file.read_text(encoding="utf-8") == f"version_id={VERSION_ID}\n"
+    assert out_file.read_text(encoding="utf-8") == f"version_id={VERSION_ID}\n"
 
 
 def test_write_github_output_appends_multiple_lines(monkeypatch, tmp_path, action_module):
-  out_file = tmp_path / "github_output.txt"
-  monkeypatch.setenv("GITHUB_OUTPUT", str(out_file))
+    out_file = tmp_path / "github_output.txt"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(out_file))
 
-  action_module.write_github_output("version_id", VERSION_ID)
-  action_module.write_github_output("version_name", VERSION_NAME)
+    action_module.write_github_output("version_id", VERSION_ID)
+    action_module.write_github_output("version_name", VERSION_NAME)
 
-  assert out_file.read_text(encoding="utf-8") == f"version_id={VERSION_ID}\nversion_name={VERSION_NAME}\n"
+    assert out_file.read_text(encoding="utf-8") == f"version_id={VERSION_ID}\nversion_name={VERSION_NAME}\n"
+
+
+def test_main_happy_path_writes_github_output(monkeypatch, tmp_path, capsys, action_module, required_env):
+    out_file = tmp_path / "github_output.txt"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(out_file))
+    required_env(JIRA_VERSION_DESCRIPTION="  hello  ")
+    fake_jira = object()
+
+    def fake_jira_ctor(*, url, username, password, cloud):
+        assert url == BASE_URL
+        assert username == "user"
+        assert password == "token"
+        assert cloud is True
+        return fake_jira
+
+    captured = {}
+
+    def fake_ensure_version(jira, project_key, version_name, description):
+        captured["args"] = (jira, project_key, version_name, description)
+        return VERSION_ID
+
+    monkeypatch.setattr(action_module, "Jira", fake_jira_ctor)
+    monkeypatch.setattr(action_module, "ensure_version", fake_ensure_version)
+
+    action_module.main()
+
+    assert captured["args"] == (fake_jira, "PRJ", VERSION_NAME, "hello")
+    out = capsys.readouterr().out
+    assert f"version_id = {VERSION_ID}" in out
+    assert out_file.read_text(encoding="utf-8") == f"version_id={VERSION_ID}\n"
+
+
+@pytest.mark.parametrize("desc", [None, "", "   ", "\n\t  "])
+def test_main_strips_description_to_none(monkeypatch, tmp_path, capsys, action_module, desc, required_env):
+    out_file = tmp_path / "github_output.txt"
+    monkeypatch.setenv("GITHUB_OUTPUT", str(out_file))
+    required_env()
+    if desc is None:
+        monkeypatch.delenv("JIRA_VERSION_DESCRIPTION", raising=False)
+    else:
+        monkeypatch.setenv("JIRA_VERSION_DESCRIPTION", desc)
+    fake_jira = object()
+    monkeypatch.setattr(action_module, "Jira", lambda **_: fake_jira)
+    captured = {}
+
+    def fake_ensure_version(_jira, _project_key, _version_name, description):
+        captured["description"] = description
+        return "111"
+
+    monkeypatch.setattr(action_module, "ensure_version", fake_ensure_version)
+
+    action_module.main()
+
+    assert captured["description"] is None
+
+    assert out_file.read_text(encoding="utf-8") == "version_id=111\n"
+    out = capsys.readouterr().out
+    assert "version_id = 111" in out
+
+
+def test_main_exits_1_when_missing_required_env(monkeypatch, capsys, action_module, required_env):
+    monkeypatch.delenv("JIRA_URL", raising=False)
+
+    with pytest.raises(SystemExit) as exc:
+        action_module.main()
+
+    assert exc.value.code == 1
+    err = capsys.readouterr().err
+    assert "Missing required environment variable: JIRA_URL" in err
+
+
+def test_main_exits_1_on_http_error_from_ensure_version(monkeypatch, capsys, action_module, required_env):
+    required_env(JIRA_VERSION_DESCRIPTION="desc")
+    monkeypatch.setattr(action_module, "Jira", lambda **_: object())
+
+    def boom(*_args, **_kwargs):
+        raise HTTPError("boom")
+
+    monkeypatch.setattr(action_module, "ensure_version", boom)
+
+    with pytest.raises(SystemExit) as exc:
+        action_module.main()
+
+    assert exc.value.code == 1
+    err = capsys.readouterr().err
+    assert "HTTP error occurred." in err
+    assert "boom" in err
