@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 actions_dir=".github/actions"
 readme_file="docs/README.md"
