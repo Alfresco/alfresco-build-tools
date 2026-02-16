@@ -30,6 +30,7 @@ jobs:
           ingress-nginx-ref: ${{ matrix.ingress == 'ingress-nginx' && 'main' || 'skip' }}
           traefik-enabled: ${{ matrix.ingress == 'traefik' && 'true' || 'false' }}
           cloud-provider-kind-enabled: true
+          metrics: true
 
       - name: Verify ingress endpoint output
         env:
@@ -56,3 +57,11 @@ jobs:
           wait-timeout: 5s
           wait-resource: deployments
           wait-condition: Available
+
+      - name: Ensure metrics are available
+        run: |
+          echo "Current node usage:"
+          kubectl top nodes
+          echo "Current pods usage:"
+          kubectl top pods --all-namespaces
+          echo "✅ Metrics are available"
