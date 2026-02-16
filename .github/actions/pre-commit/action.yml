@@ -18,7 +18,7 @@ inputs:
   python-version:
     description: The python version of the local runner
     required: false
-    default: "3.9"
+    default: "3.11"
   skip_checkout:
     description: If the internal checkout action should be skipped or not
     required: false

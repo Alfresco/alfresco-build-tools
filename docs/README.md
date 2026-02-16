@@ -1578,7 +1578,7 @@ This workflow sets up a Python environment using the standard setup-python actio
       - uses: actions/setup-python@v4
         id: setup-python
         with:
-          python-version: "3.9"
+          python-version: "3.11"
       - uses: Alfresco/alfresco-build-tools/.github/actions/pipenv@v13.0.0
         with:
           python-version: ${{ steps.setup-python.outputs.python-version }}
