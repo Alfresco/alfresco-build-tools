@@ -40,6 +40,6 @@
   language: system
 - id: check-readme
   name: Check README entries
-  language: system
-  entry: check_readme.sh
+  language: script
+  entry: ./check_readme.sh
   pass_filenames: false
