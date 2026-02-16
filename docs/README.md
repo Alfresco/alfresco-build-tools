@@ -178,7 +178,7 @@ Since repositories hold a `settings.xml` file at the root with environment varia
         run: mvn --settings settings.xml [...]
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_USERNAME: ${{ secrets.NEXUS_PASSWORD }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 ```
 
 Alternatively, the [s4u/maven-settings-action](https://github.com/s4u/maven-settings-action) could be used.
