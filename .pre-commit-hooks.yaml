@@ -38,7 +38,7 @@
       [ -f \"$f\" ] && markdown-toc $MDTOC_ARGS -i $f;
     done"
   language: system
-- id: check-readme
+- id: check-readme-missing-entries
   name: Check README entries
   language: script
   entry: ./check_readme.sh

@@ -42,8 +42,8 @@ repos:
 
   - repo: local
     hooks:
-      - id: check-readme
-        name: Check README entries
+      - id: check-readme-missing-entries
+        name: Check README entries for GitHub Actions missing entries
         language: system
         entry: ./check_readme.sh
         args: [--exclude-path, .github/actions/dbp-charts]

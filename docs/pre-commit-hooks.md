@@ -86,6 +86,6 @@ Add to your `.pre-commit-config.yaml`:
   - repo: https://github.com/Alfresco/alfresco-build-tools
     rev: v13.1.0
     hooks:
-      - id: check-readme
+      - id: check-readme-missing-entries
         args: [--readme-file, docs/README.md, --exclude-path, .github/actions/dbp-charts]
 ```
