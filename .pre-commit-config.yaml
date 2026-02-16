@@ -16,25 +16,30 @@ repos:
         exclude: '.*/dist/.*'
       - id: trailing-whitespace
         exclude: '.*/dist/.*'
+
   - repo: https://github.com/sirosen/check-jsonschema
-    rev: 0.35.0
+    rev: 0.36.2
     hooks:
       - id: check-dependabot
       - id: check-github-actions
       - id: check-github-workflows
+
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.46.0
+    rev: v0.47.0
     hooks:
     - id: markdownlint
+
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.9
+    rev: v1.7.11
     hooks:
       - id: actionlint
+
   - repo: https://github.com/hyland/github-actions-ensure-sha-pinned-actions
-    rev: v1.1.0
+    rev: v1.2.0
     hooks:
       - id: gha-sha-convert
         args: [--allowlist, 'Alfresco/alfresco-build-tools/*']
+
   - repo: local
     hooks:
       - id: check-readme
@@ -42,3 +47,21 @@ repos:
         language: system
         entry: ./check_readme.sh
         pass_filenames: false
+
+  - repo: https://github.com/psf/black
+    rev: 26.1.0
+    hooks:
+      - id: black
+
+  - repo: https://github.com/pycqa/isort
+    rev: 7.0.0
+    hooks:
+      - id: isort
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.3.0
+    hooks:
+      - id: flake8
+        additional_dependencies:
+          - flake8-pyproject
+          - flake8-quotes
