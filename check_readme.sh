@@ -77,7 +77,7 @@ for folder in $folders; do
   search_string="### $action_name"
   if ! grep -q "$search_string" "$readme_file"; then
     echo "No entry found for $search_string in $readme_file"
-    ((missing_entries++))
+    missing_entries=$((missing_entries + 1))
   fi
 done
 
