@@ -160,7 +160,7 @@ runs:
         echo "result=$RESULT" >> $GITHUB_OUTPUT
 
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v13.0.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v14.0.0
 
     - name: Transform mentions to JSON entities
       id: transform-mentions
