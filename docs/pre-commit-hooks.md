@@ -88,5 +88,4 @@ Add to your `.pre-commit-config.yaml`:
     hooks:
       - id: check-readme
         args: [--readme-file, docs/README.md, --exclude-path, .github/actions/dbp-charts]
-        pass_filenames: false
 ```
