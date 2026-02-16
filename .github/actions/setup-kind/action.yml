@@ -122,10 +122,11 @@ runs:
       shell: bash
       if: inputs.metrics == 'true'
       run: >-
-        helm install --repo https://kubernetes-sigs.github.io/metrics-server/
+        helm install metrics-server metrics-server
+        --repo https://kubernetes-sigs.github.io/metrics-server/
         --set args={--kubelet-insecure-tls}
-        metrics-server metrics-server
         --namespace kube-system
+        --wait
 
     - name: Setup cloud-provider-kind
       if: inputs.cloud-provider-kind-enabled == 'true'
