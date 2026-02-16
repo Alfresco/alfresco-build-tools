@@ -25,7 +25,6 @@ inline-quotes = "double"
 profile="black"
 
 [tool.pytest.ini_options]
-#addopts = "-ra --strict-markers --import-mode=importlib"
 testpaths = ["unit"]
 python_files = ["test_*.py"]
 pythonpath = ["../../../actions/jira-get-or-create-release"]
@@ -37,7 +36,8 @@ addopts = '''
     --color=yes
     --random-order
     -o junit_family=xunit2
-    --cov=../../../actions/jira-get-or-create-release
+    --junitxml=report.xml
+    --cov=jira_get_or_create_release
     --cov-report=term-missing
     --cov-report=xml
 '''

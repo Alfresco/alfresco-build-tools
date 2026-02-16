@@ -25,7 +25,7 @@ def action_module():
   if not action_path.exists():
     raise FileNotFoundError(f"action.py not found at: {action_path}")
 
-  spec = importlib.util.spec_from_file_location("action", action_path)
+  spec = importlib.util.spec_from_file_location("jira_get_or_create_release", action_path)
   module = importlib.util.module_from_spec(spec)
   assert spec.loader is not None
   spec.loader.exec_module(module)
