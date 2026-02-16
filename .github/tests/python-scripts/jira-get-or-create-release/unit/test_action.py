@@ -273,116 +273,120 @@ def test_create_version_with_description_updates_version_after_create(jira, acti
 
 
 @responses.activate
-def test_ensure_version_returns_existing_version_id_without_creating(jira, capsys, action_module):
-    responses.add(
-        responses.GET,
-        VERSIONS_URL,
-        json=[
-            {"id": "10001", "name": "1.0.0"},
-            {"id": VERSION_ID, "name": "FF Test"},
-        ],
-        status=200,
-    )
+def test_ensure_version_returns_existing_without_creating(jira, action_module, capsys):
+  responses.add(responses.GET, VERSIONS_URL, json=[{"id": VERSION_ID, "name": VERSION_NAME}], status=200)
 
-    version_id = action_module.ensure_version(jira, PROJECT_KEY, "FF Test", description=None)
+  vid = action_module.ensure_version(jira, PROJECT_KEY, VERSION_NAME, description="ignored")
+  assert vid == VERSION_ID
+  assert len(responses.calls) == 1
 
-    assert version_id == VERSION_ID
-
-    out = capsys.readouterr().out
-    assert f"Version FF Test found with id {VERSION_ID}." in out
-
-    # Only one HTTP call: GET versions
-    assert len(responses.calls) == 1
-    assert responses.calls[0].request.method == "GET"
-    assert responses.calls[0].request.url == VERSIONS_URL
+  out = capsys.readouterr().out
+  assert f"Version {VERSION_NAME} found with id {VERSION_ID}." in out
 
 
+@pytest.mark.parametrize(
+  "versions_list, description, expect_update",
+  [
+    # missing version; no description
+    ([{"id": "10001", "name": "1.0.0"}], None, False),
+    # missing version; description provided
+    ([], VERSION_DESCRIPTION, True),
+  ],
+)
 @responses.activate
-def test_ensure_version_creates_when_missing_without_description(jira, capsys, action_module):
+def test_ensure_version_creates_when_missing_parametric(
+  jira, capsys, action_module, versions_list, description, expect_update
+):
+  responses.add(responses.GET, VERSIONS_URL, json=versions_list, status=200)
+  responses.add(responses.GET, PROJECT_URL, json={"id": "12345"}, status=200)
+  responses.add(
+    responses.POST,
+    CREATE_VERSION_URL,
+    json={"id": VERSION_ID, "name": VERSION_NAME},
+    status=201,
+  )
+  if expect_update:
     responses.add(
-        responses.GET,
-        VERSIONS_URL,
-        json=[
-            {"id": "10001", "name": "1.0.0"},
-        ],
-        status=200,
-    )
-    responses.add(responses.GET, PROJECT_URL, json={"id": "12345"}, status=200)
-    responses.add(responses.POST, CREATE_VERSION_URL, json={"id": VERSION_ID, "name": VERSION_NAME}, status=201)
-
-    version_id = action_module.ensure_version(jira, PROJECT_KEY, VERSION_NAME, description=None)
-
-    assert version_id == VERSION_ID
-    out = capsys.readouterr().out
-    assert f"Version {VERSION_NAME} created successfully with id {VERSION_ID}." in out
-
-    # HTTP calls: GET versions, GET project, POST create version
-    assert len(responses.calls) == 3
-    assert responses.calls[0].request.method == "GET"
-    assert responses.calls[0].request.url == VERSIONS_URL
-    assert responses.calls[1].request.method == "GET"
-    assert responses.calls[1].request.url == PROJECT_URL
-    assert responses.calls[2].request.method == "POST"
-    assert responses.calls[2].request.url == CREATE_VERSION_URL
-
-    # Validate POST payload (no description)
-    body = responses.calls[2].request.body
-    if isinstance(body, bytes):
-        body = body.decode("utf-8")
-    payload = json.loads(body)
-
-    assert payload["name"] == VERSION_NAME
-    assert str(payload["projectId"]) == "12345"
-    assert payload["released"] is False
-    assert payload["archived"] is False
-    assert "description" not in payload
-
-
-@responses.activate
-def test_ensure_version_creates_then_updates_description_when_provided(jira, capsys, action_module):
-    responses.add(responses.GET, VERSIONS_URL, json=[], status=200)
-    responses.add(responses.GET, PROJECT_URL, json={"id": "12345"}, status=200)
-    responses.add(responses.POST, CREATE_VERSION_URL, json={"id": VERSION_ID, "name": VERSION_NAME}, status=201)
-    responses.add(
-        responses.PUT,
-        UPDATE_VERSION_URL,
-        json={"id": VERSION_ID, "name": VERSION_NAME, "description": VERSION_DESCRIPTION},
-        status=200,
+      responses.PUT,
+      UPDATE_VERSION_URL,
+      json={"id": VERSION_ID, "name": VERSION_NAME, "description": VERSION_DESCRIPTION},
+      status=200,
     )
 
-    version_id = action_module.ensure_version(
-        jira,
-        PROJECT_KEY,
-        VERSION_NAME,
-        description=VERSION_DESCRIPTION,
-    )
+  version_id = action_module.ensure_version(
+    jira,
+    PROJECT_KEY,
+    VERSION_NAME,
+    description=description,
+  )
 
-    assert version_id == VERSION_ID
-    out = capsys.readouterr().out
-    assert f"Version {VERSION_NAME} created successfully with id {VERSION_ID}." in out
+  assert version_id == VERSION_ID
+  out = capsys.readouterr().out
+  assert f"Version {VERSION_NAME} created successfully with id {VERSION_ID}." in out
 
-    # HTTP calls: GET versions, GET project, POST create, PUT update
-    assert len(responses.calls) == 4
-    assert responses.calls[0].request.method == "GET"
-    assert responses.calls[0].request.url == VERSIONS_URL
-    assert responses.calls[1].request.method == "GET"
-    assert responses.calls[1].request.url == PROJECT_URL
-    assert responses.calls[2].request.method == "POST"
-    assert responses.calls[2].request.url == CREATE_VERSION_URL
+  # HTTP calls: GET versions, GET project, POST create (+ optional PUT update)
+  expected_calls = 4 if expect_update else 3
+  assert len(responses.calls) == expected_calls
+  assert responses.calls[0].request.method == "GET"
+  assert responses.calls[0].request.url == VERSIONS_URL
+  assert responses.calls[1].request.method == "GET"
+  assert responses.calls[1].request.url == PROJECT_URL
+  assert responses.calls[2].request.method == "POST"
+  assert responses.calls[2].request.url == CREATE_VERSION_URL
 
-    # POST payload should not contain description
-    body = responses.calls[2].request.body
-    if isinstance(body, bytes):
-        body = body.decode("utf-8")
-    payload = json.loads(body)
-    assert payload["name"] == VERSION_NAME
-    assert "description" not in payload
+  # Validate POST payload (never includes description)
+  body = responses.calls[2].request.body
+  if isinstance(body, bytes):
+    body = body.decode("utf-8")
+  payload = json.loads(body)
+
+  assert payload["name"] == VERSION_NAME
+  assert str(payload["projectId"]) == "12345"
+  assert payload["released"] is False
+  assert payload["archived"] is False
+  assert "description" not in payload
+
+  if expect_update:
     assert responses.calls[3].request.method == "PUT"
     assert responses.calls[3].request.url == UPDATE_VERSION_URL
 
-    # PUT payload must contain description
     body = responses.calls[3].request.body
     if isinstance(body, bytes):
-        body = body.decode("utf-8")
+      body = body.decode("utf-8")
     payload = json.loads(body)
     assert payload["description"] == VERSION_DESCRIPTION
+
+
+def test_write_github_output_noop_when_env_missing(monkeypatch, tmp_path, action_module):
+  monkeypatch.delenv("GITHUB_OUTPUT", raising=False)
+  out_file = tmp_path / "github_output.txt"
+
+  action_module.write_github_output("version_id", VERSION_ID)
+
+  assert not out_file.exists()
+
+
+@pytest.mark.parametrize("value", ["", "   "])
+def test_write_github_output_noop_when_env_blank(monkeypatch, tmp_path, action_module, value):
+  monkeypatch.setenv("GITHUB_OUTPUT", value)
+
+  action_module.write_github_output("version_id", VERSION_ID)
+
+
+def test_write_github_output_writes_key_value_line(monkeypatch, tmp_path, action_module):
+  out_file = tmp_path / "github_output.txt"
+  monkeypatch.setenv("GITHUB_OUTPUT", str(out_file))
+
+  action_module.write_github_output("version_id", VERSION_ID)
+
+  assert out_file.read_text(encoding="utf-8") == f"version_id={VERSION_ID}\n"
+
+
+def test_write_github_output_appends_multiple_lines(monkeypatch, tmp_path, action_module):
+  out_file = tmp_path / "github_output.txt"
+  monkeypatch.setenv("GITHUB_OUTPUT", str(out_file))
+
+  action_module.write_github_output("version_id", VERSION_ID)
+  action_module.write_github_output("version_name", VERSION_NAME)
+
+  assert out_file.read_text(encoding="utf-8") == f"version_id={VERSION_ID}\nversion_name={VERSION_NAME}\n"
