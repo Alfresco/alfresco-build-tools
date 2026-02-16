@@ -58,6 +58,16 @@ if [ ! -d "$actions_dir" ]; then
   exit 2
 fi
 
+if [ ! -r "$readme_file" ]; then
+  echo "README file not found or not readable: $readme_file"
+  exit 2
+fi
+
+if ! [[ "$allowed_missing_entries" =~ ^[0-9]+$ ]]; then
+  echo "Invalid --missing-entries value: $allowed_missing_entries"
+  exit 2
+fi
+
 if ! find "$actions_dir" -type f -name action.yml -print -quit | grep -q .; then
   echo "No action.yml files found in $actions_dir"
   exit 2
