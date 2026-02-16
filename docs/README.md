@@ -1181,6 +1181,27 @@ top of self-hosted runners coming with vanilla ubuntu images or the latest arm64
           package-names-list: "postgresql-client" # optional packages to install
 ```
 
+### jira-get-or-create-release
+
+Retrieve a JIRA cloud release or create one if it does not exist.
+In any case the release id is returned as output
+
+```yaml
+      - name: Ensure Jira release
+        id: jira
+        uses: Alfresco/alfresco-build-tools/.github/actions/jira-get-or-create-release@v12.3.0
+        with:
+          jira-url: ${{ secrets.JIRA_URL }}
+          jira-project-key: "THEPROJECT"
+          jira-version-name: "The Version Name"
+          jira-version-description: "Test release 1.2.3 - Description"
+          jira-user: ${{ secrets.JIRA_USER }}
+          jira-token: ${{ secrets.JIRA_TOKEN }}
+
+      - name: Reuse version id
+        run: echo "Jira version id = ${{ steps.jira.outputs.version-id }}"
+```
+
 ### jx-updatebot-pr
 
 Create a Pull Request on each downstream repository using [jx-updatebot](https://github.com/jenkins-x-plugins/jx-updatebot).
