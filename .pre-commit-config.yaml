@@ -46,6 +46,7 @@ repos:
         name: Check README entries
         language: system
         entry: ./check_readme.sh
+        args: [--exclude-path, .github/actions/dbp-charts]
         pass_filenames: false
 
   - repo: https://github.com/psf/black
