@@ -77,7 +77,7 @@ Arguments:
 
 - `--actions-dir DIR` (default: `.github/actions`)
 - `--readme-file FILE` (default: `docs/README.md`)
-- `--missing-entries N` (default: `0`)
+- `--missing-entries N` (default: `0`, allow up to N missing entries)
 - `--exclude-path PATH` (repeatable)
 
 Add to your `.pre-commit-config.yaml`:

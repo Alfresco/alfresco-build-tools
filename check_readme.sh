@@ -3,6 +3,7 @@
 actions_dir=".github/actions"
 readme_file="docs/README.md"
 missing_entries=0
+allowed_missing_entries=0
 exclude_paths=()
 
 usage() {
@@ -31,7 +32,7 @@ while [ $# -gt 0 ]; do
       ;;
     --missing-entries)
       require_arg "$1" "$2"
-      missing_entries="$2"
+      allowed_missing_entries="$2"
       shift 2
       ;;
     --exclude-path)
@@ -82,5 +83,8 @@ done
 # Report the number of missing entries
 if [ $missing_entries -gt 0 ]; then
   echo "$missing_entries entries not found in $readme_file"
+fi
+
+if [ $missing_entries -gt $allowed_missing_entries ]; then
   exit 1
 fi
