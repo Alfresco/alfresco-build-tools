@@ -14,7 +14,7 @@ venv
 '''
 
 [tool.flake8]
-ignore = ['W503'] # W503 line break before binary operator, but W503 is not PEP 8 compliant
+ignore = ['W503'] # W503 line break before binary operator - ignored as PEP 8 now recommends this style
 max-line-length = 120
 max-complexity = 18
 count = true
