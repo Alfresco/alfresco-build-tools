@@ -77,7 +77,10 @@ folders=$(find "$actions_dir" -type f -name action.yml -print | xargs -n1 dirnam
 
 # Check each folder
 for folder in $folders; do
-  [ -d "$folder" ] || continue
+  if [ ! -d "$folder" ]; then
+    echo "Invalid action directory in list: $folder"
+    exit 2
+  fi
   for exclude_path in "${exclude_paths[@]}"; do
     case "$folder" in
       "$exclude_path"|"$exclude_path"/*) continue 2 ;;
