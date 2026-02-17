@@ -1,7 +1,7 @@
 [tool.pytest.ini_options]
 testpaths = ["unit"]
 python_files = ["test_*.py"]
-pythonpath = ["../../../actions/slack-file-upload"]
+pythonpath = ["..", "../../../actions/slack-file-upload"]
 addopts = '''
     -vvv
     -ra

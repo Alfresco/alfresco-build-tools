@@ -1,7 +1,7 @@
 [tool.pytest.ini_options]
 testpaths = ["unit"]
 python_files = ["test_*.py"]
-pythonpath = ["../../../actions/jira-get-or-create-release"]
+pythonpath = ["..", "../../../actions/jira-get-or-create-release"]
 addopts = '''
     -vvv
     -ra
