@@ -23,6 +23,10 @@ defaults:
   run:
     shell: bash
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
 jobs:
   resolve:
     runs-on: ubuntu-latest
@@ -65,6 +69,12 @@ jobs:
       matrix: ${{ fromJSON(needs.resolve.outputs.matrix_json) }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Skip if superseded by newer run
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_EVENT_PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
+        run: ./.github/scripts/skip-if-superseded.sh
 
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
