@@ -9,6 +9,7 @@ set -euo pipefail
 
 ACTIONS_ROOT=".github/actions"
 TESTS_ROOT=".github/tests/python-scripts"
+SHARED_DIR="shared"
 
 declare -A impacted=()
 
@@ -18,6 +19,8 @@ while IFS= read -r file; do
   if [[ "$file" == "$ACTIONS_ROOT/"* ]]; then
     rest="${file#${ACTIONS_ROOT}/}"
     action="${rest%%/*}"
+    # Ignore shared test helpers (not an action)
+    [[ "$action" == "$SHARED_DIR" ]] && continue
     [[ -n "$action" ]] && impacted["$action"]=1
   elif [[ "$file" == "$TESTS_ROOT/"* ]]; then
     rest="${file#${TESTS_ROOT}/}"
@@ -30,6 +33,8 @@ tests_dirs=()
 matrix_items=()
 
 for action in "${!impacted[@]}"; do
+  # Safety: ignore shared even if it ends up here somehow
+  [[ "$action" == "$SHARED_DIR" ]] && continue
   test_dir="${TESTS_ROOT}/${action}"
   if [[ -d "$test_dir" ]]; then
     tests_dirs+=("$test_dir")
