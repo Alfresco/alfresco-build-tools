@@ -52,5 +52,8 @@ fi
   echo "tests_dirs<<EOF"
   printf "%s\n" "${tests_dirs_sorted[@]}"
   echo "EOF"
-  echo "matrix_json={\"include\":[${matrix_sorted[*]}]}"
+  (
+    IFS=,
+    echo "matrix_json={\"include\":[${matrix_sorted[*]}]}"
+  )
 } >> "$GITHUB_OUTPUT"
