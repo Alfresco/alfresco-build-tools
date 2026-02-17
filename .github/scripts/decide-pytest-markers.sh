@@ -24,7 +24,7 @@ if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
     if has_label "$LABEL_POLL"; then HAS_POLL=true; fi
 
     if [[ "$HAS_INT" == true && "$HAS_POLL" == true ]]; then
-      MARKER='true'
+      MARKER='(not integration_pollution) or integration_pollution'
       MODE='all'
     elif [[ "$HAS_INT" == true ]]; then
       MARKER='not integration_pollution'
