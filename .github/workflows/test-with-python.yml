@@ -11,12 +11,17 @@ on:
       - ".github/workflows/test-with-python.yml"
   pull_request:
     branches: [ master ]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
     paths:
       - ".github/actions/**/action.yml"
       - ".github/actions/**/*.py"
       - ".github/actions/**/requirements.txt"
       - ".github/tests/python-scripts/**"
       - ".github/workflows/test-with-python.yml"
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   resolve:
@@ -35,7 +40,6 @@ jobs:
 
       - name: Resolve impacted python action tests
         id: resolve
-        shell: bash
         env:
           CHANGED: ${{ steps.changes.outputs.all_changed_files }}
         run: |
@@ -75,10 +79,19 @@ jobs:
           [ -f ".github/tests/python-scripts/${{ matrix.action }}/dev-requirements.txt" ] && \
             python -m pip install -r .github/tests/python-scripts/${{ matrix.action }}/dev-requirements.txt
 
+      - name: Decide pytest markers from PR labels
+        id: decide_markers
+        run: ./.github/scripts/decide-pytest-markers.sh
+
       - name: Run tests for ${{ matrix.action }}
         working-directory: .github/tests/python-scripts/${{ matrix.action }}
         run: |
-          python -m pytest
+          echo "Selected test mode: ${{ steps.decide_markers.outputs.mode }}"
+          if [ -n "${{ steps.decide_markers.outputs.marker }}" ]; then
+            python -m pytest -m "${{ steps.decide_markers.outputs.marker }}"
+          else
+            python -m pytest
+          fi
 
       - name: Publish test report
         uses: dorny/test-reporter@b082adf0eced0765477756c2a610396589b8c637 # v2.5.0

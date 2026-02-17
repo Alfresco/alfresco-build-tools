@@ -1,7 +1,11 @@
 [tool.pytest.ini_options]
-testpaths = ["unit"]
+testpaths = ["unit", "integration"]
 python_files = ["test_*.py"]
 pythonpath = ["..", "../../../actions/jira-get-or-create-release"]
+markers = [
+  "integration: integration tests (require external systems, may be slower)",
+  "integration_pollution: integration tests with irreversible side effects (e.g. creating Jira tickets that cannot be deleted)",
+]
 addopts = '''
     -vvv
     -ra
@@ -17,4 +21,5 @@ addopts = '''
     --cov=jira_get_or_create_release
     --cov-report=term-missing
     --cov-report=xml
+    -m "not integration and not integration_pollution"
 '''
