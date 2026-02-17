@@ -83,15 +83,29 @@ jobs:
         id: decide_markers
         run: ./.github/scripts/decide-pytest-markers.sh
 
+      - name: Debug labels + marker decision
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          echo "=== PR labels from event payload ==="
+          jq -r '.pull_request.labels[].name' "$GITHUB_EVENT_PATH" || true
+          echo "=== decide outputs ==="
+          echo "mode='${{ steps.decide_markers.outputs.mode }}'"
+          echo "marker='${{ steps.decide_markers.outputs.marker }}'"
+          echo "=== pytest config addopts (for sanity) ==="
+          python - <<'PY'
+          import tomllib, pathlib
+          p = pathlib.Path("pyproject.toml")
+          data = tomllib.loads(p.read_text())
+          opts = data.get("tool", {}).get("pytest", {}).get("ini_options", {}).get("addopts", "")
+          print(opts)
+          PY
+
       - name: Run tests for ${{ matrix.action }}
         working-directory: .github/tests/python-scripts/${{ matrix.action }}
         run: |
           echo "Selected test mode: ${{ steps.decide_markers.outputs.mode }}"
-          if [ -n "${{ steps.decide_markers.outputs.marker }}" ]; then
-            python -m pytest -m "${{ steps.decide_markers.outputs.marker }}"
-          else
-            python -m pytest
-          fi
+          echo "Selected pytest -m: ${{ steps.decide_markers.outputs.marker }}"
+          python -m pytest -m "${{ steps.decide_markers.outputs.marker }}"
 
       - name: Publish test report
         uses: dorny/test-reporter@b082adf0eced0765477756c2a610396589b8c637 # v2.5.0
