@@ -1,29 +1,3 @@
-[tool.black]
-line-length = 120
-force-exclude = '''
-.git
-.pytest_cache
-.coverage
-.tox
-.venv
-_build
-buck-out
-build
-dist
-venv
-'''
-
-[tool.flake8]
-ignore = ['W503'] # W503 line break before binary operator, but W503 is not PEP 8 compliant
-max-line-length = 120
-max-complexity = 18
-count = true
-exclude = ['venv']
-inline-quotes = "double"
-
-[tool.isort]
-profile="black"
-
 [tool.pytest.ini_options]
 testpaths = ["unit"]
 python_files = ["test_*.py"]
