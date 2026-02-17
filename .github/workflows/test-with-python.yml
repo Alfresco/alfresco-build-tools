@@ -1,14 +1,90 @@
-name: CI with Python
+name: Python Tests
 
 on:
   push:
     branches: [ master ]
+    paths:
+      - ".github/actions/**/action.yml"
+      - ".github/actions/**/*.py"
+      - ".github/actions/**/requirements.txt"
+      - ".github/tests/python-scripts/**"
+      - ".github/workflows/test-with-python.yml"
   pull_request:
     branches: [ master ]
+    paths:
+      - ".github/actions/**/action.yml"
+      - ".github/actions/**/*.py"
+      - ".github/actions/**/requirements.txt"
+      - ".github/tests/python-scripts/**"
+      - ".github/workflows/test-with-python.yml"
 
 jobs:
-  test:
-    name: test
+  resolve:
     runs-on: ubuntu-latest
+    outputs:
+      has_tests: ${{ steps.resolve.outputs.has_tests }}
+      matrix_json: ${{ steps.resolve.outputs.matrix_json }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: List changes
+        id: changes
+        uses: ./.github/actions/github-list-changes
+
+      - name: Resolve impacted python action tests
+        id: resolve
+        shell: bash
+        env:
+          CHANGED: ${{ steps.changes.outputs.all_changed_files }}
+        run: |
+          printf "%s\n" "$CHANGED" > changed_files.txt
+          ./.github/scripts/resolve-python-action-tests.sh < changed_files.txt
+
+      - name: Debug
+        run: |
+          echo "has_tests=${{ steps.resolve.outputs.has_tests }}"
+          echo '${{ steps.resolve.outputs.matrix_json }}'
+
+  tests:
+    name: ${{ matrix.action }}
+    needs: resolve
+    if: needs.resolve.outputs.has_tests == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.resolve.outputs.matrix_json) }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install test deps
+        run: |
+          python -m pip install --upgrade pip
+          [ -f ".github/actions/${{ matrix.action }}/requirements.txt" ] && \
+            python -m pip install -r .github/actions/${{ matrix.action }}/requirements.txt
+          [ -f ".github/tests/python-scripts/${{ matrix.action }}/dev-requirements.txt" ] && \
+            python -m pip install -r .github/tests/python-scripts/${{ matrix.action }}/dev-requirements.txt
+
+      - name: Run tests for ${{ matrix.action }}
+        working-directory: .github/tests/python-scripts/${{ matrix.action }}
+        run: |
+          python -m pytest
+
+      - name: Publish test report
+        uses: dorny/test-reporter@b082adf0eced0765477756c2a610396589b8c637 # v2.5.0
+        if: ${{ !cancelled() }}
+        with:
+          working-directory: .github/tests/python-scripts/${{ matrix.action }}
+          name: ${{ matrix.action }}
+          path: report.xml
+          reporter: java-junit

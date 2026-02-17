@@ -5,12 +5,15 @@ pythonpath = ["../../../actions/jira-get-or-create-release"]
 addopts = '''
     -vvv
     -ra
+    --tb=long
+    --showlocals
     --strict-markers
     --import-mode=importlib
     --color=yes
     --random-order
     -o junit_family=xunit2
-    --junitxml=report.xml
+    -o junit_logging=all
+    --junit-xml=report.xml
     --cov=jira_get_or_create_release
     --cov-report=term-missing
     --cov-report=xml
