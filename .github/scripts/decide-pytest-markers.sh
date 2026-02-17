@@ -23,17 +23,17 @@ if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
     if has_label "$LABEL_INT"; then HAS_INT=true; fi
     if has_label "$LABEL_POLL"; then HAS_POLL=true; fi
 
-    # Policy:
-    # - no label => unit only
-    # - integration label => unit + integration (safe)
-    # - both labels => everything
     if [[ "$HAS_INT" == true && "$HAS_POLL" == true ]]; then
-      MARKER=''     # empty => don't pass -m (run everything)
+      MARKER='true'
       MODE='all'
     elif [[ "$HAS_INT" == true ]]; then
       MARKER='not integration_pollution'
       MODE='safe'
+    else
+      MARKER='not (integration or integration_pollution)'
+      MODE='unit-only'
     fi
+
   fi
 fi
 
