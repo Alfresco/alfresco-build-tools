@@ -2,7 +2,6 @@ import importlib.util
 from pathlib import Path
 
 import pytest
-import responses
 
 
 @pytest.fixture
@@ -28,6 +27,5 @@ def action_module():
     return module
 
 
-@responses.activate
 def test_dummy():
     print("hey !")
