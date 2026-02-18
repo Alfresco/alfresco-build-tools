@@ -16,7 +16,7 @@ jobs:
 
       - uses: mig4/setup-bats@af9a00deb21b5d795cabfeaa8d9060410377686d # v1.2.0
         with:
-          bats-version: 1.8.0
+          bats-version: 1.13.0
 
       - name: 🦇🦇🦇
         run: bats -r --print-output-on-failure .
