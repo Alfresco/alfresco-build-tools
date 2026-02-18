@@ -23,12 +23,36 @@ defaults:
   run:
     shell: bash
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: false
-
 jobs:
+  gate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    outputs:
+      should_run: ${{ steps.lock.outputs.should_run }}
+      lock_acquired: ${{ steps.lock.outputs.lock_acquired }}
+      lock_ref_path: ${{ steps.lock.outputs.lock_ref_path }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Acquire PR lock (atomic; breaks stale locks)
+        id: lock
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: ./.github/scripts/acquire-pr-lock.sh
+
+      - name: Debug gate decision
+        run: |
+          echo "should_run=${{ steps.lock.outputs.should_run }}"
+          echo "lock_acquired=${{ steps.lock.outputs.lock_acquired }}"
+          echo "lock_ref_path=${{ steps.lock.outputs.lock_ref_path }}"
+
   resolve:
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     outputs:
       has_tests: ${{ steps.resolve.outputs.has_tests }}
@@ -57,8 +81,8 @@ jobs:
 
   tests:
     name: ${{ matrix.action }}
-    needs: resolve
-    if: needs.resolve.outputs.has_tests == 'true'
+    needs: [gate, resolve]
+    if: needs.gate.outputs.should_run == 'true' && needs.resolve.outputs.has_tests == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -69,12 +93,6 @@ jobs:
       matrix: ${{ fromJSON(needs.resolve.outputs.matrix_json) }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
-      - name: Skip if superseded by newer run
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          GITHUB_EVENT_PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
-        run: ./.github/scripts/skip-if-superseded.sh
 
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
@@ -93,23 +111,6 @@ jobs:
         id: decide_markers
         run: ./.github/scripts/decide-pytest-markers.sh
 
-      - name: Debug labels + marker decision
-        if: ${{ github.event_name == 'pull_request' }}
-        run: |
-          echo "=== PR labels from event payload ==="
-          jq -r '.pull_request.labels[].name' "$GITHUB_EVENT_PATH" || true
-          echo "=== decide outputs ==="
-          echo "mode='${{ steps.decide_markers.outputs.mode }}'"
-          echo "marker='${{ steps.decide_markers.outputs.marker }}'"
-          echo "=== pytest config addopts (for sanity) ==="
-          python - <<'PY'
-          import tomllib, pathlib
-          p = pathlib.Path("pyproject.toml")
-          data = tomllib.loads(p.read_text())
-          opts = data.get("tool", {}).get("pytest", {}).get("ini_options", {}).get("addopts", "")
-          print(opts)
-          PY
-
       - name: Run tests for ${{ matrix.action }}
         working-directory: .github/tests/python-scripts/${{ matrix.action }}
         run: |
@@ -125,3 +126,17 @@ jobs:
           name: ${{ matrix.action }}
           path: report.xml
           reporter: java-junit
+
+  unlock:
+    needs: [gate, resolve, tests]
+    if: ${{ always() && needs.gate.outputs.lock_acquired == 'true' && needs.gate.outputs.lock_ref_path != '' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Release PR lock
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LOCK_REF_PATH: ${{ needs.gate.outputs.lock_ref_path }}
+        run: ./.github/scripts/release-pr-lock.sh
