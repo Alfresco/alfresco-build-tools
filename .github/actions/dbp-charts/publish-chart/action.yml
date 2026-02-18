@@ -26,7 +26,7 @@ runs:
       with:
         fetch-depth: 0
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v14.1.1
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v15.0.0
     - name: Publish
       run: ${{ github.action_path }}/publish_chart.sh
       shell: bash
