@@ -8,7 +8,6 @@ LABEL_POLL="test/python-integration-pollution"
 MARKER='not (integration or integration_pollution)'
 MODE='unit-only'
 
-# Not a PR event => keep default
 if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
   EVENT_PATH="${GITHUB_EVENT_PATH:-}"
   if [[ -n "$EVENT_PATH" && -f "$EVENT_PATH" ]]; then
@@ -19,7 +18,6 @@ if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
 
     HAS_INT=false
     HAS_POLL=false
-
     if has_label "$LABEL_INT"; then HAS_INT=true; fi
     if has_label "$LABEL_POLL"; then HAS_POLL=true; fi
 
@@ -29,19 +27,13 @@ if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
     elif [[ "$HAS_INT" == true ]]; then
       MARKER='not integration_pollution'
       MODE='safe'
-    else
-      MARKER='not (integration or integration_pollution)'
-      MODE='unit-only'
     fi
-
   fi
 fi
 
-# Emit outputs (GitHub Actions)
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
   echo "marker=$MARKER" >> "$GITHUB_OUTPUT"
   echo "mode=$MODE" >> "$GITHUB_OUTPUT"
 else
-  # local usage fallback
   echo "$MARKER"
 fi
