@@ -19,7 +19,7 @@ You can provide a GitHub environment name with the `terraform_env` input to
 target a specific environment.
 
 When `terraform_env` is not explicitly set, the workflow will attempt to
-determine environment dynamically by locating the first changed `.tfvars` file
+determine the environment dynamically by locating the first changed `.tfvars` file
 for the environment name. This detection applies to both pull requests and
 pushes against the default branch.
 
@@ -28,11 +28,11 @@ named `<terraform_root_path>-dev` (e.g. `infra-dev` if `terraform_root_path` is
 `infra`), or to the value provided in the `terraform_default_env` input if set
 (e.g. `develop`)
 
-When workflows run against branches which are not the default branch, the
-workflow will fall back to branch-based environment approach: a GitHub
-environment named `production` is expected when workflow is running against the
-`main` branch, and an environment named with the branch name when running
-against any other branch (e.g. `develop` for `develop` branch, `preprod` for
+When tfvars-based environment detection does not apply (for example, for branches
+that are not the default branch) or does not find a specific environment, the
+workflow falls back to a branch-based environment: PRs and pushes targeting the
+`main` branch use the `production` environment, while other branches use the branch
+name as the environment (e.g. `develop` for the `develop` branch, `preprod` for the
 `preprod` branch, etc.).
 
 GitHub Environments must be configured with the following GitHub variables
@@ -171,7 +171,10 @@ jobs: # one job for each terraform folder/stack
   invoke-terraform:
     uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.0.0
     with:
-      # terraform_root_path: # autodetected using the first changed folder in PR/push
+      # terraform_root_path: # autodetected using the first changed folder (alphabetically) in PR/push
+      # Note: if multiple terraform folders are changed in a single PR, only the first one (alphabetically) will be used.
+      #       To manage multiple terraform workspaces independently, define separate jobs with explicit terraform_root_path
+      #       values (see invoke-terraform-infra and invoke-terraform-k8s examples above).
       # terraform_default_env: # will default to <terraform_root_path>-dev
       terraform_operation: ${{ inputs.terraform_operation }}
       tfvars_subfolder: vars
