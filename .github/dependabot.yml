@@ -33,6 +33,7 @@ updates:
       interval: "weekly"
     labels:
       - "dependencies"
+      - "python"
     commit-message:
       prefix: "feat(deps)"
       prefix-development: "chore(deps)"
@@ -44,6 +45,7 @@ updates:
       interval: "weekly"
     labels:
       - "test/dependencies"
+      - "python"
     commit-message:
       prefix: "feat(deps)"
       prefix-development: "chore(deps)"
