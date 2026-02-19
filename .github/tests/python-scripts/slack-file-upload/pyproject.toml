@@ -1,0 +1,20 @@
+[tool.pytest.ini_options]
+testpaths = ["unit"]
+python_files = ["test_*.py"]
+pythonpath = ["..", "../../../actions/slack-file-upload"]
+addopts = '''
+    -vvv
+    -ra
+    --tb=long
+    --showlocals
+    --strict-markers
+    --import-mode=importlib
+    --color=yes
+    --random-order
+    -o junit_family=xunit2
+    -o junit_logging=all
+    --junit-xml=report.xml
+    --cov=slack-file-upload
+    --cov-report=term-missing
+    --cov-report=xml
+'''
