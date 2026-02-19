@@ -23,6 +23,12 @@ The CI pipeline:
 | Integration | With `test/python-integration` label | Validate remote behavior         |
 | Pollution   | With both integration labels         | Validate irreversible operations |
 
+### Automatic dependency updates
+
+Test dependencies are automatically updated via Dependabot using a shared configuration across all test projects.
+
+Each GitHub Action maintains its own Dependabot configuration, as some actions are not yet covered by automated tests.
+
 ## Unit tests
 
 - They are always run.
