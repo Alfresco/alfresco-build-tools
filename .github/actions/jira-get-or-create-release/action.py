@@ -68,6 +68,7 @@ def ensure_version(jira: Jira, project_key: str, version_name: str, description:
 
 def write_github_output(key: str, value: str) -> None:
     out_path = os.getenv("GITHUB_OUTPUT")
+    out_path = out_path.strip() if out_path else None
 
     if not out_path:
         return
