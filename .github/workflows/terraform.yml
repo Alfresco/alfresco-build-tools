@@ -178,6 +178,7 @@ jobs:
             exit 1
           fi
 
+          echo "Using environment based on branch name: $environment"
           echo "environment_name=${environment}" >> "$GITHUB_OUTPUT"
 
       - name: Add summary info
