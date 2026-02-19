@@ -114,7 +114,7 @@ jobs:
         if: >-
           inputs.terraform_env == '' && (
             github.event.repository.default_branch == github.ref_name ||
-            github.event.repository.default_branch == github.head_ref
+            github.event.repository.default_branch == github.base_ref
           )
         env:
           TERRAFORM_ROOT_PATH: ${{ steps.detect-path.outputs.terraform_root_path || inputs.terraform_root_path }}
