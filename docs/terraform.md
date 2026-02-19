@@ -163,23 +163,54 @@ permissions:
   contents: read
   # id-token: write # required to use OIDC authentication with AWS
 
-jobs: # one job for each terraform folder/stack
+jobs:
+  # Single job for all terraform folders/stacks, with dynamic detection of the root path
+  # and environment based on changed files in PRs/pushes against the default branch,
+  # or branch name for other branches.
+  invoke-terraform:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.0.0
+    with:
+      # Autodetected using the first changed folder (alphabetically) in PR/push
+      #
+      # terraform_root_path: my-subfolder
+
+      # Autodetected using the first changed tfvars file in PR/push,
+      # or by branch name for non-default branches.
+      #
+      # terraform_env: my-env
+
+      # Used as fallback if no tfvars file is changed in PR/push against the default branch
+      # Defaults to <terraform_root_path>-dev if not set
+      #
+      # terraform_default_env:
+
+      # Only needed for workflow_dispatch, auto-detected for PRs and pushes:
+      terraform_operation: ${{ inputs.terraform_operation }}
+
+      # Recommended to have a structured layout with tfvars files in a separate subfolder.
+      tfvars_subfolder: vars
+    secrets: inherit
+
+  # One job for a specific terraform folder/stack.
+  # Environment can still be auto-detected based on changed tfvars files or branch name.
   invoke-terraform-infra:
     uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.0.0
     with:
-      terraform_root_path: infra # optional - see invoke-terraform job below
-      terraform_default_env: develop # optional - see invoke-terraform job below
-      # only needed for workflow_dispatch, auto-detected for PRs and pushes:
+      terraform_root_path: infra
+      terraform_default_env: develop
       terraform_operation: ${{ inputs.terraform_operation }}
-      tfvars_subfolder: vars # recommended
+      tfvars_subfolder: vars
     secrets: inherit
 
-  # another job for a different terraform folder/stack, which depends on the previous one if you want to ensure a specific execution order (e.g. infra before k8s)
+  # Another job for a different terraform folder/stack
+  # which depends on the previous one if you want to ensure
+  # a specific execution order (e.g. infra before k8s).
   invoke-terraform-k8s:
     needs: invoke-terraform-infra
     uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.0.0
     with:
       terraform_root_path: k8s
+      terraform_default_env: develop
       terraform_operation: ${{ inputs.terraform_operation }}
       tfvars_subfolder: vars
       # Optionally install kubectl (see kubectl support section below)
@@ -187,18 +218,16 @@ jobs: # one job for each terraform folder/stack
       # kubectl_version: v1.28.0  # optional - defaults to latest stable
     secrets: inherit
 
-    # a separate job which can handle more than one terraform folder/stack.
-  invoke-terraform:
+  # The most static approach with hardcoded terraform root path and environment,
+  # which can be useful for simple repositories with a single stack and environment,
+  # or for scheduled workflows.
+  invoke-terraform-static:
     uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.0.0
     with:
-      # terraform_root_path: # autodetected using the first changed folder (alphabetically) in PR/push
-      # Note: if multiple terraform folders are changed in a single PR, only the first one (alphabetically) will be used.
-      #       To manage multiple terraform workspaces independently, define separate jobs with explicit terraform_root_path
-      #       values (see invoke-terraform-infra and invoke-terraform-k8s examples above).
-      # terraform_default_env: # will default to <terraform_root_path>-dev
-      terraform_operation: ${{ inputs.terraform_operation }}
+      terraform_root_path: infra
+      terraform_env: production
+      terraform_operation: plan
       tfvars_subfolder: vars
-    secrets: inherit
 ```
 
 ### kubectl support
