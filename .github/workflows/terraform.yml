@@ -259,6 +259,10 @@ jobs:
     steps:
       - name: Check environment requirements
         run: |
+          if [ -z "${{ needs.compute_basic_vars.outputs.environment_name }}" ]; then
+            echo "Environment name should have been determined at this point, but it's empty. BUG?"
+            exit 1
+          fi
           if [ -z "${{ vars.RESOURCE_NAME }}" ]; then
             echo "RESOURCE_NAME must be set in the vars context to provide a unique identifier"
             exit 1
