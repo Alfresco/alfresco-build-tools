@@ -20,7 +20,7 @@ on:
         type: string
         required: false
       terraform_default_env:
-        description: "the default terraform environment to use when auto-detection does not find a specific env (default: <terraform_root_path>-dev)"
+        description: the default terraform environment to use when auto-detection does not find a specific env (defaults to <terraform_root_path>-dev)
         type: string
         required: false
       create_oidc_token_file:
@@ -86,14 +86,14 @@ jobs:
             echo "::warning::tfvars_subfolder input is not set. Consider organizing your tfvars files in a 'vars' subfolder for better structure. Set tfvars_subfolder: 'vars' in your workflow to use this recommended layout."
           fi
 
-      - name: Checkout
+      - name: Checkout to inspect changes and autodetect terraform root path and environment
         if: inputs.terraform_root_path == '' || inputs.terraform_env == ''
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/merge', github.event.issue.number) || '' }}
           fetch-depth: 0
 
-      - name: Retrieve PR changes
+      - name: Retrieve PR or last commit changes
         if: inputs.terraform_root_path == '' || inputs.terraform_env == ''
         id: pr-changes
         uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v15.0.0
