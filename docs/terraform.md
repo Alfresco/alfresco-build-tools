@@ -15,19 +15,25 @@ optionally allowing a multi-state approach for managing resources.
 
 ### GitHub Environments
 
-You can provide GitHub environment name with the `terraform_env` input.
+You can provide a GitHub environment name with the `terraform_env` input to
+target a specific environment.
 
 When `terraform_env` is not explicitly set, the workflow will attempt to
 determine environment dynamically by locating the first changed `.tfvars` file
 for the environment name. This detection applies to both pull requests and
 pushes against the default branch.
 
-When workflows run against other branches which are not the default branch, or
-when there are no changed `.tfvars` files, the workflow will fall back to
-branch-based environment approach: a GitHub environment named `production` is
-expected when workflow is running against the `main` branch, and an environment
-named with the branch name when running against any other branch (e.g. `develop`
-for `develop` branch, `preprod` for `preprod` branch, etc.).
+If no `.tfvars` file is changed, the workflow will default to an environment
+named `<terraform_root_path>-dev` (e.g. `infra-dev` if `terraform_root_path` is
+`infra`), or to the value provided in the `terraform_default_env` input if set
+(e.g. `develop`)
+
+When workflows run against branches which are not the default branch, the
+workflow will fall back to branch-based environment approach: a GitHub
+environment named `production` is expected when workflow is running against the
+`main` branch, and an environment named with the branch name when running
+against any other branch (e.g. `develop` for `develop` branch, `preprod` for
+`preprod` branch, etc.).
 
 GitHub Environments must be configured with the following GitHub variables
 (repository or environment):
@@ -86,11 +92,12 @@ Any other tfvars file must be named after the GitHub environment name, e.g.
 When running against the default branch, the workflow will target the
 environment matching the first changed `.tfvars` file (the `tfvars` filename
 must match the GitHub environment name, e.g. `production.tfvars` ->
-`production`), or fallback to branch-based environment assumptions if no
-`.tfvars` file is changed.
+`production`), or fallback to the default environment as per
+`terraform_default_env` input or `<terraform_root_path>-dev` convention if no
+tfvars file is changed.
 
 When running against any other branch, the workflow will target the environment
-matching the branch name.
+matching the branch name (`base_ref` for `pull_request`, `ref_name` for `push`).
 
 ### Environment variables
 
@@ -140,11 +147,14 @@ jobs: # one job for each terraform folder/stack
   invoke-terraform-infra:
     uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.0.0
     with:
-      terraform_root_path: infra # optional - autodetection use the first changed folder in PR/push
-      terraform_operation: ${{ inputs.terraform_operation }} # only needed for workflow_dispatch, auto-detected for PRs and pushes
+      terraform_root_path: infra # optional - see invoke-terraform job below
+      terraform_default_env: develop # optional - see invoke-terraform job below
+      # only needed for workflow_dispatch, auto-detected for PRs and pushes:
+      terraform_operation: ${{ inputs.terraform_operation }}
       tfvars_subfolder: vars # recommended
     secrets: inherit
 
+  # another job for a different terraform folder/stack, which depends on the previous one if you want to ensure a specific execution order (e.g. infra before k8s)
   invoke-terraform-k8s:
     needs: invoke-terraform-infra
     uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.0.0
@@ -155,6 +165,16 @@ jobs: # one job for each terraform folder/stack
       # Optionally install kubectl (see kubectl support section below)
       # install_kubectl: true
       # kubectl_version: v1.28.0  # optional - defaults to latest stable
+    secrets: inherit
+
+    # a separate job which can handle more than one terraform folder/stack.
+  invoke-terraform:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.0.0
+    with:
+      # terraform_root_path: # autodetected using the first changed folder in PR/push
+      # terraform_default_env: # will default to <terraform_root_path>-dev
+      terraform_operation: ${{ inputs.terraform_operation }}
+      tfvars_subfolder: vars
     secrets: inherit
 ```
 
