@@ -110,7 +110,7 @@ jobs:
           echo "First changed folder: $first_changed_folder"
           echo "terraform_root_path=$first_changed_folder" >> "$GITHUB_OUTPUT"
 
-      - name: Compute first changed tfvars file (when PR raised against default branch)
+      - name: Compute first changed tfvars file (when running against default branch)
         if: >-
           inputs.terraform_env == '' && (
             github.event.repository.default_branch == github.ref_name ||
@@ -128,8 +128,8 @@ jobs:
             | xargs -r basename -s .tfvars)
 
           if [ -z "$first_changed_tfvars" ]; then
-            echo "No specific tfvars file changed, falling back to branch-based environment assumptions"
-            first_changed_tfvars=""
+            echo "No specific tfvars file changed, defaulting to '${{ env.TERRAFORM_ROOT_PATH }}-dev'"
+            first_changed_tfvars="${{ env.TERRAFORM_ROOT_PATH }}-dev"
           else
             echo "Automatically selected environment based on tfvars file: $first_changed_tfvars"
           fi
