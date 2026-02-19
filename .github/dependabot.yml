@@ -35,6 +35,7 @@ updates:
       - "dependencies"
     commit-message:
       prefix: "feat(deps)"
+      prefix-development: "chore(deps)"
     open-pull-requests-limit: 10
 
   - package-ecosystem: "pip"
@@ -44,5 +45,6 @@ updates:
     labels:
       - "test/dependencies"
     commit-message:
+      prefix: "feat(deps)"
       prefix-development: "chore(deps)"
     open-pull-requests-limit: 10
