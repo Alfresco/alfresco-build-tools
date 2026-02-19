@@ -24,7 +24,7 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         raise ValueError("File path must be provided as the first argument.")
 
-    SLACK_BOT_TOKEN = os.environ["SLACK_BOT_TOKEN"]  # hop
+    SLACK_BOT_TOKEN = os.environ["SLACK_BOT_TOKEN"]
     CHANNEL_ID = os.environ["SLACK_CHANNEL_ID"]
     FILE_PATH = sys.argv[1]
     TITLE = sys.argv[2] if len(sys.argv) > 2 else None

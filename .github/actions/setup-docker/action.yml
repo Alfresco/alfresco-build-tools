@@ -3,7 +3,7 @@ description: "Install latest docker engine and start the service (useful on self
 runs:
   using: composite
   steps:
-    - name: Setup Dockere
+    - name: Setup Docker
       shell: bash
       run: |
         sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
