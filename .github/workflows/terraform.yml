@@ -96,7 +96,7 @@ jobs:
       - name: Retrieve PR changes
         if: inputs.terraform_root_path == '' || inputs.terraform_env == ''
         id: pr-changes
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v12.4.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v15.0.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
