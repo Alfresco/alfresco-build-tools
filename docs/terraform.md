@@ -120,7 +120,7 @@ permissions:
 
 jobs: # one job for each terraform folder/stack
   invoke-terraform-infra:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.0.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.1.0
     with:
       terraform_root_path: infra
       terraform_operation: ${{ inputs.terraform_operation }}
@@ -129,7 +129,7 @@ jobs: # one job for each terraform folder/stack
 
   invoke-terraform-k8s:
     needs: invoke-terraform-infra
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.0.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.1.0
     with:
       terraform_root_path: k8s
       terraform_operation: ${{ inputs.terraform_operation }}
@@ -158,7 +158,7 @@ Example:
 ```yaml
 jobs:
   invoke-terraform-k8s:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.0.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.1.0
     with:
       terraform_root_path: k8s
       install_kubectl: true
@@ -222,7 +222,7 @@ permissions:
 
 jobs:
   pre-commit:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v15.0.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v15.1.0
     with:
       BOT_GITHUB_USERNAME: ${{ vars.BOT_GITHUB_USERNAME }}
     secrets: inherit
