@@ -25,3 +25,14 @@ updates:
     directory: "/.github/actions/pipenv"
     schedule:
       interval: "monthly"
+
+  - package-ecosystem: "pip"
+    directory: "/.github/tests/python-scripts/jira-get-or-create-release"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "test/dependencies"
+    commit-message:
+      prefix: "feat(deps)"
+      prefix-development: "chore(deps)"
+    open-pull-requests-limit: 10
