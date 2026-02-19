@@ -18,6 +18,8 @@ For terraform-related topics of GitHub Actions, see the [Terraform section](docs
 
 For pre-commit hooks documentation, see the [Pre-commit Hooks section](docs/pre-commit-hooks.md).
 
+For Python scripts testing guidelines, see the [Python Testing documentation](.github/tests/python-scripts/README.md).
+
 For GitHub Copilot instructions and development guidelines, see [`.github/copilot-instructions.md`](.github/copilot-instructions.md).
 
 ## Release
