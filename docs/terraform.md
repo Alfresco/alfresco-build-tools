@@ -10,30 +10,52 @@ workflow automation for Terraform projects within the Alfresco organization.
 
 We are currently maintaining a reusable workflow which implements an opinionated
 workflow to manage terraform repositories leveraging the
-[dflook/terraform-github-actions](https://github.com/dflook/terraform-github-actions),
-optionally allowing a multi-state approach for managing resources.
+[dflook/terraform-github-actions](https://github.com/dflook/terraform-github-actions).
+
+The combination of dynamic stack/folder detection based on changed files and
+environment detection based on changed tfvars files for PRs targeting the
+default branch, and branch-based environment selection for other branches,
+allows for a flexible and automated workflow that adapts to different
+development and deployment scenarios. With this approach you can:
+
+- raise a PR with changes to a specific stack/folder and tfvars file to target a
+  specific environment
+- raise a PR with changes to a specific stack/folder without changing any tfvars file
+  to target the default environment for that stack
+- promote changes already merged to the default branch to other environments by
+  raising a PR to merge the default branch into the target environment branch.
+  Optionally use the [branch promotion workflow](#branch-promotion-workflow) to
+  automate this process.
+
+Or alternatively, you can always provide a specific stack/folder and environment
+as workflow inputs for a more controlled deployment (see `terraform_root_path`
+and `terraform_env` inputs below).
 
 ### GitHub Environments
+
+GitHub Environments must be used to manage different deployment stacks (your
+infrastructure) and environments (e.g. dev, preprod, production) and their
+associated secrets and variables.
 
 You can provide a GitHub environment name with the `terraform_env` input to
 target a specific environment.
 
 When `terraform_env` is not explicitly set, the workflow will attempt to
-determine the environment dynamically by locating the first changed `.tfvars` file
-for the environment name. This detection applies to both pull requests and
-pushes against the default branch.
+determine the environment dynamically by locating the first changed `.tfvars`
+file which matches the environment name. This detection applies to both pull
+requests and pushes against the **default branch**.
 
 If no `.tfvars` file is changed, the workflow will default to an environment
 named `<terraform_root_path>-dev` (e.g. `infra-dev` if `terraform_root_path` is
 `infra`), or to the value provided in the `terraform_default_env` input if set
-(e.g. `develop`)
+(e.g. `develop`).
 
-When tfvars-based environment detection does not apply (for example, for branches
-that are not the default branch) or does not find a specific environment, the
-workflow falls back to a branch-based environment: PRs and pushes targeting the
-`main` branch use the `production` environment, while other branches use the branch
-name as the environment (e.g. `develop` for the `develop` branch, `preprod` for the
-`preprod` branch, etc.).
+For branches that are not the default branch, the tfvars file matching will not
+be applied, and the workflow falls back to a branch-based environment approach,
+where: PRs and pushes targeting the `main` branch use the `production`
+environment, while all the other branches use the branch name as the environment
+(e.g. `develop` for the `develop` branch, `preprod` for the `preprod` branch,
+etc.).
 
 GitHub Environments must be configured with the following GitHub variables
 (repository or environment):
@@ -65,8 +87,8 @@ backend "s3" {
 
 The following GitHub secrets (all optional) are also accepted by this workflow:
 
-- `AWS_ACCESS_KEY_ID`: access key to use the AWS terraform provider
-- `AWS_SECRET_ACCESS_KEY`: secret key to use the AWS terraform provider
+- `AWS_ACCESS_KEY_ID`: (optional when using OIDC) access key to use the AWS terraform provider
+- `AWS_SECRET_ACCESS_KEY`: (optional when using OIDC) secret key to use the AWS terraform provider
 - `BOT_GITHUB_TOKEN` (to access private terraform modules in the Alfresco org)
 - `DOCKER_USERNAME` (optional): Docker Hub credentials
 - `DOCKER_PASSWORD` (optional): Docker Hub credentials
@@ -90,11 +112,9 @@ Any other tfvars file must be named after the GitHub environment name, e.g.
 `production.tfvars`, `develop.tfvars`, etc.
 
 When running against the default branch, the workflow will target the
-environment matching the first changed `.tfvars` file (the `tfvars` filename
-must match the GitHub environment name, e.g. `production.tfvars` ->
-`production`), or fallback to the default environment as per
-`terraform_default_env` input or `<terraform_root_path>-dev` convention if no
-tfvars file is changed.
+environment matching the first changed `.tfvars` file, or fallback to the
+default environment as per `terraform_default_env` input or
+`<terraform_root_path>-dev` convention if no tfvars file is changed.
 
 When running against any other branch, the workflow will target the environment
 matching the branch name (`base_ref` for `pull_request`, `ref_name` for `push`).
