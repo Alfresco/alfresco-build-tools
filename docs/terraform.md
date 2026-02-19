@@ -15,10 +15,19 @@ optionally allowing a multi-state approach for managing resources.
 
 ### GitHub Environments
 
-You can provide Github environment name with `terraform_env` input. If not set,
-this workflow assumes a GitHub environment named `production` to be present when
-run against the `main` branch, and any other environment when run against
-`develop` branch or any other branch.
+You can provide GitHub environment name with the `terraform_env` input.
+
+When `terraform_env` is not explicitly set, the workflow will attempt to
+determine environment dynamically by locating the first changed `.tfvars` file
+for the environment name. This detection applies to both pull requests and
+pushes against the default branch.
+
+When workflows run against other branches which are not the default branch, or
+when there are no changed `.tfvars` files, the workflow will fall back to
+branch-based environment approach: a GitHub environment named `production` is
+expected when workflow is running against the `main` branch, and an environment
+named with the branch name when running against any other branch (e.g. `develop`
+for `develop` branch, `preprod` for `preprod` branch, etc.).
 
 GitHub Environments must be configured with the following GitHub variables
 (repository or environment):
@@ -63,9 +72,9 @@ The following GitHub secrets (all optional) are also accepted by this workflow:
 ### Tfvars files
 
 By default, the workflow will look for tfvars files in the root of the
-`terraform_root_path`. You can specify a different subfolder using the
-`tfvars_subfolder` input. It's recommended to use a `vars` subfolder to store
-your tfvars files.
+`terraform_root_path` folder. You can specify a different relative subfolder
+using the `tfvars_subfolder` input. It's highly recommended to use a `vars`
+subfolder to store your tfvars files.
 
 Having a shared `common.tfvars` file is required to define common variables
 across all environments, e.g. tags, resource names, etc. It can be a blank file
@@ -73,6 +82,15 @@ if no common variables are needed.
 
 Any other tfvars file must be named after the GitHub environment name, e.g.
 `production.tfvars`, `develop.tfvars`, etc.
+
+When running against the default branch, the workflow will target the
+environment matching the first changed `.tfvars` file (the `tfvars` filename
+must match the GitHub environment name, e.g. `production.tfvars` ->
+`production`), or fallback to branch-based environment assumptions if no
+`.tfvars` file is changed.
+
+When running against any other branch, the workflow will target the environment
+matching the branch name.
 
 ### Environment variables
 
@@ -122,9 +140,9 @@ jobs: # one job for each terraform folder/stack
   invoke-terraform-infra:
     uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.0.0
     with:
-      terraform_root_path: infra
-      terraform_operation: ${{ inputs.terraform_operation }}
-      tfvars_subfolder: vars
+      terraform_root_path: infra # optional - autodetection use the first changed folder in PR/push
+      terraform_operation: ${{ inputs.terraform_operation }} # only needed for workflow_dispatch, auto-detected for PRs and pushes
+      tfvars_subfolder: vars # recommended
     secrets: inherit
 
   invoke-terraform-k8s:

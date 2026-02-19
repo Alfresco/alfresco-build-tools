@@ -4,10 +4,9 @@ on:
   workflow_call:
     inputs:
       terraform_root_path:
-        description: the path to the root module to apply
+        description: the path to the root module to apply, auto-detected if not provided
         type: string
         required: false
-        default: .
       terraform_operation:
         description: |
           the terraform operation to perform (plan, apply or destroy).
@@ -17,7 +16,7 @@ on:
         type: string
         required: false
       terraform_env:
-        description: the terraform environment to use (e.g. dev, staging, prod)
+        description: the terraform environment to use (e.g. dev, staging, prod), auto-detected if not provided
         type: string
         required: false
       create_oidc_token_file:
@@ -45,6 +44,7 @@ on:
       AWS_SECRET_ACCESS_KEY:
         required: false
       BOT_GITHUB_TOKEN:
+        description: a GitHub token used to fetch terraform modules from private GitHub repositories.
         required: false
       DOCKER_USERNAME:
         required: false
@@ -58,7 +58,7 @@ on:
 jobs:
   compute_basic_vars:
     name: compute basic variables
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - name: Validate inputs
         env:
@@ -82,7 +82,61 @@ jobs:
             echo "::warning::tfvars_subfolder input is not set. Consider organizing your tfvars files in a 'vars' subfolder for better structure. Set tfvars_subfolder: 'vars' in your workflow to use this recommended layout."
           fi
 
-      - name: Evaluate branch name
+      - name: Checkout
+        if: inputs.terraform_root_path == '' || inputs.terraform_env == ''
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/merge', github.event.issue.number) || '' }}
+          fetch-depth: 0
+
+      - name: Retrieve PR changes
+        if: inputs.terraform_root_path == '' || inputs.terraform_env == ''
+        id: pr-changes
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v12.4.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute first changed folder (terraform workspace path)
+        if: inputs.terraform_root_path == ''
+        id: detect-path
+        run: |
+          first_changed_folder=$(echo "${{ steps.pr-changes.outputs.all_changed_files }}" \
+            | grep '/' \
+            | cut -d/ -f1 \
+            | grep -Ev '^(\..*|test)$' \
+            | sort -u \
+            | head -1 || true)
+
+          echo "First changed folder: $first_changed_folder"
+          echo "terraform_root_path=$first_changed_folder" >> "$GITHUB_OUTPUT"
+
+      - name: Compute first changed tfvars file (when PR raised against default branch)
+        if: >-
+          inputs.terraform_env == '' && (
+            github.event.repository.default_branch == github.ref_name ||
+            github.event.repository.default_branch == github.head_ref
+          )
+        env:
+          TERRAFORM_ROOT_PATH: ${{ steps.detect-path.outputs.terraform_root_path || inputs.terraform_root_path }}
+        id: detect-tfvars
+        run: |
+          first_changed_tfvars=$(echo "${{ steps.pr-changes.outputs.all_changed_files }}" \
+            | grep -v 'common.tfvars' \
+            | grep -E '^${{ env.TERRAFORM_ROOT_PATH }}/.*\.tfvars$' \
+            | sort -u \
+            | head -1 \
+            | xargs -r basename -s .tfvars)
+
+          if [ -z "$first_changed_tfvars" ]; then
+            echo "No specific tfvars file changed, falling back to branch-based environment assumptions"
+            first_changed_tfvars=""
+          fi
+
+          echo "Automatically selected environment based on tfvars file: $first_changed_tfvars"
+          echo "terraform_tfvars_file=$first_changed_tfvars" >> "$GITHUB_OUTPUT"
+
+
+      - name: Evaluate environment to target
         id: basic_vars
         env:
           GH_TOKEN: ${{ github.token }}
@@ -90,6 +144,12 @@ jobs:
           if [ -n "${{ inputs.terraform_env }}" ]; then
             echo "Using environment from input: ${{ inputs.terraform_env }}"
             echo "environment_name=${{ inputs.terraform_env }}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ -n "${{ steps.detect-tfvars.outputs.terraform_tfvars_file }}" ]; then
+            echo "Using environment from changed tfvars file: ${{ steps.detect-tfvars.outputs.terraform_tfvars_file }}"
+            echo "environment_name=${{ steps.detect-tfvars.outputs.terraform_tfvars_file }}" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -136,6 +196,7 @@ jobs:
           fi
     outputs:
       environment_name: ${{ steps.basic_vars.outputs.environment_name }}
+      terraform_root_path: ${{ steps.detect-path.outputs.terraform_root_path || inputs.terraform_root_path }}
 
   terraform:
     runs-on: ubuntu-latest
@@ -239,52 +300,52 @@ jobs:
       - name: Load environment variables from yml
         uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v15.0.0
         with:
-          yml_path: ${{ inputs.terraform_root_path }}/tfenv.yml
+          yml_path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/tfenv.yml
 
       - name: Terraform validate
         if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_review') && github.run_attempt == 1
         uses: dflook/terraform-validate@4cef5d8a4b92bcd88486e41e22a42942a382c9d6 # v2.2.3
         with:
-          path: ${{ inputs.terraform_root_path }}
+          path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
           backend_config: |
             bucket=${{ vars.TERRAFORM_STATE_BUCKET }}
-            key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
+            key=${{ vars.RESOURCE_NAME }}/${{ needs.compute_basic_vars.outputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform plan
         uses: dflook/terraform-plan@7878bff63e2099cdc9be9a6f33cbbbf687f8f0fe # v2.2.3
         if: github.event_name == 'pull_request' || github.event_name == 'pull_request_review' || inputs.terraform_operation == 'plan' || (github.event_name == 'issue_comment' && contains(github.event.comment.body, 'terraform plan'))
         with:
-          label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
-          path: ${{ inputs.terraform_root_path }}
+          label: ${{ vars.RESOURCE_NAME }} ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
+          path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
           var_file: |
-            ${{ inputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}common.tfvars
-            ${{ inputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}${{ needs.compute_basic_vars.outputs.environment_name }}.tfvars
+            ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}common.tfvars
+            ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}${{ needs.compute_basic_vars.outputs.environment_name }}.tfvars
           backend_config: |
             bucket=${{ vars.TERRAFORM_STATE_BUCKET }}
-            key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
+            key=${{ vars.RESOURCE_NAME }}/${{ needs.compute_basic_vars.outputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform apply
         uses: dflook/terraform-apply@5489b988934a50bf1489d5b7c5253b46520a7dca # v2.2.3
         if: github.event_name == 'push' || inputs.terraform_operation == 'apply' || (github.event_name == 'issue_comment' && contains(github.event.comment.body, 'terraform apply'))
         with:
-          label: ${{ vars.RESOURCE_NAME }} ${{ inputs.terraform_root_path }}
-          path: ${{ inputs.terraform_root_path }}
+          label: ${{ vars.RESOURCE_NAME }} ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
+          path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
           auto_approve: ${{ inputs.terraform_operation == 'apply' }}
           var_file: |
-            ${{ inputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}common.tfvars
-            ${{ inputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}${{ needs.compute_basic_vars.outputs.environment_name }}.tfvars
+            ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}common.tfvars
+            ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}${{ needs.compute_basic_vars.outputs.environment_name }}.tfvars
           backend_config: |
             bucket=${{ vars.TERRAFORM_STATE_BUCKET }}
-            key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
+            key=${{ vars.RESOURCE_NAME }}/${{ needs.compute_basic_vars.outputs.terraform_root_path }}/terraform.tfstate
 
       - name: Terraform destroy
         uses: dflook/terraform-destroy@b198834c4a4dd959f26649f2a9d24c59e9c9f205 # v2.2.3
         if: inputs.terraform_operation == 'destroy'
         with:
-          path: ${{ inputs.terraform_root_path }}
+          path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
           var_file: |
-            ${{ inputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}common.tfvars
-            ${{ inputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}${{ needs.compute_basic_vars.outputs.environment_name }}.tfvars
+            ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}common.tfvars
+            ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}${{ needs.compute_basic_vars.outputs.environment_name }}.tfvars
           backend_config: |
             bucket=${{ vars.TERRAFORM_STATE_BUCKET }}
-            key=${{ vars.RESOURCE_NAME }}/${{ inputs.terraform_root_path }}/terraform.tfstate
+            key=${{ vars.RESOURCE_NAME }}/${{ needs.compute_basic_vars.outputs.terraform_root_path }}/terraform.tfstate
