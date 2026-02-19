@@ -130,9 +130,10 @@ jobs:
           if [ -z "$first_changed_tfvars" ]; then
             echo "No specific tfvars file changed, falling back to branch-based environment assumptions"
             first_changed_tfvars=""
+          else
+            echo "Automatically selected environment based on tfvars file: $first_changed_tfvars"
           fi
 
-          echo "Automatically selected environment based on tfvars file: $first_changed_tfvars"
           echo "terraform_tfvars_file=$first_changed_tfvars" >> "$GITHUB_OUTPUT"
 
 
