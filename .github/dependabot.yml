@@ -26,6 +26,17 @@ updates:
     schedule:
       interval: "monthly"
 
+# jira-get-or-create-release action
+  - package-ecosystem: "pip"
+    directory: "/.github/actions/jira-get-or-create-release"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "feat(deps)"
+    open-pull-requests-limit: 10
+
   - package-ecosystem: "pip"
     directory: "/.github/tests/python-scripts/jira-get-or-create-release"
     schedule:
@@ -33,6 +44,5 @@ updates:
     labels:
       - "test/dependencies"
     commit-message:
-      prefix: "feat(deps)"
       prefix-development: "chore(deps)"
     open-pull-requests-limit: 10
