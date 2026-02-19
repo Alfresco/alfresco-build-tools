@@ -19,6 +19,10 @@ on:
         description: the terraform environment to use (e.g. dev, staging, prod), auto-detected if not provided
         type: string
         required: false
+      terraform_default_env:
+        description: "the default terraform environment to use when auto-detection does not find a specific env (default: <terraform_root_path>-dev)"
+        type: string
+        required: false
       create_oidc_token_file:
         description: whether to create a file with an OIDC token for AWS
         type: boolean
@@ -112,7 +116,7 @@ jobs:
 
       - name: Compute first changed tfvars file (when running against default branch)
         if: >-
-          inputs.terraform_env == '' && inputs.terraform_root_path == '' && (
+          inputs.terraform_env == '' && (
             github.event.repository.default_branch == github.ref_name ||
             github.event.repository.default_branch == github.base_ref
           )
@@ -128,8 +132,9 @@ jobs:
             | xargs -r basename -s .tfvars)
 
           if [ -z "$first_changed_tfvars" ]; then
-            echo "No specific tfvars file changed, defaulting to '${{ env.TERRAFORM_ROOT_PATH }}-dev'"
-            first_changed_tfvars="${{ env.TERRAFORM_ROOT_PATH }}-dev"
+            DEFAULT_ENV="${{ inputs.terraform_default_env || format('{0}-dev', env.TERRAFORM_ROOT_PATH) }}"
+            echo "No specific tfvars file changed, defaulting to '$DEFAULT_ENV'"
+            first_changed_tfvars="$DEFAULT_ENV"
           else
             echo "Automatically selected environment based on tfvars file: $first_changed_tfvars"
           fi
