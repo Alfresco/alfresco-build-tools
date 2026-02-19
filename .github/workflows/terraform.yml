@@ -258,17 +258,19 @@ jobs:
       PR_CHECKOUT_REF: refs/pull/${{ github.event.issue.number }}/merge
     steps:
       - name: Check environment requirements
+        env:
+          ENVIRONMENT_NAME: ${{ needs.compute_basic_vars.outputs.environment_name }}
         run: |
-          if [ -z "${{ needs.compute_basic_vars.outputs.environment_name }}" ]; then
+          if [ -z "$ENVIRONMENT_NAME" ]; then
             echo "Environment name should have been determined at this point, but it's empty. BUG?"
             exit 1
           fi
           if [ -z "${{ vars.RESOURCE_NAME }}" ]; then
-            echo "RESOURCE_NAME must be set in the vars context to provide a unique identifier"
+            echo "RESOURCE_NAME must be set in the vars context of $ENVIRONMENT_NAME to provide a unique identifier"
             exit 1
           fi
           if [ -z "${{ vars.TERRAFORM_STATE_BUCKET }}" ]; then
-            echo "TERRAFORM_STATE_BUCKET must be set in the vars context"
+            echo "TERRAFORM_STATE_BUCKET must be set in the vars context of $ENVIRONMENT_NAME to specify the S3 bucket used for terraform state storage"
             exit 1
           fi
 
