@@ -46,10 +46,10 @@ runs:
       shell: bash
       working-directory: ${{ github.action_path }}
       env:
-        JIRA_URL: ${{ inputs['jira-url'] }}
-        JIRA_PROJECT_KEY: ${{ inputs['jira-project-key'] }}
-        JIRA_VERSION_NAME: ${{ inputs['jira-version-name'] }}
-        JIRA_VERSION_DESCRIPTION: ${{ inputs['jira-version-description'] }}
-        JIRA_USER: ${{ inputs['jira-user'] }}
-        JIRA_TOKEN: ${{ inputs['jira-token'] }}
+        JIRA_URL: ${{ inputs.jira-url }}
+        JIRA_PROJECT_KEY: ${{ inputs.jira-project-key }}
+        JIRA_VERSION_NAME: ${{ inputs.jira-version-name }}
+        JIRA_VERSION_DESCRIPTION: ${{ inputs.jira-version-description }}
+        JIRA_USER: ${{ inputs.jira-user }}
+        JIRA_TOKEN: ${{ inputs.jira-token }}
       run: python action.py
