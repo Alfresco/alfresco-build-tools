@@ -168,14 +168,14 @@ Credentials should be already available via organization secrets, otherwise they
 provided as repository secrets.
 
 Since repositories hold a `settings.xml` file at the root with environment variables `MAVEN_USERNAME` and
-`MAVEN_USERNAME` filled for the username and password, only a mapping of variables is needed:
+`MAVEN_PASSWORD` filled for the username and password, only a mapping of variables is needed:
 
 ```yml
       - name: Build with Maven
         run: mvn --settings settings.xml [...]
         env:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_USERNAME: ${{ secrets.NEXUS_PASSWORD }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
 ```
 
 Alternatively, the [s4u/maven-settings-action](https://github.com/s4u/maven-settings-action) could be used.
