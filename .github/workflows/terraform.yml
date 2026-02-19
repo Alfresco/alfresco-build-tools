@@ -186,7 +186,14 @@ jobs:
         env:
           COMMENT_CONTAINS_TERRAFORM_PLAN: ${{ contains(github.event.comment.body, 'terraform plan') || false }}
           COMMENT_CONTAINS_TERRAFORM_APPLY: ${{ contains(github.event.comment.body, 'terraform apply') || false }}
+          TERRAFORM_ROOT_PATH: ${{ (steps.detect-path.outputs.terraform_root_path || inputs.terraform_root_path) }}
         run: |
+          if [ -z "$TERRAFORM_ROOT_PATH" ]; then
+            echo "### Not running Terraform 🚀" >> "$GITHUB_STEP_SUMMARY"
+            echo "Could not determine the root path for Terraform. Assuming there are no Terraform changes to apply, so skipping Terraform execution." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
           echo "### Running Terraform 🚀" >> "$GITHUB_STEP_SUMMARY"
           echo "- Environment: **${{ steps.basic_vars.outputs.environment_name }}**" >> "$GITHUB_STEP_SUMMARY"
           if [ "${{ env.COMMENT_CONTAINS_TERRAFORM_PLAN }}" == "true" ]; then
@@ -204,6 +211,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - compute_basic_vars
+    if: needs.compute_basic_vars.outputs.environment_name != '' && needs.compute_basic_vars.outputs.terraform_root_path != ''
     environment: ${{ needs.compute_basic_vars.outputs.environment_name }}
     concurrency:
       group: ${{ needs.compute_basic_vars.outputs.environment_name }}
