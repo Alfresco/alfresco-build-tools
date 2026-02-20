@@ -38,7 +38,7 @@ ISSUE_URL = f"{JIRA_URL}/rest/api/3/issue/{ISSUE_KEY}"
 ISSUE_FIXVERSIONS_URL = f"{ISSUE_URL}?{urlencode({'fields': 'fixVersions'})}"
 
 OUTPUT_CHANGED = "changed"
-OUTPUT_FIXVERSIONS = "fix_versions"
+OUTPUT_FIXVERSIONS = "fix-versions"
 
 
 # -----------------------------

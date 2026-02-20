@@ -6,7 +6,7 @@ from atlassian import Jira
 from requests import HTTPError
 
 OUTPUT_CHANGED = "changed"
-OUTPUT_FIXVERSIONS = "fix_versions"
+OUTPUT_FIXVERSIONS = "fix-versions"
 
 
 def get_required_env(var_name: str) -> str:

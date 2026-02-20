@@ -29,9 +29,9 @@ outputs:
   changed:
     description: "Whether the issue was updated"
     value: ${{ steps.run.outputs.changed }}
-  fix_versions:
+  fix-versions:
     description: "Comma-separated list of resulting fix versions"
-    value: ${{ steps.run.outputs.fix_versions }}
+    value: ${{ steps.run.outputs.fix-versions }}
 
 runs:
   using: "composite"
