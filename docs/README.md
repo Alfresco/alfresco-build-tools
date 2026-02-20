@@ -1276,7 +1276,7 @@ This action:
 | Name           | Description                                             |
 |----------------|---------------------------------------------------------|
 | `changed`      | `true` if the issue was updated, `false` otherwise      |
-| `fix_versions` | Comma-separated list of final fix versions on the issue |
+| `fix-versions` | Comma-separated list of final fix versions on the issue |
 
 #### Example --- Use outputs
 
@@ -1285,7 +1285,7 @@ This action:
   if: steps.jira.outputs.changed == 'true'
   run: |
     echo "Final fix versions on issue:"
-    echo "${{ steps.jira.outputs.fix_versions }}"
+    echo "${{ steps.jira.outputs.fix-versions }}"
 ```
 
 ### jx-updatebot-pr
