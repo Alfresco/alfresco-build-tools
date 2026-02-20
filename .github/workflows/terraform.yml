@@ -95,7 +95,7 @@ jobs:
 
       - name: Retrieve PR or last commit changes
         if: inputs.terraform_root_path == '' || inputs.terraform_env == ''
-        id: pr-changes
+        id: last-changes-diff
         uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v15.0.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -104,7 +104,7 @@ jobs:
         if: inputs.terraform_root_path == ''
         id: detect-path
         run: |
-          first_changed_folder=$(echo "${{ steps.pr-changes.outputs.all_changed_files }}" \
+          first_changed_folder=$(echo "${{ steps.last-changes-diff.outputs.all_changed_files }}" \
             | grep '/' \
             | cut -d/ -f1 \
             | grep -Ev '^(\..*|test)$' \
@@ -124,7 +124,7 @@ jobs:
           TERRAFORM_ROOT_PATH: ${{ steps.detect-path.outputs.terraform_root_path }}
         id: detect-tfvars
         run: |
-          first_changed_tfvars=$(echo "${{ steps.pr-changes.outputs.all_changed_files }}" \
+          first_changed_tfvars=$(echo "${{ steps.last-changes-diff.outputs.all_changed_files }}" \
             | grep -v 'common.tfvars' \
             | grep -E '^${{ env.TERRAFORM_ROOT_PATH }}/.*\.tfvars$' \
             | sort -u \
