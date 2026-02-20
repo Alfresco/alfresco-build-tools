@@ -132,3 +132,13 @@ setup() {
     # Cleanup
     rm "$TEMP_EVENT"
 }
+
+@test "base-ref empty" {
+    export GITHUB_BASE_REF=""
+
+    run get-branch-name.sh
+
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Detected branch name is 'OPSEXP-1234'"* ]]
+    [[ "$output" == *"Detected base branch name is ''"* ]]
+}
