@@ -9,31 +9,17 @@ inputs:
     description: ensure that the final branch name is no longer than specified characters
     default: "0"
     required: false
-  export-to-env:
-    description: |-
-      add the branch name to the runner environment variables (env)
-      **DEPRECATED**: please switch to using `branch-name` output instead.
-      This option will be removed in a future release.
-    default: "true"
-    required: false
   additional-pr-events:
     description: include handling for issue_comment and pull_request_review events, which require additional permission on GITHUB_TOKEN
     default: "false"
     required: false
-outputs:
-  branch-name:
-    description: the branch name extracted from GitHub, sanitized and truncated if specified
-    value: ${{ steps.get-branch-name.outputs.branch-name }}
 runs:
   using: composite
   steps:
-    - name: Get branch name
-      id: get-branch-name
-      run: ${{ github.action_path }}/get-branch-name.sh
-      env:
-        SANITIZE: ${{ inputs.sanitize }}
-        MAX_LENGTH: ${{ inputs.max-length }}
-        EXPORT_TO_ENV: ${{ inputs.export-to-env }}
-        ADDITIONAL_PR_EVENTS: ${{ inputs.additional-pr-events }}
-        GH_TOKEN: ${{ github.token }}
+    - id: get-branch-name
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.1.0
+    - name: Set env
+      run: |
+        echo "::warning::The get-branch-name action is DEPRECATED, move to get-branch-name-v2 and ensure you are using \`branch-name\` output instead of \$BRANCH_NAME or your build will break in a future release."
+        echo "BRANCH_NAME=${{ steps.get-branch-name.outputs.branch-name }}" >> $GITHUB_ENV
       shell: bash

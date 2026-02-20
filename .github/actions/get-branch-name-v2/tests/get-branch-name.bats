@@ -8,6 +8,7 @@ setup() {
     export GITHUB_ENV=/dev/null
     export GITHUB_OUTPUT=/dev/null
     export GITHUB_HEAD_REF="OPSEXP-1234"
+    export GITHUB_BASE_REF="master"
 
     # Mock get-branch-name defaults
     export MAX_LENGTH="0"
@@ -18,7 +19,8 @@ setup() {
     run get-branch-name.sh
 
     [ "$status" -eq 0 ]
-    [ "$output" = "Detected branch name is 'OPSEXP-1234'" ]
+    [[ "$output" == *"Detected branch name is 'OPSEXP-1234'"* ]]
+    [[ "$output" == *"Detected base branch name is 'master'"* ]]
 }
 
 @test "sanitize" {
@@ -27,7 +29,8 @@ setup() {
     run get-branch-name.sh
 
     [ "$status" -eq 0 ]
-    [ "$output" = "Detected branch name is 'opsexp-1234'" ]
+    [[ "$output" == *"Detected branch name is 'opsexp-1234'"* ]]
+    [[ "$output" == *"Detected base branch name is 'master'"* ]]
 }
 
 @test "max-length" {
@@ -36,7 +39,8 @@ setup() {
     run get-branch-name.sh
 
     [ "$status" -eq 0 ]
-    [ "$output" = "Detected branch name is 'OPSEXP'" ]
+    [[ "$output" == *"Detected branch name is 'OPSEXP'"* ]]
+    [[ "$output" == *"Detected base branch name is 'master'"* ]]
 }
 
 @test "max-length and trailing dash" {
@@ -45,7 +49,8 @@ setup() {
     run get-branch-name.sh
 
     [ "$status" -eq 0 ]
-    [ "$output" = "Detected branch name is 'OPSEXP'" ]
+    [[ "$output" == *"Detected branch name is 'OPSEXP'"* ]]
+    [[ "$output" == *"Detected base branch name is 'master'"* ]]
 }
 
 @test "max-length and not trailing dash" {
@@ -54,7 +59,8 @@ setup() {
     run get-branch-name.sh
 
     [ "$status" -eq 0 ]
-    [ "$output" = "Detected branch name is 'OPSEXP-12'" ]
+    [[ "$output" == *"Detected branch name is 'OPSEXP-12'"* ]]
+    [[ "$output" == *"Detected base branch name is 'master'"* ]]
 }
 
 @test "additional-pr-events disabled by default" {
@@ -65,7 +71,8 @@ setup() {
 
     [ "$status" -eq 0 ]
     [[ "$output" != *"Additional events handling is enabled"* ]]
-    [ "$output" = "Detected branch name is 'OPSEXP-1234'" ]
+    [[ "$output" == *"Detected branch name is 'OPSEXP-1234'"* ]]
+    [[ "$output" == *"Detected base branch name is 'master'"* ]]
 }
 
 @test "additional-pr-events for issue_comment event" {
@@ -80,7 +87,7 @@ setup() {
     # Mock gh command
     function gh() {
         if [ "$1" = "pr" ] && [ "$2" = "view" ]; then
-            echo "feature-branch"
+            echo '{"headRefName":"feature-branch","baseRefName":"main"}'
         fi
     }
     export -f gh
@@ -89,8 +96,9 @@ setup() {
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"Additional events handling is enabled"* ]]
-    [[ "$output" == *"Evaluated branch name for issue_comment event: feature-branch"* ]]
+    [[ "$output" == *"Evaluated issue_comment event"* ]]
     [[ "$output" == *"Detected branch name is 'feature-branch'"* ]]
+    [[ "$output" == *"Detected base branch name is 'main'"* ]]
 
     # Cleanup
     rm "$TEMP_EVENT"
@@ -108,7 +116,7 @@ setup() {
     # Mock gh command
     function gh() {
         if [ "$1" = "pr" ] && [ "$2" = "view" ]; then
-            echo "review-branch"
+            echo '{"headRefName":"review-branch","baseRefName":"develop"}'
         fi
     }
     export -f gh
@@ -117,8 +125,9 @@ setup() {
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"Additional events handling is enabled"* ]]
-    [[ "$output" == *"Evaluated branch name for pull_request_review event: review-branch"* ]]
+    [[ "$output" == *"Evaluated pull_request_review event"* ]]
     [[ "$output" == *"Detected branch name is 'review-branch'"* ]]
+    [[ "$output" == *"Detected base branch name is 'develop'"* ]]
 
     # Cleanup
     rm "$TEMP_EVENT"

@@ -1,0 +1,35 @@
+name: "Get branch name"
+description: "Get branch name from GitHub and load it as a variable to the runner env"
+inputs:
+  sanitize:
+    description: sanitize branch name and avoid anything that isn't letters, numbers, dash
+    default: "false"
+    required: false
+  max-length:
+    description: ensure that the final branch name is no longer than specified characters
+    default: "0"
+    required: false
+  additional-pr-events:
+    description: include handling for issue_comment and pull_request_review events, which require additional permission on GITHUB_TOKEN
+    default: "false"
+    required: false
+outputs:
+  branch-name:
+    description: the branch name extracted from GitHub, sanitized and truncated if specified
+    value: ${{ steps.get-branch-name.outputs.branch-name }}
+  base-branch-name:
+    description: the base branch name (the branch you want to merge your changes into) for pull request events
+    value: ${{ steps.get-branch-name.outputs.base-branch-name }}
+runs:
+  using: composite
+  steps:
+    - name: Get branch name
+      id: get-branch-name
+      run: ${{ github.action_path }}/get-branch-name.sh
+      env:
+        SANITIZE: ${{ inputs.sanitize }}
+        MAX_LENGTH: ${{ inputs.max-length }}
+        EXPORT_TO_ENV: ${{ inputs.export-to-env }}
+        ADDITIONAL_PR_EVENTS: ${{ inputs.additional-pr-events }}
+        GH_TOKEN: ${{ github.token }}
+      shell: bash

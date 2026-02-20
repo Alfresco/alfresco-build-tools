@@ -86,7 +86,7 @@ runs:
     - name: Get branch name
       id: get-branch-name
       uses: >-
-        Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v15.1.0
+        Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.1.0
     - name: Get commit msg
       uses: >-
         Alfresco/alfresco-build-tools/.github/actions/get-commit-message@v15.1.0

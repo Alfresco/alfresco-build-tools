@@ -46,7 +46,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [enforce-pr-conventions](#enforce-pr-conventions)
   - [env-load-from-yaml](#env-load-from-yaml)
   - [free-hosted-runner-disk-space](#free-hosted-runner-disk-space)
-  - [get-branch-name](#get-branch-name)
+  - [get-branch-name-v2](#get-branch-name-v2)
   - [get-build-info](#get-build-info)
   - [gh-cache-cleanup-on-merge](#gh-cache-cleanup-on-merge)
   - [git-check-existing-tag](#git-check-existing-tag)
@@ -681,22 +681,23 @@ run a disk usage analysis and print the top offenders before and after the clean
           diagnose-top-offenders-enabled: true
 ```
 
-### get-branch-name
+### get-branch-name-v2
 
 Extracts the branch name from GitHub context and provides it as an output
 optional sanitization and truncation.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v15.1.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.1.0
         id: branch-info
-      - name: Use branch name
-        run: echo "Branch is ${{ steps.branch-info.outputs.branch-name }}"
+      - run: echo "Current branch is ${{ steps.branch-info.outputs.branch-name }}"
+      - run: echo "PR base branch is ${{ steps.branch-info.outputs.base-branch-name }}"
 ```
 
-You can also sanitize (lowercase, and remove whatever is not alphanumeric or hyphen) and truncate branch name:
+You can also sanitize (lowercase, and remove whatever is not alphanumeric or
+hyphen) and truncate branch name:
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v15.1.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.1.0
         id: branch-info
         with:
           sanitize: true
@@ -706,20 +707,18 @@ You can also sanitize (lowercase, and remove whatever is not alphanumeric or hyp
 Handle additional PR events (requires `pull-requests: read` permission):
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v15.1.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.1.0
         with:
           additional-pr-events: true
 ```
 
-Legacy usage with environment variable (deprecated - use outputs instead to
+Legacy version with environment variable (deprecated - use outputs instead to
 avoid polluting the environment of all the following steps):
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v15.1.0
-          with:
-            export-to-env: true
       - name: Use branch name
-        run: echo "Branch is $BRANCH_NAME"
+        run: echo "Current branch is $BRANCH_NAME"
 ```
 
 ### get-build-info
