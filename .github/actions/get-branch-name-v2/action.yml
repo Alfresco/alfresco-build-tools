@@ -29,7 +29,6 @@ runs:
       env:
         SANITIZE: ${{ inputs.sanitize }}
         MAX_LENGTH: ${{ inputs.max-length }}
-
         ADDITIONAL_PR_EVENTS: ${{ inputs.additional-pr-events }}
         GH_TOKEN: ${{ github.token }}
       shell: bash
