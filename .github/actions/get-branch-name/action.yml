@@ -9,10 +9,6 @@ inputs:
     description: ensure that the final branch name is no longer than specified characters
     default: "0"
     required: false
-  additional-pr-events:
-    description: include handling for issue_comment and pull_request_review events, which require additional permission on GITHUB_TOKEN
-    default: "false"
-    required: false
 runs:
   using: composite
   steps:
