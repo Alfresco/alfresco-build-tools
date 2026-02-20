@@ -263,7 +263,7 @@ def test_main_exits_when_neither_version_id_nor_name(action_module, monkeypatch,
 def test_main_handles_unexpected_exception(action_module, monkeypatch, capsys):
     _set_minimal_required_env(monkeypatch, version_id="10001", version_name=None)
 
-    def boom(_args, _kwargs):
+    def boom(*_args, **_kwargs):
         raise RuntimeError("boom")
 
     monkeypatch.setattr(action_module, "resolve_version", boom)
