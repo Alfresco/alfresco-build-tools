@@ -14,11 +14,11 @@ inputs:
   jira-issue-key:
     description: "Jira issue key (e.g. ABCD-123)"
     required: true
-  jira_version_name:
-    description: "Fix version name (mutually exclusive with jira_version_id)"
+  jira-version-name:
+    description: "Fix version name (mutually exclusive with jira-version-id)"
     required: false
-  jira_version_id:
-    description: "Fix version ID (mutually exclusive with jira_version_name)"
+  jira-version-id:
+    description: "Fix version ID (mutually exclusive with jira-version-name)"
     required: false
   merge-versions:
     description: "If the ticket already has fix versions then merge them with the new one, else overwrite them."
