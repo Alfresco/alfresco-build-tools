@@ -426,12 +426,12 @@ To retry a github action step or command on failure, here is an example -
 ```yml
       - uses: Wandalen/wretry.action@e68c23e6309f2871ca8ae4763e7629b9c258e1ea # v3.8.0
         with:
-        action: actions/setup-node@2.3.0
-        with: |
-          node-version: 14.x
-          architecture: x64
-        attempt_limit: 3
-        attempt_delay: 2000
+          action: actions/setup-node@2.3.0
+          with: |
+            node-version: 14.x
+            architecture: x64
+          attempt_limit: 3
+          attempt_delay: 2000
 ```
 
 Please visit [wretry.action](https://github.com/Wandalen/wretry.action) for more examples of how to use this action
@@ -1230,6 +1230,95 @@ In any case the release id is returned as output
 
       - name: Reuse version id
         run: echo "Jira version id = ${{ steps.jira.outputs.version-id }}"
+```
+
+### jira-set-fix-version
+
+Set a fix version on a JIRA issue.
+
+This action:
+
+- Verifies that the provided fix version **exists in the target project** (fails with a clear error otherwise).
+- Accepts either a **version name** or a **version ID** (mutually exclusive).
+- Automatically derives the project key from the issue key.
+- Adds the fix version to the issue.
+- Supports **merge or overwrite mode** via `merge-versions`.
+- Avoids duplicates automatically.
+- Does nothing if the version is already set on the issue.
+
+#### Inputs
+
+| Name                | Required | Description                                                                      |
+|---------------------|----------|----------------------------------------------------------------------------------|
+| `jira-url`          | Yes      | Base URL of your JIRA instance                                                   |
+| `jira-user`         | Yes      | JIRA user (email or username)                                                    |
+| `jira-token`        | Yes      | JIRA API token                                                                   |
+| `jira-issue-key`    | Yes      | JIRA issue key (e.g. ABC-123)                                                    |
+| `jira-version-name` | No       | Name of the fix version to set                                                   |
+| `jira-version-id`   | No       | ID of the fix version to set                                                     |
+| `merge-versions`    | No       | (default: `true`, merges with existing fix versions. If `false`, overwrites them |
+
+> \* You must provide **either** `jira-version-name` **or**
+> `jira-version-id`, but not both.
+
+#### Example --- Merge mode (default)
+
+``` yaml
+- name: Set Jira fix version (merge mode)
+  id: jira
+  uses: Alfresco/alfresco-build-tools/.github/actions/jira-set-fix-version@v12.3.0
+  with:
+    jira-url: ${{ secrets.JIRA_URL }}
+    jira-user: ${{ secrets.JIRA_USER }}
+    jira-token: ${{ secrets.JIRA_TOKEN }}
+    jira-issue-key: "THEPROJECT-123"
+    jira-version-name: "1.2.3"
+```
+
+#### Example --- Using version ID
+
+``` yaml
+- name: Set Jira fix version (by ID)
+  id: jira
+  uses: Alfresco/alfresco-build-tools/.github/actions/jira-set-fix-version@v12.3.0
+  with:
+    jira-url: ${{ secrets.JIRA_URL }}
+    jira-user: ${{ secrets.JIRA_USER }}
+    jira-token: ${{ secrets.JIRA_TOKEN }}
+    jira-issue-key: "THEPROJECT-123"
+    jira-version-id: "12345"
+```
+
+#### Example --- Overwrite mode
+
+``` yaml
+- name: Set Jira fix version (overwrite mode)
+  id: jira
+  uses: Alfresco/alfresco-build-tools/.github/actions/jira-set-fix-version@v12.3.0
+  with:
+    jira-url: ${{ secrets.JIRA_URL }}
+    jira-user: ${{ secrets.JIRA_USER }}
+    jira-token: ${{ secrets.JIRA_TOKEN }}
+    jira-issue-key: "THEPROJECT-123"
+    jira-version-name: "1.2.3"
+    merge-versions: false
+```
+
+#### Outputs
+
+| Name           | Description                                             |
+|----------------|---------------------------------------------------------|
+| `changed`      | `true` if the issue was updated, `false` otherwise      |
+| `fix_versions` | Comma-separated list of final fix versions on the issue |
+
+#### Example --- Use outputs
+
+``` yaml
+- name: Print fix versions if issue was updated
+  if: steps.jira.outputs.changed == 'true'
+  run: |
+    echo "Final fix versions on issue:"
+    echo "${{ steps.jira.outputs.fix_versions }}"
 ```
 
 ### jx-updatebot-pr
