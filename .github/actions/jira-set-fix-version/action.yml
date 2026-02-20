@@ -49,6 +49,7 @@ runs:
         python -m pip install -r requirements.txt
 
     - name: Run action script
+      id: run
       shell: bash
       working-directory: ${{ github.action_path }}
       env:
