@@ -691,8 +691,8 @@ Extracts the branch name from GitHub context and provides it as an output, with 
       - run: echo "PR base branch is ${{ steps.branch-info.outputs.base-branch-name }}"
 ```
 
-You can also sanitize (lowercase, replace `/` with `-`, and remove `.` characters)
-and truncate branch name:
+You can also sanitize (lowercase, replace `/` with `-`, and remove `.`
+characters) and truncate branch name:
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.2.0
