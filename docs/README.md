@@ -1256,7 +1256,7 @@ This action:
 | `jira-issue-key`    | Yes      | JIRA issue key (e.g. ABC-123)                                                    |
 | `jira-version-name` | No       | Name of the fix version to set                                                   |
 | `jira-version-id`   | No       | ID of the fix version to set                                                     |
-| `merge-versions`    | No       | (default: `true`, merges with existing fix versions. If `false`, overwrites them |
+| `merge-versions`    | No       | (default: `true`) merges with existing fix versions. If `false`, overwrites them |
 
 > \* You must provide **either** `jira-version-name` **or**
 > `jira-version-id`, but not both.
