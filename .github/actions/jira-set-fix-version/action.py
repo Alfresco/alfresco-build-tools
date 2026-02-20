@@ -5,6 +5,9 @@ from typing import Any, Dict, List, Optional, Tuple
 from atlassian import Jira
 from requests import HTTPError
 
+OUTPUT_CHANGED = "changed"
+OUTPUT_FIXVERSIONS = "fix_versions"
+
 
 def get_required_env(var_name: str) -> str:
     value = os.getenv(var_name)
@@ -222,8 +225,8 @@ def main() -> None:
 
         # 5) Outputs
         target_names = ",".join([str(v.get("name", "")).strip() for v in target if str(v.get("name", "")).strip()])
-        write_github_output("changed", "true" if changed else "false")
-        write_github_output("fix_versions", target_names)
+        write_github_output(OUTPUT_CHANGED, "true" if changed else "false")
+        write_github_output(OUTPUT_FIXVERSIONS, target_names)
 
         # Human-friendly logs
         if changed:
