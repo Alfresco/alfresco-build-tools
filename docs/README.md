@@ -687,7 +687,7 @@ Extracts the branch name from GitHub context and provides it as an output
 optional sanitization and truncation.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.1.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.2.0
         id: branch-info
       - run: echo "Current branch is ${{ steps.branch-info.outputs.branch-name }}"
       - run: echo "PR base branch is ${{ steps.branch-info.outputs.base-branch-name }}"
@@ -697,7 +697,7 @@ You can also sanitize (lowercase, and remove whatever is not alphanumeric or
 hyphen) and truncate branch name:
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.1.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.2.0
         id: branch-info
         with:
           sanitize: true
@@ -707,7 +707,7 @@ hyphen) and truncate branch name:
 Handle additional PR events (requires `pull-requests: read` permission):
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.1.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.2.0
         with:
           additional-pr-events: true
 ```

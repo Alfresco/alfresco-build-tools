@@ -13,7 +13,10 @@ runs:
   using: composite
   steps:
     - id: get-branch-name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.1.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.2.0
+      with:
+        sanitize: ${{ inputs.sanitize }}
+        max-length: ${{ inputs.max-length }}
     - name: Set env
       run: |
         echo "::warning::The get-branch-name action is DEPRECATED, move to get-branch-name-v2 and ensure you are using \`branch-name\` output instead of \$BRANCH_NAME or your build will break in a future release."
