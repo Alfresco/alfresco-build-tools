@@ -35,4 +35,5 @@ runs:
         MAX_LENGTH: ${{ inputs.max-length }}
         EXPORT_TO_ENV: ${{ inputs.export-to-env }}
         ADDITIONAL_PR_EVENTS: ${{ inputs.additional-pr-events }}
+        GH_TOKEN: ${{ github.token }}
       shell: bash
