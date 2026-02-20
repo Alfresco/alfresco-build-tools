@@ -81,9 +81,10 @@ runs:
     - name: Login to Docker Hub
       uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
       with:
-        username: ${{ inputs.docker_username}}
+        username: ${{ inputs.docker_username }}
         password: ${{ inputs.docker_password }}
     - name: Get branch name
+      id: get-branch-name
       uses: >-
         Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v15.1.0
     - name: Get commit msg
@@ -94,7 +95,7 @@ runs:
       uses: >-
         Alfresco/alfresco-build-tools/.github/actions/dbp-charts/kubernetes-valid-ns@v15.1.0
       with:
-        branch_name: ${{ env.BRANCH_NAME }}
+        branch_name: ${{ steps.get-branch-name.outputs.branch-name }}
         release_prefix: ${{ inputs.release_prefix }}
     - name: Run helm chart test script
       run: ${{ github.action_path }}/helm_install.sh

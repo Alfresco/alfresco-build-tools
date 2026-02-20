@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 setup() {
     # Runs everywhere
     DIR="$( cd "$( dirname "$BATS_TEST_FILENAME" )" >/dev/null 2>&1 && pwd )"
@@ -5,6 +6,7 @@ setup() {
 
     # Mock GitHub Actions default variables
     export GITHUB_ENV=/dev/null
+    export GITHUB_OUTPUT=/dev/null
     export GITHUB_HEAD_REF="OPSEXP-1234"
 
     # Mock get-branch-name defaults
@@ -16,7 +18,7 @@ setup() {
     run get-branch-name.sh
 
     [ "$status" -eq 0 ]
-    [ "$output" = "Branch name is 'OPSEXP-1234'" ]
+    [ "$output" = "Detected branch name is 'OPSEXP-1234'" ]
 }
 
 @test "sanitize" {
@@ -25,7 +27,7 @@ setup() {
     run get-branch-name.sh
 
     [ "$status" -eq 0 ]
-    [ "$output" = "Branch name is 'opsexp-1234'" ]
+    [ "$output" = "Detected branch name is 'opsexp-1234'" ]
 }
 
 @test "max-length" {
@@ -34,7 +36,7 @@ setup() {
     run get-branch-name.sh
 
     [ "$status" -eq 0 ]
-    [ "$output" = "Branch name is 'OPSEXP'" ]
+    [ "$output" = "Detected branch name is 'OPSEXP'" ]
 }
 
 @test "max-length and trailing dash" {
@@ -43,7 +45,7 @@ setup() {
     run get-branch-name.sh
 
     [ "$status" -eq 0 ]
-    [ "$output" = "Branch name is 'OPSEXP'" ]
+    [ "$output" = "Detected branch name is 'OPSEXP'" ]
 }
 
 @test "max-length and not trailing dash" {
@@ -52,5 +54,72 @@ setup() {
     run get-branch-name.sh
 
     [ "$status" -eq 0 ]
-    [ "$output" = "Branch name is 'OPSEXP-12'" ]
+    [ "$output" = "Detected branch name is 'OPSEXP-12'" ]
+}
+
+@test "additional-pr-events disabled by default" {
+    export ADDITIONAL_PR_EVENTS="false"
+    export GITHUB_EVENT_NAME="issue_comment"
+
+    run get-branch-name.sh
+
+    [ "$status" -eq 0 ]
+    [[ "$output" != *"Additional events handling is enabled"* ]]
+    [ "$output" = "Detected branch name is 'OPSEXP-1234'" ]
+}
+
+@test "additional-pr-events for issue_comment event" {
+    export ADDITIONAL_PR_EVENTS="true"
+    export GITHUB_EVENT_NAME="issue_comment"
+
+    # Create temporary event payload
+    TEMP_EVENT=$(mktemp)
+    echo '{"issue":{"pull_request":{"html_url":"https://github.com/test/repo/pull/123"}}}' > "$TEMP_EVENT"
+    export GITHUB_EVENT_PATH="$TEMP_EVENT"
+
+    # Mock gh command
+    function gh() {
+        if [ "$1" = "pr" ] && [ "$2" = "view" ]; then
+            echo "feature-branch"
+        fi
+    }
+    export -f gh
+
+    run get-branch-name.sh
+
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Additional events handling is enabled"* ]]
+    [[ "$output" == *"Evaluated branch name for issue_comment event: feature-branch"* ]]
+    [[ "$output" == *"Detected branch name is 'feature-branch'"* ]]
+
+    # Cleanup
+    rm "$TEMP_EVENT"
+}
+
+@test "additional-pr-events for pull_request_review event" {
+    export ADDITIONAL_PR_EVENTS="true"
+    export GITHUB_EVENT_NAME="pull_request_review"
+
+    # Create temporary event payload
+    TEMP_EVENT=$(mktemp)
+    echo '{"pull_request":{"html_url":"https://github.com/test/repo/pull/456"}}' > "$TEMP_EVENT"
+    export GITHUB_EVENT_PATH="$TEMP_EVENT"
+
+    # Mock gh command
+    function gh() {
+        if [ "$1" = "pr" ] && [ "$2" = "view" ]; then
+            echo "review-branch"
+        fi
+    }
+    export -f gh
+
+    run get-branch-name.sh
+
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"Additional events handling is enabled"* ]]
+    [[ "$output" == *"Evaluated branch name for pull_request_review event: review-branch"* ]]
+    [[ "$output" == *"Detected branch name is 'review-branch'"* ]]
+
+    # Cleanup
+    rm "$TEMP_EVENT"
 }

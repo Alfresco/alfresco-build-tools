@@ -160,6 +160,7 @@ runs:
         echo "result=$RESULT" >> $GITHUB_OUTPUT
 
     - name: Get branch name
+      id: get-branch-name
       uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v15.1.0
 
     - name: Transform mentions to JSON entities
@@ -202,7 +203,7 @@ runs:
         RUN_LINK: ${{ steps.compute-run-link.outputs.result }}
         WORKFLOW_TITLE: ${{ steps.compute-workflow-title.outputs.result }}
         COLOR: ${{ steps.compute-color.outputs.result }}
-        TITLE: "Notification on ${{ steps.compute-event.outputs.result }} on branch [`${{ env.BRANCH_NAME }}`](${{ env.REPO_URL }}/tree/${{ env.BRANCH_NAME }})"
+        TITLE: "Notification on ${{ steps.compute-event.outputs.result }} on branch [`${{ steps.get-branch-name.outputs.branch-name }}`](${{ env.REPO_URL }}/tree/${{ steps.get-branch-name.outputs.branch-name }})"
         ENTITIES: ${{ steps.transform-mentions.outputs.result }}
       with:
         webhook_url: ${{ inputs.webhook-url }}

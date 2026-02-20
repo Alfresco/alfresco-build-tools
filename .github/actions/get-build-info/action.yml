@@ -3,7 +3,9 @@ description: "Get build-related info from GitHub and load it as generically name
 runs:
   using: composite
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v15.1.0
+    - name: "Get branch name"
+      id: get-branch-name
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v15.1.0
     - name: "Get build info"
       run: |
         [[ $GITHUB_EVENT_NAME == "pull_request" ]] && IS_PULL_REQUEST="true" || IS_PULL_REQUEST="false"
@@ -11,9 +13,11 @@ runs:
         echo "BUILD_NUMBER=$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
         echo "ATTEMPT_NUMBER=$GITHUB_RUN_ATTEMPT" >> "$GITHUB_ENV"
         echo "JOB_NAME=$GITHUB_JOB" >> "$GITHUB_ENV"
+        echo "BRANCH_NAME=${{ steps.get-branch-name.outputs.branch-name }}" >> "$GITHUB_ENV"
 
         echo "Pull Request: '$IS_PULL_REQUEST'"
         echo "Build Number: '$GITHUB_RUN_NUMBER'"
         echo "Attempt Number: '$GITHUB_RUN_ATTEMPT'"
         echo "Job Name: '$GITHUB_JOB'"
+        echo "Branch Name: '${{ steps.get-branch-name.outputs.branch-name }}'"
       shell: bash

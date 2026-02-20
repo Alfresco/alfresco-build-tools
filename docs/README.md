@@ -75,6 +75,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [helm-update-chart-version](#helm-update-chart-version)
   - [install-galaxy-deps](#install-galaxy-deps)
   - [install-ubuntu-default-tools](#install-ubuntu-default-tools)
+  - [jira-get-or-create-release](#jira-get-or-create-release)
   - [jx-updatebot-pr](#jx-updatebot-pr)
   - [kubectl-keep-nslogs](#kubectl-keep-nslogs)
   - [kubectl-wait](#kubectl-wait)
@@ -682,10 +683,43 @@ run a disk usage analysis and print the top offenders before and after the clean
 
 ### get-branch-name
 
-Loads the name of the branch on which the action was called into `BRANCH_NAME` environment variable
+Extracts the branch name from GitHub context and provides it as an output
+optional sanitization and truncation.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v15.1.0
+        id: branch-info
+      - name: Use branch name
+        run: echo "Branch is ${{ steps.branch-info.outputs.branch-name }}"
+```
+
+You can also sanitize (lowercase, and remove whatever is not alphanumeric or hyphen) and truncate branch name:
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v15.1.0
+        id: branch-info
+        with:
+          sanitize: true
+          max-length: 20
+```
+
+Handle additional PR events (requires `pull-requests: read` permission):
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v15.1.0
+        with:
+          additional-pr-events: true
+```
+
+Legacy usage with environment variable (deprecated - use outputs instead to
+avoid polluting the environment of all the following steps):
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v15.1.0
+          with:
+            export-to-env: true
+      - name: Use branch name
+        run: echo "Branch is $BRANCH_NAME"
 ```
 
 ### get-build-info
