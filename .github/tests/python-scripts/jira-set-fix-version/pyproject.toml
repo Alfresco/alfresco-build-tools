@@ -18,7 +18,7 @@ addopts = '''
     -o junit_family=xunit2
     -o junit_logging=all
     --junit-xml=report.xml
-    --cov=jira-set-fix-version
+    --cov=jira_set_fix_version
     --cov-report=term-missing
     --cov-report=xml
     -m "not integration and not integration_pollution"

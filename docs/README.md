@@ -426,7 +426,7 @@ To retry a github action step or command on failure, here is an example -
 ```yml
       - uses: Wandalen/wretry.action@e68c23e6309f2871ca8ae4763e7629b9c258e1ea # v3.8.0
         with:
-          action: actions/setup-node@2.3.0
+          action: actions/setup-node@eeb10ffd4b07fb40a4f44ab76f0f5c0d5b35e4f9 # v2.3.0
           with: |
             node-version: 14.x
             architecture: x64
@@ -1266,7 +1266,7 @@ This action:
 ``` yaml
 - name: Set Jira fix version (merge mode)
   id: jira
-  uses: Alfresco/alfresco-build-tools/.github/actions/jira-set-fix-version@v12.3.0
+  uses: Alfresco/alfresco-build-tools/.github/actions/jira-set-fix-version@v15.2.0
   with:
     jira-url: ${{ secrets.JIRA_URL }}
     jira-user: ${{ secrets.JIRA_USER }}
@@ -1280,7 +1280,7 @@ This action:
 ``` yaml
 - name: Set Jira fix version (by ID)
   id: jira
-  uses: Alfresco/alfresco-build-tools/.github/actions/jira-set-fix-version@v12.3.0
+  uses: Alfresco/alfresco-build-tools/.github/actions/jira-set-fix-version@v15.2.0
   with:
     jira-url: ${{ secrets.JIRA_URL }}
     jira-user: ${{ secrets.JIRA_USER }}
@@ -1294,7 +1294,7 @@ This action:
 ``` yaml
 - name: Set Jira fix version (overwrite mode)
   id: jira
-  uses: Alfresco/alfresco-build-tools/.github/actions/jira-set-fix-version@v12.3.0
+  uses: Alfresco/alfresco-build-tools/.github/actions/jira-set-fix-version@v15.2.0
   with:
     jira-url: ${{ secrets.JIRA_URL }}
     jira-user: ${{ secrets.JIRA_USER }}
