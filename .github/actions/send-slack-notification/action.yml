@@ -109,7 +109,8 @@ runs:
         echo "result=$RESULT" >> $GITHUB_OUTPUT
 
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v15.2.0
+      id: get-branch-name
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.2.0
 
     - name: Send slack notification
       id: slack
@@ -124,6 +125,7 @@ runs:
         MESSAGE_OUTPUT: ${{ steps.compute-message.outputs.result }}
         RUN_LINK: ${{ steps.compute-run-link.outputs.result }}
         WORKFLOW_TITLE: ${{ steps.compute-workflow-title.outputs.result }}
+        BRANCH_NAME: ${{ steps.get-branch-name.outputs.branch-name }}
       with:
         channel-id: "${{ inputs.channel-id }}"
         payload: |

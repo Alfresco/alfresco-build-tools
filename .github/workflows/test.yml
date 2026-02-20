@@ -155,3 +155,9 @@ jobs:
           echo "Full commit message header (output): $COMMIT_MSG_HEADER_OUTPUT"
           echo "Full commit message header (env): $COMMIT_MSG_HEADER_ENV"
       # endregion
+
+      - uses: ./.github/actions/get-branch-name-v2
+        id: branch-info
+      - name: Show current branches
+        run: |
+          echo "Current branch is ${{ steps.branch-info.outputs.branch-name }}"
