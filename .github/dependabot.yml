@@ -29,7 +29,7 @@ updates:
 # Python testing dependencies
   - package-ecosystem: "pip"
     directories:
-      - "/.github/tests/python-scripts/**/*"
+      - "/.github/tests/python-scripts/*"
     schedule:
       interval: "weekly"
     labels:
