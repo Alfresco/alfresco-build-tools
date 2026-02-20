@@ -683,9 +683,7 @@ run a disk usage analysis and print the top offenders before and after the clean
 
 ### get-branch-name-v2
 
-Extracts the branch name from GitHub context and provides it as an output
-optional sanitization and truncation.
-
+Extracts the branch name from GitHub context and provides it as an output, with optional sanitization and truncation.
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.2.0
         id: branch-info
@@ -693,8 +691,8 @@ optional sanitization and truncation.
       - run: echo "PR base branch is ${{ steps.branch-info.outputs.base-branch-name }}"
 ```
 
-You can also sanitize (lowercase, and remove whatever is not alphanumeric or
-hyphen) and truncate branch name:
+You can also sanitize (lowercase, replace `/` with `-`, and remove `.` characters)
+and truncate branch name:
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.2.0

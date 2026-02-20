@@ -1,5 +1,5 @@
 name: "Get branch name"
-description: "Get branch name from GitHub and load it as a variable to the runner env"
+description: "Get branch (and base branch) name from GitHub and expose it via action outputs"
 inputs:
   sanitize:
     description: sanitize branch name and avoid anything that isn't letters, numbers, dash
@@ -29,7 +29,7 @@ runs:
       env:
         SANITIZE: ${{ inputs.sanitize }}
         MAX_LENGTH: ${{ inputs.max-length }}
-        EXPORT_TO_ENV: ${{ inputs.export-to-env }}
+
         ADDITIONAL_PR_EVENTS: ${{ inputs.additional-pr-events }}
         GH_TOKEN: ${{ github.token }}
       shell: bash

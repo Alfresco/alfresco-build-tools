@@ -6,11 +6,11 @@ if [ "$ADDITIONAL_PR_EVENTS" = "true" ]; then
     echo "Additional events handling is enabled, checking for issue_comment and pull_request_review events"
 
     if [ "$GITHUB_EVENT_NAME" == "issue_comment" ]; then
-        PR_URL=$(cat "$GITHUB_EVENT_PATH" | jq -r '.issue.pull_request.html_url')
+        PR_URL=$(cat "$GITHUB_EVENT_PATH" | jq -r '.issue.pull_request.html_url // empty')
     fi
 
     if [ "$GITHUB_EVENT_NAME" == "pull_request_review" ]; then
-        PR_URL=$(cat "$GITHUB_EVENT_PATH" | jq -r '.pull_request.html_url')
+        PR_URL=$(cat "$GITHUB_EVENT_PATH" | jq -r '.pull_request.html_url // empty')
     fi
 
     if [ -n "$PR_URL" ]; then
