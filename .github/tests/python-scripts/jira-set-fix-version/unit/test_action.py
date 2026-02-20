@@ -37,6 +37,9 @@ PROJECT_VERSIONS_URL = f"{JIRA_URL}/rest/api/2/project/{PROJECT_KEY}/versions"
 ISSUE_URL = f"{JIRA_URL}/rest/api/3/issue/{ISSUE_KEY}"
 ISSUE_FIXVERSIONS_URL = f"{ISSUE_URL}?{urlencode({'fields': 'fixVersions'})}"
 
+OUTPUT_CHANGED = "changed"
+OUTPUT_FIXVERSIONS = "fix_versions"
+
 
 # -----------------------------
 # Helpers
@@ -301,8 +304,8 @@ def test_main_updates_issue_when_merge_true_and_version_missing(action_module, m
     assert "✅ Updated fixVersions" in captured.out
 
     outputs = out_file.read_text(encoding="utf-8").splitlines()
-    assert "changed=true" in outputs
-    assert any(line.startswith("fix_versions=") for line in outputs)
+    assert f"{OUTPUT_CHANGED}=true" in outputs
+    assert any(line.startswith(f"{OUTPUT_FIXVERSIONS}=") for line in outputs)
 
 
 @responses.activate
@@ -325,8 +328,8 @@ def test_main_no_update_when_merge_true_and_version_already_present(action_modul
     assert "ℹ️ No change needed" in captured.out
 
     outputs = out_file.read_text(encoding="utf-8").splitlines()
-    assert "changed=false" in outputs
-    assert any(line.startswith("fix_versions=") for line in outputs)
+    assert f"{OUTPUT_CHANGED}=false" in outputs
+    assert any(line.startswith(f"{OUTPUT_FIXVERSIONS}=") for line in outputs)
 
 
 @responses.activate

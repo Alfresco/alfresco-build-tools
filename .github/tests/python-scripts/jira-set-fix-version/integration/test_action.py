@@ -305,5 +305,5 @@ def test_integration_merge_true_from_empty_initial_state_adds_version(
     assert action_module.versions_equal(after, [v1])
 
     out = _read_github_output(out_file)
-    assert out.get("changed") == "true"
-    assert "fix_versions" in out
+    assert out.get(OUTPUT_CHANGED) == "true"
+    assert OUTPUT_FIX_VERSIONS in out
