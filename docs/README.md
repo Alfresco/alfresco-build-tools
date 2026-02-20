@@ -683,7 +683,9 @@ run a disk usage analysis and print the top offenders before and after the clean
 
 ### get-branch-name-v2
 
-Extracts the branch name from GitHub context and provides it as an output, with optional sanitization and truncation.
+Extracts the branch name and base branch for PRs, from GitHub context and
+provides them as outputs, with optional sanitization and truncation.
+
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.2.0
         id: branch-info
