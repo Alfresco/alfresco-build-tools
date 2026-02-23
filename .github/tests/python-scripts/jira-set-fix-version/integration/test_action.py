@@ -13,7 +13,7 @@ ENV_JIRA_URL = "JIRA_URL"
 ENV_JIRA_USER = "JIRA_USER"
 ENV_JIRA_TOKEN = "JIRA_TOKEN"
 
-ENV_JIRA_ISSUE_KEY = "JIRA_ISSUE_KEY"
+ENV_JIRA_ISSUE_KEYS = "JIRA_ISSUE_KEYS"
 ENV_JIRA_VERSION_ID = "JIRA_VERSION_ID"
 ENV_JIRA_VERSION_NAME = "JIRA_VERSION_NAME"
 ENV_MERGE_VERSIONS = "MERGE_VERSIONS"
@@ -21,6 +21,7 @@ ENV_GITHUB_OUTPUT = "GITHUB_OUTPUT"
 
 OUTPUT_CHANGED = "changed"
 OUTPUT_FIX_VERSIONS = "fix-versions"
+OUTPUT_FIXVERSIONS_BY_ISSUE = "fix-versions-by-issue"
 
 INTEGRATION_ISSUE_KEY = "OPSEXP-3863"
 
@@ -78,11 +79,11 @@ def _pick_two_distinct_versions_or_skip(versions: list[dict[str, Any]]) -> tuple
     return versions[0], versions[1]
 
 
-def _set_env_for_main(monkeypatch, *, jira_url: str, jira_user: str, jira_token: str, issue_key: str) -> None:
+def _set_env_for_main(monkeypatch, *, jira_url: str, jira_user: str, jira_token: str, issue_keys: str) -> None:
     monkeypatch.setenv(ENV_JIRA_URL, jira_url)
     monkeypatch.setenv(ENV_JIRA_USER, jira_user)
     monkeypatch.setenv(ENV_JIRA_TOKEN, jira_token)
-    monkeypatch.setenv(ENV_JIRA_ISSUE_KEY, issue_key)
+    monkeypatch.setenv(ENV_JIRA_ISSUE_KEYS, issue_keys)
 
 
 # -----------------------------
@@ -157,7 +158,13 @@ def test_integration_merge_true_adds_missing_version_from_known_initial_state(
     current = action_module.unique_versions_by_id_or_name(action_module.get_issue_fix_versions(jira_client, issue_key))
     assert action_module.versions_equal(current, initial)
 
-    _set_env_for_main(monkeypatch, jira_url=jira_url, jira_user=jira_user, jira_token=jira_token, issue_key=issue_key)
+    _set_env_for_main(
+        monkeypatch,
+        jira_url=jira_url,
+        jira_user=jira_user,
+        jira_token=jira_token,
+        issue_keys=issue_key,  # single issue still goes into JIRA_ISSUE_KEYS
+    )
     monkeypatch.setenv(ENV_JIRA_VERSION_ID, str(v2["id"]).strip())
     monkeypatch.delenv(ENV_JIRA_VERSION_NAME, raising=False)
     monkeypatch.setenv(ENV_MERGE_VERSIONS, "true")
@@ -179,6 +186,7 @@ def test_integration_merge_true_adds_missing_version_from_known_initial_state(
     out = _read_github_output(out_file)
     assert out.get(OUTPUT_CHANGED) == "true"
     assert OUTPUT_FIX_VERSIONS in out
+    assert OUTPUT_FIXVERSIONS_BY_ISSUE in out
 
 
 def test_integration_merge_false_replaces_versions_from_known_initial_state(
@@ -203,7 +211,13 @@ def test_integration_merge_false_replaces_versions_from_known_initial_state(
     current = action_module.unique_versions_by_id_or_name(action_module.get_issue_fix_versions(jira_client, issue_key))
     assert action_module.versions_equal(current, initial)
 
-    _set_env_for_main(monkeypatch, jira_url=jira_url, jira_user=jira_user, jira_token=jira_token, issue_key=issue_key)
+    _set_env_for_main(
+        monkeypatch,
+        jira_url=jira_url,
+        jira_user=jira_user,
+        jira_token=jira_token,
+        issue_keys=issue_key,
+    )
     monkeypatch.setenv(ENV_JIRA_VERSION_ID, str(v1["id"]).strip())
     monkeypatch.delenv(ENV_JIRA_VERSION_NAME, raising=False)
     monkeypatch.setenv(ENV_MERGE_VERSIONS, "false")
@@ -222,6 +236,7 @@ def test_integration_merge_false_replaces_versions_from_known_initial_state(
     # could be false only if the initial state already exactly matched [v1], but we set [v1, v2], so it should be true
     assert out.get(OUTPUT_CHANGED) == "true"
     assert OUTPUT_FIX_VERSIONS in out
+    assert OUTPUT_FIXVERSIONS_BY_ISSUE in out
 
 
 def test_integration_merge_true_no_change_when_version_already_present_from_known_initial_state(
@@ -246,7 +261,13 @@ def test_integration_merge_true_no_change_when_version_already_present_from_know
     current = action_module.unique_versions_by_id_or_name(action_module.get_issue_fix_versions(jira_client, issue_key))
     assert action_module.versions_equal(current, initial)
 
-    _set_env_for_main(monkeypatch, jira_url=jira_url, jira_user=jira_user, jira_token=jira_token, issue_key=issue_key)
+    _set_env_for_main(
+        monkeypatch,
+        jira_url=jira_url,
+        jira_user=jira_user,
+        jira_token=jira_token,
+        issue_keys=issue_key,
+    )
     monkeypatch.setenv(ENV_JIRA_VERSION_ID, str(v1["id"]).strip())
     monkeypatch.delenv(ENV_JIRA_VERSION_NAME, raising=False)
     monkeypatch.setenv(ENV_MERGE_VERSIONS, "true")
@@ -262,6 +283,7 @@ def test_integration_merge_true_no_change_when_version_already_present_from_know
     out = _read_github_output(out_file)
     assert out.get(OUTPUT_CHANGED) == "false"
     assert OUTPUT_FIX_VERSIONS in out
+    assert OUTPUT_FIXVERSIONS_BY_ISSUE in out
 
 
 def test_integration_merge_true_from_empty_initial_state_adds_version(
@@ -290,7 +312,9 @@ def test_integration_merge_true_from_empty_initial_state_adds_version(
     monkeypatch.setenv("JIRA_URL", jira_url)
     monkeypatch.setenv("JIRA_USER", jira_user)
     monkeypatch.setenv("JIRA_TOKEN", jira_token)
-    monkeypatch.setenv("JIRA_ISSUE_KEY", issue_key)
+
+    # single issue goes into JIRA_ISSUE_KEYS
+    monkeypatch.setenv("JIRA_ISSUE_KEYS", issue_key)
 
     monkeypatch.setenv("JIRA_VERSION_ID", str(v1["id"]).strip())
     monkeypatch.delenv("JIRA_VERSION_NAME", raising=False)
@@ -307,3 +331,4 @@ def test_integration_merge_true_from_empty_initial_state_adds_version(
     out = _read_github_output(out_file)
     assert out.get(OUTPUT_CHANGED) == "true"
     assert OUTPUT_FIX_VERSIONS in out
+    assert OUTPUT_FIXVERSIONS_BY_ISSUE in out
