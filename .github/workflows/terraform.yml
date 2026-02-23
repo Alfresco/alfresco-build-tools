@@ -132,7 +132,7 @@ jobs:
             | sort -u \
             | head -1 || true)
 
-          echo "First changed folder: $first_changed_folder"
+          echo "First changed folder: ${first_changed_folder:-none}"
           echo "terraform_root_path=$first_changed_folder" >> "$GITHUB_OUTPUT"
 
       - name: Compute first changed tfvars file (when running against default branch)
