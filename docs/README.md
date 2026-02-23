@@ -84,7 +84,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [maven-dependency-scan](#maven-dependency-scan)
     - [`restore-artifact-pattern` option](#restore-artifact-pattern-option)
   - [maven-build](#maven-build)
-    - [Jacoco report options](#jacoco-report-options)
+    - [JaCoCo report options](#jacoco-report-options)
   - [maven-build-and-tag](#maven-build-and-tag)
     - [Preview option for maven-build-and-tag](#preview-option-for-maven-build-and-tag)
     - [Option to skip tests for maven-build-and-tag](#option-to-skip-tests-for-maven-build-and-tag)
@@ -421,7 +421,7 @@ on:
 
 ### Retry an action
 
-To retry a github action step or command on failure, here is an example -
+To retry a GitHub action step or command on failure, here is an example -
 
 ```yml
       - uses: Wandalen/wretry.action@e68c23e6309f2871ca8ae4763e7629b9c258e1ea # v3.8.0
@@ -452,7 +452,7 @@ available via pre-commit as well.
 
 Handles automated approval and merge of propagation PRs used to handle alpha releases on builds.
 
-This action requires a dedicated secret (named `BOT_GITHUB_TOKEN` in the sample) to setup the "auto-merge" behavior: the default `GITHUB_TOKEN` is not used in this case, otherwise a build would not be triggered when the PR is merged, [see reference solution](https://david.gardiner.net.au/2021/07/github-actions-not-running.html).
+This action requires a dedicated secret (named `BOT_GITHUB_TOKEN` in the sample) to set up the "auto-merge" behavior: the default `GITHUB_TOKEN` is not used in this case, otherwise a build would not be triggered when the PR is merged, [see reference solution](https://david.gardiner.net.au/2021/07/github-actions-not-running.html).
 
 Another token is also needed to handled approval. It can be the default `GITHUB_TOKEN`, but it cannot be the same one that is used for auto-merge behavior as the user might match the creator of the PR (and auto-approval of a PR is not allowed).
 
@@ -762,7 +762,7 @@ Checks if a tag with the given name already exists for this remote repository. R
 ### get-commit-message
 
 Loads the content of the last commit message that triggered the action into `COMMIT_MESSAGE` environment variable
-This action requires a checkout with fetch-depth option as follow:
+This action requires a checkout with fetch-depth option as follows:
 
 ```yaml
 
@@ -917,7 +917,7 @@ Use this action when running a workflow which clone a private repository over ht
 List the changes in a pull request (`pull-request` event) or that were pushed to
 a branch (`push` event).
 
-This action requires a checkout with `fetch-depth: 0` option as follow:
+This action requires a checkout with `fetch-depth: 0` option as follows:
 
 ```yaml
       - uses: actions/checkout@v3
@@ -933,7 +933,7 @@ output `all_changed_files` and optionally to the env variable
 `GITHUB_MODIFIED_FILES`.
 
 Optionally, it can also support `issue_comment` event for PRs, but it requires
-providing a github token and checking out the merge commit:
+providing a GitHub token and checking out the merge commit:
 
 ```yaml
       - uses: actions/checkout@v3
@@ -1022,7 +1022,7 @@ This approach also allows to avoid re-triggering validations when the PR is alre
 
 For Dependabot use case, that also allows following good security practices where secrets needed for the validation are not shared as Dependabot secrets.
 
-It requires a dedicated secret (named `BOT_GITHUB_TOKEN` in the sample) to setup the "auto-merge" behavior: the default `GITHUB_TOKEN` is not used in this case, otherwise a build would not be triggered when the PR is merged, [see reference solution](https://david.gardiner.net.au/2021/07/github-actions-not-running.html).
+It requires a dedicated secret (named `BOT_GITHUB_TOKEN` in the sample) to set up the "auto-merge" behavior: the default `GITHUB_TOKEN` is not used in this case, otherwise a build would not be triggered when the PR is merged, [see reference solution](https://david.gardiner.net.au/2021/07/github-actions-not-running.html).
 
 See also sibling action [github-require-secrets](#github-require-secrets).
 
@@ -1045,7 +1045,7 @@ jobs:
 
 ### github-trigger-labeled-pr
 
-This action helps triggering events on a Pull Request when it is labeled with one of the specified labels.
+This action helps to trigger events on a Pull Request when it is labeled with one of the specified labels.
 
 The corresponding workflow needs to be triggered by corresponding milestoned event.
 This approach allows to avoid re-triggering validations when any label is added to the PR, as the list of labels can be specified.
@@ -1509,7 +1509,7 @@ Builds a maven project using the provided command.
           m2-current-build-upload-name: 'm2-artifacts'
 ```
 
-#### Jacoco report options
+#### JaCoCo report options
 
 If the inputs `jacoco-report-name`, `target-folder-upload-name` and `m2-current-build-upload-name` are provided,
 it also generates aggregated coverage reports and makes them available as build artifact for a next job processing it. It's typically followed by a job containing a step
@@ -1793,13 +1793,13 @@ Default context information is also added (launch attributes), unless the `auto-
 By using the `rp-use-static-launch-name` flag, you can determine whether the launch name in Report Portal should be static or unique for each execution. By default, it is set to `false`.
 Setting it to `true` means that the value from 'rp-launch-prefix' will be used as the full launch name.
 
-Sample options with auto-configuration:
+Sample options with autoconfiguration:
 
 ```bash
 "-Drp.launch=short-run-push-3674979523" "-Drp.uuid=***" "-Drp.endpoint=http://localhost:8080" "-Drp.project=my-project" "-Drp.description=[Run on GitHub Actions 3674979523](https://github.com/Alfresco/alfresco-build-tools/actions/runs/3674979523)" "-Drp.attributes=branch:my-branch;event:push;repository:Alfresco/alfresco-build-tools;ghrun:3674979523;run:short-run-push-3674979523;myattribute:my-filter"
 ```
 
-Sample options without auto-configuration:
+Sample options without autoconfiguration:
 
 ```bash
 "-Drp.launch=short-run-push" "-Drp.uuid=***" "-Drp.endpoint=http://localhost:8080" "-Drp.project=my-project" "-Drp.attributes=ghrun:3674979523"
@@ -1810,10 +1810,10 @@ Sample usage:
 ```yaml
 
 env:
-  # the github event name and run id will be automatically added to the launch key
+  # the GitHub event name and run id will be automatically added to the launch key
   RP_LAUNCH_PREFIX: my-test-run
   RP_TOKEN: ${{ secrets.RP_TOKEN }}
-  # should not be a secret to be visible in summary and slack messages
+  # should not be a secret to be visible in summary and Slack messages
   RP_URL: http://localhost:8080
   RP_PROJECT: my-project
   RP_FILTER: my-filter
@@ -1917,7 +1917,7 @@ Sample usage (as follow-up of above sample):
         append: true
 ```
 
-This will send a slack notification that looks like:
+This will send a Slack notification that looks like:
 
 ![Slack Message Report Portal](./images/send-slack-pr.png)
 
@@ -1929,7 +1929,7 @@ This will give the following sample output on the GH Actions run summary (when u
 
 ![GH Actions Summary Report Portal](./images/rp-gh-summary.png)
 
-The equivalent output "teams-message" (using standard markdown format) is available for Teams messages.
+The equivalent output "teams-message" (using standard Markdown format) is available for Teams messages.
 
 ### resolve-preview-name
 
@@ -1944,7 +1944,7 @@ Resolve preview name based on the PR number and run number:
 
 ### send-slack-notification-slow-job
 
-Sends a slack notification when current run took more time than specified via `max-build-time-seconds` input.
+Sends a Slack notification when current run took more time than specified via `max-build-time-seconds` input.
 This action should be added at the end to correctly measure the time.
 
 ```yaml
@@ -1957,7 +1957,7 @@ This action should be added at the end to correctly measure the time.
 
 ### send-slack-notification
 
-Sends a slack notification with a pre-defined payload, relying on the [slackapi/slack-github-action](https://github.com/slackapi/slack-github-action) official action.
+Sends a Slack notification with a pre-defined payload, relying on the [slackapi/slack-github-action](https://github.com/slackapi/slack-github-action) official action.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v15.3.0
@@ -1969,7 +1969,7 @@ Sends a slack notification with a pre-defined payload, relying on the [slackapi/
 
 If not set, the default color is red.
 
-Depending on the GitHub event, the slack message can show different kind of information (PR title, last commit message, etc...)
+Depending on the GitHub event, the Slack message can show different kind of information (PR title, last commit message, etc...)
 
 Sample notification on `push` event:
 
@@ -2150,7 +2150,7 @@ checksum verification is performed but warning is emitted to ease configuration.
         # Alternate mappings for ARCH
         #x86_64_arch: 'amd64'
         #aarch64_arch: 'arm64'
-        # Alternatively, override the ARCH environment variable but it will break multi-arch support.
+        # Alternatively, override the ARCH environment variable, but it will break multi-arch support.
         #env:
         #  ARCH: "amd64" # or "arm64"
         # checksums: |
@@ -2201,7 +2201,7 @@ Set up a specific version of jx-release-version and add it to the PATH.
 
 ### setup-kcadm
 
-Setup the `kcadm` binary from Keycloak distribution and add it to the PATH.
+Set up the `kcadm` binary from Keycloak distribution and add it to the PATH.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-kcadm@v15.3.0
@@ -2594,7 +2594,7 @@ More docs on [using concurrency](https://docs.github.com/en/actions/using-jobs/u
 ### Expiring tags for quay.io images
 
 It may be desirable to push docker images from branches to test them before
-merge but we should avoid polluting the image registry with these tags.
+merge, but we should avoid polluting the image registry with these tags.
 
 With quay.io, this can be easily achieved by setting the following label on the
 docker image like:
@@ -2800,7 +2800,7 @@ When running pre-commit locally you may get failures with the following error:
 realpath: command not found
 ```
 
-This is because macosx lacks support for that, and it can be fixed with:
+This is because macOS lacks support for that, and it can be fixed with:
 
 ```sh
 brew install coreutils
