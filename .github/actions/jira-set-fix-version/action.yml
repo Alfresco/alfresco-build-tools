@@ -1,5 +1,5 @@
 name: "jira-set-fix-version"
-description: "Add/Set the fix version to/on a JIRA issue"
+description: "Add/Set the fix version to/on one or more JIRA issues"
 
 inputs:
   jira-url:
@@ -11,8 +11,8 @@ inputs:
   jira-token:
     description: "Jira user token (should come from secrets)"
     required: true
-  jira-issue-key:
-    description: "Jira issue key (e.g. ABCD-123)"
+  jira-issue-keys:
+    description: "Comma-separated Jira issue keys (e.g. ABCD-123 or ABCD-123,ABCD-456). Spaces are allowed and ignored."
     required: true
   jira-version-name:
     description: "Fix version name (mutually exclusive with jira-version-id)"
@@ -27,11 +27,14 @@ inputs:
 
 outputs:
   changed:
-    description: "Whether the issue was updated"
+    description: "Whether at least one issue was updated"
     value: ${{ steps.run.outputs.changed }}
   fix-versions:
-    description: "Comma-separated list of resulting fix versions"
+    description: "Comma-separated list of resulting fix versions (union across processed issues)"
     value: ${{ steps.run.outputs.fix-versions }}
+  fix-versions-by-issue:
+    description: "Per-issue resulting fix versions, format: ISSUE-1:v1,v2|ISSUE-2:v1"
+    value: ${{ steps.run.outputs.fix-versions-by-issue }}
 
 runs:
   using: "composite"
@@ -56,7 +59,7 @@ runs:
         JIRA_URL: ${{ inputs.jira-url }}
         JIRA_USER: ${{ inputs.jira-user }}
         JIRA_TOKEN: ${{ inputs.jira-token }}
-        JIRA_ISSUE_KEY: ${{ inputs.jira-issue-key }}
+        JIRA_ISSUE_KEYS: ${{ inputs.jira-issue-keys }}
         JIRA_VERSION_NAME: ${{ inputs.jira-version-name }}
         JIRA_VERSION_ID: ${{ inputs.jira-version-id }}
         MERGE_VERSIONS: ${{ inputs.merge-versions }}
