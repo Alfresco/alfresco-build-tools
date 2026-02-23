@@ -107,7 +107,6 @@ def created_version_ids(jira_env):
             pass
 
 
-@pytest.mark.skip(reason="Need ACR-5754 to be resolved")
 def test_create_without_description(
     jira_env,
     unique_version_name,
@@ -142,7 +141,6 @@ def test_create_without_description(
     assert (version.get("description") or "").strip() == ""
 
 
-@pytest.mark.skip(reason="Need ACR-5754 to be resolved")
 def test_create_with_description(
     jira_env,
     unique_version_name,
@@ -178,7 +176,6 @@ def test_create_with_description(
     assert (version.get("description") or "").strip() == description
 
 
-@pytest.mark.skip(reason="Need ACR-5754 to be resolved")
 def test_create_twice_returns_same_version_id(
     jira_env,
     unique_version_name,
