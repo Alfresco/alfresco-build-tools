@@ -1234,31 +1234,34 @@ In any case the release id is returned as output
 
 ### jira-set-fix-version
 
-Set a fix version on a JIRA issue.
+Set a fix version on **one or more JIRA issues**.
 
 This action:
 
 - Verifies that the provided fix version **exists in the target project** (fails with a clear error otherwise).
 - Accepts either a **version name** or a **version ID** (mutually exclusive).
-- Automatically derives the project key from the issue key.
-- Adds the fix version to the issue.
+- Automatically derives the project key from the **first issue key**.
+- Supports **multiple issues** (comma-separated list).
+- Adds the fix version to each issue.
 - Supports **merge or overwrite mode** via `merge-versions`.
 - Avoids duplicates automatically.
-- Does nothing if the version is already set on the issue.
+- Does nothing for issues where the version is already set.
+
+> All issues must belong to the **same JIRA project**.
 
 #### Inputs
 
-| Name                | Required | Description                                                                      |
-|---------------------|----------|----------------------------------------------------------------------------------|
-| `jira-url`          | Yes      | Base URL of your JIRA instance                                                   |
-| `jira-user`         | Yes      | JIRA user (email or username)                                                    |
-| `jira-token`        | Yes      | JIRA API token                                                                   |
-| `jira-issue-key`    | Yes      | JIRA issue key (e.g. ABC-123)                                                    |
-| `jira-version-name` | No       | Name of the fix version to set                                                   |
-| `jira-version-id`   | No       | ID of the fix version to set                                                     |
-| `merge-versions`    | No       | (default: `true`) merges with existing fix versions. If `false`, overwrites them |
+| Name                | Required | Description                                                                                               |
+|---------------------|----------|-----------------------------------------------------------------------------------------------------------|
+| `jira-url`          | Yes      | Base URL of your JIRAinstance                                                                             |
+| `jira-user`         | Yes      | JIRA user (email orusername)                                                                              |
+| `jira-token`        | Yes      | JIRA API token                                                                                            |
+| `jira-issue-keys`   | Yes      | **Comma-separated** JIRA issue keys (e.g. `ABC-123` or `ABC-123,ABC-456`). Spaces are allowed and ignored |
+| `jira-version-name` | No       | Name of the fix version to set                                                                            |
+| `jira-version-id`   | No       | ID of the fix version to set                                                                              |
+| `merge-versions`    | No       | (default: `true`) merges with existing fix versions. If `false`, overwrites them                          |
 
-> \* You must provide **either** `jira-version-name` **or**
+> You must provide **either** `jira-version-name` **or**
 > `jira-version-id`, but not both.
 
 #### Example --- Merge mode (default)
@@ -1271,7 +1274,21 @@ This action:
     jira-url: ${{ secrets.JIRA_URL }}
     jira-user: ${{ secrets.JIRA_USER }}
     jira-token: ${{ secrets.JIRA_TOKEN }}
-    jira-issue-key: "THEPROJECT-123"
+    jira-issue-keys: "THEPROJECT-123"
+    jira-version-name: "1.2.3"
+```
+
+#### Example --- Multiple issues
+
+``` yaml
+- name: Set Jira fix version on multiple issues
+  id: jira
+  uses: Alfresco/alfresco-build-tools/.github/actions/jira-set-fix-version@v15.2.0
+  with:
+    jira-url: ${{ secrets.JIRA_URL }}
+    jira-user: ${{ secrets.JIRA_USER }}
+    jira-token: ${{ secrets.JIRA_TOKEN }}
+    jira-issue-keys: "THEPROJECT-123,THEPROJECT-456"
     jira-version-name: "1.2.3"
 ```
 
@@ -1285,7 +1302,7 @@ This action:
     jira-url: ${{ secrets.JIRA_URL }}
     jira-user: ${{ secrets.JIRA_USER }}
     jira-token: ${{ secrets.JIRA_TOKEN }}
-    jira-issue-key: "THEPROJECT-123"
+    jira-issue-keys: "THEPROJECT-123"
     jira-version-id: "12345"
 ```
 
@@ -1299,26 +1316,30 @@ This action:
     jira-url: ${{ secrets.JIRA_URL }}
     jira-user: ${{ secrets.JIRA_USER }}
     jira-token: ${{ secrets.JIRA_TOKEN }}
-    jira-issue-key: "THEPROJECT-123"
+    jira-issue-keys: "THEPROJECT-123"
     jira-version-name: "1.2.3"
     merge-versions: false
 ```
 
 #### Outputs
 
-| Name           | Description                                             |
-|----------------|---------------------------------------------------------|
-| `changed`      | `true` if the issue was updated, `false` otherwise      |
-| `fix-versions` | Comma-separated list of final fix versions on the issue |
+| Name                    | Description                                                                    |
+|-------------------------|--------------------------------------------------------------------------------|
+| `changed`               | `true` if at least one issue was updated, `false` otherwise                    |
+| `fix-versions`          | Comma-separated list of resulting fix versions (union across processed issues) |
+| `fix-versions-by-issue` | Per-issue resulting fix versions in the format: `ISSUE-1:v1,v2\|ISSUE-2:v1`    |
 
 #### Example --- Use outputs
 
 ``` yaml
-- name: Print fix versions if issue was updated
+- name: Print fix versions if at least one issue was updated
   if: steps.jira.outputs.changed == 'true'
   run: |
-    echo "Final fix versions on issue:"
+    echo "Final fix versions (union):"
     echo "${{ steps.jira.outputs.fix-versions }}"
+
+    echo "Per issue:"
+    echo "${{ steps.jira.outputs.fix-versions-by-issue }}"
 ```
 
 ### jx-updatebot-pr
