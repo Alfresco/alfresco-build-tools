@@ -137,7 +137,10 @@ jobs:
           echo "terraform_root_path=$first_changed_folder" >> "$GITHUB_OUTPUT"
 
       - name: Compute first changed tfvars file (when running against default branch)
-        if: inputs.terraform_env == '' && steps.set-outputs.outputs.is_promotion_pr == 'false'
+        if: >-
+          inputs.terraform_env == '' &&
+          steps.set-outputs.outputs.is_promotion_pr == 'false' &&
+          steps.detect-path.outputs.terraform_root_path != ''
         env:
           TERRAFORM_ROOT_PATH: ${{ steps.detect-path.outputs.terraform_root_path }}
         id: detect-tfvars
