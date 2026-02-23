@@ -1,0 +1,66 @@
+name: "jira-set-fix-version"
+description: "Add/Set the fix version to/on one or more JIRA issues"
+
+inputs:
+  jira-url:
+    description: "Jira base URL (e.g. https://your-domain.atlassian.net)"
+    required: true
+  jira-user:
+    description: "Jira user name (should come from secrets)"
+    required: true
+  jira-token:
+    description: "Jira user token (should come from secrets)"
+    required: true
+  jira-issue-keys:
+    description: "Comma-separated Jira issue keys (e.g. ABCD-123 or ABCD-123,ABCD-456). Spaces are allowed and ignored."
+    required: true
+  jira-version-name:
+    description: "Fix version name (mutually exclusive with jira-version-id)"
+    required: false
+  jira-version-id:
+    description: "Fix version ID (mutually exclusive with jira-version-name)"
+    required: false
+  merge-versions:
+    description: "If the ticket already has fix versions then merge them with the new one, else overwrite them."
+    required: false
+    default: "true"
+
+outputs:
+  changed:
+    description: "Whether at least one issue was updated"
+    value: ${{ steps.run.outputs.changed }}
+  fix-versions:
+    description: "Comma-separated list of resulting fix versions (union across processed issues)"
+    value: ${{ steps.run.outputs.fix-versions }}
+  fix-versions-by-issue:
+    description: "Per-issue resulting fix versions, format: ISSUE-1:v1,v2|ISSUE-2:v1"
+    value: ${{ steps.run.outputs.fix-versions-by-issue }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      with:
+        python-version: "3.11"
+        cache: "pip"
+
+    - name: Install python dependencies
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -r requirements.txt
+
+    - name: Run action script
+      id: run
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      env:
+        JIRA_URL: ${{ inputs.jira-url }}
+        JIRA_USER: ${{ inputs.jira-user }}
+        JIRA_TOKEN: ${{ inputs.jira-token }}
+        JIRA_ISSUE_KEYS: ${{ inputs.jira-issue-keys }}
+        JIRA_VERSION_NAME: ${{ inputs.jira-version-name }}
+        JIRA_VERSION_ID: ${{ inputs.jira-version-id }}
+        MERGE_VERSIONS: ${{ inputs.merge-versions }}
+      run: python action.py
