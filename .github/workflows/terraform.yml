@@ -89,7 +89,7 @@ jobs:
       - name: Get branch name
         if: inputs.terraform_root_path == ''
         id: get-branch-name
-        uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@OPSEXP-3857-get-branch-events
+        uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.4.0
         with:
           additional-pr-events: true
 
@@ -98,7 +98,7 @@ jobs:
         id: set-outputs
         env:
           PUSH_ON_DEFAULT_BRANCH: ${{ github.event.repository.default_branch == steps.get-branch-name.outputs.branch_name }}
-          PR_AGAINST_DEFAULT_BRANCH: ${{ github.event.repository.default_branch == github.base_ref }}
+          PR_AGAINST_DEFAULT_BRANCH: ${{ github.event.repository.default_branch == steps.get-branch-name.outputs.base_branch_name }}
         run: |
           echo "is_promotion_pr=${{ env.PUSH_ON_DEFAULT_BRANCH == 'false' && env.PR_AGAINST_DEFAULT_BRANCH == 'false' }}" >> "$GITHUB_OUTPUT"
 
