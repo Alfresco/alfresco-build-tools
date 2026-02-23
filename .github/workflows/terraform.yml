@@ -138,10 +138,9 @@ jobs:
       - name: Compute first changed tfvars file (when running against default branch)
         if: >-
           inputs.terraform_env == '' &&
-          steps.set-outputs.outputs.is_promotion_pr == 'false' &&
-          steps.detect-path.outputs.terraform_root_path != ''
+          steps.set-outputs.outputs.is_promotion_pr == 'false'
         env:
-          TERRAFORM_ROOT_PATH: ${{ steps.detect-path.outputs.terraform_root_path }}
+          TERRAFORM_ROOT_PATH: ${{ steps.detect-path.outputs.terraform_root_path || inputs.terraform_root_path }}
         id: detect-tfvars
         run: |
           first_changed_tfvars=$(echo "${{ steps.last-changes-diff.outputs.all_changed_files }}" \
