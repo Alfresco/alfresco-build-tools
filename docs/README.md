@@ -1253,8 +1253,8 @@ This action:
 
 | Name                | Required | Description                                                                                               |
 |---------------------|----------|-----------------------------------------------------------------------------------------------------------|
-| `jira-url`          | Yes      | Base URL of your JIRAinstance                                                                             |
-| `jira-user`         | Yes      | JIRA user (email orusername)                                                                              |
+| `jira-url`          | Yes      | Base URL of your JIRA instance                                                                            |
+| `jira-user`         | Yes      | JIRA user (email or username)                                                                             |
 | `jira-token`        | Yes      | JIRA API token                                                                                            |
 | `jira-issue-keys`   | Yes      | **Comma-separated** JIRA issue keys (e.g. `ABC-123` or `ABC-123,ABC-456`). Spaces are allowed and ignored |
 | `jira-version-name` | No       | Name of the fix version to set                                                                            |
