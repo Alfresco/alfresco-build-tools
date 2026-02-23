@@ -1243,7 +1243,7 @@ This action:
 - Automatically derives the project key from the **first issue key**.
 - Supports **multiple issues** (comma-separated list).
 - Adds the fix version to each issue.
-- Supports **merge or overwrite mode** via `merge-versions`.
+- Supports **merge or overwrite** of existing fix versions via `merge-versions`.
 - Avoids duplicates automatically.
 - Does nothing for issues where the version is already set.
 
