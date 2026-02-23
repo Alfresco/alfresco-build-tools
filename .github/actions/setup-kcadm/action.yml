@@ -15,4 +15,4 @@ runs:
         ln -s keycloak-$KEYCLOAK_VERSION keycloak && ln -s ${PWD}/keycloak/bin/kcadm.sh /usr/local/bin
         kcadm.sh help
       env:
-        DEFAULT_KEYCLOAK_VERSION: 26.5.3
+        DEFAULT_KEYCLOAK_VERSION: 26.5.4
