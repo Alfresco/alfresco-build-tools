@@ -110,7 +110,7 @@ runs:
 
     - name: Get branch name
       id: get-branch-name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.2.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.3.0
 
     - name: Send slack notification
       id: slack
