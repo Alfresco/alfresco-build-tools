@@ -7,6 +7,8 @@ from requests import HTTPError
 
 OUTPUT_CHANGED = "changed"
 OUTPUT_FIXVERSIONS = "fix-versions"
+# Optional output to help debug multi-issue runs
+OUTPUT_FIXVERSIONS_BY_ISSUE = "fix-versions-by-issue"
 
 
 def get_required_env(var_name: str) -> str:
@@ -17,6 +19,13 @@ def get_required_env(var_name: str) -> str:
         sys.exit(1)
 
     return value
+
+
+def get_optional_env(var_name: str) -> Optional[str]:
+    v = os.getenv(var_name)
+    if v is None:
+        return None
+    return v.strip() or None
 
 
 def parse_bool(value: str) -> bool:
@@ -40,13 +49,31 @@ def project_key_from_issue_key(issue_key: str) -> str:
     return issue_key.split("-", 1)[0].strip()
 
 
-def get_optional_env(var_name: str) -> Optional[str]:
-    v = os.getenv(var_name)
+def parse_issue_keys(raw: str) -> List[str]:
+    """
+    Accept comma-separated issue keys.
+    Spaces are ignored.
 
-    if v is None:
-        return None
+    Examples:
+      "PROJ-1"
+      "PROJ-1,PROJ-2"
+      "PROJ-1, PROJ-2 ,PROJ-3"
+    """
+    if not raw or not raw.strip():
+        return []
 
-    return v.strip() or None
+    normalized = raw.replace(" ", "").strip()
+    parts = normalized.split(",")
+
+    # Reject empty segments (e.g., trailing comma or double commas)
+    if any(not p for p in parts):
+        print(
+            "❌ Invalid JIRA_ISSUE_KEYS format. Use comma-separated values like: PROJ-1,PROJ-2",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    return parts
 
 
 def resolve_version(
@@ -59,6 +86,7 @@ def resolve_version(
     Resolve a Jira version from the project's versions list using either:
     - version_id (preferred)
     - version_name (fallback)
+
     Only one should be provided.
     """
     versions = jira.get_project_versions(project_key) or []
@@ -67,10 +95,8 @@ def resolve_version(
         for v in versions:
             if str(v.get("id", "")).strip() == version_id:
                 return v
-
         return None
 
-    # version_name is provided
     for v in versions:
         if str(v.get("name", "")).strip() == version_name:
             return v
@@ -85,7 +111,7 @@ def write_github_output(key: str, value: str) -> None:
     if not out_path:
         return
 
-    # NOTE: This simple format assumes value has no newlines (true here).
+    # NOTE: This simple format assumes value has no newlines.
     with open(out_path, "a", encoding="utf-8") as f:
         f.write(f"{key}={value}\n")
 
@@ -123,7 +149,6 @@ def get_issue_fix_versions(jira: Jira, issue_key: str) -> List[Dict[str, Any]]:
     # Cloud uses API v3. This endpoint returns fixVersions as a list of objects.
     issue = jira.get(f"rest/api/3/issue/{issue_key}", params={"fields": "fixVersions"}) or {}
     fields = issue.get("fields") or {}
-
     return fields.get("fixVersions") or []
 
 
@@ -154,7 +179,14 @@ def main() -> None:
     jira_url = get_required_env("JIRA_URL")
     jira_user = get_required_env("JIRA_USER")
     jira_token = get_required_env("JIRA_TOKEN")
-    issue_key = get_required_env("JIRA_ISSUE_KEY")
+
+    # Simplified contract: only JIRA_ISSUE_KEYS
+    issue_keys_raw = get_required_env("JIRA_ISSUE_KEYS")
+    issue_keys = parse_issue_keys(issue_keys_raw)
+
+    if not issue_keys:
+        print("❌ No issue keys provided (JIRA_ISSUE_KEYS).", file=sys.stderr)
+        sys.exit(1)
 
     version_name = get_optional_env("JIRA_VERSION_NAME")
     version_id = get_optional_env("JIRA_VERSION_ID")
@@ -169,7 +201,8 @@ def main() -> None:
 
     merge_versions = parse_bool(os.getenv("MERGE_VERSIONS", "true"))
 
-    project_key = project_key_from_issue_key(issue_key)
+    # Same-project assumption: derive project from the first issue
+    project_key = project_key_from_issue_key(issue_keys[0])
 
     jira = Jira(
         url=jira_url,
@@ -179,9 +212,8 @@ def main() -> None:
     )
 
     try:
-        # 1) Validate the provided version exists in the project (single fetch inside resolver)
+        # Resolve once per project
         version = resolve_version(jira, project_key, version_id=version_id, version_name=version_name)
-
         if not version:
             if version_id:
                 print(
@@ -195,43 +227,61 @@ def main() -> None:
                 )
             sys.exit(1)
 
-        # 2) Fetch current fix versions on the issue
-        current = unique_versions_by_id_or_name(get_issue_fix_versions(jira, issue_key))
-
-        # 3) Build target fix versions list
         version_id_norm = str(version.get("id", "")).strip()
         version_name_norm = str(version.get("name", "")).strip()
 
-        already_present = any(
-            (version_id_norm and str(v.get("id", "")).strip() == version_id_norm)
-            or (version_name_norm and str(v.get("name", "")).strip() == version_name_norm)
-            for v in current
-        )
+        changed_any = False
+        union_names: List[str] = []
+        by_issue_parts: List[str] = []
 
-        if merge_versions:
-            target = list(current)
-            if not already_present:
-                target.append(version)
-        else:
-            target = [version]
+        for issue_key in issue_keys:
+            # Safety guard: ensure all issues belong to the same project
+            if project_key_from_issue_key(issue_key) != project_key:
+                print(
+                    f"❌ Issue '{issue_key}' is not in project '{project_key}'. "
+                    f"All issues must be in the same Jira project for this action.",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
 
-        target = unique_versions_by_id_or_name(target)
+            current = unique_versions_by_id_or_name(get_issue_fix_versions(jira, issue_key))
 
-        # 4) Update only if needed
-        changed = not versions_equal(current, target)
-        if changed:
-            update_issue_fix_versions(jira, issue_key, target)
+            already_present = any(
+                (version_id_norm and str(v.get("id", "")).strip() == version_id_norm)
+                or (version_name_norm and str(v.get("name", "")).strip() == version_name_norm)
+                for v in current
+            )
 
-        # 5) Outputs
-        target_names = ",".join([str(v.get("name", "")).strip() for v in target if str(v.get("name", "")).strip()])
-        write_github_output(OUTPUT_CHANGED, "true" if changed else "false")
-        write_github_output(OUTPUT_FIXVERSIONS, target_names)
+            if merge_versions:
+                target = list(current)
+                if not already_present:
+                    target.append(version)
+            else:
+                target = [version]
 
-        # Human-friendly logs
-        if changed:
-            print(f"✅ Updated fixVersions for {issue_key}: {target_names}")
-        else:
-            print(f"ℹ️ No change needed for {issue_key}. fixVersions already up-to-date: {target_names}")
+            target = unique_versions_by_id_or_name(target)
+
+            changed = not versions_equal(current, target)
+            if changed:
+                update_issue_fix_versions(jira, issue_key, target)
+                changed_any = True
+
+            target_names_list = [str(v.get("name", "")).strip() for v in target if str(v.get("name", "")).strip()]
+            for n in target_names_list:
+                if n and n not in union_names:
+                    union_names.append(n)
+
+            target_names = ",".join(target_names_list)
+            by_issue_parts.append(f"{issue_key}:{target_names}")
+
+            if changed:
+                print(f"✅ Updated fixVersions for {issue_key}: {target_names}")
+            else:
+                print(f"ℹ️ No change needed for {issue_key}. fixVersions already up-to-date: {target_names}")
+
+        write_github_output(OUTPUT_CHANGED, "true" if changed_any else "false")
+        write_github_output(OUTPUT_FIXVERSIONS, ",".join(union_names))
+        write_github_output(OUTPUT_FIXVERSIONS_BY_ISSUE, "|".join(by_issue_parts))
 
     except HTTPError as e:
         print("❌ HTTP error occurred while calling Jira.", file=sys.stderr)
