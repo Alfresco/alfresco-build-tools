@@ -25,7 +25,7 @@ runs:
 
     - name: Slack Notification
       if: fromJSON(steps.fetch_time.outputs.total_time) > fromJSON(inputs.max-build-time-seconds)
-      uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v15.3.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v15.4.0
       with:
         channel-id: ${{ inputs.slack-channel }}
         message: 'Max build time exceeded: took ${{ steps.fetch_time.outputs.total_time }} seconds (expected max: ${{ inputs.max-build-time-seconds }} seconds)'
