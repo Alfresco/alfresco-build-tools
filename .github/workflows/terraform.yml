@@ -179,7 +179,8 @@ jobs:
             exit 0
           fi
 
-          BRANCH_NAME="${{ steps.get-branch-name.outputs.branch-name }}"
+          echo "Falling back to PR base branch or push branch name for environment name"
+          BRANCH_NAME="${{ steps.get-branch-name.outputs.base-branch-name || steps.get-branch-name.outputs.branch-name }}"
           BRANCH_LOWER=${BRANCH_NAME,,}
           if [ "$BRANCH_LOWER" == "main" ]; then
             environment="production"
