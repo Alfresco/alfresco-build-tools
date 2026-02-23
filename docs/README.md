@@ -46,7 +46,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [enforce-pr-conventions](#enforce-pr-conventions)
   - [env-load-from-yaml](#env-load-from-yaml)
   - [free-hosted-runner-disk-space](#free-hosted-runner-disk-space)
-  - [get-branch-name](#get-branch-name)
+  - [get-branch-name-v2](#get-branch-name-v2)
   - [get-build-info](#get-build-info)
   - [gh-cache-cleanup-on-merge](#gh-cache-cleanup-on-merge)
   - [git-check-existing-tag](#git-check-existing-tag)
@@ -75,6 +75,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [helm-update-chart-version](#helm-update-chart-version)
   - [install-galaxy-deps](#install-galaxy-deps)
   - [install-ubuntu-default-tools](#install-ubuntu-default-tools)
+  - [jira-get-or-create-release](#jira-get-or-create-release)
   - [jx-updatebot-pr](#jx-updatebot-pr)
   - [kubectl-keep-nslogs](#kubectl-keep-nslogs)
   - [kubectl-wait](#kubectl-wait)
@@ -680,12 +681,44 @@ run a disk usage analysis and print the top offenders before and after the clean
           diagnose-top-offenders-enabled: true
 ```
 
-### get-branch-name
+### get-branch-name-v2
 
-Loads the name of the branch on which the action was called into `BRANCH_NAME` environment variable
+Extracts the branch name and base branch for PRs, from GitHub context and
+provides them as outputs, with optional sanitization and truncation.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.2.0
+        id: branch-info
+      - run: echo "Current branch is ${{ steps.branch-info.outputs.branch-name }}"
+      - run: echo "PR base branch is ${{ steps.branch-info.outputs.base-branch-name }}"
+```
+
+You can also sanitize (lowercase, replace `/` with `-`, and remove `.`
+characters) and truncate branch name:
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.2.0
+        id: branch-info
+        with:
+          sanitize: true
+          max-length: 20
+```
+
+Handle additional PR events (requires `pull-requests: read` permission):
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.2.0
+        with:
+          additional-pr-events: true
+```
+
+Legacy version with environment variable (deprecated - use outputs instead to
+avoid polluting the environment of all the following steps):
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v15.2.0
+      - name: Use branch name
+        run: echo "Current branch is $BRANCH_NAME"
 ```
 
 ### get-build-info

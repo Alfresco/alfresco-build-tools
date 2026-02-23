@@ -20,11 +20,13 @@ runs:
   using: "composite"
   steps:
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v15.2.0
+      id: get-branch-name
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.2.0
 
     - name: Check upcoming runs
       id: check
       env:
+        BRANCH_NAME: ${{ steps.get-branch-name.outputs.branch-name }}
         GH_TOKEN: ${{ inputs.github-token }}
         WORKFLOW: ${{ inputs.workflow }}
         EVENT: ${{ inputs.event }}

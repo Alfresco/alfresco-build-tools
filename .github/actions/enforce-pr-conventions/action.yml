@@ -20,12 +20,14 @@ runs:
   using: composite
   steps:
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v15.2.0
+      id: get-branch-name
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.2.0
 
     - name: Check is Dependabot PR or Propagation PR
       id: check
       env:
         PR_USER: ${{ github.event.pull_request.user.login }}
+        BRANCH_NAME: ${{ steps.get-branch-name.outputs.branch-name }}
       shell: bash
       run: |
           if [[ $PR_USER != 'dependabot[bot]' && $BRANCH_NAME != pr-* ]]; then
@@ -65,9 +67,12 @@ runs:
     - name: Check whitelisted branches
       if: steps.check.outputs.continue == 'true'
       id: check-whitelist-branches
+      env:
+        BRANCH_NAME: ${{ steps.get-branch-name.outputs.branch-name }}
+        WHITELIST_BRANCHES: ${{ inputs.whitelist-branches }}
       shell: bash
       run: |
-        readarray -t branches <<< "${{ inputs.whitelist-branches }}"
+        readarray -t branches <<< "${WHITELIST_BRANCHES}"
         for branch in "${branches[@]}"; do
             if [[ $BRANCH_NAME == $branch ]]; then
                 echo "continue=false" >> $GITHUB_OUTPUT
@@ -80,7 +85,7 @@ runs:
       if: steps.check.outputs.continue == 'true' && steps.check-whitelist-branches.outputs.continue == 'true'
       shell: bash
       env:
-        LOCAL_BRANCH: ${{ env.BRANCH_NAME }}
+        LOCAL_BRANCH: ${{ steps.get-branch-name.outputs.branch-name }}
         BRANCH_REGEX: ${{ steps.generate-regex.outputs.valid-branch-regex }}
       run: |
         if [[ ${#LOCAL_BRANCH} != 0 && ! $LOCAL_BRANCH =~ $BRANCH_REGEX ]]; then
