@@ -46,7 +46,8 @@ runs:
   using: composite
   steps:
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v15.0.0
+      id: get-branch-name
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.4.0
 
     - name: Compute Report Portal input info
       id: info
@@ -59,4 +60,5 @@ runs:
         RP_EXTRA_ATTRIBUTES: ${{ inputs.rp-extra-attributes }}
         AUTO: ${{ inputs.auto-configure }}
         USE_STATIC_LAUNCH_NAME: ${{ inputs.rp-use-static-launch-name }}
+        BRANCH_NAME: ${{ steps.get-branch-name.outputs.branch-name }}
       run: ${{ github.action_path }}/get-rp-input.sh

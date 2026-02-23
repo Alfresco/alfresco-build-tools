@@ -194,7 +194,7 @@ jobs:
   # One job for a specific terraform folder/stack.
   # Environment can still be auto-detected based on changed tfvars files or branch name.
   invoke-terraform-infra:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.0.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.4.0
     with:
       terraform_root_path: infra
       terraform_default_env: develop
@@ -207,7 +207,7 @@ jobs:
   # a specific execution order (e.g. infra before k8s).
   invoke-terraform-k8s:
     needs: invoke-terraform-infra
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.0.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.4.0
     with:
       terraform_root_path: k8s
       terraform_default_env: develop
@@ -248,7 +248,7 @@ Example:
 ```yaml
 jobs:
   invoke-terraform-k8s:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.0.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.4.0
     with:
       terraform_root_path: k8s
       install_kubectl: true
@@ -312,7 +312,7 @@ permissions:
 
 jobs:
   pre-commit:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v15.0.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v15.4.0
     with:
       BOT_GITHUB_USERNAME: ${{ vars.BOT_GITHUB_USERNAME }}
     secrets: inherit

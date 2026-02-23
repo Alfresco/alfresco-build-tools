@@ -160,7 +160,8 @@ runs:
         echo "result=$RESULT" >> $GITHUB_OUTPUT
 
     - name: Get branch name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v15.0.0
+      id: get-branch-name
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v15.4.0
 
     - name: Transform mentions to JSON entities
       id: transform-mentions
@@ -192,7 +193,7 @@ runs:
         fi
 
     - name: Send teams notification
-      uses: skitionek/notify-microsoft-teams@11e40c38c3a629ae65a985b582eca4897b01e79e # v1.0.9
+      uses: skitionek/notify-microsoft-teams@0953822ab410e9a50e2abd2d6d8f85230b1ae4d6 # v1.1.0
       env:
         ACTOR_URL: ${{ steps.compute-actor-urls.outputs.actor_url }}
         ACTOR_AVATAR_URL: ${{ steps.compute-actor-urls.outputs.actor_avatar_url }}
@@ -202,7 +203,7 @@ runs:
         RUN_LINK: ${{ steps.compute-run-link.outputs.result }}
         WORKFLOW_TITLE: ${{ steps.compute-workflow-title.outputs.result }}
         COLOR: ${{ steps.compute-color.outputs.result }}
-        TITLE: "Notification on ${{ steps.compute-event.outputs.result }} on branch [`${{ env.BRANCH_NAME }}`](${{ env.REPO_URL }}/tree/${{ env.BRANCH_NAME }})"
+        TITLE: "Notification on ${{ steps.compute-event.outputs.result }} on branch [`${{ steps.get-branch-name.outputs.branch-name }}`](${{ env.REPO_URL }}/tree/${{ steps.get-branch-name.outputs.branch-name }})"
         ENTITIES: ${{ steps.transform-mentions.outputs.result }}
       with:
         webhook_url: ${{ inputs.webhook-url }}
