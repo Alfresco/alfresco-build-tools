@@ -30,7 +30,6 @@ def parse_bool(value: str) -> bool:
 
 
 def project_key_from_issue_key(issue_key: str) -> str:
-    # Jira issue keys are usually like "PROJ-123"
     if "-" not in issue_key:
         print(
             f"❌ Invalid JIRA issue key format: '{issue_key}'. Expected something like 'PROJ-123'.",
