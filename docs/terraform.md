@@ -234,7 +234,7 @@ jobs:
   # which can be useful for simple repositories with a single stack and environment,
   # or for scheduled workflows.
   invoke-terraform-static:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.0.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.4.0
     with:
       terraform_root_path: infra
       terraform_env: production
