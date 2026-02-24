@@ -93,7 +93,7 @@ jobs:
           additional-pr-events: true
 
       - name: Set outputs
-        if: inputs.terraform_root_path == ''
+        if: inputs.terraform_root_path == '' || inputs.terraform_env == ''
         id: set-outputs
         env:
           PUSH_ON_DEFAULT_BRANCH: ${{ github.event.repository.default_branch == steps.get-branch-name.outputs.branch-name }}
