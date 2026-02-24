@@ -25,4 +25,4 @@ jobs:
         env:
           BATS_LIB_PATH: ${{ steps.setup-bats.outputs.lib-path }}
           TERM: xterm
-        run: bats -r --print-output-on-failure .
+        run: bats -r --print-output-on-failure --formatter pretty .
