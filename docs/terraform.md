@@ -119,6 +119,16 @@ default environment as per `terraform_default_env` input or
 When running against any other branch, the workflow will target the environment
 matching the branch name (`base_ref` for `pull_request`, `ref_name` for `push`).
 
+### PR comments
+
+When the workflow is triggered by a PR comment, it will look for the presence of
+the strings `terraform plan` or `terraform apply` in the comment body to determine
+the requested operation.
+
+Currently there are no additional restrictions on who/when can trigger terraform
+operations via PR comments, so it's recommended to enable deployment protection
+rules on production environments.
+
 ### Environment variables
 
 You can provide additional environment variables to the terraform execution by
@@ -144,9 +154,11 @@ on:
       - main
       - develop
       - preprod
-  # optional - to trigger a terraform apply adding a pr comment with text 'terraform apply'
+  # optional - to trigger a terraform operation by adding a PR comment
+  # with text 'terraform plan' or 'terraform apply'
   issue_comment:
     types: [created]
+  # optional - to trigger manually from the Actions tab with a specific operation
   workflow_dispatch:
     inputs:
       terraform_operation:
