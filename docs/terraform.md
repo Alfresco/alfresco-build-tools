@@ -180,7 +180,7 @@ jobs:
   # and environment based on changed files in PRs/pushes against the default branch,
   # or branch name for other branches.
   invoke-terraform:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.0.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v15.4.0
     with:
       # Autodetected using the first changed folder (alphabetically) in PR/push
       #
