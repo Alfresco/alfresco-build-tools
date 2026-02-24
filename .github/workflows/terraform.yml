@@ -143,6 +143,12 @@ jobs:
           TERRAFORM_ROOT_PATH: ${{ steps.detect-path.outputs.terraform_root_path || inputs.terraform_root_path }}
         id: detect-tfvars
         run: |
+          if [ -z "${TERRAFORM_ROOT_PATH}" ]; then
+            echo "Cannot auto-detect a terraform environment without a terraform root path. Skipping environment auto-detection."
+            echo "terraform_tfvars_file=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           first_changed_tfvars=$(echo "${{ steps.last-changes-diff.outputs.all_changed_files }}" \
             | grep -v 'common.tfvars' \
             | grep -E '^${{ env.TERRAFORM_ROOT_PATH }}/.*\.tfvars$' \
