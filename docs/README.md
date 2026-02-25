@@ -1342,6 +1342,74 @@ This action:
     echo "${{ steps.jira.outputs.fix-versions-by-issue }}"
 ```
 
+### jira-propagate-release
+
+This GitHub composite action extracts Jira ticket IDs from a **GitHub Release event payload** and propagates the release tag as a **Fix Version** in Jira.
+It is designed to be used in workflows triggered by `release` events.
+
+#### 🚀 What It Does
+
+1. Reads the GitHub Release event payload (`GITHUB_EVENT_PATH`)
+2. Extracts Jira ticket IDs from:
+   - Release name
+   - Tag name
+   - Release URL
+   - Release body
+3. Creates (or retrieves) the corresponding Jira Version
+4. Sets the extracted tickets' **Fix Version** field
+
+If no tickets are found, the action exits cleanly without failing the workflow.
+
+#### 📦 Inputs
+
+| Name                       | Required | Default                 | Description                                              |
+|----------------------------|----------|-------------------------|----------------------------------------------------------|
+| `ticket-regex`             | No       | `[A-Z][A-Z0-9]+-[0-9]+` | Regex used to detect Jira tickets                        |
+| `jira-url`                 | Yes      | ---                     | Jira base URL (e.g. `https://your-domain.atlassian.net`) |
+| `jira-project-key`         | Yes      | ---                     | Jira project key (e.g. `ABC`)                            |
+| `jira-version-description` | No       | `""`                    | Optional Jira version description                        |
+| `merge-versions`           | No       | `"true"`                | Merge with existing Fix Versions instead of overwriting  |
+| `jira-user`                | Yes      | ---                     | Jira username/email (use secrets)                        |
+| `jira-token`               | Yes      | ---                     | Jira API token (use secrets)                             |
+
+#### 📤 Outputs
+
+| Name                | Description                                   |
+|---------------------|-----------------------------------------------|
+| `tickets-csv`       | Extracted tickets as CSV (e.g. `ABC-1,DEF-2`) |
+| `jira-version-name` | Release tag name used as Jira Version         |
+| `jira-version-id`   | Jira version ID (created or existing)         |
+| `fix-changed`       | `true` if at least one issue was updated      |
+
+#### 🧠 Requirements
+
+- Must run in a workflow triggered by a **`release` event**
+- `jq` must be available (present on GitHub-hosted runners)
+
+#### 🛠 Example Usage
+
+```yaml
+name: Release → Jira
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  propagate-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Propagate Jira release
+        uses: Alfresco/alfresco-build-tools/.github/actions/jira-propagate-release@v15.4.0
+        with:
+          jira-url: ${{ secrets.JIRA_URL }}
+          jira-project-key: "OPSEXP"
+          jira-user: ${{ secrets.JIRA_USER }}
+          jira-token: ${{ secrets.JIRA_TOKEN }}
+          merge-versions: "true"
+```
+
 ### jx-updatebot-pr
 
 Create a Pull Request on each downstream repository using [jx-updatebot](https://github.com/jenkins-x-plugins/jx-updatebot).
