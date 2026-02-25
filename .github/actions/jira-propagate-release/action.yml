@@ -1,0 +1,81 @@
+name: "jira-propagate-release"
+description: "Extract Jira tickets from a GitHub release payload JSON and propagate release as Fix Version in Jira."
+
+inputs:
+  jira-url:
+    required: true
+    description: "Jira base URL (e.g. https://your-domain.atlassian.net)"
+  jira-user:
+    required: true
+    description: "Jira username/email (pass as a secret from the workflow)."
+  jira-token:
+    required: true
+    description: "Jira API token (pass as a secret from the workflow)."
+  jira-project-key:
+    required: true
+    description: "Jira project key (e.g. ABC)"
+  jira-version-description:
+    required: false
+    default: ""
+    description: "Optional Jira version description"
+  merge-versions:
+    required: false
+    default: "true"
+    description: "Merge with existing Fix Versions (true) or overwrite (false)"
+  ticket-regex:
+    description: "Regex used to find tickets in release payload"
+    required: false
+    default: "[A-Z][A-Z0-9]+-[0-9]+"
+
+outputs:
+  tickets-csv:
+    value: ${{ steps.extract.outputs.tickets-csv }}
+    description: "Tickets as one-line CSV"
+  jira-version-name:
+    value: ${{ steps.extract.outputs.jira-version-name }}
+    description: "Release tag name (from payload)"
+  jira-version-id:
+    value: ${{ steps.jira-release.outputs.version-id }}
+    description: "Jira version id (existing or created)"
+  fix-changed:
+    value: ${{ steps.set-fix.outputs.changed || 'false' }}
+    description: "Whether at least one issue was updated"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Extract tickets + tag from release payload
+      id: extract
+      shell: bash
+      env:
+        TICKET_REGEX: ${{ inputs.ticket-regex }}
+      run: |
+        "${{ github.action_path }}/extract-tickets-from-release-payload.sh"
+
+    - name: Get or create Jira release/version
+      id: jira-release
+      uses: Alfresco/alfresco-build-tools/.github/actions/jira-get-or-create-release@v15.5.1
+      with:
+        jira-url: ${{ inputs.jira-url }}
+        jira-project-key: ${{ inputs.jira-project-key }}
+        jira-version-name: ${{ steps.extract.outputs.jira-version-name }}
+        jira-version-description: ${{ inputs.jira-version-description }}
+        jira-user: ${{ inputs.jira-user }}
+        jira-token: ${{ inputs.jira-token }}
+
+    - name: Set Fix Version on tickets (skip if none)
+      id: set-fix
+      if: ${{ steps.extract.outputs.tickets-csv != '' }}
+      uses: Alfresco/alfresco-build-tools/.github/actions/jira-set-fix-version@v15.5.1
+      with:
+        jira-url: ${{ inputs.jira-url }}
+        jira-user: ${{ inputs.jira-user }}
+        jira-token: ${{ inputs.jira-token }}
+        jira-issue-keys: ${{ steps.extract.outputs.tickets-csv }}
+        jira-version-name: ${{ steps.extract.outputs.jira-version-name }}
+        merge-versions: ${{ inputs.merge-versions }}
+
+    - name: No tickets found (notice)
+      if: ${{ steps.extract.outputs.tickets-csv == '' }}
+      shell: bash
+      run: echo "::notice::No tickets found in release payload; skipping fix version update."
