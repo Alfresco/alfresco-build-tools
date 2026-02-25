@@ -1401,7 +1401,7 @@ jobs:
 
     steps:
       - name: Propagate Jira release
-        uses: Alfresco/alfresco-build-tools/.github/actions/jira-propagate-release@v15.4.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/jira-propagate-release@v15.5.1
         with:
           jira-url: ${{ secrets.JIRA_URL }}
           jira-project-key: "OPSEXP"
