@@ -3,11 +3,6 @@
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 SCRIPT="$REPO_ROOT/.github/actions/jira-propagate-release/extract-tickets-from-release-payload.sh"
 
-setup() {
-  [ -f "${SCRIPT}" ]
-  chmod +x "${SCRIPT}"
-}
-
 @test "writes outputs to GITHUB_OUTPUT (unique, sorted, one-line CSV)" {
   payload="$(mktemp)"
   out_file="$(mktemp)"

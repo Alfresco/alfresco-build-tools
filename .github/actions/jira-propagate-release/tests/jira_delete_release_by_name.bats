@@ -4,7 +4,6 @@ setup() {
   TEST_TMPDIR="$(mktemp -d)"
   SUT="$TEST_TMPDIR/jira_delete_release_by_name.sh"
   cp "$BATS_TEST_DIRNAME/../jira_delete_release_by_name.sh" "$SUT"
-  chmod +x "$SUT"
 
   MOCKBIN="$TEST_TMPDIR/mockbin"
   mkdir -p "$MOCKBIN"
