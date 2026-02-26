@@ -153,12 +153,6 @@ jobs:
             exit 0
           fi
 
-          if [ "${{ steps.set-outputs.outputs.is_promotion_pr_related }}" == "true" ]; then
-            echo "This is a promotion PR so skipping environment auto-detection based on changed files."
-            echo "terraform_tfvars_file=" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
           first_changed_tfvars=$(echo "${{ steps.last-changes-diff.outputs.all_changed_files }}" \
             | grep -v 'common.tfvars' \
             | grep -E '^${{ env.TERRAFORM_ROOT_PATH }}/.*\.tfvars$' \
