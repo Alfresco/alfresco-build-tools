@@ -97,7 +97,7 @@ jobs:
         id: set-outputs
         env:
           PUSH_ON_DEFAULT_BRANCH: ${{ github.event_name == 'push' && github.event.repository.default_branch == steps.get-branch-name.outputs.branch-name }}
-          PR_AGAINST_DEFAULT_BRANCH: ${{ github.event_name == 'pull_request' && github.event.repository.default_branch == steps.get-branch-name.outputs.base-branch-name }}
+          PR_AGAINST_DEFAULT_BRANCH: ${{ github.event.repository.default_branch == steps.get-branch-name.outputs.base-branch-name }}
         run: |
           echo "Workflow is related to a promotion PR if:"
           echo "- it's not a push on the default branch (PUSH_ON_DEFAULT_BRANCH=false)"
