@@ -96,7 +96,7 @@ jobs:
         if: inputs.terraform_root_path == '' || inputs.terraform_env == ''
         id: set-outputs
         env:
-          PUSH_ON_DEFAULT_BRANCH: ${{ github.event.repository.default_branch == steps.get-branch-name.outputs.branch-name }}
+          PUSH_ON_DEFAULT_BRANCH: ${{ github.event_name == 'push' && github.event.repository.default_branch == steps.get-branch-name.outputs.branch-name }}
           PR_AGAINST_DEFAULT_BRANCH: ${{ github.event.repository.default_branch == steps.get-branch-name.outputs.base-branch-name }}
         run: |
           echo "Workflow is related to a promotion PR if:"
