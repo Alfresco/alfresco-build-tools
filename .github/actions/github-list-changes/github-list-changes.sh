@@ -24,18 +24,19 @@ list_pr_changes() {
         echo "Failed to get base ref for PR, invalid github token?"
         exit 1
     fi
+    echo "Get the list of changed files from the pull request $pr_number from base ref $base_ref"
     git diff --name-only "origin/$base_ref" "refs/remotes/pull/$pr_number/merge" > all-changed-files.txt
 }
 
 if [[ $GITHUB_EVENT_NAME == "pull_request" ]]; then
-    # Get the list of changed files from the pull request.
+    echo "Get the list of changed files from the pull request $PULL_REQUEST_NUMBER"
     git diff --name-only origin/$GITHUB_BASE_REF refs/remotes/pull/$PULL_REQUEST_NUMBER/merge > all-changed-files.txt
 elif [[ $GITHUB_EVENT_NAME == "push" ]]; then
     # Check if the old commit exists (it might not for force pushes).
-    old_commit=$BEFORE_COMMIT
     # If it doesn't exist, then run against the (single) latest commit.
+    old_commit=$BEFORE_COMMIT
     git log -1 $old_commit > /dev/null 2>&1 || old_commit="$AFTER_COMMIT~"
-    # Get the list of changed files from the pushed commits.
+    echo "Get the list of changed files from $old_commit to $AFTER_COMMIT"
     git diff --name-only $old_commit $AFTER_COMMIT > all-changed-files.txt
 elif [[ $GITHUB_EVENT_NAME == "issue_comment" ]]; then
     list_pr_changes ".issue.pull_request" "issue_comment"
