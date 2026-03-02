@@ -73,3 +73,10 @@ repos:
       - id: shellcheck
         args: [ "--severity=style" ]
         files: ^\.github/scripts/.*\.sh$
+
+  - repo: https://github.com/thlorenz/doctoc
+    rev: v2.3.0
+    hooks:
+      - id: doctoc
+        args: [--maxlevel, '3', --github, --notitle]
+        files: ^docs/README\.md$
