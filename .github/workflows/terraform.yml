@@ -124,7 +124,7 @@ jobs:
         id: detect-path
         run: |
           if [ "${{ steps.set-outputs.outputs.is_promotion_pr_related }}" == "true" ]; then
-            PROMOTION_PR_FILTER=$(echo "${{ steps.get-branch-name.outputs.branch-name }}" | cut -d'-' -f1)
+            PROMOTION_PR_FILTER=$(echo "${{ steps.get-branch-name.outputs.base-branch-name }}" | cut -d'-' -f1)
             echo "This is a promotion PR so restricting changed files to folders matching ${PROMOTION_PR_FILTER}"
           fi
 
