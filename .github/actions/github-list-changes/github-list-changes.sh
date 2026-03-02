@@ -24,7 +24,7 @@ list_pr_changes() {
         echo "Failed to get base ref for PR, invalid github token?"
         exit 1
     fi
-    echo "Get the list of changed files from the pull request $pr_number from base ref $base_ref"
+    echo "Get the list of changed files for $event_label from the pull request $pr_number with base ref $base_ref"
     git diff --name-only "origin/$base_ref" "refs/remotes/pull/$pr_number/merge" > all-changed-files.txt
 }
 
