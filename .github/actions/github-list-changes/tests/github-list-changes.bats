@@ -33,9 +33,7 @@ teardown() {
 
     function gh() {
         if [ "$1" = "pr" ] && [ "$2" = "view" ]; then
-            if [ "$5" = "number" ]; then echo "42"
-            elif [ "$5" = "baseRefName" ]; then echo "main"
-            fi
+            echo '{"number":42,"baseRefName":"main"}'
         fi
     }
     export -f gh
@@ -103,9 +101,7 @@ teardown() {
 
     function gh() {
         if [ "$1" = "pr" ] && [ "$2" = "view" ]; then
-            if [ "$5" = "number" ]; then echo "99"
-            elif [ "$5" = "baseRefName" ]; then echo "develop"
-            fi
+            echo '{"number":99,"baseRefName":"develop"}'
         fi
     }
     export -f gh
@@ -168,9 +164,7 @@ teardown() {
     # gh returns a valid PR number but empty base ref (e.g. permission issue)
     function gh() {
         if [ "$1" = "pr" ] && [ "$2" = "view" ]; then
-            if [ "$5" = "number" ]; then echo "99"
-            elif [ "$5" = "baseRefName" ]; then echo ""
-            fi
+            echo '{"number":99,"baseRefName":""}'
         fi
     }
     export -f gh
@@ -178,7 +172,7 @@ teardown() {
     run github-list-changes.sh
 
     [ "$status" -eq 1 ]
-    [[ "$output" == *"Failed to get base ref"* ]]
+    [[ "$output" == *"Failed to get PR base ref"* ]]
 
     rm "$TEMP_EVENT"
 }

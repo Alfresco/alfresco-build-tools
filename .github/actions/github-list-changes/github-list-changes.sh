@@ -16,17 +16,20 @@ list_pr_changes() {
         exit 0
     fi
 
+    local pr_json
+    pr_json=$(gh pr view "$pr_url" --json number,baseRefName)
+
     local pr_number
-    pr_number=$(gh pr view "$pr_url" --json number --jq '.number')
+    pr_number=$(jq -r '.number // empty' <<< "$pr_json")
     if [[ -z "$pr_number" ]]; then
-        echo "Failed to get PR number from event payload, cannot proceed with $event_label event."
+        echo "Failed to get PR number from $pr_url, cannot proceed with $event_label event."
         exit 1
     fi
 
     local base_ref
-    base_ref=$(gh pr view "$pr_url" --json baseRefName --jq '.baseRefName')
+    base_ref=$(jq -r '.baseRefName // empty' <<< "$pr_json")
     if [[ -z "$base_ref" ]]; then
-        echo "Failed to get base ref for PR, cannot proceed with $event_label event."
+        echo "Failed to get PR base ref from $pr_url, cannot proceed with $event_label event."
         exit 1
     fi
     echo "Getting the list of changed files for $event_label from the pull request $pr_number with base ref $base_ref"
