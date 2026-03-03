@@ -16,11 +16,11 @@ For pre-commit hooks documentation, see the [Pre-commit Hooks section](pre-commi
 
 Here follows the list of GitHub Actions topics available in the current document:
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 - [GitHub Actions](#github-actions)
   - [Java setup](#java-setup)
-    - [Setup JDK](#setup-jdk)
-    - [Setup Maven Credentials](#setup-maven-credentials)
-    - [Setup Maven Build Options](#setup-maven-build-options)
 - [GitHub Actions provided by community](#github-actions-provided-by-community)
   - [Comment a PR](#comment-a-pr)
   - [Docker build and push](#docker-build-and-push)
@@ -76,18 +76,16 @@ Here follows the list of GitHub Actions topics available in the current document
   - [install-galaxy-deps](#install-galaxy-deps)
   - [install-ubuntu-default-tools](#install-ubuntu-default-tools)
   - [jira-get-or-create-release](#jira-get-or-create-release)
+  - [jira-set-fix-version](#jira-set-fix-version)
+  - [jira-propagate-release](#jira-propagate-release)
   - [jx-updatebot-pr](#jx-updatebot-pr)
   - [kubectl-keep-nslogs](#kubectl-keep-nslogs)
   - [kubectl-wait](#kubectl-wait)
   - [load-release-descriptor](#load-release-descriptor)
   - [maven-configure](#maven-configure)
   - [maven-dependency-scan](#maven-dependency-scan)
-    - [`restore-artifact-pattern` option](#restore-artifact-pattern-option)
   - [maven-build](#maven-build)
-    - [JaCoCo report options](#jacoco-report-options)
   - [maven-build-and-tag](#maven-build-and-tag)
-    - [Preview option for maven-build-and-tag](#preview-option-for-maven-build-and-tag)
-    - [Option to skip tests for maven-build-and-tag](#option-to-skip-tests-for-maven-build-and-tag)
   - [maven-deploy-file](#maven-deploy-file)
   - [maven-release](#maven-release)
   - [maven-tag](#maven-tag)
@@ -105,7 +103,6 @@ Here follows the list of GitHub Actions topics available in the current document
   - [send-slack-notification-slow-job](#send-slack-notification-slow-job)
   - [send-slack-notification](#send-slack-notification)
   - [send-teams-notification](#send-teams-notification)
-    - [Mentions](#mentions)
   - [setup-checkov](#setup-checkov)
   - [setup-docker](#setup-docker)
   - [setup-fluxcli](#setup-fluxcli)
@@ -140,11 +137,11 @@ Here follows the list of GitHub Actions topics available in the current document
   - [Serialize pull request builds](#serialize-pull-request-builds)
   - [Expiring tags for quay.io images](#expiring-tags-for-quayio-images)
   - [Running a dependabot PR workflow only when pull request is approved](#running-a-dependabot-pr-workflow-only-when-pull-request-is-approved)
-    - [Using the pr-review-check reusable workflow](#using-the-pr-review-check-reusable-workflow)
-    - [Manual job condition approach](#manual-job-condition-approach)
   - [Automating github-actions updates](#automating-github-actions-updates)
 - [Known issues](#known-issues)
   - [realpath not available under macosx](#realpath-not-available-under-macosx)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## GitHub Actions
 
