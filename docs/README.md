@@ -920,7 +920,7 @@ a branch (`push` event).
 This action requires a checkout with `fetch-depth: 0` option as follows:
 
 ```yaml
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v15.6.4
@@ -932,14 +932,13 @@ The action outputs the list of changed files (one path per line) using the
 output `all_changed_files` and optionally to the env variable
 `GITHUB_MODIFIED_FILES`.
 
-Optionally, it can also support `issue_comment` event for PRs, but it requires
-providing a GitHub token and checking out the merge commit:
+Optionally, it can also support `issue_comment` and `pull_request_review` events
+for PRs, but it requires providing a GitHub token.
 
 ```yaml
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/merge', github.event.issue.number) || '' }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v15.6.4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
