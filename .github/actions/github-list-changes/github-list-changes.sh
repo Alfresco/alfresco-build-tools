@@ -12,31 +12,36 @@ list_pr_changes() {
     local pr_url
     pr_url=$(jq -r "${jq_root}.html_url // empty" "$GITHUB_EVENT_PATH")
     if [[ -z "$pr_url" ]]; then
-        echo "The $event_label event is not associated with a pull request, can't do anything."
+        echo "The $event_label event is not associated with a pull request, skipping."
         exit 0
     fi
 
     local pr_number
-    pr_number=$(jq -r "${jq_root}.number" "$GITHUB_EVENT_PATH")
+    pr_number=$(gh pr view "$pr_url" --json number --jq '.number')
+    if [[ -z "$pr_number" ]]; then
+        echo "Failed to get PR number from event payload, cannot proceed with $event_label event."
+        exit 1
+    fi
+
     local base_ref
     base_ref=$(gh pr view "$pr_url" --json baseRefName --jq '.baseRefName')
     if [[ -z "$base_ref" ]]; then
-        echo "Failed to get base ref for PR, invalid github token?"
+        echo "Failed to get base ref for PR, cannot proceed with $event_label event."
         exit 1
     fi
-    echo "Get the list of changed files for $event_label from the pull request $pr_number with base ref $base_ref"
+    echo "Getting the list of changed files for $event_label from the pull request $pr_number with base ref $base_ref"
     git diff --name-only "origin/$base_ref" "refs/remotes/pull/$pr_number/merge" > all-changed-files.txt
 }
 
 if [[ $GITHUB_EVENT_NAME == "pull_request" ]]; then
-    echo "Get the list of changed files from the pull request $PULL_REQUEST_NUMBER"
+    echo "Getting the list of changed files from the pull request $PULL_REQUEST_NUMBER"
     git diff --name-only origin/$GITHUB_BASE_REF refs/remotes/pull/$PULL_REQUEST_NUMBER/merge > all-changed-files.txt
 elif [[ $GITHUB_EVENT_NAME == "push" ]]; then
     # Check if the old commit exists (it might not for force pushes).
     # If it doesn't exist, then run against the (single) latest commit.
     old_commit=$BEFORE_COMMIT
     git log -1 $old_commit > /dev/null 2>&1 || old_commit="$AFTER_COMMIT~"
-    echo "Get the list of changed files from $old_commit to $AFTER_COMMIT"
+    echo "Getting the list of changed files from $old_commit to $AFTER_COMMIT"
     git diff --name-only $old_commit $AFTER_COMMIT > all-changed-files.txt
 elif [[ $GITHUB_EVENT_NAME == "issue_comment" ]]; then
     list_pr_changes ".issue.pull_request" "issue_comment"
