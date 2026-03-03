@@ -87,6 +87,28 @@ teardown() {
     rm "$TEMP_EVENT"
 }
 
+@test "issue_comment: fails when PR number cannot be retrieved" {
+    export GITHUB_EVENT_NAME="issue_comment"
+
+    TEMP_EVENT=$(mktemp)
+    echo '{"issue":{"pull_request":{"html_url":"https://github.com/test/repo/pull/42"}}}' > "$TEMP_EVENT"
+    export GITHUB_EVENT_PATH="$TEMP_EVENT"
+
+    function gh() {
+        if [ "$1" = "pr" ] && [ "$2" = "view" ]; then
+            echo '{"number":null,"baseRefName":"main"}'
+        fi
+    }
+    export -f gh
+
+    run github-list-changes.sh
+
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"Failed to get PR number"* ]]
+
+    rm "$TEMP_EVENT"
+}
+
 # ---------------------------------------------------------------------------
 # pull_request_review event
 # ---------------------------------------------------------------------------
@@ -150,6 +172,28 @@ teardown() {
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"not associated with a pull request"* ]]
+
+    rm "$TEMP_EVENT"
+}
+
+@test "pull_request_review: fails when PR number cannot be retrieved" {
+    export GITHUB_EVENT_NAME="pull_request_review"
+
+    TEMP_EVENT=$(mktemp)
+    echo '{"pull_request":{"html_url":"https://github.com/test/repo/pull/99"}}' > "$TEMP_EVENT"
+    export GITHUB_EVENT_PATH="$TEMP_EVENT"
+
+    function gh() {
+        if [ "$1" = "pr" ] && [ "$2" = "view" ]; then
+            echo '{"number":null,"baseRefName":"main"}'
+        fi
+    }
+    export -f gh
+
+    run github-list-changes.sh
+
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"Failed to get PR number"* ]]
 
     rm "$TEMP_EVENT"
 }
