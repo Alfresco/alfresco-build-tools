@@ -45,7 +45,7 @@ jobs:
       - name: Test HTTP latency
         uses: ./.github/actions/http-latency
         with:
-          url: https://packages.nuxeo.com
+          url: https://nexus.platform.dev.nuxeo.com/
           warmup: 1
           iterations: 5
 
