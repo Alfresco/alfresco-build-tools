@@ -45,7 +45,7 @@ jobs:
       - name: Test HTTP latency
         uses: ./.github/actions/http-latency
         with:
-          url: https://nexus.platform.dev.nuxeo.com/
+          url: https://repo1.maven.org/maven2/
           warmup: 1
           iterations: 5
 
