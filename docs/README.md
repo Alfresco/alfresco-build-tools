@@ -1210,7 +1210,7 @@ A GitHub composite action to measure HTTP service latency with statistical analy
 - 🎯 Clean, reusable outputs
 - 📝 Human-readable summary
 
-#### Inputs
+#### http-latency inputs
 
 | Input | Description | Required | Default |
 | ----- | ----------- | -------- | ------- |
@@ -1218,7 +1218,7 @@ A GitHub composite action to measure HTTP service latency with statistical analy
 | `iterations` | Number of test iterations | No | `10` |
 | `warmup` | Number of warmup requests | No | `3` |
 
-#### Outputs
+#### http-latency outputs
 
 | Output | Description |
 | ------ | ----------- |
