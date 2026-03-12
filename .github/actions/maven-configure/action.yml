@@ -79,9 +79,9 @@ runs:
       env:
         MAVEN_SETTINGS_PATH: ${{ inputs.maven-settings-path }}
       run: |
-       NTP='--no-transfer-progress'
-       ${{ inputs.verbose }} && NTP=''
-       TEST_OPTIONS=''
+        NTP='--no-transfer-progress'
+        ${{ inputs.verbose }} && NTP=''
+        TEST_OPTIONS=''
         [[ $SKIP_TESTS == 'true' ]] && TEST_OPTIONS='-DskipTests=true -DskipITs=true'
         echo "result=--show-version --settings $MAVEN_SETTINGS_PATH $NTP $TEST_OPTIONS" >> $GITHUB_OUTPUT
 
