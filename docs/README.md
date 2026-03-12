@@ -1537,7 +1537,8 @@ Create the project Dependency Graph
     restore-artifact-path: '~./m2/com/groupId'
     java-version: '21'
     maven-version: '3.8.8'
-    maven-args: '--settings settings.xml'
+    maven-args: 'mvn args'
+    maven-settings-path: #optional path to maven settings
     maven-username: ${{ secrets.MAVEN_USERNAME }}
     maven-password: ${{ secrets.MAVEN_PASSWORD }}
     ghcr-username: ${{ secrets.GHCR_USERNAME }}

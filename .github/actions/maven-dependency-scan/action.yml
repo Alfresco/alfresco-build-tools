@@ -23,7 +23,7 @@ inputs:
   maven-password:
     description: Maven password for authentication.
     required: false
-  settings-file:
+  maven-settings-path:
     description: Path to the Maven settings.xml file to use.
     required: false
   ghcr-username:
@@ -49,12 +49,12 @@ runs:
       with:
         java-version: ${{ inputs.java-version }}
         maven-version: ${{ inputs.maven-version }}
+        maven-settings-path: ${{ inputs.maven-settings-path }}
 
     - name: Submit Dependency Graph
       uses: advanced-security/maven-dependency-submission-action@b275d12641ac2d2108b2cbb7598b154ad2f2cee8 # v5.0.0
       with:
         maven-args: ${{ steps.maven-configure.outputs.maven-options }} ${{ inputs.maven-args }}
-        settings-file: ${{ inputs.settings-file || '' }}
       env:
         MAVEN_USERNAME: ${{ inputs.maven-username }}
         MAVEN_PASSWORD: ${{ inputs.maven-password }}
