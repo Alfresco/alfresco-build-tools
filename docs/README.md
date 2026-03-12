@@ -1534,7 +1534,7 @@ Allows specifying a custom Maven settings file path. Defaults to `settings.xml`.
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@v15.7.1
         with:
           java-version: '21'
-          maven-setting-file: 'custom-settings.xml'
+          maven-settings-path: '.ci.settings.xml'
 ```
 
 ### maven-dependency-scan
