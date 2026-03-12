@@ -1526,6 +1526,17 @@ Set up Java and Maven version and compute common maven options including setting
           maven-version: '3.8.8'
 ```
 
+#### `maven-setting-file` input
+
+Allows specifying a custom Maven settings file path. Defaults to `settings.xml`.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@v15.7.1
+        with:
+          java-version: '21'
+          maven-setting-file: 'custom-settings.xml'
+```
+
 ### maven-dependency-scan
 
 Create the project Dependency Graph
