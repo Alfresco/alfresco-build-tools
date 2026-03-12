@@ -13,6 +13,14 @@ inputs:
     description: 'Number of warmup requests before measurement'
     required: false
     default: '3'
+  tcp_timeout:
+    description: 'Maximum time in seconds to wait for each request'
+    required: false
+    default: '2'
+  xfer_max_time:
+    description: 'Maximum time in seconds for the entire request'
+    required: false
+    default: '10'
 
 outputs:
   total_time_mean:
@@ -62,7 +70,11 @@ runs:
 
         echo "🔥 Warming up with $WARMUP requests..."
         for i in $(seq 1 $WARMUP); do
-          curl -s -o /dev/null "$URL" || true
+          curl \
+               --connect-timeout ${{ inputs.tcp_timeout }} \
+               --max-time ${{inputs.xfer_max_time }} \
+               -s \
+               -o /dev/null "$URL" || true
         done
 
         echo "📊 Running $ITERATIONS benchmark iterations..."
@@ -73,7 +85,10 @@ runs:
         # Run iterations and collect metrics
         for i in $(seq 1 $ITERATIONS); do
           echo -n "."
-          curl -w "%{time_namelookup},%{time_connect},%{time_pretransfer},%{time_starttransfer},%{time_total}\n" \
+          curl \
+               --connect-timeout ${{ inputs.tcp_timeout }} \
+               --max-time ${{inputs.xfer_max_time }} \
+               -w "%{time_namelookup},%{time_connect},%{time_pretransfer},%{time_starttransfer},%{time_total}\n" \
                -o /dev/null -s "$URL" >> "$RESULTS_FILE"
         done
         echo ""
