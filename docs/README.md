@@ -135,7 +135,6 @@ Here follows the list of GitHub Actions topics available in the current document
 - [Cookbook](#cookbook)
   - [Conditional job/step depending on PR labels](#conditional-jobstep-depending-on-pr-labels)
   - [Serialize pull request builds](#serialize-pull-request-builds)
-  - [Expiring tags for quay.io images](#expiring-tags-for-quayio-images)
   - [Running a dependabot PR workflow only when pull request is approved](#running-a-dependabot-pr-workflow-only-when-pull-request-is-approved)
   - [Automating github-actions updates](#automating-github-actions-updates)
 - [Known issues](#known-issues)
@@ -1585,7 +1584,7 @@ with the action `sonar-scan-on-built-project`.
 Check out, builds a maven project and docker images, generating a new alpha version for it on push events:
 
 - publish maven artifacts to Nexus
-- push docker images to quay.io
+- push docker images to aws ecr and gh container registry
 - create GitHub tag for the new alpha release
 
 ```yaml
@@ -2655,60 +2654,6 @@ The `github.run_id` is just a fallback to not queue the workflow run when both
 variables are empty (when event is not related to a specific ref).
 
 More docs on [using concurrency](https://docs.github.com/en/actions/using-jobs/using-concurrency)
-
-### Expiring tags for quay.io images
-
-It may be desirable to push docker images from branches to test them before
-merge, but we should avoid polluting the image registry with these tags.
-
-With quay.io, this can be easily achieved by setting the following label on the
-docker image like:
-
-```properties
-quay.expires-after=2w
-```
-
-For the supported time formats, please check the [RedHat official
-documentation](https://access.redhat.com/documentation/it-it/red_hat_quay/3.2/html/use_red_hat_quay/working_with_tags#tag-expiration).
-
-An example step which computes the label could be:
-
-```yml
-- id: vars
-  name: Compute Docker vars
-  run: |
-    if [[ "${{ github.ref_name }}" == "main" ]]; then
-      echo "image_tag=latest" >> $GITHUB_OUTPUT
-      echo "image_labels=" >> $GITHUB_OUTPUT
-    else
-      echo "image_tag=${GITHUB_REF_NAME//\//-}" >> $GITHUB_OUTPUT
-      echo "image_labels=quay.expires-after=2w" >> $GITHUB_OUTPUT
-    fi
-```
-
-Then, if you are using the `docker/build-push-action` action:
-
-```yml
-- name: Build and push
-  uses: docker/build-push-action@v5
-  with:
-    push: ${{ github.actor != 'dependabot[bot]' }} # avoid pushing on dependabot pr
-    tags: |
-      quay.io/${{ env.IMAGE_REGISTRY_NAMESPACE }}/${{ env.IMAGE_REPOSITORY }}:${{ steps.vars.outputs.image_tag }}
-    platforms: linux/amd64,linux/arm64/v8
-    labels: ${{ steps.vars.outputs.image_labels }}
-    provenance: false # required due to https://issues.redhat.com/browse/PROJQUAY-5013
-```
-
-Alternatively, if you are building Docker images as part of a Maven lifecycle
-using the [docker-maven-plugin](https://dmp.fabric8.io):
-
-```yml
-- name: "Build"
-  env:
-    MAVEN_OPTS: "-Ddocker.labels.${{ steps.vars.outputs.image_labels }}"
-  run: mvn -B -V package -DskipTests
-```
 
 ### Running a dependabot PR workflow only when pull request is approved
 
