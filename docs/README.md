@@ -1537,12 +1537,19 @@ Create the project Dependency Graph
     restore-artifact-path: '~./m2/com/groupId'
     java-version: '21'
     maven-version: '3.8.8'
-    maven-args: '--settings settings.xml'
+    maven-args: '-Pmy-profile'
+    settings-file: '.mvn/settings.xml'
     maven-username: ${{ secrets.MAVEN_USERNAME }}
     maven-password: ${{ secrets.MAVEN_PASSWORD }}
     ghcr-username: ${{ secrets.GHCR_USERNAME }}
     ghcr-password: ${{ secrets.GHCR_PASSWORD }}
 ```
+
+#### `settings-file` option
+
+Provide the path to a custom Maven `settings.xml` file. This is passed directly to the underlying
+`advanced-security/maven-dependency-submission-action` and takes precedence over any `--settings`
+flag that might otherwise be passed via `maven-args`.
 
 #### `restore-artifact-pattern` option
 
