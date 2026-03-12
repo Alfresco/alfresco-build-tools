@@ -1526,7 +1526,7 @@ Set up Java and Maven version and compute common maven options including setting
           maven-version: '3.8.8'
 ```
 
-#### `maven-setting-file` input
+#### `maven-settings-path` input
 
 Allows specifying a custom Maven settings file path. Defaults to `settings.xml`.
 
