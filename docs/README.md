@@ -1524,6 +1524,7 @@ Set up Java and Maven version and compute common maven options including setting
         with:
           java-version: '21'
           maven-version: '3.8.8'
+         # maven-settings-path: '.ci.settings.xml' # optional
 ```
 
 ### maven-dependency-scan
