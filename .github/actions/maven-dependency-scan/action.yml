@@ -23,6 +23,9 @@ inputs:
   maven-password:
     description: Maven password for authentication.
     required: false
+  maven-settings-path:
+    description: Path to the Maven settings.xml file to use.
+    required: false
   ghcr-username:
     description: ghcr.io user name
     required: false
@@ -46,6 +49,7 @@ runs:
       with:
         java-version: ${{ inputs.java-version }}
         maven-version: ${{ inputs.maven-version }}
+        maven-settings-path: ${{ inputs.maven-settings-path }}
 
     - name: Submit Dependency Graph
       uses: advanced-security/maven-dependency-submission-action@b275d12641ac2d2108b2cbb7598b154ad2f2cee8 # v5.0.0
