@@ -14,6 +14,10 @@ inputs:
     description: Maven version to set up.
     required: false
     default: ''
+  maven-settings-path:
+    description: Path to the Maven settings.xml file to use.
+    required: false
+    default: 'settings.xml'
   skip-tests-label:
     description: The label to skip tests.
     required: false
@@ -72,12 +76,14 @@ runs:
     - name: Compute maven options
       id: compute-maven-options
       shell: bash
+      env:
+        MAVEN_SETTINGS_PATH: ${{ inputs.maven-settings-path }}
       run: |
         NTP='--no-transfer-progress'
         ${{ inputs.verbose }} && NTP=''
         TEST_OPTIONS=''
         [[ $SKIP_TESTS == 'true' ]] && TEST_OPTIONS='-DskipTests=true -DskipITs=true'
-        echo "result=--show-version --settings settings.xml $NTP $TEST_OPTIONS" >> $GITHUB_OUTPUT
+        echo "result=--show-version --settings $MAVEN_SETTINGS_PATH $NTP $TEST_OPTIONS" >> $GITHUB_OUTPUT
 
     - name: Set is_preview env variable
       id: set-is-preview-env-variable
