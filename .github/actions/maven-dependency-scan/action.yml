@@ -24,7 +24,7 @@ inputs:
     description: Maven password for authentication.
     required: false
   settings-file:
-    description: Maven settings.xml path
+    description: Path to the Maven settings.xml file to use.
     required: false
   ghcr-username:
     description: ghcr.io user name
