@@ -76,14 +76,9 @@ runs:
     - name: Compute maven options
       id: compute-maven-options
       shell: bash
+      env:
+        MAVEN_SETTINGS_PATH: ${{ inputs.maven-settings-path }}
       run: |
-        NTP='--no-transfer-progress'
-        ${{ inputs.verbose }} && NTP=''
-        TEST_OPTIONS=''
-shell: bash
-env:
-  MAVEN_SETTINGS_PATH: ${{ inputs.maven-settings-path }}
-run: |
        NTP='--no-transfer-progress'
        ${{ inputs.verbose }} && NTP=''
        TEST_OPTIONS=''

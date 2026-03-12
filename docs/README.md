@@ -1523,8 +1523,10 @@ Set up Java and Maven version and compute common maven options including setting
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@v15.7.1
         with:
           java-version: '21'
-         maven-version: '3.8.8'
+          maven-version: '3.8.8'
          # maven-settings-path: '.ci.settings.xml' # optional
+```
+
 ### maven-dependency-scan
 
 Create the project Dependency Graph
