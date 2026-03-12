@@ -68,3 +68,24 @@ Add to your `.pre-commit-config.yaml`:
 ```
 
 Note:- Some more kubepug hooks are available like kubepug-minimum, and kubepug-recommend.
+
+## Check README entries
+
+Verify that each action under `.github/actions` has a matching entry in `docs/README.md`.
+
+Arguments:
+
+- `--actions-dir DIR` (default: `.github/actions`)
+- `--readme-file FILE` (default: `docs/README.md`)
+- `--missing-entries N` (default: `0`, allow up to N missing entries)
+- `--exclude-path PATH` (repeatable)
+
+Add to your `.pre-commit-config.yaml`:
+
+```yaml
+  - repo: https://github.com/Alfresco/alfresco-build-tools
+    rev: v14.1.0
+    hooks:
+      - id: check-readme-missing-entries
+        args: [--readme-file, docs/README.md, --exclude-path, .github/actions/dbp-charts]
+```

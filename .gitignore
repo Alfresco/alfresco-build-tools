@@ -56,3 +56,10 @@ node_modules
 
 # vscode settings
 .vscode
+
+mise.toml
+__pycache__
+coverage.xml
+.coverage
+nosetests.xml
+report.xml

@@ -119,20 +119,6 @@ jobs:
 
       - uses: ./.github/actions/setup-checkov
       - uses: ./.github/actions/setup-fluxcli
-      - uses: ./.github/actions/setup-kind
-      - uses: ./.github/actions/kubectl-wait
-        with:
-          namespace: kube-system
-          wait-timeout: 5s
-          wait-resource: deployment/coredns
-          wait-condition: Available
-      - uses: ./.github/actions/kubectl-wait
-        with:
-          namespace: kube-system
-          wait-timeout: 5s
-          wait-resource: deployments
-          wait-condition: Available
-
       - uses: ./.github/actions/setup-updatecli
       - uses: ./.github/actions/setup-github-release-binary
         with:
@@ -176,3 +162,9 @@ jobs:
           echo "Full commit message header (output): $COMMIT_MSG_HEADER_OUTPUT"
           echo "Full commit message header (env): $COMMIT_MSG_HEADER_ENV"
       # endregion
+
+      - uses: ./.github/actions/get-branch-name-v2
+        id: branch-info
+      - name: Show current branches
+        run: |
+          echo "Current branch is ${{ steps.branch-info.outputs.branch-name }}"

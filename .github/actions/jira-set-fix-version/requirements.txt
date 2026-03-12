@@ -1,0 +1,1 @@
+atlassian-python-api==4.0.7

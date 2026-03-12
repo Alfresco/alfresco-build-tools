@@ -1,33 +1,55 @@
 #!/bin/bash -e
 
-if [[ $GITHUB_EVENT_NAME == "pull_request" ]]; then
-    # Get the list of changed files from the pull request.
-    git diff --name-only origin/$GITHUB_BASE_REF refs/remotes/pull/$PULL_REQUEST_NUMBER/merge > all-changed-files.txt
-elif [[ $GITHUB_EVENT_NAME == "push" ]]; then
-    # Check if the old commit exists (it might not for force pushes).
-    old_commit=$BEFORE_COMMIT
-    # If it doesn't exist, then run against the (single) latest commit.
-    git log -1 $old_commit > /dev/null 2>&1 || old_commit="$AFTER_COMMIT~"
-    # Get the list of changed files from the pushed commits.
-    git diff --name-only $old_commit $AFTER_COMMIT > all-changed-files.txt
-elif [[ $GITHUB_EVENT_NAME == "issue_comment" ]]; then
+list_pr_changes() {
+    local jq_root=$1
+    local event_label=$2
+
     if [[ -z "$GH_TOKEN" ]]; then
-        echo "github-token not provided, cannot proceed with issue_comment event."
+        echo "github-token not provided, cannot proceed with $event_label event."
         exit 1
     fi
-    if [[ $(cat "$GITHUB_EVENT_PATH" | jq -r '.issue.pull_request.url // empty') == "" ]]; then
-        echo "The issue comment is not on a pull request, can't do anything."
+
+    local pr_url
+    pr_url=$(jq -r "${jq_root}.html_url // empty" "$GITHUB_EVENT_PATH")
+    if [[ -z "$pr_url" ]]; then
+        echo "The $event_label event is not associated with a pull request, skipping."
         exit 0
     fi
 
-    PR_URL=$(cat "$GITHUB_EVENT_PATH" | jq -r '.issue.pull_request.html_url')
-    PULL_REQUEST_NUMBER=$(cat "$GITHUB_EVENT_PATH" | jq -r '.issue.number')
-    GITHUB_BASE_REF=$(gh pr view "$PR_URL" --json baseRefName --jq '.baseRefName')
-    if [[ -z "$GITHUB_BASE_REF" ]]; then
-        echo "Failed to get base ref for PR, invalid github token?"
+    local pr_json
+    pr_json=$(gh pr view "$pr_url" --json number,baseRefName)
+
+    local pr_number
+    pr_number=$(jq -r '.number // empty' <<< "$pr_json")
+    if [[ -z "$pr_number" ]]; then
+        echo "Failed to get PR number from $pr_url, cannot proceed with $event_label event."
         exit 1
     fi
-    git diff --name-only "origin/$GITHUB_BASE_REF" "refs/remotes/pull/$PULL_REQUEST_NUMBER/merge" > all-changed-files.txt
+
+    local base_ref
+    base_ref=$(jq -r '.baseRefName // empty' <<< "$pr_json")
+    if [[ -z "$base_ref" ]]; then
+        echo "Failed to get PR base ref from $pr_url, cannot proceed with $event_label event."
+        exit 1
+    fi
+    echo "Getting the list of changed files for $event_label from the pull request $pr_number with base ref $base_ref"
+    git diff --name-only "origin/$base_ref" "refs/remotes/pull/$pr_number/merge" > all-changed-files.txt
+}
+
+if [[ $GITHUB_EVENT_NAME == "pull_request" ]]; then
+    echo "Getting the list of changed files from the pull request $PULL_REQUEST_NUMBER"
+    git diff --name-only origin/$GITHUB_BASE_REF refs/remotes/pull/$PULL_REQUEST_NUMBER/merge > all-changed-files.txt
+elif [[ $GITHUB_EVENT_NAME == "push" ]]; then
+    # Check if the old commit exists (it might not for force pushes).
+    # If it doesn't exist, then run against the (single) latest commit.
+    old_commit=$BEFORE_COMMIT
+    git log -1 $old_commit > /dev/null 2>&1 || old_commit="$AFTER_COMMIT~"
+    echo "Getting the list of changed files from $old_commit to $AFTER_COMMIT"
+    git diff --name-only $old_commit $AFTER_COMMIT > all-changed-files.txt
+elif [[ $GITHUB_EVENT_NAME == "issue_comment" ]]; then
+    list_pr_changes ".issue.pull_request" "issue_comment"
+elif [[ $GITHUB_EVENT_NAME == "pull_request_review" ]]; then
+    list_pr_changes ".pull_request" "pull_request_review"
 else
     echo "Unsupported event type: $GITHUB_EVENT_NAME"
     exit 1
