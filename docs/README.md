@@ -1539,7 +1539,7 @@ Create the project Dependency Graph
     java-version: '21'
     maven-version: '3.8.8'
     maven-args: '-Dmaven.test.skip=true' #sample mvn args
-    maven-settings-path: '.ci.settings.xml' #optional path to maven settings
+    maven-settings-path: '.ci.settings.xml' # optional path to maven settings, defaults to 'settings.xml' for retrocompatiblity
     maven-username: ${{ secrets.MAVEN_USERNAME }}
     maven-password: ${{ secrets.MAVEN_PASSWORD }}
     ghcr-username: ${{ secrets.GHCR_USERNAME }}

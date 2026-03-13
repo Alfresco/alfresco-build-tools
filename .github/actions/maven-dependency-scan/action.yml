@@ -26,6 +26,7 @@ inputs:
   maven-settings-path:
     description: Path to the Maven settings.xml file to use.
     required: false
+    default: 'settings.xml'
   ghcr-username:
     description: ghcr.io user name
     required: false
