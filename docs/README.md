@@ -1539,7 +1539,7 @@ Create the project Dependency Graph
     java-version: '21'
     maven-version: '3.8.8'
     maven-args: '-Dmaven.test.skip=true' #sample mvn args
-    maven-settings-path: '.ci.settings.xml' #optional path to maven settings
+    maven-settings-path: '.ci.settings.xml' #optional path to maven settings, defaults to 'settings.xml'
     maven-username: ${{ secrets.MAVEN_USERNAME }}
     maven-password: ${{ secrets.MAVEN_PASSWORD }}
     ghcr-username: ${{ secrets.GHCR_USERNAME }}
@@ -1550,6 +1550,10 @@ Create the project Dependency Graph
 
 Allow restoring artifacts from an earlier job to avoid attempts to download them from remote. To be used alongside with the option `restore-artifact-path`
 to specify the path where the artifacts are stored.
+
+#### `maven-settings-path` option
+
+Path to the Maven `settings.xml` file to use. Defaults to `settings.xml` in the repository root. Override this when using a custom settings file (e.g. `.ci.settings.xml`).
 
 ### maven-build
 
