@@ -1,0 +1,40 @@
+#!/bin/bash
+# Mock curl for http-latency tests
+# Outputs deterministic timing data via -w format string
+# Format expected: %{time_namelookup},%{time_connect},%{time_pretransfer},%{time_starttransfer},%{time_total}
+
+# Check if -w flag is present (benchmark mode)
+has_write_out=false
+for arg in "$@"; do
+    if [[ "$arg" == *"time_namelookup"* ]]; then
+        has_write_out=true
+        break
+    fi
+done
+
+if $has_write_out; then
+    # Return deterministic timing data
+    # Values cycle through a small set to produce known mean/stddev
+    CALL_COUNT_FILE="${BATS_TMPDIR}/curl_call_count"
+    if [[ -f "$CALL_COUNT_FILE" ]]; then
+        count=$(< "$CALL_COUNT_FILE")
+    else
+        count=0
+    fi
+    count=$((count + 1))
+    echo "$count" > "$CALL_COUNT_FILE"
+
+    # Use MOCK_CURL_DATA if set, otherwise use deterministic pattern
+    if [[ -n "$MOCK_CURL_DATA" ]]; then
+        echo "$MOCK_CURL_DATA"
+    else
+        # Alternating values: 0.1 and 0.3 → mean=0.2, known stddev
+        if (( count % 2 == 1 )); then
+            echo "0.001000,0.010000,0.020000,0.030000,0.100000"
+        else
+            echo "0.003000,0.030000,0.060000,0.090000,0.300000"
+        fi
+    fi
+fi
+# For warmup requests (no -w flag), just exit successfully
+exit 0

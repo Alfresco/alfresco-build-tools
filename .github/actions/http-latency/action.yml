@@ -1,0 +1,76 @@
+name: 'HTTP Latency Benchmark'
+description: 'Measure HTTP service latency metrics including mean and standard deviation'
+
+inputs:
+  url:
+    description: 'The HTTP(S) URL to test'
+    required: true
+  iterations:
+    description: 'Number of test iterations to run'
+    required: false
+    default: '10'
+  warmup:
+    description: 'Number of warmup requests before measurement'
+    required: false
+    default: '3'
+  tcp_timeout:
+    description: 'Maximum time in seconds to wait for each request'
+    required: false
+    default: '5'
+  xfer_max_time:
+    description: 'Maximum time in seconds for the entire request'
+    required: false
+    default: '10'
+
+outputs:
+  total_time_mean:
+    description: 'Mean total request time in seconds'
+    value: ${{ steps.benchmark.outputs.total_time_mean }}
+  total_time_stddev:
+    description: 'Standard deviation of total request time in seconds'
+    value: ${{ steps.benchmark.outputs.total_time_stddev }}
+  connect_time_mean:
+    description: 'Mean TCP connect time in seconds'
+    value: ${{ steps.benchmark.outputs.connect_time_mean }}
+  connect_time_stddev:
+    description: 'Standard deviation of TCP connect time in seconds'
+    value: ${{ steps.benchmark.outputs.connect_time_stddev }}
+  namelookup_time_mean:
+    description: 'Mean DNS lookup time in seconds'
+    value: ${{ steps.benchmark.outputs.namelookup_time_mean }}
+  namelookup_time_stddev:
+    description: 'Standard deviation of DNS lookup time in seconds'
+    value: ${{ steps.benchmark.outputs.namelookup_time_stddev }}
+  pretransfer_time_mean:
+    description: 'Mean time to send query in seconds'
+    value: ${{ steps.benchmark.outputs.pretransfer_time_mean }}
+  pretransfer_time_stddev:
+    description: 'Standard deviation of time to send query in seconds'
+    value: ${{ steps.benchmark.outputs.pretransfer_time_stddev }}
+  starttransfer_time_mean:
+    description: 'Mean time to receive first byte in seconds'
+    value: ${{ steps.benchmark.outputs.starttransfer_time_mean }}
+  starttransfer_time_stddev:
+    description: 'Standard deviation of time to receive first byte in seconds'
+    value: ${{ steps.benchmark.outputs.starttransfer_time_stddev }}
+  summary:
+    description: 'Human-readable summary of all metrics'
+    value: ${{ steps.benchmark.outputs.summary }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run HTTP Latency Benchmark
+      id: benchmark
+      shell: bash
+      env:
+        URL: ${{ inputs.url }}
+        ITERATIONS: ${{ inputs.iterations }}
+        WARMUP: ${{ inputs.warmup }}
+        TCP_TIMEOUT: ${{ inputs.tcp_timeout }}
+        XFER_MAX_TIME: ${{ inputs.xfer_max_time }}
+      run: ${{ github.action_path }}/action.sh
+
+branding:
+  icon: 'activity'
+  color: 'blue'

@@ -42,6 +42,13 @@ jobs:
             -exec sed -i 's|uses: Alfresco/alfresco-build-tools/\.github/actions/\([^@]*\)@v[0-9]\+\.[0-9]\+\.[0-9]\+|uses: ./.github/actions/\1|g' {} \;
           git diff
 
+      - name: Test HTTP latency
+        uses: ./.github/actions/http-latency
+        with:
+          url: https://repo1.maven.org/maven2/
+          warmup: 1
+          iterations: 5
+
       # free-hosted-runner-disk-space action usage and test
       - name: Check available disk space before running free-hosted-runner-disk-space action
         id: free-hosted-runner-disk-space

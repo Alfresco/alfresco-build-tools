@@ -73,6 +73,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [helm-template-yamllint](#helm-template-yamllint)
   - [helm-plugin](#helm-plugin)
   - [helm-update-chart-version](#helm-update-chart-version)
+  - [http-latency](#http-latency)
   - [install-galaxy-deps](#install-galaxy-deps)
   - [install-ubuntu-default-tools](#install-ubuntu-default-tools)
   - [jira-get-or-create-release](#jira-get-or-create-release)
@@ -1183,6 +1184,67 @@ Updates `version` attribute inside `Chart.yaml` file:
       - uses: Alfresco/alfresco-build-tools/.github/actions/helm-update-chart-version@v15.9.1
         with:
           new-version: 1.0.0
+```
+
+### http-latency
+
+A GitHub composite action to measure HTTP service latency with statistical analysis.
+
+#### Features
+
+- 🔥 Warmup requests to avoid cold-start penalties
+- 📊 Multiple timing metrics (DNS, TCP, TLS, TTFB, Total)
+- 📈 Statistical analysis (mean and standard deviation)
+- 🎯 Clean, reusable outputs
+- 📝 Human-readable summary
+
+#### http-latency inputs
+
+| Input | Description | Required | Default |
+| ----- | ----------- | -------- | ------- |
+| `url` | The HTTP(S) URL to test | Yes | - |
+| `iterations` | Number of test iterations | No | `10` |
+| `warmup` | Number of warmup requests | No | `3` |
+| `tcp_timeout` | TCP connect timeout in seconds | No | `5` |
+| `xfer_max_time` | Maximum total transfer time in seconds | No | `10` |
+
+#### http-latency outputs
+
+| Output | Description |
+| ------ | ----------- |
+| `total_time_mean` | Mean total request time (seconds) |
+| `total_time_stddev` | Standard deviation of total time |
+| `connect_time_mean` | Mean TCP connect time (seconds) |
+| `connect_time_stddev` | Standard deviation of connect time |
+| `namelookup_time_mean` | Mean DNS lookup time (seconds) |
+| `namelookup_time_stddev` | Standard deviation of DNS lookup |
+| `pretransfer_time_mean` | Mean time to send query (seconds) |
+| `pretransfer_time_stddev` | Standard deviation of pretransfer |
+| `starttransfer_time_mean` | Mean time to first byte (seconds) |
+| `starttransfer_time_stddev` | Standard deviation of starttransfer |
+| `summary` | Markdown-formatted summary table |
+
+#### Usage
+
+```yaml
+name: Benchmark API
+on: [push]
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Benchmark Production API
+        uses: Alfresco/alfresco-build-tools/.github/actions/http-latency@v15.9.1
+        id: benchmark
+        with:
+          url: 'https://api.example.com/health'
+          iterations: 20
+          warmup: 5
+
+      - name: Display Results
+        run: |
+          echo "${{ steps.benchmark.outputs.summary }}" >> $GITHUB_STEP_SUMMARY
 ```
 
 ### install-galaxy-deps
