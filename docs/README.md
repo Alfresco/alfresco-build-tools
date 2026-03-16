@@ -1205,6 +1205,8 @@ A GitHub composite action to measure HTTP service latency with statistical analy
 | `url` | The HTTP(S) URL to test | Yes | - |
 | `iterations` | Number of test iterations | No | `10` |
 | `warmup` | Number of warmup requests | No | `3` |
+| `tcp_timeout` | TCP connect timeout in seconds | No | `5` |
+| `xfer_max_time` | Maximum total transfer time in seconds | No | `10` |
 
 #### http-latency outputs
 
@@ -1233,7 +1235,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Benchmark Production API
-        uses: Alfresco/alfresco-build-tools/.github/actions/http-latency@v12.10.2
+        uses: Alfresco/alfresco-build-tools/.github/actions/http-latency@v15.9.1
         id: benchmark
         with:
           url: 'https://api.example.com/health'
