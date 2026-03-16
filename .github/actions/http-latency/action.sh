@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-ITERATIONS="${ITERATIONS:-100}"
-WARMUP="${WARMUP:-10}"
+ITERATIONS="${ITERATIONS:-10}"
+WARMUP="${WARMUP:-3}"
 TCP_TIMEOUT="${TCP_TIMEOUT:-5}"
 XFER_MAX_TIME="${XFER_MAX_TIME:-10}"
 
@@ -93,8 +93,8 @@ END {
   # Create summary
   printf "summary<<EOF\n"
   printf "## 📈 Latency Benchmark Results\n\n"
-  printf "**URL**: '"$URL"'\n"
-  printf "**Iterations**: '"$ITERATIONS"'\n\n"
+  printf "**URL**: %s\n", URL
+  printf "**Iterations**: %s\n\n", ITERATIONS
   printf "| Metric | Mean | Std Dev |\n"
   printf "|--------|------|----------|\n"
   printf "| DNS Lookup | %.3fs | ±%.3fs |\n", mean_namelookup, stddev_namelookup
