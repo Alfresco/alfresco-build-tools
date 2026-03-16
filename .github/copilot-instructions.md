@@ -17,7 +17,7 @@ the release workflow will automatically update these references during releases.
 
 ### Documentation Requirements (CRITICAL)
 
-**MANDATORY: Always update `docs/README.md` when adding or modifying GitHub Actions.**
+**MANDATORY: Always update `docs/README.md` when adding or modifying user-facing features of GitHub Actions.**
 
 This is required for ANY change to actions, including:
 
@@ -28,7 +28,7 @@ This is required for ANY change to actions, including:
 
 **Before opening a PR, you MUST:**
 
-1. Update `docs/README.md` with the changes
+1. Update `docs/README.md` with the user-facing changes
 2. Run `./check_readme.sh` to validate all actions are documented
 3. Verify the documentation accurately reflects the current state
 
@@ -197,13 +197,11 @@ For common operations:
 
 Before opening or reviewing a PR, verify:
 
-1. ✅ **Documentation updated**: `docs/README.md` reflects all action changes
+1. ✅ **Documentation updated**: `docs/README.md` reflects all user-facing action changes
 2. ✅ **Validation passed**: `./check_readme.sh` runs successfully
 3. ✅ **Version label**: Appropriate `release/patch|minor|major` label added
 4. ✅ **Pre-commit hooks**: All checks pass
 5. ✅ **Internal references**: Use version tags, not SHA pins
-
-**When reviewing PRs that modify actions, ALWAYS check if `docs/README.md` was updated.**
 
 ## Useful Commands
 
