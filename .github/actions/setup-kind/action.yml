@@ -229,8 +229,8 @@ runs:
         helm repo add traefik https://traefik.github.io/charts
         helm upgrade --install traefik traefik/traefik \
           --version ${{ inputs.traefik-chart-version }} \
-          --set providers.${NGINX_PROVIDER_NAME}.enabled=true \
-          --set providers.${NGINX_PROVIDER_NAME}.watchIngressWithoutClass=true \
+          --set providers.${{ env.NGINX_PROVIDER_NAME }}.enabled=true \
+          --set providers.${{ env.NGINX_PROVIDER_NAME }}.watchIngressWithoutClass=true \
           -n traefik \
           --create-namespace
 
