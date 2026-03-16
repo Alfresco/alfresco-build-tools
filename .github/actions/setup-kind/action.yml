@@ -206,15 +206,31 @@ runs:
           controller: k8s.io/ingress-nginx
         EOF
 
+    - name: Set additional Traefik outputs depending on chart major version
+      shell: bash
+      id: set-traefik-outputs
+      if: steps.set-outputs.outputs.ingress == 'traefik'
+      env:
+        TRAEFIK_CHART_VERSION: ${{ inputs.traefik-chart-version }}
+      run: |
+        TRAEFIK_MAJOR_VERSION=$(echo "${TRAEFIK_CHART_VERSION}" | cut -d. -f1 | tr -d 'v')
+        if [ "$TRAEFIK_MAJOR_VERSION" -ge "40" ]; then
+          echo "traefik-nginx-provider-name=kubernetesIngressNGINX" >> "$GITHUB_OUTPUT"
+        else
+          echo "traefik-nginx-provider-name=kubernetesIngressNginx" >> "$GITHUB_OUTPUT"
+        fi
+
     - name: Install Traefik ingress controller
       shell: bash
       if: steps.set-outputs.outputs.ingress == 'traefik'
+      env:
+        NGINX_PROVIDER_NAME: ${{ steps.set-traefik-outputs.outputs.traefik-nginx-provider-name }}
       run: |
         helm repo add traefik https://traefik.github.io/charts
         helm upgrade --install traefik traefik/traefik \
           --version ${{ inputs.traefik-chart-version }} \
-          --set providers.kubernetesIngressNginx.enabled=true \
-          --set providers.kubernetesIngressNginx.watchIngressWithoutClass=true \
+          --set providers.${NGINX_PROVIDER_NAME}.enabled=true \
+          --set providers.${NGINX_PROVIDER_NAME}.watchIngressWithoutClass=true \
           -n traefik \
           --create-namespace
 
