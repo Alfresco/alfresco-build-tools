@@ -48,9 +48,21 @@ RELEASE_NAME="$(jq -r '.release.name // ""' "${EVENT_PATH}")"
 TAG_NAME="$(jq -r '.release.tag_name // ""' "${EVENT_PATH}")"
 HTML_URL="$(jq -r '.release.html_url // ""' "${EVENT_PATH}")"
 
-# In GitHub Actions mode, also expose the tag name as an output for downstream steps.
+# Normalize GitHub tag → Jira version name
+RAW_TAG_NAME="${TAG_NAME}"
+
+# Remove GitHub version prefix if provided
+NORMALIZED_TAG="${RAW_TAG_NAME}"
+if [[ -n "${GITHUB_VERSION_PREFIX:-}" ]]; then
+  NORMALIZED_TAG="${NORMALIZED_TAG#"$GITHUB_VERSION_PREFIX"}"
+fi
+
+# Add Jira version prefix if provided
+JIRA_VERSION_NAME="${JIRA_VERSION_PREFIX:-}${NORMALIZED_TAG}"
+
+# Expose Jira version name as output
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
-  write_output "jira-version-name" "${TAG_NAME}"
+  write_output "jira-version-name" "${JIRA_VERSION_NAME}"
 fi
 
 BLOB=$(
