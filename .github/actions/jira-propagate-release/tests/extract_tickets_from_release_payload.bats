@@ -3,42 +3,50 @@
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 SCRIPT="$REPO_ROOT/.github/actions/jira-propagate-release/extract-tickets-from-release-payload.sh"
 
-@test "writes outputs to GITHUB_OUTPUT (unique, sorted, one-line CSV)" {
-  payload="$(mktemp)"
-  out_file="$(mktemp)"
+teardown() {
+  rm -f "grep_err.txt"
+}
 
-  cat > "${payload}" <<'JSON'
+# --------------------------------------------------
+# 🧱 Helpers
+# --------------------------------------------------
+
+make_payload() {
+  local tag="$1"
+  local name="${2:-Release}"
+  local body="${3:-}"
+
+  payload="$(mktemp)"
+  cat > "${payload}" <<JSON
 {
   "release": {
-    "name": "Release v1.2.3",
-    "tag_name": "v1.2.3",
-    "html_url": "https://github.com/org/repo/releases/tag/v1.2.3",
-    "body": "Fixes: ABC-12, DEF-3\nAlso mentions ABC-12 again.\nRef: XYZ-999"
+    "name": "${name}",
+    "tag_name": "${tag}",
+    "html_url": "https://github.com/org/repo/releases/tag/${tag}",
+    "body": "${body}"
   }
 }
 JSON
+}
+
+# --------------------------------------------------
+# 🎯 Core behavior
+# --------------------------------------------------
+
+@test "writes outputs to GITHUB_OUTPUT (unique, sorted CSV)" {
+  make_payload "v1.2.3" "Release v1.2.3" "Fixes: ABC-12, DEF-3\nABC-12 again\nRef XYZ-999"
+  out_file="$(mktemp)"
 
   run env GITHUB_OUTPUT="${out_file}" bash "${SCRIPT}" "${payload}"
   [ "$status" -eq 0 ]
 
-  # Output file should contain tickets-csv=...
   grep -qx "tickets-csv=ABC-12,DEF-3,XYZ-999" "${out_file}"
   grep -qx "jira-version-name=v1.2.3" "${out_file}"
 }
 
-@test "writes empty tickets-csv to GITHUB_OUTPUT when none found" {
-  payload="$(mktemp)"
+@test "writes empty tickets-csv when none found" {
+  make_payload "v1.2.3" "Release v1.2.3" "No tickets here"
   out_file="$(mktemp)"
-
-  cat > "${payload}" <<'JSON'
-{
-  "release": {
-    "name": "Release v1.2.3",
-    "tag_name": "v1.2.3",
-    "body": "No ticket references here"
-  }
-}
-JSON
 
   run env GITHUB_OUTPUT="${out_file}" bash "${SCRIPT}" "${payload}"
   [ "$status" -eq 0 ]
@@ -47,18 +55,94 @@ JSON
   grep -qx "jira-version-name=v1.2.3" "${out_file}"
 }
 
-@test "supports overriding ticket regex via env var (and writes to outputs)" {
-  payload="$(mktemp)"
+# --------------------------------------------------
+# 🧩 Prefix logic (NEW FEATURE)
+# --------------------------------------------------
+
+@test "no prefixes → unchanged tag" {
+  make_payload "v1.2.3"
   out_file="$(mktemp)"
 
-  cat > "${payload}" <<'JSON'
-{
-  "release": {
-    "name": "Release",
-    "body": "Matches only TC-1 and OPS-22, ignores ABC-9"
-  }
+  run env GITHUB_OUTPUT="${out_file}" bash "${SCRIPT}" "${payload}"
+  [ "$status" -eq 0 ]
+
+  grep -qx "jira-version-name=v1.2.3" "${out_file}"
 }
-JSON
+
+@test "removes GitHub release prefix" {
+  make_payload "v2.3.4"
+  out_file="$(mktemp)"
+
+  run env \
+    GITHUB_OUTPUT="${out_file}" \
+    GITHUB_VERSION_PREFIX="v" \
+    bash "${SCRIPT}" "${payload}"
+
+  [ "$status" -eq 0 ]
+  grep -qx "jira-version-name=2.3.4" "${out_file}"
+}
+
+@test "adds Jira release prefix" {
+  make_payload "3.4.5"
+  out_file="$(mktemp)"
+
+  run env \
+    GITHUB_OUTPUT="${out_file}" \
+    JIRA_VERSION_PREFIX="MyComponent-" \
+    bash "${SCRIPT}" "${payload}"
+
+  [ "$status" -eq 0 ]
+  grep -qx "jira-version-name=MyComponent-3.4.5" "${out_file}"
+}
+
+@test "applies both GitHub and Jira prefixes" {
+  make_payload "release-5.6.7"
+  out_file="$(mktemp)"
+
+  run env \
+    GITHUB_OUTPUT="${out_file}" \
+    GITHUB_VERSION_PREFIX="release-" \
+    JIRA_VERSION_PREFIX="MyComponent-" \
+    bash "${SCRIPT}" "${payload}"
+
+  [ "$status" -eq 0 ]
+  grep -qx "jira-version-name=MyComponent-5.6.7" "${out_file}"
+}
+
+@test "empty prefixes are ignored" {
+  make_payload "v1.2.3"
+  out_file="$(mktemp)"
+
+  run env \
+    GITHUB_OUTPUT="${out_file}" \
+    GITHUB_VERSION_PREFIX="" \
+    JIRA_VERSION_PREFIX="" \
+    bash "${SCRIPT}" "${payload}"
+
+  [ "$status" -eq 0 ]
+  grep -qx "jira-version-name=v1.2.3" "${out_file}"
+}
+
+@test "GitHub prefix not present → no change" {
+  make_payload "1.2.3"
+  out_file="$(mktemp)"
+
+  run env \
+    GITHUB_OUTPUT="${out_file}" \
+    GITHUB_VERSION_PREFIX="v" \
+    bash "${SCRIPT}" "${payload}"
+
+  [ "$status" -eq 0 ]
+  grep -qx "jira-version-name=1.2.3" "${out_file}"
+}
+
+# --------------------------------------------------
+# 🎯 Ticket extraction
+# --------------------------------------------------
+
+@test "supports overriding ticket regex" {
+  make_payload "v1.0.0" "Release" "Matches TC-1 OPS-22 ignores ABC-9"
+  out_file="$(mktemp)"
 
   run env \
     GITHUB_OUTPUT="${out_file}" \
@@ -69,7 +153,11 @@ JSON
   grep -qx "tickets-csv=OPS-22,TC-1" "${out_file}"
 }
 
-@test "null-safe: missing fields do not crash and produce empty output" {
+# --------------------------------------------------
+# 🛡️ Robustness
+# --------------------------------------------------
+
+@test "null-safe: missing fields do not crash" {
   payload="$(mktemp)"
   out_file="$(mktemp)"
 
@@ -91,66 +179,42 @@ JSON
   grep -qx "jira-version-name=" "${out_file}"
 }
 
-@test "CLI mode prints tickets-csv=... when GITHUB_OUTPUT is not set" {
-  payload="$(mktemp)"
+@test "CLI mode prints to stdout when GITHUB_OUTPUT is unset" {
+  make_payload "v1.0.0" "Release" "Fix: ABC-1"
 
-  cat > "${payload}" <<'JSON'
-{
-  "release": {
-    "body": "Fix: ABC-1"
-  }
-}
-JSON
-
-  # In GitHub Actions, GITHUB_OUTPUT is usually set by default.
-  # Unset it explicitly to test CLI stdout behavior.
   run env -u GITHUB_OUTPUT bash "${SCRIPT}" "${payload}"
   [ "$status" -eq 0 ]
+
   output="${output//$'\n'/}"
   [ "$output" = "tickets-csv=ABC-1" ]
 }
 
-@test "fails gracefully on malformed JSON input" {
+@test "fails on malformed JSON" {
   payload="$(mktemp)"
+
   cat > "${payload}" <<'JSON'
 {
   "release": {
-    "name": "Release v1.2.3",
-    "body": "This JSON is malformed"
+    "name": "Release",
+    "body": "broken"
   }
 JSON
+
   run bash "${SCRIPT}" "${payload}"
-  # Expect a non-zero status due to JSON parse error
   [ "$status" -ne 0 ]
-  # Ensure some error output is produced (from jq or the script)
   [ -n "$output" ]
 }
 
-@test "fails with clear error on invalid TICKET_REGEX" {
-  payload="$(mktemp)"
+@test "fails on invalid TICKET_REGEX" {
+  make_payload "v1.2.3" "Release" "ABC-1"
   out_file="$(mktemp)"
 
-  cat >"${payload}" <<EOF
-{
-  "release": {
-    "tag_name": "v1.2.3",
-    "name": "Release",
-    "body": "ABC-1"
-  }
-}
-EOF
+  run env \
+    GITHUB_OUTPUT="${out_file}" \
+    TICKET_REGEX="[" \
+    bash "${SCRIPT}" "${payload}"
 
-  export GITHUB_OUTPUT="${out_file}"
-  export TICKET_REGEX="["   # invalid regex
-
-  run "${SCRIPT}" "${payload}"
-
-  # Should fail
   [ "$status" -ne 0 ]
-
-  # Should emit error annotation
   [[ "$output" == *"Invalid TICKET_REGEX"* ]]
-
-  # Should not write tickets-csv
   ! grep -q "^tickets-csv=" "${out_file}"
 }

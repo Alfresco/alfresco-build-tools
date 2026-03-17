@@ -7,15 +7,18 @@ set -euo pipefail
 #   extract-tickets-from-release-payload.sh [path_to_event_json]
 #
 # Environment variables:
-#   TICKET_REGEX  - regex for ticket IDs (default: Jira-like)
-#   GITHUB_OUTPUT - if set, write outputs there (GitHub Actions outputs file)
+#   TICKET_REGEX                  Regex for ticket IDs (default: Jira-like)
+#   GITHUB_OUTPUT                 If set, write outputs there (GitHub Actions outputs file)
+#   GITHUB_VERSION_PREFIX         Prefix to remove from GitHub tag (literal match)
+#   JIRA_VERSION_PREFIX           Prefix to prepend to Jira version name
 #
 # Output keys:
-#   tickets-csv=ABC-1,DEF-2        (empty if no tickets)
-#   jira-version-name=v1.2.3       (empty if tag_name missing)
+#   tickets-csv=ABC-1,DEF-2        Comma-separated list of unique ticket IDs (empty if none found)
+#   jira-version-name=v1.2.3       Normalized Jira version name derived from the GitHub tag (empty if tag_name missing)
 #
 # Exit codes:
-#   0 even if no tickets are found (writes/prints tickets-csv=)
+#   0 success even if no tickets are found (writes/prints tickets-csv=)
+#   1 error (missing payload, jq not available, invalid regex, etc.)
 
 EVENT_PATH="${1:-${GITHUB_EVENT_PATH:-}}"
 TICKET_REGEX="${TICKET_REGEX:-[A-Z][A-Z0-9]+-[0-9]+}"
@@ -48,9 +51,19 @@ RELEASE_NAME="$(jq -r '.release.name // ""' "${EVENT_PATH}")"
 TAG_NAME="$(jq -r '.release.tag_name // ""' "${EVENT_PATH}")"
 HTML_URL="$(jq -r '.release.html_url // ""' "${EVENT_PATH}")"
 
-# In GitHub Actions mode, also expose the tag name as an output for downstream steps.
+# Remove GitHub version prefix if provided (literal match)
+NORMALIZED_TAG="${TAG_NAME}"
+
+if [[ -n "${GITHUB_VERSION_PREFIX:-}" && "$NORMALIZED_TAG" == "$GITHUB_VERSION_PREFIX"* ]]; then
+  NORMALIZED_TAG="${NORMALIZED_TAG:${#GITHUB_VERSION_PREFIX}}"
+fi
+
+# Add Jira version prefix if provided
+JIRA_VERSION_NAME="${JIRA_VERSION_PREFIX:-}${NORMALIZED_TAG}"
+
+# Expose Jira version name as output
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
-  write_output "jira-version-name" "${TAG_NAME}"
+  write_output "jira-version-name" "${JIRA_VERSION_NAME}"
 fi
 
 BLOB=$(

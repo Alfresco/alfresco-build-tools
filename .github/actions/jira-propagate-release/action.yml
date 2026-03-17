@@ -18,6 +18,14 @@ inputs:
     required: false
     default: ""
     description: "Optional Jira version description"
+  jira-version-prefix:
+    required: false
+    default: ""
+    description: "Optional Jira version prefix to add to the Jira release name"
+  github-version-prefix:
+    required: false
+    default: ""
+    description: "Optional GitHub version prefix to remove from the release tag name when creating the Jira release name (e.g. 'v' to remove 'v' from 'v1.0.0')"
   merge-versions:
     required: false
     default: "true"
@@ -33,7 +41,7 @@ outputs:
     description: "Tickets as one-line CSV"
   jira-version-name:
     value: ${{ steps.extract.outputs.jira-version-name }}
-    description: "Release tag name (from payload)"
+    description: "Jira version name derived from the release tag, after applying optional GitHub/Jira prefixes"
   jira-version-id:
     value: ${{ steps.jira-release.outputs.version-id }}
     description: "Jira version id (existing or created)"
@@ -49,6 +57,8 @@ runs:
       shell: bash
       env:
         TICKET_REGEX: ${{ inputs.ticket-regex }}
+        GITHUB_VERSION_PREFIX: ${{ inputs.github-version-prefix }}
+        JIRA_VERSION_PREFIX: ${{ inputs.jira-version-prefix }}
       run: |
         "${{ github.action_path }}/extract-tickets-from-release-payload.sh"
 
