@@ -1413,29 +1413,53 @@ It is designed to be used in workflows triggered by `release` events.
    - Tag name
    - Release URL
    - Release body
-3. Creates (or retrieves) the corresponding Jira Version
-4. Sets the extracted tickets' **Fix Version** field
+3. Normalizes the GitHub release tag into a Jira-compatible version name:
+   - Optionally removes a GitHub prefix (e.g. `v`, `release-`)
+   - Optionally adds a Jira prefix (e.g. `MyComponent-`)
+4. Creates (or retrieves) the corresponding Jira Version
+5. Sets the extracted tickets' **Fix Version** field
 
 If no tickets are found, the action exits cleanly without failing the workflow.
 
 #### 📦 Inputs
 
-| Name                       | Required | Default                 | Description                                              |
-|----------------------------|----------|-------------------------|----------------------------------------------------------|
-| `ticket-regex`             | No       | `[A-Z][A-Z0-9]+-[0-9]+` | Regex used to detect Jira tickets                        |
-| `jira-url`                 | Yes      | ---                     | Jira base URL (e.g. `https://your-domain.atlassian.net`) |
-| `jira-project-key`         | Yes      | ---                     | Jira project key (e.g. `ABC`)                            |
-| `jira-version-description` | No       | `""`                    | Optional Jira version description                        |
-| `merge-versions`           | No       | `"true"`                | Merge with existing Fix Versions instead of overwriting  |
-| `jira-user`                | Yes      | ---                     | Jira username/email (use secrets)                        |
-| `jira-token`               | Yes      | ---                     | Jira API token (use secrets)                             |
+| Name                       | Required | Default                 | Description                                                                 |
+|----------------------------|----------|-------------------------|-----------------------------------------------------------------------------|
+| `ticket-regex`             | No       | `[A-Z][A-Z0-9]+-[0-9]+` | Regex used to detect Jira tickets                                           |
+| `jira-url`                 | Yes      | ---                     | Jira base URL (e.g. `https://your-domain.atlassian.net`)                    |
+| `jira-project-key`         | Yes      | ---                     | Jira project key (e.g. `ABC`)                                               |
+| `jira-version-description` | No       | `""`                    | Optional Jira version description                                           |
+| `merge-versions`           | No       | `"true"`                | Merge with existing Fix Versions instead of overwriting                     |
+| `jira-user`                | Yes      | ---                     | Jira username/email (use secrets)                                           |
+| `jira-token`               | Yes      | ---                     | Jira API token (use secrets)                                                |
+| `github-release-prefix`    | No       | `""`                    | Prefix to remove from GitHub tag (e.g. `v`, `release-`)                     |
+| `jira-release-prefix`      | No       | `""`                    | Prefix to prepend to Jira version name (e.g. `MyComponent-`)                |
+
+#### 🔁 Version Name Normalization
+
+The Jira version name is derived from the GitHub tag using the following logic:
+
+1. Start from the GitHub tag name
+2. Remove `github-release-prefix` if provided
+3. Prepend `jira-release-prefix` if provided
+
+#### Examples
+
+| GitHub Prefix | Jira Prefix    | GitHub Tag      | Jira Version Name   |
+|---------------|----------------|-----------------|---------------------|
+| (none)        | (none)         | `v1.2.3`        | `v1.2.3`            |
+| `v`           | (none)         | `v2.3.4`        | `2.3.4`             |
+| (none)        | `MyComponent-` | `3.4.5`         | `MyComponent-3.4.5` |
+| `release-`    | `MyComponent-` | `release-5.6.7` | `MyComponent-5.6.7` |
+
+👉 If a prefix is empty, it is ignored.
 
 #### 📤 Outputs
 
 | Name                | Description                                   |
 |---------------------|-----------------------------------------------|
 | `tickets-csv`       | Extracted tickets as CSV (e.g. `ABC-1,DEF-2`) |
-| `jira-version-name` | Release tag name used as Jira Version         |
+| `jira-version-name` | Normalized Jira version name                  |
 | `jira-version-id`   | Jira version ID (created or existing)         |
 | `fix-changed`       | `true` if at least one issue was updated      |
 
@@ -1466,6 +1490,8 @@ jobs:
           jira-user: ${{ secrets.JIRA_USER }}
           jira-token: ${{ secrets.JIRA_TOKEN }}
           merge-versions: "true"
+          github-release-prefix: "v"
+          jira-release-prefix: "MyComponent-"
 ```
 
 ### jx-updatebot-pr
