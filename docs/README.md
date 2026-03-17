@@ -1423,17 +1423,17 @@ If no tickets are found, the action exits cleanly without failing the workflow.
 
 #### 📦 Inputs
 
-| Name                       | Required | Default                 | Description                                                                 |
-|----------------------------|----------|-------------------------|-----------------------------------------------------------------------------|
-| `ticket-regex`             | No       | `[A-Z][A-Z0-9]+-[0-9]+` | Regex used to detect Jira tickets                                           |
-| `jira-url`                 | Yes      | ---                     | Jira base URL (e.g. `https://your-domain.atlassian.net`)                    |
-| `jira-project-key`         | Yes      | ---                     | Jira project key (e.g. `ABC`)                                               |
-| `jira-version-description` | No       | `""`                    | Optional Jira version description                                           |
-| `merge-versions`           | No       | `"true"`                | Merge with existing Fix Versions instead of overwriting                     |
-| `jira-user`                | Yes      | ---                     | Jira username/email (use secrets)                                           |
-| `jira-token`               | Yes      | ---                     | Jira API token (use secrets)                                                |
-| `github-version-prefix`    | No       | `""`                    | Prefix to remove from GitHub tag (e.g. `v`, `release-`)                     |
-| `jira-version-prefix`      | No       | `""`                    | Prefix to prepend to Jira version name (e.g. `MyComponent-`)                |
+| Name                       | Required | Default                 | Description                                                  |
+|----------------------------|----------|-------------------------|--------------------------------------------------------------|
+| `ticket-regex`             | No       | `[A-Z][A-Z0-9]+-[0-9]+` | Regex used to detect Jira tickets                            |
+| `jira-url`                 | Yes      | ---                     | Jira base URL (e.g. `https://your-domain.atlassian.net`)     |
+| `jira-project-key`         | Yes      | ---                     | Jira project key (e.g. `ABC`)                                |
+| `jira-version-description` | No       | `""`                    | Optional Jira version description                            |
+| `merge-versions`           | No       | `"true"`                | Merge with existing Fix Versions instead of overwriting      |
+| `jira-user`                | Yes      | ---                     | Jira username/email (use vars)                               |
+| `jira-token`               | Yes      | ---                     | Jira API token (use secrets)                                 |
+| `github-version-prefix`    | No       | `""`                    | Prefix to remove from GitHub tag (e.g. `v`, `release-`)      |
+| `jira-version-prefix`      | No       | `""`                    | Prefix to prepend to Jira version name (e.g. `MyComponent-`) |
 
 #### 🔁 Version Name Normalization
 
