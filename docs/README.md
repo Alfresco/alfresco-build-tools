@@ -1279,11 +1279,11 @@ In any case the release id is returned as output
         id: jira
         uses: Alfresco/alfresco-build-tools/.github/actions/jira-get-or-create-release@v15.12.0
         with:
-          jira-url: ${{ secrets.JIRA_URL }}
+          jira-url: ${{ vars.JIRA_URL }}
           jira-project-key: "THEPROJECT"
           jira-version-name: "The Version Name"
           jira-version-description: "Test release 1.2.3 - Description"
-          jira-user: ${{ secrets.JIRA_USER }}
+          jira-user: ${{ vars.JIRA_USER }}
           jira-token: ${{ secrets.JIRA_TOKEN }}
 
       - name: Reuse version id
@@ -1329,8 +1329,8 @@ This action:
   id: jira
   uses: Alfresco/alfresco-build-tools/.github/actions/jira-set-fix-version@v15.12.0
   with:
-    jira-url: ${{ secrets.JIRA_URL }}
-    jira-user: ${{ secrets.JIRA_USER }}
+    jira-url: ${{ vars.JIRA_URL }}
+    jira-user: ${{ vars.JIRA_USER }}
     jira-token: ${{ secrets.JIRA_TOKEN }}
     jira-issue-keys: "THEPROJECT-123"
     jira-version-name: "1.2.3"
@@ -1343,8 +1343,8 @@ This action:
   id: jira
   uses: Alfresco/alfresco-build-tools/.github/actions/jira-set-fix-version@v15.12.0
   with:
-    jira-url: ${{ secrets.JIRA_URL }}
-    jira-user: ${{ secrets.JIRA_USER }}
+    jira-url: ${{ vars.JIRA_URL }}
+    jira-user: ${{ vars.JIRA_USER }}
     jira-token: ${{ secrets.JIRA_TOKEN }}
     jira-issue-keys: "THEPROJECT-123,THEPROJECT-456"
     jira-version-name: "1.2.3"
@@ -1357,8 +1357,8 @@ This action:
   id: jira
   uses: Alfresco/alfresco-build-tools/.github/actions/jira-set-fix-version@v15.12.0
   with:
-    jira-url: ${{ secrets.JIRA_URL }}
-    jira-user: ${{ secrets.JIRA_USER }}
+    jira-url: ${{ vars.JIRA_URL }}
+    jira-user: ${{ vars.JIRA_USER }}
     jira-token: ${{ secrets.JIRA_TOKEN }}
     jira-issue-keys: "THEPROJECT-123"
     jira-version-id: "12345"
@@ -1371,8 +1371,8 @@ This action:
   id: jira
   uses: Alfresco/alfresco-build-tools/.github/actions/jira-set-fix-version@v15.12.0
   with:
-    jira-url: ${{ secrets.JIRA_URL }}
-    jira-user: ${{ secrets.JIRA_USER }}
+    jira-url: ${{ vars.JIRA_URL }}
+    jira-user: ${{ vars.JIRA_USER }}
     jira-token: ${{ secrets.JIRA_TOKEN }}
     jira-issue-keys: "THEPROJECT-123"
     jira-version-name: "1.2.3"
@@ -1485,9 +1485,9 @@ jobs:
       - name: Propagate Jira release
         uses: Alfresco/alfresco-build-tools/.github/actions/jira-propagate-release@v15.12.0
         with:
-          jira-url: ${{ secrets.JIRA_URL }}
+          jira-url: ${{ vars.JIRA_URL }}
           jira-project-key: "OPSEXP"
-          jira-user: ${{ secrets.JIRA_USER }}
+          jira-user: ${{ vars.JIRA_USER }}
           jira-token: ${{ secrets.JIRA_TOKEN }}
           merge-versions: "true"
           github-version-prefix: "v"
