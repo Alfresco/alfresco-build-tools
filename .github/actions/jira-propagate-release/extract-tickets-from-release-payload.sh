@@ -52,8 +52,7 @@ TAG_NAME="$(jq -r '.release.tag_name // ""' "${EVENT_PATH}")"
 HTML_URL="$(jq -r '.release.html_url // ""' "${EVENT_PATH}")"
 
 # Remove GitHub version prefix if provided (literal match)
-RAW_TAG_NAME="${TAG_NAME}"
-NORMALIZED_TAG="${RAW_TAG_NAME}"
+NORMALIZED_TAG="${TAG_NAME}"
 
 if [[ -n "${GITHUB_VERSION_PREFIX:-}" && "$NORMALIZED_TAG" == "$GITHUB_VERSION_PREFIX"* ]]; then
   NORMALIZED_TAG="${NORMALIZED_TAG:${#GITHUB_VERSION_PREFIX}}"

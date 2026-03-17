@@ -1432,16 +1432,16 @@ If no tickets are found, the action exits cleanly without failing the workflow.
 | `merge-versions`           | No       | `"true"`                | Merge with existing Fix Versions instead of overwriting                     |
 | `jira-user`                | Yes      | ---                     | Jira username/email (use secrets)                                           |
 | `jira-token`               | Yes      | ---                     | Jira API token (use secrets)                                                |
-| `github-release-prefix`    | No       | `""`                    | Prefix to remove from GitHub tag (e.g. `v`, `release-`)                     |
-| `jira-release-prefix`      | No       | `""`                    | Prefix to prepend to Jira version name (e.g. `MyComponent-`)                |
+| `github-version-prefix`    | No       | `""`                    | Prefix to remove from GitHub tag (e.g. `v`, `release-`)                     |
+| `jira-version-prefix`      | No       | `""`                    | Prefix to prepend to Jira version name (e.g. `MyComponent-`)                |
 
 #### 🔁 Version Name Normalization
 
 The Jira version name is derived from the GitHub tag using the following logic:
 
 1. Start from the GitHub tag name
-2. Remove `github-release-prefix` if provided
-3. Prepend `jira-release-prefix` if provided
+2. Remove `github-version-prefix` if provided
+3. Prepend `jira-version-prefix` if provided
 
 #### Examples
 
@@ -1490,8 +1490,8 @@ jobs:
           jira-user: ${{ secrets.JIRA_USER }}
           jira-token: ${{ secrets.JIRA_TOKEN }}
           merge-versions: "true"
-          github-release-prefix: "v"
-          jira-release-prefix: "MyComponent-"
+          github-version-prefix: "v"
+          jira-version-prefix: "MyComponent-"
 ```
 
 ### jx-updatebot-pr
