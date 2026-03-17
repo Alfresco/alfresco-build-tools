@@ -41,7 +41,7 @@ outputs:
     description: "Tickets as one-line CSV"
   jira-version-name:
     value: ${{ steps.extract.outputs.jira-version-name }}
-    description: "Release tag name (from payload)"
+    description: "Jira version name derived from the release tag, after applying optional GitHub/Jira prefixes"
   jira-version-id:
     value: ${{ steps.jira-release.outputs.version-id }}
     description: "Jira version id (existing or created)"
