@@ -22,27 +22,12 @@ updates:
           - "*"
 
   - package-ecosystem: "pip"
-    directory: "/.github/actions/pipenv"
-    schedule:
-      interval: "monthly"
-
-  # Python testing dependencies
-  - package-ecosystem: "pip"
     directories:
-      - "/.github/tests/python-scripts/*"
-    schedule:
-      interval: "weekly"
-    labels:
-      - "test/dependencies"
-      - "python"
-    commit-message:
-      prefix: "feat(deps)"
-      prefix-development: "chore(deps)"
-    open-pull-requests-limit: 20
-
-  # jira-get-or-create-release action
-  - package-ecosystem: "pip"
-    directory: "/.github/actions/jira-get-or-create-release"
+      - "/.github/actions/pipenv"
+      - "/.github/actions/jira-get-or-create-release"
+      - "/.github/actions/jira-set-fix-version"
+      - "/.github/tests/python-scripts/jira-get-or-create-release"
+      - "/.github/tests/python-scripts/jira-set-fix-version"
     schedule:
       interval: "weekly"
     labels:
@@ -51,17 +36,7 @@ updates:
     commit-message:
       prefix: "feat(deps)"
       prefix-development: "chore(deps)"
-    open-pull-requests-limit: 10
-
-  # jira-set-fix-version action
-  - package-ecosystem: "pip"
-    directory: "/.github/actions/jira-set-fix-version"
-    schedule:
-      interval: "weekly"
-    labels:
-      - "dependencies"
-      - "python"
-    commit-message:
-      prefix: "feat(deps)"
-      prefix-development: "chore(deps)"
-    open-pull-requests-limit: 10
+    groups:
+      python-packages:
+        patterns:
+          - "*"
