@@ -26,8 +26,7 @@ updates:
       - "/.github/actions/pipenv"
       - "/.github/actions/jira-get-or-create-release"
       - "/.github/actions/jira-set-fix-version"
-      - "/.github/tests/python-scripts/jira-get-or-create-release"
-      - "/.github/tests/python-scripts/jira-set-fix-version"
+      - "/.github/tests/python-scripts/*"
     schedule:
       interval: "weekly"
     labels:
