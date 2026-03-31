@@ -61,7 +61,7 @@ runs:
       id: pre-commit
       continue-on-error: ${{ fromJSON(inputs.auto-commit == 'true') }}
       run: |
-        uv run --frozen pre-commit run --show-diff-on-failure --color=always ${{ steps.build-extra-args.outputs.RUN_EXTRA_ARGS }}
+        uv run --frozen --project ${{ github.action_path }} pre-commit run --show-diff-on-failure --color=always ${{ steps.build-extra-args.outputs.RUN_EXTRA_ARGS }}
       shell: bash
 
     - name: Auto-commit changes if requested
@@ -70,6 +70,6 @@ runs:
       if: inputs.auto-commit == 'true'
 
     - name: Run pre-commit again to verify changes
-      run: uv run --frozen pre-commit run --show-diff-on-failure --color=always ${{ steps.build-extra-args.outputs.RUN_EXTRA_ARGS }}
+      run: uv run --frozen --project ${{ github.action_path }} pre-commit run --show-diff-on-failure --color=always ${{ steps.build-extra-args.outputs.RUN_EXTRA_ARGS }}
       if: inputs.auto-commit == 'true' && steps.pre-commit.outcome == 'failure'
       shell: bash
