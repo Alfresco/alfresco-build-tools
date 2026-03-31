@@ -1876,7 +1876,6 @@ Additional inputs:
 | Input                  | Description                                                                         | Default   |
 | ---------------------- | ----------------------------------------------------------------------------------- | --------- |
 | `pre-commit-args`      | Extra arguments passed to `pre-commit run`                                          |           |
-| `pre-commit-all-files` | Run checks on all files (`"true"`) or only changed files (`"false"`)                | `"true"`  |
 | `auto-commit`          | Commit automated fixups back to the branch (requires `permissions.contents: write`) | `"false"` |
 | `python-version`       | Python version used to run pre-commit                                               | `"3.11"`  |
 | `skip_checkout`        | Skip the internal `actions/checkout` step                                           | `"false"` |

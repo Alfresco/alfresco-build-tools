@@ -2,13 +2,8 @@ name: "Pre-commit run"
 description: "Run pre-commit using a self-managed uv environment"
 inputs:
   pre-commit-args:
-    description: Additional parameters to pass to pre-commit
+    description: Additional parameters to pass to pre-commit (--all-files is always included)
     required: false
-  pre-commit-all-files:
-    description: >-
-      Whether to run pre-commit checks on all files.
-    required: false
-    default: "true"
   auto-commit:
     description: >-
       Enables auto-commit of eventual fixups
@@ -43,20 +38,14 @@ runs:
       with:
         working-directory: ${{ github.action_path }}
 
-    - name: Build extra_args
+    - name: Build pre-commit extra arguments
       shell: bash
       id: build-extra-args
       env:
-        PRE_COMMIT_ALL_FILES: ${{ inputs.pre-commit-all-files }}
         PRE_COMMIT_ARGS: ${{ inputs.pre-commit-args }}
       run: |
-        if [[ "${PRE_COMMIT_ALL_FILES}" == "true" ]]; then EXTRA_ARGS='--all-files'
-        elif [[ "${PRE_COMMIT_ALL_FILES}" != "false" ]]; then
-          echo "Invalid value for pre-commit-all-files: '${PRE_COMMIT_ALL_FILES}'. Must be 'true' or 'false'." >&2
-          exit 1
-        fi
-        EXTRA_ARGS="${EXTRA_ARGS} ${PRE_COMMIT_ARGS}"
-        echo "RUN_EXTRA_ARGS=${EXTRA_ARGS}" >> $GITHUB_OUTPUT
+        EXTRA_ARGS="--all-files ${PRE_COMMIT_ARGS}"
+        echo "args=${EXTRA_ARGS}" >> $GITHUB_OUTPUT
 
     - name: Cache pre-commit
       uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
@@ -68,7 +57,7 @@ runs:
       id: pre-commit
       continue-on-error: ${{ inputs.auto-commit == 'true' }}
       run: |
-        uv run --frozen --project ${{ github.action_path }} pre-commit run --show-diff-on-failure --color=always ${{ steps.build-extra-args.outputs.RUN_EXTRA_ARGS }}
+        uv run --frozen --project ${{ github.action_path }} pre-commit run --show-diff-on-failure --color=always ${{ steps.build-extra-args.outputs.args }}
       shell: bash
 
     - name: Auto-commit changes if requested
@@ -77,6 +66,6 @@ runs:
       if: inputs.auto-commit == 'true'
 
     - name: Run pre-commit again to verify changes
-      run: uv run --frozen --project ${{ github.action_path }} pre-commit run --show-diff-on-failure --color=always ${{ steps.build-extra-args.outputs.RUN_EXTRA_ARGS }}
+      run: uv run --frozen --project ${{ github.action_path }} pre-commit run --show-diff-on-failure --color=always ${{ steps.build-extra-args.outputs.args }}
       if: inputs.auto-commit == 'true' && steps.pre-commit.outcome == 'failure'
       shell: bash
