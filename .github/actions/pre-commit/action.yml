@@ -40,29 +40,38 @@ runs:
 
     - name: Build extra_args
       shell: bash
-      env:
-        EXTRA_ARGS: ''
+      id: build-extra-args
       run: |
         ${{ inputs.pre-commit-all-files }} && EXTRA_ARGS='--all-files'
         EXTRA_ARGS="${EXTRA_ARGS} ${{ inputs.pre-commit-args }}"
-        echo EXTRA_ARGS="${EXTRA_ARGS}" >> $GITHUB_ENV
+        echo "RUN_EXTRA_ARGS=${EXTRA_ARGS}" >> $GITHUB_OUTPUT
+
+    - name: Install pre-commit dependencies
+      run: >-
+        pip install --no-deps --require-hashes
+        --index-url https://pypi.org/simple/
+        -r ${{ github.action_path }}/requirements.txt
+      shell: bash
+
+    - name: Cache pre-commit
+      uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+      with:
+        path: ~/.cache/pre-commit
+        key: pre-commit-3|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
 
     - name: Run pre-commit
-      uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
       id: pre-commit
-      env:
-        CONTINUE_ON_ERROR: ${{ inputs.auto-commit == 'true' }}
-      continue-on-error: ${{ fromJSON(env.CONTINUE_ON_ERROR) }}
-      with:
-        extra_args: ${{ env.EXTRA_ARGS }}
+      continue-on-error: ${{ fromJSON(inputs.auto-commit == 'true') }}
+      run: |
+        pre-commit run --show-diff-on-failure --color=always ${{ steps.build-extra-args.outputs.RUN_EXTRA_ARGS }}
+      shell: bash
 
-    - name: Auto-commit changes
+    - name: Auto-commit changes if requested
       uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 # v7.1.0
       id: auto-commit-action
       if: inputs.auto-commit == 'true'
 
     - name: Run pre-commit again to verify changes
-      uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
+      run: pre-commit run --show-diff-on-failure --color=always ${{ steps.build-extra-args.outputs.RUN_EXTRA_ARGS }}
       if: inputs.auto-commit == 'true' && steps.pre-commit.outcome == 'failure'
-      with:
-        extra_args: ${{ env.EXTRA_ARGS }}
+      shell: bash
