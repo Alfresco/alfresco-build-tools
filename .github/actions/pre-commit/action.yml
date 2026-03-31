@@ -62,7 +62,7 @@ runs:
       uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
       with:
         path: ~/.cache/pre-commit
-        key: pre-commit-3|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
+        key: pre-commit-4|${{ env.pythonLocation }}|${{ hashFiles('.pre-commit-config.yaml') }}
 
     - name: Run pre-commit
       id: pre-commit
