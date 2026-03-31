@@ -46,9 +46,16 @@ runs:
     - name: Build extra_args
       shell: bash
       id: build-extra-args
+      env:
+        PRE_COMMIT_ALL_FILES: ${{ inputs.pre-commit-all-files }}
+        PRE_COMMIT_ARGS: ${{ inputs.pre-commit-args }}
       run: |
-        ${{ inputs.pre-commit-all-files }} && EXTRA_ARGS='--all-files'
-        EXTRA_ARGS="${EXTRA_ARGS} ${{ inputs.pre-commit-args }}"
+        if [[ "${PRE_COMMIT_ALL_FILES}" == "true" ]]; then EXTRA_ARGS='--all-files'
+        elif [[ "${PRE_COMMIT_ALL_FILES}" != "false" ]]; then
+          echo "Invalid value for pre-commit-all-files: '${PRE_COMMIT_ALL_FILES}'. Must be 'true' or 'false'." >&2
+          exit 1
+        fi
+        EXTRA_ARGS="${EXTRA_ARGS} ${PRE_COMMIT_ARGS}"
         echo "RUN_EXTRA_ARGS=${EXTRA_ARGS}" >> $GITHUB_OUTPUT
 
     - name: Cache pre-commit
