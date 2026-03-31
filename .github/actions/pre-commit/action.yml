@@ -1,12 +1,12 @@
 name: "Pre-commit run"
-description: "Install and run pre-commit"
+description: "Run pre-commit using a self-managed uv environment"
 inputs:
   pre-commit-args:
     description: Additional parameters to pass to pre-commit
     required: false
   pre-commit-all-files:
     description: >-
-      Whether to run pre-commit checks on all files (defaults to "true")
+      Whether to run pre-commit checks on all files.
     required: false
     default: "true"
   auto-commit:
@@ -16,7 +16,7 @@ inputs:
     required: false
     default: "false"
   python-version:
-    description: The python version of the local runner
+    description: Python version used to run pre-commit
     required: false
     default: "3.11"
   skip_checkout:
