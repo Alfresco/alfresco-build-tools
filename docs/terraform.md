@@ -267,7 +267,7 @@ jobs:
       tfvars_subfolder: vars
 
   invoke-terraform-custom-secrets:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v16.0.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v17.0.0
     with:
       terraform_root_path: infra
       terraform_default_env: develop
