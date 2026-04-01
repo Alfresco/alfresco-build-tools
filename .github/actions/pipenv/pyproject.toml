@@ -1,0 +1,11 @@
+[project]
+name = "pipenv-action"
+version = "0.1.0"
+description = "A GitHub Action for installing Python packages with pipenv."
+requires-python = ">=3.11"
+dependencies = [
+    "pipenv==2026.5.0",
+]
+
+[tool.uv]
+required-version = "==0.9.28"
