@@ -1200,29 +1200,29 @@ A GitHub composite action to measure HTTP service latency with statistical analy
 
 #### http-latency inputs
 
-| Input | Description | Required | Default |
-| ----- | ----------- | -------- | ------- |
-| `url` | The HTTP(S) URL to test | Yes | - |
-| `iterations` | Number of test iterations | No | `10` |
-| `warmup` | Number of warmup requests | No | `3` |
-| `tcp_timeout` | TCP connect timeout in seconds | No | `5` |
-| `xfer_max_time` | Maximum total transfer time in seconds | No | `10` |
+| Input           | Description                            | Required | Default |
+| --------------- | -------------------------------------- | -------- | ------- |
+| `url`           | The HTTP(S) URL to test                | Yes      | -       |
+| `iterations`    | Number of test iterations              | No       | `10`    |
+| `warmup`        | Number of warmup requests              | No       | `3`     |
+| `tcp_timeout`   | TCP connect timeout in seconds         | No       | `5`     |
+| `xfer_max_time` | Maximum total transfer time in seconds | No       | `10`    |
 
 #### http-latency outputs
 
-| Output | Description |
-| ------ | ----------- |
-| `total_time_mean` | Mean total request time (seconds) |
-| `total_time_stddev` | Standard deviation of total time |
-| `connect_time_mean` | Mean TCP connect time (seconds) |
-| `connect_time_stddev` | Standard deviation of connect time |
-| `namelookup_time_mean` | Mean DNS lookup time (seconds) |
-| `namelookup_time_stddev` | Standard deviation of DNS lookup |
-| `pretransfer_time_mean` | Mean time to send query (seconds) |
-| `pretransfer_time_stddev` | Standard deviation of pretransfer |
-| `starttransfer_time_mean` | Mean time to first byte (seconds) |
+| Output                      | Description                         |
+| --------------------------- | ----------------------------------- |
+| `total_time_mean`           | Mean total request time (seconds)   |
+| `total_time_stddev`         | Standard deviation of total time    |
+| `connect_time_mean`         | Mean TCP connect time (seconds)     |
+| `connect_time_stddev`       | Standard deviation of connect time  |
+| `namelookup_time_mean`      | Mean DNS lookup time (seconds)      |
+| `namelookup_time_stddev`    | Standard deviation of DNS lookup    |
+| `pretransfer_time_mean`     | Mean time to send query (seconds)   |
+| `pretransfer_time_stddev`   | Standard deviation of pretransfer   |
+| `starttransfer_time_mean`   | Mean time to first byte (seconds)   |
 | `starttransfer_time_stddev` | Standard deviation of starttransfer |
-| `summary` | Markdown-formatted summary table |
+| `summary`                   | Markdown-formatted summary table    |
 
 #### Usage
 
@@ -1310,7 +1310,7 @@ This action:
 #### Inputs
 
 | Name                | Required | Description                                                                                               |
-|---------------------|----------|-----------------------------------------------------------------------------------------------------------|
+| ------------------- | -------- | --------------------------------------------------------------------------------------------------------- |
 | `jira-url`          | Yes      | Base URL of your JIRA instance                                                                            |
 | `jira-user`         | Yes      | JIRA user (email or username)                                                                             |
 | `jira-token`        | Yes      | JIRA API token                                                                                            |
@@ -1382,7 +1382,7 @@ This action:
 #### Outputs
 
 | Name                    | Description                                                                    |
-|-------------------------|--------------------------------------------------------------------------------|
+| ----------------------- | ------------------------------------------------------------------------------ |
 | `changed`               | `true` if at least one issue was updated, `false` otherwise                    |
 | `fix-versions`          | Comma-separated list of resulting fix versions (union across processed issues) |
 | `fix-versions-by-issue` | Per-issue resulting fix versions in the format: `ISSUE-1:v1,v2\|ISSUE-2:v1`    |
@@ -1424,7 +1424,7 @@ If no tickets are found, the action exits cleanly without failing the workflow.
 #### 📦 Inputs
 
 | Name                       | Required | Default                 | Description                                                  |
-|----------------------------|----------|-------------------------|--------------------------------------------------------------|
+| -------------------------- | -------- | ----------------------- | ------------------------------------------------------------ |
 | `ticket-regex`             | No       | `[A-Z][A-Z0-9]+-[0-9]+` | Regex used to detect Jira tickets                            |
 | `jira-url`                 | Yes      | ---                     | Jira base URL (e.g. `https://your-domain.atlassian.net`)     |
 | `jira-project-key`         | Yes      | ---                     | Jira project key (e.g. `ABC`)                                |
@@ -1446,7 +1446,7 @@ The Jira version name is derived from the GitHub tag using the following logic:
 #### Examples
 
 | GitHub Prefix | Jira Prefix    | GitHub Tag      | Jira Version Name   |
-|---------------|----------------|-----------------|---------------------|
+| ------------- | -------------- | --------------- | ------------------- |
 | (none)        | (none)         | `v1.2.3`        | `v1.2.3`            |
 | `v`           | (none)         | `v2.3.4`        | `2.3.4`             |
 | (none)        | `MyComponent-` | `3.4.5`         | `MyComponent-3.4.5` |
@@ -1457,7 +1457,7 @@ The Jira version name is derived from the GitHub tag using the following logic:
 #### 📤 Outputs
 
 | Name                | Description                                   |
-|---------------------|-----------------------------------------------|
+| ------------------- | --------------------------------------------- |
 | `tickets-csv`       | Extracted tickets as CSV (e.g. `ABC-1,DEF-2`) |
 | `jira-version-name` | Normalized Jira version name                  |
 | `jira-version-id`   | Jira version ID (created or existing)         |
@@ -1832,6 +1832,9 @@ Moves artifacts from one repository to another on Nexus 3, identified by a parti
 
 Executes a [pre-commit](https://pre-commit.com/) step.
 
+The action self-manages its own pre-commit installation via
+[uv](https://docs.astral.sh/uv/).
+
 This action is usually added in a dedicated workflow:
 
 ```yml
@@ -1867,6 +1870,15 @@ for the proper handling of auto-commit feature, unless you specify:
         with:
           skip_checkout: "true"
 ```
+
+Additional inputs:
+
+| Input                  | Description                                                                         | Default   |
+| ---------------------- | ----------------------------------------------------------------------------------- | --------- |
+| `pre-commit-args`      | Extra arguments passed to `pre-commit run`                                          |           |
+| `auto-commit`          | Commit automated fixups back to the branch (requires `permissions.contents: write`) | `"false"` |
+| `python-version`       | Python version used to run pre-commit                                               | `"3.11"`  |
+| `skip_checkout`        | Skip the internal `actions/checkout` step                                           | `"false"` |
 
 ### process-coverage-report
 

@@ -1,0 +1,11 @@
+[project]
+name = "pre-commit-action"
+version = "0.1.0"
+description = "A GitHub Action for running pre-commit hooks."
+requires-python = ">=3.11"
+dependencies = [
+    "pre-commit>=4.5.1",
+]
+
+[tool.uv]
+required-version = "==0.9.28"
