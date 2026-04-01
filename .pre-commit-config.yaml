@@ -11,7 +11,6 @@ repos:
       - id: fix-byte-order-marker
       - id: mixed-line-ending
         args: ['--fix=lf']
-        exclude: .github/actions/send-slack-notification/tests/sample-commit-message.txt
       - id: end-of-file-fixer
         exclude: '.*/dist/.*'
       - id: trailing-whitespace

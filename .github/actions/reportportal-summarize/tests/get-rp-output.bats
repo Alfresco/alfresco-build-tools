@@ -54,12 +54,3 @@ teardown() {
     [ "$(< $GITHUB_OUTPUT)" = "$DISABLED" ]
     [ "$output" = "$ECHO_DISABLED" ]
 }
-
-@test "slack message rp disabled" {
-    export RP_LAUNCH_KEY=""
-    run get-slack-message.sh
-    [ "$status" -eq 0 ]
-
-    expected="message="
-    [ "$(< $GITHUB_OUTPUT)" = "$expected" ]
-}
