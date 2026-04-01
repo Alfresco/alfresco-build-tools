@@ -58,6 +58,26 @@ on:
         required: false
       RANCHER2_SECRET_KEY:
         required: false
+      CUSTOM_SECRET_0:
+        required: false
+      CUSTOM_SECRET_1:
+        required: false
+      CUSTOM_SECRET_2:
+        required: false
+      CUSTOM_SECRET_3:
+        required: false
+      CUSTOM_SECRET_4:
+        required: false
+      CUSTOM_SECRET_5:
+        required: false
+      CUSTOM_SECRET_6:
+        required: false
+      CUSTOM_SECRET_7:
+        required: false
+      CUSTOM_SECRET_8:
+        required: false
+      CUSTOM_SECRET_9:
+        required: false
 
 jobs:
   compute_basic_vars:
@@ -250,6 +270,16 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       RANCHER2_ACCESS_KEY: ${{ secrets.RANCHER2_ACCESS_KEY }}
       RANCHER2_SECRET_KEY: ${{ secrets.RANCHER2_SECRET_KEY }}
+      CUSTOM_SECRET_0: ${{ secrets.CUSTOM_SECRET_0 }}
+      CUSTOM_SECRET_1: ${{ secrets.CUSTOM_SECRET_1 }}
+      CUSTOM_SECRET_2: ${{ secrets.CUSTOM_SECRET_2 }}
+      CUSTOM_SECRET_3: ${{ secrets.CUSTOM_SECRET_3 }}
+      CUSTOM_SECRET_4: ${{ secrets.CUSTOM_SECRET_4 }}
+      CUSTOM_SECRET_5: ${{ secrets.CUSTOM_SECRET_5 }}
+      CUSTOM_SECRET_6: ${{ secrets.CUSTOM_SECRET_6 }}
+      CUSTOM_SECRET_7: ${{ secrets.CUSTOM_SECRET_7 }}
+      CUSTOM_SECRET_8: ${{ secrets.CUSTOM_SECRET_8 }}
+      CUSTOM_SECRET_9: ${{ secrets.CUSTOM_SECRET_9 }}
       RESOURCE_NAME: ${{ vars.RESOURCE_NAME }}
       TF_VAR_resource_name: ${{ vars.RESOURCE_NAME }}
       TERRAFORM_HTTP_CREDENTIALS: |
