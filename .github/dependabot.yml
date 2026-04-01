@@ -11,6 +11,11 @@ updates:
       - "setup-kind/kind.yml"
     schedule:
       interval: "weekly"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    cooldown:
+      default-days: 7
     groups:
       # https://github.com/dflook/terraform-github-actions
       # multiple action always released together
@@ -32,6 +37,8 @@ updates:
     labels:
       - "dependencies"
       - "python"
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: "feat(deps)"
       prefix-development: "chore(deps)"
@@ -39,3 +46,17 @@ updates:
       python-packages:
         patterns:
           - "*"
+
+  - package-ecosystem: "uv"
+    directories:
+      - "/.github/actions/pre-commit"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "python"
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "feat(deps)"
+      prefix-development: "chore(deps)"
