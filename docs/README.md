@@ -101,8 +101,6 @@ Here follows the list of GitHub Actions topics available in the current document
   - [reportportal-prepare](#reportportal-prepare)
   - [reportportal-summarize](#reportportal-summarize)
   - [resolve-preview-name](#resolve-preview-name)
-  - [send-slack-notification-slow-job](#send-slack-notification-slow-job)
-  - [send-slack-notification](#send-slack-notification)
   - [send-teams-notification](#send-teams-notification)
   - [setup-checkov](#setup-checkov)
   - [setup-docker](#setup-docker)
@@ -119,7 +117,6 @@ Here follows the list of GitHub Actions topics available in the current document
   - [setup-terraform-docs](#setup-terraform-docs)
   - [setup-updatebot](#setup-updatebot)
   - [setup-updatecli](#setup-updatecli)
-  - [slack-file-upload](#slack-file-upload)
   - [sonar-scan-on-built-project](#sonar-scan-on-built-project)
   - [sonar-scanner](#sonar-scanner)
   - [update-deployment-runtime-versions](#update-deployment-runtime-versions)
@@ -2051,7 +2048,6 @@ This will give the following sample output on the GH Actions run summary (when u
 Used in combination with [reportportal-prepare](#reportportal-prepare).
 
 Adds a message to the steps summary when Report Portal usage is detected.
-Also builds a message to be sent to slack.
 The message contains links to the workflow Report Portal launches.
 
 Sample usage (as follow-up of above sample):
@@ -2072,24 +2068,7 @@ Sample usage (as follow-up of above sample):
       run: |
         echo "::error title=run-tests::Tests failed: re-throwing on error."
         exit 1
-
-    - name: Notify Slack on failure
-      if: always() && failure()
-      uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v16.0.0
-      with:
-        channel-id: "channel-id"
-        token: ${{ secrets.SLACK_BOT_TOKEN }}
-        message: ${{ steps.rp-summarize.outputs.slack-message }}
-        append: true
 ```
-
-This will send a Slack notification that looks like:
-
-![Slack Message Report Portal](./images/send-slack-pr.png)
-
-This message handles use cases where there is only one launch, multiple launches, or when no launches have been found:
-
-![Slack Message Report Portal Not Found](./images/send-slack-push.png)
 
 This will give the following sample output on the GH Actions run summary (when used in combination with the sample workflow documented in the previous section):
 
@@ -2106,89 +2085,6 @@ Resolve preview name based on the PR number and run number:
         id: resolve-preview-name
       - run: |
           echo ${{ steps.resolve-preview-name.outputs.preview-name }}
-```
-
-### send-slack-notification-slow-job
-
-Sends a Slack notification when current run took more time than specified via `max-build-time-seconds` input.
-This action should be added at the end to correctly measure the time.
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification-slow-job@v16.0.0
-        with:
-          channel-id: 'channel-id'
-          token: ${{ secrets.SLACK_BOT_TOKEN }}
-          max-build-time-seconds: '10'
-```
-
-### send-slack-notification
-
-Sends a Slack notification with a pre-defined payload, relying on the [slackapi/slack-github-action](https://github.com/slackapi/slack-github-action) official action.
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v16.0.0
-        with:
-          channel-id: 'channel-id'
-          token: ${{ secrets.SLACK_BOT_TOKEN }}
-          notification-color: '#A30200'
-```
-
-If not set, the default color is red.
-
-Depending on the GitHub event, the Slack message can show different kind of information (PR title, last commit message, etc...)
-
-Sample notification on `push` event:
-
-![Slack Message Append](./images/send-slack-push.png)
-
-Sample notification on `pull_request` event:
-
-![Slack Message Append](./images/send-slack-pr.png)
-
-An optional message can be given instead of the default one:
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v16.0.0
-        with:
-          channel-id: 'channel-id'
-          token: ${{ secrets.SLACK_BOT_TOKEN }}
-          message: "My own content"
-```
-
-![Slack Custom Message](./images/send-slack-custom-message.png)
-
-This message can also be appended to the default message:
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v16.0.0
-        with:
-          channel-id: "channel-id"
-          token: ${{ secrets.SLACK_BOT_TOKEN }}
-          message: ${{ steps.output.reportportal-summarize.outputs.message }}
-          append: true
-```
-
-The action also outputs the id of the Slack thread (`thread-id`) that is being created or replied to when sending the message:
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v16.0.0
-        id: slack
-        with:
-          channel-id: 'channel-id'
-          token: ${{ secrets.SLACK_BOT_TOKEN }}
-      - run: |
-          echo ${{ steps.slack.outputs.thread-id }}
-```
-
-If you want the message to be posted as a reply to an existing thread rather than starting its own, make sure to specify the optional `thread-id` input:
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/send-slack-notification@v16.0.0
-        id: slack
-        with:
-          channel-id: 'channel-id'
-          token: ${{ secrets.SLACK_BOT_TOKEN }}
-          thread-id: 'thread-id'
 ```
 
 ### send-teams-notification
@@ -2485,19 +2381,6 @@ Install the updatecli binary from GitHub Releases and add it to the PATH.
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-updatecli@v16.0.0
         with:
           version: "0.93.0" # omit to use the default version provided by the action
-```
-
-### slack-file-upload
-
-Uploads a file to a Slack channel.
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/slack-file-upload@v16.0.0
-        with:
-          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
-          slack-channel-id: 'channel-id' # not the channel name
-          file-path: 'path/to/file'
-          file-title: 'file description' # optional
 ```
 
 ### sonar-scan-on-built-project
