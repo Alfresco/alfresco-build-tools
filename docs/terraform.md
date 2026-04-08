@@ -97,6 +97,15 @@ The following GitHub secrets (all optional) are also accepted by this workflow:
 - `RANCHER2_SECRET_KEY` (optional): secret key to use the rancher terraform
   provider
 
+Up to 10 additional custom secrets can be passed to the workflow using the
+`CUSTOM_SECRET_0` through `CUSTOM_SECRET_9` secrets. Each secret is made
+available as an environment variable in the terraform job under the same name
+(`CUSTOM_SECRET_0`, `CUSTOM_SECRET_1`, etc.).
+
+To use these secrets with a more meaningful name — for example to match the
+default environment variable names expected by a terraform provider — you can
+set additional [Environment variables](#environment-variables).
+
 ### Tfvars files
 
 By default, the workflow will look for tfvars files in the root of the
@@ -134,6 +143,22 @@ rules on production environments.
 You can provide additional environment variables to the terraform execution by
 creating a file named `tfenv.yml` in the root of your terraform workspace,
 following the syntax supported by [env-load-from-yaml action](README.md#env-load-from-yaml)
+
+You can use this mechanism to give meaningful names to the [custom
+secrets](#github-secrets) passed to the workflow, for example to match the
+default environment variable names expected by a terraform provider.
+
+For example, to use the custom secrets as credentials for the [GitHub
+provider](https://registry.terraform.io/providers/integrations/github/latest/docs),
+you can set the following in `tfenv.yml`:
+
+```yaml
+env:
+  global:
+    - GITHUB_APP_ID=$CUSTOM_SECRET_0
+    - GITHUB_APP_INSTALLATION_ID=$CUSTOM_SECRET_1
+    - GITHUB_APP_PEM_FILE=$CUSTOM_SECRET_2
+```
 
 ### Example usage
 
@@ -240,6 +265,21 @@ jobs:
       terraform_env: production
       terraform_operation: plan
       tfvars_subfolder: vars
+
+  invoke-terraform-custom-secrets:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v17.0.0
+    with:
+      terraform_root_path: infra
+      terraform_default_env: develop
+      terraform_operation: ${{ inputs.terraform_operation }}
+      tfvars_subfolder: vars
+    # Pass up to 10 custom secrets to the workflow
+    secrets:
+      CUSTOM_SECRET_0: ${{ secrets.GITHUB_APP_ID }}
+      CUSTOM_SECRET_1: ${{ secrets.GITHUB_APP_INSTALLATION_ID }}
+      CUSTOM_SECRET_2: ${{ secrets.GITHUB_APP_PEM_FILE }}
+      # ...
+      # CUSTOM_SECRET_9: ${{ secrets.MY_CUSTOM_SECRET }}
 ```
 
 ### kubectl support

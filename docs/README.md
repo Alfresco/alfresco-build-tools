@@ -604,13 +604,22 @@ Examples:
 
 ### env-load-from-yaml
 
-Load environment variables from a yaml file
+Load environment variables from a yaml file:
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v17.0.0
         with:
           ignore_regex: ^BRANCH_NAME=.*
           yml_path: .travis/env.yml
+```
+
+Example of `env.yml` file:
+
+```yaml
+env:
+  global:
+    - VAR1=value1
+    - VAR2=${ANOTHER_VAR}
 ```
 
 ### free-hosted-runner-disk-space
