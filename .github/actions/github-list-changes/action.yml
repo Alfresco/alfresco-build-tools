@@ -23,4 +23,5 @@ runs:
         PULL_REQUEST_NUMBER: ${{ github.event.number }}
         WRITE_LIST_TO_ENV: ${{ inputs.write-list-to-env }}
         GH_TOKEN: ${{ inputs.github-token }}
+        DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
       run: ${{ github.action_path }}/github-list-changes.sh

@@ -50,6 +50,9 @@ elif [[ $GITHUB_EVENT_NAME == "issue_comment" ]]; then
     list_pr_changes ".issue.pull_request" "issue_comment"
 elif [[ $GITHUB_EVENT_NAME == "pull_request_review" ]]; then
     list_pr_changes ".pull_request" "pull_request_review"
+elif [[ $GITHUB_EVENT_NAME == "workflow_dispatch" ]]; then
+    echo "Getting the list of changed files from origin/$DEFAULT_BRANCH to HEAD"
+    git diff --name-only "origin/$DEFAULT_BRANCH" HEAD > all-changed-files.txt
 else
     echo "Unsupported event type: $GITHUB_EVENT_NAME"
     exit 1
