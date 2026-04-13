@@ -249,6 +249,7 @@ jobs:
             exit 1
           fi
 
+          echo "Determined terraform operation: $operation"
           echo "terraform_operation=${operation}" >> "$GITHUB_OUTPUT"
 
       - name: Add workflow summary info
