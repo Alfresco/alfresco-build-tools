@@ -918,8 +918,10 @@ Use this action when running a workflow which clone a private repository over ht
 
 ### github-list-changes
 
-List the changes in a pull request (`pull-request` event) or that were pushed to
-a branch (`push` event).
+List the changes in a pull request (`pull_request` event, optionally
+`issue_comment` and `pull_request_review` events if a GitHub token is provided),
+that were pushed to a branch (`push` event), or that differ from the default
+branch on a manual run (`workflow_dispatch` event).
 
 This action requires a checkout with `fetch-depth: 0` option as follows:
 
