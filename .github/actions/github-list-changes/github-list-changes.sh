@@ -51,8 +51,12 @@ elif [[ $GITHUB_EVENT_NAME == "issue_comment" ]]; then
 elif [[ $GITHUB_EVENT_NAME == "pull_request_review" ]]; then
     list_pr_changes ".pull_request" "pull_request_review"
 elif [[ $GITHUB_EVENT_NAME == "workflow_dispatch" ]]; then
+    if ! git rev-parse --verify "refs/remotes/origin/$DEFAULT_BRANCH" > /dev/null 2>&1; then
+        echo "Failed to resolve origin/$DEFAULT_BRANCH, cannot determine changed files for workflow_dispatch."
+        exit 1
+    fi
     echo "Getting the list of changed files from origin/$DEFAULT_BRANCH to HEAD"
-    git diff --name-only "origin/$DEFAULT_BRANCH" HEAD > all-changed-files.txt
+    git diff --name-only "origin/$DEFAULT_BRANCH"...HEAD > all-changed-files.txt
 else
     echo "Unsupported event type: $GITHUB_EVENT_NAME"
     exit 1
