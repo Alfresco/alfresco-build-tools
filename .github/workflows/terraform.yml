@@ -135,7 +135,7 @@ jobs:
       - name: Retrieve PR or last commit changes (used for auto-detection of terraform root path and/or environment)
         if: inputs.terraform_root_path == '' || inputs.terraform_env == ''
         id: last-changes-diff
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@OPSEXP-3992-list-changes-workflow-dispatch
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v17.1.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
