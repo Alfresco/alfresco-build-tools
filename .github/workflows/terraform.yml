@@ -235,14 +235,14 @@ jobs:
           IS_ISSUE_COMMENT_EVENT: ${{ github.event_name == 'issue_comment' }}
           COMMENT_REQUESTS_PLAN: ${{ contains(github.event.comment.body, 'terraform plan') }}
           COMMENT_REQUESTS_APPLY: ${{ contains(github.event.comment.body, 'terraform apply') }}
-          TERRAFORM_OPERATION: ${{ inputs.terraform_operation }}
+          TERRAFORM_OPERATION_FROM_INPUTS: ${{ inputs.terraform_operation }}
         run: |
           # Resolve a single operation with precedence: plan > apply > destroy
-          if [[ "$IS_PULL_REQUEST_EVENT" == "true" ]] || [[ "$TERRAFORM_OPERATION" == "plan" ]] || { [[ "$IS_ISSUE_COMMENT_EVENT" == "true" ]] && [[ "$COMMENT_REQUESTS_PLAN" == "true" ]]; }; then
+          if [[ "$IS_PULL_REQUEST_EVENT" == "true" ]] || [[ "$TERRAFORM_OPERATION_FROM_INPUTS" == "plan" ]] || { [[ "$IS_ISSUE_COMMENT_EVENT" == "true" ]] && [[ "$COMMENT_REQUESTS_PLAN" == "true" ]]; }; then
             operation="plan"
-          elif [[ "$IS_PUSH_EVENT" == "true" ]] || [[ "$TERRAFORM_OPERATION" == "apply" ]] || { [[ "$IS_ISSUE_COMMENT_EVENT" == "true" ]] && [[ "$COMMENT_REQUESTS_APPLY" == "true" ]]; }; then
+          elif [[ "$IS_PUSH_EVENT" == "true" ]] || [[ "$TERRAFORM_OPERATION_FROM_INPUTS" == "apply" ]] || { [[ "$IS_ISSUE_COMMENT_EVENT" == "true" ]] && [[ "$COMMENT_REQUESTS_APPLY" == "true" ]]; }; then
             operation="apply"
-          elif [[ "$TERRAFORM_OPERATION" == "destroy" ]]; then
+          elif [[ "$TERRAFORM_OPERATION_FROM_INPUTS" == "destroy" ]]; then
             operation="destroy"
           else
             echo "Unable to determine terraform operation from the current event and inputs. BUG?" >&2
