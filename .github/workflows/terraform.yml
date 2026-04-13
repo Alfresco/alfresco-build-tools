@@ -227,10 +227,28 @@ jobs:
           echo "Using environment based on branch name: $environment"
           echo "environment_name=${environment}" >> "$GITHUB_OUTPUT"
 
+      - name: Evaluate terraform operation
+        id: operation
+        env:
+          IS_PULL_REQUEST_EVENT: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_review' }}
+          IS_PUSH_EVENT: ${{ github.event_name == 'push' }}
+          IS_ISSUE_COMMENT_EVENT: ${{ github.event_name == 'issue_comment' }}
+          COMMENT_REQUESTS_PLAN: ${{ contains(github.event.comment.body, 'terraform plan') }}
+          COMMENT_REQUESTS_APPLY: ${{ contains(github.event.comment.body, 'terraform apply') }}
+        run: |
+          {
+            # Plan runs for PR-related events, explicit plan input, or issue comments requesting a plan.
+            echo "terraform_operation_is_plan=${{ env.IS_PULL_REQUEST_EVENT == 'true' || inputs.terraform_operation == 'plan' || (env.IS_ISSUE_COMMENT_EVENT == 'true' && env.COMMENT_REQUESTS_PLAN == 'true') }}"
+
+            # Apply runs for push events, explicit apply input, or issue comments requesting an apply.
+            echo "terraform_operation_is_apply=${{ env.IS_PUSH_EVENT == 'true' || inputs.terraform_operation == 'apply' || (env.IS_ISSUE_COMMENT_EVENT == 'true' && env.COMMENT_REQUESTS_APPLY == 'true') }}"
+
+            # Destroy only runs when explicitly requested.
+            echo "terraform_operation_is_destroy=${{ inputs.terraform_operation == 'destroy' }}"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Add workflow summary info
         env:
-          COMMENT_CONTAINS_TERRAFORM_PLAN: ${{ contains(github.event.comment.body, 'terraform plan') || false }}
-          COMMENT_CONTAINS_TERRAFORM_APPLY: ${{ contains(github.event.comment.body, 'terraform apply') || false }}
           TERRAFORM_ROOT_PATH: ${{ (steps.detect-path.outputs.terraform_root_path || inputs.terraform_root_path) }}
         run: |
           if [ -z "$TERRAFORM_ROOT_PATH" ]; then
@@ -241,16 +259,19 @@ jobs:
 
           echo "### Running Terraform 🚀" >> "$GITHUB_STEP_SUMMARY"
           echo "- Environment: **${{ steps.basic_vars.outputs.environment_name }}**" >> "$GITHUB_STEP_SUMMARY"
-          if [ "${{ env.COMMENT_CONTAINS_TERRAFORM_PLAN }}" == "true" ]; then
+          if [ "${{ steps.operation.outputs.terraform_operation_is_plan }}" == "true" ]; then
             echo "- Operation: **plan**" >> "$GITHUB_STEP_SUMMARY"
-          elif [ "${{ env.COMMENT_CONTAINS_TERRAFORM_APPLY }}" == "true" ]; then
+          elif [ "${{ steps.operation.outputs.terraform_operation_is_apply }}" == "true" ]; then
             echo "- Operation: **apply**" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "- Operation: **${{ inputs.terraform_operation || ((github.event_name == 'pull_request' || github.event_name == 'pull_request_review') && 'plan' || 'apply') }}**" >> "$GITHUB_STEP_SUMMARY"
+          elif [ "${{ steps.operation.outputs.terraform_operation_is_destroy }}" == "true" ]; then
+            echo "- Operation: **destroy**" >> "$GITHUB_STEP_SUMMARY"
           fi
     outputs:
       environment_name: ${{ steps.basic_vars.outputs.environment_name }}
       terraform_root_path: ${{ steps.detect-path.outputs.terraform_root_path || inputs.terraform_root_path }}
+      terraform_operation_is_plan: ${{ steps.operation.outputs.terraform_operation_is_plan }}
+      terraform_operation_is_apply: ${{ steps.operation.outputs.terraform_operation_is_apply }}
+      terraform_operation_is_destroy: ${{ steps.operation.outputs.terraform_operation_is_destroy }}
 
   terraform:
     runs-on: ubuntu-latest
@@ -260,9 +281,8 @@ jobs:
     environment:
       name: ${{ needs.compute_basic_vars.outputs.environment_name }}
       # Tracking deployment only when running terraform apply.
-      # Make sure conditionals are kept in sync with the ones in the terraform apply step below
       # https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/deploy-to-environment
-      deployment: ${{ github.event_name == 'push' || inputs.terraform_operation == 'apply' || (github.event_name == 'issue_comment' && contains(github.event.comment.body, 'terraform apply')) }}
+      deployment: ${{ needs.compute_basic_vars.outputs.terraform_operation_is_apply == 'true' }}
     concurrency:
       group: ${{ needs.compute_basic_vars.outputs.environment_name }}
       cancel-in-progress: false
@@ -379,7 +399,7 @@ jobs:
           yml_path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/tfenv.yml
 
       - name: Terraform validate
-        if: (github.event_name == 'pull_request' || github.event_name == 'pull_request_review') && github.run_attempt == 1
+        if: needs.compute_basic_vars.outputs.terraform_operation_is_plan == 'true' && github.run_attempt == 1
         uses: dflook/terraform-validate@4cef5d8a4b92bcd88486e41e22a42942a382c9d6 # v2.2.3
         with:
           path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
@@ -389,7 +409,7 @@ jobs:
 
       - name: Terraform plan
         uses: dflook/terraform-plan@7878bff63e2099cdc9be9a6f33cbbbf687f8f0fe # v2.2.3
-        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_review' || inputs.terraform_operation == 'plan' || (github.event_name == 'issue_comment' && contains(github.event.comment.body, 'terraform plan'))
+        if: needs.compute_basic_vars.outputs.terraform_operation_is_plan == 'true'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
           path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
@@ -402,7 +422,7 @@ jobs:
 
       - name: Terraform apply
         uses: dflook/terraform-apply@5489b988934a50bf1489d5b7c5253b46520a7dca # v2.2.3
-        if: github.event_name == 'push' || inputs.terraform_operation == 'apply' || (github.event_name == 'issue_comment' && contains(github.event.comment.body, 'terraform apply'))
+        if: needs.compute_basic_vars.outputs.terraform_operation_is_apply == 'true'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
           path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
@@ -416,7 +436,7 @@ jobs:
 
       - name: Terraform destroy
         uses: dflook/terraform-destroy@b198834c4a4dd959f26649f2a9d24c59e9c9f205 # v2.2.3
-        if: inputs.terraform_operation == 'destroy'
+        if: needs.compute_basic_vars.outputs.terraform_operation_is_destroy == 'true'
         with:
           path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
           var_file: |
