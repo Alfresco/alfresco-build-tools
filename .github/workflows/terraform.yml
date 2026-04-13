@@ -257,7 +257,11 @@ jobs:
     needs:
       - compute_basic_vars
     if: needs.compute_basic_vars.outputs.environment_name != '' && needs.compute_basic_vars.outputs.terraform_root_path != ''
-    environment: ${{ needs.compute_basic_vars.outputs.environment_name }}
+    environment:
+      name: ${{ needs.compute_basic_vars.outputs.environment_name }}
+      # Tracking deployment only when running terraform apply
+      # https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/deploy-to-environment
+      deployment: ${{ github.event_name == 'push' || inputs.terraform_operation == 'apply' || (github.event_name == 'issue_comment' && contains(github.event.comment.body, 'terraform apply')) }}
     concurrency:
       group: ${{ needs.compute_basic_vars.outputs.environment_name }}
       cancel-in-progress: false
