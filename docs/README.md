@@ -128,6 +128,7 @@ Here follows the list of GitHub Actions topics available in the current document
 - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
   - [branch-promotion-prs](#branch-promotion-prs)
   - [helm-publish-new-package-version](#helm-publish-new-package-version)
+  - [repository-mirror](#repository-mirror)
   - [reusable-release](#reusable-release)
   - [terraform](#terraform)
 - [Cookbook](#cookbook)
@@ -2554,6 +2555,54 @@ Calculates the new alpha version, creates new git tag and publishes the new pack
       helm-charts-repo-branch: gh-pages
     secrets: inherit
 ```
+
+### repository-mirror
+
+Force-pushes specific branches from source repositories to separate target
+(mirror) repositories, keeping them in sync.
+
+The list of repositories and branches to mirror is declared in a configuration
+file in the caller repository (e.g. `.github/mirrored-repos.yml`). Each entry
+supports two forms.
+
+**Multiple branches (no rename)** — use the `branches` list; the branch name is
+preserved as-is in the target repository:
+
+```yaml
+repos:
+  - source: Alfresco/alfresco-community-repo
+    target: Alfresco/alfresco-community-repo-25.N
+    branches:
+      - release/25.N
+      - release/25.1
+```
+
+**Single branch rename** — use the `branch` key (singular) with a `{source,
+target}` mapping to push to a different branch name in the mirror:
+
+```yaml
+repos:
+  # rename — push release/25.N as "main" in the target
+  - source: Alfresco/alfresco-community-repo
+    target: Alfresco/alfresco-community-repo-25.N
+    branch:
+      source: release/25.N
+      target: main
+```
+
+```yaml
+jobs:
+  mirror:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/reusable-repository-mirror.yml@v17.3.0
+    with:
+      config-file: .github/mirrored-repos.yml
+    secrets:
+      bot-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+```
+
+To add a new mirror, append an entry to your configuration file following one of
+the forms above. The `bot-token` secret must have **read access to the source
+repositories** and **write access to the target repositories**.
 
 ### reusable-release
 
