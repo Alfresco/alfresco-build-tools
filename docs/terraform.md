@@ -205,7 +205,7 @@ jobs:
   # and environment based on changed files in PRs/pushes against the default branch,
   # or branch name for other branches.
   invoke-terraform:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v17.3.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v17.4.0
     with:
       # Autodetected using the first changed folder (alphabetically) in PR/push
       #
@@ -231,7 +231,7 @@ jobs:
   # One job for a specific terraform folder/stack.
   # Environment can still be auto-detected based on changed tfvars files or branch name.
   invoke-terraform-infra:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v17.3.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v17.4.0
     with:
       terraform_root_path: infra
       terraform_default_env: develop
@@ -244,7 +244,7 @@ jobs:
   # a specific execution order (e.g. infra before k8s).
   invoke-terraform-k8s:
     needs: invoke-terraform-infra
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v17.3.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v17.4.0
     with:
       terraform_root_path: k8s
       terraform_default_env: develop
@@ -259,7 +259,7 @@ jobs:
   # which can be useful for simple repositories with a single stack and environment,
   # or for scheduled workflows.
   invoke-terraform-static:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v17.3.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v17.4.0
     with:
       terraform_root_path: infra
       terraform_env: production
@@ -267,7 +267,7 @@ jobs:
       tfvars_subfolder: vars
 
   invoke-terraform-custom-secrets:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v17.3.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v17.4.0
     with:
       terraform_root_path: infra
       terraform_default_env: develop
@@ -300,7 +300,7 @@ Example:
 ```yaml
 jobs:
   invoke-terraform-k8s:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v17.3.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v17.4.0
     with:
       terraform_root_path: k8s
       install_kubectl: true
@@ -364,7 +364,7 @@ permissions:
 
 jobs:
   pre-commit:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v17.3.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v17.4.0
     with:
       BOT_GITHUB_USERNAME: ${{ vars.BOT_GITHUB_USERNAME }}
     secrets: inherit
