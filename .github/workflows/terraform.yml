@@ -108,7 +108,7 @@ jobs:
 
       - name: Evaluate current branch
         id: get-branch-name
-        uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v17.2.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v17.3.0
         with:
           additional-pr-events: true
 
@@ -135,7 +135,7 @@ jobs:
       - name: Retrieve PR or last commit changes (used for auto-detection of terraform root path and/or environment)
         if: inputs.terraform_root_path == '' || inputs.terraform_env == ''
         id: last-changes-diff
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v17.2.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v17.3.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -371,7 +371,7 @@ jobs:
         run: npm install @actions/core@1.11.0 @actions/http-client@2.2.3
 
       - name: Request token
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         if: ${{ inputs.create_oidc_token_file }}
         id: idtoken
         with:
@@ -385,7 +385,7 @@ jobs:
         run: echo "${{ steps.idtoken.outputs.id_token }}" >> idtoken.json
 
       - name: Assume AWS Role when AWS_ROLE_ARN is set
-        uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
         if: vars.AWS_ROLE_ARN != ''
         with:
           aws-region: ${{ env.AWS_DEFAULT_REGION}}
@@ -393,7 +393,7 @@ jobs:
           role-session-name: TerraformWorkflow
 
       - name: Load environment variables from yml
-        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v17.2.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v17.3.0
         with:
           yml_path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/tfenv.yml
 
