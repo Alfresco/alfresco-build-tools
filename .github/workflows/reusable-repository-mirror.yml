@@ -1,0 +1,79 @@
+name: Mirror repositories
+
+on:
+  workflow_call:
+    inputs:
+      config-file:
+        description: "Path to the mirrored repos configuration file"
+        required: false
+        type: string
+    secrets:
+      bot-token:
+        description: "Token with read access to source repositories and write access to target repositories"
+        required: true
+
+jobs:
+  generate-matrix:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set matrix data
+        id: set-matrix
+        run: |
+          # shellcheck disable=SC2016
+          echo "matrix=$(yq e '
+            [.repos[] | select(has("branches")) | . as $r | .branches[] | {
+              "source": $r.source, "target": $r.target,
+              "branch": ., "target_branch": .,
+              "name": ($r.source + " @ " + .)
+            }]
+            +
+            [.repos[] | select(has("branch")) | select(.branch | type == "!!map") | . as $r | {
+              "source": $r.source, "target": $r.target,
+              "branch": $r.branch.source, "target_branch": $r.branch.target,
+              "name": ($r.source + " @ " + $r.branch.source + " -> " + $r.branch.target)
+            }]
+          ' -o json -I=0 "${{ inputs.config-file }}")" >> "$GITHUB_OUTPUT"
+
+  mirror:
+    runs-on: ubuntu-latest
+    name: ${{ matrix.name }}
+    needs: generate-matrix
+    permissions: {}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    steps:
+      - name: Validate secrets
+        env:
+          GH_TOKEN: ${{ secrets.bot-token }}
+        run: |
+          if [ -z "${GH_TOKEN}" ]; then
+            echo "::error::bot-token secret is not available. Please provide a token with read access to source repositories and write access to target repositories."
+            exit 1
+          fi
+
+      - name: Mirror branch
+        env:
+          GH_TOKEN: ${{ secrets.bot-token }}
+          SOURCE_REPO: ${{ matrix.source }}
+          TARGET_REPO: ${{ matrix.target }}
+          BRANCH: ${{ matrix.branch }}
+          TARGET_BRANCH: ${{ matrix.target_branch }}
+        run: |
+          git clone --single-branch --branch "${BRANCH}" \
+            "https://x-access-token:${GH_TOKEN}@github.com/${SOURCE_REPO}.git" \
+            source
+          cd source
+          # --force is intentional: the target is a read-only mirror and must exactly
+          # match the source branch at all times.
+          git push --force \
+            "https://x-access-token:${GH_TOKEN}@github.com/${TARGET_REPO}.git" \
+            "HEAD:refs/heads/${TARGET_BRANCH}"
