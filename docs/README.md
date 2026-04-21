@@ -1671,6 +1671,8 @@ Builds a maven project using the provided command.
           m2-current-build-upload-name: 'm2-artifacts'
 ```
 
+When `docker-username` and `docker-password` are provided, the action logs in to both `docker.io` and `dhi.io`.
+
 #### JaCoCo report options
 
 If the inputs `jacoco-report-name`, `target-folder-upload-name` and `m2-current-build-upload-name` are provided,
