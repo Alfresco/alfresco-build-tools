@@ -279,9 +279,9 @@ jobs:
     if: needs.compute_basic_vars.outputs.environment_name != '' && needs.compute_basic_vars.outputs.terraform_root_path != ''
     environment:
       name: ${{ needs.compute_basic_vars.outputs.environment_name }}
-      # Tracking deployment only when running terraform apply.
-      # https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/deploy-to-environment
-      deployment: ${{ needs.compute_basic_vars.outputs.terraform_operation == 'apply' }}
+      # Tracking deployment only when running terraform apply or destroy.
+      # https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/control-deployments#using-environments-without-deployments
+      deployment: ${{ needs.compute_basic_vars.outputs.terraform_operation != 'plan' }}
     concurrency:
       group: ${{ needs.compute_basic_vars.outputs.environment_name }}
       cancel-in-progress: false
