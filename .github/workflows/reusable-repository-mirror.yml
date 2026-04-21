@@ -7,7 +7,6 @@ on:
         description: "Path to the mirrored repos configuration file"
         required: false
         type: string
-        default: ".github/mirrored-repos.yml"
     secrets:
       bot-token:
         description: "Token with read access to source repositories and write access to target repositories"
