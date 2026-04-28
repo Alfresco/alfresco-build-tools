@@ -49,6 +49,18 @@ jobs:
           warmup: 1
           iterations: 5
 
+      - uses: ./.github/actions/awf-run-command
+        with:
+          allowed-domains: hyland.com
+          command: curl -sSf https://www.google.com
+          agent-timeout: 1
+
+      - uses: ./.github/actions/awf-run-command
+        with:
+          allowed-domains: hyland.com
+          command: curl -sSf https://www.hyland.com
+          agent-timeout: 1
+
       # free-hosted-runner-disk-space action usage and test
       - name: Check available disk space before running free-hosted-runner-disk-space action
         id: free-hosted-runner-disk-space
@@ -168,15 +180,3 @@ jobs:
       - name: Show current branches
         run: |
           echo "Current branch is ${{ steps.branch-info.outputs.branch-name }}"
-
-      - uses: ./.github/actions/awf-run-command
-        with:
-          allowed-domains: hyland.com
-          command: curl -sSf https://www.google.com
-          agent-timeout: 1
-
-      - uses: ./.github/actions/awf-run-command
-        with:
-          allowed-domains: hyland.com
-          command: curl -sSf https://www.hyland.com
-          agent-timeout: 1
