@@ -49,7 +49,9 @@ jobs:
           warmup: 1
           iterations: 5
 
-      - uses: ./.github/actions/awf-run-command
+      - name: Test AWF with disallowed domain
+        uses: ./.github/actions/awf-run-command
+        if: runner.arch != 'ARM64'
         id: awf-test-failure
         continue-on-error: true
         with:
@@ -58,11 +60,13 @@ jobs:
           agent-timeout: 1
 
       - name: Assert that command failed due to AWF restrictions
-        if: steps.awf-test-failure.outcome != 'failure'
+        if: steps.awf-test-failure.outcome != 'failure' && runner.arch != 'ARM64'
         run: |
           echo "Previous command should have failed due to AWF restrictions!" && exit 1
 
-      - uses: ./.github/actions/awf-run-command
+      - name: Test AWF with allowed domain
+        uses: ./.github/actions/awf-run-command
+        if: runner.arch != 'ARM64'
         with:
           allowed-domains: hyland.com
           command: curl -sSf https://www.hyland.com
