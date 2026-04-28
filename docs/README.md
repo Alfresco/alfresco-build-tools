@@ -36,6 +36,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [Actions SHA pinning](#actions-sha-pinning)
 - [GitHub Actions provided by us](#github-actions-provided-by-us)
   - [automate-propagation](#automate-propagation)
+  - [awf-run-command](#awf-run-command)
   - [calculate-next-internal-version](#calculate-next-internal-version)
   - [configure-git-author](#configure-git-author)
   - [dependabot-missing-actions-check](#dependabot-missing-actions-check)
@@ -453,11 +454,25 @@ This action requires a dedicated secret (named `BOT_GITHUB_TOKEN` in the sample)
 Another token is also needed to handled approval. It can be the default `GITHUB_TOKEN`, but it cannot be the same one that is used for auto-merge behavior as the user might match the creator of the PR (and auto-approval of a PR is not allowed).
 
 ```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/automate-propagation@v17.6.1
-      with:
-        auto-merge-token: ${{ secrets.BOT_GITHUB_TOKEN }}
-        approval-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: Alfresco/alfresco-build-tools/.github/actions/automate-propagation@v17.6.1
+        with:
+          auto-merge-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          approval-token: ${{ secrets.GITHUB_TOKEN }}
 ```
+
+### awf-run-command
+
+Sets up [AWF](https://github.com/github/gh-aw-firewall) and runs a custom
+command with restricted outbound domains (comma separated).
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/awf-run-command@v17.6.1
+        with:
+          allowed-domains: registry.npmjs.org
+          command: npm ci
+```
+
+The `command` input supports any shell command string. It runs through `sudo awf --allow-domains ...`.
 
 ### calculate-next-internal-version
 

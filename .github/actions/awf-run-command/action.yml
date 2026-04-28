@@ -1,0 +1,22 @@
+name: 'Run command with AWF'
+description: 'Set up GitHub AW Firewall and run a command with restricted outbound domains.'
+inputs:
+  allowed-domains:
+    description: 'Comma-separated domains allowed by AWF (for example: github.com,api.github.com).'
+    required: true
+  command:
+    description: 'Command to execute through AWF (for example: curl https://api.github.com).'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup awf
+      uses: github/gh-aw-firewall@df45257d391861b5bfdecf74017fd0c1d87d2e18 # v0.25.29
+
+    - name: Run command with firewall
+      shell: bash
+      env:
+        AWF_ALLOWED_DOMAINS: ${{ inputs.allowed-domains }}
+        AWF_COMMAND: ${{ inputs.command }}
+      run: |
+        sudo awf --allow-domains "$AWF_ALLOWED_DOMAINS" -- bash -euo pipefail -c "$AWF_COMMAND"
