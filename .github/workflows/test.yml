@@ -168,3 +168,8 @@ jobs:
       - name: Show current branches
         run: |
           echo "Current branch is ${{ steps.branch-info.outputs.branch-name }}"
+
+      - uses: ./.github/actions/awf-run-command
+        with:
+          allowed-domains: google.com
+          command: curl https://www.google.com

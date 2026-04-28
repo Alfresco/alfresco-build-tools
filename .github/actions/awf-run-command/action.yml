@@ -19,4 +19,4 @@ runs:
         AWF_ALLOWED_DOMAINS: ${{ inputs.allowed-domains }}
         AWF_COMMAND: ${{ inputs.command }}
       run: |
-        awf --allow-domains "$AWF_ALLOWED_DOMAINS" -- bash -euo pipefail -c "$AWF_COMMAND"
+        sudo env PATH="$PATH" awf --allow-domains "$AWF_ALLOWED_DOMAINS" -- bash -euo pipefail -c "$AWF_COMMAND"
