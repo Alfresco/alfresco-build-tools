@@ -172,9 +172,11 @@ jobs:
       - uses: ./.github/actions/awf-run-command
         with:
           allowed-domains: hyland.com
-          command: curl -sfF https://www.google.com
+          command: curl -sSf https://www.google.com
+          agent-timeout: 1
 
       - uses: ./.github/actions/awf-run-command
         with:
           allowed-domains: hyland.com
-          command: curl -sfF https://www.hyland.com
+          command: curl -sSf https://www.hyland.com
+          agent-timeout: 1
