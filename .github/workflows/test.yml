@@ -171,5 +171,10 @@ jobs:
 
       - uses: ./.github/actions/awf-run-command
         with:
-          allowed-domains: google.com
-          command: curl https://www.google.com
+          allowed-domains: hyland.com
+          command: curl -sfF https://www.google.com
+
+      - uses: ./.github/actions/awf-run-command
+        with:
+          allowed-domains: hyland.com
+          command: curl -sfF https://www.hyland.com
