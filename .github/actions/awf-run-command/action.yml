@@ -24,7 +24,7 @@ runs:
         AWF_COMMAND: ${{ inputs.command }}
         AWF_AGENT_TIMEOUT: ${{ inputs.agent-timeout }}
       run: >-
-        sudo env PATH="$PATH"
+        sudo -E
         awf --allow-domains "$AWF_ALLOWED_DOMAINS"
         --agent-timeout "$AWF_AGENT_TIMEOUT"
         -- bash -euo pipefail -c "cd $GITHUB_WORKSPACE && $AWF_COMMAND"
