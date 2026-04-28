@@ -7,6 +7,10 @@ inputs:
   command:
     description: 'Command to execute through AWF (for example: curl https://api.github.com).'
     required: true
+  agent-timeout:
+    description: 'Maximum time in minutes for the agent command to run.'
+    required: false
+    default: '15'
 runs:
   using: 'composite'
   steps:
@@ -18,8 +22,9 @@ runs:
       env:
         AWF_ALLOWED_DOMAINS: ${{ inputs.allowed-domains }}
         AWF_COMMAND: ${{ inputs.command }}
-        AWF_MOUNT: ${{ inputs.mount }}
+        AWF_AGENT_TIMEOUT: ${{ inputs.agent-timeout }}
       run: >-
         sudo env PATH="$PATH"
         awf --allow-domains "$AWF_ALLOWED_DOMAINS"
+        --agent-timeout "$AWF_AGENT_TIMEOUT"
         -- bash -euo pipefail -c "cd $GITHUB_WORKSPACE && $AWF_COMMAND"

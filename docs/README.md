@@ -470,9 +470,11 @@ command with restricted outbound domains (comma separated).
         with:
           allowed-domains: registry.npmjs.org
           command: npm ci
+          agent-timeout: 15 # optional, minutes (default: 15)
 ```
 
 The `command` input supports any shell command string. It runs through `sudo awf --allow-domains ...`.
+Use `agent-timeout` to limit execution time in minutes (defaults to `15`).
 
 ### calculate-next-internal-version
 
