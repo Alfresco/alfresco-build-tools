@@ -7,10 +7,6 @@ inputs:
   command:
     description: 'Command to execute through AWF (for example: curl https://api.github.com).'
     required: true
-  mount:
-    description: 'Mount path in host_path:container_path[:ro|rw] format. Defaults to $GITHUB_WORKSPACE:$GITHUB_WORKSPACE.'
-    required: false
-    default: ''
 runs:
   using: 'composite'
   steps:
@@ -23,6 +19,7 @@ runs:
         AWF_ALLOWED_DOMAINS: ${{ inputs.allowed-domains }}
         AWF_COMMAND: ${{ inputs.command }}
         AWF_MOUNT: ${{ inputs.mount }}
-      run: |
-        mount_arg="${AWF_MOUNT:-$GITHUB_WORKSPACE:$GITHUB_WORKSPACE}"
-        sudo env PATH="$PATH" awf --allow-domains "$AWF_ALLOWED_DOMAINS" --mount "$mount_arg" -- bash -euo pipefail -c "$AWF_COMMAND"
+      run: >-
+        sudo env PATH="$PATH"
+        awf --allow-domains "$AWF_ALLOWED_DOMAINS"
+        -- bash -euo pipefail -c "cd $GITHUB_WORKSPACE && $AWF_COMMAND"

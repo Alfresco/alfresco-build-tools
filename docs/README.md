@@ -470,12 +470,9 @@ command with restricted outbound domains (comma separated).
         with:
           allowed-domains: registry.npmjs.org
           command: npm ci
-          # mount: /custom/host/path:/custom/container/path:ro  # optional, defaults to $GITHUB_WORKSPACE:$GITHUB_WORKSPACE
 ```
 
 The `command` input supports any shell command string. It runs through `sudo awf --allow-domains ...`.
-
-By default, `$GITHUB_WORKSPACE` is mounted into the AWF sandbox so the command has access to the repository. Use the `mount` input to override with a custom `host_path:container_path[:ro|rw]` mapping.
 
 ### calculate-next-internal-version
 
