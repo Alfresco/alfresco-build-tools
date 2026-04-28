@@ -50,10 +50,17 @@ jobs:
           iterations: 5
 
       - uses: ./.github/actions/awf-run-command
+        id: awf-test-failure
+        continue-on-error: true
         with:
           allowed-domains: hyland.com
           command: curl -sSf https://www.google.com
           agent-timeout: 1
+
+      - name: Assert that command failed due to AWF restrictions
+        if: steps.awf-test-failure.outcome != 'failure'
+        run: |
+          echo "Previous command should have failed due to AWF restrictions!" && exit 1
 
       - uses: ./.github/actions/awf-run-command
         with:
