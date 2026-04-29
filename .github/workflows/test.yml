@@ -49,6 +49,29 @@ jobs:
           warmup: 1
           iterations: 5
 
+      - name: Test AWF with disallowed domain
+        uses: ./.github/actions/awf-run-command
+        if: runner.arch != 'ARM64'
+        id: awf-test-failure
+        continue-on-error: true
+        with:
+          allowed-domains: hyland.com
+          command: curl -sSf https://www.google.com
+          agent-timeout: 1
+
+      - name: Assert that command failed due to AWF restrictions
+        if: steps.awf-test-failure.outcome != 'failure' && runner.arch != 'ARM64'
+        run: |
+          echo "Previous command should have failed due to AWF restrictions!" && exit 1
+
+      - name: Test AWF with allowed domain
+        uses: ./.github/actions/awf-run-command
+        if: runner.arch != 'ARM64'
+        with:
+          allowed-domains: hyland.com
+          command: curl -sSf https://www.hyland.com
+          agent-timeout: 1
+
       # free-hosted-runner-disk-space action usage and test
       - name: Check available disk space before running free-hosted-runner-disk-space action
         id: free-hosted-runner-disk-space
