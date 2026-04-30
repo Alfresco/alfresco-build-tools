@@ -19,14 +19,20 @@ the release workflow will automatically update these references during releases.
 
 **MANDATORY: Always update `docs/README.md` when adding or modifying user-facing features of GitHub Actions.**
 
-This is required for ANY change to actions, including:
+Documentation updates are required only for **user-facing changes**, such as:
 
 - New actions or workflows
-- Modified inputs/outputs in existing actions
-- Changed action behavior or functionality
+- New or modified inputs/outputs in existing actions
+- New features or enhancements to existing action behavior
 - Updated usage patterns or examples
 
-**Before opening a PR, you MUST:**
+Documentation updates are **NOT required** for:
+
+- Bug fixes that restore expected behavior without changing the user-facing interface
+- Internal refactoring with no observable change for users
+- CI/infrastructure-only changes
+
+**Before opening a PR with user-facing changes, you MUST:**
 
 1. Update `docs/README.md` with the user-facing changes
 2. Run `./check_readme.sh` to validate all actions are documented
@@ -189,7 +195,7 @@ For common operations:
 - **CRITICAL**: Never use SHA pins for internal action references (`Alfresco/alfresco-build-tools/.github/...`) - always use version tags to ensure automatic release updates work
 - **Don't** use `latest` tags for external actions - always pin versions
 - **Avoid** hardcoding repository-specific values in reusable actions
-- **Don't** merge PRs without updating documentation
+- **Don't** merge PRs with user-facing changes (new features or enhancements) without updating `docs/README.md`
 - **Never** commit secrets or sensitive information
 - **Avoid** breaking backward compatibility without major version bump
 
@@ -197,7 +203,7 @@ For common operations:
 
 Before opening or reviewing a PR, verify:
 
-1. ✅ **Documentation updated**: `docs/README.md` reflects all user-facing action changes
+1. ✅ **Documentation updated**: `docs/README.md` reflects all user-facing changes (new features or enhancements); skip for bug fixes
 2. ✅ **Validation passed**: `./check_readme.sh` runs successfully
 3. ✅ **Version label**: Appropriate `release/patch|minor|major` label added
 4. ✅ **Pre-commit hooks**: All checks pass
