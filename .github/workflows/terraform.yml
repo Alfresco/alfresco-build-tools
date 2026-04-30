@@ -259,6 +259,8 @@ jobs:
       - name: Add workflow summary info
         env:
           TERRAFORM_ROOT_PATH: ${{ (steps.detect-path.outputs.terraform_root_path || inputs.terraform_root_path) }}
+          TERRAFORM_OPERATION: ${{ steps.operation.outputs.terraform_operation }}
+          TERRAFORM_ENV: ${{ steps.basic_vars.outputs.environment_name }}
         run: |
           if [ -z "$TERRAFORM_ROOT_PATH" ]; then
             echo "### Not running Terraform 🚀" >> "$GITHUB_STEP_SUMMARY"
@@ -266,10 +268,16 @@ jobs:
             exit 0
           fi
 
+          if [ -z "$TERRAFORM_OPERATION" ]; then
+            echo "### Not running Terraform 🚀" >> "$GITHUB_STEP_SUMMARY"
+            echo "Could not determine the Terraform operation to perform. Assuming there are no Terraform changes to apply, so skipping Terraform execution." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
           {
             echo "### Running Terraform 🚀"
-            echo "- Environment: **${{ steps.basic_vars.outputs.environment_name }}**"
-            echo "- Operation: **${{ steps.operation.outputs.terraform_operation }}**"
+            echo "- Environment: **${TERRAFORM_ENV}**"
+            echo "- Operation: **${TERRAFORM_OPERATION}**"
           } >> "$GITHUB_STEP_SUMMARY"
     outputs:
       environment_name: ${{ steps.basic_vars.outputs.environment_name }}
