@@ -456,7 +456,7 @@ jobs:
 
       - name: Set TERRAFORM_HTTP_CREDENTIALS for fetching private modules
         if: steps.app-token.outputs.token
-        run: echo "TERRAFORM_HTTP_CREDENTIALS=github.com/${{ inputs.github-app-repo-owner }}=x-access-token::${{ steps.app-token.outputs.token }}" >> "$GITHUB_ENV"
+        run: echo "TERRAFORM_HTTP_CREDENTIALS=github.com/${{ inputs.github-app-repo-owner }}=x-access-token:${{ steps.app-token.outputs.token }}" >> "$GITHUB_ENV"
 
       - name: Terraform validate
         if: needs.compute_basic_vars.outputs.terraform_operation == 'plan' && github.run_attempt == 1
