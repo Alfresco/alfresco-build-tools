@@ -58,6 +58,8 @@ on:
         required: false
       RANCHER2_SECRET_KEY:
         required: false
+      AZURE_CREDENTIALS:
+        required: false
       CUSTOM_SECRET_0:
         required: false
       CUSTOM_SECRET_1:
@@ -295,6 +297,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       RANCHER2_ACCESS_KEY: ${{ secrets.RANCHER2_ACCESS_KEY }}
       RANCHER2_SECRET_KEY: ${{ secrets.RANCHER2_SECRET_KEY }}
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       CUSTOM_SECRET_0: ${{ secrets.CUSTOM_SECRET_0 }}
       CUSTOM_SECRET_1: ${{ secrets.CUSTOM_SECRET_1 }}
       CUSTOM_SECRET_2: ${{ secrets.CUSTOM_SECRET_2 }}
@@ -389,9 +392,15 @@ jobs:
         uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
         if: vars.AWS_ROLE_ARN != ''
         with:
-          aws-region: ${{ env.AWS_DEFAULT_REGION}}
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           role-session-name: TerraformWorkflow
+
+      - name: Configure Azure Credentials
+        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        if: env.AZURE_CREDENTIALS != ''
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Load environment variables from yml
         uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@v17.6.1
