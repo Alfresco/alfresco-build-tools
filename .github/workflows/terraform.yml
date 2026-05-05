@@ -58,6 +58,8 @@ on:
       BOT_GITHUB_TOKEN:
         description: a GitHub token used to fetch terraform modules from private GitHub repositories.
         required: false
+      TERRAFORM_HTTP_CREDENTIALS:
+        required: false
       DOCKER_USERNAME:
         required: false
       DOCKER_PASSWORD:
@@ -318,8 +320,7 @@ jobs:
       CUSTOM_SECRET_9: ${{ secrets.CUSTOM_SECRET_9 }}
       RESOURCE_NAME: ${{ vars.RESOURCE_NAME }}
       TF_VAR_resource_name: ${{ vars.RESOURCE_NAME }}
-      TERRAFORM_HTTP_CREDENTIALS: |
-        github.com/Alfresco=alfresco-build:${{ secrets.BOT_GITHUB_TOKEN }}
+      TERRAFORM_HTTP_CREDENTIALS: ${{ secrets.TERRAFORM_HTTP_CREDENTIALS }}
       TERRAFORM_PRE_RUN: |
         set +x -euo pipefail
         if [ -n "$AZURE_CREDENTIALS" ]; then
