@@ -119,7 +119,14 @@ The following GitHub secrets (all optional) are also accepted by this workflow:
 - `AWS_SECRET_ACCESS_KEY`: (optional when using OIDC) secret key to use the AWS terraform provider
 - `AZURE_CREDENTIALS`: (required for Azure) JSON object containing Azure service
   principal credentials (`clientId`, `clientSecret`, `subscriptionId`, `tenantId`)
-- `BOT_GITHUB_TOKEN` (to access private terraform modules in the Alfresco org)
+- `BOT_GITHUB_TOKEN`: (optional) token to access private terraform modules in the
+  Alfresco org. Used as a fallback when `github-app-repo-owner` is not set.
+- `GITHUB_TOKEN_CLIENT_ID`: (optional) client ID of a GitHub App used to generate
+  a token for accessing private terraform modules. Requires `github-app-repo-owner`
+  input and `GITHUB_TOKEN_PRIVATE_KEY` secret to be set.
+- `GITHUB_TOKEN_PRIVATE_KEY`: (optional) private key of the GitHub App used to
+  generate a token for accessing private terraform modules. Requires
+  `github-app-repo-owner` input and `GITHUB_TOKEN_CLIENT_ID` secret to be set.
 - `DOCKER_USERNAME` (optional): Docker Hub credentials
 - `DOCKER_PASSWORD` (optional): Docker Hub credentials
 - `RANCHER2_ACCESS_KEY` (optional): access key to use the rancher terraform

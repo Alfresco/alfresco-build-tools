@@ -318,8 +318,6 @@ jobs:
       CUSTOM_SECRET_9: ${{ secrets.CUSTOM_SECRET_9 }}
       RESOURCE_NAME: ${{ vars.RESOURCE_NAME }}
       TF_VAR_resource_name: ${{ vars.RESOURCE_NAME }}
-      TERRAFORM_HTTP_CREDENTIALS: |
-        github.com/Alfresco=alfresco-build:${{ secrets.BOT_GITHUB_TOKEN }}
       TERRAFORM_PRE_RUN: |
         set +x -euo pipefail
         if [ -n "$AZURE_CREDENTIALS" ]; then
@@ -400,6 +398,7 @@ jobs:
           TERRAFORM_ROOT_PATH: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
         run: |
           if [ -n "${{ vars.TERRAFORM_STATE_STORAGE_ACCOUNT }}" ]; then
+            echo "Using Azure Storage backend: ${{ vars.TERRAFORM_STATE_STORAGE_ACCOUNT }}/${{ vars.TERRAFORM_STATE_CONTAINER }}"
             {
               echo "backend_config<<BACKEND"
               echo "resource_group_name=${{ vars.TERRAFORM_STATE_RESOURCE_GROUP }}"
@@ -410,6 +409,7 @@ jobs:
               echo "BACKEND"
             } >> "$GITHUB_OUTPUT"
           else
+            echo "Using AWS S3 backend: ${{ vars.TERRAFORM_STATE_BUCKET }}"
             {
               echo "backend_config<<BACKEND"
               echo "bucket=${{ vars.TERRAFORM_STATE_BUCKET }}"
@@ -462,10 +462,16 @@ jobs:
           client-id: ${{ secrets.GITHUB_TOKEN_CLIENT_ID }}
           private-key: ${{ secrets.GITHUB_TOKEN_PRIVATE_KEY }}
           owner: ${{ inputs.github-app-repo-owner }}
+          repositories: |
+            terraform-alfresco-modules
 
-      - name: Override TERRAFORM_HTTP_CREDENTIALS with GitHub App token
-        if: steps.app-token.outputs.token != ''
-        run: echo "TERRAFORM_HTTP_CREDENTIALS=github.com/${{ inputs.github-app-repo-owner }}=x-access-token:${{ steps.app-token.outputs.token }}" >> "$GITHUB_ENV"
+      - name: Set TERRAFORM_HTTP_CREDENTIALS
+        run: |
+          if [ -n "${{ steps.app-token.outputs.token }}" ]; then
+            echo "TERRAFORM_HTTP_CREDENTIALS=github.com/${{ inputs.github-app-repo-owner }}=x-access-token:${{ steps.app-token.outputs.token }}" >> "$GITHUB_ENV"
+          elif [ -n "${{ secrets.BOT_GITHUB_TOKEN }}" ]; then
+            echo "TERRAFORM_HTTP_CREDENTIALS=github.com/Alfresco=alfresco-build:${{ secrets.BOT_GITHUB_TOKEN }}" >> "$GITHUB_ENV"
+          fi
 
       - name: Terraform validate
         if: needs.compute_basic_vars.outputs.terraform_operation == 'plan' && github.run_attempt == 1
