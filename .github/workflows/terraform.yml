@@ -43,11 +43,11 @@ on:
         required: false
         default: ''
       github_app_repo_owner:
-        description: the owner of the GitHub App used to generate a token for accessing private repositories (if needed for fetching terraform modules or other resources). Can be the same organization or another one where the GitHub App is installed.
+        description: the owner (organization) of the GitHub App used to generate a token for accessing the private 'terraform-alfresco-modules' repository. Requires github_app_token_client_id and GITHUB_TOKEN_PRIVATE_KEY to be set.
         type: string
         required: false
       github_app_token_client_id:
-        description: the client ID of the GitHub App used to generate a token for accessing private repositories (if needed for fetching terraform modules or other resources). Requires github_app_repo_owner and GITHUB_TOKEN_PRIVATE_KEY to be set.
+        description: the client ID of the GitHub App used to generate a token for accessing the private 'terraform-alfresco-modules' repository. Requires github_app_repo_owner and GITHUB_TOKEN_PRIVATE_KEY to be set.
         type: string
         required: false
     secrets:
@@ -381,6 +381,10 @@ jobs:
           fi
           if [ -z "${{ vars.TERRAFORM_STATE_BUCKET }}" ] && [ -z "${{ vars.TERRAFORM_STATE_STORAGE_ACCOUNT }}" ]; then
             echo "Either TERRAFORM_STATE_BUCKET (for AWS S3) or TERRAFORM_STATE_STORAGE_ACCOUNT (for Azure Storage) must be set in the vars context of $ENVIRONMENT_NAME to specify the backend used for terraform state storage"
+            exit 1
+          fi
+          if [ -n "${{ vars.TERRAFORM_STATE_BUCKET }}" ] && [ -n "${{ vars.TERRAFORM_STATE_STORAGE_ACCOUNT }}" ]; then
+            echo "TERRAFORM_STATE_BUCKET and TERRAFORM_STATE_STORAGE_ACCOUNT are mutually exclusive in the vars context of $ENVIRONMENT_NAME; configure exactly one terraform state backend"
             exit 1
           fi
           if [ -n "${{ vars.TERRAFORM_STATE_STORAGE_ACCOUNT }}" ]; then

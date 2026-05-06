@@ -113,7 +113,8 @@ backend "azurerm" {}
 
 ### GitHub Secrets
 
-The following GitHub secrets (all optional) are also accepted by this workflow:
+The following GitHub secrets are accepted by this workflow. Most are optional,
+but some are required depending on the selected backend or authentication mode:
 
 - `AWS_ACCESS_KEY_ID`: (optional when using OIDC) access key to use the AWS terraform provider
 - `AWS_SECRET_ACCESS_KEY`: (optional when using OIDC) secret key to use the AWS terraform provider
