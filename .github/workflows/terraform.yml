@@ -54,8 +54,6 @@ on:
       BOT_GITHUB_TOKEN:
         description: a GitHub token used to fetch terraform modules from private GitHub repositories.
         required: false
-      TERRAFORM_HTTP_CREDENTIALS:
-        required: false
       DOCKER_USERNAME:
         required: false
       DOCKER_PASSWORD:
@@ -90,6 +88,7 @@ on:
         required: false
       GITHUB_TOKEN_PRIVATE_KEY:
         required: false
+
 jobs:
   compute_basic_vars:
     name: compute basic variables
@@ -319,6 +318,8 @@ jobs:
       CUSTOM_SECRET_9: ${{ secrets.CUSTOM_SECRET_9 }}
       RESOURCE_NAME: ${{ vars.RESOURCE_NAME }}
       TF_VAR_resource_name: ${{ vars.RESOURCE_NAME }}
+      TERRAFORM_HTTP_CREDENTIALS: |
+        github.com/Alfresco=alfresco-build:${{ secrets.BOT_GITHUB_TOKEN }}
       TERRAFORM_PRE_RUN: |
         set +x -euo pipefail
         if [ -n "$AZURE_CREDENTIALS" ]; then
@@ -460,6 +461,7 @@ jobs:
           yml_path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/tfenv.yml
 
       - name: Generate GitHub App token
+        if: inputs.github-app-repo-owner != ''
         id: app-token
         uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
         with:
@@ -467,8 +469,8 @@ jobs:
           private-key: ${{ secrets.GITHUB_TOKEN_PRIVATE_KEY }}
           owner: ${{ inputs.github-app-repo-owner }}
 
-      - name: Set TERRAFORM_HTTP_CREDENTIALS for fetching private modules
-        if: steps.app-token.outputs.token
+      - name: Override TERRAFORM_HTTP_CREDENTIALS with GitHub App token
+        if: steps.app-token.outputs.token != ''
         run: echo "TERRAFORM_HTTP_CREDENTIALS=github.com/${{ inputs.github-app-repo-owner }}=x-access-token:${{ steps.app-token.outputs.token }}" >> "$GITHUB_ENV"
 
       - name: Terraform validate

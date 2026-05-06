@@ -100,10 +100,10 @@ variables:
 - `TERRAFORM_STATE_CONTAINER`: the name of the blob container within the storage
   account
 
-The backend configuration is automatically constructed with
-`use_azuread_auth=true` and `use_cli=true`, which means the `AZURE_CREDENTIALS`
-secret must be provided to authenticate via Azure CLI. The state file key is
-built using the pattern `<RESOURCE_NAME>/<terraform_root_path>/terraform.tfstate`.
+The backend configuration is automatically constructed with `use_cli=true`,
+which means the `AZURE_CREDENTIALS` secret must be provided to authenticate via
+Azure CLI. The state file key is built using the pattern
+`<RESOURCE_NAME>/<terraform_root_path>/terraform.tfstate`.
 
 Your Terraform code should declare the `azurerm` backend:
 
@@ -118,7 +118,7 @@ The following GitHub secrets (all optional) are also accepted by this workflow:
 - `AWS_ACCESS_KEY_ID`: (optional when using OIDC) access key to use the AWS terraform provider
 - `AWS_SECRET_ACCESS_KEY`: (optional when using OIDC) secret key to use the AWS terraform provider
 - `AZURE_CREDENTIALS`: (required for Azure) JSON object containing Azure service
-  principal credentials (`clientId`, `clientSecret`, `tenantId`)
+  principal credentials (`clientId`, `clientSecret`, `subscriptionId`, `tenantId`)
 - `BOT_GITHUB_TOKEN` (to access private terraform modules in the Alfresco org)
 - `DOCKER_USERNAME` (optional): Docker Hub credentials
 - `DOCKER_PASSWORD` (optional): Docker Hub credentials
