@@ -314,6 +314,20 @@ jobs:
       CUSTOM_SECRET_2: ${{ secrets.GITHUB_APP_PEM_FILE }}
       # ...
       # CUSTOM_SECRET_9: ${{ secrets.MY_CUSTOM_SECRET }}
+
+  # Azure Storage backend with GitHub App token for private terraform modules
+  invoke-terraform-aks:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v17.6.1
+    with:
+      terraform_root_path: infra
+      terraform_default_env: develop
+      terraform_operation: ${{ inputs.terraform_operation }}
+      tfvars_subfolder: envs
+      github_app_repo_owner: Alfresco
+      github_app_token_client_id: ${{ vars.MY_GITHUB_APP_CLIENT_ID }}
+    secrets:
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      GITHUB_TOKEN_PRIVATE_KEY: ${{ secrets.MY_GITHUB_APP_PRIVATE_KEY }}
 ```
 
 ### kubectl support

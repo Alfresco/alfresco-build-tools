@@ -323,7 +323,7 @@ jobs:
       TERRAFORM_PRE_RUN: |
         set +x -euo pipefail
         if [ -n "$AZURE_CREDENTIALS" ]; then
-          curl -skL https://aka.ms/InstallAzureCLIDeb | bash
+          curl -sL https://aka.ms/InstallAzureCLIDeb | bash
           CLIENT_ID=$(echo "$AZURE_CREDENTIALS" | jq -r '.clientId')
           CLIENT_SECRET=$(echo "$AZURE_CREDENTIALS" | jq -r '.clientSecret')
           TENANT_ID=$(echo "$AZURE_CREDENTIALS" | jq -r '.tenantId')
@@ -390,6 +390,16 @@ jobs:
             fi
             if [ -z "${{ vars.TERRAFORM_STATE_CONTAINER }}" ]; then
               echo "TERRAFORM_STATE_CONTAINER must be set in the vars context of $ENVIRONMENT_NAME when using Azure Storage backend"
+              exit 1
+            fi
+            if [ -z "${{ secrets.AZURE_CREDENTIALS }}" ]; then
+              echo "AZURE_CREDENTIALS secret must be provided when using Azure Storage backend"
+              exit 1
+            fi
+          fi
+          if [ -n "${{ inputs.github_app_repo_owner }}" ]; then
+            if [ -z "${{ inputs.github_app_token_client_id }}" ] || [ -z "${{ secrets.GITHUB_TOKEN_PRIVATE_KEY }}" ]; then
+              echo "github_app_token_client_id input and GITHUB_TOKEN_PRIVATE_KEY secret must both be provided when github_app_repo_owner is set"
               exit 1
             fi
           fi
