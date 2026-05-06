@@ -405,7 +405,6 @@ jobs:
               echo "storage_account_name=${{ vars.TERRAFORM_STATE_STORAGE_ACCOUNT }}"
               echo "container_name=${{ vars.TERRAFORM_STATE_CONTAINER }}"
               echo "key=${{ vars.RESOURCE_NAME }}/${{ env.TERRAFORM_ROOT_PATH }}/terraform.tfstate"
-              echo "use_azuread_auth=true"
               echo "use_cli=true"
               echo "BACKEND"
             } >> "$GITHUB_OUTPUT"
