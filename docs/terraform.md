@@ -123,7 +123,7 @@ The following GitHub secrets (all optional) are also accepted by this workflow:
   Alfresco org. Used as a fallback when `github_app_repo_owner` is not set.
 - `GITHUB_TOKEN_PRIVATE_KEY`: (optional) private key of the GitHub App used to
   generate a token for accessing private terraform modules. Requires
-  `github-app-repo-owner` input and `github_app_repo_owner` input to be set.
+  `github_app_repo_owner` input and `github_app_token_client_id` input to be set.
 - `DOCKER_USERNAME` (optional): Docker Hub credentials
 - `DOCKER_PASSWORD` (optional): Docker Hub credentials
 - `RANCHER2_ACCESS_KEY` (optional): access key to use the rancher terraform
