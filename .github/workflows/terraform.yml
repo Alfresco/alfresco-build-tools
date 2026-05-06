@@ -42,8 +42,12 @@ on:
         type: string
         required: false
         default: ''
-      github-app-repo-owner:
+      github_app_repo_owner:
         description: the owner of the GitHub App used to generate a token for accessing private repositories (if needed for fetching terraform modules or other resources). Can be the same organization or another one where the GitHub App is installed.
+        type: string
+        required: false
+      github_app_token_client_id:
+        description: the client ID of the GitHub App used to generate a token for accessing private repositories (if needed for fetching terraform modules or other resources). Requires github_app_repo_owner and GITHUB_TOKEN_PRIVATE_KEY to be set.
         type: string
         required: false
     secrets:
@@ -83,8 +87,6 @@ on:
       CUSTOM_SECRET_8:
         required: false
       CUSTOM_SECRET_9:
-        required: false
-      GITHUB_TOKEN_CLIENT_ID:
         required: false
       GITHUB_TOKEN_PRIVATE_KEY:
         required: false
@@ -455,20 +457,20 @@ jobs:
           yml_path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/tfenv.yml
 
       - name: Generate GitHub App token
-        if: inputs.github-app-repo-owner != ''
+        if: inputs.github_app_repo_owner != ''
         id: app-token
         uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
         with:
-          client-id: ${{ secrets.GITHUB_TOKEN_CLIENT_ID }}
+          client-id: ${{ inputs.github_app_token_client_id }}
           private-key: ${{ secrets.GITHUB_TOKEN_PRIVATE_KEY }}
-          owner: ${{ inputs.github-app-repo-owner }}
+          owner: ${{ inputs.github_app_repo_owner }}
           repositories: |
             terraform-alfresco-modules
 
       - name: Set TERRAFORM_HTTP_CREDENTIALS
         run: |
           if [ -n "${{ steps.app-token.outputs.token }}" ]; then
-            echo "TERRAFORM_HTTP_CREDENTIALS=github.com/${{ inputs.github-app-repo-owner }}=x-access-token:${{ steps.app-token.outputs.token }}" >> "$GITHUB_ENV"
+            echo "TERRAFORM_HTTP_CREDENTIALS=github.com/${{ inputs.github_app_repo_owner }}=x-access-token:${{ steps.app-token.outputs.token }}" >> "$GITHUB_ENV"
           elif [ -n "${{ secrets.BOT_GITHUB_TOKEN }}" ]; then
             echo "TERRAFORM_HTTP_CREDENTIALS=github.com/Alfresco=alfresco-build:${{ secrets.BOT_GITHUB_TOKEN }}" >> "$GITHUB_ENV"
           fi
