@@ -326,7 +326,11 @@ jobs:
           CLIENT_ID=$(echo "$AZURE_CREDENTIALS" | jq -r '.clientId')
           CLIENT_SECRET=$(echo "$AZURE_CREDENTIALS" | jq -r '.clientSecret')
           TENANT_ID=$(echo "$AZURE_CREDENTIALS" | jq -r '.tenantId')
+          SUBSCRIPTION_ID=$(echo "$AZURE_CREDENTIALS" | jq -r '.subscriptionId')
           az login --service-principal -u "$CLIENT_ID" -p "$CLIENT_SECRET" --tenant "$TENANT_ID" --output none
+          if [ -n "$SUBSCRIPTION_ID" ] && [ "$SUBSCRIPTION_ID" != "null" ]; then
+            az account set --subscription "$SUBSCRIPTION_ID"
+          fi
         fi
         if [ ! -x ./aws/install ]; then
           curl -sSf https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip
