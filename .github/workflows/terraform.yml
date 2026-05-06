@@ -43,7 +43,7 @@ on:
         required: false
         default: ''
       github-app-repo-owner:
-        description: the owner of the GitHub App used to generate a token for accessing private repositories (if needed for fetching terraform modules or other resources). Can be the same repository or another one where the GitHub App is installed.
+        description: the owner of the GitHub App used to generate a token for accessing private repositories (if needed for fetching terraform modules or other resources). Can be the same organization or another one where the GitHub App is installed.
         type: string
         required: false
     secrets:

@@ -123,7 +123,7 @@ The following GitHub secrets (all optional) are also accepted by this workflow:
   Alfresco org. Used as a fallback when `github-app-repo-owner` is not set.
 - `GITHUB_TOKEN_CLIENT_ID`: (optional) client ID of a GitHub App used to generate
   a token for accessing private terraform modules. Requires `github-app-repo-owner`
-  input and `GITHUB_TOKEN_PRIVATE_KEY` secret to be set.
+  input and `GITHUB_TOKEN_PRIVATE_KEY` secret to be provided.
 - `GITHUB_TOKEN_PRIVATE_KEY`: (optional) private key of the GitHub App used to
   generate a token for accessing private terraform modules. Requires
   `github-app-repo-owner` input and `GITHUB_TOKEN_CLIENT_ID` secret to be set.
