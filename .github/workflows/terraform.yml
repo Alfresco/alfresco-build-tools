@@ -42,14 +42,6 @@ on:
         type: string
         required: false
         default: ''
-      backend_config:
-        description: |
-          Custom backend configuration for Terraform (e.g. for azurerm backend).
-          When provided, this overrides the default S3 backend config.
-          Format: key=value pairs, one per line.
-        type: string
-        required: false
-        default: ''
       github-app-repo-owner:
         description: the owner of the GitHub App used to generate a token for accessing private repositories (if needed for fetching terraform modules or other resources). Can be the same repository or another one where the GitHub App is installed.
         type: string
@@ -331,6 +323,10 @@ jobs:
         set +x -euo pipefail
         if [ -n "$AZURE_CREDENTIALS" ]; then
           curl -skL https://aka.ms/InstallAzureCLIDeb | bash
+          CLIENT_ID=$(echo "$AZURE_CREDENTIALS" | jq -r '.clientId')
+          CLIENT_SECRET=$(echo "$AZURE_CREDENTIALS" | jq -r '.clientSecret')
+          TENANT_ID=$(echo "$AZURE_CREDENTIALS" | jq -r '.tenantId')
+          az login --service-principal -u "$CLIENT_ID" -p "$CLIENT_SECRET" --tenant "$TENANT_ID" --output none
         fi
         if [ ! -x ./aws/install ]; then
           curl -sSf https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip
@@ -378,21 +374,35 @@ jobs:
             echo "RESOURCE_NAME must be set in the vars context of $ENVIRONMENT_NAME to provide a unique identifier"
             exit 1
           fi
-          if [ -z "${{ inputs.backend_config }}" ] && [ -z "${{ vars.TERRAFORM_STATE_BUCKET }}" ]; then
-            echo "TERRAFORM_STATE_BUCKET must be set in the vars context of $ENVIRONMENT_NAME to specify the S3 bucket used for terraform state storage (or provide a custom backend_config input)"
+          if [ -z "${{ vars.TERRAFORM_STATE_BUCKET }}" ] && [ -z "${{ vars.TERRAFORM_STATE_STORAGE_ACCOUNT }}" ]; then
+            echo "Either TERRAFORM_STATE_BUCKET (for AWS S3) or TERRAFORM_STATE_STORAGE_ACCOUNT (for Azure Storage) must be set in the vars context of $ENVIRONMENT_NAME to specify the backend used for terraform state storage"
             exit 1
+          fi
+          if [ -n "${{ vars.TERRAFORM_STATE_STORAGE_ACCOUNT }}" ]; then
+            if [ -z "${{ vars.TERRAFORM_STATE_RESOURCE_GROUP }}" ]; then
+              echo "TERRAFORM_STATE_RESOURCE_GROUP must be set in the vars context of $ENVIRONMENT_NAME when using Azure Storage backend"
+              exit 1
+            fi
+            if [ -z "${{ vars.TERRAFORM_STATE_CONTAINER }}" ]; then
+              echo "TERRAFORM_STATE_CONTAINER must be set in the vars context of $ENVIRONMENT_NAME when using Azure Storage backend"
+              exit 1
+            fi
           fi
 
       - name: Build backend config
         id: backend-config
         env:
           TERRAFORM_ROOT_PATH: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
-          CUSTOM_BACKEND_CONFIG: ${{ inputs.backend_config }}
         run: |
-          if [ -n "$CUSTOM_BACKEND_CONFIG" ]; then
+          if [ -n "${{ vars.TERRAFORM_STATE_STORAGE_ACCOUNT }}" ]; then
             {
               echo "backend_config<<BACKEND"
-              echo "${{ env.CUSTOM_BACKEND_CONFIG }}"
+              echo "resource_group_name=${{ vars.TERRAFORM_STATE_RESOURCE_GROUP }}"
+              echo "storage_account_name=${{ vars.TERRAFORM_STATE_STORAGE_ACCOUNT }}"
+              echo "container_name=${{ vars.TERRAFORM_STATE_CONTAINER }}"
+              echo "key=${{ vars.RESOURCE_NAME }}/${{ env.TERRAFORM_ROOT_PATH }}/terraform.tfstate"
+              echo "use_azuread_auth=true"
+              echo "use_cli=true"
               echo "BACKEND"
             } >> "$GITHUB_OUTPUT"
           else

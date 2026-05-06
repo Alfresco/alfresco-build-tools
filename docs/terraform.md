@@ -60,15 +60,20 @@ etc.).
 GitHub Environments must be configured with the following GitHub variables
 (repository or environment):
 
+- `RESOURCE_NAME`: used to namespace every resource created, e.g. State file in
+  the storage backend. You can use it as well inside Terraform by defining a
+  variable `resource_name` in your Terraform code.
+
+#### AWS S3 backend
+
+When using AWS S3 as the Terraform state backend, set the following variables:
+
 - `AWS_DEFAULT_REGION`: where the AWS resources will be created
 - `AWS_ROLE_ARN` (optional): the ARN of the role to assume in case OIDC
   authentication is available
-- `RESOURCE_NAME`: used to namespace every resource created, e.g. State file in
-  the S3 bucket. You can use it as well inside Terraform by defining a variable
-  `resource_name` in your Terraform code.
-- `TERRAFORM_STATE_BUCKET`: the name of the S3 bucket where to store the terraform
-  state. You can reuse the same bucket for multiple environments as long as you
-  provide a different `RESOURCE_NAME` for each environment.
+- `TERRAFORM_STATE_BUCKET`: the name of the S3 bucket where to store the
+  terraform state. You can reuse the same bucket for multiple environments as
+  long as you provide a different `RESOURCE_NAME` for each environment.
 
 Alternatively to providing `AWS_ROLE_ARN` as GitHub variable, you can set
 `create_oidc_token_file` input to `true` to request an AWS OIDC token which will
@@ -83,12 +88,37 @@ backend "s3" {
 }
 ```
 
+#### Azure Storage backend
+
+When using Azure Storage as the Terraform state backend, set the following
+variables:
+
+- `TERRAFORM_STATE_RESOURCE_GROUP`: the name of the Azure resource group
+  containing the storage account
+- `TERRAFORM_STATE_STORAGE_ACCOUNT`: the name of the Azure storage account where
+  to store the terraform state
+- `TERRAFORM_STATE_CONTAINER`: the name of the blob container within the storage
+  account
+
+The backend configuration is automatically constructed with
+`use_azuread_auth=true` and `use_cli=true`, which means the `AZURE_CREDENTIALS`
+secret must be provided to authenticate via Azure CLI. The state file key is
+built using the pattern `<RESOURCE_NAME>/<terraform_root_path>/terraform.tfstate`.
+
+Your Terraform code should declare the `azurerm` backend:
+
+```tf
+backend "azurerm" {}
+```
+
 ### GitHub Secrets
 
 The following GitHub secrets (all optional) are also accepted by this workflow:
 
 - `AWS_ACCESS_KEY_ID`: (optional when using OIDC) access key to use the AWS terraform provider
 - `AWS_SECRET_ACCESS_KEY`: (optional when using OIDC) secret key to use the AWS terraform provider
+- `AZURE_CREDENTIALS`: (required for Azure) JSON object containing Azure service
+  principal credentials (`clientId`, `clientSecret`, `tenantId`)
 - `BOT_GITHUB_TOKEN` (to access private terraform modules in the Alfresco org)
 - `DOCKER_USERNAME` (optional): Docker Hub credentials
 - `DOCKER_PASSWORD` (optional): Docker Hub credentials
