@@ -333,11 +333,13 @@ jobs:
             az account set --subscription "$SUBSCRIPTION_ID"
           fi
         fi
-        if [ ! -x ./aws/install ]; then
-          curl -sSf https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip
-          unzip -q awscliv2.zip
+        if [ -n "$AWS_ACCESS_KEY_ID" ] || [ -n "${{ vars.AWS_ROLE_ARN }}" ]; then
+          if [ ! -x ./aws/install ]; then
+            curl -sSf https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip
+            unzip -q awscliv2.zip
+          fi
+          ./aws/install
         fi
-        ./aws/install
         if [ "${{ inputs.install_kubectl }}" == "true" ]; then
           if [ -z "${{ inputs.kubectl_version }}" ]; then
             echo "⚙️ Will install latest stable kubectl..."
