@@ -42,6 +42,14 @@ on:
         type: string
         required: false
         default: ''
+      github_app_repo_owner:
+        description: the owner (organization) of the GitHub App used to generate a token for accessing the private 'terraform-alfresco-modules' repository. Requires github_app_token_client_id and GITHUB_TOKEN_PRIVATE_KEY to be set.
+        type: string
+        required: false
+      github_app_token_client_id:
+        description: the client ID of the GitHub App used to generate a token for accessing the private 'terraform-alfresco-modules' repository. Requires github_app_repo_owner and GITHUB_TOKEN_PRIVATE_KEY to be set.
+        type: string
+        required: false
     secrets:
       AWS_ACCESS_KEY_ID:
         required: false
@@ -57,6 +65,8 @@ on:
       RANCHER2_ACCESS_KEY:
         required: false
       RANCHER2_SECRET_KEY:
+        required: false
+      AZURE_CREDENTIALS:
         required: false
       CUSTOM_SECRET_0:
         required: false
@@ -77,6 +87,8 @@ on:
       CUSTOM_SECRET_8:
         required: false
       CUSTOM_SECRET_9:
+        required: false
+      GITHUB_TOKEN_PRIVATE_KEY:
         required: false
 
 jobs:
@@ -307,6 +319,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       RANCHER2_ACCESS_KEY: ${{ secrets.RANCHER2_ACCESS_KEY }}
       RANCHER2_SECRET_KEY: ${{ secrets.RANCHER2_SECRET_KEY }}
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       CUSTOM_SECRET_0: ${{ secrets.CUSTOM_SECRET_0 }}
       CUSTOM_SECRET_1: ${{ secrets.CUSTOM_SECRET_1 }}
       CUSTOM_SECRET_2: ${{ secrets.CUSTOM_SECRET_2 }}
@@ -319,15 +332,26 @@ jobs:
       CUSTOM_SECRET_9: ${{ secrets.CUSTOM_SECRET_9 }}
       RESOURCE_NAME: ${{ vars.RESOURCE_NAME }}
       TF_VAR_resource_name: ${{ vars.RESOURCE_NAME }}
-      TERRAFORM_HTTP_CREDENTIALS: |
-        github.com/Alfresco=alfresco-build:${{ secrets.BOT_GITHUB_TOKEN }}
       TERRAFORM_PRE_RUN: |
         set +x -euo pipefail
-        if [ ! -x ./aws/install ]; then
-          curl -sSf https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip
-          unzip -q awscliv2.zip
+        if [ -n "$AZURE_CREDENTIALS" ]; then
+          curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+          CLIENT_ID=$(echo "$AZURE_CREDENTIALS" | jq -r '.clientId')
+          CLIENT_SECRET=$(echo "$AZURE_CREDENTIALS" | jq -r '.clientSecret')
+          TENANT_ID=$(echo "$AZURE_CREDENTIALS" | jq -r '.tenantId')
+          SUBSCRIPTION_ID=$(echo "$AZURE_CREDENTIALS" | jq -r '.subscriptionId')
+          az login --service-principal -u "$CLIENT_ID" -p "$CLIENT_SECRET" --tenant "$TENANT_ID" --output none
+          if [ -n "$SUBSCRIPTION_ID" ] && [ "$SUBSCRIPTION_ID" != "null" ]; then
+            az account set --subscription "$SUBSCRIPTION_ID"
+          fi
         fi
-        ./aws/install
+        if [ -n "$AWS_ACCESS_KEY_ID" ] || [ -n "${{ vars.AWS_ROLE_ARN }}" ]; then
+          if [ ! -x ./aws/install ]; then
+            curl -sSf https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip
+            unzip -q awscliv2.zip
+          fi
+          ./aws/install
+        fi
         if [ "${{ inputs.install_kubectl }}" == "true" ]; then
           if [ -z "${{ inputs.kubectl_version }}" ]; then
             echo "⚙️ Will install latest stable kubectl..."
@@ -369,9 +393,59 @@ jobs:
             echo "RESOURCE_NAME must be set in the vars context of $ENVIRONMENT_NAME to provide a unique identifier"
             exit 1
           fi
-          if [ -z "${{ vars.TERRAFORM_STATE_BUCKET }}" ]; then
-            echo "TERRAFORM_STATE_BUCKET must be set in the vars context of $ENVIRONMENT_NAME to specify the S3 bucket used for terraform state storage"
+          if [ -z "${{ vars.TERRAFORM_STATE_BUCKET }}" ] && [ -z "${{ vars.TERRAFORM_STATE_STORAGE_ACCOUNT }}" ]; then
+            echo "Either TERRAFORM_STATE_BUCKET (for AWS S3) or TERRAFORM_STATE_STORAGE_ACCOUNT (for Azure Storage) must be set in the vars context of $ENVIRONMENT_NAME to specify the backend used for terraform state storage"
             exit 1
+          fi
+          if [ -n "${{ vars.TERRAFORM_STATE_BUCKET }}" ] && [ -n "${{ vars.TERRAFORM_STATE_STORAGE_ACCOUNT }}" ]; then
+            echo "TERRAFORM_STATE_BUCKET and TERRAFORM_STATE_STORAGE_ACCOUNT are mutually exclusive in the vars context of $ENVIRONMENT_NAME; configure exactly one terraform state backend"
+            exit 1
+          fi
+          if [ -n "${{ vars.TERRAFORM_STATE_STORAGE_ACCOUNT }}" ]; then
+            if [ -z "${{ vars.TERRAFORM_STATE_RESOURCE_GROUP }}" ]; then
+              echo "TERRAFORM_STATE_RESOURCE_GROUP must be set in the vars context of $ENVIRONMENT_NAME when using Azure Storage backend"
+              exit 1
+            fi
+            if [ -z "${{ vars.TERRAFORM_STATE_CONTAINER }}" ]; then
+              echo "TERRAFORM_STATE_CONTAINER must be set in the vars context of $ENVIRONMENT_NAME when using Azure Storage backend"
+              exit 1
+            fi
+            if [ -z "${{ secrets.AZURE_CREDENTIALS }}" ]; then
+              echo "AZURE_CREDENTIALS secret must be provided when using Azure Storage backend"
+              exit 1
+            fi
+          fi
+          if [ -n "${{ inputs.github_app_repo_owner }}" ]; then
+            if [ -z "${{ inputs.github_app_token_client_id }}" ] || [ -z "${{ secrets.GITHUB_TOKEN_PRIVATE_KEY }}" ]; then
+              echo "github_app_token_client_id input and GITHUB_TOKEN_PRIVATE_KEY secret must both be provided when github_app_repo_owner is set"
+              exit 1
+            fi
+          fi
+
+      - name: Build backend config
+        id: backend-config
+        env:
+          TERRAFORM_ROOT_PATH: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
+        run: |
+          if [ -n "${{ vars.TERRAFORM_STATE_STORAGE_ACCOUNT }}" ]; then
+            echo "Using Azure Storage backend: ${{ vars.TERRAFORM_STATE_STORAGE_ACCOUNT }}/${{ vars.TERRAFORM_STATE_CONTAINER }}"
+            {
+              echo "backend_config<<BACKEND"
+              echo "resource_group_name=${{ vars.TERRAFORM_STATE_RESOURCE_GROUP }}"
+              echo "storage_account_name=${{ vars.TERRAFORM_STATE_STORAGE_ACCOUNT }}"
+              echo "container_name=${{ vars.TERRAFORM_STATE_CONTAINER }}"
+              echo "key=${{ vars.RESOURCE_NAME }}/${{ env.TERRAFORM_ROOT_PATH }}/terraform.tfstate"
+              echo "use_cli=true"
+              echo "BACKEND"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "Using AWS S3 backend: ${{ vars.TERRAFORM_STATE_BUCKET }}"
+            {
+              echo "backend_config<<BACKEND"
+              echo "bucket=${{ vars.TERRAFORM_STATE_BUCKET }}"
+              echo "key=${{ vars.RESOURCE_NAME }}/${{ env.TERRAFORM_ROOT_PATH }}/terraform.tfstate"
+              echo "BACKEND"
+            } >> "$GITHUB_OUTPUT"
           fi
 
       - name: Checkout
@@ -401,7 +475,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
         if: vars.AWS_ROLE_ARN != ''
         with:
-          aws-region: ${{ env.AWS_DEFAULT_REGION}}
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           role-session-name: TerraformWorkflow
 
@@ -410,14 +484,31 @@ jobs:
         with:
           yml_path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/tfenv.yml
 
+      - name: Generate GitHub App token
+        if: inputs.github_app_repo_owner != ''
+        id: app-token
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+        with:
+          client-id: ${{ inputs.github_app_token_client_id }}
+          private-key: ${{ secrets.GITHUB_TOKEN_PRIVATE_KEY }}
+          owner: ${{ inputs.github_app_repo_owner }}
+          repositories: |
+            terraform-alfresco-modules
+
+      - name: Set TERRAFORM_HTTP_CREDENTIALS
+        run: |
+          if [ -n "${{ steps.app-token.outputs.token }}" ]; then
+            echo "TERRAFORM_HTTP_CREDENTIALS=github.com/${{ inputs.github_app_repo_owner }}=x-access-token:${{ steps.app-token.outputs.token }}" >> "$GITHUB_ENV"
+          elif [ -n "${{ secrets.BOT_GITHUB_TOKEN }}" ]; then
+            echo "TERRAFORM_HTTP_CREDENTIALS=github.com/Alfresco=alfresco-build:${{ secrets.BOT_GITHUB_TOKEN }}" >> "$GITHUB_ENV"
+          fi
+
       - name: Terraform validate
         if: needs.compute_basic_vars.outputs.terraform_operation == 'plan' && github.run_attempt == 1
         uses: dflook/terraform-validate@4cef5d8a4b92bcd88486e41e22a42942a382c9d6 # v2.2.3
         with:
           path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
-          backend_config: |
-            bucket=${{ vars.TERRAFORM_STATE_BUCKET }}
-            key=${{ vars.RESOURCE_NAME }}/${{ needs.compute_basic_vars.outputs.terraform_root_path }}/terraform.tfstate
+          backend_config: ${{ steps.backend-config.outputs.backend_config }}
 
       - name: Terraform plan
         uses: dflook/terraform-plan@7878bff63e2099cdc9be9a6f33cbbbf687f8f0fe # v2.2.3
@@ -428,9 +519,7 @@ jobs:
           var_file: |
             ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}common.tfvars
             ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}${{ needs.compute_basic_vars.outputs.environment_name }}.tfvars
-          backend_config: |
-            bucket=${{ vars.TERRAFORM_STATE_BUCKET }}
-            key=${{ vars.RESOURCE_NAME }}/${{ needs.compute_basic_vars.outputs.terraform_root_path }}/terraform.tfstate
+          backend_config: ${{ steps.backend-config.outputs.backend_config }}
 
       - name: Terraform apply
         uses: dflook/terraform-apply@5489b988934a50bf1489d5b7c5253b46520a7dca # v2.2.3
@@ -442,9 +531,7 @@ jobs:
           var_file: |
             ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}common.tfvars
             ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}${{ needs.compute_basic_vars.outputs.environment_name }}.tfvars
-          backend_config: |
-            bucket=${{ vars.TERRAFORM_STATE_BUCKET }}
-            key=${{ vars.RESOURCE_NAME }}/${{ needs.compute_basic_vars.outputs.terraform_root_path }}/terraform.tfstate
+          backend_config: ${{ steps.backend-config.outputs.backend_config }}
 
       - name: Terraform destroy
         uses: dflook/terraform-destroy@b198834c4a4dd959f26649f2a9d24c59e9c9f205 # v2.2.3
@@ -454,6 +541,4 @@ jobs:
           var_file: |
             ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}common.tfvars
             ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/${{ inputs.tfvars_subfolder && format('{0}/', inputs.tfvars_subfolder) || '' }}${{ needs.compute_basic_vars.outputs.environment_name }}.tfvars
-          backend_config: |
-            bucket=${{ vars.TERRAFORM_STATE_BUCKET }}
-            key=${{ vars.RESOURCE_NAME }}/${{ needs.compute_basic_vars.outputs.terraform_root_path }}/terraform.tfstate
+          backend_config: ${{ steps.backend-config.outputs.backend_config }}

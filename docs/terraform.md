@@ -60,15 +60,20 @@ etc.).
 GitHub Environments must be configured with the following GitHub variables
 (repository or environment):
 
+- `RESOURCE_NAME`: used to namespace every resource created, e.g. State file in
+  the storage backend. You can use it as well inside Terraform by defining a
+  variable `resource_name` in your Terraform code.
+
+#### AWS S3 backend
+
+When using AWS S3 as the Terraform state backend, set the following variables:
+
 - `AWS_DEFAULT_REGION`: where the AWS resources will be created
 - `AWS_ROLE_ARN` (optional): the ARN of the role to assume in case OIDC
   authentication is available
-- `RESOURCE_NAME`: used to namespace every resource created, e.g. State file in
-  the S3 bucket. You can use it as well inside Terraform by defining a variable
-  `resource_name` in your Terraform code.
-- `TERRAFORM_STATE_BUCKET`: the name of the S3 bucket where to store the terraform
-  state. You can reuse the same bucket for multiple environments as long as you
-  provide a different `RESOURCE_NAME` for each environment.
+- `TERRAFORM_STATE_BUCKET`: the name of the S3 bucket where to store the
+  terraform state. You can reuse the same bucket for multiple environments as
+  long as you provide a different `RESOURCE_NAME` for each environment.
 
 Alternatively to providing `AWS_ROLE_ARN` as GitHub variable, you can set
 `create_oidc_token_file` input to `true` to request an AWS OIDC token which will
@@ -83,13 +88,43 @@ backend "s3" {
 }
 ```
 
+#### Azure Storage backend
+
+When using Azure Storage as the Terraform state backend, set the following
+variables:
+
+- `TERRAFORM_STATE_RESOURCE_GROUP`: the name of the Azure resource group
+  containing the storage account
+- `TERRAFORM_STATE_STORAGE_ACCOUNT`: the name of the Azure storage account where
+  to store the terraform state
+- `TERRAFORM_STATE_CONTAINER`: the name of the blob container within the storage
+  account
+
+The backend configuration is automatically constructed with `use_cli=true`,
+which means the `AZURE_CREDENTIALS` secret must be provided to authenticate via
+Azure CLI. The state file key is built using the pattern
+`<RESOURCE_NAME>/<terraform_root_path>/terraform.tfstate`.
+
+Your Terraform code should declare the `azurerm` backend:
+
+```tf
+backend "azurerm" {}
+```
+
 ### GitHub Secrets
 
-The following GitHub secrets (all optional) are also accepted by this workflow:
+The following GitHub secrets are accepted by this workflow. Most are optional,
+but some are required depending on the selected backend or authentication mode:
 
 - `AWS_ACCESS_KEY_ID`: (optional when using OIDC) access key to use the AWS terraform provider
 - `AWS_SECRET_ACCESS_KEY`: (optional when using OIDC) secret key to use the AWS terraform provider
-- `BOT_GITHUB_TOKEN` (to access private terraform modules in the Alfresco org)
+- `AZURE_CREDENTIALS`: (required for Azure) JSON object containing Azure service
+  principal credentials (`clientId`, `clientSecret`, `subscriptionId`, `tenantId`)
+- `BOT_GITHUB_TOKEN`: (optional) token to access private terraform modules in the
+  Alfresco org. Used as a fallback when `github_app_repo_owner` is not set.
+- `GITHUB_TOKEN_PRIVATE_KEY`: (optional) private key of the GitHub App used to
+  generate a token for accessing private terraform modules. Requires
+  `github_app_repo_owner` input and `github_app_token_client_id` input to be set.
 - `DOCKER_USERNAME` (optional): Docker Hub credentials
 - `DOCKER_PASSWORD` (optional): Docker Hub credentials
 - `RANCHER2_ACCESS_KEY` (optional): access key to use the rancher terraform
@@ -280,6 +315,20 @@ jobs:
       CUSTOM_SECRET_2: ${{ secrets.GITHUB_APP_PEM_FILE }}
       # ...
       # CUSTOM_SECRET_9: ${{ secrets.MY_CUSTOM_SECRET }}
+
+  # Azure Storage backend with GitHub App token for private terraform modules
+  invoke-terraform-aks:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v17.6.1
+    with:
+      terraform_root_path: infra
+      terraform_default_env: develop
+      terraform_operation: ${{ inputs.terraform_operation }}
+      tfvars_subfolder: envs
+      github_app_repo_owner: Alfresco
+      github_app_token_client_id: ${{ vars.MY_GITHUB_APP_CLIENT_ID }}
+    secrets:
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      GITHUB_TOKEN_PRIVATE_KEY: ${{ secrets.MY_GITHUB_APP_PRIVATE_KEY }}
 ```
 
 ### kubectl support
