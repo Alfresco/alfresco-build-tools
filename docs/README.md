@@ -677,22 +677,6 @@ You can override the default behavior by adding one or more of the following inp
           remove-tools-cache: false
 ```
 
-Since GitHub hosted runners use Azure VMs which provide a local SSD mount under
-`/mnt` by default, you can get additional space by enabling the optional
-`merge-disk-volumes` input. This feature is brought by the community action
-[maximize-build-space](https://github.com/easimon/maximize-build-space). This
-will expand the root filesystem leveraging the extra space available under `/mnt`.
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v17.7.0
-        with:
-          merge-disk-volumes: true
-          build-mount-path: '/var/lib/docker/' # optional - default to GITHUB_WORKSPACE
-          root-reserve-mb: 12288  # optional
-          temp-reserve-mb: 100  # optional
-          swap-size-mb: 1024  # optional
-```
-
 There is an additional input `diagnose-top-offenders-enabled` which when set to `true` will
 run a disk usage analysis and print the top offenders before and after the cleanup.
 

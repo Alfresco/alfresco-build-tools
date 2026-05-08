@@ -1,45 +1,6 @@
 name: Free GHA runner disk space
-description: Frees up disk space on GitHub Actions hosted runners by removing unneeded software and optionally merging disk volumes to maximize build space.
+description: Frees up disk space on GitHub Actions hosted runners by removing unneeded software.
 inputs:
-  merge-disk-volumes:
-    description: Maximize build space by leveraging local disk volume /mnt. Disabled by default due to long duration.
-    required: false
-    default: 'false'
-  root-reserve-mb:
-    description: Space to be left free on the root filesystem, in Megabytes. Only applicable if merge-disk-volumes is set to true.
-    required: false
-    default: '12288'
-  temp-reserve-mb:
-    description: Space to be left free on the temp filesystem (/mnt), in Megabytes. Only applicable if merge-disk-volumes is set to true.
-    required: false
-    default: '100'
-  swap-size-mb:
-    description: Swap space to create, in Megabytes. Only applicable if merge-disk-volumes is set to true.
-    required: false
-    default: '1024'
-  overprovision-lvm:
-    description: |
-      Create the LVM disk images as sparse files, making the space required for the LVM image files *appear* unused on the
-      hosting volumes until actually allocated. Use with care, this can lead to surprising out-of-disk-space situations.
-      You should prefer adjusting root-reserve-mb/temp-reserve-mb over using this option.
-    required: false
-    default: 'false'
-  build-mount-path:
-    description: Absolute path to the mount point where the build space will be available, defaults to /var/lib/docker/ if unset. Only applicable if merge-disk-volumes is set to true.
-    required: false
-    default: '/var/lib/docker/'
-  build-mount-path-ownership:
-    description: Ownership of the mount point path, defaults to standard "runner" user and group. Only applicable if merge-disk-volumes is set to true.
-    required: false
-    default: 'runner:runner'
-  pv-loop-path:
-    description: Absolute file path for the LVM image created on the root filesystem, the default is usually fine. Only applicable if merge-disk-volumes is set to true.
-    required: false
-    default: '/pv.img'
-  tmp-pv-loop-path:
-    description: Absolute file path for the LVM image created on the temp filesystem, the default is usually fine. Must reside on /mnt . Only applicable if merge-disk-volumes is set to true.
-    required: false
-    default: '/mnt/tmp-pv.img'
   remove-dotnet:
     description: Removes .NET runtime and libraries
     required: false
@@ -94,11 +55,6 @@ runs:
         echo "Available storage:"
         df -h
         echo
-
-    - name: Move /var/lib/docker/
-      if: inputs.merge-disk-volumes == 'true'
-      run: sudo mv /var/lib/docker/ "${GITHUB_WORKSPACE}/docker"
-      shell: bash
 
     - name: Run optional diagnostic of top offenders before cleanup
       if: inputs.diagnose-top-offenders-enabled == 'true'
@@ -222,24 +178,6 @@ runs:
       if: inputs.diagnose-top-offenders-enabled == 'true'
       run: |
         sudo du -h --max-depth=4 /usr /opt | sort -hr 2>/dev/null | head -n 20 || true
-      shell: bash
-
-    - name: Maximize build space
-      if: inputs.merge-disk-volumes == 'true'
-      uses: easimon/maximize-build-space@fc881a613ad2a34aca9c9624518214ebc21dfc0c # v10
-      with:
-        root-reserve-mb: ${{ inputs.root-reserve-mb }}
-        temp-reserve-mb: ${{ inputs.temp-reserve-mb }}
-        swap-size-mb: ${{ inputs.swap-size-mb }}
-        overprovision-lvm: ${{ inputs.overprovision-lvm }}
-        build-mount-path: ${{ inputs.build-mount-path }}
-        build-mount-path-ownership: ${{ inputs.build-mount-path-ownership }}
-        pv-loop-path: ${{ inputs.pv-loop-path }}
-        tmp-pv-loop-path: ${{ inputs.tmp-pv-loop-path }}
-
-    - name: Restore /var/lib/docker/
-      if: inputs.merge-disk-volumes == 'true'
-      run: sudo sh -c "mv ${GITHUB_WORKSPACE}/docker/* /var/lib/docker"
       shell: bash
 
     - name: Runner system report after cleanup
