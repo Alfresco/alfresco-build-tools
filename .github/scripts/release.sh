@@ -22,4 +22,4 @@ else
 fi
 
 grep -RIl "Alfresco/alfresco-build-tools.*@" | xargs -r sed -i -e "s#\(Alfresco/alfresco-build-tools[^@[:space:]]*@\)\(v[0-9]\+\.[0-9]\+\.[0-9]\+\|[a-f0-9]\{40\}\)#\1$RELEASE_SHA#g"
-echo "Bump to $RELEASE_SHA completed successfully."
+echo "Bump to $RELEASE_VERSION ($RELEASE_SHA) completed successfully."
