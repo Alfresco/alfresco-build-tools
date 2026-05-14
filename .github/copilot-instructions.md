@@ -78,7 +78,7 @@ Additional notes or configuration details.
 - **MUST** use SHA pins: `Alfresco/alfresco-build-tools/.github/actions/action-name@<40-char-sha>`
 - **NEVER** use version tags: `Alfresco/alfresco-build-tools/.github/actions/action-name@v17.7.0`
 - SHA pins are managed **automatically by the release process** — do not set them manually
-- The release workflow creates an empty commit, captures its SHA, and updates all internal refs to that SHA
+- The release workflow creates a release candidate commit (SHA_RC) from the current HEAD, then the final release commit pins refs to SHA_RC — growing consistent depth by +2 levels per release cycle
 
 **Examples:**
 
