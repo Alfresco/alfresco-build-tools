@@ -73,10 +73,10 @@ if ! find "$actions_dir" -type f -name action.yml -print -quit | grep -q .; then
   exit 2
 fi
 
-folders=$(find "$actions_dir" -type f -name action.yml -print | xargs -n1 dirname | sort -u)
+folders=$(find "$actions_dir" -type f -name action.yml -print0 | xargs -0 -n1 dirname | sort -u)
 
 # Check each folder
-for folder in $folders; do
+while IFS= read -r folder; do
   if [ ! -d "$folder" ]; then
     echo "Invalid action directory in list: $folder"
     exit 2
@@ -92,13 +92,11 @@ for folder in $folders; do
     echo "No entry found for $search_string in $readme_file"
     missing_entries=$((missing_entries + 1))
   fi
-done
-
-# Report the number of missing entries
-if [ $missing_entries -gt 0 ]; then
+done <<< "$folders"
+if [ "$missing_entries" -gt 0 ]; then
   echo "$missing_entries entries not found in $readme_file"
 fi
 
-if [ $missing_entries -gt $allowed_missing_entries ]; then
+if [ "$missing_entries" -gt "$allowed_missing_entries" ]; then
   exit 1
 fi

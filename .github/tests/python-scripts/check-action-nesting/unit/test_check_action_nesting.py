@@ -1,8 +1,7 @@
-import pytest
-from unit.conftest import install_fixture_actions, make_workflow
-
 import check_action_nesting  # noqa: F401 - ensure module is importable
+import pytest
 from check_action_nesting import collect_nodes, main, max_depth
+from unit.conftest import install_fixture_actions, make_workflow
 
 # ---------------------------------------------------------------------------
 # collect_nodes

@@ -41,5 +41,5 @@
 - id: check-readme-missing-entries
   name: Check README entries
   language: script
-  entry: ./check_readme.sh
+  entry: .github/scripts/check_readme.sh
   pass_filenames: false

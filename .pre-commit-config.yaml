@@ -46,7 +46,7 @@ repos:
       - id: check-action-nesting-depth
         name: Check GitHub Actions nesting depth
         language: python
-        entry: python check_action_nesting.py
+        entry: python .github/scripts/check_action_nesting.py
         args: [--max-depth, '3']
         pass_filenames: false
         files: ^\.github/(actions|workflows)/.*\.ya?ml$
@@ -55,7 +55,7 @@ repos:
       - id: check-readme-missing-entries
         name: Check README entries for GitHub Actions missing entries
         language: system
-        entry: ./check_readme.sh
+        entry: .github/scripts/check_readme.sh
         args: [--exclude-path, .github/actions/dbp-charts]
         pass_filenames: false
 
