@@ -5,7 +5,7 @@ runs:
   steps:
     - name: "Get branch name"
       id: get-branch-name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@v17.7.0
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@ec80243b9377b36b6a0a527c3ae9670da9c62e67
     - name: "Get build info"
       run: |
         [[ $GITHUB_EVENT_NAME == "pull_request" ]] && IS_PULL_REQUEST="true" || IS_PULL_REQUEST="false"

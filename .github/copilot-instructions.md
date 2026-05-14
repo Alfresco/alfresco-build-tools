@@ -75,22 +75,23 @@ Additional notes or configuration details.
 
 **For reusable workflows and composite actions referencing actions within this repository:**
 
-- **MUST** use version tags: `Alfresco/alfresco-build-tools/.github/actions/action-name@v17.7.0`
-- **NEVER** use SHA pins: `Alfresco/alfresco-build-tools/.github/actions/action-name@abc123def456`
-- This ensures the `release.sh` script can automatically update all internal references during releases
+- **MUST** use SHA pins: `Alfresco/alfresco-build-tools/.github/actions/action-name@<40-char-sha>`
+- **NEVER** use version tags: `Alfresco/alfresco-build-tools/.github/actions/action-name@v17.7.0`
+- SHA pins are managed **automatically by the release process** — do not set them manually
+- The release workflow creates a release candidate commit (SHA_RC) from the current HEAD, then the final release commit pins refs to SHA_RC — growing consistent depth by +2 levels per release cycle
 
 **Examples:**
 
-✅ **Correct (version tag):**
+✅ **Correct (SHA pin):**
+
+```yaml
+- uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
+```
+
+❌ **Incorrect (version tag):**
 
 ```yaml
 - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v17.7.0
-```
-
-❌ **Incorrect (SHA pin):**
-
-```yaml
-- uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@abc123def456
 ```
 
 **For external actions (from other repositories):**
@@ -150,8 +151,8 @@ pre-commit run --all-files
 - The released version is determined from PR labels (`release/major`, `release/minor`, `release/patch`)
 - Actions will automatically be updated with the release tag by the release workflow itself, no need to do it manually
 - Release notes are auto-generated from PR titles and descriptions
-- The `release.sh` script automatically updates all internal version references that use version tags
-- **CRITICAL**: Internal references must use version tags (not SHA pins) for automatic updates to work
+- The `release.sh` script automatically pins all internal references to the SHA of the release candidate commit
+- **CRITICAL**: Internal references must use SHA pins (not version tags); these are managed automatically by the release process — do not set them manually
 
 ### Pull Request Guidelines
 
@@ -192,7 +193,7 @@ For common operations:
 ## Common Pitfalls to Avoid
 
 - **Never** skip version bumping for functional changes
-- **CRITICAL**: Never use SHA pins for internal action references (`Alfresco/alfresco-build-tools/.github/...`) - always use version tags to ensure automatic release updates work
+- **CRITICAL**: Never use version tags for internal action references (`Alfresco/alfresco-build-tools/.github/...`) - always use SHA pins (managed automatically by the release process)
 - **Don't** use `latest` tags for external actions - always pin versions
 - **Avoid** hardcoding repository-specific values in reusable actions
 - **Don't** merge PRs with user-facing changes (new features or enhancements) without updating `docs/README.md`
@@ -207,7 +208,7 @@ Before opening or reviewing a PR, verify:
 2. ✅ **Validation passed**: `.github/scripts/check_readme.sh` runs successfully
 3. ✅ **Version label**: Appropriate `release/patch|minor|major` label added
 4. ✅ **Pre-commit hooks**: All checks pass
-5. ✅ **Internal references**: Use version tags, not SHA pins
+5. ✅ **Internal references**: Use SHA pins (managed by release process), not version tags
 
 ## Useful Commands
 
@@ -221,14 +222,14 @@ pre-commit run --all-files
 # Test specific action locally
 cd .github/actions/action-name && bats tests/
 
-# Find all internal action references (should use version tags)
-grep -r "Alfresco/alfresco-build-tools/.github" .github/
+# Find all internal action references (should use SHA pins, not version tags)
+grep -r "Alfresco/alfresco-build-tools/.github" .github/ --include="*.yml"
 
-# Check for forbidden SHA pins in internal references (should return no results)
-grep -r "Alfresco/alfresco-build-tools/.github.*@[a-f0-9]\{7,\}" .github/
+# Check for forbidden version tags in internal references (should return no results)
+grep -r "Alfresco/alfresco-build-tools/.github.*@v[0-9]" .github/ --include="*.yml"
 
-# Find all version tag references for release updating
-grep -r "alfresco-build-tools.*@v" .github/
+# Find all SHA-pinned internal references (the correct format)
+grep -r "alfresco-build-tools.*@[0-9a-f]\{40\}" .github/ --include="*.yml"
 
 # Check for undocumented actions
 diff <(ls .github/actions) <(grep -o "### [^#]*" docs/README.md | sed 's/### //')
