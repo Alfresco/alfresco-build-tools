@@ -41,6 +41,14 @@ repos:
 
   - repo: local
     hooks:
+      - id: check-action-nesting-depth
+        name: Check GitHub Actions nesting depth
+        language: python
+        entry: python check_action_nesting.py
+        args: [--max-depth, '3']
+        pass_filenames: false
+        files: ^\.github/(actions|workflows)/.*\.yml$
+
       - id: check-readme-missing-entries
         name: Check README entries for GitHub Actions missing entries
         language: system
