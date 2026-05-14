@@ -2649,8 +2649,10 @@ jobs:
 
 Release command has access to the following environment variables:
 
-- RELEASE_VERSION: the new version calculated
-- CURRENT_VERSION: the previous version
+- `RELEASE_VERSION`: the new version calculated
+- `CURRENT_VERSION`: the previous version
+- `COMMIT_USERNAME`: the configured commit username (from `commit_username` input)
+- `COMMIT_EMAIL`: the configured commit email (from `commit_email` input)
 
 ### terraform
 
