@@ -118,6 +118,8 @@ jobs:
             env:
               RELEASE_VERSION: ${{ steps.bump-semver.outputs.new-version }}
               CURRENT_VERSION: ${{ steps.bump-semver.outputs.current-version }}
+              COMMIT_USERNAME: ${{ inputs.commit_username }}
+              COMMIT_EMAIL: ${{ inputs.commit_email }}
             run: |
               ${{ inputs.release_command }}
 

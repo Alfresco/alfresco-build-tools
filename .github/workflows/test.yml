@@ -39,7 +39,7 @@ jobs:
         if: contains(github.event.pull_request.labels.*.name, 'test/local-actions')
         run: |
           find .github/actions -name "action.yml" -type f \
-            -exec sed -i 's|uses: Alfresco/alfresco-build-tools/\.github/actions/\([^@]*\)@v[0-9]\+\.[0-9]\+\.[0-9]\+|uses: ./.github/actions/\1|g' {} \;
+            -exec sed -i 's|uses: Alfresco/alfresco-build-tools/\.github/actions/\([^@]*\)@\([0-9a-f]\{40\}\|v[0-9]\+\.[0-9]\+\.[0-9]\+\)|uses: ./.github/actions/\1|g' {} \;
           git diff
 
       - name: Test HTTP latency
