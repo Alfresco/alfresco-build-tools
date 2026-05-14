@@ -24,12 +24,12 @@ git config user.email "$COMMIT_EMAIL"
 # Pass 1: release candidate commit
 # Pin all .github/ refs to SHA_PREV (the last merged commit).
 SHA_PREV=$(git rev-parse HEAD)
-grep -Rl "Alfresco/alfresco-build-tools.*@" .github/ --include="*.yml" | xargs sed -i -e \
-  "s|\(Alfresco/alfresco-build-tools[^@]*@\)\([0-9a-f]\{40\}\|v[0-9]\+\.[0-9]\+\.[0-9]\+\)|\1$SHA_PREV|g"
+grep -Rl "Alfresco/alfresco-build-tools.*@" .github/ --include="*.yml" | xargs sed -i -E \
+  "s|(Alfresco/alfresco-build-tools[^@]*@)[0-9a-f]{40}|\1$SHA_PREV|g"
 
 # Update version tags in docs/ (human-readable semver for user-facing documentation)
-grep -Rl "Alfresco/alfresco-build-tools.*@v" docs/ | xargs sed -i -e \
-  "s/\(Alfresco\/alfresco-build-tools[^@]*@\)v[0-9]\+\.[0-9]\+\.[0-9]\+/\1$RELEASE_VERSION/g"
+grep -Rl "Alfresco/alfresco-build-tools.*@v" docs/ | xargs sed -i -E \
+  "s|(Alfresco/alfresco-build-tools[^@]*@)v[0-9]+\.[0-9]+\.[0-9]+|\1$RELEASE_VERSION|g"
 
 git add -A
 git commit -m "Release candidate $RELEASE_VERSION"
@@ -41,6 +41,6 @@ echo "Pass 1 complete: pinned refs to SHA_PREV=$SHA_PREV, created SHA_RC=$SHA_RC
 # candidate commit, which in turn references SHA_PREV (the actual code).
 # Each release adds 2 more levels of consistent nesting depth; deeper chains
 # gain full consistency over successive releases.
-grep -Rl "Alfresco/alfresco-build-tools.*@" .github/ --include="*.yml" | xargs sed -i -e \
-  "s|\(Alfresco/alfresco-build-tools[^@]*@\)\([0-9a-f]\{40\}\|v[0-9]\+\.[0-9]\+\.[0-9]\+\)|\1$SHA_RC|g"
+grep -Rl "Alfresco/alfresco-build-tools.*@" .github/ --include="*.yml" | xargs sed -i -E \
+  "s|(Alfresco/alfresco-build-tools[^@]*@)[0-9a-f]{40}|\1$SHA_RC|g"
 echo "Pass 2 complete: pinned refs to SHA_RC=$SHA_RC (git-auto-commit-action will create the final release commit)"
