@@ -1,0 +1,8 @@
+name: Stub leaf action (test fixture - depth 0)
+description: No internal dependencies. Acts as a leaf node in nesting-depth tests.
+runs:
+  using: composite
+  steps:
+    - name: No-op
+      shell: bash
+      run: echo "leaf"

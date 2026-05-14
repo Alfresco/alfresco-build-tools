@@ -32,12 +32,14 @@ repos:
     rev: v1.7.12
     hooks:
       - id: actionlint
+        exclude: ^\.github/tests/
 
   - repo: https://github.com/hyland/github-actions-ensure-sha-pinned-actions
     rev: v1.2.0
     hooks:
       - id: gha-sha-convert
         args: [--allowlist, 'Alfresco/alfresco-build-tools/*']
+        exclude: ^\.github/tests/
 
   - repo: local
     hooks:
@@ -48,6 +50,7 @@ repos:
         args: [--max-depth, '3']
         pass_filenames: false
         files: ^\.github/(actions|workflows)/.*\.yml$
+        additional_dependencies: [pyyaml]
 
       - id: check-readme-missing-entries
         name: Check README entries for GitHub Actions missing entries

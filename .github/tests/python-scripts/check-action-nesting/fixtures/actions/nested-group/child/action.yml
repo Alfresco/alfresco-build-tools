@@ -1,0 +1,10 @@
+name: Stub nested child action (test fixture - depth 0)
+description: >
+  Action living under a sub-directory (nested-group/child).
+  Its full path key is "nested-group/child", matching how uses: refs are written.
+runs:
+  using: composite
+  steps:
+    - name: No-op
+      shell: bash
+      run: echo "nested child"

@@ -1,0 +1,11 @@
+name: Stub action using folded scalar syntax (test fixture - depth 1)
+description: >
+  Same as wraps-leaf but uses the YAML folded scalar form for the uses: key,
+  matching the style found in .github/actions/dbp-charts/verify-helm/action.yml.
+  Verifies the nesting checker handles all valid YAML scalar forms.
+runs:
+  using: composite
+  steps:
+    - name: Call leaf via folded scalar
+      uses: >-
+        Alfresco/alfresco-build-tools/.github/actions/leaf@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa

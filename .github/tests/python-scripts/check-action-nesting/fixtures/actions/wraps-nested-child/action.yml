@@ -1,0 +1,8 @@
+name: Stub action wrapping a nested-group/child action (test fixture - depth 1)
+description: >
+  Calls nested-group/child using its full sub-path.
+  Verifies that collect_nodes correctly resolves sub-directory action keys.
+runs:
+  using: composite
+  steps:
+    - uses: Alfresco/alfresco-build-tools/.github/actions/nested-group/child@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa

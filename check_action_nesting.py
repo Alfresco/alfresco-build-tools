@@ -4,36 +4,61 @@ Check that no composite action or reusable workflow exceeds the maximum allowed
 nesting depth for internal Alfresco/alfresco-build-tools action references.
 
 Nesting depth is defined as the longest chain of internal `uses:` hops starting
-from a given action/workflow. Leaf actions (no internal calls) have depth 0.
+from a given action/workflow. Leaf actions (no internal deps) have depth 0.
 
 Exit 1 if any node exceeds --max-depth (default: 3).
 """
 
 import argparse
-import re
 import sys
 from pathlib import Path
 
-INTERNAL_REF = re.compile(r"uses:\s+Alfresco/alfresco-build-tools/\.github/actions/([^@\s]+)")
+import yaml
+
+INTERNAL_PREFIX = "Alfresco/alfresco-build-tools/.github/actions/"
+
+
+def _extract_uses_values(data) -> list[str]:
+    """Recursively walk a parsed YAML structure and collect all `uses:` values."""
+    results = []
+    if isinstance(data, dict):
+        if "uses" in data and isinstance(data["uses"], str):
+            results.append(data["uses"])
+        for value in data.values():
+            results.extend(_extract_uses_values(value))
+    elif isinstance(data, list):
+        for item in data:
+            results.extend(_extract_uses_values(item))
+    return results
+
+
+def _internal_deps(path: Path) -> set[str]:
+    """Return the set of internal action names referenced by a YAML file."""
+    try:
+        data = yaml.safe_load(path.read_text())
+    except yaml.YAMLError:
+        return set()
+    deps = set()
+    for ref in _extract_uses_values(data):
+        if ref.startswith(INTERNAL_PREFIX):
+            action_name = ref[len(INTERNAL_PREFIX) :].split("@")[0].strip("/")
+            deps.add(action_name)
+    return deps
 
 
 def collect_nodes(root: Path) -> dict[str, set[str]]:
     """Return a dict mapping node-name → set of internal action names it calls."""
     deps: dict[str, set[str]] = {}
+    actions_root = root / ".github" / "actions"
 
-    # Composite actions
-    for action_yml in (root / ".github" / "actions").rglob("action.yml"):
-        name = action_yml.parent.name
-        content = action_yml.read_text()
-        deps[name] = {m.group(1).strip("/") for m in INTERNAL_REF.finditer(content)}
+    for action_yml in actions_root.rglob("action.yml"):
+        name = str(action_yml.parent.relative_to(actions_root))
+        deps[name] = _internal_deps(action_yml)
 
-    # Reusable workflows
     for wf_yml in (root / ".github" / "workflows").glob("*.yml"):
-        content = wf_yml.read_text()
-        calls = {m.group(1).strip("/") for m in INTERNAL_REF.finditer(content)}
+        calls = _internal_deps(wf_yml)
         if calls:
-            node_name = f"workflow:{wf_yml.name}"
-            deps[node_name] = calls
+            deps[f"workflow:{wf_yml.name}"] = calls
 
     return deps
 
