@@ -130,6 +130,30 @@ def test_main_empty_repo_passes(tmp_path, monkeypatch):
     assert main() == 0
 
 
+def test_collect_nodes_workflow_with_yaml_extension_is_included(tmp_path):
+    install_fixture_actions(tmp_path, "leaf")
+    make_workflow(tmp_path, "my-wf.yaml", uses=["leaf"])
+    deps = collect_nodes(tmp_path)
+    assert "workflow:my-wf.yaml" in deps
+    assert deps["workflow:my-wf.yaml"] == {"leaf"}
+
+
+def test_collect_nodes_action_with_yaml_extension_is_detected(tmp_path):
+    """An action.yaml file (not action.yml) should be scanned."""
+    (tmp_path / ".github" / "actions" / "yaml-action").mkdir(parents=True)
+    yaml_file = tmp_path / ".github" / "actions" / "yaml-action" / "action.yaml"
+    from unit.conftest import STUB_SHA
+
+    yaml_file.write_text(
+        "name: yaml-action\nruns:\n  using: composite\n  steps:\n"
+        f"    - uses: Alfresco/alfresco-build-tools/.github/actions/leaf@{STUB_SHA}\n"
+    )
+    install_fixture_actions(tmp_path, "leaf")
+    deps = collect_nodes(tmp_path)
+    assert "yaml-action" in deps
+    assert deps["yaml-action"] == {"leaf"}
+
+
 def test_main_output_lists_all_violations(tmp_path, monkeypatch, capsys):
     install_fixture_actions(tmp_path, "leaf", "wraps-leaf", "wraps-wraps-leaf", "wraps-wraps-wraps-leaf", "too-deep")
     # Also add a second violating action by copying too-deep under a different name

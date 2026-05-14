@@ -49,7 +49,7 @@ repos:
         entry: python check_action_nesting.py
         args: [--max-depth, '3']
         pass_filenames: false
-        files: ^\.github/(actions|workflows)/.*\.yml$
+        files: ^\.github/(actions|workflows)/.*\.ya?ml$
         additional_dependencies: [pyyaml]
 
       - id: check-readme-missing-entries

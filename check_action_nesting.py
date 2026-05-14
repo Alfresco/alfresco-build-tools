@@ -51,11 +51,11 @@ def collect_nodes(root: Path) -> dict[str, set[str]]:
     deps: dict[str, set[str]] = {}
     actions_root = root / ".github" / "actions"
 
-    for action_yml in actions_root.rglob("action.yml"):
+    for action_yml in [*actions_root.rglob("action.yml"), *actions_root.rglob("action.yaml")]:
         name = str(action_yml.parent.relative_to(actions_root))
         deps[name] = _internal_deps(action_yml)
 
-    for wf_yml in (root / ".github" / "workflows").glob("*.yml"):
+    for wf_yml in [*(root / ".github" / "workflows").glob("*.yml"), *(root / ".github" / "workflows").glob("*.yaml")]:
         calls = _internal_deps(wf_yml)
         if calls:
             deps[f"workflow:{wf_yml.name}"] = calls
