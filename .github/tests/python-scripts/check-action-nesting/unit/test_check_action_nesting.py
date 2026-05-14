@@ -1,3 +1,4 @@
+import pytest
 from unit.conftest import install_fixture_actions, make_workflow
 
 import check_action_nesting  # noqa: F401 - ensure module is importable
@@ -97,6 +98,12 @@ def test_max_depth_unknown_node_returns_zero():
     assert max_depth("unknown", {}, {}) == 0
 
 
+def test_max_depth_cycle_raises_value_error():
+    deps = {"a": {"b"}, "b": {"a"}}
+    with pytest.raises(ValueError, match="Cycle"):
+        max_depth("a", deps, {})
+
+
 # ---------------------------------------------------------------------------
 # main (integration via tmp_path + fixture actions)
 # ---------------------------------------------------------------------------
@@ -168,3 +175,21 @@ def test_main_output_lists_all_violations(tmp_path, monkeypatch, capsys):
     out = capsys.readouterr().out
     assert "too-deep" in out
     assert "also-too-deep" in out
+
+
+def test_main_reports_cycle_as_error(tmp_path, monkeypatch, capsys):
+    """A dependency cycle must be detected and reported, not silently ignored."""
+    from unit.conftest import STUB_SHA
+
+    actions_root = tmp_path / ".github" / "actions"
+    for name, dep in [("cycle-a", "cycle-b"), ("cycle-b", "cycle-a")]:
+        action_dir = actions_root / name
+        action_dir.mkdir(parents=True)
+        (action_dir / "action.yml").write_text(
+            f"name: {name}\nruns:\n  using: composite\n  steps:\n"
+            f"    - uses: Alfresco/alfresco-build-tools/.github/actions/{dep}@{STUB_SHA}\n"
+        )
+    monkeypatch.setattr("sys.argv", ["check_action_nesting.py", "--root", str(tmp_path)])
+    assert main() == 1
+    out = capsys.readouterr().out
+    assert "Cycle" in out

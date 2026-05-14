@@ -16,6 +16,7 @@ from pathlib import Path
 import yaml
 
 INTERNAL_PREFIX = "Alfresco/alfresco-build-tools/.github/actions/"
+_VISITING = object()  # sentinel: node is on the current DFS stack (cycle guard)
 
 
 def _extract_uses_values(data) -> list[str]:
@@ -63,15 +64,14 @@ def collect_nodes(root: Path) -> dict[str, set[str]]:
     return deps
 
 
-def max_depth(node: str, deps: dict[str, set[str]], cache: dict[str, int]) -> int:
+def max_depth(node: str, deps: dict[str, set[str]], cache: dict) -> int:
     if node in cache:
-        return cache[node]
-    cache[node] = -1  # cycle guard
+        if cache[node] is _VISITING:
+            raise ValueError(f"Cycle detected involving '{node}'")
+        return cache[node]  # type: ignore[return-value]
+    cache[node] = _VISITING
     children = deps.get(node, set())
-    if not children:
-        result = 0
-    else:
-        result = 1 + max(max_depth(c, deps, cache) for c in children)
+    result = 0 if not children else 1 + max(max_depth(c, deps, cache) for c in children)
     cache[node] = result
     return result
 
@@ -93,13 +93,23 @@ def main() -> int:
     args = parser.parse_args()
 
     deps = collect_nodes(args.root)
-    cache: dict[str, int] = {}
+    cache: dict = {}
     violations: list[tuple[int, str]] = []
+    cycles: list[str] = []
 
     for node in deps:
-        depth = max_depth(node, deps, cache)
+        try:
+            depth = max_depth(node, deps, cache)
+        except ValueError as exc:
+            cycles.append(str(exc))
+            continue
         if depth > args.max_depth:
             violations.append((depth, node))
+
+    if cycles:
+        for msg in cycles:
+            print(f"ERROR: {msg}")
+        return 1
 
     if violations:
         violations.sort(reverse=True)
