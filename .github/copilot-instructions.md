@@ -223,13 +223,13 @@ pre-commit run --all-files
 cd .github/actions/action-name && bats tests/
 
 # Find all internal action references (should use SHA pins, not version tags)
-grep -r "Alfresco/alfresco-build-tools/.github" .github/
+grep -r "Alfresco/alfresco-build-tools/.github" .github/ --include="*.yml"
 
 # Check for forbidden version tags in internal references (should return no results)
-grep -r "Alfresco/alfresco-build-tools/.github.*@v[0-9]" .github/
+grep -r "Alfresco/alfresco-build-tools/.github.*@v[0-9]" .github/ --include="*.yml"
 
 # Find all SHA-pinned internal references (the correct format)
-grep -r "alfresco-build-tools.*@[0-9a-f]\{40\}" .github/
+grep -r "alfresco-build-tools.*@[0-9a-f]\{40\}" .github/ --include="*.yml"
 
 # Check for undocumented actions
 diff <(ls .github/actions) <(grep -o "### [^#]*" docs/README.md | sed 's/### //')
