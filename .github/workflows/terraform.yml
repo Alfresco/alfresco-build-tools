@@ -120,7 +120,7 @@ jobs:
 
       - name: Evaluate current branch
         id: get-branch-name
-        uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@ec80243b9377b36b6a0a527c3ae9670da9c62e67
+        uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@c7892aaf95a1f5e5b82ab26b502e17ff3d2f309b
         with:
           additional-pr-events: true
 
@@ -147,7 +147,7 @@ jobs:
       - name: Retrieve PR or last commit changes (used for auto-detection of terraform root path and/or environment)
         if: inputs.terraform_root_path == '' || inputs.terraform_env == ''
         id: last-changes-diff
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@ec80243b9377b36b6a0a527c3ae9670da9c62e67
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@c7892aaf95a1f5e5b82ab26b502e17ff3d2f309b
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -472,7 +472,7 @@ jobs:
         run: echo "${{ steps.idtoken.outputs.id_token }}" >> idtoken.json
 
       - name: Assume AWS Role when AWS_ROLE_ARN is set
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
         if: vars.AWS_ROLE_ARN != ''
         with:
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
@@ -480,7 +480,7 @@ jobs:
           role-session-name: TerraformWorkflow
 
       - name: Load environment variables from yml
-        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@ec80243b9377b36b6a0a527c3ae9670da9c62e67
+        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@c7892aaf95a1f5e5b82ab26b502e17ff3d2f309b
         with:
           yml_path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/tfenv.yml
 
