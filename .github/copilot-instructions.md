@@ -35,7 +35,7 @@ Documentation updates are **NOT required** for:
 **Before opening a PR with user-facing changes, you MUST:**
 
 1. Update `docs/README.md` with the user-facing changes
-2. Run `./check_readme.sh` to validate all actions are documented
+2. Run `.github/scripts/check_readme.sh` to validate all actions are documented
 3. Verify the documentation accurately reflects the current state
 
 **Action Documentation Pattern**:
@@ -59,7 +59,7 @@ Additional notes or configuration details.
 **Run validation script** to ensure all actions are documented:
 
 ```bash
-./check_readme.sh
+.github/scripts/check_readme.sh
 ```
 
 ## Action Development Guidelines
@@ -205,7 +205,7 @@ For common operations:
 Before opening or reviewing a PR, verify:
 
 1. ✅ **Documentation updated**: `docs/README.md` reflects all user-facing changes (new features or enhancements); skip for bug fixes
-2. ✅ **Validation passed**: `./check_readme.sh` runs successfully
+2. ✅ **Validation passed**: `.github/scripts/check_readme.sh` runs successfully
 3. ✅ **Version label**: Appropriate `release/patch|minor|major` label added
 4. ✅ **Pre-commit hooks**: All checks pass
 5. ✅ **Internal references**: Use SHA pins (managed by release process), not version tags
@@ -214,7 +214,7 @@ Before opening or reviewing a PR, verify:
 
 ```bash
 # Check all actions are documented
-./check_readme.sh
+.github/scripts/check_readme.sh
 
 # Validate pre-commit hooks
 pre-commit run --all-files

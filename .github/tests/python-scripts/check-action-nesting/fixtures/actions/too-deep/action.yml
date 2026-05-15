@@ -1,0 +1,9 @@
+name: Stub action exceeding max depth (test fixture - depth 4)
+description: >
+  Calls wraps-wraps-wraps-leaf → wraps-wraps-leaf → wraps-leaf → leaf.
+  Four levels of nesting — intentionally exceeds the allowed maximum of 3.
+  Used in tests that verify the pre-commit hook rejects over-nested chains.
+runs:
+  using: composite
+  steps:
+    - uses: Alfresco/alfresco-build-tools/.github/actions/wraps-wraps-wraps-leaf@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa

@@ -1,0 +1,6 @@
+name: Stub action at max depth (test fixture - depth 3)
+description: Calls wraps-wraps-leaf → wraps-leaf → leaf. Three levels of nesting (current repo max).
+runs:
+  using: composite
+  steps:
+    - uses: Alfresco/alfresco-build-tools/.github/actions/wraps-wraps-leaf@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa

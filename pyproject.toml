@@ -14,7 +14,8 @@ venv
 '''
 
 [tool.flake8]
-ignore = ['W503'] # W503 line break before binary operator - ignored as PEP 8 now recommends this style
+ignore = ['W503', 'E203'] # W503 line break before binary operator - ignored as PEP 8 now recommends this style
+                          # E203 whitespace before ':' - conflicts with Black's slice formatting
 max-line-length = 120
 max-complexity = 18
 count = true

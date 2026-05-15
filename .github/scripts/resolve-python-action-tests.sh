@@ -8,6 +8,7 @@ set -euo pipefail
 # - matrix_json for GitHub Actions matrix {"include":[{"action":"x","tests_dir":"..."}, ...]}
 
 ACTIONS_ROOT=".github/actions"
+SCRIPTS_ROOT=".github/scripts"
 TESTS_ROOT=".github/tests/python-scripts"
 SHARED_DIR="shared"
 
@@ -52,7 +53,17 @@ while IFS= read -r file; do
     continue
   fi
 
-  # 3) Anything else: ignore (do NOT trigger tests)
+  # 3) Changes to a Python script in .github/scripts/ — derive test dir name
+  #    by converting underscores to hyphens and stripping the .py extension
+  #    e.g. check_action_nesting.py -> check-action-nesting
+  if [[ "$file" == "$SCRIPTS_ROOT/"*.py ]]; then
+    script_name="$(basename "$file" .py)"
+    action="${script_name//_/-}"
+    [[ -n "$action" ]] && impacted["$action"]=1
+    continue
+  fi
+
+  # 4) Anything else: ignore (do NOT trigger tests)
 done
 
 # If shared changed => mark all tested actions impacted

@@ -1,0 +1,6 @@
+name: Stub action wrapping leaf (test fixture - depth 1)
+description: Calls leaf. One level of nesting.
+runs:
+  using: composite
+  steps:
+    - uses: Alfresco/alfresco-build-tools/.github/actions/leaf@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
