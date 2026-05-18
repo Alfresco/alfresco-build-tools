@@ -48,6 +48,7 @@ export class WorkflowHandler {
   private workflowId?: number | string
   private workflowRunId?: number
   private triggerDate = 0
+  private dispatchedInputs?: Record<string, string>
 
   constructor(token: string,
     private workflowRef: string,
@@ -67,6 +68,7 @@ export class WorkflowHandler {
     try {
       const workflowId = await this.getWorkflowId()
       this.triggerDate = new Date().setMilliseconds(0)
+      this.dispatchedInputs = inputs
       const dispatchResp = await this.octokit.rest.actions.createWorkflowDispatch({
         owner: this.owner,
         repo: this.repo,
@@ -181,7 +183,17 @@ export class WorkflowHandler {
         throw new Error('Run not found')
       }
 
-      if (runs.length > 1) {
+      if (runs.length > 1 && this.dispatchedInputs && Object.keys(this.dispatchedInputs).length > 0) {
+        core.info(`Found ${runs.length} runs. Attempting to disambiguate by matching inputs.`)
+        const matchedRun = await this.findRunMatchingInputs(runs)
+        if (matchedRun) {
+          core.info(`Matched run ${matchedRun.id} by inputs.`)
+          this.workflowRunId = matchedRun.id as number
+          return this.workflowRunId
+        }
+        core.warning(`Could not disambiguate runs by inputs. Using the last one.`)
+        await this.debugFoundWorkflowRuns(runs)
+      } else if (runs.length > 1) {
         core.warning(`Found ${runs.length} runs. Using the last one.`)
         await this.debugFoundWorkflowRuns(runs)
       }
@@ -193,6 +205,37 @@ export class WorkflowHandler {
       debug('Get workflow run id error', error)
       throw error
     }
+  }
+
+  private async findRunMatchingInputs(runs: any[]): Promise<any | null> {
+    for (const run of runs) {
+      try {
+        const response = await this.octokit.rest.actions.getWorkflowRun({
+          owner: this.owner,
+          repo: this.repo,
+          run_id: run.id
+        })
+        const runInputs = response.data.inputs || {}
+        if (this.inputsMatch(runInputs)) {
+          return run
+        }
+      } catch (e: any) {
+        core.debug(`Failed to fetch inputs for run ${run.id}: ${e.message}`)
+      }
+    }
+    return null
+  }
+
+  private inputsMatch(runInputs: Record<string, string>): boolean {
+    if (!this.dispatchedInputs) {
+      return false
+    }
+    const dispatchedKeys = Object.keys(this.dispatchedInputs)
+    const runKeys = Object.keys(runInputs)
+    if (dispatchedKeys.length === 0 || dispatchedKeys.length !== runKeys.length) {
+      return false
+    }
+    return dispatchedKeys.every(key => runInputs[key] === this.dispatchedInputs![key])
   }
 
   private async getWorkflowId(): Promise<number | string> {
