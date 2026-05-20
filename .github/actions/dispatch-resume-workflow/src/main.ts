@@ -75,7 +75,7 @@ async function handleLogs(args: any, workflowHandler: WorkflowHandler) {
 async function run(): Promise<void> {
   try {
     const args = getArgs()
-    const workflowHandler = new WorkflowHandler(args.token, args.workflowRef, args.owner, args.repo, args.ref, args.runName, args.runId)
+    const workflowHandler = new WorkflowHandler(args.token, args.workflowRef, args.owner, args.repo, args.ref, args.runName, args.runNameContains, args.runId)
 
     if (args.runId) {
       core.info(`Using existing workflow run ID: ${args.runId}`)

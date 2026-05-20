@@ -18,7 +18,10 @@ inputs:
     description: 'Repo owner & name, slash separated, only set if invoking a workflow in a different repo'
     required: false
   run-name:
-    description: 'If specified will select the run ID based on the run name'
+    description: 'If specified will select the run ID based on the run name (exact match)'
+    required: false
+  run-name-contains:
+    description: 'If specified will disambiguate runs by matching this value as a suffix of the run name (endsWith match)'
     required: false
   run-id:
     description: 'If specified will select the run ID on existing workflow'

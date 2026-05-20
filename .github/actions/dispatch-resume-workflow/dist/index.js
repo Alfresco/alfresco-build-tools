@@ -29382,7 +29382,7 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const args = (0, utils_1.getArgs)();
-            const workflowHandler = new workflow_handler_1.WorkflowHandler(args.token, args.workflowRef, args.owner, args.repo, args.ref, args.runName, args.runId);
+            const workflowHandler = new workflow_handler_1.WorkflowHandler(args.token, args.workflowRef, args.owner, args.repo, args.ref, args.runName, args.runNameContains, args.runId);
             if (args.runId) {
                 core.info(`Using existing workflow run ID: ${args.runId}`);
                 let conclusion;
@@ -29512,6 +29512,7 @@ function getArgs() {
     const waitForCompletionTimeout = toMilliseconds(core.getInput('wait-for-completion-timeout'));
     const checkStatusInterval = toMilliseconds(core.getInput('wait-for-completion-interval'));
     const runName = core.getInput('run-name');
+    const runNameContains = core.getInput('run-name-contains');
     const runId = core.getInput('run-id');
     const workflowLogMode = core.getInput('workflow-logs');
     return {
@@ -29528,6 +29529,7 @@ function getArgs() {
         waitForCompletion,
         waitForCompletionTimeout,
         runName,
+        runNameContains,
         runId,
         workflowLogMode
     };
@@ -29638,12 +29640,13 @@ const ofConclusion = (conclusion) => {
     return WorkflowRunConclusion[key];
 };
 class WorkflowHandler {
-    constructor(token, workflowRef, owner, repo, ref, runName, runId) {
+    constructor(token, workflowRef, owner, repo, ref, runName, runNameContains, runId) {
         this.workflowRef = workflowRef;
         this.owner = owner;
         this.repo = repo;
         this.ref = ref;
         this.runName = runName;
+        this.runNameContains = runNameContains;
         this.runId = runId;
         this.triggerDate = 0;
         if (runId) {
@@ -29657,7 +29660,6 @@ class WorkflowHandler {
             try {
                 const workflowId = yield this.getWorkflowId();
                 this.triggerDate = new Date().setMilliseconds(0);
-                this.dispatchedInputs = inputs;
                 const dispatchResp = yield this.octokit.rest.actions.createWorkflowDispatch({
                     owner: this.owner,
                     repo: this.repo,
@@ -29764,24 +29766,27 @@ class WorkflowHandler {
             }
             try {
                 let runs = yield this.findAllWorkflowRuns();
+                core.info(`Found ${runs.length} workflow run(s) matching criteria.`);
+                runs.forEach((r) => core.info(`  - run ${r.id}: "${r.name}"`));
                 if (this.runName) {
-                    runs = runs.filter((r) => r.name == this.runName);
+                    core.info(`Filtering by exact run-name: "${this.runName}"`);
+                    runs = runs.filter((r) => r.name === this.runName);
+                    core.info(`  ${runs.length} run(s) after filtering.`);
                 }
                 if (runs.length == 0) {
                     throw new Error('Run not found');
                 }
-                if (runs.length > 1 && this.dispatchedInputs && Object.keys(this.dispatchedInputs).length > 0) {
-                    core.info(`Found ${runs.length} runs. Attempting to disambiguate by matching inputs.`);
-                    const matchedRun = yield this.findRunMatchingInputs(runs);
-                    if (matchedRun) {
-                        core.info(`Matched run ${matchedRun.id} by inputs.`);
-                        this.workflowRunId = matchedRun.id;
+                if (runs.length > 1 && this.runNameContains) {
+                    core.info(`Attempting to disambiguate ${runs.length} runs using run-name-contains="${this.runNameContains}" (endsWith)`);
+                    const filtered = runs.filter((r) => { var _a; return (_a = r.name) === null || _a === void 0 ? void 0 : _a.endsWith(this.runNameContains); });
+                    if (filtered.length === 1) {
+                        core.info(`Disambiguated: matched run ${filtered[0].id} ("${filtered[0].name}")`);
+                        this.workflowRunId = filtered[0].id;
                         return this.workflowRunId;
                     }
-                    core.warning(`Could not disambiguate runs by inputs. Using the last one.`);
-                    yield this.debugFoundWorkflowRuns(runs);
+                    core.warning(`run-name-contains="${this.runNameContains}" matched ${filtered.length} runs, falling back.`);
                 }
-                else if (runs.length > 1) {
+                if (runs.length > 1) {
                     core.warning(`Found ${runs.length} runs. Using the last one.`);
                     yield this.debugFoundWorkflowRuns(runs);
                 }
@@ -29793,38 +29798,6 @@ class WorkflowHandler {
                 throw error;
             }
         });
-    }
-    findRunMatchingInputs(runs) {
-        return __awaiter(this, void 0, void 0, function* () {
-            for (const run of runs) {
-                try {
-                    const response = yield this.octokit.rest.actions.getWorkflowRun({
-                        owner: this.owner,
-                        repo: this.repo,
-                        run_id: run.id
-                    });
-                    const runInputs = response.data.inputs || {};
-                    if (this.inputsMatch(runInputs)) {
-                        return run;
-                    }
-                }
-                catch (e) {
-                    core.debug(`Failed to fetch inputs for run ${run.id}: ${e.message}`);
-                }
-            }
-            return null;
-        });
-    }
-    inputsMatch(runInputs) {
-        if (!this.dispatchedInputs) {
-            return false;
-        }
-        const dispatchedKeys = Object.keys(this.dispatchedInputs);
-        const runKeys = Object.keys(runInputs);
-        if (dispatchedKeys.length === 0 || dispatchedKeys.length !== runKeys.length) {
-            return false;
-        }
-        return dispatchedKeys.every(key => runInputs[key] === this.dispatchedInputs[key]);
     }
     getWorkflowId() {
         return __awaiter(this, void 0, void 0, function* () {
