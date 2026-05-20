@@ -5,6 +5,16 @@ inputs:
     description: The python version
     required: false
     default: "3.11"
+  enable-dev:
+    description: Whether to install dev packages (--dev flag)
+    required: false
+    default: "true"
+  categories:
+    description: >-
+      Comma-separated list of additional Pipfile categories to install
+      (e.g. "lint,test"). Translates to --categories for pipenv install.
+    required: false
+    default: ""
 outputs:
   pipenv-root:
     description: >-
@@ -22,5 +32,12 @@ runs:
       id: pipenv
       shell: bash
       run: |
-        pipenv install --deploy --dev --python ${{ inputs.python-version }}
+        PIPENV_ARGS=(--deploy --python "${{ inputs.python-version }}")
+        if [[ "${{ inputs.enable-dev }}" == "true" ]]; then
+          PIPENV_ARGS+=(--dev)
+        fi
+        if [[ -n "${{ inputs.categories }}" ]]; then
+          PIPENV_ARGS+=(--categories="${{ inputs.categories }}")
+        fi
+        pipenv install "${PIPENV_ARGS[@]}"
         echo "pipenv-root=$(pwd)" >> $GITHUB_OUTPUT

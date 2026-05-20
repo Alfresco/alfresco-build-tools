@@ -49,12 +49,15 @@ Brief description of what the action does.
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/action-name@ref
         with:
-          parameter: value
+          required-parameter: value
+          optional-parameter: value  # optional, default: default-value
 ```
 
 Additional notes or configuration details.
 
 **Note**: Always replace `@ref` with the most recent released tag (e.g., `@v9.1.0`).
+
+Input tables are not necessary — a YAML snippet with inline comments is sufficient to document inputs and their defaults.
 
 **Run validation script** to ensure all actions are documented:
 
