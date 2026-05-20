@@ -28,14 +28,14 @@ jobs:
         uses: terraform-linters/setup-tflint@b480b8fcdaa6f2c577f8e4fa799e89e756bb7c93 # v6.2.2
 
       - name: Install checkov
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-checkov@9cbd097aee4554eef28399d39ee6453eebdb9274
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-checkov@f5a731fc750cbec49d51a98a79f91d28618667b8
 
       - uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4.0.0
         with:
           terraform_version: ${{ steps.detect-terraform-version.outputs.terraform_version }}
 
       - name: Install terraform-docs
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-terraform-docs@9cbd097aee4554eef28399d39ee6453eebdb9274
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-terraform-docs@f5a731fc750cbec49d51a98a79f91d28618667b8
 
       - name: Setup authentication for private terraform modules
         if: env.BOT_GITHUB_USERNAME && env.BOT_GITHUB_TOKEN
@@ -45,7 +45,7 @@ jobs:
         run: |
           git config --global url."https://${BOT_GITHUB_USERNAME}:${BOT_GITHUB_TOKEN}@github.com".insteadOf "https://github.com"
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@9cbd097aee4554eef28399d39ee6453eebdb9274
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@f5a731fc750cbec49d51a98a79f91d28618667b8
         with:
           auto-commit: "true" # optionally commit automated fix changes back
           skip_checkout: "false" # mandatory with auto-commit
