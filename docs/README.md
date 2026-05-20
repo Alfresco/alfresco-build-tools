@@ -528,8 +528,15 @@ Ability to dispatch or resume an existing workflow and wait for its completion.
       - uses: Alfresco/alfresco-build-tools/.github/actions/dispatch-resume-workflow@v18.2.0
         with:
           workflow: workflow-name.yml
-          run-id: existing_run_number (optional)
+          run-id: existing_run_number # optional, resume an existing run
+          run-name: "exact run name" # optional, filter by exact run name
+          run-name-contains: "suffix" # optional, disambiguate by run name suffix (endsWith match)
 ```
+
+When multiple concurrent dispatches target the same workflow (e.g. parallel deployments to different environments),
+use `run-name-contains` to pick the correct run. It matches using `endsWith` to avoid substring collisions.
+For example, with runs named `Tests on env-prod` and `Tests on env-prod-au`, passing
+`run-name-contains: env-prod` uniquely selects the first run (not the `-au` variant).
 
 ### docker-dump-containers-logs
 

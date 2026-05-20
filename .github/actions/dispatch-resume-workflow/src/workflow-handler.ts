@@ -48,7 +48,6 @@ export class WorkflowHandler {
   private workflowId?: number | string
   private workflowRunId?: number
   private triggerDate = 0
-  private dispatchedInputs?: Record<string, string>
 
   constructor(token: string,
     private workflowRef: string,
@@ -56,6 +55,7 @@ export class WorkflowHandler {
     private repo: string,
     private ref: string,
     private runName: string,
+    private runNameContains: string,
     private runId: string) {
     if (runId) {
       this.workflowRunId = parseInt(runId)
@@ -68,7 +68,6 @@ export class WorkflowHandler {
     try {
       const workflowId = await this.getWorkflowId()
       this.triggerDate = new Date().setMilliseconds(0)
-      this.dispatchedInputs = inputs
       const dispatchResp = await this.octokit.rest.actions.createWorkflowDispatch({
         owner: this.owner,
         repo: this.repo,
@@ -175,25 +174,31 @@ export class WorkflowHandler {
     }
     try {
       let runs = await this.findAllWorkflowRuns()
+      core.info(`Found ${runs.length} workflow run(s) matching criteria.`)
+      runs.forEach((r: any) => core.info(`  - run ${r.id}: "${r.name}"`))
+
       if (this.runName) {
-        runs = runs.filter((r: any) => r.name == this.runName)
+        core.info(`Filtering by exact run-name: "${this.runName}"`)
+        runs = runs.filter((r: any) => r.name === this.runName)
+        core.info(`  ${runs.length} run(s) after filtering.`)
       }
 
       if (runs.length == 0) {
         throw new Error('Run not found')
       }
 
-      if (runs.length > 1 && this.dispatchedInputs && Object.keys(this.dispatchedInputs).length > 0) {
-        core.info(`Found ${runs.length} runs. Attempting to disambiguate by matching inputs.`)
-        const matchedRun = await this.findRunMatchingInputs(runs)
-        if (matchedRun) {
-          core.info(`Matched run ${matchedRun.id} by inputs.`)
-          this.workflowRunId = matchedRun.id as number
+      if (runs.length > 1 && this.runNameContains) {
+        core.info(`Attempting to disambiguate ${runs.length} runs using run-name-contains="${this.runNameContains}" (endsWith)`)
+        const filtered = runs.filter((r: any) => r.name?.endsWith(this.runNameContains))
+        if (filtered.length === 1) {
+          core.info(`Disambiguated: matched run ${filtered[0].id} ("${filtered[0].name}")`)
+          this.workflowRunId = filtered[0].id as number
           return this.workflowRunId
         }
-        core.warning(`Could not disambiguate runs by inputs. Using the last one.`)
-        await this.debugFoundWorkflowRuns(runs)
-      } else if (runs.length > 1) {
+        core.warning(`run-name-contains="${this.runNameContains}" matched ${filtered.length} runs, falling back.`)
+      }
+
+      if (runs.length > 1) {
         core.warning(`Found ${runs.length} runs. Using the last one.`)
         await this.debugFoundWorkflowRuns(runs)
       }
@@ -205,37 +210,6 @@ export class WorkflowHandler {
       debug('Get workflow run id error', error)
       throw error
     }
-  }
-
-  private async findRunMatchingInputs(runs: any[]): Promise<any | null> {
-    for (const run of runs) {
-      try {
-        const response = await this.octokit.rest.actions.getWorkflowRun({
-          owner: this.owner,
-          repo: this.repo,
-          run_id: run.id
-        })
-        const runInputs = response.data.inputs || {}
-        if (this.inputsMatch(runInputs)) {
-          return run
-        }
-      } catch (e: any) {
-        core.debug(`Failed to fetch inputs for run ${run.id}: ${e.message}`)
-      }
-    }
-    return null
-  }
-
-  private inputsMatch(runInputs: Record<string, string>): boolean {
-    if (!this.dispatchedInputs) {
-      return false
-    }
-    const dispatchedKeys = Object.keys(this.dispatchedInputs)
-    const runKeys = Object.keys(runInputs)
-    if (dispatchedKeys.length === 0 || dispatchedKeys.length !== runKeys.length) {
-      return false
-    }
-    return dispatchedKeys.every(key => runInputs[key] === this.dispatchedInputs![key])
   }
 
   private async getWorkflowId(): Promise<number | string> {
