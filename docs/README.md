@@ -1920,6 +1920,8 @@ This workflow sets up a Python environment using the standard setup-python actio
       - uses: Alfresco/alfresco-build-tools/.github/actions/pipenv@v18.1.0
         with:
           python-version: ${{ steps.setup-python.outputs.python-version }}
+          enable-dev: "true"       # optional, default: true
+          categories: "lint,test"  # optional, comma-separated custom Pipfile categories
 ```
 
 > This action returns the root directory where pipenv was installed from (so it can be used to build the PIPENV_PIPFILE env var)
