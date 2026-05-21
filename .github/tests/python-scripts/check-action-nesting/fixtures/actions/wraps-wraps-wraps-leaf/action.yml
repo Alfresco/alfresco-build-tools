@@ -3,4 +3,4 @@ description: Calls wraps-wraps-leaf → wraps-leaf → leaf. Three levels of nes
 runs:
   using: composite
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/wraps-wraps-leaf@a666370403b8575a97e62c7a7e0fd684b0836803
+    - uses: Alfresco/alfresco-build-tools/.github/actions/wraps-wraps-leaf@39d442d80be69af1ca1929d9c914c1e7ed135276
