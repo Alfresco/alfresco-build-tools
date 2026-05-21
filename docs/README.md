@@ -524,19 +524,30 @@ See [dbp-charts](https://github.com/Alfresco/alfresco-build-tools/tree/master/.g
 
 Ability to dispatch or resume an existing workflow and wait for its completion.
 
+The dispatch uses the `return_run_details` API parameter to get the workflow run ID
+directly from the response, eliminating the need to search for it afterwards.
+
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/dispatch-resume-workflow@v18.3.0
         with:
           workflow: workflow-name.yml
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          inputs: '{"key": "value"}' # optional, JSON string of workflow inputs
+          ref: main # optional, branch/tag/SHA to dispatch on
+          repo: owner/repo # optional, target a different repo
           run-id: existing_run_number # optional, resume an existing run
-          run-name: "exact run name" # optional, filter by exact run name
-          run-name-contains: "suffix" # optional, disambiguate by run name suffix (endsWith match)
+          run-name: "exact run name" # optional, filter by exact run name (fallback for GHES)
+          run-name-contains: "suffix" # optional, disambiguate by run name suffix (fallback for GHES)
+          wait-for-completion: 'true' # optional, default: true
+          wait-for-completion-timeout: 1h # optional, default: 1h
+          wait-for-completion-interval: 1m # optional, default: 1m
+          display-workflow-run-url: 'true' # optional, default: true
+          workflow-logs: ignore # optional: ignore|print|output|json-output
 ```
 
-When multiple concurrent dispatches target the same workflow (e.g. parallel deployments to different environments),
-use `run-name-contains` to pick the correct run. It matches using `endsWith` to avoid substring collisions.
-For example, with runs named `Tests on env-prod` and `Tests on env-prod-au`, passing
-`run-name-contains: env-prod` uniquely selects the first run (not the `-au` variant).
+On GitHub.com, `run-name` and `run-name-contains` are no longer needed since the run ID
+is returned by the dispatch API. They remain as a fallback for GitHub Enterprise Server
+instances that don't yet support `return_run_details`.
 
 ### docker-dump-containers-logs
 
