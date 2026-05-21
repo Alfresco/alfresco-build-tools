@@ -64,19 +64,46 @@ export class WorkflowHandler {
     this.octokit = github.getOctokit(token)
   }
 
-  async triggerWorkflow(inputs: any) {
+  async triggerWorkflow(inputs: any): Promise<string | undefined> {
+    const workflowId = await this.getWorkflowId()
+    this.triggerDate = new Date().setMilliseconds(0)
+
+    // Try with return_run_details first (GitHub.com)
     try {
-      const workflowId = await this.getWorkflowId()
-      this.triggerDate = new Date().setMilliseconds(0)
       const dispatchResp = await this.octokit.rest.actions.createWorkflowDispatch({
         owner: this.owner,
         repo: this.repo,
         workflow_id: workflowId,
         ref: this.ref,
-        inputs
-      })
+        inputs,
+        return_run_details: true
+      } as any)
       debug('Workflow Dispatch', dispatchResp)
+
+      if (dispatchResp.status === 200 && dispatchResp.data?.workflow_run_id) {
+        this.workflowRunId = dispatchResp.data.workflow_run_id
+        core.info(`Dispatch returned run ID: ${this.workflowRunId}`)
+        return dispatchResp.data.html_url
+      }
+      return undefined
     } catch (error: any) {
+      // GHES may reject the unknown parameter with 422 — retry without it
+      if (error.status === 422) {
+        core.info('Server does not support return_run_details, retrying without it (GHES fallback)')
+        try {
+          await this.octokit.rest.actions.createWorkflowDispatch({
+            owner: this.owner,
+            repo: this.repo,
+            workflow_id: workflowId,
+            ref: this.ref,
+            inputs
+          })
+          return undefined
+        } catch (retryError: any) {
+          debug('Workflow Dispatch retry error', retryError.message)
+          throw retryError
+        }
+      }
       debug('Workflow Dispatch error', error.message)
       throw error
     }

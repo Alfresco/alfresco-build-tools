@@ -77,6 +77,8 @@ async function run(): Promise<void> {
     const args = getArgs()
     const workflowHandler = new WorkflowHandler(args.token, args.workflowRef, args.owner, args.repo, args.ref, args.runName, args.runNameContains, args.runId)
 
+    let workflowUrl: string | undefined
+
     if (args.runId) {
       core.info(`Using existing workflow run ID: ${args.runId}`)
 
@@ -97,14 +99,24 @@ async function run(): Promise<void> {
 
     } else {
       // Trigger workflow run
-      await workflowHandler.triggerWorkflow(args.inputs)
+      const dispatchUrl = await workflowHandler.triggerWorkflow(args.inputs)
       core.info('Workflow triggered 🚀')
+      workflowUrl = dispatchUrl
     }
 
+    // Resolve run ID (instant from cache when dispatch returned it, single API call otherwise)
+    const runId = await workflowHandler.getWorkflowRunId()
+    core.setOutput('workflow-id', runId)
+
+    // Only poll for URL when user asked to display it and we don't have it yet
     if (args.displayWorkflowUrl) {
-      const url = await getFollowUrl(workflowHandler, args.displayWorkflowUrlInterval, args.displayWorkflowUrlTimeout)
-      core.info(`You can follow the running workflow here: ${url}`)
-      core.setOutput('workflow-url', url)
+      if (!workflowUrl) {
+        workflowUrl = await getFollowUrl(workflowHandler, args.displayWorkflowUrlInterval, args.displayWorkflowUrlTimeout)
+      }
+      if (workflowUrl) {
+        core.info(`You can follow the running workflow here: ${workflowUrl}`)
+        core.setOutput('workflow-url', workflowUrl)
+      }
     }
 
     if (!args.waitForCompletion) {
