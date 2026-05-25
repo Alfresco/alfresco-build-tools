@@ -38,7 +38,7 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@39d442d80be69af1ca1929d9c914c1e7ed135276
+    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@48c99914b5e9555b83f9bcbdb86022eb8b7c0b8b
       id: maven-configure
       with:
         java-version: ${{ inputs.java-version }}
@@ -46,7 +46,7 @@ runs:
 
     - name: Update pom files to the new version
       id: update-pom-to-next-version
-      uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@39d442d80be69af1ca1929d9c914c1e7ed135276
+      uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@48c99914b5e9555b83f9bcbdb86022eb8b7c0b8b
       with:
         property-to-update: ${{ inputs.property-to-update }}
         maven-cli-opts: ${{ steps.maven-configure.outputs.maven-options }}
@@ -81,7 +81,7 @@ runs:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@39d442d80be69af1ca1929d9c914c1e7ed135276
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@48c99914b5e9555b83f9bcbdb86022eb8b7c0b8b
       with:
         username: ${{ inputs.git-username }}
         add-options: -u
