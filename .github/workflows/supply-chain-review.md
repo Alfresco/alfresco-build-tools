@@ -60,6 +60,7 @@ Before collecting external data, identify and exclude internal/private dependenc
 - **npm**: Any package under the `@hyland/` or `@alfresco/` scopes
 
 For each internal dependency found:
+
 1. Remove it from the analysis pipeline — do NOT query OSV.dev, OpenSSF Scorecard, or registry APIs for these packages (they will fail or return irrelevant data).
 2. Record the package name, ecosystem, old version, and new version in a separate "Internal Dependencies (Skipped)" list.
 3. Continue with Step 2 only for the remaining external/public dependencies.
@@ -94,6 +95,7 @@ Record the overall score (0-10) and individual check results. Pay special attent
 `GET https://registry.npmjs.org/<package-name>`
 
 From the full registry document, extract for BOTH the old and new versions:
+
 - `versions[<version>]._npmUser` — the publisher
 - `versions[<version>].maintainers` — the maintainer list
 - `versions[<version>].scripts` — lifecycle scripts (`preinstall`, `install`, `postinstall`)
@@ -127,6 +129,7 @@ Assess the severity and exploitability of any CVEs or advisories returned from O
 ### 3b. Typosquatting / Name Confusion
 
 Determine if the package name could be a typosquatting attempt targeting a well-known package. Consider:
+
 - Levenshtein distance to popular packages (e.g., `lodas` vs `lodash`)
 - Dash/underscore/separator swaps (e.g., `my_package` vs `my-package`)
 - Suffix variants (e.g., `express-js`, `express.js`)
@@ -138,6 +141,7 @@ Use your knowledge of the ecosystem to identify plausible targets. Reason from y
 ### 3c. Maintainer Takeover
 
 Compare the publisher and maintainer metadata between the old and new versions. Red flags:
+
 - Publisher changed between versions (different `_npmUser`)
 - Old maintainers removed and replaced
 - New publisher has no prior history with the package
@@ -146,6 +150,7 @@ Compare the publisher and maintainer metadata between the old and new versions. 
 ### 3d. Install Script Abuse
 
 **For npm**: Analyze lifecycle scripts (`preinstall`, `install`, `postinstall`) from the registry metadata. Red flags:
+
 - Scripts that download and execute remote code (`curl`, `wget`, `http://`)
 - `eval()`, `Function()`, `child_process` usage
 - Environment variable access (`process.env`) for credential theft
@@ -155,6 +160,7 @@ Compare the publisher and maintainer metadata between the old and new versions. 
 - Scripts that are NEW in this version (not present in the old version) are especially suspicious
 
 **For Maven**: Look for dangerous build plugins in POM changes:
+
 - `exec-maven-plugin`, `maven-antrun-plugin` with `<exec>`
 - `<extensions>true</extensions>` on untrusted plugins
 - Download plugins, Groovy/script plugins
@@ -162,6 +168,7 @@ Compare the publisher and maintainer metadata between the old and new versions. 
 ### 3e. Version Anomalies
 
 Analyze the version change pattern and history from the registry metadata:
+
 - Major version jumps (skipping 1+ major versions)
 - Version downgrade (new version < old version)
 - Stable to prerelease transition
@@ -172,6 +179,7 @@ Analyze the version change pattern and history from the registry metadata:
 ### 3f. Source Code Changes
 
 If source diffs are available (from the GitHub compare API or the PR diff itself), analyze for:
+
 - Obfuscated code (minified without source maps, hex/unicode escapes, string concatenation to hide function names)
 - Data exfiltration (network calls sending `process.env`, API keys, tokens to external endpoints)
 - Filesystem access outside the package directory
@@ -184,6 +192,7 @@ If source diffs are available (from the GitHub compare API or the PR diff itself
 ### 3g. Project Health
 
 Interpret the OpenSSF Scorecard data:
+
 - Overall score below 3/10 is very concerning
 - Score below 5/10 warrants caution
 - Pay attention to specific failing checks: Maintained, Code-Review, Vulnerabilities, Branch-Protection, Signed-Releases
@@ -200,12 +209,14 @@ Evaluate whether the published artifact can be traced back to a verified source 
 #### Tag-to-Registry Provenance Mismatch
 
 Check whether the git tag for the new version corresponds to the published artifact:
+
 - Compare the tag commit date with the registry publish timestamp. A discrepancy of more than a few hours (allowing for CI/CD pipeline time) is suspicious.
 - If the source diff between the tag and the previous tag includes changes not documented in release notes, flag as suspicious.
 
 #### Mutable/Moved Tags
 
 Check if the tag appears to have been recreated:
+
 - Use `GET https://api.github.com/repos/{owner}/{repo}/git/refs/tags/{tag}` to get the tag reference.
 - For annotated tags, use `GET https://api.github.com/repos/{owner}/{repo}/git/tags/{sha}` to check the tag object and its `tagger.date`.
 - If the tag creation date is significantly newer than the commit it points to (e.g., more than 7 days), this may indicate the tag was deleted and recreated pointing to a different commit.
@@ -213,6 +224,7 @@ Check if the tag appears to have been recreated:
 #### Unsigned Tags
 
 Determine tag type and signing status:
+
 - **Annotated + signed tags** (GPG or SSH signature present) — strongest integrity signal.
 - **Annotated but unsigned tags** — moderate integrity; the tag is immutable but unverified.
 - **Lightweight tags** — weakest integrity; easily moved without trace. Flag as a risk signal for high-profile or security-critical packages.
@@ -224,6 +236,7 @@ For the tag object, check the `verification` field in the GitHub API response fo
 Check for SLSA provenance attestations or Sigstore signatures:
 
 **For npm packages**: Query `GET https://registry.npmjs.org/-/npm/v1/attestations/<package-name>@<new-version>`. If attestations are present, verify:
+
 - The `predicateType` matches a known SLSA provenance type
 - The `subject` digest matches the published package tarball
 - The build was performed by a trusted CI system (e.g., GitHub Actions)
@@ -236,6 +249,7 @@ The absence of provenance attestations on a high-profile package (>1000 weekly d
 #### Tag Mimicry on Forks
 
 Verify that the source repository URL in registry metadata points to the canonical repository:
+
 - Cross-reference the `repository` field from package metadata (Step 2c) with the GitHub API response.
 - If the repository URL points to a fork rather than the original project, flag as HIGH risk — this may indicate a hijacked tag on a lookalike fork.
 - Check that the repository owner matches known maintainers of the package.
@@ -263,7 +277,7 @@ Before posting, check if an existing PR comment from this workflow already exist
 
 Post a structured report in the following format:
 
-````
+````txt
 ## Supply Chain Security Review
 
 | Package | Ecosystem | Old Version | New Version | Risk Score | Risk Level |

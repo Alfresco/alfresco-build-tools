@@ -12,9 +12,9 @@ repos:
       - id: mixed-line-ending
         args: ['--fix=lf']
       - id: end-of-file-fixer
-        exclude: '.*/dist/.*'
+        exclude: '(.*/dist/.*|\.github/workflows/.*\.lock\.yml$)'
       - id: trailing-whitespace
-        exclude: '.*/dist/.*'
+        exclude: '(.*/dist/.*|\.github/workflows/.*\.lock\.yml$)'
 
   - repo: https://github.com/sirosen/check-jsonschema
     rev: 0.37.1
@@ -22,11 +22,13 @@ repos:
       - id: check-dependabot
       - id: check-github-actions
       - id: check-github-workflows
+        exclude: ^\.github/workflows/.*\.lock\.yml$
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.47.0
     hooks:
     - id: markdownlint
+      exclude: ^\.github/workflows/.*\.lock\.yml$
 
   - repo: https://github.com/rhysd/actionlint
     rev: v1.7.12
