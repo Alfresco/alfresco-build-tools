@@ -132,6 +132,10 @@ Here follows the list of GitHub Actions topics available in the current document
   - [repository-mirror](#repository-mirror)
   - [reusable-release](#reusable-release)
   - [terraform](#terraform)
+  - [add-pr-comment](#add-pr-comment)
+- [GitHub Agentic Workflows provided by us](#github-agentic-workflows-provided-by-us)
+  - [General Introduction](#general-introduction)
+  - [supply-chain-review](#supply-chain-review)
 - [Cookbook](#cookbook)
   - [Conditional job/step depending on PR labels](#conditional-jobstep-depending-on-pr-labels)
   - [Serialize pull request builds](#serialize-pull-request-builds)
@@ -2678,6 +2682,127 @@ Release command has access to the following environment variables:
 
 See the dedicated [terraform](terraform.md) for more information on the reusable
 workflows provided by us.
+
+### add-pr-comment
+
+A generic reusable workflow that posts a comment on a pull request. Callers
+define their own triggers (e.g., `on: pull_request` with path filters) and
+provide the comment body via input. Supports idempotent comment updates using
+an optional identifier to update the same comment on re-runs instead of creating
+duplicates.
+
+**Inputs:**
+
+- `comment-body` (required): Markdown body for the PR comment
+- `comment-identifier` (optional): Unique identifier for the comment. If provided,
+  the workflow will find and update existing comments with the same identifier
+  instead of creating new ones. Recommended for workflows that run multiple times
+  on the same PR.
+
+```yaml
+name: Post Reminder on Dependency PRs
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    paths:
+      - "pom.xml"
+      - "**/pom.xml"
+
+jobs:
+  comment:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/add-pr-comment.yml@v18.5.0
+    with:
+      comment-body: |
+        Remember to update the dependency matrix after merging.
+      comment-identifier: dependency-matrix-reminder # optional, enables comment updates
+```
+
+## GitHub Agentic Workflows provided by us
+
+### General Introduction
+
+GitHub Agentic Workflows are a new type of workflow that leverage the GitHub Copilot engine to perform complex tasks that require reasoning, decision-making, and interaction with external APIs. These workflows are designed to automate tasks that are difficult to achieve with traditional workflows, such as code reviews, security analysis, and project management.
+
+#### For Providers
+
+To update and release a new version of an Agentic Workflow, you can simply edit the md workflow file in this repository, run:
+
+```bash
+gh extension upgrade aw && gh aw compile
+```
+
+and commit the changes.
+
+#### For Consumers
+
+To install an Agentic Workflow, you can use the `gh aw add` command with the URL of the workflow file in this repository. For example:
+
+```bash
+gh aw add https://github.com/Alfresco/alfresco-build-tools/blob/main/.github/workflows/supply-chain-review.md --force
+```
+
+To keep the workflow up to date with the latest improvements and fixes, you can use the `gh aw update` command:
+
+```bash
+gh aw update
+```
+
+Additionally, a [secret](https://github.github.com/gh-aw/reference/engines/) should be provided in line with the AI Engine used by the workflow. For example, for GitHub Copilot, the `COPILOT_GITHUB_TOKEN` secret should be set with a token that has `Copilot Requests` permissions.
+
+### supply-chain-review
+
+A GitHub Agentic Workflow that performs automated supply chain security analysis
+on pull requests containing dependency changes. Triggered via the
+`/supply-chain-review` slash command in PR comments, it analyzes dependencies
+against multiple threat categories including known vulnerabilities, typosquatting,
+maintainer takeover, install script abuse, version anomalies, and project health.
+
+The workflow uses the GitHub Copilot engine with access to OSV.dev, OpenSSF
+Scorecard, npm registry, and Maven Central APIs to produce a structured risk
+assessment report posted as a PR comment.
+
+**Requirements:**
+
+- The repository must have the `COPILOT_GITHUB_TOKEN` secret appropriately set, with `Copilot Requests` permissions
+
+**Setup:**
+
+Optionally, use the [add-pr-comment](#add-pr-comment) reusable workflow to automatically prompt
+contributors to run the review when dependency files change.
+
+Example caller workflow for PR instructions:
+
+```yaml
+name: Supply Chain Review - PR Instructions
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    paths:
+      - "package.json"
+      - "package-lock.json"
+      - "**/package.json"
+      - "**/package-lock.json"
+      - "pom.xml"
+      - "**/pom.xml"
+
+jobs:
+  instructions:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/add-pr-comment.yml@v18.5.0
+    with:
+      comment-identifier: supply-chain-review-instructions
+      comment-body: |
+        ## Supply Chain Security
+
+        This PR modifies dependencies. To run a security analysis, comment:
+
+        ```
+        /supply-chain-review
+        ```
+
+        The analysis will check for vulnerabilities, typosquatting, maintainer takeovers, and other supply chain risks.
+```
 
 ## Cookbook
 
