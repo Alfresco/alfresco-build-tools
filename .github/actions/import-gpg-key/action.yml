@@ -1,0 +1,35 @@
+name: "Import GPG Key"
+description: "Imports a GPG signing key for Maven Central publishing"
+inputs:
+  gpg-signing-private-key:
+    required: true
+    description: "ASCII-armored private GPG key"
+  gpg-signing-passphrase:
+    required: true
+    description: "GPG key passphrase"
+runs:
+  using: "composite"
+  steps:
+    - name: Import key
+      shell: bash
+      env:
+        GPG_SIGNING_PRIVATE_KEY: ${{ inputs.gpg-signing-private-key }}
+        GPG_SIGNING_PASSPHRASE: ${{ inputs.gpg-signing-passphrase }}
+      run: |
+        probe_file=$(mktemp)
+        probe_signature=$(mktemp)
+        trap 'rm -f "$probe_file" "$probe_signature"' EXIT
+        mkdir -p ~/.gnupg
+        chmod 700 ~/.gnupg
+        printf '%s' "$GPG_SIGNING_PRIVATE_KEY" | gpg --batch --no-tty --import
+        echo "use-agent" >> ~/.gnupg/gpg.conf
+        echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
+        echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+        gpgconf --kill gpg-agent
+        printf 'gpg-passphrase-probe' > "$probe_file"
+        gpg --batch --yes --no-tty \
+          --pinentry-mode loopback \
+          --passphrase "$GPG_SIGNING_PASSPHRASE" \
+          --output "$probe_signature" \
+          --armor \
+          --detach-sign "$probe_file"

@@ -75,6 +75,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [helm-plugin](#helm-plugin)
   - [helm-update-chart-version](#helm-update-chart-version)
   - [http-latency](#http-latency)
+  - [import-gpg-key](#import-gpg-key)
   - [install-galaxy-deps](#install-galaxy-deps)
   - [install-ubuntu-default-tools](#install-ubuntu-default-tools)
   - [jira-get-or-create-release](#jira-get-or-create-release)
@@ -1273,6 +1274,19 @@ jobs:
         run: |
           echo "${{ steps.benchmark.outputs.summary }}" >> $GITHUB_STEP_SUMMARY
 ```
+
+### import-gpg-key
+
+Imports an ASCII-armored private GPG key into the runner's GnuPG home and verifies that the supplied passphrase can unlock the key by performing a detached-sign probe.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/import-gpg-key@v18.5.0
+        with:
+          gpg-signing-private-key: ${{ secrets.GPG_SIGNING_PRIVATE_KEY }}
+          gpg-signing-passphrase: ${{ secrets.GPG_SIGNING_PASSPHRASE }}
+```
+
+This is intended for release workflows that sign Maven artifacts later in the job.
 
 ### install-galaxy-deps
 
