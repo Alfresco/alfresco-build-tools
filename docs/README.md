@@ -1837,6 +1837,13 @@ Used to release Activiti projects. Update versions in POM files, create git tags
           nexus-password: "${{ secrets.NEXUS_PASSWORD }}"
 ```
 
+If you already import a signing key in the workflow with the community action
+[crazy-max/ghaction-import-gpg](https://github.com/crazy-max/ghaction-import-gpg),
+pin that action to a full commit SHA and keep the same secret material
+available for the `gpg-passphrase`, `gpg-secret-keys`, and `gpg-owner-trust`
+inputs above. This action still expects those values explicitly. See the
+[security guide](security.md#gpg-keys-in-workflows) for the related guidance.
+
 ### maven-tag
 
 Updates POM files to the next pre-release, commits changes and creates a Git tag.

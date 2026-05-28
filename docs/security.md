@@ -12,10 +12,28 @@ Before creating / modifying any GitHub Actions workflow make sure you're familia
 
 In this page we are also providing guidance on how to setup common tooling related to security.
 
+- [GPG keys in workflows](#gpg-keys-in-workflows)
 - [Secrets detection](#secrets-detection)
   - [First setup](#first-setup)
   - [Updating new/old secrets to the baseline](#updating-newold-secrets-to-the-baseline)
     - [Excluding multiple secrets via regex](#excluding-multiple-secrets-via-regex)
+
+## GPG keys in workflows
+
+Some release workflows need to import a private GPG key on the runner before
+signing commits or Maven artifacts. If you want to delegate that setup step to
+a community action, [crazy-max/ghaction-import-gpg](https://github.com/crazy-max/ghaction-import-gpg)
+is a common option.
+
+When using third-party GPG actions:
+
+- pin the action to a full commit SHA
+- keep the private key, passphrase, and any trust material in GitHub Secrets
+- only expose those secrets in jobs that actually need signing
+
+If you are using this repository's `maven-release` action, note that it still
+expects `gpg-passphrase`, `gpg-secret-keys`, and `gpg-owner-trust` as explicit
+inputs.
 
 ## Secrets detection
 
