@@ -47,14 +47,8 @@ runs:
         printf '%s' "$GPG_SIGNING_PRIVATE_KEY" | \
           gpg --homedir "$gpg_home" --batch --no-tty --import
 
-        cat > "$gpg_home/gpg.conf" <<'EOF'
-        use-agent
-        pinentry-mode loopback
-      EOF
-
-        cat > "$gpg_home/gpg-agent.conf" <<'EOF'
-        allow-loopback-pinentry
-      EOF
+        printf 'use-agent\npinentry-mode loopback\n' > "$gpg_home/gpg.conf"
+        printf 'allow-loopback-pinentry\n' > "$gpg_home/gpg-agent.conf"
 
         gpgconf --homedir "$gpg_home" --kill gpg-agent || true
 
