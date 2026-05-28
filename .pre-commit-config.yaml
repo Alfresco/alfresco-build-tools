@@ -45,6 +45,14 @@ repos:
 
   - repo: local
     hooks:
+      - id: compile-agentic-workflows
+        name: Validate GitHub Agentic Workflow compilation
+        language: system
+        entry: .github/scripts/compile_agentic_workflows.sh
+        pass_filenames: false
+        files: ^\.github/workflows/.*\.md$
+        stages: [pre-commit]
+
       - id: check-action-nesting-depth
         name: Check GitHub Actions nesting depth
         language: python
