@@ -27,9 +27,20 @@ echo "Validating agentic workflow compilation..."
 
 # Check if gh aw extension is installed
 if ! gh extension list 2>/dev/null | grep -q "gh-aw"; then
-    echo "✗ Error: gh aw extension is not installed"
-    echo "  Install it with: gh extension install github/gh-aw"
-    exit 1
+    # In CI, auto-install the extension
+    if [ -n "$CI" ] || [ -n "$GITHUB_ACTIONS" ]; then
+        echo "  Installing gh aw extension in CI..."
+        if ! gh extension install github/gh-aw >/dev/null 2>&1; then
+            echo "✗ Error: Failed to install gh aw extension"
+            exit 1
+        fi
+        echo "  ✓ Installed gh aw extension"
+    else
+        # In local environment, prompt user to install
+        echo "✗ Error: gh aw extension is not installed"
+        echo "  Install it with: gh extension install github/gh-aw"
+        exit 1
+    fi
 fi
 
 needs_recompile=false
