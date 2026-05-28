@@ -24,6 +24,7 @@ network:
     - api.osv.dev
     - api.scorecard.dev
     - search.maven.org
+    - registry.npmjs.org
 
 safe-outputs:
   add-comment:
