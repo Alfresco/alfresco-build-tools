@@ -27,7 +27,9 @@ network:
 
 safe-outputs:
   add-comment:
+    hide-older-comments: true
   add-labels:
+    allowed: [security:low, security:medium, security:high]
   submit-pull-request-review:
 
 ---
@@ -272,8 +274,6 @@ These are guidelines, not rigid formulas. Use judgment to combine signals — mu
 If no suspicious patterns are found, assign a score of 0-10 and risk level LOW. Most legitimate upgrades should score LOW.
 
 ## Step 5 — Post Findings as PR Comment
-
-Before posting, check if an existing PR comment from this workflow already exists by looking for a comment whose body starts with `## Supply Chain Security Review`. If one exists, update that comment with the new report. If none exists, add a new comment. This avoids cluttering the PR with duplicate reports on re-runs.
 
 Post a structured report in the following format:
 

@@ -65,6 +65,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [github-require-secrets](#github-require-secrets)
   - [github-trigger-approved-pr](#github-trigger-approved-pr)
   - [github-trigger-labeled-pr](#github-trigger-labeled-pr)
+  - [github-upsert-comment](#github-upsert-comment)
   - [helm-build-chart](#helm-build-chart)
   - [helm-integration-tests](#helm-integration-tests)
   - [helm-package-chart](#helm-package-chart)
@@ -132,7 +133,6 @@ Here follows the list of GitHub Actions topics available in the current document
   - [repository-mirror](#repository-mirror)
   - [reusable-release](#reusable-release)
   - [terraform](#terraform)
-  - [add-pr-comment](#add-pr-comment)
 - [GitHub Agentic Workflows provided by us](#github-agentic-workflows-provided-by-us)
   - [General Introduction](#general-introduction)
   - [supply-chain-review](#supply-chain-review)
@@ -1097,6 +1097,46 @@ jobs:
           labels: ${{ env.TRIGGER_LABELS }}
           milestone: Validating
 ```
+
+### github-upsert-comment
+
+Create or update a comment on a GitHub issue or pull request. Supports idempotent updates using an optional identifier to update the same comment on re-runs instead of creating duplicates.
+
+**Basic usage:**
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-upsert-comment@v18.5.0
+        with:
+          comment-body: |
+            ## Build Status
+            Build completed successfully!
+```
+
+**Idempotent usage (prevents comment spam):**
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-upsert-comment@v18.5.0
+        with:
+          comment-identifier: build-status # unique ID to find and update existing comment
+          comment-body: |
+            ## Build Status
+            Build completed at ${{ github.event.head_commit.timestamp }}
+```
+
+**Inputs:**
+
+| Input                | Description                                | Required | Default                |
+| -------------------- | ------------------------------------------ | -------- | ---------------------- |
+| `comment-body`       | Markdown body for the comment              | Yes      | -                      |
+| `comment-identifier` | Unique identifier for idempotent updates   | No       | -                      |
+| `issue-number`       | Issue or PR number                         | No       | Current PR             |
+| `github-token`       | GitHub token                               | No       | `${{ github.token }}`  |
+
+**Outputs:**
+
+| Output       | Description                              |
+| ------------ | ---------------------------------------- |
+| `comment-id` | ID of the created or updated comment     |
 
 ### helm-build-chart
 
@@ -2683,41 +2723,6 @@ Release command has access to the following environment variables:
 See the dedicated [terraform](terraform.md) for more information on the reusable
 workflows provided by us.
 
-### add-pr-comment
-
-A generic reusable workflow that posts a comment on a pull request. Callers
-define their own triggers (e.g., `on: pull_request` with path filters) and
-provide the comment body via input. Supports idempotent comment updates using
-an optional identifier to update the same comment on re-runs instead of creating
-duplicates.
-
-**Inputs:**
-
-- `comment-body` (required): Markdown body for the PR comment
-- `comment-identifier` (optional): Unique identifier for the comment. If provided,
-  the workflow will find and update existing comments with the same identifier
-  instead of creating new ones. Recommended for workflows that run multiple times
-  on the same PR.
-
-```yaml
-name: Post Reminder on Dependency PRs
-
-on:
-  pull_request:
-    types: [opened, reopened, synchronize]
-    paths:
-      - "pom.xml"
-      - "**/pom.xml"
-
-jobs:
-  comment:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/add-pr-comment.yml@v18.5.0
-    with:
-      comment-body: |
-        Remember to update the dependency matrix after merging.
-      comment-identifier: dependency-matrix-reminder # optional, enables comment updates
-```
-
 ## GitHub Agentic Workflows provided by us
 
 ### General Introduction
@@ -2768,7 +2773,7 @@ assessment report posted as a PR comment.
 
 **Setup:**
 
-Optionally, use the [add-pr-comment](#add-pr-comment) reusable workflow to automatically prompt
+Optionally, use the [github-upsert-comment](#github-upsert-comment) action to automatically prompt
 contributors to run the review when dependency files change.
 
 Example caller workflow for PR instructions:
@@ -2789,19 +2794,23 @@ on:
 
 jobs:
   instructions:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/add-pr-comment.yml@v18.5.0
-    with:
-      comment-identifier: supply-chain-review-instructions
-      comment-body: |
-        ## Supply Chain Security
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-upsert-comment@v18.5.0
+        with:
+          comment-identifier: supply-chain-review-instructions
+          comment-body: |
+            ## Supply Chain Security
 
-        This PR modifies dependencies. To run a security analysis, comment:
+            This PR modifies dependencies. To run a security analysis, comment:
 
-        ```
-        /supply-chain-review
-        ```
+            ```
+            /supply-chain-review
+            ```
 
-        The analysis will check for vulnerabilities, typosquatting, maintainer takeovers, and other supply chain risks.
+            The analysis will check for vulnerabilities, typosquatting, maintainer takeovers, and other supply chain risks.
 ```
 
 ## Cookbook
