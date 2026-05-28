@@ -342,5 +342,3 @@ No suspicious patterns detected. Routine upgrade.
 - If data collection fails for all external APIs, still analyze the PR diff directly and provide the best assessment you can with available information, noting the limitations clearly.
 - For tag poisoning checks, not all packages will have provenance attestations — this is still an emerging practice. Weight the absence of attestations proportionally to the package's profile and criticality. Do not flag low-download utility packages for missing provenance.
 - When checking tag dates, allow for reasonable CI/CD pipeline delays (up to a few hours between tag push and publish). Only flag significant discrepancies (days or weeks).
-
-Test MD change just prompt.
