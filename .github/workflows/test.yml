@@ -193,6 +193,25 @@ jobs:
           echo "import-gpg-key should fail when the passphrase is wrong"
           exit 1
 
+      - name: Test import-gpg-key isolated GNUPGHOME path
+        env:
+          HOME: ${{ runner.temp }}/gpg-isolated-home
+        uses: ./.github/actions/import-gpg-key
+        with:
+          gpg-signing-private-key: ${{ steps.test-gpg-key.outputs.private-key }}
+          gpg-signing-passphrase: correct horse battery staple
+          use-temporary-gpg-home: true
+
+      - name: Assert import-gpg-key isolated GNUPGHOME path
+        env:
+          HOME: ${{ runner.temp }}/gpg-isolated-home
+        run: |
+          [[ -n "$GNUPGHOME" ]]
+          [[ -d "$GNUPGHOME" ]]
+          [[ ! -f "$HOME/.gnupg/gpg.conf" ]]
+          [[ ! -f "$HOME/.gnupg/gpg-agent.conf" ]]
+          gpg --homedir "$GNUPGHOME" --batch --list-secret-keys | grep -q 'ci@example.com'
+
       - uses: ./.github/actions/setup-checkov
       - uses: ./.github/actions/setup-fluxcli
       - uses: ./.github/actions/setup-updatecli

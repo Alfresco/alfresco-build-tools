@@ -1,35 +1,73 @@
 name: "Import GPG Key"
 description: "Imports a GPG signing key for Maven Central publishing"
+
 inputs:
   gpg-signing-private-key:
     required: true
     description: "ASCII-armored private GPG key"
+
   gpg-signing-passphrase:
     required: true
     description: "GPG key passphrase"
+
+  use-temporary-gpg-home:
+    required: false
+    default: "false"
+    description: "Use an isolated GnuPG home directory"
+
 runs:
   using: "composite"
+
   steps:
     - name: Import key
       shell: bash
       env:
         GPG_SIGNING_PRIVATE_KEY: ${{ inputs.gpg-signing-private-key }}
         GPG_SIGNING_PASSPHRASE: ${{ inputs.gpg-signing-passphrase }}
+        USE_TEMPORARY_GPG_HOME: ${{ inputs.use-temporary-gpg-home }}
+
       run: |
+        set -euo pipefail
+
         probe_file=$(mktemp)
         probe_signature=$(mktemp)
+
         trap 'rm -f "$probe_file" "$probe_signature"' EXIT
-        mkdir -p ~/.gnupg
-        chmod 700 ~/.gnupg
-        printf '%s' "$GPG_SIGNING_PRIVATE_KEY" | gpg --batch --no-tty --import
-        echo "use-agent" >> ~/.gnupg/gpg.conf
-        echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
-        echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-        gpgconf --kill gpg-agent
+
+        gpg_home="$HOME/.gnupg"
+
+        if [[ "$USE_TEMPORARY_GPG_HOME" == "true" ]]; then
+          gpg_home=$(mktemp -d)
+          echo "GNUPGHOME=$gpg_home" >> "$GITHUB_ENV"
+        fi
+
+        mkdir -p "$gpg_home"
+        chmod 700 "$gpg_home"
+
+        printf '%s' "$GPG_SIGNING_PRIVATE_KEY" | \
+          gpg --homedir "$gpg_home" --batch --no-tty --import
+
+        cat > "$gpg_home/gpg.conf" <<'EOF'
+        use-agent
+        pinentry-mode loopback
+      EOF
+
+        cat > "$gpg_home/gpg-agent.conf" <<'EOF'
+        allow-loopback-pinentry
+      EOF
+
+        gpgconf --homedir "$gpg_home" --kill gpg-agent || true
+
         printf 'gpg-passphrase-probe' > "$probe_file"
-        gpg --batch --yes --no-tty \
+
+        gpg \
+          --homedir "$gpg_home" \
+          --batch \
+          --yes \
+          --no-tty \
           --pinentry-mode loopback \
           --passphrase "$GPG_SIGNING_PASSPHRASE" \
-          --output "$probe_signature" \
           --armor \
+          --output "$probe_signature" \
           --detach-sign "$probe_file"
+          

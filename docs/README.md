@@ -1284,9 +1284,12 @@ Imports an ASCII-armored private GPG key into the runner's GnuPG home and verifi
         with:
           gpg-signing-private-key: ${{ secrets.GPG_SIGNING_PRIVATE_KEY }}
           gpg-signing-passphrase: ${{ secrets.GPG_SIGNING_PASSPHRASE }}
+          use-temporary-gpg-home: true  # optional, default: false
 ```
 
 This is intended for release workflows that sign Maven artifacts later in the job.
+When `use-temporary-gpg-home` is `true`, the action imports the key into an
+isolated directory and exports `GNUPGHOME` for later steps in the same job.
 
 ### install-galaxy-deps
 
