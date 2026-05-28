@@ -70,4 +70,3 @@ runs:
           --armor \
           --output "$probe_signature" \
           --detach-sign "$probe_file"
-          
