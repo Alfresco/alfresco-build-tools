@@ -46,7 +46,7 @@ repos:
   - repo: local
     hooks:
       - id: compile-agentic-workflows
-        name: Compile GitHub Agentic Workflows
+        name: Validate GitHub Agentic Workflow compilation
         language: system
         entry: .github/scripts/compile_agentic_workflows.sh
         pass_filenames: false

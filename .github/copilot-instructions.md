@@ -200,23 +200,12 @@ GitHub Agentic Workflows (AWF) are markdown-based workflows that use AI agents (
 ### Development Workflow
 
 1. **Edit the `.md` file** - Modify the workflow instructions in plain markdown
-2. **Pre-commit hook auto-compiles** - The `compile-agentic-workflows` hook automatically:
-   - Upgrades the `gh aw` extension to the latest version
-   - Compiles the `.md` file to generate the `.lock.yml` file
-   - Stages all generated files (`.lock.yml`, `.github/aw/`, `.gitattributes`, `dependabot.yml`)
-3. **Commit both files** - Both `.md` and `.lock.yml` are committed together
+2. **Compile the workflow** - Run the compilation command:
 
-### Manual Compilation (if needed)
-
-If you need to manually compile (e.g., pre-commit hook disabled):
-
-```bash
-# Upgrade gh aw extension
-gh extension upgrade aw
-
-# Compile the workflow
-gh aw compile .github/workflows/workflow-name.md
-```
+   ```bash
+   gh extension upgrade aw # Ensure you have the latest version of the gh aw extension
+   gh aw compile .github/workflows/workflow-name.md
+   ```
 
 ### Important Notes
 
