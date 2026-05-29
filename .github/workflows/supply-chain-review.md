@@ -261,7 +261,7 @@ Verify that the source repository URL in registry metadata points to the canonic
 Assign a risk score (0-100) to each dependency using these guidelines:
 
 | Priority | Signal                                                                                                                                                                                                                                                     | Typical Impact |
-|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------|
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
 | Highest  | Known CRITICAL/HIGH CVEs in new version, confirmed typosquatting, malicious code in diff, build provenance mismatch (tag points to different code than published artifact), tag mimicry on fork                                                            | 60+ points     |
 | High     | Maintainer takeover pattern (publisher changed + old maintainers removed), dangerous install scripts, known compromised package, moved/recreated tag with different commit, provenance attestations removed from package that previously had them          | 20-40 points   |
 | Medium   | Low OpenSSF Scorecard (< 3), publisher changed (without full takeover), new install scripts, very recent publish (< 48h), obfuscated code in diff, unsigned lightweight tags on security-critical packages, absence of provenance on high-profile packages | 10-20 points   |
@@ -277,7 +277,7 @@ If no suspicious patterns are found, assign a score of 0-10 and risk level LOW. 
 
 Post a structured report in the following format:
 
-````txt
+```txt
 ## Supply Chain Security Review
 
 | Package | Ecosystem | Old Version | New Version | Risk Score | Risk Level |
@@ -320,7 +320,7 @@ No suspicious patterns detected. Routine upgrade.
 - **approve**: LOW risk, routine upgrade, no concerns found
 - **review**: MEDIUM risk, a human should examine specific findings before merging
 - **block**: HIGH/CRITICAL risk, should not be merged without security team review
-````
+```
 
 ## Step 6 — Apply Label and Review Status
 
