@@ -59,7 +59,7 @@ Before collecting external data, identify and exclude internal/private dependenc
 **Internal dependency namespaces (skip these):**
 
 - **Maven**: Any dependency with a `groupId` starting with `com.hyland.` or `org.alfresco.`
-- **npm**: Any package under the `@hyland/` or `@alfresco/` scopes
+- **npm**: Any package under the `@hyland/`, `@hylandsoftware/`, or `@alfresco/` scopes
 
 For each internal dependency found:
 
