@@ -37,7 +37,7 @@ runs:
   using: composite
   steps:
     - name: Setup rancher
-      uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@7cfb4a7b2a1cd59c7102855d142cda026c4b1fd2
+      uses: Alfresco/alfresco-build-tools/.github/actions/setup-rancher-cli@eae6eca716938b1a6deefc7789a9c510cf53bd5d
       with:
         url: ${{ inputs.test-rancher-url }}
         access-key: ${{ inputs.test-rancher-access-key }}
