@@ -282,6 +282,7 @@ Post a structured report in the following format.
 GitHub enforces a maximum of 10 mentions per comment. Package names containing `@` (like `@hyland/core`, `@alfresco/js-api`) are interpreted as user/team mentions and trigger this limit, causing comment post failures.
 
 **Before generating the comment text**:
+
 1. Replace **every** `@` symbol in package names with `(at)` — e.g., `@hyland/core` → `(at)hyland/core`
 2. Apply this transformation to ALL occurrences: table cells, headings, inline code blocks, findings sections, reason columns
 3. This applies to both external and internal dependencies
