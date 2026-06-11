@@ -95,32 +95,35 @@ runs:
         sudo mv jx-updatebot /usr/local/bin
       shell: bash
       working-directory: /tmp
-    - name: Setup commit signing
-      if: inputs.gpg-private-key != ''
-      uses: Alfresco/automate-build-tools/.github/actions/setup-commit-signing@45f203f0347f6eace4813dbaa3031055b3d5b9cd # v4.12.0
-      with:
-        gpg-private-key: ${{ inputs.gpg-private-key }}
-        gpg-private-key-fingerprint: ${{ inputs.gpg-private-key-fingerprint }}
-        git-user-name: ${{ inputs.git-author-name }}
-        git-user-email: ${{ inputs.git-author-email }}
     - name: Run jx-updatebot
-      run: >
-        jx-updatebot pr
-        --auto-merge=${{ inputs.auto-merge }}
-        --version='${{ inputs.version }}'
-        --pull-request-title='${{ inputs.pull-request-title }}'
-        --pull-request-body="${{ inputs.pull-request-body }}"
-        --commit-title='${{ inputs.commit-title }}'
-        --commit-message="${{ inputs.commit-message }}"
-        --labels='${{ inputs.labels }}'
-        --base-branch-name='${{ inputs.base-branch-name }}'
-        --config-file='${{ inputs.config-file }}'
-        --version-file='${{ inputs.version-file }}'
-        --dir='${{ inputs.dir }}'
-        ${{ inputs.flags }}
+      run: |
+        if [[ -n "$GPG_PRIVATE_KEY" ]]; then
+          GNUPGHOME=$(mktemp -d)
+          chmod 700 "$GNUPGHOME"
+          export GNUPGHOME
+          printf '%s' "$GPG_PRIVATE_KEY" | gpg --batch --yes --import
+          git config --global user.signingkey "$GPG_PRIVATE_KEY_FINGERPRINT"
+          git config --global commit.gpgsign true
+        fi
+
+        jx-updatebot pr \
+          --auto-merge=${{ inputs.auto-merge }} \
+          --version='${{ inputs.version }}' \
+          --pull-request-title='${{ inputs.pull-request-title }}' \
+          --pull-request-body="${{ inputs.pull-request-body }}" \
+          --commit-title='${{ inputs.commit-title }}' \
+          --commit-message="${{ inputs.commit-message }}" \
+          --labels='${{ inputs.labels }}' \
+          --base-branch-name='${{ inputs.base-branch-name }}' \
+          --config-file='${{ inputs.config-file }}' \
+          --version-file='${{ inputs.version-file }}' \
+          --dir='${{ inputs.dir }}' \
+          ${{ inputs.flags }}
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       env:
+        GPG_PRIVATE_KEY: ${{ inputs.gpg-private-key }}
+        GPG_PRIVATE_KEY_FINGERPRINT: ${{ inputs.gpg-private-key-fingerprint }}
         GIT_USERNAME: ${{ inputs.git-username }}
         GIT_TOKEN: ${{ inputs.git-token }}
         GIT_AUTHOR_NAME: ${{ inputs.git-author-name }}
