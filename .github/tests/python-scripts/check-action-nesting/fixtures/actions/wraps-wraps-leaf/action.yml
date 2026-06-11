@@ -3,4 +3,4 @@ description: Calls wraps-leaf → leaf. Two levels of nesting.
 runs:
   using: composite
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/wraps-leaf@9d4b4ff5eac104e61cf1aa7c98ca9c63e7b63193
+    - uses: Alfresco/alfresco-build-tools/.github/actions/wraps-leaf@361da20c2ba028e54f7f13e961016cf25e59df8f
