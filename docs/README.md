@@ -132,6 +132,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [branch-promotion-prs](#branch-promotion-prs)
   - [helm-publish-new-package-version](#helm-publish-new-package-version)
   - [repository-mirror](#repository-mirror)
+  - [stale-pr-cleanup](#stale-pr-cleanup)
   - [reusable-release](#reusable-release)
   - [terraform](#terraform)
 - [GitHub Agentic Workflows provided by us](#github-agentic-workflows-provided-by-us)
