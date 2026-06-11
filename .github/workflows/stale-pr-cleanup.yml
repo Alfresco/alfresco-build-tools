@@ -17,7 +17,7 @@ on:
         description: "Comma-separated list of labels that exempt a PR from being marked as stale"
         required: false
         type: string
-        default: "keep-open"
+        default: "keep-open,dependencies"
       operations-per-run:
         description: "Maximum number of operations per run"
         required: false
