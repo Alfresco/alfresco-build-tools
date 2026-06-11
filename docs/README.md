@@ -2706,7 +2706,7 @@ jobs:
     with:
       stale-days: 60 # optional, default: 60
       close-after-stale-days: 30 # optional, default: 30
-      exempt-pr-labels: keep-open # optional, default: keep-open
+      exempt-pr-labels: "keep-open,dependencies" # optional, default: "keep-open,dependencies"
       operations-per-run: 100 # optional, default: 100
       debug-only: false # optional, default: false
 ```
