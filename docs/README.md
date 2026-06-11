@@ -2687,6 +2687,29 @@ To add a new mirror, append an entry to your configuration file following one of
 the forms above. The `bot-token` secret must have **read access to the source
 repositories** and **write access to the target repositories**.
 
+### stale-pr-cleanup
+
+Marks pull requests as stale after a configurable inactivity period and closes
+them automatically if they remain inactive.
+
+```yaml
+name: Stale PR Cleanup
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+
+jobs:
+  stale:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/stale-pr-cleanup.yml@v18.7.1
+    with:
+      stale-days: 60 # optional, default: 60
+      close-after-stale-days: 30 # optional, default: 30
+      exempt-pr-labels: keep-open # optional, default: keep-open
+      operations-per-run: 100 # optional, default: 100
+      debug-only: false # optional, default: false
+```
+
 ### reusable-release
 
 Automates the release process by determining the version bump type (major,
