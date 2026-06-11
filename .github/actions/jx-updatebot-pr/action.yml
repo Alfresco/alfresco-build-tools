@@ -70,6 +70,14 @@ inputs:
     description: the user email to git commit
     required: false
     default: ''
+  gpg-private-key:
+    description: ASCII-armored GPG private key for commit signing
+    required: false
+    default: ''
+  gpg-private-key-fingerprint:
+    description: 40-char GPG fingerprint of the signing key
+    required: false
+    default: ''
   jx-updatebot-release:
     description: the version of jx-updatebot release binary.
     required: false
@@ -87,6 +95,14 @@ runs:
         sudo mv jx-updatebot /usr/local/bin
       shell: bash
       working-directory: /tmp
+    - name: Setup commit signing
+      if: inputs.gpg-private-key != ''
+      uses: Alfresco/automate-build-tools/.github/actions/setup-commit-signing@45f203f0347f6eace4813dbaa3031055b3d5b9cd # v4.12.0
+      with:
+        gpg-private-key: ${{ inputs.gpg-private-key }}
+        gpg-private-key-fingerprint: ${{ inputs.gpg-private-key-fingerprint }}
+        git-user-name: ${{ inputs.git-author-name }}
+        git-user-email: ${{ inputs.git-author-email }}
     - name: Run jx-updatebot
       run: >
         jx-updatebot pr
