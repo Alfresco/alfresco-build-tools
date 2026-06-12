@@ -31,7 +31,7 @@ runs:
         PR_AUTHOR_LOGIN: ${{ inputs.pr-author-login }}
       shell: bash
       run: |
-        if [[ $LABEL == 'updatebot' && ( $PR_LOGIN == "$PR_AUTHOR_LOGIN" || $PR_LOGIN == 'alfresco-build' ) ]]
+        if [[ "${LABEL:-}" == 'updatebot' && ( "${PR_LOGIN:-}" == "${PR_AUTHOR_LOGIN:-}" || "${PR_LOGIN:-}" == 'alfresco-build' ) ]]
         then
             echo "continue=true" >> $GITHUB_OUTPUT
         else
