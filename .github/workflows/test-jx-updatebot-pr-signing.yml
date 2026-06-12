@@ -26,6 +26,8 @@ jobs:
           working-directory: .github/tests/jx-updatebot-pr
           auto-merge: 'false'
           version: 0.0.0-test
+          git-username: ${{ github.actor }}
+          git-token: ${{ github.token }}
           git-author-name: CI Test
           git-author-email: ci@example.com
 
@@ -83,6 +85,8 @@ jobs:
           working-directory: .github/tests/jx-updatebot-pr
           auto-merge: 'false'
           version: 0.0.0-test
+          git-username: ${{ github.actor }}
+          git-token: ${{ github.token }}
           git-author-name: CI Test
           git-author-email: ci@example.com
           gpg-private-key: ${{ steps.test-gpg-key.outputs.private-key }}
