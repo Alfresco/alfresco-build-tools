@@ -1629,7 +1629,7 @@ This action will promote alpha version to `alfresco-process-releases` repository
           gpg-private-key-fingerprint: ${{ secrets.GIT_COMMIT_SIGNING_FINGERPRINT }}
 ```
 
-When `gpg-private-key` is set, the action imports the key and signs all commits. Omit the GPG inputs to keep the previous unsigned behavior.
+When `gpg-private-key` is set, the action imports the key and signs all commits (the key must be unencrypted / have no passphrase). Omit the GPG inputs to keep the previous unsigned behavior.
 
 ### kubectl-keep-nslogs
 
