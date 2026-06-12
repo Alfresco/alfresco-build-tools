@@ -98,6 +98,10 @@ runs:
     - name: Run jx-updatebot
       run: |
         if [[ -n "$GPG_PRIVATE_KEY" ]]; then
+          if [[ -z "$GPG_PRIVATE_KEY_FINGERPRINT" ]]; then
+            echo "gpg-private-key-fingerprint must be set when gpg-private-key is provided" >&2
+            exit 1
+          fi
           GNUPGHOME=$(mktemp -d)
           chmod 700 "$GNUPGHOME"
           export GNUPGHOME
