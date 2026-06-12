@@ -14,6 +14,12 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
+      - name: Prepare updatebot fixture repo
+        run: |
+          git init -q -b main .github/tests/jx-updatebot-pr
+          git -C .github/tests/jx-updatebot-pr remote add origin \
+            https://github.com/Alfresco/alfresco-build-tools.git
+
       - name: Run jx-updatebot-pr without signing
         uses: ./.github/actions/jx-updatebot-pr
         with:
@@ -64,6 +70,12 @@ jobs:
             echo EOF
             echo "fingerprint=${fingerprint}"
           } >> "$GITHUB_OUTPUT"
+
+      - name: Prepare updatebot fixture repo
+        run: |
+          git init -q -b main .github/tests/jx-updatebot-pr
+          git -C .github/tests/jx-updatebot-pr remote add origin \
+            https://github.com/Alfresco/alfresco-build-tools.git
 
       - name: Run jx-updatebot-pr with signing
         uses: ./.github/actions/jx-updatebot-pr
