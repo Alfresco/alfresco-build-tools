@@ -1,0 +1,88 @@
+name: Test jx-updatebot-pr signing
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/actions/jx-updatebot-pr/**
+      - .github/workflows/test-jx-updatebot-pr-signing.yml
+      - .github/tests/jx-updatebot-pr/**
+
+jobs:
+  without-signing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run jx-updatebot-pr without signing
+        uses: ./.github/actions/jx-updatebot-pr
+        with:
+          working-directory: .github/tests/jx-updatebot-pr
+          auto-merge: 'false'
+          version: 0.0.0-test
+          git-author-name: CI Test
+          git-author-email: ci@example.com
+
+      - name: Assert commit signing is not configured
+        run: |
+          if [[ "$(git config --global commit.gpgsign || echo false)" == "true" ]]; then
+            echo "Expected commit.gpgsign to be unset/false without GPG inputs"
+            exit 1
+          fi
+
+  with-signing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Generate test GPG key
+        id: test-gpg-key
+        run: |
+          export GNUPGHOME
+          GNUPGHOME=$(mktemp -d)
+          chmod 700 "$GNUPGHOME"
+
+          cat > key-params <<'EOF'
+          Key-Type: RSA
+          Key-Length: 2048
+          Subkey-Type: RSA
+          Subkey-Length: 2048
+          Name-Real: CI Test Key
+          Name-Email: ci@example.com
+          Expire-Date: 0
+          %no-protection
+          %commit
+          EOF
+
+          gpg --batch --generate-key key-params
+
+          fingerprint=$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr:/ {print $10; exit}')
+
+          {
+            echo 'private-key<<EOF'
+            gpg --armor --export-secret-keys ci@example.com
+            echo EOF
+            echo "fingerprint=${fingerprint}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Run jx-updatebot-pr with signing
+        uses: ./.github/actions/jx-updatebot-pr
+        with:
+          working-directory: .github/tests/jx-updatebot-pr
+          auto-merge: 'false'
+          version: 0.0.0-test
+          git-author-name: CI Test
+          git-author-email: ci@example.com
+          gpg-private-key: ${{ steps.test-gpg-key.outputs.private-key }}
+          gpg-private-key-fingerprint: ${{ steps.test-gpg-key.outputs.fingerprint }}
+
+      - name: Assert commit signing is configured
+        run: |
+          if [[ "$(git config --global commit.gpgsign)" != "true" ]]; then
+            echo "Expected commit.gpgsign to be true with GPG inputs"
+            exit 1
+          fi
+          if [[ -z "$(git config --global user.signingkey)" ]]; then
+            echo "Expected user.signingkey to be set with GPG inputs"
+            exit 1
+          fi
