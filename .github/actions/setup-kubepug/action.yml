@@ -8,7 +8,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@d7bd5450fd3d1279f8c54700c32ebbd95854debb
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@e4247c11773ac73215da9360baa52bf500f9fb67
       with:
         repo: kubepug/kubepug
         version: ${{ inputs.version }}
