@@ -7,7 +7,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@65337afe0b55c1a0034096ff8c36148451886411
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@d7bd5450fd3d1279f8c54700c32ebbd95854debb
       with:
         repo: updatecli/updatecli
         version: ${{ inputs.version }}

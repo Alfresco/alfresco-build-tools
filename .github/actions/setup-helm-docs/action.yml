@@ -11,7 +11,7 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@65337afe0b55c1a0034096ff8c36148451886411
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@d7bd5450fd3d1279f8c54700c32ebbd95854debb
       with:
         repo: norwoodj/helm-docs
         version: ${{ inputs.version != '' && inputs.version || env.DEFAULT_HELM_DOCS_VERSION }}
