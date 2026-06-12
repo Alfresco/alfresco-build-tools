@@ -70,6 +70,14 @@ inputs:
     description: the user email to git commit
     required: false
     default: ''
+  gpg-private-key:
+    description: ASCII-armored GPG private key for commit signing
+    required: false
+    default: ''
+  gpg-private-key-fingerprint:
+    description: 40-char GPG fingerprint of the signing key
+    required: false
+    default: ''
   jx-updatebot-release:
     description: the version of jx-updatebot release binary.
     required: false
@@ -88,23 +96,38 @@ runs:
       shell: bash
       working-directory: /tmp
     - name: Run jx-updatebot
-      run: >
-        jx-updatebot pr
-        --auto-merge=${{ inputs.auto-merge }}
-        --version='${{ inputs.version }}'
-        --pull-request-title='${{ inputs.pull-request-title }}'
-        --pull-request-body="${{ inputs.pull-request-body }}"
-        --commit-title='${{ inputs.commit-title }}'
-        --commit-message="${{ inputs.commit-message }}"
-        --labels='${{ inputs.labels }}'
-        --base-branch-name='${{ inputs.base-branch-name }}'
-        --config-file='${{ inputs.config-file }}'
-        --version-file='${{ inputs.version-file }}'
-        --dir='${{ inputs.dir }}'
-        ${{ inputs.flags }}
+      run: |
+        if [[ -n "$GPG_PRIVATE_KEY" ]]; then
+          if [[ -z "$GPG_PRIVATE_KEY_FINGERPRINT" ]]; then
+            echo "gpg-private-key-fingerprint must be set when gpg-private-key is provided" >&2
+            exit 1
+          fi
+          GNUPGHOME=$(mktemp -d)
+          chmod 700 "$GNUPGHOME"
+          export GNUPGHOME
+          printf '%s' "$GPG_PRIVATE_KEY" | gpg --batch --yes --import
+          git config --global user.signingkey "$GPG_PRIVATE_KEY_FINGERPRINT"
+          git config --global commit.gpgsign true
+        fi
+
+        jx-updatebot pr \
+          --auto-merge=${{ inputs.auto-merge }} \
+          --version='${{ inputs.version }}' \
+          --pull-request-title='${{ inputs.pull-request-title }}' \
+          --pull-request-body="${{ inputs.pull-request-body }}" \
+          --commit-title='${{ inputs.commit-title }}' \
+          --commit-message="${{ inputs.commit-message }}" \
+          --labels='${{ inputs.labels }}' \
+          --base-branch-name='${{ inputs.base-branch-name }}' \
+          --config-file='${{ inputs.config-file }}' \
+          --version-file='${{ inputs.version-file }}' \
+          --dir='${{ inputs.dir }}' \
+          ${{ inputs.flags }}
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       env:
+        GPG_PRIVATE_KEY: ${{ inputs.gpg-private-key }}
+        GPG_PRIVATE_KEY_FINGERPRINT: ${{ inputs.gpg-private-key-fingerprint }}
         GIT_USERNAME: ${{ inputs.git-username }}
         GIT_TOKEN: ${{ inputs.git-token }}
         GIT_AUTHOR_NAME: ${{ inputs.git-author-name }}

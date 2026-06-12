@@ -9,9 +9,12 @@ inputs:
   approval-token:
     description: >
       Token used to approve.
-      This token CANNOT be the `BOT_GITHUB_TOKEN` secret, because it's linked to alfresco-build user (who created the PR).
+      This token CANNOT be the `BOT_GITHUB_TOKEN` secret, because it's linked to the user who created the PR.
       The default `GITHUB_TOKEN` can be used in this case.
     required: true
+  pr-author-login:
+    description: GitHub login of the user that creates propagation PRs
+    required: false
   merge-option:
     description: 'Merge option'
     required: false
@@ -25,9 +28,10 @@ runs:
       env:
         LABEL: ${{ github.event.label.name }}
         PR_LOGIN: ${{ github.event.pull_request.user.login }}
+        PR_AUTHOR_LOGIN: ${{ inputs.pr-author-login }}
       shell: bash
       run: |
-        if [[ $LABEL == 'updatebot' && $PR_LOGIN == 'alfresco-build' ]]
+        if [[ "${LABEL:-}" == 'updatebot' && ( "${PR_LOGIN:-}" == "${PR_AUTHOR_LOGIN:-}" || "${PR_LOGIN:-}" == 'alfresco-build' ) ]]
         then
             echo "continue=true" >> $GITHUB_OUTPUT
         else

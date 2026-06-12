@@ -464,7 +464,10 @@ Another token is also needed to handled approval. It can be the default `GITHUB_
         with:
           auto-merge-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           approval-token: ${{ secrets.GITHUB_TOKEN }}
+          pr-author-login: ${{ secrets.GIT_USERNAME }}
 ```
+
+`pr-author-login` is the GitHub username of the service account that opens propagation PRs. Auto-approve and auto-merge run only when the PR author matches this value (or is `alfresco-build` during the transition).
 
 ### awf-run-command
 
@@ -1623,7 +1626,11 @@ This action will promote alpha version to `alfresco-process-releases` repository
           git-token: ${{ secrets.GIT_TOKEN }}
           git-author-name: ${{ secrets.GIT_AUTHOR_NAME }}
           git-author-email: ${{ secrets.GIT_AUTHOR_EMAIL }}
+          gpg-private-key: ${{ secrets.GIT_COMMIT_SIGNING_PRIVATE_KEY }}
+          gpg-private-key-fingerprint: ${{ secrets.GIT_COMMIT_SIGNING_FINGERPRINT }}
 ```
+
+When `gpg-private-key` is set, the action imports the key and signs all commits (the key must be unencrypted / have no passphrase). Omit the GPG inputs to keep the previous unsigned behavior.
 
 ### kubectl-keep-nslogs
 
