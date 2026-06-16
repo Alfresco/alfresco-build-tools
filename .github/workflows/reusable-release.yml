@@ -132,6 +132,7 @@ jobs:
               files: |
                 **
               if-no-commit: info
+              token: ${{ secrets.BOT_GITHUB_TOKEN }}
 
           - name: Generate release notes and git tag
             if: steps.set-release-level.outputs.release-level != ''
