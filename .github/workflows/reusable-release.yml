@@ -63,8 +63,6 @@ jobs:
             with:
               client-id: ${{ inputs.github_app_id }}
               private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-              owner: ${{ github.repository_owner }}
-              repositories: ${{ github.event.repository.name }}
               permission-contents: write
 
           - name: Validate authentication is configured
