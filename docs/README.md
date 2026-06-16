@@ -2772,10 +2772,40 @@ jobs:
           BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
 ```
 
+The workflow needs a token with permission to push to `target_branch` and to
+create releases. The example above uses the `BOT_GITHUB_TOKEN` secret, which can
+be a PAT or the default `GITHUB_TOKEN` (`BOT_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}`)
+as long as the job grants it `contents: write` and `target_branch` allows it to
+push (note that pushes made with `GITHUB_TOKEN` do not trigger further workflow
+runs). Alternatively, authenticate with a GitHub App as described below.
+
 Changes produced by the release command are committed back to `target_branch`
 as a verified/signed commit (via [verified-bot-commit](#git-commit-and-push)),
 so this workflow can be used on branches protected by rulesets that require
 signed commits.
+
+#### Authentication with a GitHub App
+
+Instead of `BOT_GITHUB_TOKEN`, set the `github_app_id` input (the App client id,
+not sensitive) and provide the `GH_APP_PRIVATE_KEY` secret. The workflow then
+mints a short-lived installation token (via
+[actions/create-github-app-token](https://github.com/actions/create-github-app-token))
+scoped to the current repository and uses it for checkout, the commit back and
+the release creation. When `github_app_id` is set it takes precedence over
+`BOT_GITHUB_TOKEN`.
+
+```yaml
+jobs:
+    release:
+        name: Release
+        if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+        uses: Alfresco/alfresco-build-tools/.github/workflows/reusable-release.yml@v18.9.0
+        with:
+          release_type_override: ${{ inputs.release_type }}
+          github_app_id: ${{ vars.GH_APP_ID }}
+        secrets:
+          GH_APP_PRIVATE_KEY: ${{ secrets.GH_APP_PRIVATE_KEY }}
+```
 
 Release command has access to the following environment variables:
 
@@ -2783,6 +2813,11 @@ Release command has access to the following environment variables:
 - `CURRENT_VERSION`: the previous version
 - `COMMIT_USERNAME`: the configured commit username (from `commit_username` input)
 - `COMMIT_EMAIL`: the configured commit email (from `commit_email` input)
+
+The `commit_username` / `commit_email` inputs are kept for backward compatibility
+and are only forwarded to the release command as the env vars above; the pushed
+commit author is now determined by the authentication token (PAT or GitHub App),
+not by these values.
 
 ### terraform
 
