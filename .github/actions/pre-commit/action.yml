@@ -60,10 +60,12 @@ runs:
         uv run --frozen --project ${{ github.action_path }} pre-commit run --show-diff-on-failure --color=always ${{ steps.build-extra-args.outputs.args }}
       shell: bash
 
-    - name: Auto-commit changes if requested
-      uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 # v7.1.0
+    - name: Commit changes
+      uses: iarekylew00t/verified-bot-commit@5b4e8852dc472093935b8debcb81459bb79f7986 # v2.3.2
       with:
-        commit_author: 'github-actions[bot] <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>'
+        message: '[pre-commit] Auto-commit fixups'
+        files: |
+          **
       id: auto-commit-action
       if: inputs.auto-commit == 'true'
 
