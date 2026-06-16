@@ -64,6 +64,7 @@ runs:
       uses: iarekylew00t/verified-bot-commit@5b4e8852dc472093935b8debcb81459bb79f7986 # v2.3.2
       with:
         message: '[pre-commit] Auto-commit fixups'
+        ref: ${{ github.event.pull_request.head.ref }}
         files: |
           **
       id: auto-commit-action
