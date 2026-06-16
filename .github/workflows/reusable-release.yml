@@ -124,13 +124,14 @@ jobs:
               ${{ inputs.release_command }}
 
           - name: Commit back changes from release script
-            uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 # v7.1.0
+            uses: iarekylew00t/verified-bot-commit@5b4e8852dc472093935b8debcb81459bb79f7986 # v2.3.2
             if: steps.set-release-level.outputs.release-level != '' && inputs.release_command != ''
             with:
-              branch: ${{ inputs.target_branch }}
-              commit_message: Release ${{ steps.bump-semver.outputs.new-version }}
-              commit_user_name: ${{ inputs.commit_username }}
-              commit_user_email: ${{ inputs.commit_email }}
+              ref: ${{ inputs.target_branch }}
+              message: Release ${{ steps.bump-semver.outputs.new-version }}
+              files: |
+                **
+              if-no-commit: info
 
           - name: Generate release notes and git tag
             if: steps.set-release-level.outputs.release-level != ''

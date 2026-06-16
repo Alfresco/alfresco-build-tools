@@ -8,7 +8,7 @@ inputs:
   md_src:
     description: |
       Markdown file(s) to generate Table of Contents for. It can be a list of
-      space separated files or a glob pattern relative to the repository root.
+      new-line separated files or a glob pattern relative to the repository root.
     required: true
   depth:
     description: Depth of Table of Contents
@@ -61,8 +61,10 @@ runs:
       shell: bash
     - name: Autocommit changes
       if: inputs.dry_run == 'false'
-      uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 # v7.1.0
+      uses: iarekylew00t/verified-bot-commit@5b4e8852dc472093935b8debcb81459bb79f7986 # v2.3.2
       with:
-        commit_message: Auto update TOC in ${{ inputs.md_src }}
-        disable_globbing: true
-        file_pattern: ${{ inputs.md_src }}
+        ref: ${{ github.event.pull_request.head.ref }}
+        message: Auto update TOC
+        files: |
+          ${{ inputs.md_src }}
+        if-no-commit: info
