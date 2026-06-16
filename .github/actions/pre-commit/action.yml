@@ -62,6 +62,8 @@ runs:
 
     - name: Auto-commit changes if requested
       uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 # v7.1.0
+      with:
+        commit_author: 'github-actions[bot] <${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com>'
       id: auto-commit-action
       if: inputs.auto-commit == 'true'
 
