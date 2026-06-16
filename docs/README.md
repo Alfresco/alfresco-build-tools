@@ -320,9 +320,9 @@ internally by the [pre-commit](#pre-commit), [md-toc](#md-toc) and
 [reusable-release](#reusable-release) actions for their auto-commit features.
 
 It replaces the previously used
-[stefanzweifel/git-auto-commit-action](https://github.com/stefanzweifel/git-auto-commit-action):
-because `verified-bot-commit` creates commits through the GitHub API, those commits
-are automatically [verified/signed](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification)
+[stefanzweifel/git-auto-commit-action](https://github.com/stefanzweifel/git-auto-commit-action).
+Because `verified-bot-commit` creates commits through the GitHub API, those commits are automatically
+[verified/signed](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification)
 at no extra cost (no GPG/SSH key management required). This lets the consuming
 repositories enable [repository rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets)
 that require signed commits while still allowing these automated commits.
