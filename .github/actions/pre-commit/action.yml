@@ -27,8 +27,29 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Determine checkout ref
+      id: checkout-ref
+      shell: bash
+      env:
+        AUTO_COMMIT: ${{ inputs.auto-commit }}
+        HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        DEFAULT_REF: ${{ github.ref }}
+      run: |
+        # When auto-commit is enabled on a pull_request, checkout the PR head
+        # branch instead of the default merge ref: otherwise pre-commit would
+        # run against the synthetic merge commit and push unrelated base-branch
+        # changes back to the PR branch. Fall back to github.ref (never empty)
+        # for non-PR events or when auto-commit is disabled.
+        if [ "$AUTO_COMMIT" = "true" ] && [ -n "$HEAD_REF" ]; then
+          echo "ref=$HEAD_REF" >> "$GITHUB_OUTPUT"
+        else
+          echo "ref=$DEFAULT_REF" >> "$GITHUB_OUTPUT"
+        fi
+
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       if: inputs.skip_checkout == 'false'
+      with:
+        ref: ${{ steps.checkout-ref.outputs.ref }}
 
     - name: Set up Python ${{ inputs.python-version }}
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -67,7 +88,7 @@ runs:
       if: inputs.auto-commit == 'true' && steps.pre-commit.outcome == 'failure'
       uses: iarekylew00t/verified-bot-commit@5b4e8852dc472093935b8debcb81459bb79f7986 # v2.3.2
       with:
-        ref: ${{ github.event.pull_request.head.ref }}
+        ref: ${{ steps.checkout-ref.outputs.ref }}
         message: '[pre-commit] Auto-commit fixups'
         files: |
           ${{ inputs.auto-commit-files }}
