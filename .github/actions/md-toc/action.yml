@@ -81,7 +81,7 @@ runs:
       if: inputs.dry_run == 'false'
       uses: iarekylew00t/verified-bot-commit@5b4e8852dc472093935b8debcb81459bb79f7986 # v2.3.2
       with:
-        ref: ${{ github.event.pull_request.head.ref }}
+        ref: ${{ github.event.pull_request.head.ref || github.ref }}
         message: Auto update TOC
         files: ${{ steps.file-list.outputs.files }}
         if-no-commit: info
