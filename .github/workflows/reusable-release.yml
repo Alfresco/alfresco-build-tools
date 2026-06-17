@@ -17,17 +17,35 @@ on:
         required: false
         type: string
       commit_username:
-        description: "Username for committing"
+        description: >-
+          Git username exposed to the release command as the COMMIT_USERNAME env
+          var. Kept for backward compatibility: the pushed commit author is now
+          determined by the auth token, not this value
         required: false
         type: string
       commit_email:
-        description: "Email for committing"
+        description: >-
+          Git email exposed to the release command as the COMMIT_EMAIL env var.
+          Kept for backward compatibility: the pushed commit author is now
+          determined by the auth token, not this value
+        required: false
+        type: string
+      github_app_client_id:
+        description: >-
+          GitHub App client id. When set, the workflow authenticates via a
+          GitHub App installation token (with the GH_APP_PRIVATE_KEY secret)
+          instead of BOT_GITHUB_TOKEN
         required: false
         type: string
     secrets:
       BOT_GITHUB_TOKEN:
-        description: "GitHub token with permissions to create release and push commits"
-        required: true
+        description: >-
+          GitHub token with permissions to create release and push commits.
+          Required unless github_app_client_id is set.
+        required: false
+      GH_APP_PRIVATE_KEY:
+        description: "GitHub App private key (used when github_app_client_id is set)"
+        required: false
 
 concurrency:
   group: release-${{ github.event.repository.name }}
@@ -38,11 +56,29 @@ jobs:
         name: Release
         runs-on: ubuntu-latest
         steps:
+          - name: Create GitHub App token
+            id: app-token
+            if: inputs.github_app_client_id != ''
+            uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+            with:
+              client-id: ${{ inputs.github_app_client_id }}
+              private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+              permission-contents: write
+
+          - name: Validate authentication is configured
+            env:
+              EFFECTIVE_TOKEN: ${{ steps.app-token.outputs.token || secrets.BOT_GITHUB_TOKEN }}
+            run: |
+              if [ -z "$EFFECTIVE_TOKEN" ]; then
+                echo "::error::No authentication configured: set the github_app_client_id input (with the GH_APP_PRIVATE_KEY secret) or provide the BOT_GITHUB_TOKEN secret."
+                exit 1
+              fi
+
           - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
             with:
               fetch-depth: 0
               ref: ${{ inputs.target_branch }}
-              token: ${{ secrets.BOT_GITHUB_TOKEN }}
+              token: ${{ steps.app-token.outputs.token || secrets.BOT_GITHUB_TOKEN }}
 
           - name: Get release type from PR label or input
             id: set-release-level
@@ -132,10 +168,10 @@ jobs:
               files: |
                 **
               if-no-commit: info
-              token: ${{ secrets.BOT_GITHUB_TOKEN }}
+              token: ${{ steps.app-token.outputs.token || secrets.BOT_GITHUB_TOKEN }}
 
           - name: Generate release notes and git tag
             if: steps.set-release-level.outputs.release-level != ''
             env:
-              GH_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+              GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.BOT_GITHUB_TOKEN }}
             run: gh release create "${{ steps.bump-semver.outputs.new-version }}" --generate-notes -t "${{ steps.bump-semver.outputs.new-version }}"
