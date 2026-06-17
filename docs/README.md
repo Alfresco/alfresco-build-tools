@@ -2786,12 +2786,12 @@ signed commits.
 
 #### Authentication with a GitHub App
 
-Instead of `BOT_GITHUB_TOKEN`, set the `github_app_id` input (the App client id,
-not sensitive) and provide the `GH_APP_PRIVATE_KEY` secret. The workflow then
-mints a short-lived installation token (via
+Instead of `BOT_GITHUB_TOKEN`, set the `github_app_client_id` input (the App
+client id, not sensitive) and provide the `GH_APP_PRIVATE_KEY` secret. The
+workflow then mints a short-lived installation token (via
 [actions/create-github-app-token](https://github.com/actions/create-github-app-token))
 scoped to the current repository and uses it for checkout, the commit back and
-the release creation. When `github_app_id` is set it takes precedence over
+the release creation. When `github_app_client_id` is set it takes precedence over
 `BOT_GITHUB_TOKEN`.
 
 ```yaml
@@ -2802,7 +2802,7 @@ jobs:
         uses: Alfresco/alfresco-build-tools/.github/workflows/reusable-release.yml@v18.9.0
         with:
           release_type_override: ${{ inputs.release_type }}
-          github_app_id: ${{ vars.GH_APP_ID }}
+          github_app_client_id: ${{ vars.GH_APP_CLIENT_ID }}
         secrets:
           GH_APP_PRIVATE_KEY: ${{ secrets.GH_APP_PRIVATE_KEY }}
 ```

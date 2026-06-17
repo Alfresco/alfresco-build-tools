@@ -30,7 +30,7 @@ on:
           determined by the auth token, not this value
         required: false
         type: string
-      github_app_id:
+      github_app_client_id:
         description: >-
           GitHub App client id. When set, the workflow authenticates via a
           GitHub App installation token (with the GH_APP_PRIVATE_KEY secret)
@@ -41,10 +41,10 @@ on:
       BOT_GITHUB_TOKEN:
         description: >-
           GitHub token with permissions to create release and push commits.
-          Required unless github_app_id is set.
+          Required unless github_app_client_id is set.
         required: false
       GH_APP_PRIVATE_KEY:
-        description: "GitHub App private key (used when github_app_id is set)"
+        description: "GitHub App private key (used when github_app_client_id is set)"
         required: false
 
 concurrency:
@@ -58,10 +58,10 @@ jobs:
         steps:
           - name: Create GitHub App token
             id: app-token
-            if: inputs.github_app_id != ''
+            if: inputs.github_app_client_id != ''
             uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
             with:
-              client-id: ${{ inputs.github_app_id }}
+              client-id: ${{ inputs.github_app_client_id }}
               private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
               permission-contents: write
 
@@ -70,7 +70,7 @@ jobs:
               EFFECTIVE_TOKEN: ${{ steps.app-token.outputs.token || secrets.BOT_GITHUB_TOKEN }}
             run: |
               if [ -z "$EFFECTIVE_TOKEN" ]; then
-                echo "::error::No authentication configured: set the github_app_id input (with the GH_APP_PRIVATE_KEY secret) or provide the BOT_GITHUB_TOKEN secret."
+                echo "::error::No authentication configured: set the github_app_client_id input (with the GH_APP_PRIVATE_KEY secret) or provide the BOT_GITHUB_TOKEN secret."
                 exit 1
               fi
 
