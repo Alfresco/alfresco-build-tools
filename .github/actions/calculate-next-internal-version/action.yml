@@ -23,7 +23,7 @@ runs:
   using: "composite"
   steps:
     - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-pysemver@f53a178656dbd7b9ecc4761017a9904066b61e38
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-pysemver@e4247c11773ac73215da9360baa52bf500f9fb67
     - id: next-prerelease-resolver
       run: ${{ github.action_path }}/next-prerelease.sh
       shell: bash
