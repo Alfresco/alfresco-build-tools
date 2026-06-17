@@ -2631,7 +2631,7 @@ jobs:
       draft-pr: false
       reviewers: 'user1,user2,user3' # optional - comma or newline-separated list of GitHub usernames
       team-reviewers: 'team1,team2' # optional - comma or newline-separated list of GitHub teams
-      github-app-client-id: ${{ vars.GH_APP_MY_APP_APP_ID }} # GitHub App client ID (or App ID)
+      github-app-client-id: ${{ vars.GH_APP_MY_APP_CLIENT_ID }} # GitHub App client ID
     secrets:
       github-app-private-key: ${{ secrets.GH_APP_MY_APP_PRIVATE_KEY }} # GitHub App private key (PEM)
 ```
