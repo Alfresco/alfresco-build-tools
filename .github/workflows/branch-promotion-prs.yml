@@ -31,10 +31,17 @@ on:
         description: 'A comma or newline-separated list of GitHub teams to request as reviewers'
         type: string
         required: false
+      github-app-client-id:
+        description: 'GitHub App client ID (or App ID) used to mint a short-lived token for creating PRs. Provide together with the github-app-private-key secret to use GitHub App authentication instead of gh-token.'
+        type: string
+        required: false
     secrets:
       gh-token:
-        description: 'GitHub token for creating PRs'
-        required: true
+        description: 'GitHub token (PAT) for creating PRs. Used as a fallback when GitHub App authentication is not configured. Deprecated: prefer github-app-client-id + github-app-private-key.'
+        required: false
+      github-app-private-key:
+        description: 'GitHub App private key (PEM) used to mint a short-lived token for creating PRs. Provide together with the github-app-client-id input.'
+        required: false
 
 permissions:
   contents: read
@@ -46,10 +53,28 @@ jobs:
       matrix:
         branch: ${{ fromJson(inputs.target-branches) }}
     steps:
+      - name: Generate GitHub App token
+        id: app-token
+        if: inputs.github-app-client-id != ''
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ inputs.github-app-client-id }}
+          private-key: ${{ secrets.github-app-private-key }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - name: Get GitHub App user id
+        id: get-user-id
+        if: inputs.github-app-client-id != ''
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ matrix.branch }}
+          token: ${{ steps.app-token.outputs.token || secrets.gh-token }}
 
       - name: Reset promotion branch
         run: |
@@ -65,4 +90,6 @@ jobs:
           body: ${{ format(inputs.pr-body-template, matrix.branch, inputs.source-branch) }}
           reviewers: ${{ inputs.reviewers }}
           team-reviewers: ${{ inputs.team-reviewers }}
-          token: ${{ secrets.gh-token }}
+          token: ${{ steps.app-token.outputs.token || secrets.gh-token }}
+          committer: ${{ steps.app-token.outputs.app-slug && format('{0}[bot] <{1}+{0}[bot]@users.noreply.github.com>', steps.app-token.outputs.app-slug, steps.get-user-id.outputs.user-id) || 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' }}
+          author: ${{ steps.app-token.outputs.app-slug && format('{0}[bot] <{1}+{0}[bot]@users.noreply.github.com>', steps.app-token.outputs.app-slug, steps.get-user-id.outputs.user-id) || 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>' }}

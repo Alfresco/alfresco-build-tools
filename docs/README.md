@@ -2605,6 +2605,10 @@ Check `action.yml` for the full list of inputs and their descriptions.
 
 Automates the creation of pull requests to promote changes from a source branch to multiple target branches. This workflow is useful for promoting changes across different environments (e.g., from develop to staging and production branches).
 
+Authentication can be provided either via a GitHub App (recommended) or a token/PAT. When `github-app-client-id` (input) and `github-app-private-key` (secret) are set, the workflow mints a short-lived GitHub App token and commits as the App's bot identity; otherwise it falls back to the `gh-token` secret.
+
+Using GitHub App authentication (recommended):
+
 ```yaml
 name: Promote to Environment Branches
 
@@ -2627,6 +2631,18 @@ jobs:
       draft-pr: false
       reviewers: 'user1,user2,user3' # optional - comma or newline-separated list of GitHub usernames
       team-reviewers: 'team1,team2' # optional - comma or newline-separated list of GitHub teams
+      github-app-client-id: ${{ vars.GH_APP_MY_APP_APP_ID }} # GitHub App client ID (or App ID)
+    secrets:
+      github-app-private-key: ${{ secrets.GH_APP_MY_APP_PRIVATE_KEY }} # GitHub App private key (PEM)
+```
+
+Using a token/PAT (fallback):
+
+```yaml
+  promote:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/branch-promotion-prs.yml@v18.9.0
+    with:
+      target-branches: '["staging", "production"]'
     secrets:
       gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
 ```
