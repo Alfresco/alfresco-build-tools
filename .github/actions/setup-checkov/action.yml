@@ -8,7 +8,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@e4247c11773ac73215da9360baa52bf500f9fb67
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@6ea7d726da1d58566a4aef08168c0366856c8f61
       with:
         repo: bridgecrewio/checkov
         version: ${{ inputs.version }}
