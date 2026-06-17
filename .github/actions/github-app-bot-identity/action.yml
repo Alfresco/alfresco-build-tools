@@ -1,7 +1,7 @@
 name: GitHub App bot identity
 description: >
   Resolve the bot user id for a GitHub App and build the git committer/author identity
-  string (`<name> <id+<name>@users.noreply.github.com>`). When no app-slug is provided,
+  string (`slug[bot] <id+slug[bot]@users.noreply.github.com>`). When no app-slug is provided,
   falls back to the default github-actions[bot] identity.
 inputs:
   app-slug:
@@ -19,16 +19,16 @@ outputs:
     description: The numeric user id of the bot account.
     value: ${{ steps.resolve.outputs.user-id }}
   name:
-    description: The bot account name, e.g. `<slug>[bot]` (suitable for `git config user.name`).
+    description: The bot account name, e.g. `slug[bot]` (suitable for `git config user.name`).
     value: ${{ steps.resolve.outputs.name }}
   email:
     description: >
-      The bot no-reply email `<id>+<name>@users.noreply.github.com`
+      The bot no-reply email `id+slug[bot]@users.noreply.github.com`
       (suitable for `git config user.email`).
     value: ${{ steps.resolve.outputs.email }}
   identity:
     description: >
-      The git committer/author identity string in the form `<name> <email>`.
+      The git committer/author identity string in the form `slug[bot] <id+slug[bot]@users.noreply.github.com>`.
     value: ${{ steps.resolve.outputs.identity }}
 runs:
   using: composite
