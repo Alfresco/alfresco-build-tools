@@ -73,7 +73,7 @@ runs:
         path: ${{ inputs.m2-uploaded-group-path }}
 
     - name: SonarQube Scan
-      uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@e4247c11773ac73215da9360baa52bf500f9fb67
+      uses: Alfresco/alfresco-build-tools/.github/actions/maven-build@6ea7d726da1d58566a4aef08168c0366856c8f61
       env:
         SONAR_TOKEN: ${{ inputs.sonar-token }}
       with:

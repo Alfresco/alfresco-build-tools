@@ -10,6 +10,12 @@ inputs:
       (requires `permissions.contents: write` on the calling job)
     required: false
     default: "false"
+  auto-commit-files:
+    description: >-
+      Files to include in the auto-commit (if enabled, defaults to all files)
+      (ignored if auto-commit is disabled)
+    required: false
+    default: "**"
   python-version:
     description: Python version used to run pre-commit
     required: false
@@ -21,12 +27,29 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Determine checkout ref
+      id: checkout-ref
+      shell: bash
+      env:
+        AUTO_COMMIT: ${{ inputs.auto-commit }}
+        HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        DEFAULT_REF: ${{ github.ref }}
+      run: |
+        # When auto-commit is enabled on a pull_request, checkout the PR head
+        # branch instead of the default merge ref: otherwise pre-commit would
+        # run against the synthetic merge commit and push unrelated base-branch
+        # changes back to the PR branch. Fall back to github.ref (never empty)
+        # for non-PR events or when auto-commit is disabled.
+        if [ "$AUTO_COMMIT" = "true" ] && [ -n "$HEAD_REF" ]; then
+          echo "ref=$HEAD_REF" >> "$GITHUB_OUTPUT"
+        else
+          echo "ref=$DEFAULT_REF" >> "$GITHUB_OUTPUT"
+        fi
+
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       if: inputs.skip_checkout == 'false'
-      env:
-        REF_TO_CHECKOUT: ${{ inputs.auto-commit == 'true' && github.event.pull_request.head.ref || '' }}
       with:
-        ref: ${{ env.REF_TO_CHECKOUT }}
+        ref: ${{ steps.checkout-ref.outputs.ref }}
 
     - name: Set up Python ${{ inputs.python-version }}
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -60,10 +83,16 @@ runs:
         uv run --frozen --project ${{ github.action_path }} pre-commit run --show-diff-on-failure --color=always ${{ steps.build-extra-args.outputs.args }}
       shell: bash
 
-    - name: Auto-commit changes if requested
-      uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 # v7.1.0
+    - name: Commit changes
       id: auto-commit-action
-      if: inputs.auto-commit == 'true'
+      if: inputs.auto-commit == 'true' && steps.pre-commit.outcome == 'failure'
+      uses: iarekylew00t/verified-bot-commit@5b4e8852dc472093935b8debcb81459bb79f7986 # v2.3.2
+      with:
+        ref: ${{ steps.checkout-ref.outputs.ref }}
+        message: '[pre-commit] Auto-commit fixups'
+        files: |
+          ${{ inputs.auto-commit-files }}
+        if-no-commit: info
 
     - name: Run pre-commit again to verify changes
       run: uv run --frozen --project ${{ github.action_path }} pre-commit run --show-diff-on-failure --color=always ${{ steps.build-extra-args.outputs.args }}

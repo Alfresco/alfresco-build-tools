@@ -8,7 +8,8 @@ inputs:
   md_src:
     description: |
       Markdown file(s) to generate Table of Contents for. It can be a list of
-      space separated files or a glob pattern relative to the repository root.
+      space- or new-line separated files or a glob pattern relative to the
+      repository root.
     required: true
   depth:
     description: Depth of Table of Contents
@@ -59,10 +60,28 @@ runs:
           fi
         done
       shell: bash
+    - name: Normalize md_src into newline-separated file list
+      if: inputs.dry_run == 'false'
+      id: file-list
+      env:
+        MD_SRC: ${{ inputs.md_src }}
+      run: |
+        # Accept both space- and newline-separated md_src for backward compat:
+        # verified-bot-commit expects one glob/file per line. Disable globbing so
+        # patterns (e.g. docs/*.md) are passed through verbatim and expanded by
+        # the commit action itself.
+        set -f
+        {
+          echo 'files<<EOF'
+          for f in $MD_SRC; do echo "$f"; done
+          echo 'EOF'
+        } >> "$GITHUB_OUTPUT"
+      shell: bash
     - name: Autocommit changes
       if: inputs.dry_run == 'false'
-      uses: stefanzweifel/git-auto-commit-action@04702edda442b2e678b25b537cec683a1493fcb9 # v7.1.0
+      uses: iarekylew00t/verified-bot-commit@5b4e8852dc472093935b8debcb81459bb79f7986 # v2.3.2
       with:
-        commit_message: Auto update TOC in ${{ inputs.md_src }}
-        disable_globbing: true
-        file_pattern: ${{ inputs.md_src }}
+        ref: ${{ github.event.pull_request.head.ref || github.ref }}
+        message: Auto update TOC
+        files: ${{ steps.file-list.outputs.files }}
+        if-no-commit: info
