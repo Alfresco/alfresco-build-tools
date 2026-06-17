@@ -263,3 +263,21 @@ jobs:
       - name: Show current branches
         run: |
           echo "Current branch is ${{ steps.branch-info.outputs.branch-name }}"
+
+      #region Test github-app-bot-identity
+      # No app-slug: exercises the fallback that resolves github-actions[bot] via the API
+      - uses: ./.github/actions/github-app-bot-identity
+        id: bot-identity
+      - name: Assert resolved bot identity
+        env:
+          NAME: ${{ steps.bot-identity.outputs.name }}
+          EMAIL: ${{ steps.bot-identity.outputs.email }}
+          USER_ID: ${{ steps.bot-identity.outputs.user-id }}
+          IDENTITY: ${{ steps.bot-identity.outputs.identity }}
+        run: |
+          echo "name=$NAME email=$EMAIL user-id=$USER_ID identity=$IDENTITY"
+          test "$NAME" = "github-actions[bot]"
+          [[ "$USER_ID" =~ ^[0-9]+$ ]]
+          test "$EMAIL" = "${USER_ID}+github-actions[bot]@users.noreply.github.com"
+          test "$IDENTITY" = "github-actions[bot] <${EMAIL}>"
+      #endregion
