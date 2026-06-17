@@ -8,10 +8,14 @@ setup() {
     export GH_TOKEN="dummy"
     export APP_SLUG=""
 
-    # Mock gh to return a fixed user id for the /users/<bot> lookup
+    # Mock gh to resolve the user id from the queried /users/<bot> endpoint
     function gh() {
         if [ "$1" = "api" ]; then
-            echo "12345678"
+            case "$2" in
+                "/users/my-app[bot]") echo "12345678" ;;
+                "/users/github-actions[bot]") echo "41898282" ;;
+                *) echo "0" ;;
+            esac
         fi
     }
     export -f gh
@@ -28,7 +32,7 @@ setup() {
     [[ "$output" == *"Resolved identity is 'my-app[bot] <12345678+my-app[bot]@users.noreply.github.com>'"* ]]
 }
 
-@test "falls back to github-actions[bot] when app-slug is empty" {
+@test "falls back to github-actions[bot] and resolves its id via the API" {
     export APP_SLUG=""
 
     run resolve-bot-identity.sh
@@ -39,18 +43,16 @@ setup() {
     [[ "$output" == *"Resolved identity is 'github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>'"* ]]
 }
 
-@test "does not call the API when falling back" {
-    export APP_SLUG=""
+@test "fails when the API lookup fails" {
+    export APP_SLUG="my-app"
 
-    # gh mock fails the test if invoked
+    # gh mock returns a non-zero status to simulate an API failure
     function gh() {
-        echo "gh should not be called" >&2
         return 1
     }
     export -f gh
 
     run resolve-bot-identity.sh
 
-    [ "$status" -eq 0 ]
-    [[ "$output" == *"github-actions[bot]"* ]]
+    [ "$status" -ne 0 ]
 }

@@ -1,11 +1,14 @@
 #!/bin/bash -e
 if [ -n "$APP_SLUG" ]; then
     BOT_NAME="${APP_SLUG}[bot]"
-    USER_ID="$(gh api "/users/${BOT_NAME}" --jq .id)"
 else
     BOT_NAME="github-actions[bot]"
-    USER_ID="41898282"
 fi
+
+# Resolve the bot user id via the API in both branches so we never hard-code a
+# magic id (which would be wrong on GitHub Enterprise Server or if GitHub ever
+# changes it).
+USER_ID="$(gh api "/users/${BOT_NAME}" --jq .id)"
 
 EMAIL="${USER_ID}+${BOT_NAME}@users.noreply.github.com"
 IDENTITY="${BOT_NAME} <${EMAIL}>"
