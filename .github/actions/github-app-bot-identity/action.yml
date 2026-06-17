@@ -1,0 +1,54 @@
+name: GitHub App bot identity
+description: >
+  Resolve the bot user id for a GitHub App and build the git committer/author identity
+  string (`<name> <id+<name>@users.noreply.github.com>`). When no app-slug is provided,
+  falls back to the default github-actions[bot] identity.
+inputs:
+  app-slug:
+    description: >
+      The GitHub App slug (e.g. the `app-slug` output of actions/create-github-app-token).
+      When empty, the action falls back to the github-actions[bot] identity.
+    required: false
+    default: ''
+  github-token:
+    description: Token used to query the GitHub API for the bot user id.
+    required: false
+    default: ${{ github.token }}
+outputs:
+  user-id:
+    description: The numeric user id of the bot account.
+    value: ${{ steps.resolve.outputs.user-id }}
+  name:
+    description: The bot account name, e.g. `<slug>[bot]` (suitable for `git config user.name`).
+    value: ${{ steps.resolve.outputs.name }}
+  email:
+    description: >
+      The bot no-reply email `<id>+<name>@users.noreply.github.com`
+      (suitable for `git config user.email`).
+    value: ${{ steps.resolve.outputs.email }}
+  identity:
+    description: >
+      The git committer/author identity string in the form `<name> <email>`.
+    value: ${{ steps.resolve.outputs.identity }}
+runs:
+  using: composite
+  steps:
+    - name: Resolve bot identity
+      id: resolve
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        APP_SLUG: ${{ inputs.app-slug }}
+      run: |
+        if [ -n "$APP_SLUG" ]; then
+          bot_name="${APP_SLUG}[bot]"
+          user_id="$(gh api "/users/${bot_name}" --jq .id)"
+        else
+          bot_name="github-actions[bot]"
+          user_id="41898282"
+        fi
+        email="${user_id}+${bot_name}@users.noreply.github.com"
+        echo "user-id=${user_id}" >> "$GITHUB_OUTPUT"
+        echo "name=${bot_name}" >> "$GITHUB_OUTPUT"
+        echo "email=${email}" >> "$GITHUB_OUTPUT"
+        echo "identity=${bot_name} <${email}>" >> "$GITHUB_OUTPUT"

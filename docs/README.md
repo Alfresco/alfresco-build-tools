@@ -54,6 +54,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [get-commit-message](#get-commit-message)
   - [git-commit-changes](#git-commit-changes)
   - [git-latest-tag](#git-latest-tag)
+  - [github-app-bot-identity](#github-app-bot-identity)
   - [github-check-upcoming-runs](#github-check-upcoming-runs)
   - [github-deployment-create](#github-deployment-create)
   - [github-deployment-status-update](#github-deployment-status-update)
@@ -836,6 +837,33 @@ Gets the latest tag and commit sha for the given pattern. The result is returned
       - uses: Alfresco/alfresco-build-tools/.github/actions/git-latest-tag@v18.9.0
         with:
           pattern: 1.0.0-alpha*
+```
+
+### github-app-bot-identity
+
+Resolves the bot user id for a GitHub App and builds the git committer/author identity string (`<name> <id+<name>@users.noreply.github.com>`) to use when committing as the App. Provide the `app-slug` output of [actions/create-github-app-token](https://github.com/actions/create-github-app-token); when `app-slug` is empty the action falls back to the default `github-actions[bot]` identity.
+
+```yaml
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.GH_APP_MY_APP_APP_ID }}
+          private-key: ${{ secrets.GH_APP_MY_APP_PRIVATE_KEY }}
+
+      - name: Resolve bot identity
+        id: bot-identity
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-app-bot-identity@v18.9.0
+        with:
+          app-slug: ${{ steps.app-token.outputs.app-slug }}
+          github-token: ${{ steps.app-token.outputs.token }}
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          committer: ${{ steps.bot-identity.outputs.identity }}
+          author: ${{ steps.bot-identity.outputs.identity }}
 ```
 
 ### github-check-upcoming-runs
