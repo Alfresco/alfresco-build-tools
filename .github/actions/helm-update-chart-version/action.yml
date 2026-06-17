@@ -16,7 +16,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@dfe3091372ffecd5ec0ef2b2dc78da7ceed64bd6
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm-docs@6ea7d726da1d58566a4aef08168c0366856c8f61
       with:
         version: ${{ inputs.helm-docs-version }}
     - name: Update version
