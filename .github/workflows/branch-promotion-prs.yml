@@ -84,4 +84,3 @@ jobs:
           reviewers: ${{ inputs.reviewers }}
           team-reviewers: ${{ inputs.team-reviewers }}
           token: ${{ steps.app-token.outputs.token || secrets.gh-token }}
-          sign-commits: true
