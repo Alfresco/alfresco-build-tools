@@ -314,10 +314,18 @@ Will result in:
 
 ### Git commit and push
 
-[stefanzweifel/git-auto-commit-action](https://github.com/stefanzweifel/git-auto-commit-action)
-can be used to automatically commit and push changed files back to GitHub.
+[iarekylew00t/verified-bot-commit](https://github.com/iarekylew00t/verified-bot-commit)
+is used to automatically commit and push changed files back to GitHub. It is used
+internally by the [pre-commit](#pre-commit), [md-toc](#md-toc) and
+[reusable-release](#reusable-release) actions for their auto-commit features.
 
-We are also using it inside the [pre-commit](#pre-commit) action for the auto-commit feature.
+It replaces the previously used
+[stefanzweifel/git-auto-commit-action](https://github.com/stefanzweifel/git-auto-commit-action).
+Because `verified-bot-commit` creates commits through the GitHub API, those commits are automatically
+[verified/signed](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification)
+at no extra cost (no GPG/SSH key management required). This lets the consuming
+repositories enable [repository rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets)
+that require signed commits while still allowing these automated commits.
 
 ### pmd
 
@@ -1895,12 +1903,16 @@ Generates a Markdown table of contents for a file.
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/md-toc@v18.9.0
         with:
+          # md_src accepts a space- or new-line separated list and/or globs
           md_src: 'LICENSE.md README.md docs/*.md'
           bullets: '-'
           depth: '4'
           md_toc_version: 1.2.0
           node_install: 'false'
 ```
+
+This action requires `permissions.contents: write` on the calling job to commit
+the generated ToC back to the pull request branch.
 
 For ToC to be inserted in your file, it needs to contain the HTML comment below:
 
@@ -1975,6 +1987,7 @@ Additional inputs:
 | ---------------------- | ----------------------------------------------------------------------------------- | --------- |
 | `pre-commit-args`      | Extra arguments passed to `pre-commit run`                                          |           |
 | `auto-commit`          | Commit automated fixups back to the branch (requires `permissions.contents: write`) | `"false"` |
+| `auto-commit-files`    | Files to include in the auto-commit (new-line separated globs)                      | `"**"`    |
 | `python-version`       | Python version used to run pre-commit                                               | `"3.11"`  |
 | `skip_checkout`        | Skip the internal `actions/checkout` step                                           | `"false"` |
 
@@ -2758,6 +2771,11 @@ jobs:
         secrets:
           BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
 ```
+
+Changes produced by the release command are committed back to `target_branch`
+as a verified/signed commit (via [verified-bot-commit](#git-commit-and-push)),
+so this workflow can be used on branches protected by rulesets that require
+signed commits.
 
 Release command has access to the following environment variables:
 
