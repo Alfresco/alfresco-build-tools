@@ -35,20 +35,8 @@ runs:
   steps:
     - name: Resolve bot identity
       id: resolve
-      shell: bash
+      run: ${{ github.action_path }}/resolve-bot-identity.sh
       env:
         GH_TOKEN: ${{ inputs.github-token }}
         APP_SLUG: ${{ inputs.app-slug }}
-      run: |
-        if [ -n "$APP_SLUG" ]; then
-          bot_name="${APP_SLUG}[bot]"
-          user_id="$(gh api "/users/${bot_name}" --jq .id)"
-        else
-          bot_name="github-actions[bot]"
-          user_id="41898282"
-        fi
-        email="${user_id}+${bot_name}@users.noreply.github.com"
-        echo "user-id=${user_id}" >> "$GITHUB_OUTPUT"
-        echo "name=${bot_name}" >> "$GITHUB_OUTPUT"
-        echo "email=${email}" >> "$GITHUB_OUTPUT"
-        echo "identity=${bot_name} <${email}>" >> "$GITHUB_OUTPUT"
+      shell: bash
