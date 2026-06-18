@@ -31,10 +31,17 @@ on:
         description: 'A comma or newline-separated list of GitHub teams to request as reviewers'
         type: string
         required: false
+      github-app-client-id:
+        description: 'GitHub App client ID (or App ID) used to mint a short-lived token for creating PRs. Provide together with the github-app-private-key secret to use GitHub App authentication instead of gh-token.'
+        type: string
+        required: false
     secrets:
       gh-token:
-        description: 'GitHub token for creating PRs'
-        required: true
+        description: 'GitHub token (PAT) for creating PRs. Used as a fallback when GitHub App authentication is not configured. Deprecated: prefer github-app-client-id + github-app-private-key.'
+        required: false
+      github-app-private-key:
+        description: 'GitHub App private key (PEM) used to mint a short-lived token for creating PRs. Provide together with the github-app-client-id input.'
+        required: false
 
 permissions:
   contents: read
@@ -46,10 +53,21 @@ jobs:
       matrix:
         branch: ${{ fromJson(inputs.target-branches) }}
     steps:
+      - name: Generate GitHub App token
+        id: app-token
+        if: inputs.github-app-client-id != ''
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ inputs.github-app-client-id }}
+          private-key: ${{ secrets.github-app-private-key }}
+          permission-contents: write
+          permission-pull-requests: write
+
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: ${{ matrix.branch }}
+          token: ${{ steps.app-token.outputs.token || secrets.gh-token }}
 
       - name: Reset promotion branch
         run: |
@@ -65,4 +83,4 @@ jobs:
           body: ${{ format(inputs.pr-body-template, matrix.branch, inputs.source-branch) }}
           reviewers: ${{ inputs.reviewers }}
           team-reviewers: ${{ inputs.team-reviewers }}
-          token: ${{ secrets.gh-token }}
+          token: ${{ steps.app-token.outputs.token || secrets.gh-token }}
