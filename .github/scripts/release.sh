@@ -33,17 +33,11 @@ grep -Rl "Alfresco/alfresco-build-tools.*@v" docs/ | xargs sed -i -E \
 
 GITHUB_TOKEN=$GH_TOKEN npx --yes @gionn/verified-bot-commit@2.3.2-alpha.9fe9b4e \
   --repository "Alfresco/alfresco-build-tools" \
-  --ref "$GITHUB_REF" \
+  --ref "$$TARGET_BRANCH" \
   --files "**" \
   --message "Release candidate $RELEASE_VERSION"
 
 SHA_RC=$(git rev-parse HEAD)
-
-# Push the release candidate commit to the remote. The next step commits the
-# release changes via the GitHub API (verified-bot-commit), which builds on top
-# of the remote branch tip; without this push it would create the release commit
-# on top of SHA_PREV and silently drop this candidate commit.
-git push origin HEAD
 echo "Pass 1 complete: pinned refs to SHA_PREV=$SHA_PREV, pushed SHA_RC=$SHA_RC"
 
 # Pass 2: release commit (picked up by verified-bot-commit)

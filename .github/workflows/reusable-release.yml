@@ -157,6 +157,7 @@ jobs:
               COMMIT_USERNAME: ${{ inputs.commit_username }}
               COMMIT_EMAIL: ${{ inputs.commit_email }}
               GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.BOT_GITHUB_TOKEN }}
+              TARGET_BRANCH: ${{ inputs.target_branch }}
             run: |
               ${{ inputs.release_command }}
 
