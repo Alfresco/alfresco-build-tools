@@ -43,6 +43,14 @@ on:
           set, the setup-node action is run; otherwise it is skipped.
         required: false
         type: string
+      github_app_workflows_permission:
+        description: >-
+          Request the workflows:write permission on the GitHub App token.
+          Required when the release commit modifies files under
+          .github/workflows/, otherwise the GitHub API rejects the commit.
+        required: false
+        type: boolean
+        default: false
     secrets:
       BOT_GITHUB_TOKEN:
         description: >-
@@ -70,6 +78,7 @@ jobs:
               client-id: ${{ inputs.github_app_client_id }}
               private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
               permission-contents: write
+              permission-workflows: ${{ inputs.github_app_workflows_permission && 'write' || '' }}
 
           - name: Validate authentication is configured
             env:

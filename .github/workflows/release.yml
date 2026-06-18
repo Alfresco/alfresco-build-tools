@@ -25,5 +25,6 @@ jobs:
           release_command: ./.github/scripts/release.sh
           node_version: 24
           github_app_client_id: ${{ vars.GH_APP_ENGINEERING_ADMIN_CLIENT_ID }}
+          github_app_workflows_permission: true
         secrets:
           GH_APP_PRIVATE_KEY: ${{ secrets.GH_APP_ENGINEERING_ADMIN_PRIVATE_KEY }}
