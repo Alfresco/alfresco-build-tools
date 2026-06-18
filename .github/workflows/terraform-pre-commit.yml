@@ -23,7 +23,7 @@ on:
       BOT_GITHUB_TOKEN:
         required: false
       GITHUB_APP_PRIVATE_KEY:
-        description: 'GitHub App private key used to generate a token for accessing private terraform modules (used when github_app_repositories_owner is set)'
+        description: 'GitHub App private key used to generate a token for accessing private terraform modules (used when github_app_client_id is set)'
         required: false
 
 jobs:
