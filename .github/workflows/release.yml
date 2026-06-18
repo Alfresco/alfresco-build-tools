@@ -23,6 +23,6 @@ jobs:
         with:
           release_type_override: ${{ inputs.release_type }}
           release_command: ./.github/scripts/release.sh
-          github_app_client_id: ${{ vars.GH_APP_ENGINEERING_CONTRIB_CLIENT_ID }}
+          github_app_client_id: ${{ vars.GH_APP_ENGINEERING_ADMIN_CLIENT_ID }}
         secrets:
-          GH_APP_PRIVATE_KEY: ${{ secrets.GH_APP_ENGINEERING_CONTRIB_PRIVATE_KEY }}
+          GH_APP_PRIVATE_KEY: ${{ secrets.GH_APP_ENGINEERING_ADMIN_PRIVATE_KEY }}
