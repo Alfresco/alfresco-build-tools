@@ -22,8 +22,7 @@ jobs:
         uses: ./.github/workflows/reusable-release.yml
         with:
           release_type_override: ${{ inputs.release_type }}
-          commit_username: ${{ vars.BOT_GITHUB_USERNAME }}
-          commit_email: ${{ vars.BOT_GITHUB_EMAIL }}
           release_command: ./.github/scripts/release.sh
+          github_app_client_id: ${{ vars.GH_APP_ENGINEERING_CONTRIB_CLIENT_ID }}
         secrets:
-          BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+          GH_APP_PRIVATE_KEY: ${{ secrets.GH_APP_ENGINEERING_CONTRIB_PRIVATE_KEY }}

@@ -31,12 +31,11 @@ grep -Rl "Alfresco/alfresco-build-tools.*@" .github/ --include="*.yml" | xargs s
 grep -Rl "Alfresco/alfresco-build-tools.*@v" docs/ | xargs sed -i -E \
   "s|(Alfresco/alfresco-build-tools[^@]*@)v[0-9]+\.[0-9]+\.[0-9]+|\1$RELEASE_VERSION|g"
 
-npx --yes @gionn/verified-bot-commit@2.3.2-alpha.9fe9b4e \
+GITHUB_TOKEN=$GH_TOKEN npx --yes @gionn/verified-bot-commit@2.3.2-alpha.9fe9b4e \
   --repository "Alfresco/alfresco-build-tools" \
   --ref "refs/heads/master" \
   --files "**" \
-  --message "Release candidate $RELEASE_VERSION" \
-  --token "$GITHUB_TOKEN"
+  --message "Release candidate $RELEASE_VERSION"
 
 SHA_RC=$(git rev-parse HEAD)
 

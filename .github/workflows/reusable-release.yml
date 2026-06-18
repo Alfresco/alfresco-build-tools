@@ -156,6 +156,7 @@ jobs:
               CURRENT_VERSION: ${{ steps.bump-semver.outputs.current-version }}
               COMMIT_USERNAME: ${{ inputs.commit_username }}
               COMMIT_EMAIL: ${{ inputs.commit_email }}
+              GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.BOT_GITHUB_TOKEN }}
             run: |
               ${{ inputs.release_command }}
 
