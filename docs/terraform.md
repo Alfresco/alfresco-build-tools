@@ -419,6 +419,37 @@ jobs:
     secrets: inherit
 ```
 
+### Authenticating to private terraform modules
+
+When the terraform code references modules in private GitHub repositories, the
+workflow needs credentials to fetch them. Two authentication modes are supported:
+
+- **GitHub App (recommended):** set the `github_app_repositories_owner` and
+  `github_app_client_id` inputs and provide the `GITHUB_APP_PRIVATE_KEY`
+  secret. The workflow generates a short-lived installation token for the App
+  installation on `github_app_repositories_owner` and rewrites git URLs for
+  `github.com/<owner>` to use it. Optionally set `github_app_repositories` to
+  scope the token to specific repositories; when omitted, the token can access
+  all repositories the App installation is granted.
+- **Bot token (fallback):** set the `BOT_GITHUB_USERNAME` input and provide the
+  `BOT_GITHUB_TOKEN` secret. The workflow rewrites all `github.com` git URLs to use
+  these credentials.
+
+If both modes are configured, the GitHub App token takes precedence.
+
+Example using the GitHub App authentication mode:
+
+```yaml
+jobs:
+  pre-commit:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v18.10.0
+    with:
+      github_app_repositories_owner: Alfresco
+      github_app_client_id: ${{ vars.MY_GITHUB_APP_CLIENT_ID }}
+    secrets:
+      GITHUB_APP_PRIVATE_KEY: ${{ secrets.MY_GITHUB_APP_PRIVATE_KEY }}
+```
+
 ## Branch promotion workflow
 
 For Terraform projects with multiple environment branches, you can use the
