@@ -11,15 +11,7 @@ if [ -z "$RELEASE_VERSION" ] || [[ ! "$RELEASE_VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-
   exit 1
 fi
 
-if [ -z "$COMMIT_USERNAME" ] || [ -z "$COMMIT_EMAIL" ]; then
-  echo "COMMIT_USERNAME and COMMIT_EMAIL must be set for git authorship"
-  exit 1
-fi
-
 echo "Going to pin Alfresco-build-tools refs via two-pass approach (release $RELEASE_VERSION)"
-
-git config user.name "$COMMIT_USERNAME"
-git config user.email "$COMMIT_EMAIL"
 
 # Pass 1: release candidate commit
 # Pin all .github/ refs to SHA_PREV (the last merged commit).
