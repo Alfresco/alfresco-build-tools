@@ -54,7 +54,7 @@ jobs:
         run: |
           if [ -n "$APP_TOKEN" ]; then
             echo "Using GitHub App token scoped to ${GITHUB_APP_REPOSITORIES_OWNER}"
-            git config --global url."https://x-access-token:${APP_TOKEN}@github.com/${GITHUB_APP_REPOSITORIES_OWNER}".insteadOf "https://github.com/${GITHUB_APP_REPOSITORIES_OWNER}"
+            git config --global url."https://x-access-token:${APP_TOKEN}@github.com/${GITHUB_APP_REPOSITORIES_OWNER}/".insteadOf "https://github.com/${GITHUB_APP_REPOSITORIES_OWNER}/"
           elif [ -n "$BOT_GITHUB_USERNAME" ] && [ -n "$BOT_GITHUB_TOKEN" ]; then
             echo "Using BOT_GITHUB_TOKEN for github.com"
             git config --global url."https://${BOT_GITHUB_USERNAME}:${BOT_GITHUB_TOKEN}@github.com".insteadOf "https://github.com"
