@@ -33,7 +33,7 @@ grep -Rl "Alfresco/alfresco-build-tools.*@v" docs/ | xargs sed -i -E \
 
 GITHUB_TOKEN=$GH_TOKEN npx --yes @gionn/verified-bot-commit@2.3.2-alpha.9fe9b4e \
   --repository "Alfresco/alfresco-build-tools" \
-  --ref "refs/heads/master" \
+  --ref "$GITHUB_REF" \
   --files "**" \
   --message "Release candidate $RELEASE_VERSION"
 
