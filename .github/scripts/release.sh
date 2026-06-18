@@ -23,12 +23,20 @@ grep -Rl "Alfresco/alfresco-build-tools.*@" .github/ --include="*.yml" | xargs s
 grep -Rl "Alfresco/alfresco-build-tools.*@v" docs/ | xargs sed -i -E \
   "s|(Alfresco/alfresco-build-tools[^@]*@)v[0-9]+\.[0-9]+\.[0-9]+|\1$RELEASE_VERSION|g"
 
+# Auth for the @gionn scope; keep ${GH_TOKEN} literal so npm interpolates it at runtime.
+{
+  echo "@gionn:registry=https://npm.pkg.github.com"
+  # shellcheck disable=SC2016 # literal ${GH_TOKEN}; npm interpolates it at runtime
+  echo '//npm.pkg.github.com/:_authToken=${GH_TOKEN}'
+} >> "$HOME/.npmrc"
 GITHUB_TOKEN=$GH_TOKEN npx --yes @gionn/verified-bot-commit@2.3.2-alpha.9fe9b4e \
   --repository "Alfresco/alfresco-build-tools" \
-  --ref "$$TARGET_BRANCH" \
+  --ref "$TARGET_BRANCH" \
   --files "**" \
   --message "Release candidate $RELEASE_VERSION"
 
+# verified-bot-commit creates the commit remotely, so pull it to advance local HEAD.
+git pull origin "$TARGET_BRANCH"
 SHA_RC=$(git rev-parse HEAD)
 echo "Pass 1 complete: pinned refs to SHA_PREV=$SHA_PREV, pushed SHA_RC=$SHA_RC"
 
