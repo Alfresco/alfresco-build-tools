@@ -23,7 +23,16 @@ grep -Rl "Alfresco/alfresco-build-tools.*@" .github/ --include="*.yml" | xargs s
 grep -Rl "Alfresco/alfresco-build-tools.*@v" docs/ | xargs sed -i -E \
   "s|(Alfresco/alfresco-build-tools[^@]*@)v[0-9]+\.[0-9]+\.[0-9]+|\1$RELEASE_VERSION|g"
 
-GITHUB_TOKEN=$GH_TOKEN npx --yes @gionn-net/verified-bot-commit@2.3.2-alpha.ba097e9 \
+# Verify the published package integrity before executing it with npx.
+VBC_PKG="@gionn-net/verified-bot-commit@3.0.0"
+VBC_EXPECTED_INTEGRITY="sha512-gNWco5bzvqhAYTSFXrnzNGxd3PYspX9CHb4wtGbw+VHfeo4s83sUe2BgglRWSl2nS85uUEU+je7/u9Fyn5F9CQ=="
+VBC_ACTUAL_INTEGRITY=$(npm view "$VBC_PKG" dist.integrity)
+if [ "$VBC_ACTUAL_INTEGRITY" != "$VBC_EXPECTED_INTEGRITY" ]; then
+  echo "Integrity check failed for $VBC_PKG: expected '$VBC_EXPECTED_INTEGRITY', got '$VBC_ACTUAL_INTEGRITY'"
+  exit 1
+fi
+
+GITHUB_TOKEN=$GH_TOKEN npx --yes "$VBC_PKG" \
   --repository "Alfresco/alfresco-build-tools" \
   --ref "$TARGET_BRANCH" \
   --files "**" \
