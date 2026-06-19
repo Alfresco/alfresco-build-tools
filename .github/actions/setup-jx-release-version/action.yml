@@ -8,7 +8,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@1377561e142380b8359a2037f3a5ca8016517880
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@ea5ef8e5f1835df3f3cafebceed94f66dbdb86ee
       with:
         repo: jenkins-x-plugins/jx-release-version
         version: ${{ inputs.version }}
