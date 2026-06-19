@@ -38,8 +38,8 @@ GITHUB_TOKEN=$GH_TOKEN npx --yes "$VBC_PKG" \
   --files "**" \
   --message "Release candidate $RELEASE_VERSION"
 
-# verified-bot-commit creates the commit remotely, so pull it to advance local HEAD.
-git pull origin "$TARGET_BRANCH"
+# verified-bot-commit advances the local branch ref to the new commit, so HEAD
+# already points at the candidate commit here.
 SHA_RC=$(git rev-parse HEAD)
 echo "Pass 1 complete: pinned refs to SHA_PREV=$SHA_PREV, pushed SHA_RC=$SHA_RC"
 
