@@ -2784,6 +2784,7 @@ jobs:
           commit_email: ${{ vars.BOT_GITHUB_EMAIL }}
           # release_command: ./release.sh # optional, command to run for custom release steps before tagging
           # target_branch: custom-branch # optional, defaults to the default branch
+          # node_version: 24 # optional, set to a Node.js version if the release command needs Node.js
         secrets:
           BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
 ```
@@ -2794,6 +2795,27 @@ be a PAT or the default `GITHUB_TOKEN` (`BOT_GITHUB_TOKEN: ${{ secrets.GITHUB_TO
 as long as the job grants it `contents: write` and `target_branch` allows it to
 push (note that pushes made with `GITHUB_TOKEN` do not trigger further workflow
 runs). Alternatively, authenticate with a GitHub App as described below.
+
+#### Custom release command
+
+When the `release_command` input is set, the workflow runs the specified
+command. This allows for custom release steps to be executed before the version
+is tagged and the release is created, such as updating version numbers in files,
+generating changelogs, etc.
+
+Release command has access to the following environment variables:
+
+- `RELEASE_VERSION`: the new version calculated
+- `CURRENT_VERSION`: the previous version
+- `COMMIT_USERNAME`: the configured commit username (from `commit_username` input)
+- `COMMIT_EMAIL`: the configured commit email (from `commit_email` input)
+- `GH_TOKEN`: the authentication token (GitHub App installation token or `BOT_GITHUB_TOKEN`)
+- `TARGET_BRANCH`: the branch the release is created from (from `target_branch` input)
+
+If the release command needs Node.js (for example to run an `npx` tool), set the
+`node_version` input so the workflow runs
+[actions/setup-node](https://github.com/actions/setup-node) before executing the
+command; the step is skipped when the input is left empty.
 
 Changes produced by the release command are committed back to `target_branch`
 as a verified/signed commit (via [verified-bot-commit](#git-commit-and-push)),
@@ -2819,16 +2841,16 @@ jobs:
         with:
           release_type_override: ${{ inputs.release_type }}
           github_app_client_id: ${{ vars.GH_APP_CLIENT_ID }}
+          # github_app_workflows_permission: true # optional, set to true if the release command modifies workflow files
         secrets:
           GH_APP_PRIVATE_KEY: ${{ secrets.GH_APP_PRIVATE_KEY }}
 ```
 
-Release command has access to the following environment variables:
-
-- `RELEASE_VERSION`: the new version calculated
-- `CURRENT_VERSION`: the previous version
-- `COMMIT_USERNAME`: the configured commit username (from `commit_username` input)
-- `COMMIT_EMAIL`: the configured commit email (from `commit_email` input)
+If the release command commits changes to files under `.github/workflows/`, also
+set `github_app_workflows_permission: true` so the minted token is granted the
+`workflows: write` permission; the GitHub API otherwise rejects commits that
+modify workflow files. The GitHub App must have the Workflows permission enabled
+in its configuration for this to be grantable.
 
 The `commit_username` / `commit_email` inputs are kept for backward compatibility
 and are only forwarded to the release command as the env vars above; the pushed
