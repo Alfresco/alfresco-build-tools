@@ -120,7 +120,7 @@ jobs:
 
       - name: Evaluate current branch
         id: get-branch-name
-        uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@612f26975df00c98ec97b624a6ba387ed3b4304c
+        uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@3b0682d5f94cdbd90d4938cdbfb5ddbf7b7a938f
         with:
           additional-pr-events: true
 
@@ -147,7 +147,7 @@ jobs:
       - name: Retrieve PR or last commit changes (used for auto-detection of terraform root path and/or environment)
         if: inputs.terraform_root_path == '' || inputs.terraform_env == ''
         id: last-changes-diff
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@612f26975df00c98ec97b624a6ba387ed3b4304c
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@3b0682d5f94cdbd90d4938cdbfb5ddbf7b7a938f
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -480,7 +480,7 @@ jobs:
           role-session-name: TerraformWorkflow
 
       - name: Load environment variables from yml
-        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@612f26975df00c98ec97b624a6ba387ed3b4304c
+        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@3b0682d5f94cdbd90d4938cdbfb5ddbf7b7a938f
         with:
           yml_path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/tfenv.yml
 

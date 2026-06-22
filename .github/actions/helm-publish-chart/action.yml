@@ -110,7 +110,7 @@ runs:
         fi
 
     - name: Commit changes
-      uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@612f26975df00c98ec97b624a6ba387ed3b4304c
+      uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@3b0682d5f94cdbd90d4938cdbfb5ddbf7b7a938f
       with:
         username: ${{ inputs.git-username }}
         add-options: .
