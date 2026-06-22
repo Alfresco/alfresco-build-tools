@@ -52,8 +52,9 @@ echo "Pass 1 complete: pinned refs to SHA_PREV=$SHA_PREV, pushed SHA_RC=$SHA_RC"
 # a child) and the non-force ref update fails with "Update is not a fast
 # forward".
 echo "Waiting for the GitHub API to report $SHA_RC as the head of $TARGET_BRANCH"
+ENCODED_BRANCH=${TARGET_BRANCH//\//%2F}
 for attempt in $(seq 1 30); do
-  REMOTE_HEAD=$(gh api "repos/Alfresco/alfresco-build-tools/git/ref/heads/$TARGET_BRANCH" \
+  REMOTE_HEAD=$(gh api "repos/Alfresco/alfresco-build-tools/git/ref/heads/$ENCODED_BRANCH" \
     --jq '.object.sha' 2>/dev/null || echo "")
   if [ "$REMOTE_HEAD" = "$SHA_RC" ]; then
     echo "API reports $TARGET_BRANCH at $SHA_RC after $attempt attempt(s)"
