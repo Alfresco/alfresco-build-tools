@@ -43,6 +43,29 @@ GITHUB_TOKEN=$GH_TOKEN npx --yes "$VBC_PKG" \
 SHA_RC=$(git rev-parse HEAD)
 echo "Pass 1 complete: pinned refs to SHA_PREV=$SHA_PREV, pushed SHA_RC=$SHA_RC"
 
+# Wait until the GitHub API reports the candidate commit as the branch head
+# before the next step creates the release commit. The release commit step
+# (verified-bot-commit action) reads the branch head from the API to use as the
+# new commit's parent; GitHub ref reads are eventually consistent, so right
+# after this push the API may still return SHA_PREV. If that happens, the
+# release commit is parented on SHA_PREV (a sibling of the candidate instead of
+# a child) and the non-force ref update fails with "Update is not a fast
+# forward".
+echo "Waiting for the GitHub API to report $SHA_RC as the head of $TARGET_BRANCH"
+for attempt in $(seq 1 30); do
+  REMOTE_HEAD=$(gh api "repos/Alfresco/alfresco-build-tools/git/ref/heads/$TARGET_BRANCH" \
+    --jq '.object.sha' 2>/dev/null || echo "")
+  if [ "$REMOTE_HEAD" = "$SHA_RC" ]; then
+    echo "API reports $TARGET_BRANCH at $SHA_RC after $attempt attempt(s)"
+    break
+  fi
+  if [ "$attempt" -eq 30 ]; then
+    echo "Timed out waiting for $TARGET_BRANCH to report $SHA_RC (last seen: '$REMOTE_HEAD')"
+    exit 1
+  fi
+  sleep 2
+done
+
 # Pass 2: release commit (picked up by verified-bot-commit)
 # Pin all .github/ refs to SHA_RC so the tagged release commit references the
 # candidate commit, which in turn references SHA_PREV (the actual code).
