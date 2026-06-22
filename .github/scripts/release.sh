@@ -11,15 +11,7 @@ if [ -z "$RELEASE_VERSION" ] || [[ ! "$RELEASE_VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-
   exit 1
 fi
 
-if [ -z "$COMMIT_USERNAME" ] || [ -z "$COMMIT_EMAIL" ]; then
-  echo "COMMIT_USERNAME and COMMIT_EMAIL must be set for git authorship"
-  exit 1
-fi
-
 echo "Going to pin Alfresco-build-tools refs via two-pass approach (release $RELEASE_VERSION)"
-
-git config user.name "$COMMIT_USERNAME"
-git config user.email "$COMMIT_EMAIL"
 
 # Pass 1: release candidate commit
 # Pin all .github/ refs to SHA_PREV (the last merged commit).
@@ -31,15 +23,24 @@ grep -Rl "Alfresco/alfresco-build-tools.*@" .github/ --include="*.yml" | xargs s
 grep -Rl "Alfresco/alfresco-build-tools.*@v" docs/ | xargs sed -i -E \
   "s|(Alfresco/alfresco-build-tools[^@]*@)v[0-9]+\.[0-9]+\.[0-9]+|\1$RELEASE_VERSION|g"
 
-git add -A
-git commit -m "Release candidate $RELEASE_VERSION"
-SHA_RC=$(git rev-parse HEAD)
+# Verify the published package integrity before executing it with npx.
+VBC_PKG="@gionn-net/verified-bot-commit@3.0.0"
+VBC_EXPECTED_INTEGRITY="sha512-gNWco5bzvqhAYTSFXrnzNGxd3PYspX9CHb4wtGbw+VHfeo4s83sUe2BgglRWSl2nS85uUEU+je7/u9Fyn5F9CQ=="
+VBC_ACTUAL_INTEGRITY=$(npm view "$VBC_PKG" dist.integrity)
+if [ "$VBC_ACTUAL_INTEGRITY" != "$VBC_EXPECTED_INTEGRITY" ]; then
+  echo "Integrity check failed for $VBC_PKG: expected '$VBC_EXPECTED_INTEGRITY', got '$VBC_ACTUAL_INTEGRITY'"
+  exit 1
+fi
 
-# Push the release candidate commit to the remote. The next step commits the
-# release changes via the GitHub API (verified-bot-commit), which builds on top
-# of the remote branch tip; without this push it would create the release commit
-# on top of SHA_PREV and silently drop this candidate commit.
-git push origin HEAD
+GITHUB_TOKEN=$GH_TOKEN npx --yes "$VBC_PKG" \
+  --repository "Alfresco/alfresco-build-tools" \
+  --ref "$TARGET_BRANCH" \
+  --files "**" \
+  --message "Release candidate $RELEASE_VERSION"
+
+# verified-bot-commit advances the local branch ref to the new commit, so HEAD
+# already points at the candidate commit here.
+SHA_RC=$(git rev-parse HEAD)
 echo "Pass 1 complete: pinned refs to SHA_PREV=$SHA_PREV, pushed SHA_RC=$SHA_RC"
 
 # Pass 2: release commit (picked up by verified-bot-commit)
