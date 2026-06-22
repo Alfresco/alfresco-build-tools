@@ -120,11 +120,12 @@ but some are required depending on the selected backend or authentication mode:
 - `AWS_SECRET_ACCESS_KEY`: (optional when using OIDC) secret key to use the AWS terraform provider
 - `AZURE_CREDENTIALS`: (required for Azure) JSON object containing Azure service
   principal credentials (`clientId`, `clientSecret`, `subscriptionId`, `tenantId`)
-- `BOT_GITHUB_TOKEN`: (optional) token to access private terraform modules in the
-  Alfresco org. Used as a fallback when `github_app_repo_owner` is not set.
-- `GITHUB_TOKEN_PRIVATE_KEY`: (optional) private key of the GitHub App used to
+- `BOT_GITHUB_TOKEN`: (optional) token to access private terraform modules.
+  Used as a fallback when `github_app_client_id` is not set; requires the
+  `BOT_GITHUB_USERNAME` input to be set.
+- `GITHUB_APP_PRIVATE_KEY`: (optional) private key of the GitHub App used to
   generate a token for accessing private terraform modules. Requires
-  `github_app_repo_owner` input and `github_app_token_client_id` input to be set.
+  `github_app_repositories_owner` input and `github_app_client_id` input to be set.
 - `DOCKER_USERNAME` (optional): Docker Hub credentials
 - `DOCKER_PASSWORD` (optional): Docker Hub credentials
 - `RANCHER2_ACCESS_KEY` (optional): access key to use the rancher terraform
@@ -324,11 +325,11 @@ jobs:
       terraform_default_env: develop
       terraform_operation: ${{ inputs.terraform_operation }}
       tfvars_subfolder: envs
-      github_app_repo_owner: Alfresco
-      github_app_token_client_id: ${{ vars.MY_GITHUB_APP_CLIENT_ID }}
+      github_app_repositories_owner: Alfresco
+      github_app_client_id: ${{ vars.MY_GITHUB_APP_CLIENT_ID }}
     secrets:
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-      GITHUB_TOKEN_PRIVATE_KEY: ${{ secrets.MY_GITHUB_APP_PRIVATE_KEY }}
+      GITHUB_APP_PRIVATE_KEY: ${{ secrets.MY_GITHUB_APP_PRIVATE_KEY }}
 ```
 
 ### kubectl support

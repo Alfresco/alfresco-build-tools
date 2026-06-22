@@ -42,12 +42,20 @@ on:
         type: string
         required: false
         default: ''
-      github_app_repo_owner:
-        description: the owner (organization) of the GitHub App used to generate a token for accessing the private 'terraform-alfresco-modules' repository. Requires github_app_token_client_id and GITHUB_TOKEN_PRIVATE_KEY to be set.
+      BOT_GITHUB_USERNAME:
+        description: 'Username to allow fetching private modules on GitHub (BOT_GITHUB_TOKEN is required). Used as a fallback when github_app_client_id is not set.'
         type: string
         required: false
-      github_app_token_client_id:
-        description: the client ID of the GitHub App used to generate a token for accessing the private 'terraform-alfresco-modules' repository. Requires github_app_repo_owner and GITHUB_TOKEN_PRIVATE_KEY to be set.
+      github_app_repositories_owner:
+        description: the owner (organization) of the GitHub App used to generate a token for accessing private terraform module repositories. Requires github_app_client_id and GITHUB_APP_PRIVATE_KEY to be set.
+        type: string
+        required: false
+      github_app_client_id:
+        description: the client ID of the GitHub App used to generate a token for accessing private terraform module repositories. Requires github_app_repositories_owner and GITHUB_APP_PRIVATE_KEY to be set.
+        type: string
+        required: false
+      github_app_repositories:
+        description: optional comma or newline-separated list of repositories to scope the GitHub App token to. When empty, the token can access all repositories the App installation is granted on github_app_repositories_owner.
         type: string
         required: false
     secrets:
@@ -88,7 +96,8 @@ on:
         required: false
       CUSTOM_SECRET_9:
         required: false
-      GITHUB_TOKEN_PRIVATE_KEY:
+      GITHUB_APP_PRIVATE_KEY:
+        description: 'GitHub App private key used to generate a token for accessing private terraform modules (used when github_app_client_id is set)'
         required: false
 
 jobs:
@@ -415,12 +424,6 @@ jobs:
               exit 1
             fi
           fi
-          if [ -n "${{ inputs.github_app_repo_owner }}" ]; then
-            if [ -z "${{ inputs.github_app_token_client_id }}" ] || [ -z "${{ secrets.GITHUB_TOKEN_PRIVATE_KEY }}" ]; then
-              echo "github_app_token_client_id input and GITHUB_TOKEN_PRIVATE_KEY secret must both be provided when github_app_repo_owner is set"
-              exit 1
-            fi
-          fi
 
       - name: Build backend config
         id: backend-config
@@ -485,22 +488,30 @@ jobs:
           yml_path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/tfenv.yml
 
       - name: Generate GitHub App token
-        if: inputs.github_app_repo_owner != ''
+        if: inputs.github_app_client_id != ''
         id: app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          client-id: ${{ inputs.github_app_token_client_id }}
-          private-key: ${{ secrets.GITHUB_TOKEN_PRIVATE_KEY }}
-          owner: ${{ inputs.github_app_repo_owner }}
-          repositories: |
-            terraform-alfresco-modules
+          client-id: ${{ inputs.github_app_client_id }}
+          private-key: ${{ secrets.GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ inputs.github_app_repositories_owner }}
+          repositories: ${{ inputs.github_app_repositories }}
 
       - name: Set TERRAFORM_HTTP_CREDENTIALS
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_APP_REPOSITORIES_OWNER: ${{ inputs.github_app_repositories_owner }}
+          BOT_GITHUB_USERNAME: ${{ inputs.BOT_GITHUB_USERNAME }}
+          BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
         run: |
-          if [ -n "${{ steps.app-token.outputs.token }}" ]; then
-            echo "TERRAFORM_HTTP_CREDENTIALS=github.com/${{ inputs.github_app_repo_owner }}=x-access-token:${{ steps.app-token.outputs.token }}" >> "$GITHUB_ENV"
-          elif [ -n "${{ secrets.BOT_GITHUB_TOKEN }}" ]; then
-            echo "TERRAFORM_HTTP_CREDENTIALS=github.com/Alfresco=alfresco-build:${{ secrets.BOT_GITHUB_TOKEN }}" >> "$GITHUB_ENV"
+          if [ -n "$APP_TOKEN" ]; then
+            if [ -z "$GITHUB_APP_REPOSITORIES_OWNER" ]; then
+              echo "::error::github_app_repositories_owner must be set to properly propagate authentication to the correct org"
+              exit 1
+            fi
+            echo "TERRAFORM_HTTP_CREDENTIALS=github.com/${GITHUB_APP_REPOSITORIES_OWNER}=x-access-token:${APP_TOKEN}" >> "$GITHUB_ENV"
+          elif [ -n "$BOT_GITHUB_USERNAME" ] && [ -n "$BOT_GITHUB_TOKEN" ]; then
+            echo "TERRAFORM_HTTP_CREDENTIALS=github.com=${BOT_GITHUB_USERNAME}:${BOT_GITHUB_TOKEN}" >> "$GITHUB_ENV"
           fi
 
       - name: Terraform validate
