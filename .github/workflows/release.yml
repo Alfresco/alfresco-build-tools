@@ -21,7 +21,6 @@ jobs:
         if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
         uses: ./.github/workflows/reusable-release.yml
         with:
-          target_branch: 'fix/release-fast-forward-race'
           release_type_override: ${{ inputs.release_type }}
           release_command: ./.github/scripts/release.sh
           node_version: 24
