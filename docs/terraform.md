@@ -442,7 +442,7 @@ Example using the GitHub App authentication mode:
 ```yaml
 jobs:
   pre-commit:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v18.10.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v18.12.0
     with:
       github_app_repositories_owner: Alfresco
       github_app_client_id: ${{ vars.MY_GITHUB_APP_CLIENT_ID }}

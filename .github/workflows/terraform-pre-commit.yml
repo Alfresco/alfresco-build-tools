@@ -53,6 +53,10 @@ jobs:
           BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
         run: |
           if [ -n "$APP_TOKEN" ]; then
+            if [ -z "$GITHUB_APP_REPOSITORIES_OWNER" ]; then
+              echo "::error::github_app_repositories_owner must be set to properly propagate authentication to the correct org"
+              exit 1
+            fi
             echo "Using GitHub App token scoped to ${GITHUB_APP_REPOSITORIES_OWNER}"
             git config --global url."https://x-access-token:${APP_TOKEN}@github.com/${GITHUB_APP_REPOSITORIES_OWNER}/".insteadOf "https://github.com/${GITHUB_APP_REPOSITORIES_OWNER}/"
           elif [ -n "$BOT_GITHUB_USERNAME" ] && [ -n "$BOT_GITHUB_TOKEN" ]; then
