@@ -194,7 +194,7 @@ jobs:
               token: ${{ steps.app-token.outputs.token || secrets.BOT_GITHUB_TOKEN }}
 
           - name: Generate release notes and git tag
-            if: steps.set-release-level.outputs.release-level != ''
+            if: steps.set-release-level.outputs.release-level != '' && false
             env:
               GH_TOKEN: ${{ steps.app-token.outputs.token || secrets.BOT_GITHUB_TOKEN }}
             run: gh release create "${{ steps.bump-semver.outputs.new-version }}" --generate-notes -t "${{ steps.bump-semver.outputs.new-version }}"
