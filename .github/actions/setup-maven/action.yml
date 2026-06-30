@@ -11,10 +11,6 @@ inputs:
       parallel jobs that share the same key, or to force a fresh cache.
     required: false
     default: ''
-outputs:
-  version:
-    description: 'Version of Maven that is available on the PATH after this action runs.'
-    value: ${{ steps.detect.outputs.version }}
 runs:
   using: "composite"
   steps:
@@ -83,25 +79,6 @@ runs:
         echo "MAVEN_HOME=$MAVEN_HOME" >> "$GITHUB_ENV"
         echo "$MAVEN_HOME/bin" >> "$GITHUB_PATH"
 
-    - name: Detect Maven version
-      id: detect
+    - name: Verify Maven
       shell: bash
-      env:
-        REQUESTED_VERSION: ${{ inputs.version }}
-      run: |
-        set -euo pipefail
-
-        if ! command -v mvn >/dev/null 2>&1; then
-          echo "::error::Maven is not available on the PATH."
-          exit 1
-        fi
-
-        VERSION=$(mvn -v | awk '/^Apache Maven/ {print $3; exit}')
-        echo "Detected Maven version on PATH: $VERSION"
-
-        if [[ "$VERSION" != "$REQUESTED_VERSION" ]]; then
-          echo "::error::Maven on PATH ($VERSION) does not match the requested version ($REQUESTED_VERSION). PATH updates may not have taken effect; check that no later step overwrites \$PATH or \$MAVEN_HOME."
-          exit 1
-        fi
-
-        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      run: mvn --version
