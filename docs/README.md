@@ -2450,8 +2450,8 @@ Install the Kubernetes preupgrade checker and add it to the PATH.
 ### setup-maven
 
 Install a specific Apache Maven version from the Apache archive and add it to
-the PATH. When the `version` input is empty, the action is a no-op and the
-Maven version already available on the runner is used.
+the PATH. When the `version` input is empty, the action is a no-op and uses the
+Maven version already available on the runner (the step fails if `mvn` is not on the PATH).
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-maven@v18.13.0
