@@ -102,6 +102,22 @@ jobs:
 
       #region Test setup-maven
       - uses: ./.github/actions/setup-maven
+        id: setup-maven-noop
+      - name: Assert setup-maven no-op still reports the runner's Maven
+        env:
+          NOOP_VERSION: ${{ steps.setup-maven-noop.outputs.version }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$NOOP_VERSION" ]]; then
+            echo "setup-maven should populate outputs.version even when no version is requested"
+            exit 1
+          fi
+          if [[ ! "$NOOP_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "outputs.version is not a valid Maven version: '$NOOP_VERSION'"
+            exit 1
+          fi
+
+      - uses: ./.github/actions/setup-maven
         id: setup-maven-fixed-version
         with:
           version: 3.9.9
