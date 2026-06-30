@@ -100,6 +100,36 @@ jobs:
           expected-version: ${{ steps.setup-helm-docs-fixed-version.outputs.version }}
       #endregion
 
+      #region Test setup-maven
+      - uses: ./.github/actions/setup-maven
+        id: setup-maven-fixed-version
+        with:
+          version: 3.9.9
+      - uses: ./.github/tests/actions/test-setup-maven
+        with:
+          expected-version: ${{ steps.setup-maven-fixed-version.outputs.version }}
+
+      - uses: ./.github/actions/setup-maven
+        id: setup-maven-other-version
+        with:
+          version: 3.8.8
+      - uses: ./.github/tests/actions/test-setup-maven
+        with:
+          expected-version: ${{ steps.setup-maven-other-version.outputs.version }}
+
+      - name: Test setup-maven rejects invalid version
+        id: setup-maven-invalid
+        continue-on-error: true
+        uses: ./.github/actions/setup-maven
+        with:
+          version: not-a-version
+      - name: Assert setup-maven failed on invalid version
+        if: steps.setup-maven-invalid.outcome != 'failure'
+        run: |
+          echo "setup-maven should fail when given an invalid version"
+          exit 1
+      #endregion
+
       - uses: ./.github/actions/setup-jx-release-version
       - uses: ./.github/actions/setup-kubepug
       - uses: ./.github/actions/rancher
