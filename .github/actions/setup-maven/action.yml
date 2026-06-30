@@ -2,9 +2,8 @@ name: 'Setup Maven'
 description: 'Install a specific Apache Maven version and add it to the PATH.'
 inputs:
   version:
-    description: 'Version of Apache Maven to install (e.g. 3.9.9). If empty, uses the Maven version already on the PATH.'
-    required: false
-    default: ''
+    description: 'Version of Apache Maven to install (e.g. 3.9.9).'
+    required: true
 outputs:
   version:
     description: 'Version of Maven that is available on the PATH after this action runs.'
@@ -12,8 +11,8 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Install Maven
-      if: inputs.version != ''
+    - name: Resolve install paths
+      id: paths
       shell: bash
       env:
         MAVEN_VERSION: ${{ inputs.version }}
@@ -25,12 +24,30 @@ runs:
           exit 1
         fi
 
+        INSTALL_DIR="$RUNNER_TEMP/apache-maven/$MAVEN_VERSION"
+        echo "install-dir=$INSTALL_DIR" >> "$GITHUB_OUTPUT"
+        echo "maven-home=$INSTALL_DIR/apache-maven-${MAVEN_VERSION}" >> "$GITHUB_OUTPUT"
+
+    - name: Cache Maven distribution
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: ${{ steps.paths.outputs.install-dir }}
+        key: apache-maven-${{ runner.os }}-${{ inputs.version }}
+
+    - name: Install Maven
+      shell: bash
+      env:
+        MAVEN_VERSION: ${{ inputs.version }}
+        INSTALL_DIR: ${{ steps.paths.outputs.install-dir }}
+        MAVEN_HOME: ${{ steps.paths.outputs.maven-home }}
+      run: |
+        set -euo pipefail
+
         MAJOR="${MAVEN_VERSION%%.*}"
-        INSTALL_DIR="$RUNNER_TOOL_CACHE/apache-maven/$MAVEN_VERSION"
         ARCHIVE="apache-maven-${MAVEN_VERSION}-bin.tar.gz"
         BASE_URL="https://archive.apache.org/dist/maven/maven-${MAJOR}/${MAVEN_VERSION}/binaries"
 
-        if [[ ! -x "$INSTALL_DIR/apache-maven-${MAVEN_VERSION}/bin/mvn" ]]; then
+        if [[ ! -x "$MAVEN_HOME/bin/mvn" ]]; then
           mkdir -p "$INSTALL_DIR"
           cd "$RUNNER_TEMP"
 
@@ -52,9 +69,10 @@ runs:
 
           tar -xzf "$ARCHIVE" -C "$INSTALL_DIR"
           rm -f "$ARCHIVE" "${ARCHIVE}.sha512"
+        else
+          echo "Reusing cached Maven at $MAVEN_HOME"
         fi
 
-        MAVEN_HOME="$INSTALL_DIR/apache-maven-${MAVEN_VERSION}"
         echo "MAVEN_HOME=$MAVEN_HOME" >> "$GITHUB_ENV"
         echo "$MAVEN_HOME/bin" >> "$GITHUB_PATH"
 
@@ -74,7 +92,7 @@ runs:
         VERSION=$(mvn -v | awk '/^Apache Maven/ {print $3; exit}')
         echo "Detected Maven version on PATH: $VERSION"
 
-        if [[ -n "$REQUESTED_VERSION" && "$VERSION" != "$REQUESTED_VERSION" ]]; then
+        if [[ "$VERSION" != "$REQUESTED_VERSION" ]]; then
           echo "::error::Maven on PATH ($VERSION) does not match the requested version ($REQUESTED_VERSION). PATH updates may not have taken effect; check that no later step overwrites \$PATH or \$MAVEN_HOME."
           exit 1
         fi
