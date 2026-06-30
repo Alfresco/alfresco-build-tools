@@ -7,13 +7,12 @@ inputs:
     default: ''
 outputs:
   version:
-    description: 'Version of Maven that was installed.'
-    value: ${{ steps.install.outputs.version }}
+    description: 'Version of Maven that is available on the PATH after this action runs.'
+    value: ${{ steps.detect.outputs.version }}
 runs:
   using: "composite"
   steps:
     - name: Install Maven
-      id: install
       if: inputs.version != ''
       shell: bash
       env:
@@ -29,22 +28,55 @@ runs:
         MAJOR="${MAVEN_VERSION%%.*}"
         INSTALL_DIR="$RUNNER_TOOL_CACHE/apache-maven/$MAVEN_VERSION"
         ARCHIVE="apache-maven-${MAVEN_VERSION}-bin.tar.gz"
-        URL="https://archive.apache.org/dist/maven/maven-${MAJOR}/${MAVEN_VERSION}/binaries/${ARCHIVE}"
+        BASE_URL="https://archive.apache.org/dist/maven/maven-${MAJOR}/${MAVEN_VERSION}/binaries"
 
         if [[ ! -x "$INSTALL_DIR/apache-maven-${MAVEN_VERSION}/bin/mvn" ]]; then
           mkdir -p "$INSTALL_DIR"
-          echo "Downloading $URL ..."
-          curl -fsSL -o "$RUNNER_TEMP/$ARCHIVE" "$URL"
-          tar -xzf "$RUNNER_TEMP/$ARCHIVE" -C "$INSTALL_DIR"
-          rm -f "$RUNNER_TEMP/$ARCHIVE"
+          cd "$RUNNER_TEMP"
+
+          echo "Downloading ${BASE_URL}/${ARCHIVE} ..."
+          curl -fsSL -o "$ARCHIVE" "${BASE_URL}/${ARCHIVE}"
+
+          echo "Downloading ${BASE_URL}/${ARCHIVE}.sha512 ..."
+          curl -fsSL -o "${ARCHIVE}.sha512" "${BASE_URL}/${ARCHIVE}.sha512"
+
+          EXPECTED_SHA=$(awk '{print tolower($1); exit}' "${ARCHIVE}.sha512")
+          ACTUAL_SHA=$(shasum -a 512 "$ARCHIVE" | awk '{print tolower($1)}')
+          if [[ -z "$EXPECTED_SHA" || "$EXPECTED_SHA" != "$ACTUAL_SHA" ]]; then
+            echo "::error::SHA-512 checksum mismatch for ${ARCHIVE}."
+            echo "Expected: $EXPECTED_SHA"
+            echo "Actual:   $ACTUAL_SHA"
+            exit 1
+          fi
+          echo "SHA-512 checksum verified."
+
+          tar -xzf "$ARCHIVE" -C "$INSTALL_DIR"
+          rm -f "$ARCHIVE" "${ARCHIVE}.sha512"
         fi
 
         MAVEN_HOME="$INSTALL_DIR/apache-maven-${MAVEN_VERSION}"
         echo "MAVEN_HOME=$MAVEN_HOME" >> "$GITHUB_ENV"
         echo "$MAVEN_HOME/bin" >> "$GITHUB_PATH"
-        echo "version=$MAVEN_VERSION" >> "$GITHUB_OUTPUT"
 
-    - name: Verify Maven installation
-      if: inputs.version != ''
+    - name: Detect Maven version
+      id: detect
       shell: bash
-      run: mvn --version
+      env:
+        REQUESTED_VERSION: ${{ inputs.version }}
+      run: |
+        set -euo pipefail
+
+        if ! command -v mvn >/dev/null 2>&1; then
+          echo "::error::Maven is not available on the PATH."
+          exit 1
+        fi
+
+        VERSION=$(mvn -v | awk '/^Apache Maven/ {print $3; exit}')
+        echo "Detected Maven version on PATH: $VERSION"
+
+        if [[ -n "$REQUESTED_VERSION" && "$VERSION" != "$REQUESTED_VERSION" ]]; then
+          echo "::error::Maven on PATH ($VERSION) does not match the requested version ($REQUESTED_VERSION). PATH updates may not have taken effect; check that no later step overwrites \$PATH or \$MAVEN_HOME."
+          exit 1
+        fi
+
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
