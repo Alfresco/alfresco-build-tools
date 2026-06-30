@@ -4,6 +4,13 @@ inputs:
   version:
     description: 'Version of Apache Maven to install (e.g. 3.9.9).'
     required: true
+  cache-key-suffix:
+    description: >
+      Optional suffix appended to the cache key
+      (apache-maven-<os>-<arch>-<version>-<suffix>). Use it to disambiguate
+      parallel jobs that share the same key, or to force a fresh cache.
+    required: false
+    default: ''
 outputs:
   version:
     description: 'Version of Maven that is available on the PATH after this action runs.'
@@ -32,7 +39,7 @@ runs:
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
         path: ${{ steps.paths.outputs.install-dir }}
-        key: apache-maven-${{ runner.os }}-${{ runner.arch }}-${{ inputs.version }}
+        key: apache-maven-${{ runner.os }}-${{ runner.arch }}-${{ inputs.version }}${{ inputs.cache-key-suffix != '' && format('-{0}', inputs.cache-key-suffix) || '' }}
 
     - name: Install Maven
       shell: bash

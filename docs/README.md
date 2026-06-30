@@ -2451,12 +2451,15 @@ Install the Kubernetes preupgrade checker and add it to the PATH.
 
 Install a specific Apache Maven version from the Apache archive and add it to
 the PATH. The distribution is cached across runs (via `actions/cache`, keyed on
-the requested version) to avoid re-downloading it every time.
+the OS, architecture and requested version) to avoid re-downloading it every
+time. Set `cache-key-suffix` to disambiguate parallel jobs that would otherwise
+share the same key, or to force a fresh cache.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-maven@v18.13.0
         with:
           version: "3.9.9"
+          # cache-key-suffix: "my-suffix" # optional
 ```
 
 ### setup-pysemver
