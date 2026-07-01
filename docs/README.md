@@ -115,6 +115,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [setup-kcadm](#setup-kcadm)
   - [setup-kind](#setup-kind)
   - [setup-kubepug](#setup-kubepug)
+  - [setup-maven](#setup-maven)
   - [setup-pysemver](#setup-pysemver)
   - [setup-rancher-cli](#setup-rancher-cli)
   - [setup-terraform-docs](#setup-terraform-docs)
@@ -2444,6 +2445,21 @@ Install the Kubernetes preupgrade checker and add it to the PATH.
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-kubepug@v18.13.0
         with:
           version: "1.3.2"
+```
+
+### setup-maven
+
+Install a specific Apache Maven version from the Apache archive and add it to
+the PATH. The distribution is cached across runs (via `actions/cache`, keyed on
+the OS, architecture and requested version) to avoid re-downloading it every
+time. Set `cache-key-suffix` to disambiguate parallel jobs that would otherwise
+share the same key, or to force a fresh cache.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-maven@v18.13.0
+        with:
+          version: "3.9.9"
+          # cache-key-suffix: "my-suffix" # optional
 ```
 
 ### setup-pysemver

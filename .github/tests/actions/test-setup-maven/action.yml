@@ -1,0 +1,30 @@
+name: Test setup-maven
+description: >
+  Just a test for setup-maven
+inputs:
+  expected-version:
+    description: 'Expected Maven version on the PATH'
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Check Maven version on PATH
+      shell: bash
+      env:
+        EXPECTED_VERSION: ${{ inputs.expected-version }}
+      run: |
+        set -euo pipefail
+        ACTUAL=$(mvn -v | awk '/^Apache Maven/ {print $3; exit}')
+        echo "Expected: $EXPECTED_VERSION"
+        echo "Actual:   $ACTUAL"
+        [ "$ACTUAL" = "$EXPECTED_VERSION" ]
+
+    - name: Check MAVEN_HOME points to the installed version
+      shell: bash
+      env:
+        EXPECTED_VERSION: ${{ inputs.expected-version }}
+      run: |
+        set -euo pipefail
+        [ -n "${MAVEN_HOME:-}" ]
+        [ -x "$MAVEN_HOME/bin/mvn" ]
+        [[ "$MAVEN_HOME" == *"apache-maven-${EXPECTED_VERSION}" ]]
