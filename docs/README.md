@@ -1946,7 +1946,7 @@ Installs Node.js dependencies and runs Playwright tests, with support for both
 npm and pnpm package managers.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/playwright-run-tests@ref
+      - uses: Alfresco/alfresco-build-tools/.github/actions/playwright-run-tests@v18.15.0
         with:
           node-version: "24.14.0"
           script-command: "pnpm run test:e2e"

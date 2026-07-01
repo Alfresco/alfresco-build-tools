@@ -303,3 +303,35 @@ jobs:
       - name: Show current branches
         run: |
           echo "Current branch is ${{ steps.branch-info.outputs.branch-name }}"
+
+  test-playwright-run-tests:
+    runs-on: ubuntu-latest
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - fixture: npm-fixture
+            expected-pm: npm
+          - fixture: pnpm-fixture
+            expected-pm: pnpm
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Run playwright-run-tests action (${{ matrix.fixture }})
+        id: playwright
+        uses: ./.github/actions/playwright-run-tests
+        with:
+          node-version: "20"
+          working-directory: .github/tests/actions/test-playwright-run-tests/${{ matrix.fixture }}
+          script-command: "echo test-executed-successfully"
+
+      - name: Verify resolved package manager
+        run: |
+          ACTUAL="${{ steps.playwright.outputs.package-manager-used }}"
+          EXPECTED="${{ matrix.expected-pm }}"
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "::error::Expected package-manager-used=$EXPECTED but got $ACTUAL"
+            exit 1
+          fi
+          echo "Correctly resolved package manager: $ACTUAL"
