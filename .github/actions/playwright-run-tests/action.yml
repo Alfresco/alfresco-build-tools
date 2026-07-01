@@ -1,0 +1,122 @@
+name: "Playwright run tests"
+description: "Installs Node.js dependencies and runs Playwright tests with support for npm and pnpm"
+inputs:
+  node-version:
+    description: "Node.js version to install"
+    required: false
+    default: "20"
+  package-manager:
+    description: "Package manager to use: auto, npm, or pnpm. When auto, detects from lock files."
+    required: false
+    default: "auto"
+  script-command:
+    description: "The command to run the Playwright tests (e.g. 'npx playwright test' or 'pnpm run test:e2e')"
+    required: true
+  working-directory:
+    description: "Working directory for install and test commands"
+    required: false
+    default: "."
+outputs:
+  package-manager-used:
+    description: "The package manager that was resolved and used (npm or pnpm)"
+    value: ${{ steps.detect-pm.outputs.pm }}
+runs:
+  using: "composite"
+  steps:
+    - name: Validate inputs
+      shell: bash
+      run: |
+        case "${{ inputs.package-manager }}" in
+          auto|npm|pnpm) ;;
+          *) echo "::error::Invalid package-manager '${{ inputs.package-manager }}'. Accepted values: auto, npm, pnpm."; exit 1 ;;
+        esac
+
+    - name: Detect package manager
+      id: detect-pm
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        PM="${{ inputs.package-manager }}"
+        if [ "$PM" = "auto" ]; then
+          if [ -f "pnpm-lock.yaml" ]; then
+            PM="pnpm"
+          else
+            PM="npm"
+          fi
+        fi
+        echo "pm=$PM" >> "$GITHUB_OUTPUT"
+        echo "Resolved package manager: $PM"
+
+    - name: Setup Node.js (npm)
+      if: steps.detect-pm.outputs.pm == 'npm'
+      uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: npm
+        cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+
+    - name: Setup Node.js (pnpm)
+      if: steps.detect-pm.outputs.pm == 'pnpm'
+      uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Enable corepack and prepare pnpm
+      if: steps.detect-pm.outputs.pm == 'pnpm'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        corepack enable
+        if PM_SPEC=$(node -e "const pm=require('./package.json').packageManager; if (!pm || !pm.startsWith('pnpm')) process.exit(1); process.stdout.write(pm)" 2>/dev/null); then
+          corepack prepare "$PM_SPEC" --activate
+        else
+          corepack prepare pnpm@latest --activate
+        fi
+
+    - name: Get pnpm store directory
+      if: steps.detect-pm.outputs.pm == 'pnpm'
+      id: pnpm-store
+      shell: bash
+      run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+    - name: Cache pnpm store
+      if: steps.detect-pm.outputs.pm == 'pnpm'
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: ${{ steps.pnpm-store.outputs.path }}
+        key: ${{ runner.os }}-pnpm-${{ hashFiles(format('{0}/pnpm-lock.yaml', inputs.working-directory)) }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-
+
+    - name: Install dependencies (npm)
+      if: steps.detect-pm.outputs.pm == 'npm'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        test -f package-lock.json || { echo "::error::package-lock.json not found in '${{ inputs.working-directory }}' but package-manager resolved to npm (npm ci requires a lockfile)."; exit 1; }
+        npm ci
+
+    - name: Install dependencies (pnpm)
+      if: steps.detect-pm.outputs.pm == 'pnpm'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        test -f pnpm-lock.yaml || { echo "::error::pnpm-lock.yaml not found in '${{ inputs.working-directory }}' but package-manager resolved to pnpm (pnpm --frozen-lockfile requires a lockfile)."; exit 1; }
+        pnpm install --frozen-lockfile
+
+    - name: Install Playwright browsers (npm)
+      if: steps.detect-pm.outputs.pm == 'npm'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: npx playwright install --with-deps
+
+    - name: Install Playwright browsers (pnpm)
+      if: steps.detect-pm.outputs.pm == 'pnpm'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: pnpm exec playwright install --with-deps
+
+    - name: Run Playwright tests
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: ${{ inputs.script-command }}

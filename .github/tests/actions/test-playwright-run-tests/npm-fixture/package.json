@@ -1,0 +1,10 @@
+{
+  "name": "playwright-npm-fixture",
+  "private": true,
+  "scripts": {
+    "test": "echo npm-test-passed"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.52.0"
+  }
+}

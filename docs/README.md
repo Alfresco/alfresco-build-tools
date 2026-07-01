@@ -1940,6 +1940,29 @@ Moves artifacts from one repository to another on Nexus 3, identified by a parti
           version: 1.0.0
 ```
 
+### playwright-run-tests
+
+Installs Node.js dependencies and runs Playwright tests, with support for both
+npm and pnpm package managers.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/playwright-run-tests@v18.15.0
+        with:
+          node-version: "24.14.0"
+          script-command: "pnpm run test:e2e"
+```
+
+| Input               | Description                                                                        | Default  |
+| ------------------- | ---------------------------------------------------------------------------------- | -------- |
+| `node-version`      | Node.js version to install                                                         | `"20"`   |
+| `package-manager`   | Package manager to use: `auto`, `npm`, or `pnpm`. When `auto`, detects from lock files. | `"auto"` |
+| `script-command`    | The command to run the Playwright tests (required)                                  |          |
+| `working-directory` | Working directory for install and test commands                                     | `"."`    |
+
+When `package-manager` is set to `auto` (the default), the action checks for
+`pnpm-lock.yaml` in the working directory and uses pnpm if found, otherwise
+falls back to npm.
+
 ### pre-commit
 
 Executes a [pre-commit](https://pre-commit.com/) step.
