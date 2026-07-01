@@ -1,0 +1,25 @@
+name: Test maven-configure
+description: >
+  Just a test for maven-configure
+inputs:
+  maven-options:
+    description: 'The maven-options output produced by maven-configure'
+    required: true
+  skip-tests:
+    description: 'The skip-tests output produced by maven-configure'
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Check computed outputs
+      shell: bash
+      env:
+        MAVEN_OPTIONS: ${{ inputs.maven-options }}
+        SKIP_TESTS: ${{ inputs.skip-tests }}
+      run: |
+        set -euo pipefail
+        echo "maven-options: $MAVEN_OPTIONS"
+        echo "skip-tests:    $SKIP_TESTS"
+        [[ "$MAVEN_OPTIONS" == *"--show-version"* ]]
+        [[ "$MAVEN_OPTIONS" == *"--settings settings.xml"* ]]
+        [ "$SKIP_TESTS" = "false" ]
