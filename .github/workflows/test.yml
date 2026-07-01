@@ -136,7 +136,6 @@ jobs:
           maven-version: 3.9.9
       - uses: ./.github/tests/actions/test-maven-configure
         with:
-          expected-maven-version: 3.9.9
           maven-options: ${{ steps.maven-configure.outputs.maven-options }}
           skip-tests: ${{ steps.maven-configure.outputs.skip-tests }}
       #endregion

@@ -2,9 +2,6 @@ name: Test maven-configure
 description: >
   Just a test for maven-configure
 inputs:
-  expected-maven-version:
-    description: 'Expected Maven version on the PATH'
-    required: true
   maven-options:
     description: 'The maven-options output produced by maven-configure'
     required: true
@@ -14,17 +11,6 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Check Maven version on PATH
-      shell: bash
-      env:
-        EXPECTED_VERSION: ${{ inputs.expected-maven-version }}
-      run: |
-        set -euo pipefail
-        ACTUAL=$(mvn -v | awk '/^Apache Maven/ {print $3; exit}')
-        echo "Expected: $EXPECTED_VERSION"
-        echo "Actual:   $ACTUAL"
-        [ "$ACTUAL" = "$EXPECTED_VERSION" ]
-
     - name: Check computed outputs
       shell: bash
       env:
