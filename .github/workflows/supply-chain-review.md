@@ -30,6 +30,8 @@ safe-outputs:
     hide-older-comments: true
   add-labels:
     allowed: [security:low, security:medium, security:high]
+  remove-labels:
+    allowed: [security:low, security:medium, security:high]
   submit-pull-request-review:
 
 ---
@@ -335,7 +337,8 @@ No suspicious patterns detected. Routine upgrade.
 
 ## Step 6 — Apply Label and Review Status
 
-- Apply a label to the PR based on the highest risk level found:
+- First, remove any `security:low`, `security:medium`, or `security:high` labels already present on the PR from a previous review — this PR may have been reviewed before (e.g., after a new commit), and stale risk labels must not remain alongside the new one.
+- Then apply a label to the PR based on the highest risk level found:
   - `security:low` for LOW risk
   - `security:medium` for MEDIUM risk
   - `security:high` for HIGH or CRITICAL risk
