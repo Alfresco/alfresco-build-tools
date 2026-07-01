@@ -15,7 +15,7 @@ inputs:
     required: false
     default: ''
   maven-setup-cache-key-suffix:
-    description: Suffix for the Maven setup cache key
+    description: Suffix for the Maven setup cache key.
     required: false
     default: ''
   maven-settings-path:
