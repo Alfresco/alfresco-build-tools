@@ -1,0 +1,39 @@
+name: Test maven-configure
+description: >
+  Just a test for maven-configure
+inputs:
+  expected-maven-version:
+    description: 'Expected Maven version on the PATH'
+    required: true
+  maven-options:
+    description: 'The maven-options output produced by maven-configure'
+    required: true
+  skip-tests:
+    description: 'The skip-tests output produced by maven-configure'
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Check Maven version on PATH
+      shell: bash
+      env:
+        EXPECTED_VERSION: ${{ inputs.expected-maven-version }}
+      run: |
+        set -euo pipefail
+        ACTUAL=$(mvn -v | awk '/^Apache Maven/ {print $3; exit}')
+        echo "Expected: $EXPECTED_VERSION"
+        echo "Actual:   $ACTUAL"
+        [ "$ACTUAL" = "$EXPECTED_VERSION" ]
+
+    - name: Check computed outputs
+      shell: bash
+      env:
+        MAVEN_OPTIONS: ${{ inputs.maven-options }}
+        SKIP_TESTS: ${{ inputs.skip-tests }}
+      run: |
+        set -euo pipefail
+        echo "maven-options: $MAVEN_OPTIONS"
+        echo "skip-tests:    $SKIP_TESTS"
+        [[ "$MAVEN_OPTIONS" == *"--show-version"* ]]
+        [[ "$MAVEN_OPTIONS" == *"--settings settings.xml"* ]]
+        [ "$SKIP_TESTS" = "false" ]
