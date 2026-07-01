@@ -1,0 +1,11 @@
+{
+  "name": "playwright-pnpm-fixture",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "test": "echo pnpm-test-passed"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.52.0"
+  }
+}

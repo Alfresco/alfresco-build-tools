@@ -67,8 +67,8 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       run: |
         corepack enable
-        if node -e "const pm = require('./package.json').packageManager; if (!pm || !pm.startsWith('pnpm')) process.exit(1)" 2>/dev/null; then
-          corepack prepare --activate
+        if PM_SPEC=$(node -e "const pm=require('./package.json').packageManager; if (!pm || !pm.startsWith('pnpm')) process.exit(1); process.stdout.write(pm)" 2>/dev/null); then
+          corepack prepare "$PM_SPEC" --activate
         else
           corepack prepare pnpm@latest --activate
         fi
@@ -92,13 +92,17 @@ runs:
       if: steps.detect-pm.outputs.pm == 'npm'
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      run: npm ci
+      run: |
+        test -f package-lock.json || { echo "::error::package-lock.json not found in '${{ inputs.working-directory }}' but package-manager resolved to npm (npm ci requires a lockfile)."; exit 1; }
+        npm ci
 
     - name: Install dependencies (pnpm)
       if: steps.detect-pm.outputs.pm == 'pnpm'
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      run: pnpm install --frozen-lockfile
+      run: |
+        test -f pnpm-lock.yaml || { echo "::error::pnpm-lock.yaml not found in '${{ inputs.working-directory }}' but package-manager resolved to pnpm (pnpm --frozen-lockfile requires a lockfile)."; exit 1; }
+        pnpm install --frozen-lockfile
 
     - name: Install Playwright browsers (npm)
       if: steps.detect-pm.outputs.pm == 'npm'
