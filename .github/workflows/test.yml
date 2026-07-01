@@ -16,11 +16,11 @@ jobs:
       (github.actor != 'dependabot[bot]' && github.event_name != 'pull_request_review')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: pre-commit checks
         uses: ./.github/actions/pre-commit
       - name: Ensure SHA pinned actions
-        uses: hyland/github-actions-ensure-sha-pinned-actions@7d494b6b53e71f75194d74b4dd890a2266d060b5 # v2.0.0
+        uses: hyland/github-actions-ensure-sha-pinned-actions@7957efb76aba0eec7580a9c0392d3e5bec381359 # v2.0.1
         with:
           allowlist: |
             Alfresco/alfresco-build-tools/*
@@ -34,7 +34,7 @@ jobs:
           - ubuntu-latest
           - ubuntu-24.04-arm
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Switch to local actions when requested
         if: contains(github.event.pull_request.labels.*.name, 'test/local-actions')
         run: |
