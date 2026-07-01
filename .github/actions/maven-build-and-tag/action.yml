@@ -109,7 +109,7 @@ runs:
   steps:
     - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@4387dba6fc37d3c25037f56e41b9b3fce68f709d
+    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@5d6a95bc02cda64ff2e804674f7571bb215873c7
       id: maven-configure
       with:
         java-version: ${{ inputs.java-version }}
@@ -122,7 +122,7 @@ runs:
     - name: Update pom files to the new version
       id: update-pom-to-next-version
       if: github.event_name == 'push' || env.IS_PREVIEW == 'true'
-      uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@4387dba6fc37d3c25037f56e41b9b3fce68f709d
+      uses: Alfresco/alfresco-build-tools/.github/actions/update-pom-to-next-pre-release@5d6a95bc02cda64ff2e804674f7571bb215873c7
       with:
         property-to-update: ${{ inputs.property-to-update }}
         maven-cli-opts: ${{ steps.maven-configure.outputs.maven-options }}
@@ -225,7 +225,7 @@ runs:
       shell: bash
       run: find . -name TEST-*.xml -exec grep -h testcase {} \; | awk -F '"' '{printf("%s#%s() - %.3fms\n", $4, $2, $6); }' | sort -n -k 3 | tail -20
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@4387dba6fc37d3c25037f56e41b9b3fce68f709d
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@5d6a95bc02cda64ff2e804674f7571bb215873c7
       if: github.event_name == 'push'
       with:
         username: ${{ inputs.git-username }}
