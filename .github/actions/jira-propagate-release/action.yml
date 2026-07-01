@@ -64,7 +64,7 @@ runs:
 
     - name: Get or create Jira release/version
       id: jira-release
-      uses: Alfresco/alfresco-build-tools/.github/actions/jira-get-or-create-release@5d6a95bc02cda64ff2e804674f7571bb215873c7
+      uses: Alfresco/alfresco-build-tools/.github/actions/jira-get-or-create-release@1d4d24431cc8b3b9399eb100679e42a6fbb03ae4
       with:
         jira-url: ${{ inputs.jira-url }}
         jira-project-key: ${{ inputs.jira-project-key }}
@@ -76,7 +76,7 @@ runs:
     - name: Set Fix Version on tickets (skip if none)
       id: set-fix
       if: ${{ steps.extract.outputs.tickets-csv != '' }}
-      uses: Alfresco/alfresco-build-tools/.github/actions/jira-set-fix-version@5d6a95bc02cda64ff2e804674f7571bb215873c7
+      uses: Alfresco/alfresco-build-tools/.github/actions/jira-set-fix-version@1d4d24431cc8b3b9399eb100679e42a6fbb03ae4
       with:
         jira-url: ${{ inputs.jira-url }}
         jira-user: ${{ inputs.jira-user }}
