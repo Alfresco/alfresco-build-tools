@@ -96,6 +96,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [maven-update-pom-version](#maven-update-pom-version)
   - [md-toc](#md-toc)
   - [nexus-move-artifacts](#nexus-move-artifacts)
+  - [playwright-run-tests](#playwright-run-tests)
   - [pre-commit](#pre-commit)
   - [process-coverage-report](#process-coverage-report)
   - [pipenv](#pipenv)
@@ -1952,12 +1953,12 @@ npm and pnpm package managers.
           script-command: "pnpm run test:e2e"
 ```
 
-| Input               | Description                                                                        | Default  |
-| ------------------- | ---------------------------------------------------------------------------------- | -------- |
-| `node-version`      | Node.js version to install                                                         | `"20"`   |
-| `package-manager`   | Package manager to use: `auto`, `npm`, or `pnpm`. When `auto`, detects from lock files. | `"auto"` |
-| `script-command`    | The command to run the Playwright tests (required)                                  |          |
-| `working-directory` | Working directory for install and test commands                                     | `"."`    |
+| Input               | Description                                                    | Default  |
+| ------------------- | -------------------------------------------------------------- | -------- |
+| `node-version`      | Node.js version to install                                     | `"20"`   |
+| `package-manager`   | Package manager: `auto`, `npm`, or `pnpm` (auto-detects)       | `"auto"` |
+| `script-command`    | The command to run the Playwright tests (required)             |          |
+| `working-directory` | Working directory for install and test commands                | `"."`    |
 
 When `package-manager` is set to `auto` (the default), the action checks for
 `pnpm-lock.yaml` in the working directory and uses pnpm if found, otherwise
