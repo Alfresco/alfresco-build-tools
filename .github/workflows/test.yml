@@ -301,8 +301,13 @@ jobs:
           echo "Full commit message header (env): $COMMIT_MSG_HEADER_ENV"
           # header-only must be exactly the first line of the full message
           EXPECTED=${COMMIT_MSG_OUTPUT%%$'\n'*}
-          [ "$COMMIT_MSG_HEADER_OUTPUT" = "$EXPECTED" ] || { echo "::error::header output '$COMMIT_MSG_HEADER_OUTPUT' does not match first line '$EXPECTED'"; exit 1; }
-          [ "$COMMIT_MSG_HEADER_ENV" = "$EXPECTED" ] || { echo "::error::header env '$COMMIT_MSG_HEADER_ENV' does not match first line '$EXPECTED'"; exit 1; }
+          if [ "$COMMIT_MSG_HEADER_OUTPUT" != "$EXPECTED" ] || [ "$COMMIT_MSG_HEADER_ENV" != "$EXPECTED" ]; then
+            echo "Expected first line: $EXPECTED"
+            echo "Header output:       $COMMIT_MSG_HEADER_OUTPUT"
+            echo "Header env:          $COMMIT_MSG_HEADER_ENV"
+            echo "::error::header-only commit message does not match first line of full message"
+            exit 1
+          fi
       # endregion
 
       - uses: ./.github/actions/get-branch-name-v2
