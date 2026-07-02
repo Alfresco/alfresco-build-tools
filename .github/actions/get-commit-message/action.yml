@@ -23,7 +23,7 @@ runs:
       run: |
         MSG=$(git log --format=%B -n 1 "$CURRENT_SHA")
         if [ "${{ inputs.header-only }}" = "true" ]; then
-          MSG=$(echo "$MSG" | head -n 1)
+          MSG=${MSG%%$'\n'*}
         fi
 
         echo "COMMIT_MESSAGE<<$EOF" >> "$GITHUB_ENV"
