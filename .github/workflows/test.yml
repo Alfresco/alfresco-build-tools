@@ -283,6 +283,8 @@ jobs:
         run: |
           echo "Full commit message (output): $COMMIT_MSG_OUTPUT"
           echo "Full commit message (env): $COMMIT_MSG_ENV"
+          [ -n "$COMMIT_MSG_OUTPUT" ] || { echo "::error::full commit message output is empty"; exit 1; }
+          [ -n "$COMMIT_MSG_ENV" ] || { echo "::error::full commit message env is empty"; exit 1; }
 
       - uses: ./.github/actions/get-commit-message
         id: get-commit-message-header-only
@@ -291,11 +293,21 @@ jobs:
 
       - name: Test commit message header
         env:
+          COMMIT_MSG_OUTPUT: ${{ steps.get-full-commit-message.outputs.COMMIT_MESSAGE }}
           COMMIT_MSG_HEADER_OUTPUT: ${{ steps.get-commit-message-header-only.outputs.COMMIT_MESSAGE }}
           COMMIT_MSG_HEADER_ENV: ${{ env.COMMIT_MESSAGE }}
         run: |
           echo "Full commit message header (output): $COMMIT_MSG_HEADER_OUTPUT"
           echo "Full commit message header (env): $COMMIT_MSG_HEADER_ENV"
+          # header-only must be exactly the first line of the full message
+          EXPECTED=${COMMIT_MSG_OUTPUT%%$'\n'*}
+          if [ "$COMMIT_MSG_HEADER_OUTPUT" != "$EXPECTED" ] || [ "$COMMIT_MSG_HEADER_ENV" != "$EXPECTED" ]; then
+            echo "Expected first line: $EXPECTED"
+            echo "Header output:       $COMMIT_MSG_HEADER_OUTPUT"
+            echo "Header env:          $COMMIT_MSG_HEADER_ENV"
+            echo "::error::header-only commit message does not match first line of full message"
+            exit 1
+          fi
       # endregion
 
       - uses: ./.github/actions/get-branch-name-v2
