@@ -6,4 +6,4 @@ description: >
 runs:
   using: composite
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/wraps-wraps-wraps-leaf@6c9517bbf3fb0784d298cf6e9f3fffd28e68f8f6
+    - uses: Alfresco/alfresco-build-tools/.github/actions/wraps-wraps-wraps-leaf@8553d439d17ede3b9a0f1e8bfbdafd0cac036163
