@@ -139,7 +139,7 @@ jobs:
 
       - name: Checkout code (used for auto-detection of terraform root path and/or environment)
         if: inputs.terraform_root_path == '' || inputs.terraform_env == ''
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/merge', github.event.issue.number) || '' }}
           fetch-depth: 0
@@ -449,7 +449,7 @@ jobs:
           fi
 
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ github.event_name == 'issue_comment' && env.PR_CHECKOUT_REF || '' }}
 
@@ -472,7 +472,7 @@ jobs:
         run: echo "${{ steps.idtoken.outputs.id_token }}" >> idtoken.json
 
       - name: Assume AWS Role when AWS_ROLE_ARN is set
-        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
         if: vars.AWS_ROLE_ARN != ''
         with:
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
