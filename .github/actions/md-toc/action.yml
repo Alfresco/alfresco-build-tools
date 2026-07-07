@@ -79,7 +79,7 @@ runs:
       shell: bash
     - name: Autocommit changes
       if: inputs.dry_run == 'false'
-      uses: iarekylew00t/verified-bot-commit@5b4e8852dc472093935b8debcb81459bb79f7986 # v2.3.2
+      uses: iarekylew00t/verified-bot-commit@33985d44b7719dcaf0b854a0f4b0caad9bdc5b86 # v2.3.3
       with:
         ref: ${{ github.event.pull_request.head.ref || github.ref }}
         message: Auto update TOC
