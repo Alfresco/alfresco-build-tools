@@ -506,7 +506,7 @@ Calculate next internal version based on existing tags
 
 ### check-pr-description
 
-Fails a pull request when its description is missing or shorter than a configurable minimum word count. HTML comments (PR-template boilerplate) are stripped before counting, and draft PRs and bot authors are skipped. Add it to a consumer repo via a small `pull_request` workflow.
+Fails a pull request when its description is missing, too short, or only a ticket/URL reference. HTML comments (PR-template boilerplate), URLs and Jira ticket keys (e.g. `AAE-1234`) are excluded before measuring, so pasting just the Jira link does not pass. The remaining "meaningful" text must meet both a character and a word floor. Draft PRs and bot authors are skipped. Add it to a consumer repo via a small `pull_request` workflow.
 
 ```yaml
 name: PR Description Check
@@ -524,13 +524,14 @@ jobs:
     steps:
       - uses: Alfresco/alfresco-build-tools/.github/actions/check-pr-description@v18.16.0
         with:
-          min-words: "15" # optional, default: 15
+          min-chars: "15" # optional, default: 15
+          min-words: "3" # optional, default: 3
           skip-authors: "dependabot renovate alfresco-build*" # optional
 ```
 
 The action reads `github.event.pull_request.body`, so the consumer workflow must be triggered by `pull_request` events. No repository checkout is required.
 
-Consumer repositories should pin the reference to a commit SHA rather than a tag, as recommended in [Actions SHA pinning](#actions-sha-pinning) (the `@v18.16.0` above is a placeholder that the release process keeps in sync within this repo). The `min-words` input must be a non-negative integer.
+Consumer repositories should pin the reference to a commit SHA rather than a tag, as recommended in [Actions SHA pinning](#actions-sha-pinning) (the `@v18.16.0` above is a placeholder that the release process keeps in sync within this repo). The `min-chars` and `min-words` inputs must be non-negative integers.
 
 ### configure-git-author
 
