@@ -38,6 +38,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [automate-propagation](#automate-propagation)
   - [awf-run-command](#awf-run-command)
   - [calculate-next-internal-version](#calculate-next-internal-version)
+  - [check-pr-description](#check-pr-description)
   - [configure-git-author](#configure-git-author)
   - [dependabot-missing-actions-check](#dependabot-missing-actions-check)
   - [dbp-charts](#dbp-charts)
@@ -502,6 +503,32 @@ Calculate next internal version based on existing tags
         with:
           next-version: 1.2.3
 ```
+
+### check-pr-description
+
+Fails a pull request when its description is missing or shorter than a configurable minimum word count. HTML comments (PR-template boilerplate) are stripped before counting, and draft PRs and bot authors are skipped. Add it to a consumer repo via a small `pull_request` workflow.
+
+```yaml
+name: PR Description Check
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize, ready_for_review]
+
+jobs:
+  check-description:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/check-pr-description@v18.16.0
+        with:
+          min-words: "15" # optional, default: 15
+          skip-authors: "dependabot renovate alfresco-build*" # optional
+```
+
+The action reads `github.event.pull_request.body`, so the consumer workflow must be triggered by `pull_request` events. No repository checkout is required.
 
 ### configure-git-author
 
