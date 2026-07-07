@@ -11,6 +11,18 @@ inputs:
     description: Space-separated shell glob patterns of PR author logins to skip, in addition to any '*[bot]' author.
     required: false
     default: "dependabot renovate alfresco-build*"
+  pr-body:
+    description: Pull request body to check. Defaults to the triggering pull_request event body; override mainly for testing.
+    required: false
+    default: ""
+  pr-author:
+    description: Pull request author login. Defaults to the triggering pull_request event author; override mainly for testing.
+    required: false
+    default: ""
+  pr-draft:
+    description: Whether the pull request is a draft. Defaults to the triggering pull_request event draft flag; override mainly for testing.
+    required: false
+    default: ""
 
 runs:
   using: composite
@@ -19,8 +31,8 @@ runs:
       id: gate
       shell: bash
       env:
-        AUTHOR: ${{ github.event.pull_request.user.login }}
-        IS_DRAFT: ${{ github.event.pull_request.draft }}
+        AUTHOR: ${{ inputs.pr-author || github.event.pull_request.user.login }}
+        IS_DRAFT: ${{ inputs.pr-draft || github.event.pull_request.draft }}
         SKIP_AUTHORS: ${{ inputs.skip-authors }}
       run: |
         set -euo pipefail
@@ -33,12 +45,16 @@ runs:
         case "${AUTHOR}" in
           *"[bot]") skip=true ;;
         esac
+        # Disable pathname expansion so skip-authors patterns (e.g. alfresco-build*)
+        # are not expanded against the workspace and are matched literally by case.
+        set -f
         for pattern in ${SKIP_AUTHORS}; do
           # shellcheck disable=SC2254
           case "${AUTHOR}" in
             ${pattern}) skip=true ;;
           esac
         done
+        set +f
         if [ "${skip}" = "true" ]; then
           echo "Skipping author: ${AUTHOR}"
         fi
@@ -48,10 +64,14 @@ runs:
       if: steps.gate.outputs.skip != 'true'
       shell: bash
       env:
-        BODY: ${{ github.event.pull_request.body }}
+        BODY: ${{ inputs.pr-body || github.event.pull_request.body }}
         MIN_WORDS: ${{ inputs.min-words }}
       run: |
         set -euo pipefail
+        if ! printf '%s' "${MIN_WORDS}" | grep -Eq '^[0-9]+$'; then
+          echo "::error title=Invalid min-words::min-words must be a non-negative integer, got '${MIN_WORDS}'."
+          exit 1
+        fi
         stripped=$(printf '%s' "${BODY}" | perl -0777 -pe 's/<!--.*?-->//gs')
         words=$(printf '%s' "${stripped}" | wc -w | tr -d ' ')
         echo "PR description word count: ${words} (minimum: ${MIN_WORDS})"

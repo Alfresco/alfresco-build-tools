@@ -72,6 +72,37 @@ jobs:
           command: curl -sSf https://www.hyland.com
           agent-timeout: 1
 
+      #region Test check-pr-description
+      - name: Test check-pr-description happy path
+        uses: ./.github/actions/check-pr-description
+        with:
+          min-words: "5"
+          pr-author: octocat
+          pr-draft: "false"
+          pr-body: "This is a sufficiently long pull request description used to validate the action."
+
+      - name: Test check-pr-description fails on short body
+        id: check-pr-description-short
+        uses: ./.github/actions/check-pr-description
+        continue-on-error: true
+        with:
+          min-words: "15"
+          pr-author: octocat
+          pr-draft: "false"
+          pr-body: "Too short."
+
+      - name: Assert check-pr-description failed on short body
+        if: steps.check-pr-description-short.outcome != 'failure'
+        run: echo "check-pr-description should have failed on a short body!" && exit 1
+
+      - name: Test check-pr-description skips bot authors
+        uses: ./.github/actions/check-pr-description
+        with:
+          min-words: "15"
+          pr-author: "dependabot[bot]"
+          pr-body: "short"
+      #endregion
+
       # free-hosted-runner-disk-space action usage and test
       - name: Check available disk space before running free-hosted-runner-disk-space action
         id: free-hosted-runner-disk-space

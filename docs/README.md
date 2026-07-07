@@ -530,6 +530,8 @@ jobs:
 
 The action reads `github.event.pull_request.body`, so the consumer workflow must be triggered by `pull_request` events. No repository checkout is required.
 
+Consumer repositories should pin the reference to a commit SHA rather than a tag, as recommended in [Actions SHA pinning](#actions-sha-pinning) (the `@v18.16.0` above is a placeholder that the release process keeps in sync within this repo). The `min-words` input must be a non-negative integer.
+
 ### configure-git-author
 
 Configures the git username and email to associate commits with the provided identity
