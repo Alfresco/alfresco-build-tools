@@ -47,7 +47,7 @@ runs:
       run: |
         echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/git-check-existing-tag@04124ff69ddf12c1bbbbea895e4d5e88fa6872c0
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-check-existing-tag@145e8c19cfa19c16e1d8717a9e8a3421d5445510
       id: check-tag
       with:
         tag: ${{ env.VERSION }}
@@ -55,14 +55,14 @@ runs:
 
     - name: Update chart version
       if: steps.check-tag.outputs.exists == 'false'
-      uses: Alfresco/alfresco-build-tools/.github/actions/helm-update-chart-version@04124ff69ddf12c1bbbbea895e4d5e88fa6872c0
+      uses: Alfresco/alfresco-build-tools/.github/actions/helm-update-chart-version@145e8c19cfa19c16e1d8717a9e8a3421d5445510
       with:
         new-version: ${{ env.VERSION }}
         chart-repository-dir: ${{ inputs.chart-repository-dir }}
         chart-dir: ${{ inputs.chart-dir }}
         helm-docs-version: ${{ inputs.helm-docs-version }}
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@04124ff69ddf12c1bbbbea895e4d5e88fa6872c0
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@145e8c19cfa19c16e1d8717a9e8a3421d5445510
       if: steps.check-tag.outputs.exists == 'false'
       with:
         username: ${{ inputs.git-username }}
@@ -79,7 +79,7 @@ runs:
     - name: Package Helm Chart
       if: steps.check-tag.outputs.exists == 'false'
       id: package-helm-chart
-      uses: Alfresco/alfresco-build-tools/.github/actions/helm-package-chart@04124ff69ddf12c1bbbbea895e4d5e88fa6872c0
+      uses: Alfresco/alfresco-build-tools/.github/actions/helm-package-chart@145e8c19cfa19c16e1d8717a9e8a3421d5445510
       with:
         chart-dir: ${{ inputs.chart-dir }}
         chart-repository-dir: ${{ inputs.chart-repository-dir }}
@@ -92,7 +92,7 @@ runs:
 
     - name: Publish Helm chart
       if: steps.check-tag.outputs.exists == 'false'
-      uses: Alfresco/alfresco-build-tools/.github/actions/helm-publish-chart@04124ff69ddf12c1bbbbea895e4d5e88fa6872c0
+      uses: Alfresco/alfresco-build-tools/.github/actions/helm-publish-chart@145e8c19cfa19c16e1d8717a9e8a3421d5445510
       with:
         helm-charts-repo: ${{inputs.helm-repository}}
         helm-charts-repo-branch: ${{ inputs.helm-repository-branch }}
