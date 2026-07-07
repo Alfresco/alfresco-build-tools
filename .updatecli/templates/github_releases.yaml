@@ -13,6 +13,7 @@ scms:
       owner: '{{ requiredEnv "UPDATECLI_REPO_OWNER" }}'
       repository: '{{ requiredEnv "UPDATECLI_REPO_NAME" }}'
       branch: '{{ requiredEnv "UPDATECLI_REPO_BRANCH" }}'
+      commitusingapi: true
       commitmessage:
         type: '{{ .github.prefix }}'
         message: '{{ .github.message }}'

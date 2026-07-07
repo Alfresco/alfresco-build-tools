@@ -47,7 +47,7 @@ jobs:
         uses: ./.github/actions/setup-updatecli
 
       - name: Run Updatecli
-        run: updatecli apply -c .updatecli/templates/github_releases.yaml -v .updatecli/values/github_releases/${{ matrix.file }}
+        run: updatecli pipeline apply -c .updatecli/templates/github_releases.yaml -v .updatecli/values/github_releases/${{ matrix.file }}
         env:
           UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           UPDATECLI_USERNAME: ${{ vars.BOT_GITHUB_USERNAME }}
