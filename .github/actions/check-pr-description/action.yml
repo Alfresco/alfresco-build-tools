@@ -15,6 +15,10 @@ inputs:
     description: Space-separated shell glob patterns of PR author logins to skip, in addition to any '*[bot]' author.
     required: false
     default: "dependabot renovate alfresco-build*"
+  skip-branches:
+    description: Space-separated shell glob patterns of head branch names to skip (automated/bot PRs). Matched against github.head_ref.
+    required: false
+    default: "dependabot/* renovate/* updatecli* image-update* flux-* pr-* release-please--* changeset-release/* snyk-* whitesource* mend-* automated-* automation/*"
   pr-body:
     description: Pull request body to check. Defaults to the triggering pull_request event body; override mainly for testing.
     required: false
@@ -27,17 +31,23 @@ inputs:
     description: Whether the pull request is a draft. Defaults to the triggering pull_request event draft flag; override mainly for testing.
     required: false
     default: ""
+  pr-branch:
+    description: Head branch name of the pull request. Defaults to the triggering pull_request head ref; override mainly for testing.
+    required: false
+    default: ""
 
 runs:
   using: composite
   steps:
-    - name: Skip drafts and bot authors
+    - name: Skip drafts, bot authors and automated branches
       id: gate
       shell: bash
       env:
         AUTHOR: ${{ inputs.pr-author || github.event.pull_request.user.login }}
         IS_DRAFT: ${{ inputs.pr-draft || github.event.pull_request.draft }}
+        HEAD_BRANCH: ${{ inputs.pr-branch || github.head_ref }}
         SKIP_AUTHORS: ${{ inputs.skip-authors }}
+        SKIP_BRANCHES: ${{ inputs.skip-branches }}
       run: |
         set -euo pipefail
         if [ "${IS_DRAFT}" = "true" ]; then
@@ -49,8 +59,9 @@ runs:
         case "${AUTHOR}" in
           *"[bot]") skip=true ;;
         esac
-        # Disable pathname expansion so skip-authors patterns (e.g. alfresco-build*)
-        # are not expanded against the workspace and are matched literally by case.
+        # Disable pathname expansion so skip-authors / skip-branches patterns
+        # (e.g. alfresco-build*, dependabot/*) are matched literally by case and
+        # are not expanded against the workspace.
         set -f
         for pattern in ${SKIP_AUTHORS}; do
           # shellcheck disable=SC2254
@@ -58,9 +69,15 @@ runs:
             ${pattern}) skip=true ;;
           esac
         done
+        for pattern in ${SKIP_BRANCHES}; do
+          # shellcheck disable=SC2254
+          case "${HEAD_BRANCH}" in
+            ${pattern}) skip=true ;;
+          esac
+        done
         set +f
         if [ "${skip}" = "true" ]; then
-          echo "Skipping author: ${AUTHOR}"
+          echo "Skipping automated PR (author=${AUTHOR}, branch=${HEAD_BRANCH})."
         fi
         echo "skip=${skip}" >> "$GITHUB_OUTPUT"
 

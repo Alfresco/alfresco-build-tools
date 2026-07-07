@@ -111,6 +111,14 @@ jobs:
         with:
           pr-author: "dependabot[bot]"
           pr-body: "short"
+
+      - name: Test check-pr-description skips automated branches
+        uses: ./.github/actions/check-pr-description
+        with:
+          pr-author: svc-account
+          pr-draft: "false"
+          pr-branch: "dependabot/terraform/aws-5.0"
+          pr-body: "x"
       #endregion
 
       # free-hosted-runner-disk-space action usage and test
