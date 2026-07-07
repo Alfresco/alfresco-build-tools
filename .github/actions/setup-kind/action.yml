@@ -31,7 +31,7 @@ inputs:
     description: |
       The Traefik helm chart version to install. Check available versions on
       https://artifacthub.io/packages/helm/traefik/traefik
-    default: "39.0.0"
+    default: "41.0.2"
   cloud-provider-kind-enabled:
     description: |
       Whether to install and run cloud-provider-kind alongside the KinD cluster.
