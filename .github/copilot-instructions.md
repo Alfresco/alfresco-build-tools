@@ -159,7 +159,7 @@ pre-commit run --all-files
 
 ### Pull Request Guidelines
 
-- When creating a PR, populate the body from `.github/pull_request_template.md` (`gh pr create` won't auto-apply it): keep the checklist structure, fill the Jira reference, tick the matching `release/*` box, and write the Description.
+- When creating a PR, populate the body from `.github/pull_request_template.md` (`gh pr create` won't auto-apply it): keep the checklist structure, fill the Jira reference, tick the matching Patch/Minor/Major checkbox under "Proposed version increment", and write the Description.
 
 ## Action Categories and Patterns
 
