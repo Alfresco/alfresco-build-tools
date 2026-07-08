@@ -9,24 +9,34 @@ runs:
   using: composite
   steps:
     - name: "Dump containers logs and archive them"
+      id: dump
       shell: bash
       run: |
         # Get containers state
         docker ps -a
         # Dump all containers logs to files
         docker ps -a --format '{{.ID}} {{.Names}}' | while read -r id name ; do
-          docker logs "${id}" --tail 5000 > "${name}.log"
+          docker logs "${id}" --tail 5000 > "${name}.log" 2>&1
         done
         # Create archive with log files
-        tar -zcf logs.tar.gz *.log
+        shopt -s nullglob
+        logs=(*.log)
+        if [ ${#logs[@]} -eq 0 ]; then
+          echo "No container logs to archive, skipping upload"
+          echo "has-logs=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        echo "has-logs=true" >> "$GITHUB_OUTPUT"
+        tar -zcf logs.tar.gz "${logs[@]}"
         # Specify output artefact name
         if [ "${{ inputs.output-archive-name }}" = "containers-logs.tar.gz" ]; then
-          echo "artefactName=containers-logs-${{ github.job }}-${{ github.run_attempt }}-$(date +%Y%m%d%H%M%S).tar.gz" >> $GITHUB_ENV
+          echo "artefact-name=containers-logs-${{ github.job }}-${{ github.run_attempt }}-$(date +%Y%m%d%H%M%S).tar.gz" >> "$GITHUB_OUTPUT"
         else
-          echo "artefactName=${{ inputs.output-archive-name }}" >> $GITHUB_ENV
+          echo "artefact-name=${{ inputs.output-archive-name }}" >> "$GITHUB_OUTPUT"
         fi
     - name: "Upload archive containing all *.log files"
+      if: steps.dump.outputs.has-logs == 'true'
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         path: logs.tar.gz
-        name: ${{ env.artefactName }}
+        name: ${{ steps.dump.outputs.artefact-name }}
