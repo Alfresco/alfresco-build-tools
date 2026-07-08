@@ -1,0 +1,37 @@
+name: check-pr-description
+
+description: Fail a pull request when its description is missing, too short, or only a ticket/URL reference.
+
+inputs:
+  min-chars:
+    description: Minimum number of meaningful characters required in the PR description (HTML comments, URLs and Jira ticket keys are excluded from the count).
+    required: false
+    default: "15"
+  min-words:
+    description: Minimum number of meaningful words required in the PR description (same exclusions as min-chars). Guards against single-token padding.
+    required: false
+    default: "3"
+  skip-authors:
+    description: Space-separated shell glob patterns of PR author logins to skip, in addition to any '*[bot]' author.
+    required: false
+    default: "dependabot renovate alfresco-build*"
+  skip-branches:
+    description: Space-separated shell glob patterns of head branch names to skip (automated/bot PRs). Matched against github.head_ref.
+    required: false
+    default: "dependabot/* renovate/* updatecli* image-update* flux-* pr-* release-please--* changeset-release/* snyk-* whitesource* mend-* automated-* automation/*"
+
+runs:
+  using: composite
+  steps:
+    - name: Check PR description
+      shell: bash
+      env:
+        PR_BODY: ${{ github.event.pull_request.body }}
+        PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        PR_DRAFT: ${{ github.event.pull_request.draft }}
+        PR_BRANCH: ${{ github.head_ref }}
+        MIN_CHARS: ${{ inputs.min-chars }}
+        MIN_WORDS: ${{ inputs.min-words }}
+        SKIP_AUTHORS: ${{ inputs.skip-authors }}
+        SKIP_BRANCHES: ${{ inputs.skip-branches }}
+      run: ${{ github.action_path }}/check-pr-description.sh

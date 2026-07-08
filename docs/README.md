@@ -38,6 +38,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [automate-propagation](#automate-propagation)
   - [awf-run-command](#awf-run-command)
   - [calculate-next-internal-version](#calculate-next-internal-version)
+  - [check-pr-description](#check-pr-description)
   - [configure-git-author](#configure-git-author)
   - [dependabot-missing-actions-check](#dependabot-missing-actions-check)
   - [dbp-charts](#dbp-charts)
@@ -502,6 +503,38 @@ Calculate next internal version based on existing tags
         with:
           next-version: 1.2.3
 ```
+
+### check-pr-description
+
+Fails a pull request when its description is missing, too short, or only a ticket/URL reference. HTML comments (PR-template boilerplate), URLs and Jira ticket keys (e.g. `AAE-1234`) are excluded before measuring, so pasting just the Jira link does not pass. The remaining "meaningful" text must meet both a character and a word floor. Draft PRs, bot authors (`*[bot]` plus `skip-authors`) and automated branches (`skip-branches`, e.g. `dependabot/*`, `renovate/*`, `updatecli*`, `image-update*`) are skipped. Add it to a consumer repo via a small `pull_request` workflow.
+
+```yaml
+name: PR Description Check
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize, ready_for_review]
+
+jobs:
+  check-description:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/check-pr-description@v18.16.0
+        with:
+          min-chars: "15" # optional, default: 15
+          min-words: "3" # optional, default: 3
+          skip-authors: "dependabot renovate alfresco-build*" # optional
+          skip-branches: "dependabot/* renovate/* updatecli* image-update* flux-*" # optional
+```
+
+The action reads `github.event.pull_request.body`, so the consumer workflow must be triggered by `pull_request` events. No repository checkout is required.
+
+Automated PRs are skipped two ways: by author (`*[bot]` plus the `skip-authors` globs) and by head branch (`skip-branches` globs, matched against `github.head_ref`). Branch matching also catches automation that runs under a normal service-account login. The `skip-branches` default covers Dependabot, Renovate, updatecli, Flux image-update, release-please, changesets, Snyk, Mend/WhiteSource, propagation (`pr-*`) and generic `automated-*` / `automation/*` branches.
+
+Consumer repositories should pin the reference to a commit SHA rather than a tag, as recommended in [Actions SHA pinning](#actions-sha-pinning) (the `@v18.16.0` above is a placeholder that the release process keeps in sync within this repo). The `min-chars` and `min-words` inputs must be non-negative integers.
 
 ### configure-git-author
 
