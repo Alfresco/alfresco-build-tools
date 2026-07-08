@@ -28,7 +28,7 @@ repos:
     rev: v0.47.0
     hooks:
     - id: markdownlint
-      exclude: ^\.github/workflows/.*\.lock\.yml$
+      exclude: ^(\.github/workflows/.*\.lock\.yml|CLAUDE\.md)$
 
   - repo: https://github.com/rhysd/actionlint
     rev: v1.7.12
