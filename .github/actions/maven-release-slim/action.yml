@@ -56,7 +56,7 @@ runs:
         git push origin "${{ inputs.release-version }}"
       shell: bash
 
-    - name: "Set next development version to ${{ inputs.release-version }}"
+    - name: "Set next development version to ${{ inputs.development-version }}"
       run: mvn -B -ntp versions:set -DnewVersion="${{ inputs.development-version }}" -DgenerateBackupPoms=false
       shell: bash
 
