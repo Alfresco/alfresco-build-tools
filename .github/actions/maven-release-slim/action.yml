@@ -1,5 +1,5 @@
 name: Release and Deploy Maven project slimmed
-description: Deploy alfresco project using maven deploy, prepares repository for next development version
+description: Release and Deploy project using maven `deploy`, prepares repository for next development version
 
 inputs:
   release_version:
