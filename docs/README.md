@@ -1909,20 +1909,22 @@ Used to release Activiti projects. Update versions in POM files, create git tags
 
 ### maven-release-slim
 
-A lightweight Maven release action that sets the release version, deploys the artifacts using Maven `deploy`, tags the release and prepares the repository for the next development version. Uses a GitHub App for authenticated commits and assumes the deploy configuration is already present in the project's POM files.
+A lightweight Maven release action that sets the release version, deploys the artifacts using Maven `deploy`, tags the release and prepares the repository for the next development version. Uses `verified-bot-commit` for signed commits and assumes the deploy configuration is already present in the project's POM files.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-release-slim@v18.17.1
         with:
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
           release-version: 1.2.3
           development-version: 1.2.4-SNAPSHOT
           release-profile: release  # optional, default: release
-          maven-additional-profiles: '-P additional'  # optional, default: ''
+          maven-args: -DskipTests  # optional, default: -DskipTests
           create-tag: 'true'  # optional, default: 'true'
+          commit-message-prefix: '[skip ci]'  # optional, default: '[skip ci]'
 ```
 
-Requires the `GH_APP_ENGINEERING_CONTRIB_CLIENT_ID` variable and the `GH_APP_ENGINEERING_CONTRIB_PRIVATE_KEY` secret to be available for GitHub App authentication. Java and Maven should be set up before invoking the action.
-
+Java and Maven should be set up before invoking the action. The provided `token` is used to push the release/development version commits and must have write access to the repository contents.
+Checkout step with enough permission should be performed before using this action. 
 ### maven-tag
 
 Updates POM files to the next pre-release, commits changes and creates a Git tag.
