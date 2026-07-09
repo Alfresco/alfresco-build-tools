@@ -602,8 +602,9 @@ instances that don't yet support `return_run_details`.
 
 ### docker-dump-containers-logs
 
-Dumps Docker containers logs. Each container's log will be stored in a separate `<container_name>.log` file. All files will be archived by default under `containers-logs-<job_id>-<job_retry_number>-<timestamp>.tar.gz` and will be available to download via the workflow's summary page.
+Dumps Docker containers logs. Each container's log (both stdout and stderr) will be stored in a separate `<container_name>.log` file. All files will be archived by default under `containers-logs-<job_id>-<job_retry_number>-<timestamp>.tar.gz` and will be available to download via the workflow's summary page.
 It is also possible to specify the output archive name when providing the `output-archive-name` parameter.
+When no containers are present, no archive is uploaded.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/docker-dump-containers-logs@v18.17.0
