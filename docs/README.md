@@ -1914,11 +1914,11 @@ A lightweight Maven release action that sets the release version, deploys the ar
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-release-slim@v18.17.1
         with:
-          release_version: 1.2.3
-          development_version: 1.2.4-SNAPSHOT
-          release_profile: release  # optional, default: release
-          maven_additional_profiles: '-P additional'  # optional, default: ''
-          create_tag: 'true'  # optional, default: 'true'
+          release-version: 1.2.3
+          development-version: 1.2.4-SNAPSHOT
+          release-profile: release  # optional, default: release
+          maven-additional-profiles: '-P additional'  # optional, default: ''
+          create-tag: 'true'  # optional, default: 'true'
 ```
 
 Requires the `GH_APP_ENGINEERING_CONTRIB_CLIENT_ID` variable and the `GH_APP_ENGINEERING_CONTRIB_PRIVATE_KEY` secret to be available for GitHub App authentication. Java and Maven should be set up before invoking the action.
