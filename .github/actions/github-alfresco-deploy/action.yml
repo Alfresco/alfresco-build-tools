@@ -24,15 +24,15 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: "Set release version"
+    - name: "Set release version to ${{ inputs.release_version }}"
       run: mvn -B -ntp versions:set -DnewVersion="${{ inputs.release_version }}" -DgenerateBackupPoms=false
       shell: bash
 
-    - name: "Deploy release version"
+    - name: "Deploy release version ${{ inputs.release_version }}"
       run: mvn -B -ntp clean deploy -DskipTests -Prelease ${{ inputs.maven_addtional_profiles }} -Dproject.revision.key=${{ github.sha }}
       shell: bash
 
-    - name: "Commit release version"
+    - name: "Commit release version ${{ inputs.release_version }}"
       uses: iarekylew00t/verified-bot-commit@5b4e8852dc472093935b8debcb81459bb79f7986 # v2.3.2
       with:
         token: ${{ steps.app-token.outputs.token }}
@@ -47,11 +47,11 @@ runs:
         git push origin "${{ inputs.release_version }}"
       shell: bash
 
-    - name: "Set next development version"
+    - name: "Set next development version to ${{ inputs.release_version }}"
       run: mvn -B -ntp versions:set -DnewVersion="${{ inputs.development_version }}" -DgenerateBackupPoms=false
       shell: bash
 
-    - name: "Commit next development version"
+    - name: "Commit next development version ${{ inputs.release_version }}"
       uses: iarekylew00t/verified-bot-commit@5b4e8852dc472093935b8debcb81459bb79f7986 # v2.3.2
       with:
         token: ${{ steps.app-token.outputs.token }}
