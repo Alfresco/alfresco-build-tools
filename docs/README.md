@@ -1925,6 +1925,7 @@ A lightweight Maven release action that sets the release version, deploys the ar
 
 Java and Maven should be set up before invoking the action. The provided `token` is used to push the release/development version commits and must have write access to the repository contents.
 Checkout step with enough permission should be performed before using this action.
+
 ### maven-tag
 
 Updates POM files to the next pre-release, commits changes and creates a Git tag.
