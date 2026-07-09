@@ -44,9 +44,10 @@ runs:
       uses: iarekylew00t/verified-bot-commit@5b4e8852dc472093935b8debcb81459bb79f7986 # v2.3.2
       with:
         token: ${{ steps.app-token.outputs.token }}
+        ref: ${{ github.event.pull_request.head.ref || github.ref }}
         files: |
           pom.xml
-          */pom.xml
+          **/pom.xml
         message: "[alfresco build][skip ci] Release version ${{ inputs.release-version }}"
     - name: "Tag release version"
       if: inputs.create-tag == 'true'
@@ -59,11 +60,12 @@ runs:
       run: mvn -B -ntp versions:set -DnewVersion="${{ inputs.development-version }}" -DgenerateBackupPoms=false
       shell: bash
 
-    - name: "Commit next development version ${{ inputs.release-version }}"
+    - name: "Commit next development version ${{ inputs.development-version }}"
       uses: iarekylew00t/verified-bot-commit@5b4e8852dc472093935b8debcb81459bb79f7986 # v2.3.2
       with:
         token: ${{ steps.app-token.outputs.token }}
+        ref: ${{ github.event.pull_request.head.ref || github.ref }}
         files: |
           pom.xml
-          */pom.xml
+          **/pom.xml
         message: "[alfresco build][skip ci] Prepare next development version ${{ inputs.development-version }}"
