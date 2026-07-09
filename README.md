@@ -3,7 +3,7 @@
 [![Last release](https://img.shields.io/github/v/release/alfresco/alfresco-build-tools)](https://github.com/Alfresco/alfresco-build-tools/releases/latest)
 [![CI](https://github.com/Alfresco/alfresco-build-tools/actions/workflows/test.yml/badge.svg)](https://github.com/Alfresco/alfresco-build-tools/actions/workflows/test.yml)
 [![CI with BATS 🦇](https://github.com/Alfresco/alfresco-build-tools/actions/workflows/test-with-bats.yml/badge.svg)](https://github.com/Alfresco/alfresco-build-tools/actions/workflows/test-with-bats.yml)
-[![Release](https://github.com/Alfresco/alfresco-build-tools/actions/workflows/release.yml/badge.svg)](https://github.com/Alfresco/alfresco-build-tools/actions/workflows/release.yml)
+[![Release](https://github.com/Alfresco/alfresco-build-tools/actions/workflows/release.yml/badge.svg?event=pull_request)](https://github.com/Alfresco/alfresco-build-tools/actions/workflows/release.yml)
 [![GitHub contributors](https://img.shields.io/github/contributors/alfresco/alfresco-build-tools)](https://github.com/Alfresco/alfresco-build-tools/graphs/contributors)
 
 This repository contains shared/reusable CI configurations for GitHub Actions to serve the repositories of the Alfresco org but virtually usable by everyone.
