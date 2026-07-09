@@ -22,6 +22,13 @@ when modernizing Python dependency management in an action: it replaces the
 `setup-python` + pip-cache + `pip install` steps with `setup-uv`, converts scripts to
 run via `uv run --frozen --project`, and updates `dependabot.yml` accordingly.
 
+Copy-paste this into your agent:
+
+```text
+Fetch https://raw.githubusercontent.com/Alfresco/alfresco-build-tools/master/.github/skills/migrate-action-to-uv/SKILL.md
+and follow it to migrate this composite action from requirements.txt/pip to uv.
+```
+
 ### pimp-my-repo
 
 Bootstrap the standard configuration files a full-featured GitHub repository should have. It
@@ -31,6 +38,13 @@ generates a `.github/dependabot.yml` tailored to the ecosystems the repo actuall
 third-party actions, ignores `.claude` in `.gitignore`, sets up AI assistant
 instructions (`.github/copilot-instructions.md` with a thin `CLAUDE.md` importing it),
 and hardens how workflows scope secrets and permissions.
+
+Copy-paste this into your agent:
+
+```text
+Fetch https://raw.githubusercontent.com/Alfresco/alfresco-build-tools/master/.github/skills/pimp-my-repo/SKILL.md
+and follow it to set up baseline devops hygiene in this repo.
+```
 
 ## Adding a new skill
 
