@@ -74,16 +74,16 @@ jobs:
         uses: terraform-linters/setup-tflint@b480b8fcdaa6f2c577f8e4fa799e89e756bb7c93 # v6.2.2
 
       - name: Install checkov
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-checkov@1365eba6d741036a9164212d2ff52523b8c047ad
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-checkov@b8f2bcbce99df8eed3cb92056133912d76c9d54b
 
       - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
         with:
           terraform_version: ${{ steps.detect-terraform-version.outputs.terraform_version }}
 
       - name: Install terraform-docs
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-terraform-docs@1365eba6d741036a9164212d2ff52523b8c047ad
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-terraform-docs@b8f2bcbce99df8eed3cb92056133912d76c9d54b
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@1365eba6d741036a9164212d2ff52523b8c047ad
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@b8f2bcbce99df8eed3cb92056133912d76c9d54b
         with:
           auto-commit: "true" # optionally commit automated fix changes back
           skip_checkout: "false" # mandatory with auto-commit
