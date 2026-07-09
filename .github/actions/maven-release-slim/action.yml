@@ -2,6 +2,9 @@ name: Release and Deploy Maven project slimmed
 description: Release and Deploy project using maven `deploy`, prepares repository for next development version
 
 inputs:
+  token:
+    required: true
+    description: Github token required for authentication.
   release-version:
     required: true
     description: The version of the release (tag).
@@ -12,43 +15,39 @@ inputs:
     required: false
     description: Maven profile used for release. Defaults to "release".
     default: release
-  maven-additional-profiles:
+  maven-args:
     required: false
-    description: Additional Maven profiles/options for release. Should start with -P (e.g. "-P additional").
-    default: ''
+    description: Additional Maven arguments for release. Defaults to "-DskipTests".
+    default: -DskipTests
   create-tag:
     required: false
     description: Boolean if should create tag.
     default: 'true'
+  commit-message-prefix:
+    required: false
+    description: Prefix used by bot for commit message. Defaults to "[skip ci]".
+    default: '[skip ci]'
 
 runs:
   using: composite
   steps:
-    - name: Generate app token
-      id: app-token
-      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-      with:
-        client-id: ${{ vars.GH_APP_ENGINEERING_CONTRIB_CLIENT_ID }}
-        private-key: ${{ secrets.GH_APP_ENGINEERING_CONTRIB_PRIVATE_KEY }}
-        permission-contents: write
-
     - name: "Set release version to ${{ inputs.release-version }}"
       run: mvn -B -ntp versions:set -DnewVersion="${{ inputs.release-version }}" -DgenerateBackupPoms=false
       shell: bash
 
     - name: "Deploy release version ${{ inputs.release-version }}"
-      run: mvn -B -ntp clean deploy -DskipTests -P ${{ inputs.release-profile }} ${{ inputs.maven-additional-profiles }} -Dproject.revision.key=${{ github.sha }}
+      run: mvn -B -ntp clean deploy -P ${{ inputs.release-profile }} -Dproject.revision.key=${{ github.sha }} ${{ inputs.maven-args }}
       shell: bash
 
     - name: "Commit release version ${{ inputs.release-version }}"
       uses: iarekylew00t/verified-bot-commit@33985d44b7719dcaf0b854a0f4b0caad9bdc5b86 # v2.3.3
       with:
-        token: ${{ steps.app-token.outputs.token }}
+        token: ${{ inputs.token }}
         ref: ${{ github.event.pull_request.head.ref || github.ref }}
         files: |
           pom.xml
           **/pom.xml
-        message: "[alfresco build][skip ci] Release version ${{ inputs.release-version }}"
+        message: "${{ inputs.commit-message-prefix }} Release version ${{ inputs.release-version }}"
     - name: "Tag release version"
       if: inputs.create-tag == 'true'
       run: |
@@ -63,9 +62,9 @@ runs:
     - name: "Commit next development version ${{ inputs.development-version }}"
       uses: iarekylew00t/verified-bot-commit@33985d44b7719dcaf0b854a0f4b0caad9bdc5b86 # v2.3.3
       with:
-        token: ${{ steps.app-token.outputs.token }}
+        token: ${{ inputs.token }}
         ref: ${{ github.event.pull_request.head.ref || github.ref }}
         files: |
           pom.xml
           **/pom.xml
-        message: "[alfresco build][skip ci] Prepare next development version ${{ inputs.development-version }}"
+        message: "${{ inputs.commit-message-prefix }} Prepare next development version ${{ inputs.development-version }}"
