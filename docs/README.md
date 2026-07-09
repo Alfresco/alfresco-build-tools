@@ -14,6 +14,8 @@ For terraform-related topics of GitHub Actions, see the [Terraform section](terr
 
 For pre-commit hooks documentation, see the [Pre-commit Hooks section](pre-commit-hooks.md).
 
+For AI agent skills documentation, see the [Skills section](skills.md).
+
 Here follows the list of GitHub Actions topics available in the current document:
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
