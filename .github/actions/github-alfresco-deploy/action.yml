@@ -1,0 +1,61 @@
+name: Alfresco Deploy
+description: Deploy alfresco project using maven deploy, prepares repository for next development version
+
+inputs:
+  release_version:
+    required: true
+    description: The version of the release (tag).
+  development_version:
+    required: true
+    description: The version that will be set in pom files after the release (next dev version)
+  release_profile:
+    required: false
+    description: Maven profile used for release. Default to "release"
+    default: release
+  maven_addtional_profiles:
+    required: false
+    description: Maven additional profiles used for release. It should start with -P. Ex. "-P additional"
+    default: ''
+  create_tag:
+    required: false
+    description: Boolean if should create tag.
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: "Set release version"
+      run: mvn -B -ntp versions:set -DnewVersion="${{ inputs.release_version }}" -DgenerateBackupPoms=false
+      shell: bash
+
+    - name: "Deploy release version"
+      run: mvn -B -ntp clean deploy -DskipTests -Prelease ${{ inputs.maven_addtional_profiles }} -Dproject.revision.key=${{ github.sha }}
+      shell: bash
+
+    - name: "Commit release version"
+      uses: iarekylew00t/verified-bot-commit@5b4e8852dc472093935b8debcb81459bb79f7986 # v2.3.2
+      with:
+        token: ${{ steps.app-token.outputs.token }}
+        files: |
+          pom.xml
+          */pom.xml
+        message: "[alfresco build][skip ci] Release version ${{ inputs.release_version }}"
+    - name: "Tag release version"
+      if: inputs.create_tag == 'true'
+      run: |
+        git tag "${{ inputs.release_version }}"
+        git push origin "${{ inputs.release_version }}"
+      shell: bash
+
+    - name: "Set next development version"
+      run: mvn -B -ntp versions:set -DnewVersion="${{ inputs.development_version }}" -DgenerateBackupPoms=false
+      shell: bash
+
+    - name: "Commit next development version"
+      uses: iarekylew00t/verified-bot-commit@5b4e8852dc472093935b8debcb81459bb79f7986 # v2.3.2
+      with:
+        token: ${{ steps.app-token.outputs.token }}
+        files: |
+          pom.xml
+          */pom.xml
+        message: "[alfresco build][skip ci] Prepare next development version ${{ inputs.development_version }}"
