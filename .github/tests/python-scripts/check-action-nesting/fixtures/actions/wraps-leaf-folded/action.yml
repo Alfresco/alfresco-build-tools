@@ -8,4 +8,4 @@ runs:
   steps:
     - name: Call leaf via folded scalar
       uses: >-
-        Alfresco/alfresco-build-tools/.github/actions/leaf@53307750eeb347a1911c474b285a4fbbe1d4dc89
+        Alfresco/alfresco-build-tools/.github/actions/leaf@ab11a40feffec43dcaa5699a300c2c47f11c915c
