@@ -120,8 +120,7 @@ After wiring up pre-commit, run it across the repo and commit the result:
 pre-commit run gha-sha-convert --all-files
 ```
 
-Keep `Alfresco/alfresco-build-tools/*` refs on the allowlist — those are
-immutable tags and safe to use.
+Keep your first-party action refs (e.g. `<OWNER>/<REPO>/*`) on the allowlist only if you intentionally permit version tags for them; otherwise let `gha-sha-convert` pin them too.
 
 ## 4. Gitignore
 
