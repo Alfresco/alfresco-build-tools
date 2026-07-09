@@ -1923,8 +1923,8 @@ A lightweight Maven release action that sets the release version, deploys the ar
           commit-message-prefix: '[skip ci]'  # optional, default: '[skip ci]'
 ```
 
-Java and Maven should be set up before invoking the action. The provided `token` is used to push the release/development version commits and must have write access to the repository contents.
-Checkout step with enough permission should be performed before using this action.
+Java and Maven should be set up before invoking the action. The provided `token` must have write access to the repository contents to push the release/development version commits and (if enabled) the release tag.
+Ensure your checkout step configures Git credentials with sufficient permissions before using this action.
 
 ### maven-tag
 

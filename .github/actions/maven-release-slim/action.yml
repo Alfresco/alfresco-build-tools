@@ -1,10 +1,10 @@
-name: Release and Deploy Maven project slimmed
-description: Release and Deploy project using maven `deploy`, prepares repository for next development version
+name: Maven Release (Slim)
+description: Sets the release version, deploys artifacts with Maven, optionally tags the release, then sets the next development version.
 
 inputs:
   token:
     required: true
-    description: Github token required for authentication.
+    description: GitHub token required for authentication.
   release-version:
     required: true
     description: The version of the release (tag).
