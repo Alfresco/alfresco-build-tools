@@ -10,11 +10,11 @@ inputs:
     description: The version that will be set in pom files after the release (next dev version)
   release_profile:
     required: false
-    description: Maven profile used for release. Default to "release"
+    description: Maven profile used for release. Defaults to "release".
     default: release
-  maven_addtional_profiles:
+  maven_additional_profiles:
     required: false
-    description: Maven additional profiles used for release. It should start with -P. Ex. "-P additional"
+    description: Additional Maven profiles/options for release. Should start with -P (e.g. "-P additional").
     default: ''
   create_tag:
     required: false
@@ -37,7 +37,7 @@ runs:
       shell: bash
 
     - name: "Deploy release version ${{ inputs.release_version }}"
-      run: mvn -B -ntp clean deploy -DskipTests -Prelease ${{ inputs.maven_addtional_profiles }} -Dproject.revision.key=${{ github.sha }}
+      run: mvn -B -ntp clean deploy -DskipTests -P ${{ inputs.release_profile }} ${{ inputs.maven_additional_profiles }} -Dproject.revision.key=${{ github.sha }}
       shell: bash
 
     - name: "Commit release version ${{ inputs.release_version }}"
