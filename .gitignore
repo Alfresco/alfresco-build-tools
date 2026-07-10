@@ -57,6 +57,9 @@ node_modules
 # vscode settings
 .vscode
 
+# Claude Code local artifacts
+.claude
+
 mise.toml
 __pycache__
 coverage.xml

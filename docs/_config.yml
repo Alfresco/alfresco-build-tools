@@ -5,7 +5,7 @@ color_scheme: alfresco
 
 # Do not add path with the repository name here
 # A dynamic baseurl is being passed in the workflow
-url: https://alfresco.github.io/
+url: https://alfresco.github.io
 
 aux_links:
   Sources: https://github.com/Alfresco/alfresco-build-tools
