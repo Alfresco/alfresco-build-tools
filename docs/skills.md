@@ -43,7 +43,7 @@ Copy-paste this into your agent:
 
 ```text
 Fetch https://raw.githubusercontent.com/Alfresco/alfresco-build-tools/master/.github/skills/pimp-my-repo/SKILL.md
-and follow it to set up baseline devops hygiene in this repo.
+and follow it to set up baseline DevOps hygiene in this repo.
 ```
 
 ## Adding a new skill
