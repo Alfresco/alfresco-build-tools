@@ -385,3 +385,30 @@ BATS
     [ "$status" -eq 0 ]
     [ "$output" = 'result=,{"type":"TextBlock","text":"one"},{"type":"TextBlock","text":"two"}' ]
 }
+
+@test "compute-extra-body rejects a JSON object" {
+    export EXTRA_BODY='{"type":"TextBlock"}'
+
+    run compute-extra-body.sh
+
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"must be a JSON array"* ]]
+}
+
+@test "compute-extra-body rejects a JSON string" {
+    export EXTRA_BODY='"foo"'
+
+    run compute-extra-body.sh
+
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"must be a JSON array"* ]]
+}
+
+@test "compute-extra-body rejects invalid JSON" {
+    export EXTRA_BODY='not json'
+
+    run compute-extra-body.sh
+
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"must be a JSON array"* ]]
+}

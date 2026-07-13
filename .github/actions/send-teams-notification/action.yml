@@ -221,7 +221,7 @@ runs:
         COLOR: ${{ steps.compute-color.outputs.result }}
         TITLE: "Notification on ${{ steps.compute-event.outputs.result }} on branch [`${{ steps.get-branch-name.outputs.branch-name }}`](${{ env.REPO_URL }}/tree/${{ steps.get-branch-name.outputs.branch-name }})"
         ENTITIES: ${{ steps.transform-mentions.outputs.result }}
-        ACTIONS: ${{ inputs.card-actions }}
+        ACTIONS: ${{ inputs.card-actions || '[]' }}
         EXTRA_BODY: ${{ steps.compute-extra-body.outputs.result }}
       with:
         webhook_url: ${{ inputs.webhook-url }}
