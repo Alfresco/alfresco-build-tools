@@ -2330,6 +2330,29 @@ To get the necessary data for mentions:
 
 ![PowerAutomate Get Tag IDs Flow](./images/send-teams-get-tag-id.png)
 
+#### Custom card content
+
+Beyond the standard card, callers can extend it with their own Adaptive Card content via two optional inputs (both default to an empty array, so existing usages are unaffected):
+
+- `card-actions`: JSON array of [Adaptive Card actions](https://adaptivecards.io/explorer/Action.OpenUrl.html) rendered as buttons at the bottom of the card
+- `card-extra-body`: JSON array of Adaptive Card body elements (e.g. a `FactSet` or a monospace `TextBlock`) appended after the message
+
+Sample usage with custom buttons and body elements:
+
+```yml
+      uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v18.18.0
+      with:
+        webhook-url: ${{ secrets.MSTEAMS_WEBHOOK }}
+        title: "⛩️ Performance test failed"
+        status: failure
+        card-actions: >-
+          [{"type":"Action.OpenUrl","title":"Create Jira bug","url":"https://jira.example.com/create"},
+           {"type":"Action.OpenUrl","title":"View pipeline run","url":"${{ env.BUILD_WEB_URL }}"}]
+        card-extra-body: >-
+          [{"type":"FactSet","facts":[{"title":"Cluster","value":"my-env"}]},
+           {"type":"TextBlock","fontType":"Monospace","wrap":true,"text":"...log tail..."}]
+```
+
 ### setup-checkov
 
 Set up a specific version of Checkov and add it to the PATH.
