@@ -34,6 +34,14 @@ inputs:
     description: 'Comma-separated list of Teams tags to mention in format "tag name|tag id" (e.g.: "Security Champions|base64IdIncluding==")'
     required: false
     default: ''
+  card-actions:
+    description: 'JSON array of Adaptive Card actions (e.g. Action.OpenUrl buttons) appended to the card'
+    required: false
+    default: '[]'
+  card-extra-body:
+    description: 'JSON array of Adaptive Card body elements (e.g. a FactSet or monospace log block) appended after the message'
+    required: false
+    default: '[]'
   skip_checkout:
     description: If the internal checkout action should be skipped or not
     required: false
@@ -192,6 +200,14 @@ runs:
           echo "actor_avatar_url=$AVATARS_URL/$TRIGGERING_ACTOR?s=32" >> $GITHUB_OUTPUT
         fi
 
+    - name: Compute extra body
+      id: compute-extra-body
+      shell: bash
+      env:
+        EXTRA_BODY: ${{ inputs.card-extra-body }}
+      run: |
+        ${{ github.action_path }}/compute-extra-body.sh >> $GITHUB_OUTPUT
+
     - name: Send teams notification
       uses: skitionek/notify-microsoft-teams@0953822ab410e9a50e2abd2d6d8f85230b1ae4d6 # v1.1.0
       env:
@@ -205,6 +221,8 @@ runs:
         COLOR: ${{ steps.compute-color.outputs.result }}
         TITLE: "Notification on ${{ steps.compute-event.outputs.result }} on branch [`${{ steps.get-branch-name.outputs.branch-name }}`](${{ env.REPO_URL }}/tree/${{ steps.get-branch-name.outputs.branch-name }})"
         ENTITIES: ${{ steps.transform-mentions.outputs.result }}
+        ACTIONS: ${{ inputs.card-actions }}
+        EXTRA_BODY: ${{ steps.compute-extra-body.outputs.result }}
       with:
         webhook_url: ${{ inputs.webhook-url }}
         job: "{}"
@@ -318,8 +336,9 @@ runs:
                           ]
                         }
                       ]
-                    }
+                    }${{ env.EXTRA_BODY }}
                   ],
+                  "actions": ${{ env.ACTIONS }},
                   "backgroundImage": {
                     "url": "https://singlecolorimage.com/get/${{ env.COLOR }}/2x2",
                     "fillMode": "RepeatHorizontally"

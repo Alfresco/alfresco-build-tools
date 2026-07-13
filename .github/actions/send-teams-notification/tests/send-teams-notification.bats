@@ -347,3 +347,41 @@ BATS
     [ "$status" -eq 1 ]
     [ "$output" = "Error: Input 'John Doe' does not contain the expected format with a '|' separator" ]
 }
+
+# compute-extra-body.sh tests
+
+@test "compute-extra-body with default empty array" {
+    export EXTRA_BODY="[]"
+
+    run compute-extra-body.sh
+
+    [ "$status" -eq 0 ]
+    [ "$output" = "result=" ]
+}
+
+@test "compute-extra-body unset defaults to empty" {
+    unset EXTRA_BODY
+
+    run compute-extra-body.sh
+
+    [ "$status" -eq 0 ]
+    [ "$output" = "result=" ]
+}
+
+@test "compute-extra-body with single element" {
+    export EXTRA_BODY='[{"type":"FactSet","facts":[{"title":"Cluster","value":"my-env"}]}]'
+
+    run compute-extra-body.sh
+
+    [ "$status" -eq 0 ]
+    [ "$output" = 'result=,{"type":"FactSet","facts":[{"title":"Cluster","value":"my-env"}]}' ]
+}
+
+@test "compute-extra-body with multiple elements" {
+    export EXTRA_BODY='[{"type":"TextBlock","text":"one"},{"type":"TextBlock","text":"two"}]'
+
+    run compute-extra-body.sh
+
+    [ "$status" -eq 0 ]
+    [ "$output" = 'result=,{"type":"TextBlock","text":"one"},{"type":"TextBlock","text":"two"}' ]
+}
