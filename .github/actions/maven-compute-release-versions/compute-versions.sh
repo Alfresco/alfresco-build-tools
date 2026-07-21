@@ -17,4 +17,4 @@ NEXT_VERSION="$(awk -F. -v OFS=. '{$NF=$NF+1; print}' <<< "${RELEASE_VERSION}")"
 DEVELOPMENT_VERSION="${NEXT_VERSION}-SNAPSHOT"
 
 echo "release-version=${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
-echo "development-version=${DEVELOPMENT_VERSION}" >> "$GITHUB_OUTPUT"
+echo "next-development-version=${DEVELOPMENT_VERSION}" >> "$GITHUB_OUTPUT"

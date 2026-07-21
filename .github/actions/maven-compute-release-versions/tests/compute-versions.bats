@@ -27,7 +27,7 @@ assert_output_var() {
     run compute-versions.sh
     [ "$status" -eq 0 ]
     assert_output_var "release-version"     "26.2.0"
-    assert_output_var "development-version" "26.2.1-SNAPSHOT"
+    assert_output_var "next-development-version" "26.2.1-SNAPSHOT"
 }
 
 @test "patch rollover from 9 to 10" {
@@ -35,7 +35,7 @@ assert_output_var() {
     run compute-versions.sh
     [ "$status" -eq 0 ]
     assert_output_var "release-version"     "1.2.9"
-    assert_output_var "development-version" "1.2.10-SNAPSHOT"
+    assert_output_var "next-development-version" "1.2.10-SNAPSHOT"
 }
 
 @test "patch rollover from 99 to 100" {
@@ -43,7 +43,7 @@ assert_output_var() {
     run compute-versions.sh
     [ "$status" -eq 0 ]
     assert_output_var "release-version"     "3.0.99"
-    assert_output_var "development-version" "3.0.100-SNAPSHOT"
+    assert_output_var "next-development-version" "3.0.100-SNAPSHOT"
 }
 
 @test "patch zero is incremented to one" {
@@ -51,7 +51,7 @@ assert_output_var() {
     run compute-versions.sh
     [ "$status" -eq 0 ]
     assert_output_var "release-version"     "1.0.0"
-    assert_output_var "development-version" "1.0.1-SNAPSHOT"
+    assert_output_var "next-development-version" "1.0.1-SNAPSHOT"
 }
 
 @test "fails when mvn exits non-zero" {
@@ -66,5 +66,5 @@ assert_output_var() {
     run compute-versions.sh
     [ "$status" -eq 0 ]
     assert_output_var "release-version"     "2.5.3"
-    assert_output_var "development-version" "2.5.4-SNAPSHOT"
+    assert_output_var "next-development-version" "2.5.4-SNAPSHOT"
 }

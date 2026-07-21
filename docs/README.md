@@ -1879,10 +1879,10 @@ Strips the `-SNAPSHOT` suffix to produce the release version, then increments th
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
           release-version: ${{ steps.versions.outputs.release-version }}
-          development-version: ${{ steps.versions.outputs.development-version }}
+          development-version: ${{ steps.versions.outputs.next-development-version }}
 ```
 
-Maven must be available before invoking this action. Given a POM version of `26.2.0-SNAPSHOT`, the action produces `release-version=26.2.0` and `development-version=26.2.1-SNAPSHOT`.
+Maven must be available before invoking this action. Given a POM version of `26.2.0-SNAPSHOT`, the action produces `release-version=26.2.0` and `next-development-version=26.2.1-SNAPSHOT`.
 
 ### maven-deploy-file
 
