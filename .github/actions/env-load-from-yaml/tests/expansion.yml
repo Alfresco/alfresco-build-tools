@@ -1,0 +1,4 @@
+env:
+  global:
+    - VAR2=$ANOTHER_VAR
+    - PEM=$SOURCE_MULTILINE

@@ -2,4 +2,3 @@ env:
   global:
     - TRAVIS_BRANCH=whatever
     - APP_SETTING_ONE=value
-    - PEM=$SOURCE_MULTILINE

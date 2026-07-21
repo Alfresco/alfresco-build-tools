@@ -166,6 +166,12 @@ jobs:
       - uses: ./.github/actions/setup-terraform-docs
       - uses: ./.github/actions/setup-kcadm
       - uses: ./.github/actions/env-load-from-yaml
+        env:
+          SOURCE_MULTILINE: |
+            -----BEGIN RSA PRIVATE KEY-----
+            line one
+            line two
+            -----END RSA PRIVATE KEY-----
         with:
           ignore_regex: ^TRAVIS_BRANCH=.*
           yml_path: ./.github/tests/env-load-from-yaml/env.yml
@@ -177,6 +183,18 @@ jobs:
           fi
           if [ -n "$TRAVIS_BRANCH" ]; then
             echo TRAVIS_BRANCH should not be set!
+            exit 1
+          fi
+          if [[ "$PEM" != *$'\n'* ]]; then
+            echo PEM should be multiline!
+            exit 1
+          fi
+          if [[ "$PEM" != *"-----BEGIN RSA PRIVATE KEY-----"* ]]; then
+            echo PEM should contain the BEGIN line!
+            exit 1
+          fi
+          if [[ "$PEM" != *"-----END RSA PRIVATE KEY-----"* ]]; then
+            echo PEM should contain the END line!
             exit 1
           fi
 

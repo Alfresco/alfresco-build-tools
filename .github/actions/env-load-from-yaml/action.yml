@@ -12,13 +12,8 @@ runs:
   using: "composite"
   steps:
     - name: Parse env global
-      run: |
-        while read ENVVAR; do
-          if [[ "$ENVVAR" =~ ${{ inputs.ignore_regex }} ]]; then
-            echo "Skipping unwanted $ENVVAR"
-            continue
-          fi
-          eval $ENVVAR
-          echo "$(eval echo $ENVVAR)" >> $GITHUB_ENV
-        done < <(yq '.env.global[]' ${{ inputs.yml_path }})
       shell: bash
+      env:
+        IGNORE_REGEX: ${{ inputs.ignore_regex }}
+        YML_PATH: ${{ inputs.yml_path }}
+      run: ${{ github.action_path }}/env-load-from-yaml.sh
