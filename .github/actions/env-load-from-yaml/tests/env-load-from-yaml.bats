@@ -32,6 +32,13 @@ setup() {
     grep -qx 'VAR2=expanded-value' "$GITHUB_ENV"
 }
 
+@test "missing yaml file aborts with non-zero and writes nothing" {
+    export YML_PATH="$DIR/does-not-exist.yml"
+    run env-load-from-yaml.sh
+    [ "$status" -ne 0 ]
+    [ ! -s "$GITHUB_ENV" ]
+}
+
 @test "multiline value uses heredoc and round-trips" {
     export YML_PATH="$DIR/expansion.yml"
     export ANOTHER_VAR="whatever"

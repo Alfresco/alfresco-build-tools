@@ -1,7 +1,12 @@
 #!/bin/bash
-set -e
+set -eo pipefail
+
+# Capture yq output before looping so a yq failure/missing file aborts the
+# script instead of being swallowed by process substitution.
+entries="$(yq '.env.global[]' "$YML_PATH")"
 
 while IFS= read -r ENVVAR; do
+  [ -z "$ENVVAR" ] && continue
   if [[ "$ENVVAR" =~ $IGNORE_REGEX ]]; then
     echo "Skipping unwanted $ENVVAR"
     continue
@@ -21,4 +26,4 @@ while IFS= read -r ENVVAR; do
   else
     printf '%s=%s\n' "$name" "$value" >> "$GITHUB_ENV"
   fi
-done < <(yq '.env.global[]' "$YML_PATH")
+done <<< "$entries"
