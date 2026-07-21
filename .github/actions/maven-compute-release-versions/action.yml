@@ -1,0 +1,20 @@
+name: Maven Compute Release Versions
+description: >
+  Derives the release version and next development version from the current POM SNAPSHOT version.
+  Strips the -SNAPSHOT suffix to produce the release version, then increments the patch segment
+  for the next development version. Maven must be available on PATH before invoking this action.
+
+outputs:
+  release-version:
+    description: "The release version, e.g. 26.2.0"
+    value: ${{ steps.compute.outputs.release-version }}
+  development-version:
+    description: "The next development version, e.g. 26.2.1-SNAPSHOT"
+    value: ${{ steps.compute.outputs.development-version }}
+
+runs:
+  using: composite
+  steps:
+    - id: compute
+      shell: bash
+      run: ${{ github.action_path }}/compute-versions.sh
