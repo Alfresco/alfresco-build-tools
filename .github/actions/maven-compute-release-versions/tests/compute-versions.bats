@@ -68,3 +68,15 @@ assert_output_var() {
     assert_output_var "release-version"     "2.5.3"
     assert_output_var "next-development-version" "2.5.4-SNAPSHOT"
 }
+
+@test "fails on empty mvn output" {
+    export MOCK_POM_VERSION=""
+    run compute-versions.sh
+    [ "$status" -ne 0 ]
+}
+
+@test "fails on unsupported version format" {
+    export MOCK_POM_VERSION="1.0.0-RC1"
+    run compute-versions.sh
+    [ "$status" -ne 0 ]
+}

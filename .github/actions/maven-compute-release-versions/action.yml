@@ -1,7 +1,7 @@
 name: Maven Compute Release Versions
 description: >
-  Derives the release version and next development version from the current POM SNAPSHOT version.
-  Strips the -SNAPSHOT suffix to produce the release version, then increments the patch segment
+  Derives the release version and next development version from the current POM version (typically a -SNAPSHOT version).
+  Strips a trailing -SNAPSHOT suffix to produce the release version, then increments the last numeric segment
   for the next development version. Maven must be available on PATH before invoking this action.
 
 outputs:

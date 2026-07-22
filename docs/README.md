@@ -1868,8 +1868,8 @@ Sample usage to prevent merging when tests are skipped:
 
 ### maven-compute-release-versions
 
-Derives the release version and next development version from the current POM `SNAPSHOT` version.
-Strips the `-SNAPSHOT` suffix to produce the release version, then increments the patch segment for the next development version.
+Derives the release version and next development version from the current POM version (typically a `-SNAPSHOT` version).
+Strips a trailing `-SNAPSHOT` suffix to produce the release version, then increments the last numeric segment for the next development version.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-compute-release-versions@v18.19.0

@@ -16,5 +16,6 @@ fi
 NEXT_VERSION="$(awk -F. -v OFS=. '{$NF=$NF+1; print}' <<< "${RELEASE_VERSION}")"
 DEVELOPMENT_VERSION="${NEXT_VERSION}-SNAPSHOT"
 
+: "${GITHUB_OUTPUT:?GITHUB_OUTPUT is not set (this script must run in a GitHub Actions step)}"
 echo "release-version=${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
 echo "next-development-version=${DEVELOPMENT_VERSION}" >> "$GITHUB_OUTPUT"
