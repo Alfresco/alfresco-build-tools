@@ -93,6 +93,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [maven-dependency-scan](#maven-dependency-scan)
   - [maven-build](#maven-build)
   - [maven-build-and-tag](#maven-build-and-tag)
+  - [maven-compute-release-versions](#maven-compute-release-versions)
   - [maven-deploy-file](#maven-deploy-file)
   - [maven-release](#maven-release)
   - [maven-release-slim](#maven-release-slim)
@@ -1864,6 +1865,24 @@ Sample usage to prevent merging when tests are skipped:
         echo "This pull request can be merged."
       fi
 ```
+
+### maven-compute-release-versions
+
+Derives the release version and next development version from the current POM version (typically a `-SNAPSHOT` version).
+Strips a trailing `-SNAPSHOT` suffix to produce the release version, then increments the last numeric segment for the next development version.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-compute-release-versions@v18.19.0
+        id: versions
+
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-release-slim@v18.19.0
+        with:
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          release-version: ${{ steps.versions.outputs.release-version }}
+          development-version: ${{ steps.versions.outputs.next-development-version }}
+```
+
+Maven must be available before invoking this action. Given a POM version of `26.2.0-SNAPSHOT`, the action produces `release-version=26.2.0` and `next-development-version=26.2.1-SNAPSHOT`.
 
 ### maven-deploy-file
 
