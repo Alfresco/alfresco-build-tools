@@ -86,14 +86,14 @@ runs:
     - name: Get branch name
       id: get-branch-name
       uses: >-
-        Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@40a7d84f7a11f7a78453fc32812a27f8c6ab97f3
+        Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@0a8ddfce20924af8fb4bc5740693511716cd26f8
     - name: Get commit msg
       uses: >-
-        Alfresco/alfresco-build-tools/.github/actions/get-commit-message@40a7d84f7a11f7a78453fc32812a27f8c6ab97f3
+        Alfresco/alfresco-build-tools/.github/actions/get-commit-message@0a8ddfce20924af8fb4bc5740693511716cd26f8
     - name: Get a namespace to deploy on
       id: k8sns
       uses: >-
-        Alfresco/alfresco-build-tools/.github/actions/dbp-charts/kubernetes-valid-ns@40a7d84f7a11f7a78453fc32812a27f8c6ab97f3
+        Alfresco/alfresco-build-tools/.github/actions/dbp-charts/kubernetes-valid-ns@0a8ddfce20924af8fb4bc5740693511716cd26f8
       with:
         branch_name: ${{ steps.get-branch-name.outputs.branch-name }}
         release_prefix: ${{ inputs.release_prefix }}
@@ -112,7 +112,7 @@ runs:
     - name: Upload helm deployments logs as artifacts
       if: always()
       uses: >-
-        Alfresco/alfresco-build-tools/.github/actions/kubectl-keep-nslogs@40a7d84f7a11f7a78453fc32812a27f8c6ab97f3
+        Alfresco/alfresco-build-tools/.github/actions/kubectl-keep-nslogs@0a8ddfce20924af8fb4bc5740693511716cd26f8
       with:
         namespace: ${{ steps.k8sns.outputs.namespace }}
     - name: Uninstall Helm releases
