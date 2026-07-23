@@ -309,7 +309,7 @@ jobs:
       deployment: ${{ needs.compute_basic_vars.outputs.terraform_operation != 'plan' }}
     concurrency:
       group: ${{ needs.compute_basic_vars.outputs.environment_name }}
-      cancel-in-progress: false
+      queue: max
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
