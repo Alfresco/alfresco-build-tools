@@ -247,9 +247,18 @@ runs:
           rm -fr ~/.m2/repository/${EXCLUSION_PATTERN}
         fi
 
+    - name: Check maven cache
+      id: check-maven-cache
+      if: github.event_name == 'push' || env.IS_PREVIEW == 'true'
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        lookup-only: true
+
     - name: Save maven cache
       uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-      if: github.event_name == 'push' || env.IS_PREVIEW == 'true'
+      if: (github.event_name == 'push' || env.IS_PREVIEW == 'true') && steps.check-maven-cache.outputs.cache-hit != 'true'
       with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
