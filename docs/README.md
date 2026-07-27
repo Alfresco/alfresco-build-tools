@@ -52,9 +52,10 @@ Here follows the list of GitHub Actions topics available in the current document
   - [free-hosted-runner-disk-space](#free-hosted-runner-disk-space)
   - [get-branch-name-v2](#get-branch-name-v2)
   - [get-build-info](#get-build-info)
+  - [get-commit-message](#get-commit-message)
+  - [get-downstream-commit-message](#get-downstream-commit-message)
   - [gh-cache-cleanup-on-merge](#gh-cache-cleanup-on-merge)
   - [git-check-existing-tag](#git-check-existing-tag)
-  - [get-commit-message](#get-commit-message)
   - [git-commit-changes](#git-commit-changes)
   - [git-latest-tag](#git-latest-tag)
   - [github-check-upcoming-runs](#github-check-upcoming-runs)
@@ -857,6 +858,33 @@ If you only need the commit header (first line), you can set the `header-only` i
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-commit-message@v18.21.0
         with:
           header-only: true
+```
+
+### get-downstream-commit-message
+
+Computes the commit message and `allow-empty-commit` flag for a downstream version-bump commit.
+
+If the upstream commit title contains a `[force...]` token (e.g. `[force]` or `[force ci]`), that token is
+prepended to the generated message and `allow-empty-commit` is set to `true`. This causes the downstream commit to be
+created even when no files changed, which is useful to force-trigger downstream CI without a real code change.
+
+Without a `[force...]` token the plain version-bump message is returned and `allow-empty-commit` is `false`, meaning the
+commit is skipped when there is nothing to commit.
+
+```yaml
+      - name: Compute downstream commit message
+        id: commit-meta
+        uses: Alfresco/alfresco-build-tools/.github/actions/get-downstream-commit-message@v18.21.0
+        with:
+          commit-title: ${{ needs.commit_parser.outputs.title }}
+          version: ${{ steps.update-downstream.outputs.version }}
+          downstream-repo: community-repo
+
+      - name: Commit downstream version update
+        uses: iarekylew00t/verified-bot-commit@...
+        with:
+          message: ${{ steps.commit-meta.outputs.message }}
+          allow-empty-commit: ${{ steps.commit-meta.outputs.allow-empty-commit }}
 ```
 
 ### git-commit-changes
