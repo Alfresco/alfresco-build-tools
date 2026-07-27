@@ -868,8 +868,8 @@ If the upstream commit title contains a `[force...]` token (e.g. `[force]` or `[
 prepended to the generated message and `allow-empty-commit` is set to `true`. This causes the downstream commit to be
 created even when no files changed, which is useful to force-trigger downstream CI without a real code change.
 
-Without a `[force...]` token the plain version-bump message is returned and `allow-empty-commit` is `false`, meaning the
-commit is skipped when there is nothing to commit.
+Without a `[force...]` token the plain version-bump message is returned and `allow-empty-commit` is `false`, meaning an
+empty commit will not be created when there is nothing to commit.
 
 ```yaml
       - name: Compute downstream commit message

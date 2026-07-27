@@ -1,11 +1,14 @@
 #!/bin/bash
 set -euo pipefail
 
-if [[ "${COMMIT_TITLE}" =~ \[force[^]]*\] ]]; then
-    FORCE_TOKEN=$(echo "${COMMIT_TITLE}" | sed "s|^.*\(\[force[^]]*\]\).*$|\1|g")
-    echo "message=${FORCE_TOKEN} Update ${DOWNSTREAM_REPO} version to ${VERSION}" >> "$GITHUB_OUTPUT"
-    echo "allow-empty-commit=true" >> "$GITHUB_OUTPUT"
-else
-    echo "message=Update ${DOWNSTREAM_REPO} version to ${VERSION}" >> "$GITHUB_OUTPUT"
-    echo "allow-empty-commit=false" >> "$GITHUB_OUTPUT"
+force_prefix=""
+allow_empty_commit="false"
+if [[ "${COMMIT_TITLE}" =~ (\[force[^]]*\]) ]]; then
+    force_prefix="${BASH_REMATCH[1]} "
+    allow_empty_commit="true"
 fi
+message="${force_prefix}Update ${DOWNSTREAM_REPO} version to ${VERSION}"
+message="${message//$'\n'/ }"
+message="${message//$'\r'/ }"
+printf 'message=%s\n' "${message}" >> "$GITHUB_OUTPUT"
+printf 'allow-empty-commit=%s\n' "${allow_empty_commit}" >> "$GITHUB_OUTPUT"

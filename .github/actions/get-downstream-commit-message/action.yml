@@ -8,7 +8,7 @@ description: >
   without a real code change.
 
   Without a [force...] token the plain version-bump message is returned and allow-empty-commit is
-  false, meaning the commit is skipped when there is nothing to commit.
+  false, meaning an empty commit will not be created when there is nothing to commit.
 
 inputs:
   commit-title:
