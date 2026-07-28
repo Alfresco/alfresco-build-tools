@@ -106,7 +106,7 @@ Input tables are not necessary — a YAML snippet with inline comments is suffic
 
 New actions must justify their place in `alfresco-build-tools`: they solve a problem multiple callers (repos or
 teams) realistically need (not just one), and their name, inputs, and behavior are generic rather than tied to a
-specific downstream repo, team, or caller. Realistic anticipated reuse counts; being written generically does not
+specific downstream repo, team, or caller. Include realistic anticipated reuse counts; being written generically does not
 by itself justify inclusion.
 
 ### Security Best Practices
