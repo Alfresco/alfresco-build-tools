@@ -102,6 +102,13 @@ Input tables are not necessary — a YAML snippet with inline comments is suffic
 - **MUST** use SHA pins for security: `actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8`
 - Can't use version tags as they are mutable, SHA pins are mandatory for security
 
+### Reusability (CRITICAL)
+
+New actions must justify their place in `alfresco-build-tools`: they solve a problem multiple callers (repos or
+teams) realistically need (not just one), and their name, inputs, and behavior are generic rather than tied to a
+specific downstream repo, team, or caller. Realistic anticipated reuse counts; being written generically does not
+by itself justify inclusion.
+
 ### Security Best Practices
 
 - Pin external action versions to specific SHA commits in examples for security
@@ -232,6 +239,7 @@ Before opening or reviewing a PR, verify:
 3. ✅ **Version label**: Appropriate `release/patch|minor|major` label added
 4. ✅ **Pre-commit hooks**: All checks pass
 5. ✅ **Internal references**: Use SHA pins (managed by release process), not version tags
+6. ✅ **Reusability**: New actions solve a problem multiple callers realistically need, with generic names/inputs/behavior, not just an extraction from one workflow
 
 ## Useful Commands
 
