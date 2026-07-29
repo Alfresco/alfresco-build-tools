@@ -75,20 +75,12 @@ runs:
           rm -fr ~/.m2/repository/${EXCLUSION_PATTERN}
         fi
 
-    - name: Check maven cache
-      id: check-maven-cache
-      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        lookup-only: true
-
     - name: Save maven cache
       uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-      if: steps.check-maven-cache.outputs.cache-hit != 'true'
+      if: steps.maven-configure.outputs.cache-hit != 'true'
       with:
         path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        key: ${{ steps.maven-configure.outputs.cache-primary-key }}
 
     - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@0a318b94438ac17713a239ea444c77c05bf11097
       with:

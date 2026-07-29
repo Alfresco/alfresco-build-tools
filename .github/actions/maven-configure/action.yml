@@ -45,11 +45,19 @@ outputs:
   preview-version:
     description: The preview version when it's a preview.
     value: ${{ steps.set-preview-version.outputs.preview-version }}
+  cache-hit:
+    description: Whether an exact match was found for the Maven repository cache primary key.
+    value: ${{ steps.restore-maven-cache.outputs.cache-hit }}
+  cache-primary-key:
+    description: The primary key used to restore the Maven repository cache.
+    value: ${{ steps.restore-maven-cache.outputs.cache-primary-key }}
 
 runs:
   using: composite
   steps:
-    - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+    - name: Restore maven cache
+      id: restore-maven-cache
+      uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
