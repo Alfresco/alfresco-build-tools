@@ -2283,23 +2283,18 @@ Resolve preview name based on the PR number and run number:
 
 ### s3-staging-deploy
 
-Optionally generates a third-party license CSV using [Alfresco/third-party-license-overrides](https://github.com/Alfresco/third-party-license-overrides), then deploys a local directory of artifacts to an S3 staging bucket. The caller is responsible for preparing the deploy directory with the artifacts before invoking this action.
+Deploys a local directory of artifacts to an S3 staging bucket. The caller is responsible for preparing the deploy directory with the artifacts before invoking this action.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/s3-staging-deploy@v18.21.0
         with:
-          version: ${{ env.RELEASE_VERSION }}
           aws-access-key-id: ${{ secrets.AWS_S3_STAGING_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_S3_STAGING_SECRET_KEY }}
           aws-region: eu-west-1  # optional, default: eu-west-1
           deploy-dir: ./deploy_dir  # optional, default: ./deploy_dir
           s3-bucket: alfresco-artefacts-staging  # optional, default: alfresco-artefacts-staging
           s3-path: enterprise/MyProject/MyArtifact/${{ env.RELEASE_VERSION }}  # optional, default: '' (bucket root)
-          generate-license: 'true'  # optional, default: 'true'
-          license-output-dir: ./deploy_dir  # optional, defaults to deploy-dir
 ```
-
-When `generate-license` is `'true'` (the default), Python 3 must be available on the runner, and `version` must be provided. The license CSV is written to `license-output-dir` (defaults to `deploy-dir`) and uploaded to S3 alongside the other artifacts.
 
 ### send-teams-notification
 
