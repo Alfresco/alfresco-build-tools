@@ -505,13 +505,13 @@ jobs:
 
       - name: Terraform validate
         if: needs.compute_basic_vars.outputs.terraform_operation == 'plan' && github.run_attempt == 1
-        uses: dflook/terraform-validate@4cef5d8a4b92bcd88486e41e22a42942a382c9d6 # v2.2.3
+        uses: dflook/terraform-validate@36ef08d500fe2cd9b742b10176d2683707c7074e # v3.0.0
         with:
           path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
           backend_config: ${{ steps.backend-config.outputs.backend_config }}
 
       - name: Terraform plan
-        uses: dflook/terraform-plan@7878bff63e2099cdc9be9a6f33cbbbf687f8f0fe # v2.2.3
+        uses: dflook/terraform-plan@3f1559b085c5ceff68c3724c9b66c015a6c940cd # v3.0.0
         if: needs.compute_basic_vars.outputs.terraform_operation == 'plan'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
@@ -522,7 +522,7 @@ jobs:
           backend_config: ${{ steps.backend-config.outputs.backend_config }}
 
       - name: Terraform apply
-        uses: dflook/terraform-apply@5489b988934a50bf1489d5b7c5253b46520a7dca # v2.2.3
+        uses: dflook/terraform-apply@b7d589e72b3b2594f445627b351241d5c7dc78b6 # v3.0.0
         if: needs.compute_basic_vars.outputs.terraform_operation == 'apply'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
@@ -534,7 +534,7 @@ jobs:
           backend_config: ${{ steps.backend-config.outputs.backend_config }}
 
       - name: Terraform destroy
-        uses: dflook/terraform-destroy@b198834c4a4dd959f26649f2a9d24c59e9c9f205 # v2.2.3
+        uses: dflook/terraform-destroy@e683eeb8934e496910795bb0d8bb03f556acd7a9 # v3.0.0
         if: needs.compute_basic_vars.outputs.terraform_operation == 'destroy'
         with:
           path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
