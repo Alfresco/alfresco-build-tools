@@ -59,6 +59,7 @@ runs:
         TICKET_REGEX: ${{ inputs.ticket-regex }}
         GITHUB_VERSION_PREFIX: ${{ inputs.github-version-prefix }}
         JIRA_VERSION_PREFIX: ${{ inputs.jira-version-prefix }}
+        JIRA_PROJECT_KEY: ${{ inputs.jira-project-key }}
       run: |
         "${{ github.action_path }}/extract-tickets-from-release-payload.sh"
 
