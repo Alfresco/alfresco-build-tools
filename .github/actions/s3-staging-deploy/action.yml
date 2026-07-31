@@ -16,7 +16,7 @@ inputs:
     description: S3 bucket name
     required: true
   s3-path:
-    description: Path within the S3 bucket (without leading slash). When empty, artifacts are uploaded to the bucket root.
+    description: Path within the S3 bucket (without leading slash).
     required: true
 
 runs:
