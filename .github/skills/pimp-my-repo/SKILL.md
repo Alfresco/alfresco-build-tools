@@ -10,7 +10,9 @@ through the steps below, tailoring each to what the repo actually contains. Skip
 already configured correctly; merge rather than overwrite.
 
 1. **Dependabot** — `.github/dependabot.yml` derived from the ecosystems in use.
-2. **Pre-commit** — a baseline `.pre-commit-config.yaml` with the standard hooks.
+2. **Pre-commit** — a baseline `.pre-commit-config.yaml` with the standard hooks, wired
+   into CI via this repo's reusable `pre-commit` action, placed wherever best fits the
+   repo's existing workflows.
 3. **SHA-pinning** — every workflow references third-party actions by commit SHA.
 4. **Gitignore** — common ignores for the repo's stack, plus Claude Code artifacts.
 5. **AI assistant instructions** — `.github/copilot-instructions.md` with a thin `CLAUDE.md`.
@@ -102,6 +104,54 @@ repos:
       - id: gha-sha-convert
         args: [--allowlist, 'Alfresco/alfresco-build-tools/*']
 ```
+
+Wire the config into CI by calling this repo's reusable `pre-commit` action
+([documented here](https://github.com/Alfresco/alfresco-build-tools/blob/master/docs/README.md#pre-commit))
+instead of hand-rolling the pre-commit invocation. Use the latest released tag
+(check `git tag` in this repo, or the [releases page](https://github.com/Alfresco/alfresco-build-tools/releases)
+for the current version). Unlike other third-party actions (see
+[SHA-pinning](#3-sha-pin-third-party-actions) below), a version tag is fine here:
+`alfresco-build-tools` release tags are immutable, so pinning further has no security
+benefit (though it's harmless if you prefer it).
+
+Where the job goes depends on the shape of the target repo's existing workflows — check
+in this order and stop at the first match:
+
+1. **A single main workflow drives most CI activity** (build, test, publish, …). Add
+   `pre-commit` as that workflow's first job, and make every other job depend on it via
+   `needs: pre-commit` so a hook failure blocks the rest of the run.
+2. **No single main workflow, but one is clearly dedicated to linting/static checks**
+   (e.g. named `lint.yml`, or a job doing `actionlint`/`yamllint`/similar). Add
+   `pre-commit` as a job there instead of creating a new file.
+3. **Neither applies** (several unrelated workflows, none a natural home). Create a new
+   `.github/workflows/pre-checks.yml` dedicated to it:
+
+   Replace `<default-branch>` with the repo's actual default branch (e.g. `git remote
+   show origin | sed -n 's/HEAD branch: //p'`).
+
+   ```yaml
+   # .github/workflows/pre-checks.yml
+   name: pre-checks
+
+   on:
+     pull_request:
+       branches: [<default-branch>]
+     push:
+       branches: [<default-branch>]
+
+   jobs:
+     pre-commit:
+       runs-on: ubuntu-latest
+       permissions:
+         contents: read # bump to write only if you enable auto-commit below
+       steps:
+         - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v18.21.0
+           with:
+             auto-commit: "false" # set to "true" (and permissions.contents above to write) to auto-commit fixups
+   ```
+
+In cases 1 and 2, add the same `steps:` shown above as a job named `pre-commit` in the
+existing workflow, keeping its own `on:` triggers untouched.
 
 ## 3. SHA-pin third-party actions
 
