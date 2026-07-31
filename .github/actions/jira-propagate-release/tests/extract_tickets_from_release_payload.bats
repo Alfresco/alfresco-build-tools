@@ -153,6 +153,42 @@ JSON
   grep -qx "tickets-csv=OPS-22,TC-1" "${out_file}"
 }
 
+@test "JIRA_PROJECT_KEY filters out tickets from other projects" {
+  make_payload "v1.2.3" "Release" "Fixes ACS-11432, OPSEXP-3962 and OPSEXP-4138"
+  out_file="$(mktemp)"
+
+  run env \
+    GITHUB_OUTPUT="${out_file}" \
+    JIRA_PROJECT_KEY="OPSEXP" \
+    bash "${SCRIPT}" "${payload}"
+
+  [ "$status" -eq 0 ]
+  grep -qx "tickets-csv=OPSEXP-3962,OPSEXP-4138" "${out_file}"
+}
+
+@test "no JIRA_PROJECT_KEY → no filtering (backward compatible)" {
+  make_payload "v1.2.3" "Release" "Fixes ACS-11432, OPSEXP-3962"
+  out_file="$(mktemp)"
+
+  run env GITHUB_OUTPUT="${out_file}" bash "${SCRIPT}" "${payload}"
+
+  [ "$status" -eq 0 ]
+  grep -qx "tickets-csv=ACS-11432,OPSEXP-3962" "${out_file}"
+}
+
+@test "JIRA_PROJECT_KEY matching none → empty tickets-csv" {
+  make_payload "v1.2.3" "Release" "Fixes ACS-11432"
+  out_file="$(mktemp)"
+
+  run env \
+    GITHUB_OUTPUT="${out_file}" \
+    JIRA_PROJECT_KEY="OPSEXP" \
+    bash "${SCRIPT}" "${payload}"
+
+  [ "$status" -eq 0 ]
+  grep -qx "tickets-csv=" "${out_file}"
+}
+
 # --------------------------------------------------
 # 🛡️ Robustness
 # --------------------------------------------------
