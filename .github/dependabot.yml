@@ -26,7 +26,7 @@ updates:
           - "*"
     ignore:
       # SHA pins for internal actions are managed by the release script; dependabot must not touch them
-      - dependency-name: "Alfresco/alfresco-build-tools"
+      - dependency-name: "Alfresco/alfresco-build-tools/*"
       # Managed by gh aw compile. Version-locked to the gh-aw compiler; do not bump.
       - dependency-name: "github/gh-aw-actions"
 
