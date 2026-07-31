@@ -153,6 +153,48 @@ in this order and stop at the first match:
 In cases 1 and 2, add the same `steps:` shown above as a job named `pre-commit` in the
 existing workflow, keeping its own `on:` triggers untouched.
 
+Besides wiring pre-commit into CI, check whether `pre-commit` is available locally and
+use it to validate the new hooks before they ever hit CI:
+
+```bash
+command -v pre-commit
+```
+
+- **If it's available**, install the hooks, bump the baseline `rev`s to each hook's
+  actual latest release, and run them across the whole repo, then fix anything that
+  fails before moving on:
+
+  ```bash
+  pre-commit install
+  pre-commit autoupdate
+  pre-commit run --all-files
+  ```
+
+  The `rev`s in the baseline config above are a snapshot from when this skill was
+  written — `autoupdate` is what keeps them current instead of drifting stale from day one.
+
+- **If it's missing**, tell the user explicitly: running pre-commit locally means you
+  catch (and fix) issues before pushing, instead of waiting on CI to fail. Ask them to
+  install it with one of:
+
+  ```bash
+  pip install pre-commit
+  # or
+  brew install pre-commit
+  ```
+
+  Then re-run the check above and proceed with `pre-commit install`, `pre-commit
+  autoupdate`, and `pre-commit run --all-files` once it's installed. If they decline,
+  continue with the rest of the setup and note that the config is untested locally and
+  the pinned `rev`s may be stale compared to upstream releases; enabling `auto-commit`
+  on the CI job above still catches and fixes issues without a local install, though the
+  bot's auto-commit push usually does **not** retrigger CI on its own — the user will
+  need to push an empty commit to kick off another run once the auto-fix commit is in:
+
+  ```bash
+  git commit --allow-empty -m "Trigger CI" && git push
+  ```
+
 ## 3. SHA-pin third-party actions
 
 Every workflow and composite action must reference third-party actions by full 40-char
