@@ -27,10 +27,10 @@ runs:
       with:
         aws-region: ${{ inputs.aws-region }}
         role-to-assume: ${{ inputs.aws-role-arn }}
-        role-session-name: ${{ github.event.repository.name }}-s3-staging-deploy-${{ github.run_id }}
+        role-session-name: ${{ github.event.repository.name }}-s3-upload-${{ github.run_id }}
         role-duration-seconds: 7200
 
-    - name: Deploy to S3 Staging Bucket
+    - name: Upload to S3 bucket
       shell: bash
       env:
         DEPLOY_DIR: ${{ inputs.deploy-dir }}
