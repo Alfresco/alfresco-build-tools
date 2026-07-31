@@ -109,9 +109,10 @@ Wire the config into CI by calling this repo's reusable `pre-commit` action
 ([documented here](https://github.com/Alfresco/alfresco-build-tools/blob/master/docs/README.md#pre-commit))
 instead of hand-rolling the pre-commit invocation. Use the latest released tag
 (check `git tag` in this repo, or the [releases page](https://github.com/Alfresco/alfresco-build-tools/releases)
-for the current version). A version tag is fine here rather than a SHA pin:
-`alfresco-build-tools` release tags are immutable, so there's no security need to pin
-further (though doing so is harmless).
+for the current version). Unlike other third-party actions (see
+[SHA-pinning](#3-sha-pin-third-party-actions) below), a version tag is fine here:
+`alfresco-build-tools` release tags are immutable, so pinning further has no security
+benefit (though it's harmless if you prefer it).
 
 Where the job goes depends on the shape of the target repo's existing workflows — check
 in this order and stop at the first match:
@@ -125,25 +126,28 @@ in this order and stop at the first match:
 3. **Neither applies** (several unrelated workflows, none a natural home). Create a new
    `.github/workflows/pre-checks.yml` dedicated to it:
 
+   Replace `<default-branch>` with the repo's actual default branch (e.g. `git remote
+   show origin | sed -n 's/HEAD branch: //p'`).
+
    ```yaml
    # .github/workflows/pre-checks.yml
    name: pre-checks
 
    on:
      pull_request:
-       branches: [master]
+       branches: [<default-branch>]
      push:
-       branches: [master]
+       branches: [<default-branch>]
 
    jobs:
      pre-commit:
        runs-on: ubuntu-latest
        permissions:
-         contents: write # required only when auto-commit is enabled
+         contents: read # bump to write only if you enable auto-commit below
        steps:
          - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v18.21.0
            with:
-             auto-commit: "true" # optionally commit automated fix changes back
+             auto-commit: "false" # set to "true" (and permissions.contents above to write) to auto-commit fixups
    ```
 
 In cases 1 and 2, add the same `steps:` shown above as a job named `pre-commit` in the
