@@ -2288,12 +2288,11 @@ Deploys a local directory of artifacts to an S3 staging bucket. The caller is re
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/s3-staging-deploy@v18.21.0
         with:
-          aws-access-key-id: ${{ secrets.AWS_S3_STAGING_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_S3_STAGING_SECRET_KEY }}
-          aws-region: eu-west-1  # optional, default: eu-west-1
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-role-arn: ${{ secrets.AWS_ROLE_ARN }}
           deploy-dir: ./deploy_dir  # optional, default: ./deploy_dir
-          s3-bucket: alfresco-artefacts-staging  # optional, default: alfresco-artefacts-staging
-          s3-path: enterprise/MyProject/MyArtifact/${{ env.RELEASE_VERSION }}  # optional, default: '' (bucket root)
+          s3-bucket: ${{ vars.AWS_S3_BUCKET }}
+          s3-path: enterprise/MyProject/MyArtifact/${{ env.RELEASE_VERSION }}
 ```
 
 ### send-teams-notification
