@@ -8,7 +8,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@b438bfff56beb3ac721abf3d1dff91f946d0fb2c
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@71dbf09f0681c3daf5a1bf2770fe72eb1429eabd
       with:
         repo: terraform-docs/terraform-docs
         version: ${{ inputs.version }}
