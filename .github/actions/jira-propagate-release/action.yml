@@ -59,12 +59,13 @@ runs:
         TICKET_REGEX: ${{ inputs.ticket-regex }}
         GITHUB_VERSION_PREFIX: ${{ inputs.github-version-prefix }}
         JIRA_VERSION_PREFIX: ${{ inputs.jira-version-prefix }}
+        JIRA_PROJECT_KEY: ${{ inputs.jira-project-key }}
       run: |
         "${{ github.action_path }}/extract-tickets-from-release-payload.sh"
 
     - name: Get or create Jira release/version
       id: jira-release
-      uses: Alfresco/alfresco-build-tools/.github/actions/jira-get-or-create-release@0a318b94438ac17713a239ea444c77c05bf11097
+      uses: Alfresco/alfresco-build-tools/.github/actions/jira-get-or-create-release@ea6bb249a91f4db12c2cee054731377ba4530769
       with:
         jira-url: ${{ inputs.jira-url }}
         jira-project-key: ${{ inputs.jira-project-key }}
@@ -76,7 +77,7 @@ runs:
     - name: Set Fix Version on tickets (skip if none)
       id: set-fix
       if: ${{ steps.extract.outputs.tickets-csv != '' }}
-      uses: Alfresco/alfresco-build-tools/.github/actions/jira-set-fix-version@0a318b94438ac17713a239ea444c77c05bf11097
+      uses: Alfresco/alfresco-build-tools/.github/actions/jira-set-fix-version@ea6bb249a91f4db12c2cee054731377ba4530769
       with:
         jira-url: ${{ inputs.jira-url }}
         jira-user: ${{ inputs.jira-user }}

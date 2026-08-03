@@ -11,6 +11,7 @@ set -euo pipefail
 #   GITHUB_OUTPUT                 If set, write outputs there (GitHub Actions outputs file)
 #   GITHUB_VERSION_PREFIX         Prefix to remove from GitHub tag (literal match)
 #   JIRA_VERSION_PREFIX           Prefix to prepend to Jira version name
+#   JIRA_PROJECT_KEY              If set, keep only extracted tickets belonging to this Jira project (e.g. "ABC")
 #
 # Output keys:
 #   tickets-csv=ABC-1,DEF-2        Comma-separated list of unique ticket IDs (empty if none found)
@@ -87,6 +88,10 @@ if [[ ${grep_status} -eq 2 ]]; then
   echo "::error::Invalid TICKET_REGEX '${TICKET_REGEX}':"
   cat grep_err.txt >&2
   exit 1
+fi
+
+if [[ -n "${JIRA_PROJECT_KEY:-}" && -n "${MATCHES}" ]]; then
+  MATCHES="$(printf '%s\n' "${MATCHES}" | grep -E "^${JIRA_PROJECT_KEY}-[0-9]+$" || true)"
 fi
 
 if [[ -z "${MATCHES}" ]]; then

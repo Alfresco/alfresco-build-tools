@@ -10,7 +10,9 @@ through the steps below, tailoring each to what the repo actually contains. Skip
 already configured correctly; merge rather than overwrite.
 
 1. **Dependabot** — `.github/dependabot.yml` derived from the ecosystems in use.
-2. **Pre-commit** — a baseline `.pre-commit-config.yaml` with the standard hooks.
+2. **Pre-commit** — a baseline `.pre-commit-config.yaml` with the standard hooks, wired
+   into CI via this repo's reusable `pre-commit` action, placed wherever best fits the
+   repo's existing workflows.
 3. **SHA-pinning** — every workflow references third-party actions by commit SHA.
 4. **Gitignore** — common ignores for the repo's stack, plus Claude Code artifacts.
 5. **AI assistant instructions** — `.github/copilot-instructions.md` with a thin `CLAUDE.md`.
@@ -102,6 +104,96 @@ repos:
       - id: gha-sha-convert
         args: [--allowlist, 'Alfresco/alfresco-build-tools/*']
 ```
+
+Wire the config into CI by calling this repo's reusable `pre-commit` action
+([documented here](https://github.com/Alfresco/alfresco-build-tools/blob/master/docs/README.md#pre-commit))
+instead of hand-rolling the pre-commit invocation. Use the latest released tag
+(check `git tag` in this repo, or the [releases page](https://github.com/Alfresco/alfresco-build-tools/releases)
+for the current version). Unlike other third-party actions (see
+[SHA-pinning](#3-sha-pin-third-party-actions) below), a version tag is fine here:
+`alfresco-build-tools` release tags are immutable, so pinning further has no security
+benefit (though it's harmless if you prefer it).
+
+Where the job goes depends on the shape of the target repo's existing workflows — check
+in this order and stop at the first match:
+
+1. **A single main workflow drives most CI activity** (build, test, publish, …). Add
+   `pre-commit` as that workflow's first job, and make every other job depend on it via
+   `needs: pre-commit` so a hook failure blocks the rest of the run.
+2. **No single main workflow, but one is clearly dedicated to linting/static checks**
+   (e.g. named `lint.yml`, or a job doing `actionlint`/`yamllint`/similar). Add
+   `pre-commit` as a job there instead of creating a new file.
+3. **Neither applies** (several unrelated workflows, none a natural home). Create a new
+   `.github/workflows/pre-checks.yml` dedicated to it:
+
+   Replace `<default-branch>` with the repo's actual default branch (e.g. `git remote
+   show origin | sed -n 's/HEAD branch: //p'`).
+
+   ```yaml
+   # .github/workflows/pre-checks.yml
+   name: pre-checks
+
+   on:
+     pull_request:
+       branches: [<default-branch>]
+     push:
+       branches: [<default-branch>]
+
+   jobs:
+     pre-commit:
+       runs-on: ubuntu-latest
+       permissions:
+         contents: read # bump to write only if you enable auto-commit below
+       steps:
+         - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v18.21.0
+           with:
+             auto-commit: "false" # set to "true" (and permissions.contents above to write) to auto-commit fixups
+   ```
+
+In cases 1 and 2, add the same `steps:` shown above as a job named `pre-commit` in the
+existing workflow, keeping its own `on:` triggers untouched.
+
+Besides wiring pre-commit into CI, check whether `pre-commit` is available locally and
+use it to validate the new hooks before they ever hit CI:
+
+```bash
+command -v pre-commit
+```
+
+- **If it's available**, install the hooks, bump the baseline `rev`s to each hook's
+  actual latest release, and run them across the whole repo, then fix anything that
+  fails before moving on:
+
+  ```bash
+  pre-commit install
+  pre-commit autoupdate
+  pre-commit run --all-files
+  ```
+
+  The `rev`s in the baseline config above are a snapshot from when this skill was
+  written — `autoupdate` is what keeps them current instead of drifting stale from day one.
+
+- **If it's missing**, tell the user explicitly: running pre-commit locally means you
+  catch (and fix) issues before pushing, instead of waiting on CI to fail. Ask them to
+  install it with one of:
+
+  ```bash
+  pip install pre-commit
+  # or
+  brew install pre-commit
+  ```
+
+  Then re-run the check above and proceed with `pre-commit install`, `pre-commit
+  autoupdate`, and `pre-commit run --all-files` once it's installed. If they decline,
+  continue with the rest of the setup and note that the config is untested locally and
+  the pinned `rev`s may be stale compared to upstream releases; enabling `auto-commit`
+  on the CI job above still catches and fixes issues without a local install, though the
+  bot's auto-commit push usually does **not** retrigger CI on its own — the user will
+  need to push an empty commit to kick off another run once the auto-fix commit is in:
+
+  ```bash
+  git commit --allow-empty -m "Trigger CI" && git push
+  ```
 
 ## 3. SHA-pin third-party actions
 

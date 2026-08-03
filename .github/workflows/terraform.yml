@@ -120,7 +120,7 @@ jobs:
 
       - name: Evaluate current branch
         id: get-branch-name
-        uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@0a318b94438ac17713a239ea444c77c05bf11097
+        uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@ea6bb249a91f4db12c2cee054731377ba4530769
         with:
           additional-pr-events: true
 
@@ -147,7 +147,7 @@ jobs:
       - name: Retrieve PR or last commit changes (used for auto-detection of terraform root path and/or environment)
         if: inputs.terraform_root_path == '' || inputs.terraform_env == ''
         id: last-changes-diff
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@0a318b94438ac17713a239ea444c77c05bf11097
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@ea6bb249a91f4db12c2cee054731377ba4530769
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -472,7 +472,7 @@ jobs:
         run: echo "${{ steps.idtoken.outputs.id_token }}" >> idtoken.json
 
       - name: Assume AWS Role when AWS_ROLE_ARN is set
-        uses: aws-actions/configure-aws-credentials@517a711dbcd0e402f90c77e7e2f81e849156e31d # v6.2.2
+        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c # v6.2.3
         if: vars.AWS_ROLE_ARN != ''
         with:
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
@@ -480,7 +480,7 @@ jobs:
           role-session-name: TerraformWorkflow
 
       - name: Load environment variables from yml
-        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@0a318b94438ac17713a239ea444c77c05bf11097
+        uses: Alfresco/alfresco-build-tools/.github/actions/env-load-from-yaml@ea6bb249a91f4db12c2cee054731377ba4530769
         with:
           yml_path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}/tfenv.yml
 
@@ -505,13 +505,13 @@ jobs:
 
       - name: Terraform validate
         if: needs.compute_basic_vars.outputs.terraform_operation == 'plan' && github.run_attempt == 1
-        uses: dflook/terraform-validate@4cef5d8a4b92bcd88486e41e22a42942a382c9d6 # v2.2.3
+        uses: dflook/terraform-validate@36ef08d500fe2cd9b742b10176d2683707c7074e # v3.0.0
         with:
           path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
           backend_config: ${{ steps.backend-config.outputs.backend_config }}
 
       - name: Terraform plan
-        uses: dflook/terraform-plan@7878bff63e2099cdc9be9a6f33cbbbf687f8f0fe # v2.2.3
+        uses: dflook/terraform-plan@3f1559b085c5ceff68c3724c9b66c015a6c940cd # v3.0.0
         if: needs.compute_basic_vars.outputs.terraform_operation == 'plan'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
@@ -522,7 +522,7 @@ jobs:
           backend_config: ${{ steps.backend-config.outputs.backend_config }}
 
       - name: Terraform apply
-        uses: dflook/terraform-apply@5489b988934a50bf1489d5b7c5253b46520a7dca # v2.2.3
+        uses: dflook/terraform-apply@b7d589e72b3b2594f445627b351241d5c7dc78b6 # v3.0.0
         if: needs.compute_basic_vars.outputs.terraform_operation == 'apply'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
@@ -534,7 +534,7 @@ jobs:
           backend_config: ${{ steps.backend-config.outputs.backend_config }}
 
       - name: Terraform destroy
-        uses: dflook/terraform-destroy@b198834c4a4dd959f26649f2a9d24c59e9c9f205 # v2.2.3
+        uses: dflook/terraform-destroy@e683eeb8934e496910795bb0d8bb03f556acd7a9 # v3.0.0
         if: needs.compute_basic_vars.outputs.terraform_operation == 'destroy'
         with:
           path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
