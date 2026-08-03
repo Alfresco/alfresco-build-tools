@@ -109,6 +109,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [reportportal-prepare](#reportportal-prepare)
   - [reportportal-summarize](#reportportal-summarize)
   - [resolve-preview-name](#resolve-preview-name)
+  - [s3-upload](#s3-upload)
   - [send-teams-notification](#send-teams-notification)
   - [setup-checkov](#setup-checkov)
   - [setup-docker](#setup-docker)
@@ -2278,6 +2279,20 @@ Resolve preview name based on the PR number and run number:
         id: resolve-preview-name
       - run: |
           echo ${{ steps.resolve-preview-name.outputs.preview-name }}
+```
+
+### s3-upload
+
+Uploads a local directory of artifacts to an S3 bucket. The caller is responsible for preparing the deploy directory with the artifacts before invoking this action.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/s3-upload@v18.21.0
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-role-arn: ${{ secrets.AWS_ROLE_ARN }}
+          deploy-dir: ./deploy_dir  # optional, default: ./deploy_dir
+          s3-bucket: ${{ vars.AWS_S3_BUCKET }}
+          s3-path: enterprise/MyProject/MyArtifact/${{ env.RELEASE_VERSION }}
 ```
 
 ### send-teams-notification
