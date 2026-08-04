@@ -2293,6 +2293,7 @@ Uploads a local directory of artifacts to an S3 bucket. The caller is responsibl
           deploy-dir: ./deploy_dir  # optional, default: ./deploy_dir
           s3-bucket: ${{ vars.AWS_S3_BUCKET }}
           s3-path: enterprise/MyProject/MyArtifact/${{ env.RELEASE_VERSION }}
+          role-duration-seconds: 3600  # optional, default: 3600
 ```
 
 ### send-teams-notification
