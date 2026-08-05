@@ -304,7 +304,7 @@ jobs:
               ;;
           esac
 
-          if ! pr_data=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json state,reviewDecision,latestReviews); then
+          if ! pr_data=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json state,reviewDecision); then
             deny "Unable to fetch the review status of PR #${PR_NUMBER}, refusing to run terraform apply."
           fi
 
@@ -313,18 +313,11 @@ jobs:
             deny "PR #${PR_NUMBER} is ${pr_state}: terraform apply can only be triggered from a comment on an open pull request."
           fi
 
+          # honours required reviewers and CODEOWNERS rules from branch protection;
+          # empty when the base branch has no required-review rule configured
           review_decision=$(jq -r '.reviewDecision // ""' <<< "$pr_data")
-          if [ -n "$review_decision" ]; then
-            # honours required reviewers and CODEOWNERS rules from branch protection
-            if [ "$review_decision" != "APPROVED" ]; then
-              deny "PR #${PR_NUMBER} is not approved (review decision: ${review_decision}): terraform apply can only be triggered from a comment on an approved pull request."
-            fi
-          else
-            echo "::warning::The base branch of PR #${PR_NUMBER} does not require reviews, falling back to looking for at least one approving review. Enabling branch protection with required reviews is strongly recommended."
-            approvals=$(jq '[.latestReviews[]? | select(.state == "APPROVED")] | length' <<< "$pr_data")
-            if [ "${approvals:-0}" -lt 1 ]; then
-              deny "PR #${PR_NUMBER} has no approving review: terraform apply can only be triggered from a comment on an approved pull request."
-            fi
+          if [ "$review_decision" != "APPROVED" ]; then
+            deny "PR #${PR_NUMBER} is not approved (review decision: '${review_decision}'): terraform apply can only be triggered from a comment on an approved pull request. Ensure branch protection with required reviews is enabled on the base branch."
           fi
 
           echo "@${COMMENTER} (${commenter_permission}) is allowed to trigger terraform apply on the approved PR #${PR_NUMBER}"

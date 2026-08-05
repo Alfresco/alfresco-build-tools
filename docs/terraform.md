@@ -176,11 +176,9 @@ following conditions are met, otherwise the workflow fails with an error:
   is still open
 - the pull request is approved: the GitHub review decision must be `APPROVED`,
   which honours the required reviewers and `CODEOWNERS` rules configured through
-  branch protection. If the base branch does not require reviews at all, the
-  workflow falls back to requiring at least one approving review which has not
-  been dismissed, and emits a warning: configuring branch protection with
-  required reviews on the branches driving your infrastructure is strongly
-  recommended
+  branch protection. This requires branch protection with required reviews to be
+  enabled on the base branch; otherwise the review decision is never `APPROVED`
+  and the operation is always denied
 - the author of the comment has `write`, `maintain` or `admin` permission on the
   repository
 
