@@ -167,11 +167,35 @@ matching the branch name (`base_ref` for `pull_request`, `ref_name` for `push`).
 
 When the workflow is triggered by a PR comment, it will look for the presence of
 the strings `terraform plan` or `terraform apply` in the comment body to determine
-the requested operation.
+the requested operation. When both are present, `terraform plan` takes precedence.
 
-Currently there are no additional restrictions on who/when can trigger terraform
-operations via PR comments, so it's recommended to enable deployment protection
-rules on production environments.
+Requesting `terraform apply` from a PR comment is allowed only when **all** of the
+following conditions are met, otherwise the workflow fails with an error:
+
+- the comment is on a pull request (not on a plain issue), and that pull request
+  is still open
+- the pull request is approved: the GitHub review decision must be `APPROVED`,
+  which honours the required reviewers and `CODEOWNERS` rules configured through
+  branch protection. If the base branch does not require reviews at all, the
+  workflow falls back to requiring at least one approving review which has not
+  been dismissed, and emits a warning: configuring branch protection with
+  required reviews on the branches driving your infrastructure is strongly
+  recommended
+- the author of the comment has `write`, `maintain` or `admin` permission on the
+  repository
+
+Any error while verifying the conditions above (for example a missing token
+permission) denies the operation.
+
+These restrictions do not apply to `terraform plan` requested from a comment, nor
+to the `push` and `workflow_dispatch` triggers, which are guarded respectively by
+branch protection rules and by the repository Actions permissions. Enabling
+deployment protection rules on production environments is still recommended.
+
+The caller workflow must grant at least `pull-requests: read` to `GITHUB_TOKEN`
+(`pull-requests: write` is recommended anyway, as it is required to publish the
+plan output as a PR comment), otherwise the verification above cannot be
+performed and `terraform apply` from a PR comment is always denied.
 
 ### Environment variables
 

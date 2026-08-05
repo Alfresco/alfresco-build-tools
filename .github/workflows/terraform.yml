@@ -268,6 +268,67 @@ jobs:
           echo "Determined terraform operation: $operation"
           echo "terraform_operation=${operation}" >> "$GITHUB_OUTPUT"
 
+      - name: Authorize terraform apply requested via PR comment
+        # Only PR comments can be authored by an untrusted user: push is guarded by
+        # branch protection and workflow_dispatch by the Actions permission model.
+        if: github.event_name == 'issue_comment' && steps.operation.outputs.terraform_operation == 'apply'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          PR_HTML_URL: ${{ github.event.issue.pull_request.html_url }}
+          COMMENTER: ${{ github.event.comment.user.login }}
+        run: |
+          deny() {
+            echo "::error::$1"
+            {
+              echo "### Terraform apply denied 🛑"
+              echo "$1"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          }
+
+          # issue_comment is also fired by comments on plain issues
+          if [ -z "$PR_HTML_URL" ]; then
+            deny "terraform apply was requested from a comment which is not on a pull request."
+          fi
+
+          if ! commenter_permission=$(gh api "repos/${REPOSITORY}/collaborators/${COMMENTER}/permission" --jq '.permission'); then
+            deny "Unable to resolve the permission of @${COMMENTER} on ${REPOSITORY}, refusing to run terraform apply."
+          fi
+
+          case "$commenter_permission" in
+            admin | maintain | write) ;;
+            *)
+              deny "@${COMMENTER} has '${commenter_permission}' permission on ${REPOSITORY}: triggering terraform apply from a PR comment requires write, maintain or admin permission."
+              ;;
+          esac
+
+          if ! pr_data=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json state,reviewDecision,latestReviews); then
+            deny "Unable to fetch the review status of PR #${PR_NUMBER}, refusing to run terraform apply."
+          fi
+
+          pr_state=$(jq -r '.state' <<< "$pr_data")
+          if [ "$pr_state" != "OPEN" ]; then
+            deny "PR #${PR_NUMBER} is ${pr_state}: terraform apply can only be triggered from a comment on an open pull request."
+          fi
+
+          review_decision=$(jq -r '.reviewDecision // ""' <<< "$pr_data")
+          if [ -n "$review_decision" ]; then
+            # honours required reviewers and CODEOWNERS rules from branch protection
+            if [ "$review_decision" != "APPROVED" ]; then
+              deny "PR #${PR_NUMBER} is not approved (review decision: ${review_decision}): terraform apply can only be triggered from a comment on an approved pull request."
+            fi
+          else
+            echo "::warning::The base branch of PR #${PR_NUMBER} does not require reviews, falling back to looking for at least one approving review. Enabling branch protection with required reviews is strongly recommended."
+            approvals=$(jq '[.latestReviews[]? | select(.state == "APPROVED")] | length' <<< "$pr_data")
+            if [ "${approvals:-0}" -lt 1 ]; then
+              deny "PR #${PR_NUMBER} has no approving review: terraform apply can only be triggered from a comment on an approved pull request."
+            fi
+          fi
+
+          echo "@${COMMENTER} (${commenter_permission}) is allowed to trigger terraform apply on the approved PR #${PR_NUMBER}"
+
       - name: Add workflow summary info
         env:
           TERRAFORM_ROOT_PATH: ${{ (steps.detect-path.outputs.terraform_root_path || inputs.terraform_root_path) }}
