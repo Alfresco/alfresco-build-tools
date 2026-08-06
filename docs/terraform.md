@@ -186,8 +186,10 @@ approved: the GitHub review decision must be `APPROVED`, which honours the
 required reviewers and `CODEOWNERS` rules configured through branch protection.
 This requires branch protection with required reviews to be enabled on the base
 branch; otherwise the review decision is never `APPROVED` and the operation is
-always denied. This extra condition does not apply to `terraform plan`, since it
-is meant to be used to review changes before approving the pull request.
+denied. This extra condition does not apply to `terraform plan`, since it is
+meant to be used to review changes before approving the pull request, nor to
+commenters with `admin` permission on the repository, who can trigger
+`terraform apply` on an open pull request regardless of its review decision.
 
 Any error while verifying the conditions above (for example a missing token
 permission) denies the operation.

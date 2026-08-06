@@ -318,7 +318,7 @@ jobs:
             deny "PR #${PR_NUMBER} is ${pr_state}: terraform ${TERRAFORM_OPERATION} can only be triggered from a comment on an open pull request."
           fi
 
-          if [ "$TERRAFORM_OPERATION" == "apply" ]; then
+          if [ "$TERRAFORM_OPERATION" == "apply" ] && [ "$commenter_permission" != "admin" ]; then
             # honours required reviewers and CODEOWNERS rules from branch protection;
             # empty when the base branch has no required-review rule configured
             review_decision=$(jq -r '.reviewDecision // ""' <<< "$pr_data")
