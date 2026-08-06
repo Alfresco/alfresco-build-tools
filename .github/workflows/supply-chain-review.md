@@ -47,11 +47,7 @@ You are the primary and only analysis engine. There is no secondary check. Be th
 
 Read the **full** pull request diff — every commit in the PR, not just the latest one — and find all modified dependency files (`package.json`, `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`/`pnpm-lock.yml`, `pnpm-workspace.yaml`/`pnpm-workspace.yml`, `npm-shrinkwrap.json`, `pom.xml`, `build.gradle`, etc.).
 
-**CRITICAL: Diff against the PR's base branch, never against just the previous commit.**
-
-- Prefer the GitHub `pull_requests` tools (e.g. `get_pull_request_diff` / `get_pull_request_files`) to fetch the diff — this always reflects every commit in the PR, regardless of local git history.
-- If you fall back to local `git` commands, first determine the PR's actual base branch (check the PR context — do not assume `main` or `master`), ensure the base ref is available locally (fetch it if needed), then diff across the full range (e.g. `git diff origin/<base-branch>...HEAD`; use `--name-only` if you only need to list changed files).
-- **Do NOT** use `git diff HEAD^ HEAD`, `git diff HEAD~1`, or `git log -1` to find changes — these only compare the latest commit against its immediate parent and will silently miss dependency changes made in earlier commits of a multi-commit PR. The checkout may also be a shallow clone, so a plain `HEAD^` comparison can be misleading or fail outright.
+**CRITICAL**: always use the GitHub MCP Server `pull_requests` toolset (e.g. `get_diff` / `get_files`) to fetch the diff — this always reflects every commit in the PR, regardless of local git history, against the correct base branch. Do NOT rely on local git commands or assumptions about the PR's commit history.
 
 For each changed dependency extract:
 
