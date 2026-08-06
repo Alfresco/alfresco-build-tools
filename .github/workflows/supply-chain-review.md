@@ -50,7 +50,7 @@ Read the **full** pull request diff — every commit in the PR, not just the lat
 **CRITICAL: Diff against the PR's base branch, never against just the previous commit.**
 
 - Prefer the GitHub `pull_requests` tools (e.g. `get_pull_request_diff` / `get_pull_request_files`) to fetch the diff — this always reflects every commit in the PR, regardless of local git history.
-- If you fall back to local `git` commands, first determine the PR's actual base branch (check the PR context — do not assume `main` or `master`), then diff across the full range with something like `git diff --name-only origin/<base-branch>...HEAD`.
+- If you fall back to local `git` commands, first determine the PR's actual base branch (check the PR context — do not assume `main` or `master`), ensure the base ref is available locally (fetch it if needed), then diff across the full range (e.g. `git diff origin/<base-branch>...HEAD`; use `--name-only` if you only need to list changed files).
 - **Do NOT** use `git diff HEAD^ HEAD`, `git diff HEAD~1`, or `git log -1` to find changes — these only compare the latest commit against its immediate parent and will silently miss dependency changes made in earlier commits of a multi-commit PR. The checkout may also be a shallow clone, so a plain `HEAD^` comparison can be misleading or fail outright.
 
 For each changed dependency extract:
