@@ -245,10 +245,18 @@ jobs:
           IS_PULL_REQUEST_EVENT: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_review' }}
           IS_PUSH_EVENT: ${{ github.event_name == 'push' }}
           IS_ISSUE_COMMENT_EVENT: ${{ github.event_name == 'issue_comment' }}
+          IS_PR_COMMENT: ${{ github.event.issue.pull_request.html_url != '' }}
           COMMENT_REQUESTS_PLAN: ${{ contains(github.event.comment.body, 'terraform plan') }}
           COMMENT_REQUESTS_APPLY: ${{ contains(github.event.comment.body, 'terraform apply') }}
           TERRAFORM_OPERATION_FROM_INPUTS: ${{ inputs.terraform_operation }}
         run: |
+          # issue_comment is also fired by comments on plain issues
+          if [[ "$IS_ISSUE_COMMENT_EVENT" == "true" ]] && [[ "$IS_PR_COMMENT" != "true" ]]; then
+            echo "Comment was made on a plain issue, not a pull request. Skipping."
+            echo "terraform_operation=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           # Resolve a single operation with precedence: plan > apply > destroy
           if [[ "$IS_PULL_REQUEST_EVENT" == "true" ]] || [[ "$TERRAFORM_OPERATION_FROM_INPUTS" == "plan" ]] || { [[ "$IS_ISSUE_COMMENT_EVENT" == "true" ]] && [[ "$COMMENT_REQUESTS_PLAN" == "true" ]]; }; then
             operation="plan"
@@ -268,59 +276,58 @@ jobs:
           echo "Determined terraform operation: $operation"
           echo "terraform_operation=${operation}" >> "$GITHUB_OUTPUT"
 
-      - name: Authorize terraform apply requested via PR comment
+      - name: Authorize terraform plan/apply requested via PR comment
         # Only PR comments can be authored by an untrusted user: push is guarded by
         # branch protection and workflow_dispatch by the Actions permission model.
-        if: github.event_name == 'issue_comment' && steps.operation.outputs.terraform_operation == 'apply'
+        if: |
+          github.event_name == 'issue_comment' &&
+          (steps.operation.outputs.terraform_operation == 'plan' || steps.operation.outputs.terraform_operation == 'apply')
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.issue.number }}
-          PR_HTML_URL: ${{ github.event.issue.pull_request.html_url }}
           COMMENTER: ${{ github.event.comment.user.login }}
+          TERRAFORM_OPERATION: ${{ steps.operation.outputs.terraform_operation }}
         run: |
           deny() {
             echo "::error::$1"
             {
-              echo "### Terraform apply denied 🛑"
+              echo "### Terraform ${TERRAFORM_OPERATION} denied 🛑"
               echo "$1"
             } >> "$GITHUB_STEP_SUMMARY"
             exit 1
           }
 
-          # issue_comment is also fired by comments on plain issues
-          if [ -z "$PR_HTML_URL" ]; then
-            deny "terraform apply was requested from a comment which is not on a pull request."
-          fi
-
           if ! commenter_permission=$(gh api "repos/${REPOSITORY}/collaborators/${COMMENTER}/permission" --jq '.permission'); then
-            deny "Unable to resolve the permission of @${COMMENTER} on ${REPOSITORY}, refusing to run terraform apply."
+            deny "Unable to resolve the permission of @${COMMENTER} on ${REPOSITORY}, refusing to run terraform ${TERRAFORM_OPERATION}."
           fi
 
           case "$commenter_permission" in
             admin | maintain | write) ;;
             *)
-              deny "@${COMMENTER} has '${commenter_permission}' permission on ${REPOSITORY}: triggering terraform apply from a PR comment requires write, maintain or admin permission."
+              deny "@${COMMENTER} has '${commenter_permission}' permission on ${REPOSITORY}: triggering terraform ${TERRAFORM_OPERATION} from a PR comment requires write, maintain or admin permission."
               ;;
           esac
 
           if ! pr_data=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json state,reviewDecision); then
-            deny "Unable to fetch the review status of PR #${PR_NUMBER}, refusing to run terraform apply."
+            deny "Unable to fetch the review status of PR #${PR_NUMBER}, refusing to run terraform ${TERRAFORM_OPERATION}."
           fi
 
           pr_state=$(jq -r '.state' <<< "$pr_data")
           if [ "$pr_state" != "OPEN" ]; then
-            deny "PR #${PR_NUMBER} is ${pr_state}: terraform apply can only be triggered from a comment on an open pull request."
+            deny "PR #${PR_NUMBER} is ${pr_state}: terraform ${TERRAFORM_OPERATION} can only be triggered from a comment on an open pull request."
           fi
 
-          # honours required reviewers and CODEOWNERS rules from branch protection;
-          # empty when the base branch has no required-review rule configured
-          review_decision=$(jq -r '.reviewDecision // ""' <<< "$pr_data")
-          if [ "$review_decision" != "APPROVED" ]; then
-            deny "PR #${PR_NUMBER} is not approved (review decision: '${review_decision}'): terraform apply can only be triggered from a comment on an approved pull request. Ensure branch protection with required reviews is enabled on the base branch."
+          if [ "$TERRAFORM_OPERATION" == "apply" ]; then
+            # honours required reviewers and CODEOWNERS rules from branch protection;
+            # empty when the base branch has no required-review rule configured
+            review_decision=$(jq -r '.reviewDecision // ""' <<< "$pr_data")
+            if [ "$review_decision" != "APPROVED" ]; then
+              deny "PR #${PR_NUMBER} is not approved (review decision: '${review_decision}'): terraform apply can only be triggered from a comment on an approved pull request. Ensure branch protection with required reviews is enabled on the base branch."
+            fi
           fi
 
-          echo "@${COMMENTER} (${commenter_permission}) is allowed to trigger terraform apply on the approved PR #${PR_NUMBER}"
+          echo "@${COMMENTER} (${commenter_permission}) is allowed to trigger terraform ${TERRAFORM_OPERATION} on PR #${PR_NUMBER}"
 
       - name: Add workflow summary info
         env:
