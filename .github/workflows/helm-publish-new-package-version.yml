@@ -46,7 +46,7 @@ jobs:
 
       - id: next-release
         name: Calculate next internal release
-        uses: Alfresco/alfresco-build-tools/.github/actions/calculate-next-internal-version@ea6bb249a91f4db12c2cee054731377ba4530769
+        uses: Alfresco/alfresco-build-tools/.github/actions/calculate-next-internal-version@ef6ea717cf37f82c63d6f0f7db343e5421536d8e
         with:
           next-version: ${{ inputs.next-version }}
 
@@ -57,13 +57,13 @@ jobs:
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 
       - name: Update chart version
-        uses: Alfresco/alfresco-build-tools/.github/actions/helm-update-chart-version@ea6bb249a91f4db12c2cee054731377ba4530769
+        uses: Alfresco/alfresco-build-tools/.github/actions/helm-update-chart-version@ef6ea717cf37f82c63d6f0f7db343e5421536d8e
         with:
           new-version: ${{ env.VERSION }}
           chart-dir: ${{ inputs.chart-dir }}
           helm-docs-version: ${{ inputs.helm-docs-version }}
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@ea6bb249a91f4db12c2cee054731377ba4530769
+      - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@ef6ea717cf37f82c63d6f0f7db343e5421536d8e
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
@@ -74,7 +74,7 @@ jobs:
 
       - name: Package Helm Chart
         id: package-helm-chart
-        uses: Alfresco/alfresco-build-tools/.github/actions/helm-package-chart@ea6bb249a91f4db12c2cee054731377ba4530769
+        uses: Alfresco/alfresco-build-tools/.github/actions/helm-package-chart@ef6ea717cf37f82c63d6f0f7db343e5421536d8e
         with:
           chart-dir: ${{ inputs.chart-dir }}
 
@@ -82,7 +82,7 @@ jobs:
         run: git push origin "$VERSION"
 
       - name: Publish Helm chart
-        uses: Alfresco/alfresco-build-tools/.github/actions/helm-publish-chart@ea6bb249a91f4db12c2cee054731377ba4530769
+        uses: Alfresco/alfresco-build-tools/.github/actions/helm-publish-chart@ef6ea717cf37f82c63d6f0f7db343e5421536d8e
         with:
             helm-charts-repo: ${{ inputs.helm-charts-repo }}
             helm-charts-repo-branch: ${{ inputs.helm-charts-repo-branch }}

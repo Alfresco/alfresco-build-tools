@@ -75,7 +75,7 @@ runs:
         path: '${{ env.REPO_DIR }}'
         token: ${{ inputs.github-token }}
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/git-check-existing-tag@ea6bb249a91f4db12c2cee054731377ba4530769
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-check-existing-tag@ef6ea717cf37f82c63d6f0f7db343e5421536d8e
       id: check-tag
       with:
         tag: ${{ env.RELEASE_VERSION }}
@@ -147,7 +147,7 @@ runs:
 
     - name: Commit changes
       if: steps.check-tag.outputs.exists == 'false'
-      uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@ea6bb249a91f4db12c2cee054731377ba4530769
+      uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@ef6ea717cf37f82c63d6f0f7db343e5421536d8e
       with:
         username: ${{ inputs.git-username }}
         add-options: -u
