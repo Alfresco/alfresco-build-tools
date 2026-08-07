@@ -302,13 +302,6 @@ jobs:
             deny "Unable to resolve the permission of @${COMMENTER} on ${REPOSITORY}, refusing to run terraform ${TERRAFORM_OPERATION}."
           fi
 
-          case "$commenter_permission" in
-            admin | maintain | write) ;;
-            *)
-              deny "@${COMMENTER} has '${commenter_permission}' permission on ${REPOSITORY}: triggering terraform ${TERRAFORM_OPERATION} from a PR comment requires write, maintain or admin permission."
-              ;;
-          esac
-
           if ! pr_data=$(gh pr view "$PR_NUMBER" --repo "$REPOSITORY" --json state,reviewDecision); then
             deny "Unable to fetch the review status of PR #${PR_NUMBER}, refusing to run terraform ${TERRAFORM_OPERATION}."
           fi

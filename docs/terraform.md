@@ -174,12 +174,7 @@ requests. When a comment requesting `terraform plan` or `terraform apply` is mad
 on a plain issue, the request is silently skipped, without failing the workflow.
 
 Requesting `terraform plan` or `terraform apply` from a PR comment is allowed only
-when **all** of the following conditions are met, otherwise the workflow fails
-with an error:
-
-- the pull request is still open
-- the author of the comment has `write`, `maintain` or `admin` permission on the
-  repository
+while the pull request is still open, otherwise the workflow fails with an error.
 
 Requesting `terraform apply` additionally requires the pull request to be
 approved: the GitHub review decision must be `APPROVED`, which honours the
