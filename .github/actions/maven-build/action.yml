@@ -249,7 +249,7 @@ runs:
 
     - name: Save maven cache
       uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-      if: github.event_name == 'push' || env.IS_PREVIEW == 'true'
+      if: (github.event_name == 'push' || env.IS_PREVIEW == 'true') && steps.maven-configure.outputs.cache-hit != 'true'
       with:
         path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        key: ${{ steps.maven-configure.outputs.cache-primary-key }}
