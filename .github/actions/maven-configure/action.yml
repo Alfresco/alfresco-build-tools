@@ -72,7 +72,7 @@ runs:
 
     - name: Set up Maven
       if: inputs.maven-version != ''
-      uses: Alfresco/alfresco-build-tools/.github/actions/setup-maven@ef6ea717cf37f82c63d6f0f7db343e5421536d8e
+      uses: Alfresco/alfresco-build-tools/.github/actions/setup-maven@d3678c78711c9b415728f1d77f6eede4971e9839
       with:
         version: ${{ inputs.maven-version }}
         cache-key-suffix: ${{ inputs.maven-setup-cache-key-suffix }}
