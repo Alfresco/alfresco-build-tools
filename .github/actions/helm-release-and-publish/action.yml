@@ -29,6 +29,14 @@ inputs:
   git-username:
     description: 'The username to commit on the git repositories'
     required: true
+  gpg-private-key:
+    description: 'ASCII-armored GPG private key for commit signing'
+    required: false
+    default: ''
+  gpg-private-key-fingerprint:
+    description: '40-char GPG fingerprint of the signing key; required when gpg-private-key is provided'
+    required: false
+    default: ''
   do-push:
     description: "If 'true', changes will be pushed ('false' can be used for PRs)"
     default: 'true'
@@ -69,6 +77,8 @@ runs:
         add-options: -u
         commit-message: Release version ${{ env.VERSION }}
         repository-directory: ${{ inputs.chart-repository-dir }}
+        gpg-private-key: ${{ inputs.gpg-private-key }}
+        gpg-private-key-fingerprint: ${{ inputs.gpg-private-key-fingerprint }}
 
     - name: Create local tag
       if: steps.check-tag.outputs.exists == 'false'
@@ -101,3 +111,6 @@ runs:
         chart-package: ${{ steps.package-helm-chart.outputs.package-file-path }}
         token: ${{ inputs.helm-repository-token }}
         do-push: ${{ inputs.do-push }}
+        git-username: ${{ inputs.git-username }}
+        gpg-private-key: ${{ inputs.gpg-private-key }}
+        gpg-private-key-fingerprint: ${{ inputs.gpg-private-key-fingerprint }}

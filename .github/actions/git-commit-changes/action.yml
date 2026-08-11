@@ -21,11 +21,22 @@ inputs:
     description: "Skips the actual commit when no changes are staged"
     required: false
     default: 'false'
+  gpg-private-key:
+    description: "ASCII-armored GPG private key for commit signing"
+    required: false
+    default: ''
+  gpg-private-key-fingerprint:
+    description: "40-char GPG fingerprint of the signing key; required when gpg-private-key is provided"
+    required: false
+    default: ''
 runs:
   using: composite
   steps:
-    - name: Commit stagged changes
+    - name: Commit staged changes
       shell: bash
+      env:
+        GPG_PRIVATE_KEY: ${{ inputs.gpg-private-key }}
+        GPG_PRIVATE_KEY_FINGERPRINT: ${{ inputs.gpg-private-key-fingerprint }}
       run: |
         REPO_DIR="${{inputs.repository-directory}}"
         if [ -n "$REPO_DIR" ]
@@ -34,6 +45,8 @@ runs:
         fi
         git config --global user.name ${{ inputs.username }}
         git config --global user.email ${{ inputs.username }}@users.noreply.github.com
+        # shellcheck source=../setup-gpg-commit-signing/setup-gpg-commit-signing.sh
+        source "${GITHUB_ACTION_PATH}/../setup-gpg-commit-signing/setup-gpg-commit-signing.sh"
         git add ${{ inputs.add-options }}
         git status
         git --no-pager diff --cached
