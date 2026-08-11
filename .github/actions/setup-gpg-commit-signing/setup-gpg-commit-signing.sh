@@ -8,7 +8,11 @@ if [[ -n "${GPG_PRIVATE_KEY:-}" ]]; then
   GNUPGHOME=$(mktemp -d)
   chmod 700 "$GNUPGHOME"
   export GNUPGHOME
-  printf '%s' "$GPG_PRIVATE_KEY" | gpg --batch --yes --import
+  trap 'rm -rf "$GNUPGHOME"' EXIT
+  if ! printf '%s' "$GPG_PRIVATE_KEY" | gpg --batch --yes --import; then
+    echo "Failed to import GPG private key" >&2
+    exit 1
+  fi
   export GIT_CONFIG_COUNT=2
   export GIT_CONFIG_KEY_0=user.signingkey
   export GIT_CONFIG_VALUE_0="$GPG_PRIVATE_KEY_FINGERPRINT"

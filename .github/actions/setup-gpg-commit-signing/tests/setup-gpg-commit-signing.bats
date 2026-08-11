@@ -50,6 +50,22 @@ teardown() {
   [[ "$output" == *"gpg-private-key-fingerprint must be set"* ]]
 }
 
+@test "fails when gpg import fails" {
+  export GPG_PRIVATE_KEY="not a gpg key"
+
+  run bash -c "source \"$SCRIPT\""
+
+  [ "$status" -eq 1 ]
+  [[ "$output" == *"Failed to import GPG private key"* ]]
+}
+
+@test "cleans up gnupg home when the step shell exits" {
+  gnupg_home=$(bash -c "source \"$SCRIPT\"; echo \"\$GNUPGHOME\"")
+
+  [ -n "$gnupg_home" ]
+  [ ! -d "$gnupg_home" ]
+}
+
 @test "configures step-scoped git signing" {
   # shellcheck source=/dev/null
   source "$SCRIPT"
