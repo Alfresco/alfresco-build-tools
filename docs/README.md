@@ -871,11 +871,12 @@ unencrypted / have no passphrase). Omit the GPG inputs to keep unsigned commits.
 ```yaml
     - uses: Alfresco/alfresco-build-tools/.github/actions/git-commit-changes@v18.22.0
       with:
-        username: ${{ secrets.BOT_GITHUB_USERNAME }}
+        username: ${{ vars.HXPS_GIT_USERNAME }}
+        email: ${{ vars.HXPS_GIT_EMAIL }}
         add-options: -u
         commit-message: "My commit message"
-        gpg-private-key: ${{ secrets.GIT_COMMIT_SIGNING_PRIVATE_KEY }}
-        gpg-private-key-fingerprint: ${{ secrets.GIT_COMMIT_SIGNING_FINGERPRINT }}
+        gpg-private-key: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_PRIVATE_KEY }}
+        gpg-private-key-fingerprint: ${{ secrets.HXPS_GIT_COMMIT_SIGNING_FINGERPRINT }}
 ```
 
 > Consider using [git-commit-and-push](#git-commit-and-push) instead which
