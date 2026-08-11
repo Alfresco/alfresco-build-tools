@@ -37,22 +37,28 @@ runs:
       env:
         GPG_PRIVATE_KEY: ${{ inputs.gpg-private-key }}
         GPG_PRIVATE_KEY_FINGERPRINT: ${{ inputs.gpg-private-key-fingerprint }}
+        GIT_COMMIT_USERNAME: ${{ inputs.username }}
+        GIT_COMMIT_ADD_OPTIONS: ${{ inputs.add-options }}
+        GIT_COMMIT_MESSAGE: ${{ inputs.commit-message }}
+        GIT_COMMIT_OPTIONS: ${{ inputs.commit-options }}
+        GIT_COMMIT_REPO_DIR: ${{ inputs.repository-directory }}
+        GIT_COMMIT_SKIP_IF_NO_CHANGES: ${{ inputs.skip-if-no-changes }}
       run: |
-        REPO_DIR="${{inputs.repository-directory}}"
-        if [ -n "$REPO_DIR" ]
-        then
-          cd $REPO_DIR
+        if [ -n "$GIT_COMMIT_REPO_DIR" ]; then
+          cd "$GIT_COMMIT_REPO_DIR"
         fi
-        git config --global user.name ${{ inputs.username }}
-        git config --global user.email ${{ inputs.username }}@users.noreply.github.com
+        git config --global user.name "$GIT_COMMIT_USERNAME"
+        git config --global user.email "${GIT_COMMIT_USERNAME}@users.noreply.github.com"
         # shellcheck source=../setup-gpg-commit-signing/setup-gpg-commit-signing.sh
         source "${GITHUB_ACTION_PATH}/../setup-gpg-commit-signing/setup-gpg-commit-signing.sh"
-        git add ${{ inputs.add-options }}
+        # shellcheck disable=SC2086
+        git add $GIT_COMMIT_ADD_OPTIONS
         git status
         git --no-pager diff --cached
-        if ${{ inputs.skip-if-no-changes == 'true' }} ;
-        then
-          git diff-index --quiet HEAD || git commit -m "${{ inputs.commit-message }}" ${{ inputs.commit-options }}
+        if [ "$GIT_COMMIT_SKIP_IF_NO_CHANGES" = "true" ]; then
+          # shellcheck disable=SC2086
+          git diff-index --quiet HEAD || git commit -m "$GIT_COMMIT_MESSAGE" $GIT_COMMIT_OPTIONS
         else
-          git commit -m "${{ inputs.commit-message }}" ${{ inputs.commit-options }}
+          # shellcheck disable=SC2086
+          git commit -m "$GIT_COMMIT_MESSAGE" $GIT_COMMIT_OPTIONS
         fi
