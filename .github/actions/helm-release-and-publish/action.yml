@@ -101,4 +101,3 @@ runs:
         chart-package: ${{ steps.package-helm-chart.outputs.package-file-path }}
         token: ${{ inputs.helm-repository-token }}
         do-push: ${{ inputs.do-push }}
-        git-username: ${{ inputs.git-username }}
