@@ -21,7 +21,7 @@ runs:
   steps:
     - name: Get branch name
       id: get-branch-name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@e6ac2203c9b5d2bfa07fa6d33d447b2dc972398e
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@e09b42c07a7bf7df6f09cd023a1f20c404ade656
 
     - name: Check upcoming runs
       id: check
