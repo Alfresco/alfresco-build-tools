@@ -29,6 +29,7 @@ safe-outputs:
     hide-older-comments: true
   add-labels:
     allowed: [security:low, security:medium, security:high]
+    issue-intent: false
   remove-labels:
     allowed: [security:low, security:medium, security:high]
   submit-pull-request-review:
