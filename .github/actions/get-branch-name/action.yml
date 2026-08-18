@@ -13,7 +13,7 @@ runs:
   using: composite
   steps:
     - id: get-branch-name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@e73d05bdf80b886085a8f3828265480ada98abbc
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@51e6a63ab5c95029ec0ca414cdef310ff6a38711
       with:
         sanitize: ${{ inputs.sanitize }}
         max-length: ${{ inputs.max-length }}
