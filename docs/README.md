@@ -1949,7 +1949,7 @@ A lightweight Maven release action that sets the release version, deploys the ar
           maven-args: -DskipTests  # optional, default: -DskipTests
           create-tag: 'true'  # optional, default: 'true'
           commit-message-prefix: '[skip ci]'  # optional, default: '[skip ci]'
-          post-version-command: 'mvn generate-sources'  # optional, runs after setting the release version and before deploying
+          post-version-command: 'mvn generate-sources'  # optional, runs after each "versions:set" call (release version and next development version)
 ```
 
 Java and Maven should be set up before invoking the action. The provided `token` must have write access to the repository contents to push the release/development version commits and (if enabled) the release tag.

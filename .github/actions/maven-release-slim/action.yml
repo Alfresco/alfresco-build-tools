@@ -29,7 +29,7 @@ inputs:
     default: '[skip ci]'
   post-version-command:
     required: false
-    description: Optional custom command to run after setting the release version and before deploying (e.g. "mvn generate-sources").
+    description: Optional custom command to run after each "versions:set" call, i.e. after setting the release version and after setting the next development version (e.g. "mvn generate-sources").
     default: ''
 
 runs:
@@ -39,7 +39,7 @@ runs:
       run: mvn -B -ntp versions:set -DnewVersion="${{ inputs.release-version }}" -DgenerateBackupPoms=false
       shell: bash
 
-    - name: "Run post-version command"
+    - name: "Run post-version command after release version"
       if: inputs.post-version-command != ''
       run: ${{ inputs.post-version-command }}
       shell: bash
@@ -66,6 +66,11 @@ runs:
 
     - name: "Set next development version to ${{ inputs.development-version }}"
       run: mvn -B -ntp versions:set -DnewVersion="${{ inputs.development-version }}" -DgenerateBackupPoms=false
+      shell: bash
+
+    - name: "Run post-version command after development version"
+      if: inputs.post-version-command != ''
+      run: ${{ inputs.post-version-command }}
       shell: bash
 
     - name: "Commit next development version ${{ inputs.development-version }}"
