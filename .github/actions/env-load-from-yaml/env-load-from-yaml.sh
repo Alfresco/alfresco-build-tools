@@ -13,6 +13,13 @@ while IFS= read -r ENVVAR; do
   fi
   name="${ENVVAR%%=*}"
   rhs="${ENVVAR#*=}"
+  # Strip a single layer of surrounding quotes so a quoted multi-word value
+  # (e.g. FOO="a b c") is not re-split by the expansion eval below.
+  if [[ ${#rhs} -ge 2 && "$rhs" == \"*\" ]]; then
+    rhs="${rhs:1:${#rhs}-2}"
+  elif [[ ${#rhs} -ge 2 && "$rhs" == \'*\' ]]; then
+    rhs="${rhs:1:${#rhs}-2}"
+  fi
   eval "value=\"$rhs\""
   # shellcheck disable=SC2154 # value is assigned above via eval
   export "$name=$value"

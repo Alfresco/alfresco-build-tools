@@ -14,6 +14,13 @@ setup() {
     grep -qx 'APP_SETTING_ONE=value' "$GITHUB_ENV"
 }
 
+@test "quoted multi-word value keeps its content and strips surrounding quotes" {
+    export YML_PATH="$DIR/simple.yml"
+    run env-load-from-yaml.sh
+    [ "$status" -eq 0 ]
+    grep -qx 'QUOTED_MULTIWORD=--batch-mode --quiet -U' "$GITHUB_ENV"
+}
+
 @test "ignore_regex skips matching lines" {
     export YML_PATH="$DIR/simple.yml"
     export IGNORE_REGEX='^TRAVIS_BRANCH=.*'
