@@ -21,7 +21,7 @@ runs:
   steps:
     - name: Get branch name
       id: get-branch-name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@589e33f376c0cb4671f23f8cd2cb40ecb958e278
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@5a665d430cb3638745b7d1f66e5e25afcd6f61a4
 
     - name: Check is Dependabot PR or Propagation PR
       id: check
