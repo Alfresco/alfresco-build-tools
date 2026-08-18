@@ -1950,7 +1950,6 @@ A lightweight Maven release action that sets the release version, deploys the ar
           create-tag: 'true'  # optional, default: 'true'
           commit-message-prefix: '[skip ci]'  # optional, default: '[skip ci]'
           update-local: 'true'  # optional, default: 'true', forwarded to verified-bot-commit's update-local input
-          force-lf-eol: 'false'  # optional, default: 'false', forces LF line endings on the committed pom.xml files before committing
 ```
 
 Java and Maven should be set up before invoking the action. The provided `token` must have write access to the repository contents to push the release/development version commits and (if enabled) the release tag.
