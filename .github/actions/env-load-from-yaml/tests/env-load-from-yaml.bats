@@ -32,11 +32,56 @@ setup() {
     grep -qx 'VAR2=expanded-value' "$GITHUB_ENV"
 }
 
-@test "missing yaml file aborts with non-zero and writes nothing" {
+@test "missing yaml file is a no-op" {
     export YML_PATH="$DIR/does-not-exist.yml"
     run env-load-from-yaml.sh
-    [ "$status" -ne 0 ]
+    [ "$status" -eq 0 ]
     [ ! -s "$GITHUB_ENV" ]
+}
+
+@test "quoted multi-word value round-trips with quotes preserved" {
+    export YML_PATH="$DIR/literal.yml"
+    run env-load-from-yaml.sh
+    [ "$status" -eq 0 ]
+    grep -qxF 'QUOTED_MULTIWORD="--batch-mode --quiet -U"' "$GITHUB_ENV"
+}
+
+@test "JSON list value round-trips with quotes and brackets preserved" {
+    export YML_PATH="$DIR/literal.yml"
+    run env-load-from-yaml.sh
+    [ "$status" -eq 0 ]
+    grep -qxF 'JSON_LIST=[ "x", "y" ]' "$GITHUB_ENV"
+}
+
+@test "JSON map value round-trips with quotes and braces preserved" {
+    export YML_PATH="$DIR/literal.yml"
+    run env-load-from-yaml.sh
+    [ "$status" -eq 0 ]
+    grep -qxF 'JSON_MAP={"k":"v"}' "$GITHUB_ENV"
+}
+
+@test "\$VAR expansion still works inside an otherwise literal JSON value" {
+    export YML_PATH="$DIR/literal.yml"
+    export ANOTHER_VAR="expanded-value"
+    run env-load-from-yaml.sh
+    [ "$status" -eq 0 ]
+    grep -qxF 'EXPANDED_IN_JSON_MAP={"k":"expanded-value"}' "$GITHUB_ENV"
+}
+
+@test "\$(...) subshell syntax is kept literal, never executed" {
+    export YML_PATH="$DIR/literal.yml"
+    run env-load-from-yaml.sh
+    [ "$status" -eq 0 ]
+    grep -qxF 'SUBSHELL_ATTEMPT=$(echo pwned)' "$GITHUB_ENV"
+    ! grep -q '^pwned$' "$GITHUB_ENV"
+}
+
+@test "backtick command substitution syntax is kept literal, never executed" {
+    export YML_PATH="$DIR/literal.yml"
+    run env-load-from-yaml.sh
+    [ "$status" -eq 0 ]
+    grep -qxF 'BACKTICK_ATTEMPT=`echo pwned`' "$GITHUB_ENV"
+    ! grep -q '^pwned$' "$GITHUB_ENV"
 }
 
 @test "multiline value uses heredoc and round-trips" {

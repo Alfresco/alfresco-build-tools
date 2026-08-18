@@ -1,0 +1,8 @@
+env:
+  global:
+    - QUOTED_MULTIWORD="--batch-mode --quiet -U"
+    - JSON_LIST=[ "x", "y" ]
+    - JSON_MAP={"k":"v"}
+    - SUBSHELL_ATTEMPT=$(echo pwned)
+    - BACKTICK_ATTEMPT=`echo pwned`
+    - EXPANDED_IN_JSON_MAP={"k":"$ANOTHER_VAR"}

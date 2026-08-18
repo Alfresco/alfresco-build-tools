@@ -1,8 +1,12 @@
 #!/bin/bash
 set -eo pipefail
 
-# Capture yq output before looping so a yq failure/missing file aborts the
-# script instead of being swallowed by process substitution.
+# A missing input file is a no-op: callers rely on being able to point this
+# at an optional per-environment override file.
+[ -f "$YML_PATH" ] || exit 0
+
+# Capture yq output before looping so a yq failure aborts the script
+# instead of being swallowed by process substitution.
 entries="$(yq '.env.global[]' "$YML_PATH")"
 
 while IFS= read -r ENVVAR; do
@@ -13,8 +17,11 @@ while IFS= read -r ENVVAR; do
   fi
   name="${ENVVAR%%=*}"
   rhs="${ENVVAR#*=}"
-  eval "value=\"$rhs\""
-  # shellcheck disable=SC2154 # value is assigned above via eval
+  # Values are taken verbatim (quotes, spaces, JSON kept byte-for-byte) with
+  # only $VAR/${VAR} expansion applied, via envsubst rather than eval, so a
+  # value can never trigger shell word-splitting or command execution.
+  value="$(printf '%s' "$rhs" | envsubst; printf x)"
+  value="${value%x}"
   export "$name=$value"
   if [[ "$value" == *$'\n'* ]]; then
     delimiter="EOF_$(openssl rand -hex 8)"
