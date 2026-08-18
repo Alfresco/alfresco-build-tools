@@ -1947,6 +1947,7 @@ A lightweight Maven release action that sets the release version, deploys the ar
           development-version: 1.2.4-SNAPSHOT
           release-profile: release  # optional, default: release
           maven-args: -DskipTests  # optional, default: -DskipTests
+          versions-set-args: -DprocessAllModules=true  # optional, additional arguments for the versions:set commands
           create-tag: 'true'  # optional, default: 'true'
           commit-message-prefix: '[skip ci]'  # optional, default: '[skip ci]'
 ```

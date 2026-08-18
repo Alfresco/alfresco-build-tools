@@ -19,6 +19,10 @@ inputs:
     required: false
     description: Additional Maven arguments for release. Defaults to "-DskipTests".
     default: -DskipTests
+  versions-set-args:
+    required: false
+    description: Additional arguments passed to the versions:set commands.
+    default: ''
   create-tag:
     required: false
     description: Boolean if should create tag.
@@ -32,7 +36,7 @@ runs:
   using: composite
   steps:
     - name: "Set release version to ${{ inputs.release-version }}"
-      run: mvn -B -ntp versions:set -DnewVersion="${{ inputs.release-version }}" -DgenerateBackupPoms=false
+      run: mvn -B -ntp versions:set -DnewVersion="${{ inputs.release-version }}" -DgenerateBackupPoms=false ${{ inputs.versions-set-args }}
       shell: bash
 
     - name: "Deploy release version ${{ inputs.release-version }}"
@@ -56,7 +60,7 @@ runs:
       shell: bash
 
     - name: "Set next development version to ${{ inputs.development-version }}"
-      run: mvn -B -ntp versions:set -DnewVersion="${{ inputs.development-version }}" -DgenerateBackupPoms=false
+      run: mvn -B -ntp versions:set -DnewVersion="${{ inputs.development-version }}" -DgenerateBackupPoms=false ${{ inputs.versions-set-args }}
       shell: bash
 
     - name: "Commit next development version ${{ inputs.development-version }}"
