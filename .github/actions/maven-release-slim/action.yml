@@ -27,6 +27,10 @@ inputs:
     required: false
     description: Prefix used by bot for commit message. Defaults to "[skip ci]".
     default: '[skip ci]'
+  update-local:
+    required: false
+    description: Boolean forwarded to verified-bot-commit's "update-local" input. Defaults to "true".
+    default: 'true'
 
 runs:
   using: composite
@@ -44,6 +48,7 @@ runs:
       with:
         token: ${{ inputs.token }}
         ref: ${{ github.event.pull_request.head.ref || github.ref }}
+        update-local: ${{ inputs.update-local }}
         files: |
           pom.xml
           **/pom.xml
@@ -64,6 +69,7 @@ runs:
       with:
         token: ${{ inputs.token }}
         ref: ${{ github.event.pull_request.head.ref || github.ref }}
+        update-local: ${{ inputs.update-local }}
         files: |
           pom.xml
           **/pom.xml
