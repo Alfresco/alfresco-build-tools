@@ -27,12 +27,21 @@ inputs:
     required: false
     description: Prefix used by bot for commit message. Defaults to "[skip ci]".
     default: '[skip ci]'
+  post-version-command:
+    required: false
+    description: Optional custom command to run after setting the release version and before deploying (e.g. "mvn generate-sources").
+    default: ''
 
 runs:
   using: composite
   steps:
     - name: "Set release version to ${{ inputs.release-version }}"
       run: mvn -B -ntp versions:set -DnewVersion="${{ inputs.release-version }}" -DgenerateBackupPoms=false
+      shell: bash
+
+    - name: "Run post-version command"
+      if: inputs.post-version-command != ''
+      run: ${{ inputs.post-version-command }}
       shell: bash
 
     - name: "Deploy release version ${{ inputs.release-version }}"
