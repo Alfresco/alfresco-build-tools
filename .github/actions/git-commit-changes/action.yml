@@ -60,6 +60,7 @@ runs:
         git add $GIT_COMMIT_ADD_OPTIONS
         git status
         git --no-pager diff --cached
+        GIT_COMMIT_MESSAGE="$(printf '%s' "$GIT_COMMIT_MESSAGE" | envsubst)"
         if [ "$GIT_COMMIT_SKIP_IF_NO_CHANGES" = "true" ]; then
           # shellcheck disable=SC2086
           git diff-index --quiet HEAD || git commit -m "$GIT_COMMIT_MESSAGE" $GIT_COMMIT_OPTIONS
