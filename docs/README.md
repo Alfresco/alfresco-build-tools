@@ -42,6 +42,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [calculate-next-internal-version](#calculate-next-internal-version)
   - [check-pr-description](#check-pr-description)
   - [configure-git-author](#configure-git-author)
+  - [dependabot-workflow-run-automation](#dependabot-workflow-run-automation)
   - [dependabot-missing-actions-check](#dependabot-missing-actions-check)
   - [dbp-charts](#dbp-charts)
   - [dispatch-resume-workflow](#dispatch-resume-workflow)
@@ -554,6 +555,45 @@ Configures the git username and email to associate commits with the provided ide
 ```
 
 The two vars in the previous snippet are [workflow configuration variables](https://github.blog/changelog/2023-01-10-github-actions-support-for-configuration-variables-in-workflows/) that can be created at organization level and shared across different repositories.
+
+### dependabot-workflow-run-automation
+
+Approves and enables auto-merge for a Dependabot PR after successful CI, re-runs failed jobs up to a configured
+attempt limit, and mentions a maintainers team when the final attempt still fails.
+
+```yaml
+name: Dependabot group automation
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches:
+      - "dependabot/maven/alfresco-enterprise-repo-**"
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  automate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/dependabot-workflow-run-automation@v18.24.1
+        with:
+          app-client-id: ${{ vars.GH_APP_ENGINEERING_CONTRIB_CLIENT_ID }}
+          app-private-key: ${{ secrets.GH_APP_ENGINEERING_CONTRIB_PRIVATE_KEY }}
+          maintainers-team: Alfresco/alfresco-dependency-maintainers # optional, default shown
+          max-attempts: "2" # optional, default: 2
+          merge-method: squash # optional, default: squash
+```
+
+Use a `workflow_run.branches` filter that selects only the intended Dependabot group branches. The action also checks
+that the completed run was triggered by a pull request and that its actor is `dependabot[bot]`. It uses the workflow's
+`GITHUB_TOKEN` to re-run jobs and comment, and creates a GitHub App token to approve the PR and enable auto-merge
+because the default token cannot approve a pull request. The GitHub App must have write access to repository contents
+and pull requests. The merge method must be `merge`, `rebase`, or `squash`.
 
 ### dependabot-missing-actions-check
 
