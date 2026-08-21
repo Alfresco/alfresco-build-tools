@@ -1,0 +1,12 @@
+github:
+  prefix: 'build(deps)'
+  message: 'bump flux-operator to {{ source "lastRelease" }}'
+
+github_release:
+  owner: 'controlplaneio-fluxcd'
+  repo: 'flux-operator'
+
+target:
+  file: '.github/actions/flux-bootstrap/action.yml'
+  key: '$.inputs.operator-version.default'
+  trimprefix: 'v'
