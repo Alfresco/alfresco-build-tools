@@ -49,6 +49,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [docker-scan-image-dirs](#docker-scan-image-dirs)
   - [enforce-pr-conventions](#enforce-pr-conventions)
   - [env-load-from-yaml](#env-load-from-yaml)
+  - [flux-operator-bootstrap](#flux-operator-bootstrap)
   - [free-hosted-runner-disk-space](#free-hosted-runner-disk-space)
   - [get-branch-name-v2](#get-branch-name-v2)
   - [get-build-info](#get-build-info)
@@ -713,6 +714,36 @@ env:
     - VAR1=value1
     - VAR2=${ANOTHER_VAR}
 ```
+
+### flux-operator-bootstrap
+
+Bootstraps or uninstalls [Flux](https://fluxcd.io/) on a Kubernetes cluster using the
+[Flux Operator](https://github.com/controlplaneio-fluxcd/flux-operator).
+
+The action is cloud agnostic and expects `kubectl` to already point at the target cluster, so the caller
+owns cloud authentication and the kubeconfig. It needs `kubectl` and `helm` on the `PATH`, both
+preinstalled on GitHub hosted runners. See the
+[action README](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/flux-operator-bootstrap/README.md)
+for the prerequisite login steps and the list of opinionated defaults.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/flux-operator-bootstrap@v18.24.1
+        with:
+          action: bootstrap  # optional, default: bootstrap. Either bootstrap or uninstall
+          cluster-type: azure  # optional, default: kubernetes. One of kubernetes, openshift, aws, azure, gcp
+          sync-url: https://github.com/Alfresco/flux-infrastructure-pipeline.git  # required to bootstrap
+          sync-path: clusters/my-cluster  # required to bootstrap
+          sync-ref: refs/heads/main  # optional, default: refs/heads/main
+          github-app-id: ${{ vars.FLUX_BOOTSTRAP_GH_APP_ID }}  # required to bootstrap
+          github-app-installation-id: ${{ vars.FLUX_BOOTSTRAP_GH_APP_INSTALL_ID }}  # required to bootstrap
+          github-app-private-key: ${{ secrets.FLUX_BOOTSTRAP_GH_APP_PRIVATE_KEY }}  # required to bootstrap
+          operator-version: 0.48.0  # optional
+          wait-timeout: 5m  # optional, default: 5m
+```
+
+The GitHub App credentials are stored in the `flux-system` secret used by the `FluxInstance` to pull the
+repository. `action: uninstall` deletes the `FluxInstance`, the operator Helm release and that secret, and
+ignores every other input.
 
 ### free-hosted-runner-disk-space
 
