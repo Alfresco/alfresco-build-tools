@@ -94,6 +94,6 @@ other input. Both branches are idempotent: uninstalling a cluster that never had
 bootstrapping an already bootstrapped cluster reconciles it to the desired state.
 
 The Flux CLI version is not an input: it follows the default of
-[setup-fluxcli](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/setup-fluxcli/action.yml),
+[setup-fluxcli](../setup-fluxcli/action.yml),
 which updatecli keeps current. Callers needing a specific version can run `setup-fluxcli` themselves
 beforehand.
