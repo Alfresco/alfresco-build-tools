@@ -721,7 +721,8 @@ Bootstraps or uninstalls [Flux](https://fluxcd.io/) on a Kubernetes cluster usin
 [Flux Operator](https://github.com/controlplaneio-fluxcd/flux-operator).
 
 The action is cloud agnostic and expects `kubectl` to already point at the target cluster, so the caller
-owns cloud authentication and the kubeconfig. See the
+owns cloud authentication and the kubeconfig. It needs `kubectl` and `helm` on the `PATH`, both
+preinstalled on GitHub hosted runners. See the
 [action README](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/flux-operator-bootstrap/README.md)
 for the prerequisite login steps and the list of opinionated defaults.
 
@@ -741,8 +742,8 @@ for the prerequisite login steps and the list of opinionated defaults.
 ```
 
 The GitHub App credentials are stored in the `flux-system` secret used by the `FluxInstance` to pull the
-repository. `action: uninstall` deletes the `FluxInstance` and the operator Helm release, and ignores every
-other input.
+repository. `action: uninstall` deletes the `FluxInstance`, the operator Helm release and that secret, and
+ignores every other input.
 
 ### free-hosted-runner-disk-space
 

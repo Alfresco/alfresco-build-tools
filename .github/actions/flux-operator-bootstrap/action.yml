@@ -171,3 +171,4 @@ runs:
         if helm status flux-operator --namespace flux-system > /dev/null 2>&1; then
           helm uninstall flux-operator --namespace flux-system --wait
         fi
+        kubectl delete secret flux-system --namespace flux-system --ignore-not-found

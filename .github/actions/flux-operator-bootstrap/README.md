@@ -11,6 +11,10 @@ pointing at the target cluster, so the calling workflow owns cloud authenticatio
 keeps cloud specific credentials out of the action and lets the same action serve AKS, EKS, GKE and local
 clusters.
 
+It installs the Flux CLI itself but needs `kubectl` and `helm` (the operator is a Helm release) on the
+`PATH`. Both are preinstalled on GitHub hosted runners; self hosted runners and container jobs may need
+them added.
+
 ### AKS
 
 ```yaml
@@ -84,7 +88,8 @@ PR to promote it to an input.
 
 ## Bootstrap and uninstall
 
-`action: uninstall` deletes the `FluxInstance` and uninstalls the operator Helm release, and ignores every
+`action: uninstall` deletes the `FluxInstance`, uninstalls the operator Helm release and removes the
+`flux-system` secret so the App private key does not outlive the installation. It ignores every
 other input. Both branches are idempotent: uninstalling a cluster that never had Flux is a no-op, and
 bootstrapping an already bootstrapped cluster reconciles it to the desired state.
 
