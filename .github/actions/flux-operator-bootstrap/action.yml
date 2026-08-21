@@ -1,5 +1,5 @@
 ---
-name: Flux bootstrap
+name: Flux operator bootstrap
 description: |
   Bootstrap or uninstall Flux on a Kubernetes cluster using the Flux Operator.
   Requires an already authenticated kubectl context, see the action README for

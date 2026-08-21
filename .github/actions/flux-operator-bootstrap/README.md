@@ -1,4 +1,4 @@
-# flux-bootstrap
+# flux-operator-bootstrap
 
 Bootstraps or uninstalls [Flux](https://fluxcd.io/) on a Kubernetes cluster using the
 [Flux Operator](https://github.com/controlplaneio-fluxcd/flux-operator), driving it through a
@@ -28,7 +28,7 @@ clusters.
             --name "$CLUSTER_NAME" \
             --overwrite-existing
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/flux-bootstrap@v18.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/flux-operator-bootstrap@v18.24.1
         with:
           cluster-type: azure
           # ...
@@ -51,7 +51,7 @@ clusters.
             --region "$AWS_REGION" \
             --name "$CLUSTER_NAME"
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/flux-bootstrap@v18.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/flux-operator-bootstrap@v18.24.1
         with:
           cluster-type: aws
           # ...

@@ -7,6 +7,6 @@ github_release:
   repo: 'flux-operator'
 
 target:
-  file: '.github/actions/flux-bootstrap/action.yml'
+  file: '.github/actions/flux-operator-bootstrap/action.yml'
   key: '$.inputs.operator-version.default'
   trimprefix: 'v'
