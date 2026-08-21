@@ -723,7 +723,7 @@ Bootstraps or uninstalls [Flux](https://fluxcd.io/) on a Kubernetes cluster usin
 The action is cloud agnostic and expects `kubectl` to already point at the target cluster, so the caller
 owns cloud authentication and the kubeconfig. It needs `kubectl` and `helm` on the `PATH`, both
 preinstalled on GitHub hosted runners. See the
-[action README](../.github/actions/flux-operator-bootstrap/README.md)
+[action README](https://github.com/Alfresco/alfresco-build-tools/blob/master/.github/actions/flux-operator-bootstrap/README.md)
 for the prerequisite login steps and the list of opinionated defaults.
 
 ```yaml
