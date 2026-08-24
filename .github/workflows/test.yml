@@ -335,14 +335,7 @@ jobs:
           echo "Current branch is ${{ steps.branch-info.outputs.branch-name }}"
 
       #region Test git-check-branch-head
-      - name: Get current remote head for git-check-branch-head test
-        id: remote-head
-        run: echo "sha=$(git ls-remote origin "refs/heads/${{ steps.branch-info.outputs.branch-name }}" | cut -f1)" >> "$GITHUB_OUTPUT"
-
       - uses: ./.github/actions/git-check-branch-head
-        with:
-          expected-sha: ${{ steps.remote-head.outputs.sha }}
-          branch: ${{ steps.branch-info.outputs.branch-name }}
 
       - name: Test git-check-branch-head fails on mismatch
         id: git-check-branch-head-mismatch
@@ -350,7 +343,6 @@ jobs:
         uses: ./.github/actions/git-check-branch-head
         with:
           expected-sha: '0000000000000000000000000000000000000000'
-          branch: ${{ steps.branch-info.outputs.branch-name }}
       - name: Assert git-check-branch-head failed on mismatch
         if: steps.git-check-branch-head-mismatch.outcome != 'failure'
         run: |
@@ -362,7 +354,6 @@ jobs:
         uses: ./.github/actions/git-check-branch-head
         with:
           expected-sha: '0000000000000000000000000000000000000000'
-          branch: ${{ steps.branch-info.outputs.branch-name }}
           fail-on-mismatch: 'false'
       - name: Assert git-check-branch-head reported the mismatch
         env:

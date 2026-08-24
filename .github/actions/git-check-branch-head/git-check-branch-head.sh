@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ -n "$REPO_DIR" ]; then
-  cd "$REPO_DIR"
-fi
-
 if [ -z "$EXPECTED_SHA" ]; then
   EXPECTED_SHA=$(git rev-parse HEAD)
 fi
@@ -27,7 +23,9 @@ if [ "$REMOTE_SHA" = "$EXPECTED_SHA" ]; then
 fi
 
 echo "changed=true" >> "$GITHUB_OUTPUT"
-echo "::error::Branch '$BRANCH' on '$REMOTE' moved from expected $EXPECTED_SHA to $REMOTE_SHA since this run started. New commits landed concurrently; re-run once it is safe."
+MESSAGE="Branch '$BRANCH' on '$REMOTE' moved from expected $EXPECTED_SHA to $REMOTE_SHA since this run started. New commits landed concurrently; re-run once it is safe."
 if [ "$FAIL_ON_MISMATCH" = "true" ]; then
+  echo "::error::$MESSAGE"
   exit 1
 fi
+echo "$MESSAGE"
