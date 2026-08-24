@@ -13,9 +13,6 @@ inputs:
     description: Git remote to check.
     required: false
     default: origin
-  repository-directory:
-    description: Optional path to the the directory holding the git repository (defaults to current directory)
-    required: false
   fail-on-mismatch:
     description: Fail the step when the remote head does not match expected-sha. Set to 'false' to only report the mismatch via outputs.
     required: false
@@ -36,6 +33,5 @@ runs:
         EXPECTED_SHA: ${{ inputs.expected-sha }}
         BRANCH: ${{ inputs.branch }}
         REMOTE: ${{ inputs.remote }}
-        REPO_DIR: ${{ inputs.repository-directory }}
         FAIL_ON_MISMATCH: ${{ inputs.fail-on-mismatch }}
       run: ${{ github.action_path }}/git-check-branch-head.sh

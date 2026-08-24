@@ -8,7 +8,6 @@ setup() {
     export REMOTE="origin"
     export BRANCH="master"
     export EXPECTED_SHA="1111111111111111111111111111111111111111"
-    export REPO_DIR=""
     export FAIL_ON_MISMATCH="true"
 }
 
@@ -59,6 +58,8 @@ mock_ls_remote() {
     run git-check-branch-head.sh
     [ "$status" -eq 0 ]
     assert_output_var "changed" "true"
+    [[ "$output" == *"moved from expected"* ]]
+    [[ "$output" != *"::error::"* ]]
 }
 
 @test "fails when branch is not found on remote" {
@@ -89,23 +90,4 @@ mock_ls_remote() {
     run git-check-branch-head.sh
     [ "$status" -eq 0 ]
     assert_output_var "changed" "false"
-}
-
-@test "changes into repository-directory before running" {
-    export REPO_DIR="$BATS_TMPDIR/repo_${RANDOM}"
-    mkdir -p "$REPO_DIR"
-    git() {
-        if [ "$1" = "ls-remote" ]; then
-            [ "$PWD" = "$REPO_DIR" ] || { echo "expected cwd $REPO_DIR, got $PWD" >&2; return 1; }
-            echo "$EXPECTED_SHA	refs/heads/master"
-        else
-            echo "unexpected git invocation: $*" >&2
-            return 1
-        fi
-    }
-    export -f git
-    run git-check-branch-head.sh
-    [ "$status" -eq 0 ]
-    assert_output_var "changed" "false"
-    rm -rf "$REPO_DIR"
 }
