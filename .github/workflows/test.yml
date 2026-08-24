@@ -333,3 +333,42 @@ jobs:
       - name: Show current branches
         run: |
           echo "Current branch is ${{ steps.branch-info.outputs.branch-name }}"
+
+      #region Test git-check-branch-head
+      - name: Get current remote head for git-check-branch-head test
+        id: remote-head
+        run: echo "sha=$(git ls-remote origin "refs/heads/${{ steps.branch-info.outputs.branch-name }}" | cut -f1)" >> "$GITHUB_OUTPUT"
+
+      - uses: ./.github/actions/git-check-branch-head
+        with:
+          expected-sha: ${{ steps.remote-head.outputs.sha }}
+          branch: ${{ steps.branch-info.outputs.branch-name }}
+
+      - name: Test git-check-branch-head fails on mismatch
+        id: git-check-branch-head-mismatch
+        continue-on-error: true
+        uses: ./.github/actions/git-check-branch-head
+        with:
+          expected-sha: '0000000000000000000000000000000000000000'
+          branch: ${{ steps.branch-info.outputs.branch-name }}
+      - name: Assert git-check-branch-head failed on mismatch
+        if: steps.git-check-branch-head-mismatch.outcome != 'failure'
+        run: |
+          echo "git-check-branch-head should fail when the branch has moved"
+          exit 1
+
+      - name: Test git-check-branch-head reports mismatch without failing
+        id: git-check-branch-head-detect
+        uses: ./.github/actions/git-check-branch-head
+        with:
+          expected-sha: '0000000000000000000000000000000000000000'
+          branch: ${{ steps.branch-info.outputs.branch-name }}
+          fail-on-mismatch: 'false'
+      - name: Assert git-check-branch-head reported the mismatch
+        env:
+          CHANGED: ${{ steps.git-check-branch-head-detect.outputs.changed }}
+          REMOTE_SHA: ${{ steps.git-check-branch-head-detect.outputs.remote-sha }}
+        run: |
+          [ "$CHANGED" = "true" ] || { echo "::error::expected changed=true, got $CHANGED"; exit 1; }
+          [ -n "$REMOTE_SHA" ] || { echo "::error::remote-sha output is empty"; exit 1; }
+      #endregion

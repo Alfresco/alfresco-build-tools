@@ -31,10 +31,18 @@ inputs:
     required: false
     description: Optional custom command to run after each "versions:set" call, i.e. after setting the release version and after setting the next development version (e.g. "mvn generate-sources").
     default: ''
+  fail-on-concurrent-commits:
+    required: false
+    description: Fail the release if new commits appeared on the branch since the run started.
+    default: 'true'
 
 runs:
   using: composite
   steps:
+    - name: "Check for concurrent commits before starting the release"
+      if: inputs.fail-on-concurrent-commits == 'true'
+      uses: Alfresco/alfresco-build-tools/.github/actions/git-check-branch-head@21bf54d131a99eaea590867434e6eccdd8654569
+
     - name: "Set release version to ${{ inputs.release-version }}"
       run: mvn -B -ntp versions:set -DnewVersion="${{ inputs.release-version }}" -DgenerateBackupPoms=false
       shell: bash
@@ -47,6 +55,10 @@ runs:
     - name: "Deploy release version ${{ inputs.release-version }}"
       run: mvn -B -ntp clean deploy -P ${{ inputs.release-profile }} -Dproject.revision.key=${{ github.sha }} ${{ inputs.maven-args }}
       shell: bash
+
+    - name: "Check for concurrent commits before committing the release"
+      if: inputs.fail-on-concurrent-commits == 'true'
+      uses: Alfresco/alfresco-build-tools/.github/actions/git-check-branch-head@21bf54d131a99eaea590867434e6eccdd8654569
 
     - name: "Commit release version ${{ inputs.release-version }}"
       uses: iarekylew00t/verified-bot-commit@1ccc6afd0f789e8442cff7deec3e9856a693cc7e # v2.3.4
