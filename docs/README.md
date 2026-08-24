@@ -572,9 +572,7 @@ on:
       - "dependabot/maven/alfresco-enterprise-repo-**"
 
 permissions:
-  actions: write
-  contents: read
-  pull-requests: write
+  pull-requests: read
 
 jobs:
   automate:
@@ -592,10 +590,10 @@ jobs:
 Use a `workflow_run.branches` filter that selects only the intended Dependabot group branches. The action also checks
 that the completed run was triggered by a pull request and that its actor is `dependabot[bot]`. Before acting, it
 resolves the PR from the workflow run payload and verifies that the PR is open, authored by Dependabot, and still points
-at the completed run's head SHA. It uses the workflow's `GITHUB_TOKEN` to re-run jobs and comment, and creates a GitHub
-App token to approve the PR and enable auto-merge because the default token cannot approve a pull request. The GitHub
-App must have write access to repository contents and pull requests. The merge method must be `merge`, `rebase`, or
-`squash`.
+at the completed run's head SHA. It uses the workflow's `GITHUB_TOKEN` only to read pull request details. It creates a
+GitHub App token to re-run jobs, comment, approve the PR, and enable auto-merge because the default token cannot approve
+a pull request. The GitHub App must have write access to actions, repository contents, and pull requests. The merge
+method must be `merge`, `rebase`, or `squash`.
 
 ### dependabot-missing-actions-check
 

@@ -51,20 +51,21 @@ runs:
 
     - name: Generate GitHub App token
       id: app-token
-      if: >-
-        ${{
-          steps.pull-request.outputs.number != '' &&
-          github.event.workflow_run.conclusion == 'success'
-        }}
+      if: steps.pull-request.outputs.number != ''
       uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
       with:
         client-id: ${{ inputs.app-client-id }}
         private-key: ${{ inputs.app-private-key }}
+        permission-actions: write
         permission-contents: write
         permission-pull-requests: write
 
     - name: Approve and enable auto-merge
-      if: steps.app-token.outcome == 'success'
+      if: >-
+        ${{
+          steps.app-token.outcome == 'success' &&
+          github.event.workflow_run.conclusion == 'success'
+        }}
       shell: bash
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -89,7 +90,7 @@ runs:
         }}
       shell: bash
       env:
-        GH_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
         GH_REPO: ${{ github.repository }}
         RUN_ID: ${{ github.event.workflow_run.id }}
       run: gh run rerun "$RUN_ID" --failed
@@ -105,7 +106,7 @@ runs:
         }}
       shell: bash
       env:
-        GH_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
         GH_REPO: ${{ github.repository }}
         PR_NUMBER: ${{ steps.pull-request.outputs.number }}
         MAINTAINERS_TEAM: ${{ inputs.maintainers-team }}
