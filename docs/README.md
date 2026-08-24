@@ -868,7 +868,7 @@ Asserts that a branch's remote head still matches an expected SHA, to detect com
 ```yaml
     - uses: Alfresco/alfresco-build-tools/.github/actions/git-check-branch-head@v18.25.0
       with:
-        expected-sha: ${{ github.sha }}  # optional, defaults to the local HEAD
+        expected-sha: ${{ github.sha }}  # optional, defaults to the current pull request head SHA, or the current commit SHA
         branch: master  # optional, defaults to the pull request head ref or the current ref
         remote: origin  # optional, default: origin
         fail-on-mismatch: 'true'  # optional, default: 'true'

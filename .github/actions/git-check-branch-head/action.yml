@@ -2,9 +2,9 @@ name: Check branch head
 description: Asserts the remote branch head still matches an expected SHA, detecting commits pushed since the run started
 inputs:
   expected-sha:
-    description: SHA the branch head is expected to be at. Defaults to the current local HEAD.
+    description: SHA the branch head is expected to be at. Defaults to the current pull request head SHA, or the current commit SHA.
     required: false
-    default: ''
+    default: ${{ github.event.pull_request.head.sha || github.sha }}
   branch:
     description: Branch to check on the remote. Defaults to the current pull request head ref, or the current ref.
     required: false
