@@ -1,0 +1,174 @@
+---
+name: Flux operator bootstrap
+description: |
+  Bootstrap or uninstall Flux on a Kubernetes cluster using the Flux Operator.
+  Requires an already authenticated kubectl context, see the action README for
+  the prerequisite cloud login and kubeconfig steps.
+inputs:
+  action:
+    description: Operation to perform, either bootstrap or uninstall
+    required: false
+    default: bootstrap
+  cluster-type:
+    description: Cluster type, one of kubernetes, openshift, aws, azure or gcp
+    required: false
+    default: kubernetes
+  sync-url:
+    description: URL of the Git repository to reconcile from, required to bootstrap
+    required: false
+    default: ''
+  sync-path:
+    description: Path inside the Git repository to reconcile, required to bootstrap
+    required: false
+    default: ''
+  sync-ref:
+    description: Git reference to reconcile from
+    required: false
+    default: refs/heads/main
+  github-app-id:
+    description: ID of the GitHub App authenticating against the Git repository, required to bootstrap
+    required: false
+    default: ''
+  github-app-installation-id:
+    description: Installation ID of the GitHub App, required to bootstrap
+    required: false
+    default: ''
+  github-app-private-key:
+    description: Private key of the GitHub App in PEM format, required to bootstrap
+    required: false
+    default: ''
+  operator-version:
+    description: Version of the Flux Operator Helm chart
+    required: false
+    default: 0.48.0
+  wait-timeout:
+    description: How long to wait for the FluxInstance to become ready
+    required: false
+    default: 5m
+runs:
+  using: composite
+  steps:
+    - name: Validate inputs
+      shell: bash
+      env:
+        ACTION: ${{ inputs.action }}
+        SYNC_URL: ${{ inputs.sync-url }}
+        SYNC_PATH: ${{ inputs.sync-path }}
+        GITHUB_APP_ID: ${{ inputs.github-app-id }}
+        GITHUB_APP_INSTALLATION_ID: ${{ inputs.github-app-installation-id }}
+        GITHUB_APP_PRIVATE_KEY: ${{ inputs.github-app-private-key }}
+      run: |
+        if [ "$ACTION" != "bootstrap" ] && [ "$ACTION" != "uninstall" ]; then
+          echo "::error::action must be either bootstrap or uninstall, got '$ACTION'"
+          exit 1
+        fi
+
+        [ "$ACTION" = "bootstrap" ] || exit 0
+
+        missing=()
+        [ -n "$SYNC_URL" ] || missing+=(sync-url)
+        [ -n "$SYNC_PATH" ] || missing+=(sync-path)
+        [ -n "$GITHUB_APP_ID" ] || missing+=(github-app-id)
+        [ -n "$GITHUB_APP_INSTALLATION_ID" ] || missing+=(github-app-installation-id)
+        [ -n "$GITHUB_APP_PRIVATE_KEY" ] || missing+=(github-app-private-key)
+        if [ ${#missing[@]} -gt 0 ]; then
+          echo "::error::missing inputs required to bootstrap: ${missing[*]}"
+          exit 1
+        fi
+
+    - name: Set up Flux CLI
+      uses: Alfresco/alfresco-build-tools/.github/actions/setup-fluxcli@a4ea4002769a1284dc9e4ab3059cdea73718eb34
+
+    - name: Install Flux Operator
+      if: inputs.action == 'bootstrap'
+      shell: bash
+      env:
+        OPERATOR_VERSION: ${{ inputs.operator-version }}
+      run: |
+        helm upgrade --install flux-operator oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator \
+          --version "$OPERATOR_VERSION" \
+          --namespace flux-system \
+          --create-namespace \
+          --wait
+
+    - name: Create GitHub App secret
+      if: inputs.action == 'bootstrap'
+      shell: bash
+      env:
+        GITHUB_APP_ID: ${{ inputs.github-app-id }}
+        GITHUB_APP_INSTALLATION_ID: ${{ inputs.github-app-installation-id }}
+        GITHUB_APP_PRIVATE_KEY: ${{ inputs.github-app-private-key }}
+      run: |
+        key_file="$(mktemp)"
+        trap 'rm -f "$key_file"' EXIT
+        printf '%s' "$GITHUB_APP_PRIVATE_KEY" > "$key_file"
+        flux create secret githubapp flux-system \
+          --namespace flux-system \
+          --app-id="$GITHUB_APP_ID" \
+          --app-installation-id="$GITHUB_APP_INSTALLATION_ID" \
+          --app-private-key="$key_file" \
+          --export | kubectl apply -f -
+
+    - name: Bootstrap Flux
+      if: inputs.action == 'bootstrap'
+      shell: bash
+      env:
+        CLUSTER_TYPE: ${{ inputs.cluster-type }}
+        SYNC_URL: ${{ inputs.sync-url }}
+        SYNC_REF: ${{ inputs.sync-ref }}
+        SYNC_PATH: ${{ inputs.sync-path }}
+        WAIT_TIMEOUT: ${{ inputs.wait-timeout }}
+      run: |
+        kubectl apply -f - <<EOF
+        apiVersion: fluxcd.controlplane.io/v1
+        kind: FluxInstance
+        metadata:
+          name: flux
+          namespace: flux-system
+        spec:
+          distribution:
+            version: "2.x"
+            registry: "ghcr.io/fluxcd"
+          components:
+            - source-controller
+            - kustomize-controller
+            - helm-controller
+            - notification-controller
+            - image-reflector-controller
+            - image-automation-controller
+          cluster:
+            type: "$CLUSTER_TYPE"
+            multitenant: false
+            networkPolicy: true
+            domain: "cluster.local"
+          sync:
+            kind: GitRepository
+            provider: github
+            url: "$SYNC_URL"
+            ref: "$SYNC_REF"
+            path: "$SYNC_PATH"
+            pullSecret: "flux-system"
+        EOF
+
+        if ! kubectl wait fluxinstance/flux \
+          --namespace flux-system \
+          --for=condition=Ready \
+          --timeout="$WAIT_TIMEOUT"; then
+          echo "::error::FluxInstance did not become ready within $WAIT_TIMEOUT"
+          kubectl describe fluxinstance/flux --namespace flux-system || true
+          kubectl get pods --namespace flux-system || true
+          exit 1
+        fi
+
+    - name: Uninstall Flux
+      if: inputs.action == 'uninstall'
+      shell: bash
+      run: |
+        if kubectl get crd fluxinstances.fluxcd.controlplane.io > /dev/null 2>&1; then
+          kubectl delete fluxinstance/flux --namespace flux-system --ignore-not-found
+        fi
+        # helm uninstall --ignore-not-found needs helm >= 3.13
+        if helm status flux-operator --namespace flux-system > /dev/null 2>&1; then
+          helm uninstall flux-operator --namespace flux-system --wait
+        fi
+        kubectl delete secret flux-system --namespace flux-system --ignore-not-found
