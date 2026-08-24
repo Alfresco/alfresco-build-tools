@@ -33,7 +33,7 @@ runs:
     - id: next-prerelease-resolver
       name: Calculate next internal release
       if: inputs.version == ''
-      uses: Alfresco/alfresco-build-tools/.github/actions/calculate-next-internal-version@a4ea4002769a1284dc9e4ab3059cdea73718eb34
+      uses: Alfresco/alfresco-build-tools/.github/actions/calculate-next-internal-version@3e12ac3732f589841a5969521c63c6a8898ef638
       with:
         next-version: ${{ steps.parse-next-final-version.outputs.result }}
         prerelease-type: ${{ inputs.prerelease-type }}
@@ -50,7 +50,7 @@ runs:
         fi
 
     - name: Update pom files to the new version
-      uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@a4ea4002769a1284dc9e4ab3059cdea73718eb34
+      uses: Alfresco/alfresco-build-tools/.github/actions/maven-update-pom-version@3e12ac3732f589841a5969521c63c6a8898ef638
       with:
         version: ${{ steps.resolve-version.outputs.version }}
         maven-cli-opts: ${{ inputs.maven-cli-opts }}

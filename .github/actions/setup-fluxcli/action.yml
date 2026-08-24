@@ -8,7 +8,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@a4ea4002769a1284dc9e4ab3059cdea73718eb34
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@3e12ac3732f589841a5969521c63c6a8898ef638
       with:
         binary_name: flux
         repo: fluxcd/flux2
