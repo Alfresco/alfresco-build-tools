@@ -65,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@a4ea4002769a1284dc9e4ab3059cdea73718eb34
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@09728aeb3fd57cf22c13d77db881c7485563a83b
         with:
           java-version: ${{ inputs.java-version }}
           java-distribution: ${{ inputs.java-distribution }}
@@ -109,11 +109,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@a4ea4002769a1284dc9e4ab3059cdea73718eb34
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@09728aeb3fd57cf22c13d77db881c7485563a83b
         with:
           java-version: ${{ inputs.java-version }}
           java-distribution: ${{ inputs.java-distribution }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@a4ea4002769a1284dc9e4ab3059cdea73718eb34
+      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@09728aeb3fd57cf22c13d77db881c7485563a83b
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           email: ${{ secrets.BOT_GITHUB_EMAIL }}
