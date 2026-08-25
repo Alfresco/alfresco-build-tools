@@ -145,7 +145,7 @@ runs:
 
     - name: Setup cloud-provider-kind
       if: inputs.cloud-provider-kind-enabled == 'true'
-      uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@09728aeb3fd57cf22c13d77db881c7485563a83b
+      uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@a1a7383fe10ba7aeb6a5c304fc846d3bc5d23064
       with:
         binary_name: cloud-provider-kind
         repo: kubernetes-sigs/cloud-provider-kind
