@@ -71,107 +71,52 @@ runs:
         SWIFT_ROOT: /usr/share/swift
         POWERSHELL_ROOT: /usr/local/share/powershell
       run: |
-        if [[ ${{ inputs.remove-dotnet }} == 'true' && -d $DOTNET_ROOT ]]; then
-          echo "Removing .NET runtime and libraries..."
-          start_time=$(date +%s)
-          [[ ${{ inputs.diagnose-top-offenders-enabled }} == 'true' ]] && du -sh $DOTNET_ROOT
-          sudo rm -rf $DOTNET_ROOT
-          end_time=$(date +%s)
-          echo "Removed in $((end_time - start_time)) seconds"
-        else
-          echo "$DOTNET_ROOT not found"
-        fi
+        diagnose="${{ inputs.diagnose-top-offenders-enabled }}"
+        overall_start=$(date +%s)
 
-        if [[ ${{ inputs.remove-android }} == 'true' && -d $ANDROID_ROOT ]]; then
-          echo "Removing Android SDKs and Tools..."
-          start_time=$(date +%s)
-          [[ ${{ inputs.diagnose-top-offenders-enabled }} == 'true' ]] && du -sh $ANDROID_ROOT
-          sudo rm -rf $ANDROID_ROOT
-          end_time=$(date +%s)
-          echo "Removed in $((end_time - start_time)) seconds"
-        else
-          echo "$ANDROID_ROOT not found"
-        fi
+        remove_in_background() {
+          local label="$1" path="$2"
+          if [[ -d "$path" ]]; then
+            echo "Removing $label ($path) in the background..."
+            [[ "$diagnose" == 'true' ]] && du -sh "$path"
+            sudo rm -rf "$path" &
+          else
+            echo "$path not found, skipping $label"
+          fi
+        }
 
-        if [[ ${{ inputs.remove-haskell }} == 'true' && -d $HASKELL_ROOT ]]; then
-          echo "Removing GHC (Haskell) artifacts..."
-          start_time=$(date +%s)
-          [[ ${{ inputs.diagnose-top-offenders-enabled }} == 'true' ]] && du -sh $HASKELL_ROOT
-          sudo rm -rf $HASKELL_ROOT
-          end_time=$(date +%s)
-          echo "Removed in $((end_time - start_time)) seconds"
-        else
-          echo "$HASKELL_ROOT not found"
-        fi
-
-        if [[ ${{ inputs.remove-codeql }} == 'true' && -d $CODEQL_ROOT ]]; then
-          echo "Removing CodeQL Action Bundles..."
-          start_time=$(date +%s)
-          [[ ${{ inputs.diagnose-top-offenders-enabled }} == 'true' ]] && du -sh $CODEQL_ROOT
-          sudo rm -rf $CODEQL_ROOT
-          end_time=$(date +%s)
-          echo "Removed in $((end_time - start_time)) seconds"
-        else
-          echo "$CODEQL_ROOT not found"
-        fi
+        [[ ${{ inputs.remove-dotnet }} == 'true' ]] && remove_in_background ".NET runtime and libraries" "$DOTNET_ROOT"
+        [[ ${{ inputs.remove-android }} == 'true' ]] && remove_in_background "Android SDKs and Tools" "$ANDROID_ROOT"
+        [[ ${{ inputs.remove-haskell }} == 'true' ]] && remove_in_background "GHC (Haskell) artifacts" "$HASKELL_ROOT"
+        [[ ${{ inputs.remove-codeql }} == 'true' ]] && remove_in_background "CodeQL Action Bundles" "$CODEQL_ROOT"
+        [[ ${{ inputs.remove-swift }} == 'true' ]] && remove_in_background "Swift toolchain and libraries" "$SWIFT_ROOT"
+        [[ ${{ inputs.remove-powershell }} == 'true' ]] && remove_in_background "PowerShell Core installation" "$POWERSHELL_ROOT"
 
         if [[ ${{ inputs.remove-tools-cache }} == 'true' && -d $AGENT_TOOLSDIRECTORY ]]; then
-          echo "Removing tools and dependencies cache..."
-          start_time=$(date +%s)
-          [[ ${{ inputs.diagnose-top-offenders-enabled }} == 'true' ]] && du -sh $AGENT_TOOLSDIRECTORY
-          sudo rm -rf $AGENT_TOOLSDIRECTORY/*
-          end_time=$(date +%s)
-          echo "Removed in $((end_time - start_time)) seconds"
+          echo "Removing tools and dependencies cache ($AGENT_TOOLSDIRECTORY) in the background..."
+          [[ "$diagnose" == 'true' ]] && du -sh $AGENT_TOOLSDIRECTORY
+          sudo rm -rf $AGENT_TOOLSDIRECTORY/* &
         else
-          echo "$AGENT_TOOLSDIRECTORY not found"
-        fi
-
-        if [[ ${{ inputs.remove-swift }} == 'true' && -d $SWIFT_ROOT ]]; then
-          echo "Removing Swift toolchain and libraries..."
-          start_time=$(date +%s)
-          [[ ${{ inputs.diagnose-top-offenders-enabled }} == 'true' ]] && du -sh $SWIFT_ROOT
-          sudo rm -rf $SWIFT_ROOT
-          end_time=$(date +%s)
-          echo "Removed in $((end_time - start_time)) seconds"
-        else
-          echo "$SWIFT_ROOT not found"
-        fi
-
-        if [[ ${{ inputs.remove-powershell }} == 'true' && -d $POWERSHELL_ROOT ]]; then
-          echo "Removing PowerShell Core installation..."
-          start_time=$(date +%s)
-          [[ ${{ inputs.diagnose-top-offenders-enabled }} == 'true' ]] && du -sh $POWERSHELL_ROOT
-          sudo rm -rf $POWERSHELL_ROOT
-          end_time=$(date +%s)
-          echo "Removed in $((end_time - start_time)) seconds"
-        else
-          echo "$POWERSHELL_ROOT not found"
+          echo "$AGENT_TOOLSDIRECTORY not found, skipping tools and dependencies cache"
         fi
 
         if [[ ${{ inputs.remove-docker-images }} == 'true' ]]; then
-          echo "Removing cached Docker images..."
-          start_time=$(date +%s)
-          sudo docker image prune --all --force
-          end_time=$(date +%s)
-          echo "Removed in $((end_time - start_time)) seconds"
+          echo "Removing cached Docker images in the background..."
+          sudo docker image prune --all --force &
         fi
 
         to_remove="${{ inputs.remove-paths }}"
         if [[ -n "$to_remove" ]]; then
-          echo "Removing additional files/folders..."
-          start_time=$(date +%s)
-
           for item in $to_remove; do
-            echo "Removing $item ..."
-            [[ ${{ inputs.diagnose-top-offenders-enabled }} == 'true' ]] && du -sh "$item"
-            sudo rm -rf "$item"
+            echo "Removing $item in the background..."
+            [[ "$diagnose" == 'true' ]] && du -sh "$item"
+            sudo rm -rf "$item" &
           done
-
-          end_time=$(date +%s)
-          echo "Removed in $((end_time - start_time)) seconds"
         fi
 
-        echo "Done removing unwanted software."
+        wait
+        overall_end=$(date +%s)
+        echo "Done removing unwanted software in $((overall_end - overall_start)) seconds."
       shell: bash
 
     - name: Run optional diagnostic of top offenders after cleanup
