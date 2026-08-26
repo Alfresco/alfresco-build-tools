@@ -38,7 +38,7 @@ inputs:
     default: ''
     required: false
   diagnose-top-offenders-enabled:
-    description: Runs diagnostic steps to list top disk space offenders before and after cleanup
+    description: Runs diagnostic steps to list top disk space offenders before and after cleanup, and reports the size of each folder before it is removed
     required: false
     default: 'false'
 
@@ -74,7 +74,7 @@ runs:
         if [[ ${{ inputs.remove-dotnet }} == 'true' && -d $DOTNET_ROOT ]]; then
           echo "Removing .NET runtime and libraries..."
           start_time=$(date +%s)
-          du -sh $DOTNET_ROOT
+          [[ ${{ inputs.diagnose-top-offenders-enabled }} == 'true' ]] && du -sh $DOTNET_ROOT
           sudo rm -rf $DOTNET_ROOT
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
@@ -85,7 +85,7 @@ runs:
         if [[ ${{ inputs.remove-android }} == 'true' && -d $ANDROID_ROOT ]]; then
           echo "Removing Android SDKs and Tools..."
           start_time=$(date +%s)
-          du -sh $ANDROID_ROOT
+          [[ ${{ inputs.diagnose-top-offenders-enabled }} == 'true' ]] && du -sh $ANDROID_ROOT
           sudo rm -rf $ANDROID_ROOT
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
@@ -96,7 +96,7 @@ runs:
         if [[ ${{ inputs.remove-haskell }} == 'true' && -d $HASKELL_ROOT ]]; then
           echo "Removing GHC (Haskell) artifacts..."
           start_time=$(date +%s)
-          du -sh $HASKELL_ROOT
+          [[ ${{ inputs.diagnose-top-offenders-enabled }} == 'true' ]] && du -sh $HASKELL_ROOT
           sudo rm -rf $HASKELL_ROOT
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
@@ -107,7 +107,7 @@ runs:
         if [[ ${{ inputs.remove-codeql }} == 'true' && -d $CODEQL_ROOT ]]; then
           echo "Removing CodeQL Action Bundles..."
           start_time=$(date +%s)
-          du -sh $CODEQL_ROOT
+          [[ ${{ inputs.diagnose-top-offenders-enabled }} == 'true' ]] && du -sh $CODEQL_ROOT
           sudo rm -rf $CODEQL_ROOT
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
@@ -118,7 +118,7 @@ runs:
         if [[ ${{ inputs.remove-tools-cache }} == 'true' && -d $AGENT_TOOLSDIRECTORY ]]; then
           echo "Removing tools and dependencies cache..."
           start_time=$(date +%s)
-          du -sh $AGENT_TOOLSDIRECTORY
+          [[ ${{ inputs.diagnose-top-offenders-enabled }} == 'true' ]] && du -sh $AGENT_TOOLSDIRECTORY
           sudo rm -rf $AGENT_TOOLSDIRECTORY/*
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
@@ -129,7 +129,7 @@ runs:
         if [[ ${{ inputs.remove-swift }} == 'true' && -d $SWIFT_ROOT ]]; then
           echo "Removing Swift toolchain and libraries..."
           start_time=$(date +%s)
-          du -sh $SWIFT_ROOT
+          [[ ${{ inputs.diagnose-top-offenders-enabled }} == 'true' ]] && du -sh $SWIFT_ROOT
           sudo rm -rf $SWIFT_ROOT
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
@@ -140,7 +140,7 @@ runs:
         if [[ ${{ inputs.remove-powershell }} == 'true' && -d $POWERSHELL_ROOT ]]; then
           echo "Removing PowerShell Core installation..."
           start_time=$(date +%s)
-          du -sh $POWERSHELL_ROOT
+          [[ ${{ inputs.diagnose-top-offenders-enabled }} == 'true' ]] && du -sh $POWERSHELL_ROOT
           sudo rm -rf $POWERSHELL_ROOT
           end_time=$(date +%s)
           echo "Removed in $((end_time - start_time)) seconds"
@@ -163,7 +163,7 @@ runs:
 
           for item in $to_remove; do
             echo "Removing $item ..."
-            du -sh "$item"
+            [[ ${{ inputs.diagnose-top-offenders-enabled }} == 'true' ]] && du -sh "$item"
             sudo rm -rf "$item"
           done
 
