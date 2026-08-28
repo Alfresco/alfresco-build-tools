@@ -1,5 +1,5 @@
 name: Deploy artifacts to S3 Bucket
-description: Deploys a local directory of artifacts to a S3 bucket.
+description: Deploys a local directory of artifacts to S3, or copies from one S3 location to another.
 
 inputs:
   aws-region:
@@ -9,9 +9,17 @@ inputs:
     description: AWS role ARN to assume for deployment
     required: true
   deploy-dir:
-    description: Local directory containing artifacts to upload
+    description: Local directory containing artifacts to upload. Ignored if source-s3-uri is set.
     required: false
     default: ./deploy_dir
+  source-s3-uri:
+    description: Source S3 URI to copy from (e.g. s3://bucket/path/). If set, performs S3-to-S3 copy instead of local upload.
+    required: false
+    default: ""
+  copy-props:
+    description: Controls whether S3 object metadata is copied during S3-to-S3 copy. Only used when source-s3-uri is set.
+    required: false
+    default: "none"
   s3-bucket:
     description: S3 bucket name
     required: true
@@ -34,10 +42,12 @@ runs:
         role-session-name: ${{ github.event.repository.name }}-s3-upload-${{ github.run_id }}
         role-duration-seconds: ${{ inputs.role-duration-seconds }}
 
-    - name: Upload to S3 bucket
+    - name: Upload or copy to S3 bucket
       shell: bash
       env:
         DEPLOY_DIR: ${{ inputs.deploy-dir }}
+        SOURCE_S3_URI: ${{ inputs.source-s3-uri }}
+        COPY_PROPS: ${{ inputs.copy-props }}
         S3_BUCKET: ${{ inputs.s3-bucket }}
         S3_PATH: ${{ inputs.s3-path }}
       run: |
@@ -46,4 +56,10 @@ runs:
         else
           s3_destination="s3://${S3_BUCKET}"
         fi
-        aws s3 cp --acl private --recursive "${DEPLOY_DIR}" "${s3_destination}"
+        if [ -n "${SOURCE_S3_URI}" ]; then
+          echo "Copying from ${SOURCE_S3_URI} to ${s3_destination}"
+          aws s3 cp --acl private --recursive --copy-props "${COPY_PROPS}" "${SOURCE_S3_URI}" "${s3_destination}"
+        else
+          echo "Uploading from ${DEPLOY_DIR} to ${s3_destination}"
+          aws s3 cp --acl private --recursive "${DEPLOY_DIR}" "${s3_destination}"
+        fi
