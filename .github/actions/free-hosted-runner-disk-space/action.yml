@@ -79,7 +79,7 @@ runs:
           local label="$1" path="$2"
           if [[ -d "$path" ]]; then
             echo "Removing $label ($path) in the background..."
-            [[ "$diagnose" == 'true' ]] && du -sh "$path"
+            [[ "$diagnose" == 'true' ]] && du -sh "$path" 2>/dev/null || true
             sudo rm -rf "$path" &
             pids+=("$!")
           else
@@ -105,7 +105,7 @@ runs:
         if [[ -n "$to_remove" ]]; then
           for item in $to_remove; do
             echo "Removing $item in the background..."
-            [[ "$diagnose" == 'true' ]] && du -sh "$item"
+            [[ "$diagnose" == 'true' ]] && du -sh "$item" 2>/dev/null || true
             sudo rm -rf "$item" &
             pids+=("$!")
           done
