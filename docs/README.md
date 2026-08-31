@@ -2447,7 +2447,7 @@ To get the necessary data for mentions:
 
 Beyond the standard card, callers can extend it with their own Adaptive Card content via two optional inputs (both default to an empty array, so existing usages are unaffected):
 
-- `card-actions`: JSON array of [Adaptive Card actions](https://adaptivecards.io/explorer/Action.OpenUrl.html) rendered as buttons at the bottom of the card
+- `card-actions`: JSON array of [Adaptive Card actions](https://learn.microsoft.com/en-us/adaptive-cards/schema-explorer/action-open-url) rendered as buttons at the bottom of the card
 - `card-extra-body`: JSON array of Adaptive Card body elements (e.g. a `FactSet` or a monospace `TextBlock`) appended after the message
 
 Sample usage with custom buttons and body elements:
