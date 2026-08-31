@@ -93,7 +93,6 @@ runs:
         [[ ${{ inputs.remove-codeql }} == 'true' ]] && remove_in_background "CodeQL Action Bundles" "$CODEQL_ROOT"
         [[ ${{ inputs.remove-swift }} == 'true' ]] && remove_in_background "Swift toolchain and libraries" "$SWIFT_ROOT"
         [[ ${{ inputs.remove-powershell }} == 'true' ]] && remove_in_background "PowerShell Core installation" "$POWERSHELL_ROOT"
-
         [[ ${{ inputs.remove-tools-cache }} == 'true' ]] && remove_in_background "tools and dependencies cache" "$AGENT_TOOLSDIRECTORY"
 
         if [[ ${{ inputs.remove-docker-images }} == 'true' ]]; then
