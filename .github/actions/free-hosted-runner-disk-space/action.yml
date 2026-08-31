@@ -73,6 +73,7 @@ runs:
       run: |
         diagnose="${{ inputs.diagnose-top-offenders-enabled }}"
         overall_start=$(date +%s)
+        pids=()
 
         remove_in_background() {
           local label="$1" path="$2"
@@ -80,6 +81,7 @@ runs:
             echo "Removing $label ($path) in the background..."
             [[ "$diagnose" == 'true' ]] && du -sh "$path"
             sudo rm -rf "$path" &
+            pids+=("$!")
           else
             echo "$path not found, skipping $label"
           fi
@@ -92,17 +94,12 @@ runs:
         [[ ${{ inputs.remove-swift }} == 'true' ]] && remove_in_background "Swift toolchain and libraries" "$SWIFT_ROOT"
         [[ ${{ inputs.remove-powershell }} == 'true' ]] && remove_in_background "PowerShell Core installation" "$POWERSHELL_ROOT"
 
-        if [[ ${{ inputs.remove-tools-cache }} == 'true' && -d $AGENT_TOOLSDIRECTORY ]]; then
-          echo "Removing tools and dependencies cache ($AGENT_TOOLSDIRECTORY) in the background..."
-          [[ "$diagnose" == 'true' ]] && du -sh $AGENT_TOOLSDIRECTORY
-          sudo rm -rf $AGENT_TOOLSDIRECTORY/* &
-        else
-          echo "$AGENT_TOOLSDIRECTORY not found, skipping tools and dependencies cache"
-        fi
+        [[ ${{ inputs.remove-tools-cache }} == 'true' ]] && remove_in_background "tools and dependencies cache" "$AGENT_TOOLSDIRECTORY"
 
         if [[ ${{ inputs.remove-docker-images }} == 'true' ]]; then
           echo "Removing cached Docker images in the background..."
           sudo docker image prune --all --force &
+          pids+=("$!")
         fi
 
         to_remove="${{ inputs.remove-paths }}"
@@ -111,12 +108,22 @@ runs:
             echo "Removing $item in the background..."
             [[ "$diagnose" == 'true' ]] && du -sh "$item"
             sudo rm -rf "$item" &
+            pids+=("$!")
           done
         fi
 
-        wait
+        failed=0
+        for pid in "${pids[@]}"; do
+          wait "$pid" || failed=1
+        done
+
         overall_end=$(date +%s)
         echo "Done removing unwanted software in $((overall_end - overall_start)) seconds."
+
+        if [[ "$failed" -eq 1 ]]; then
+          echo "One or more removal commands failed." >&2
+          exit 1
+        fi
       shell: bash
 
     - name: Run optional diagnostic of top offenders after cleanup
