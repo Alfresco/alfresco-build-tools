@@ -75,7 +75,10 @@ jobs:
       # free-hosted-runner-disk-space action usage and test
       - name: Check available disk space before running free-hosted-runner-disk-space action
         id: free-hosted-runner-disk-space
-        run: echo "total_size_before=$(df --total --output=avail | tail -1)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "total_size_before=$(df --total --output=avail | tail -1)" >> "$GITHUB_OUTPUT"
+          SHELLCHECK_PROBE="some path"
+          ls $SHELLCHECK_PROBE
       - name: Free up disk space on the runner
         uses: ./.github/actions/free-hosted-runner-disk-space
         with:
