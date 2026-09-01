@@ -2361,18 +2361,33 @@ Resolve preview name based on the PR number and run number:
 
 ### s3-upload
 
-Uploads a local directory of artifacts to an S3 bucket. The caller is responsible for preparing the deploy directory with the artifacts before invoking this action.
+Uploads a local directory of artifacts to an S3 bucket, or copies artifacts from one S3 location to another. The caller is responsible for preparing the deploy directory with the artifacts before invoking this action.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/s3-upload@v18.26.0
         with:
           aws-region: ${{ vars.AWS_REGION }}
           aws-role-arn: ${{ secrets.AWS_ROLE_ARN }}
-          deploy-dir: ./deploy_dir  # optional, default: ./deploy_dir
+          source: ./deploy_dir  # optional, default: "" (falls back to deploy-dir, default ./deploy_dir); a local path or an s3:// URI
           s3-bucket: ${{ vars.AWS_S3_BUCKET }}
           s3-path: enterprise/MyProject/MyArtifact/${{ env.RELEASE_VERSION }}
           role-duration-seconds: 3600  # optional, default: 3600
 ```
+
+To copy artifacts between S3 locations instead of uploading from a local directory, set `source` to an `s3://` URI:
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/s3-upload@v18.26.0
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          aws-role-arn: ${{ secrets.AWS_ROLE_ARN }}
+          source: s3://staging-bucket/enterprise/MyProject/MyArtifact/${{ env.RELEASE_VERSION }}
+          copy-props: none  # optional, default: none
+          s3-bucket: ${{ vars.AWS_S3_BUCKET }}
+          s3-path: enterprise/MyProject/MyArtifact/${{ env.RELEASE_VERSION }}
+```
+
+`deploy-dir` is deprecated in favor of `source` but still works as a fallback when `source` is not set.
 
 ### send-teams-notification
 
