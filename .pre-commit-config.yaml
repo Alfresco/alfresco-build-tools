@@ -36,6 +36,8 @@ repos:
       - id: actionlint
         args: [-ignore, 'unexpected key "queue" for "concurrency" section. expected one of "cancel-in-progress", "group"']
         exclude: ^(\.github/tests/|\.github/workflows/.*\.lock\.yml$)
+        additional_dependencies:
+          - "github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.11.1"
 
   - repo: https://github.com/hyland/github-actions-ensure-sha-pinned-actions
     rev: v1.2.0
