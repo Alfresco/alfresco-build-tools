@@ -824,7 +824,9 @@ You can override the default behavior by adding one or more of the following inp
 ```
 
 There is an additional input `diagnose-top-offenders-enabled` which when set to `true` will
-run a disk usage analysis and print the top offenders before and after the cleanup.
+run a disk usage analysis and print the top offenders before and after the cleanup, and also
+report the size of each folder before it is removed (this is disabled by default since
+computing it adds a full extra directory scan per folder).
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.26.0
