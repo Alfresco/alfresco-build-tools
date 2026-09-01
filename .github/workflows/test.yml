@@ -79,7 +79,7 @@ jobs:
       - name: Free up disk space on the runner
         uses: ./.github/actions/free-hosted-runner-disk-space
         with:
-          diagnose-top-offenders-enabled: 'true'
+          diagnose-top-offenders-enabled: 'false'
       - name: Assert that space available on the runner has increased
         env:
           TOTAL_SIZE_BEFORE: ${{ steps.free-hosted-runner-disk-space.outputs.total_size_before }}
