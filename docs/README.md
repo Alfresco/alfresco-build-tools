@@ -55,6 +55,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [get-branch-name-v2](#get-branch-name-v2)
   - [get-build-info](#get-build-info)
   - [gh-cache-cleanup-on-merge](#gh-cache-cleanup-on-merge)
+  - [git-branch-drift](#git-branch-drift)
   - [git-check-existing-tag](#git-check-existing-tag)
   - [get-commit-message](#get-commit-message)
   - [git-commit-changes](#git-commit-changes)
@@ -901,6 +902,21 @@ jobs:
         with:
           token: ${{ secrets.GH_TOKEN }}
 ```
+
+### git-branch-drift
+
+Asserts that a branch's remote head still matches an expected SHA, to detect commits pushed to it since the run started (e.g. concurrent merges to `master` during a release). Fails the step by default when a mismatch is found; set `fail-on-mismatch: 'false'` to only report it via the `changed` output.
+
+```yaml
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-branch-drift@v18.25.0
+      with:
+        expected-sha: ${{ github.sha }}  # optional, defaults to the current pull request head SHA, or the current commit SHA
+        branch: master  # optional, defaults to the pull request head ref or the current ref
+        remote: origin  # optional, default: origin
+        fail-on-mismatch: 'true'  # optional, default: 'true'
+```
+
+Relies on the credentials `actions/checkout` persists to reach the remote; a checkout with `persist-credentials: false` needs its own authentication (e.g. `github-https-auth`).
 
 ### git-check-existing-tag
 
@@ -2023,10 +2039,13 @@ A lightweight Maven release action that sets the release version, deploys the ar
           create-tag: 'true'  # optional, default: 'true'
           commit-message-prefix: '[skip ci]'  # optional, default: '[skip ci]'
           post-version-command: 'mvn generate-sources'  # optional, runs after each "versions:set" call (release version and next development version)
+          fail-on-concurrent-commits: 'true'  # optional, default: 'true'
 ```
 
 Java and Maven should be set up before invoking the action. The provided `token` must have write access to the repository contents to push the release/development version commits and (if enabled) the release tag.
 Ensure your checkout step configures Git credentials with sufficient permissions before using this action.
+
+Uses `git-branch-drift` before starting the release and again right after the Maven deploy to abort if new commits landed on the branch in the meantime (e.g. a concurrent merge to `master`), preventing the release commits from being pushed onto an unexpected base. Set `fail-on-concurrent-commits: 'false'` to disable this check.
 
 ### maven-tag
 
