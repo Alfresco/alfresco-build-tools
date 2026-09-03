@@ -334,31 +334,36 @@ jobs:
         run: |
           echo "Current branch is ${{ steps.branch-info.outputs.branch-name }}"
 
-      #region Test git-check-branch-head
-      - uses: ./.github/actions/git-check-branch-head
+      #region Test git-branch-drift
+      # These steps check the branch's head on `origin`, which fork PRs never push to, so skip them there.
+      - if: ${{ ! github.event.pull_request.head.repo.fork }}
+        uses: ./.github/actions/git-branch-drift
 
-      - name: Test git-check-branch-head fails on mismatch
-        id: git-check-branch-head-mismatch
+      - name: Test git-branch-drift fails on mismatch
+        id: git-branch-drift-mismatch
+        if: ${{ ! github.event.pull_request.head.repo.fork }}
         continue-on-error: true
-        uses: ./.github/actions/git-check-branch-head
+        uses: ./.github/actions/git-branch-drift
         with:
           expected-sha: '0000000000000000000000000000000000000000'
-      - name: Assert git-check-branch-head failed on mismatch
-        if: steps.git-check-branch-head-mismatch.outcome != 'failure'
+      - name: Assert git-branch-drift failed on mismatch
+        if: ${{ ! github.event.pull_request.head.repo.fork && steps.git-branch-drift-mismatch.outcome != 'failure' }}
         run: |
-          echo "git-check-branch-head should fail when the branch has moved"
+          echo "git-branch-drift should fail when the branch has moved"
           exit 1
 
-      - name: Test git-check-branch-head reports mismatch without failing
-        id: git-check-branch-head-detect
-        uses: ./.github/actions/git-check-branch-head
+      - name: Test git-branch-drift reports mismatch without failing
+        id: git-branch-drift-detect
+        if: ${{ ! github.event.pull_request.head.repo.fork }}
+        uses: ./.github/actions/git-branch-drift
         with:
           expected-sha: '0000000000000000000000000000000000000000'
           fail-on-mismatch: 'false'
-      - name: Assert git-check-branch-head reported the mismatch
+      - name: Assert git-branch-drift reported the mismatch
+        if: ${{ ! github.event.pull_request.head.repo.fork }}
         env:
-          CHANGED: ${{ steps.git-check-branch-head-detect.outputs.changed }}
-          REMOTE_SHA: ${{ steps.git-check-branch-head-detect.outputs.remote-sha }}
+          CHANGED: ${{ steps.git-branch-drift-detect.outputs.changed }}
+          REMOTE_SHA: ${{ steps.git-branch-drift-detect.outputs.remote-sha }}
         run: |
           [ "$CHANGED" = "true" ] || { echo "::error::expected changed=true, got $CHANGED"; exit 1; }
           [ -n "$REMOTE_SHA" ] || { echo "::error::remote-sha output is empty"; exit 1; }

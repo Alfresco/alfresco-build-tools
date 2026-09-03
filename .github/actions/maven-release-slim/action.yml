@@ -41,7 +41,7 @@ runs:
   steps:
     - name: "Check for concurrent commits before starting the release"
       if: inputs.fail-on-concurrent-commits == 'true'
-      uses: Alfresco/alfresco-build-tools/.github/actions/git-check-branch-head@21bf54d131a99eaea590867434e6eccdd8654569
+      uses: Alfresco/alfresco-build-tools/.github/actions/git-branch-drift@21bf54d131a99eaea590867434e6eccdd8654569
 
     - name: "Set release version to ${{ inputs.release-version }}"
       run: mvn -B -ntp versions:set -DnewVersion="${{ inputs.release-version }}" -DgenerateBackupPoms=false
@@ -58,7 +58,7 @@ runs:
 
     - name: "Check for concurrent commits before committing the release"
       if: inputs.fail-on-concurrent-commits == 'true'
-      uses: Alfresco/alfresco-build-tools/.github/actions/git-check-branch-head@21bf54d131a99eaea590867434e6eccdd8654569
+      uses: Alfresco/alfresco-build-tools/.github/actions/git-branch-drift@21bf54d131a99eaea590867434e6eccdd8654569
 
     - name: "Commit release version ${{ inputs.release-version }}"
       uses: iarekylew00t/verified-bot-commit@1ccc6afd0f789e8442cff7deec3e9856a693cc7e # v2.3.4

@@ -37,7 +37,7 @@ mock_ls_remote() {
 
 @test "passes when remote head matches expected sha" {
     mock_ls_remote "$EXPECTED_SHA"
-    run git-check-branch-head.sh
+    run git-branch-drift.sh
     [ "$status" -eq 0 ]
     assert_output_var "changed" "false"
     assert_output_var "remote-sha" "$EXPECTED_SHA"
@@ -45,7 +45,7 @@ mock_ls_remote() {
 
 @test "fails when remote head moved" {
     mock_ls_remote "2222222222222222222222222222222222222222"
-    run git-check-branch-head.sh
+    run git-branch-drift.sh
     [ "$status" -ne 0 ]
     assert_output_var "changed" "true"
     assert_output_var "remote-sha" "2222222222222222222222222222222222222222"
@@ -55,7 +55,7 @@ mock_ls_remote() {
 @test "reports mismatch without failing when fail-on-mismatch is false" {
     export FAIL_ON_MISMATCH="false"
     mock_ls_remote "2222222222222222222222222222222222222222"
-    run git-check-branch-head.sh
+    run git-branch-drift.sh
     [ "$status" -eq 0 ]
     assert_output_var "changed" "true"
     [[ "$output" == *"moved from expected"* ]]
@@ -64,7 +64,7 @@ mock_ls_remote() {
 
 @test "fails when branch is not found on remote" {
     mock_ls_remote ""
-    run git-check-branch-head.sh
+    run git-branch-drift.sh
     [ "$status" -ne 0 ]
     [[ "$output" == *"not found on remote"* ]]
 }
@@ -79,7 +79,7 @@ mock_ls_remote() {
         esac
     }
     export -f git
-    run git-check-branch-head.sh
+    run git-branch-drift.sh
     [ "$status" -eq 0 ]
     assert_output_var "changed" "false"
 }
@@ -87,7 +87,7 @@ mock_ls_remote() {
 @test "strips refs/heads/ prefix from branch input" {
     export BRANCH="refs/heads/master"
     mock_ls_remote "$EXPECTED_SHA"
-    run git-check-branch-head.sh
+    run git-branch-drift.sh
     [ "$status" -eq 0 ]
     assert_output_var "changed" "false"
 }

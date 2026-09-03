@@ -1,4 +1,4 @@
-name: Check branch head
+name: Git branch drift
 description: Asserts the remote branch head still matches an expected SHA, detecting commits pushed since the run started
 inputs:
   expected-sha:
@@ -34,4 +34,4 @@ runs:
         BRANCH: ${{ inputs.branch }}
         REMOTE: ${{ inputs.remote }}
         FAIL_ON_MISMATCH: ${{ inputs.fail-on-mismatch }}
-      run: ${{ github.action_path }}/git-check-branch-head.sh
+      run: ${{ github.action_path }}/git-branch-drift.sh
