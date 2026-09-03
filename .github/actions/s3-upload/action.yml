@@ -63,7 +63,7 @@ runs:
         else
           echo "::warning::s3-bucket and s3-path are deprecated, use destination instead"
           if [ -z "${S3_BUCKET}" ]; then
-            echo "::error::destination is required"
+            echo "::error::Either destination (preferred) or s3-bucket must be set"
             exit 1
           fi
           if [ -n "${S3_PATH}" ]; then
