@@ -45,7 +45,7 @@ runs:
         merge-multiple: true
         path: ${{ inputs.restore-artifact-path }}
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@89bb2a9ef11b83490cce547e9cb894b5ffd6ae87
+    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@b798461c1be9a44a9d6e10ed38de25d1628dd2f7
       id: maven-configure
       with:
         java-version: ${{ inputs.java-version }}
