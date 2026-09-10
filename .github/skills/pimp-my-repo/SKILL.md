@@ -108,17 +108,16 @@ repos:
 ### Python
 
 If the repo contains non-trivial Python scripts — i.e. more than just CI glue under
-100 lines of code — suggest adding `ruff` for linting and formatting:
+100 lines of code — suggest adding `ruff` for linting and formatting. Check the
+[releases page](https://github.com/astral-sh/ruff-pre-commit/releases) for the latest
+`rev` before adding it:
 
 ```yaml
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    # Ruff version.
     rev: v0.16.6
     hooks:
-      # Run the linter.
       - id: ruff-check
         args: [ --fix ]
-      # Run the formatter.
       - id: ruff-format
 ```
 
