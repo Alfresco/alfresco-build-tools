@@ -34,6 +34,18 @@ Rules for every block:
   parent dirs of the marker files (collapse siblings with a glob).
 - Label with `dependencies` plus an ecosystem-specific label.
 
+**Every label referenced must exist in the repo**, or Dependabot silently skips
+labeling the PR and leaves a comment like: *"The following labels could not be found:
+`docker`. Please create it before Dependabot can add it to a pull request."* Check with
+`gh label list`, then create any missing ones before finishing:
+
+```bash
+gh label create docker --description "Docker/Dockerfile dependencies" --color 0db7ed
+```
+
+Pick a description and color that fit the ecosystem; reuse an existing label's color
+scheme if the repo already has similar ones (e.g. other ecosystem labels).
+
 ```yaml
 # Documentation for all configuration options:
 # https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference
