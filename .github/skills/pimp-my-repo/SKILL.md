@@ -122,10 +122,12 @@ If the repo contains non-trivial Python scripts — i.e. more than just CI glue 
 ```
 
 If the repo already lints/formats Python with `black`, `isort`, and/or `flake8`,
-suggest replacing them with `ruff` rather than adding it alongside — ruff supersedes
-all three, so running both is redundant. Only propose this as a separate suggestion
-to the user, since dropping existing hooks is a bigger change than adding a new one;
-don't fold it silently into an unrelated pre-commit change.
+suggest migrating to `ruff` rather than adding it alongside — ruff supersedes all
+three: "Ruff aims to be orders of magnitude faster than alternative tools while
+integrating more functionality behind a single, common interface." Only propose
+this as a separate suggestion to the user, since dropping existing hooks is a
+bigger change than adding a new one; don't fold it silently into an unrelated
+pre-commit change.
 
 ### Wire into CI
 
