@@ -55,10 +55,6 @@ on:
         NEXUS_PASSWORD:
           required: true
 
-env:
-  MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-  MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-
 jobs:
   build:
     name: "Build"
@@ -71,9 +67,15 @@ jobs:
           java-distribution: ${{ inputs.java-distribution }}
       - name: "Build"
         if: ${{ inputs.skip-tests }}
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         run: mvn -B -V install -DskipTests ${{ inputs.build-args }}
       - name: "Build and Test"
         if: ${{ !inputs.skip-tests }}
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         run: mvn -B -V install ${{ inputs.build-args }}
 
   compute_release_conditions:
@@ -118,6 +120,12 @@ jobs:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           email: ${{ secrets.BOT_GITHUB_EMAIL }}
       - name: "Build"
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         run: mvn -B -V install -DskipTests ${{ inputs.build-args }}
       - name: "Release"
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         run: mvn -B -DscmCommentPrefix="[maven-release-plugin][skip ci] " -Dusername="${{ secrets.BOT_GITHUB_USERNAME }}" -Dpassword="${{ secrets.BOT_GITHUB_TOKEN }}" -DskipTests -Darguments="-DskipTests ${{ inputs.release-args }}" ${{ inputs.extra-maven-opts }} release:clean release:prepare release:perform
