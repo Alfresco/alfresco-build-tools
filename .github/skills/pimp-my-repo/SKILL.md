@@ -13,7 +13,8 @@ already configured correctly; merge rather than overwrite.
 2. **Pre-commit** — a baseline `.pre-commit-config.yaml` with the standard hooks, wired
    into CI via this repo's reusable `pre-commit` action, placed wherever best fits the
    repo's existing workflows.
-3. **SHA-pinning** — every workflow references third-party actions by commit SHA.
+3. **SHA-pinning** — every workflow references third-party actions by commit SHA; any
+   Dockerfile pins its base images by digest.
 4. **Gitignore** — common ignores for the repo's stack, plus Claude Code artifacts.
 5. **AI assistant instructions** — `.github/copilot-instructions.md` with a thin `CLAUDE.md`.
 6. **Secrets & permissions** — least-privilege secret scoping and workflow permissions.
@@ -213,6 +214,27 @@ pre-commit run gha-sha-convert --all-files
 ```
 
 Keep your first-party action refs (e.g. `<OWNER>/<REPO>/*`) on the allowlist only if you intentionally permit version tags for them; otherwise let `gha-sha-convert` pin them too.
+
+### Docker base images
+
+If the repo contains a `Dockerfile`, the same immutability argument applies to its
+`FROM` instructions: a tag like `node:20-bookworm` can move to a different image
+underneath it at any time, so pin the digest alongside the tag.
+
+```dockerfile
+FROM node:20.11.1-bookworm@sha256:1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b
+```
+
+Resolve the digest for the tag currently in use rather than guessing it:
+
+```bash
+docker pull node:20.11.1-bookworm
+docker inspect --format '{{index .RepoDigests 0}}' node:20.11.1-bookworm
+```
+
+Keep the tag in front of the digest (`image:tag@sha256:...`) so the version stays
+human-readable, the same way SHA-pinned actions keep their version as a comment. Apply
+this to every `FROM` line, including multi-stage build stages.
 
 ## 4. Gitignore
 
