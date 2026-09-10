@@ -229,8 +229,11 @@ Resolve the digest for the tag currently in use rather than guessing it:
 
 ```bash
 docker pull node:20.11.1-bookworm
-docker inspect --format '{{index .RepoDigests 0}}' node:20.11.1-bookworm
+docker inspect --format '{{index .RepoDigests 0}}' node:20.11.1-bookworm | cut -d@ -f2
 ```
+
+(`RepoDigests` includes the repo name, e.g. `node@sha256:...`, so `cut` strips it down to
+the bare `sha256:...` that gets pasted after `image:tag@`.)
 
 Keep the tag in front of the digest (`image:tag@sha256:...`) so the version stays
 human-readable, the same way SHA-pinned actions keep their version as a comment. Apply
