@@ -28,8 +28,7 @@ def _resolve_action_path(config) -> Path:
     candidates = [d for d in resolved_dirs if d.is_dir() and (d / ACTION_FILE).exists()]
     if len(candidates) == 0:
         raise FileNotFoundError(
-            f"Could not find {ACTION_FILE} in any pythonpath entry. "
-            f"pythonpath={python_paths}, resolved={resolved_dirs}"
+            f"Could not find {ACTION_FILE} in any pythonpath entry. pythonpath={python_paths}, resolved={resolved_dirs}"
         )
     if len(candidates) > 1:
         raise RuntimeError(
