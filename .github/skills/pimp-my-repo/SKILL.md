@@ -108,7 +108,7 @@ repos:
 ### Python
 
 If the repo contains non-trivial Python scripts — i.e. more than just CI glue under
-100 lines of code — suggest adding `ruff` for linting and formatting. Check the
+100 lines of code — suggest `ruff` for linting and formatting. Check the
 [releases page](https://github.com/astral-sh/ruff-pre-commit/releases) for the latest
 `rev` before adding it:
 
@@ -120,6 +120,12 @@ If the repo contains non-trivial Python scripts — i.e. more than just CI glue 
         args: [ --fix ]
       - id: ruff-format
 ```
+
+If the repo already lints/formats Python with `black`, `isort`, and/or `flake8`,
+suggest replacing them with `ruff` rather than adding it alongside — ruff supersedes
+all three, so running both is redundant. Only propose this as a separate suggestion
+to the user, since dropping existing hooks is a bigger change than adding a new one;
+don't fold it silently into an unrelated pre-commit change.
 
 ### Wire into CI
 
