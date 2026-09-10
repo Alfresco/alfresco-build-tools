@@ -105,6 +105,25 @@ repos:
         args: [--allowlist, 'Alfresco/alfresco-build-tools/*']
 ```
 
+### Python
+
+If the repo contains non-trivial Python scripts — i.e. more than just CI glue under
+100 lines of code — suggest adding `ruff` for linting and formatting:
+
+```yaml
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.16.6
+    hooks:
+      # Run the linter.
+      - id: ruff-check
+        args: [ --fix ]
+      # Run the formatter.
+      - id: ruff-format
+```
+
+### Wire into CI
+
 Wire the config into CI by calling this repo's reusable `pre-commit` action
 ([documented here](https://github.com/Alfresco/alfresco-build-tools/blob/master/docs/README.md#pre-commit))
 instead of hand-rolling the pre-commit invocation. Use the latest released tag
@@ -152,6 +171,8 @@ in this order and stop at the first match:
 
 In cases 1 and 2, add the same `steps:` shown above as a job named `pre-commit` in the
 existing workflow, keeping its own `on:` triggers untouched.
+
+### Validate locally
 
 Besides wiring pre-commit into CI, check whether `pre-commit` is available locally and
 use it to validate the new hooks before they ever hit CI:
