@@ -189,11 +189,15 @@ jobs:
               ${{ inputs.release_command }}
 
           - name: Configure signed release commits
-            if: steps.set-release-level.outputs.release-level != '' && inputs.release_command != '' && secrets.GPG_PRIVATE_KEY_ID != ''
+            if: steps.set-release-level.outputs.release-level != '' && inputs.release_command != ''
             env:
               GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
               GPG_PRIVATE_KEY_ID: ${{ secrets.GPG_PRIVATE_KEY_ID }}
             run: |
+              if [ -z "$GPG_PRIVATE_KEY_ID" ]; then
+                exit 0
+              fi
+
               if [ -z "$GPG_PRIVATE_KEY" ]; then
                 echo "::error::GPG_PRIVATE_KEY secret must be set when GPG_PRIVATE_KEY_ID is provided."
                 exit 1
