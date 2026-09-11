@@ -1,1 +1,1 @@
-atlassian-python-api==5.0.3
+atlassian-python-api==5.0.4
