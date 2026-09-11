@@ -43,12 +43,6 @@ on:
           set, the setup-node action is run; otherwise it is skipped.
         required: false
         type: string
-      gpg_private_key_id:
-        description: >-
-          Optional GPG key ID used for signed release commits. Requires the
-          GPG_PRIVATE_KEY secret.
-        required: false
-        type: string
       github_app_workflows_permission:
         description: >-
           Request the workflows:write permission on the GitHub App token.
@@ -68,6 +62,9 @@ on:
         required: false
       GPG_PRIVATE_KEY:
         description: "Optional ASCII-armored private GPG key used for signed release commits"
+        required: false
+      GPG_PRIVATE_KEY_ID:
+        description: "Optional GPG key ID used for signed release commits"
         required: false
 
 concurrency:
@@ -192,13 +189,13 @@ jobs:
               ${{ inputs.release_command }}
 
           - name: Configure signed release commits
-            if: steps.set-release-level.outputs.release-level != '' && inputs.release_command != '' && inputs.gpg_private_key_id != ''
+            if: steps.set-release-level.outputs.release-level != '' && inputs.release_command != '' && secrets.GPG_PRIVATE_KEY_ID != ''
             env:
               GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-              GPG_PRIVATE_KEY_ID: ${{ inputs.gpg_private_key_id }}
+              GPG_PRIVATE_KEY_ID: ${{ secrets.GPG_PRIVATE_KEY_ID }}
             run: |
               if [ -z "$GPG_PRIVATE_KEY" ]; then
-                echo "::error::GPG_PRIVATE_KEY secret must be set when gpg_private_key_id is provided."
+                echo "::error::GPG_PRIVATE_KEY secret must be set when GPG_PRIVATE_KEY_ID is provided."
                 exit 1
               fi
 
