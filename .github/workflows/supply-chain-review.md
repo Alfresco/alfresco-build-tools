@@ -33,6 +33,7 @@ safe-outputs:
   remove-labels:
     allowed: [security:low, security:medium, security:high]
   submit-pull-request-review:
+    supersede-older-reviews: true
 
 ---
 
@@ -56,7 +57,7 @@ For each changed dependency extract:
 - Old version (or mark as `NEW DEPENDENCY` if newly added)
 - New version
 
-If no dependency files were changed, post a brief PR comment stating that no dependency changes were detected and no review is needed, then stop.
+If no dependency files were changed, post a brief PR comment stating that no dependency changes were detected, then go directly to Step 6 — treating this as LOW risk — to remove any stale `security:*` labels and submit the required pull request review, then stop.
 
 ## Step 1b — Filter Internal Dependencies
 
@@ -73,7 +74,7 @@ For each internal dependency found:
 2. Record the package name (with `@` replaced by `(at)` for GitHub comment compatibility), ecosystem, old version, and new version in a separate "Internal Dependencies (Skipped)" list.
 3. Continue with Step 2 only for the remaining external/public dependencies.
 
-If ALL changed dependencies are internal, skip Steps 2-4 and proceed directly to Step 5, posting a report that lists the internal dependencies and notes that no external supply chain analysis was performed.
+If ALL changed dependencies are internal, skip Steps 2-4 and proceed directly to Step 5 — treating this as LOW risk for Step 6 — posting a report that lists the internal dependencies and notes that no external supply chain analysis was performed.
 
 ## Step 2 — Collect Data for Each Dependency
 
@@ -346,13 +347,16 @@ No suspicious patterns detected. Routine upgrade.
   - `security:low` for LOW risk
   - `security:medium` for MEDIUM risk
   - `security:high` for HIGH or CRITICAL risk
-- If the highest risk level is HIGH or CRITICAL, submit a pull request review requesting changes, with a summary of the critical findings.
-- If the risk is MEDIUM, submit a pull request review as a comment, noting that human review is recommended.
-- If the risk is LOW, do not submit a review — the PR comment is sufficient.
+- **Always submit a pull request review — in every invocation, with no exceptions.** This is not conditional on risk level. A prior invocation of this workflow may have already left a `REQUEST_CHANGES` review on this PR (e.g., before the flagged dependency was fixed, downgraded, or removed); the `supersede-older-reviews` safe-output setting only dismisses that stale review once a new review is submitted, so skipping the review submission would leave the PR incorrectly blocked forever. Submit a review even when there are no dependency changes, when all dependencies are internal, or when risk is LOW.
+  - If the highest risk level is HIGH or CRITICAL, submit the review as **request changes**, with a summary of the critical findings.
+  - If the risk is MEDIUM, submit the review as a **comment**, noting that human review is recommended.
+  - If the risk is LOW (including when there are no dependency changes, or all changed dependencies are internal), submit the review as a **comment**, summarizing that no concerns were found and the PR comment has the full detail.
+  - **Never submit the review as an approval, under any circumstance** — this workflow only ever comments or requests changes; a human always makes the merge decision.
 
 ## Important Guidelines
 
-- **Never approve or merge the PR** — all actions are advisory or blocking only. A human always makes the merge decision.
+- **Never approve or merge the PR** — all actions are advisory or blocking only. A human always makes the merge decision. Every review this workflow submits must use the comment or request-changes event — never the approve event.
+- **Always submit exactly one pull request review per invocation, regardless of outcome** — this is required so that `supersede-older-reviews` can supersede/dismiss any stale `REQUEST_CHANGES` review left by an earlier run of this same workflow on the same PR.
 - Be specific in findings — cite exact data (vulnerability ID, maintainer name, script content, file path, API response) rather than vague warnings.
 - For Maven packages, adapt npm-specific checks appropriately (e.g., install scripts become build plugin analysis, maintainer metadata may be limited).
 - When a package is a NEW dependency (no old version), pay extra attention to project health, name legitimacy, and install scripts since there is no historical baseline to compare against.
