@@ -40,7 +40,7 @@ inputs:
   operator-version:
     description: Version of the Flux Operator Helm chart
     required: false
-    default: 0.59.0
+    default: 0.60.0
   wait-timeout:
     description: How long to wait for the FluxInstance to become ready
     required: false
