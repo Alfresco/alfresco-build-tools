@@ -1,26 +1,19 @@
-[tool.black]
+[tool.ruff]
 line-length = 120
-force-exclude = '''
-.git
-.pytest_cache
-.coverage
-.tox
-.venv
-_build
-buck-out
-build
-dist
-venv
-'''
+extend-exclude = [
+    ".pytest_cache",
+    ".tox",
+    ".venv",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "venv",
+]
 
-[tool.flake8]
-ignore = ['W503', 'E203'] # W503 line break before binary operator - ignored as PEP 8 now recommends this style
-                          # E203 whitespace before ':' - conflicts with Black's slice formatting
-max-line-length = 120
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "C90"]
+ignore = ["E203"] # whitespace before ':' - conflicts with the formatter's slice formatting
+
+[tool.ruff.lint.mccabe]
 max-complexity = 18
-count = true
-exclude = ['venv']
-inline-quotes = "double"
-
-[tool.isort]
-profile="black"
