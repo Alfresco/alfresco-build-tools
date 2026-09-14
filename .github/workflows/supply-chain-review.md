@@ -33,6 +33,7 @@ safe-outputs:
   remove-labels:
     allowed: [security:low, security:medium, security:high]
   submit-pull-request-review:
+    allowed-events: [COMMENT, REQUEST_CHANGES]
     supersede-older-reviews: true
 
 ---
@@ -268,7 +269,7 @@ Verify that the source repository URL in registry metadata points to the canonic
 Assign a risk score (0-100) to each dependency using these guidelines:
 
 | Priority | Signal                                                                                                                                                                                                                                                     | Typical Impact |
-| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+|----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------|
 | Highest  | Known CRITICAL/HIGH CVEs in new version, confirmed typosquatting, malicious code in diff, build provenance mismatch (tag points to different code than published artifact), tag mimicry on fork                                                            | 60+ points     |
 | High     | Maintainer takeover pattern (publisher changed + old maintainers removed), dangerous install scripts, known compromised package, moved/recreated tag with different commit, provenance attestations removed from package that previously had them          | 20-40 points   |
 | Medium   | Low OpenSSF Scorecard (< 3), publisher changed (without full takeover), new install scripts, very recent publish (< 48h), obfuscated code in diff, unsigned lightweight tags on security-critical packages, absence of provenance on high-profile packages | 10-20 points   |
@@ -304,9 +305,9 @@ GitHub enforces a maximum of 10 mentions per comment. Package names containing `
 
 ### Internal Dependencies (Skipped)
 
-| Package           | Ecosystem | Old Version | New Version | Reason                          |
-|-------------------|-----------|-------------|-------------|---------------------------------|
-| (at)hyland/core   | npm       | 3.1.0       | 3.2.0       | Internal ((at)hyland/* scope)   |
+| Package         | Ecosystem | Old Version | New Version | Reason                        |
+|-----------------|-----------|-------------|-------------|-------------------------------|
+| (at)hyland/core | npm       | 3.1.0       | 3.2.0       | Internal ((at)hyland/* scope) |
 
 _These dependencies are internal packages not available on public registries. External API checks were skipped._
 
