@@ -60,6 +60,12 @@ on:
       GH_APP_PRIVATE_KEY:
         description: "GitHub App private key (used when github_app_client_id is set)"
         required: false
+      GPG_PRIVATE_KEY:
+        description: "Optional ASCII-armored private GPG key used for signed release commits"
+        required: false
+      GPG_PRIVATE_KEY_ID:
+        description: "Optional GPG key ID used for signed release commits"
+        required: false
 
 concurrency:
   group: release-${{ github.event.repository.name }}
@@ -181,6 +187,25 @@ jobs:
               TARGET_BRANCH: ${{ inputs.target_branch }}
             run: |
               ${{ inputs.release_command }}
+
+          - name: Configure signed release commits
+            if: steps.set-release-level.outputs.release-level != '' && inputs.release_command != ''
+            env:
+              GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+              GPG_PRIVATE_KEY_ID: ${{ secrets.GPG_PRIVATE_KEY_ID }}
+            run: |
+              if [ -z "$GPG_PRIVATE_KEY_ID" ]; then
+                exit 0
+              fi
+
+              if [ -z "$GPG_PRIVATE_KEY" ]; then
+                echo "::error::GPG_PRIVATE_KEY secret must be set when GPG_PRIVATE_KEY_ID is provided."
+                exit 1
+              fi
+
+              printf '%s' "$GPG_PRIVATE_KEY" | gpg --batch --yes --pinentry-mode loopback --import
+              git config --global user.signingkey "$GPG_PRIVATE_KEY_ID"
+              git config --global commit.gpgsign true
 
           - name: Commit back changes from release script
             uses: iarekylew00t/verified-bot-commit@42a042b0407248f3c0acac00c389e729e3476e86 # v2.3.5

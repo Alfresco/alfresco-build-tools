@@ -34,6 +34,8 @@ teardown() {
 
 @test "does nothing without gpg key" {
   unset GPG_PRIVATE_KEY
+  unset GPG_PRIVATE_KEY_FINGERPRINT
+  unset GIT_CONFIG_COUNT GIT_CONFIG_KEY_0 GIT_CONFIG_VALUE_0 GIT_CONFIG_KEY_1 GIT_CONFIG_VALUE_1
 
   # shellcheck source=/dev/null
   source "$SCRIPT"
