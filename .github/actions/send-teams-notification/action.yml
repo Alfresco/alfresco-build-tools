@@ -169,7 +169,7 @@ runs:
 
     - name: Get branch name
       id: get-branch-name
-      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@673db33d14f0857f54ca251f7b4bbe4da58f1f06
+      uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name-v2@bfdc74d18707c2d47875439bb8f881c7f66868c0
 
     - name: Transform mentions to JSON entities
       id: transform-mentions
