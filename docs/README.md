@@ -3018,6 +3018,9 @@ as long as the job grants it `contents: write` and `target_branch` allows it to
 push (note that pushes made with `GITHUB_TOKEN` do not trigger further workflow
 runs). Alternatively, authenticate with a GitHub App as described below.
 
+The reusable workflow exposes a `version` output with the bumped release version,
+available to downstream jobs as `needs.<job-id>.outputs.version`.
+
 #### Custom release command
 
 When the `release_command` input is set, the workflow runs the specified
