@@ -61,9 +61,12 @@ on:
         description: "GitHub App private key (used when github_app_client_id is set)"
         required: false
     outputs:
-      version:
+      released-version:
         description: "Version produced by the release bump"
-        value: ${{ jobs.release.outputs.version }}
+        value: ${{ jobs.release.outputs.released-version }}
+      current-version:
+        description: "Current version before the release bump"
+        value: ${{ jobs.release.outputs.current-version }}
 
 concurrency:
   group: release-${{ github.event.repository.name }}
@@ -74,7 +77,8 @@ jobs:
         name: Release
         runs-on: ubuntu-latest
         outputs:
-          version: ${{ steps.bump-semver.outputs.new-version }}
+          released-version: ${{ steps.bump-semver.outputs.new-version }}
+          current-version: ${{ steps.bump-semver.outputs.current-version }}
         steps:
           - name: Create GitHub App token
             id: app-token
