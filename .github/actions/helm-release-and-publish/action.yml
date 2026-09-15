@@ -100,4 +100,5 @@ runs:
         helm-charts-repo-base-url: ${{ inputs.helm-repository-base-url }}
         chart-package: ${{ steps.package-helm-chart.outputs.package-file-path }}
         token: ${{ inputs.helm-repository-token }}
+        git-username: ${{ inputs.git-username }}
         do-push: ${{ inputs.do-push }}
