@@ -45,7 +45,7 @@ runs:
         merge-multiple: true
         path: ${{ inputs.restore-artifact-path }}
 
-    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@99b7295407698b31c46b42784fb2c6069425a8f7
+    - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@f237041b591380c58efc949274dcebdbd5653b7f
       id: maven-configure
       with:
         java-version: ${{ inputs.java-version }}
@@ -53,7 +53,7 @@ runs:
         maven-settings-path: ${{ inputs.maven-settings-path }}
 
     - name: Submit Dependency Graph
-      uses: advanced-security/maven-dependency-submission-action@b275d12641ac2d2108b2cbb7598b154ad2f2cee8 # v5.0.0
+      uses: advanced-security/maven-dependency-submission-action@a64327a7329c9939cf675e458452febe1894a70c # v6.0.1
       with:
         maven-args: ${{ steps.maven-configure.outputs.maven-options }} ${{ inputs.maven-args }}
       env:

@@ -55,25 +55,27 @@ on:
         NEXUS_PASSWORD:
           required: true
 
-env:
-  MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-  MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-
 jobs:
   build:
     name: "Build"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@99b7295407698b31c46b42784fb2c6069425a8f7
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@f237041b591380c58efc949274dcebdbd5653b7f
         with:
           java-version: ${{ inputs.java-version }}
           java-distribution: ${{ inputs.java-distribution }}
       - name: "Build"
         if: ${{ inputs.skip-tests }}
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         run: mvn -B -V install -DskipTests ${{ inputs.build-args }}
       - name: "Build and Test"
         if: ${{ !inputs.skip-tests }}
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         run: mvn -B -V install ${{ inputs.build-args }}
 
   compute_release_conditions:
@@ -109,15 +111,21 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@99b7295407698b31c46b42784fb2c6069425a8f7
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@f237041b591380c58efc949274dcebdbd5653b7f
         with:
           java-version: ${{ inputs.java-version }}
           java-distribution: ${{ inputs.java-distribution }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@99b7295407698b31c46b42784fb2c6069425a8f7
+      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@f237041b591380c58efc949274dcebdbd5653b7f
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           email: ${{ secrets.BOT_GITHUB_EMAIL }}
       - name: "Build"
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         run: mvn -B -V install -DskipTests ${{ inputs.build-args }}
       - name: "Release"
+        env:
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
         run: mvn -B -DscmCommentPrefix="[maven-release-plugin][skip ci] " -Dusername="${{ secrets.BOT_GITHUB_USERNAME }}" -Dpassword="${{ secrets.BOT_GITHUB_TOKEN }}" -DskipTests -Darguments="-DskipTests ${{ inputs.release-args }}" ${{ inputs.extra-maven-opts }} release:clean release:prepare release:perform

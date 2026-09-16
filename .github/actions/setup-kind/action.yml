@@ -111,7 +111,7 @@ runs:
         echo "kind-config-path=${KIND_CONFIG_PATH}" >> $GITHUB_OUTPUT
 
     - name: Create cluster
-      uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc # v1.14.0
+      uses: helm/kind-action@06c1ae10762d3b9c1644e7fe69596ae519e015a2 # v1.15.0
       with:
         config: ${{ steps.set-outputs.outputs.kind-config-path }}
         version: ${{ inputs.kind-version }}
@@ -145,7 +145,7 @@ runs:
 
     - name: Setup cloud-provider-kind
       if: inputs.cloud-provider-kind-enabled == 'true'
-      uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@99b7295407698b31c46b42784fb2c6069425a8f7
+      uses: Alfresco/alfresco-build-tools/.github/actions/setup-github-release-binary@f237041b591380c58efc949274dcebdbd5653b7f
       with:
         binary_name: cloud-provider-kind
         repo: kubernetes-sigs/cloud-provider-kind

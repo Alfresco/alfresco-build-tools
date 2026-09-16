@@ -13,7 +13,8 @@ already configured correctly; merge rather than overwrite.
 2. **Pre-commit** — a baseline `.pre-commit-config.yaml` with the standard hooks, wired
    into CI via this repo's reusable `pre-commit` action, placed wherever best fits the
    repo's existing workflows.
-3. **SHA-pinning** — every workflow references third-party actions by commit SHA.
+3. **SHA-pinning** — every workflow references third-party actions by commit SHA; any
+   Dockerfile pins its base images by digest.
 4. **Gitignore** — common ignores for the repo's stack, plus Claude Code artifacts.
 5. **AI assistant instructions** — `.github/copilot-instructions.md` with a thin `CLAUDE.md`.
 6. **Secrets & permissions** — least-privilege secret scoping and workflow permissions.
@@ -33,6 +34,18 @@ Rules for every block:
 - Weekly `schedule`, 7-day `cooldown`, and `directories:` (plural) pointing at the
   parent dirs of the marker files (collapse siblings with a glob).
 - Label with `dependencies` plus an ecosystem-specific label.
+
+**Every label referenced must exist in the repo**, or Dependabot silently skips
+labeling the PR and leaves a comment like: *"The following labels could not be found:
+`docker`. Please create it before Dependabot can add it to a pull request."* Check with
+`gh label list`, then create any missing ones before finishing:
+
+```bash
+gh label create docker --description "Docker/Dockerfile dependencies" --color 0db7ed
+```
+
+Pick a description and color that fit the ecosystem; reuse an existing label's color
+scheme if the repo already has similar ones (e.g. other ecosystem labels).
 
 ```yaml
 # Documentation for all configuration options:
@@ -105,6 +118,30 @@ repos:
         args: [--allowlist, 'Alfresco/alfresco-build-tools/*']
 ```
 
+### Python
+
+If the repo contains non-trivial Python scripts — i.e. more than just CI glue under
+100 lines of code — suggest `ruff` for linting and formatting. Check the
+[releases page](https://github.com/astral-sh/ruff-pre-commit/releases) for the latest
+`rev` before adding it:
+
+```yaml
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.6
+    hooks:
+      - id: ruff-check
+        args: [ --fix ]
+      - id: ruff-format
+```
+
+If the repo already lints/formats Python with `black`, `isort`, and/or `flake8`,
+suggest migrating to `ruff` rather than adding it alongside — ruff supersedes all
+three with a single, much faster tool. Only propose this as a separate suggestion
+to the user, since dropping existing hooks is a bigger change than adding a new
+one; don't fold it silently into an unrelated pre-commit change.
+
+### Wire into CI
+
 Wire the config into CI by calling this repo's reusable `pre-commit` action
 ([documented here](https://github.com/Alfresco/alfresco-build-tools/blob/master/docs/README.md#pre-commit))
 instead of hand-rolling the pre-commit invocation. Use the latest released tag
@@ -152,6 +189,8 @@ in this order and stop at the first match:
 
 In cases 1 and 2, add the same `steps:` shown above as a job named `pre-commit` in the
 existing workflow, keeping its own `on:` triggers untouched.
+
+### Validate locally
 
 Besides wiring pre-commit into CI, check whether `pre-commit` is available locally and
 use it to validate the new hooks before they ever hit CI:
@@ -213,6 +252,30 @@ pre-commit run gha-sha-convert --all-files
 ```
 
 Keep your first-party action refs (e.g. `<OWNER>/<REPO>/*`) on the allowlist only if you intentionally permit version tags for them; otherwise let `gha-sha-convert` pin them too.
+
+### Docker base images
+
+If the repo contains a `Dockerfile`, the same immutability argument applies to its
+`FROM` instructions: a tag like `node:20-bookworm` can move to a different image
+underneath it at any time, so pin the digest alongside the tag.
+
+```dockerfile
+FROM node:20.11.1-bookworm@sha256:1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b
+```
+
+Resolve the digest for the tag currently in use rather than guessing it:
+
+```bash
+docker pull node:20.11.1-bookworm
+docker inspect --format '{{index .RepoDigests 0}}' node:20.11.1-bookworm | cut -d@ -f2
+```
+
+(`RepoDigests` includes the repo name, e.g. `node@sha256:...`, so `cut` strips it down to
+the bare `sha256:...` that gets pasted after `image:tag@`.)
+
+Keep the tag in front of the digest (`image:tag@sha256:...`) so the version stays
+human-readable, the same way SHA-pinned actions keep their version as a comment. Apply
+this to every `FROM` line, including multi-stage build stages.
 
 ## 4. Gitignore
 
