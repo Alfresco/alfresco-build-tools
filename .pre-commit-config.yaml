@@ -60,7 +60,7 @@ repos:
       - id: check-self-ref-no-version
         name: Ensure $/ refs carry no @ref suffix
         language: system
-        entry: bash -c '! grep -rn "\$/[^ ]*@" .github --include="*.yml"'
+        entry: bash -c '! grep -rn "\$/[^ ]*@" .github --include="*.yml" --include="*.yaml"'
         pass_filenames: false
         files: ^\.github/(actions|workflows)/.*\.ya?ml$
 
