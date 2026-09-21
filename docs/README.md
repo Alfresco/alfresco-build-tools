@@ -466,10 +466,6 @@ starts using [Immutable releases](https://docs.github.com/en/code-security/conce
 See [github-actions-ensure-sha-pinned-actions](https://github.com/hyland/github-actions-ensure-sha-pinned-actions),
 available via pre-commit as well.
 
-This repo composes its own actions internally using GitHub's `$/` self-repository syntax rather than pinning to
-itself, so the guidance above is about the actions and workflows *you* reference from `alfresco-build-tools`, not
-about how this repo's actions call each other.
-
 ## GitHub Actions provided by us
 
 ### automate-propagation
