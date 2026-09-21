@@ -36,7 +36,6 @@ Here follows the list of GitHub Actions topics available in the current document
   - [Triggering a workflow in another repository](#triggering-a-workflow-in-another-repository)
   - [Retry an action](#retry-an-action)
   - [Actions SHA pinning](#actions-sha-pinning)
-  - [Requirements](#requirements)
 - [GitHub Actions provided by us](#github-actions-provided-by-us)
   - [automate-propagation](#automate-propagation)
   - [awf-run-command](#awf-run-command)
@@ -470,11 +469,6 @@ available via pre-commit as well.
 This repo composes its own actions internally using GitHub's `$/` self-repository syntax rather than pinning to
 itself, so the guidance above is about the actions and workflows *you* reference from `alfresco-build-tools`, not
 about how this repo's actions call each other.
-
-### Requirements
-
-Actions and reusable workflows in this repository require GitHub Actions runner **2.336.0 or newer**. GitHub-hosted
-runners already meet this; only older self-hosted runners may need an update.
 
 ## GitHub Actions provided by us
 
