@@ -77,7 +77,7 @@ runs:
         fi
 
     - name: Set up Flux CLI
-      uses: Alfresco/alfresco-build-tools/.github/actions/setup-fluxcli@74d07962d35ee65cda04fd4fe4df4beddc828be0
+      uses: $/.github/actions/setup-fluxcli
 
     - name: Install Flux Operator
       if: inputs.action == 'bootstrap'
