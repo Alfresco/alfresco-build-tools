@@ -5,4 +5,4 @@ description: >
 runs:
   using: composite
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/nested-group/child@43b8a38fca3421f9bcb4757ee3d2adce4065dbf2
+    - uses: Alfresco/alfresco-build-tools/.github/actions/nested-group/child@74d07962d35ee65cda04fd4fe4df4beddc828be0
