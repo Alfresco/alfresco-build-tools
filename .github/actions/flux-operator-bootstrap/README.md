@@ -32,7 +32,7 @@ them added.
             --name "$CLUSTER_NAME" \
             --overwrite-existing
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/flux-operator-bootstrap@v18.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/flux-operator-bootstrap@v18.28.3
         with:
           cluster-type: azure
           # ...
@@ -55,7 +55,7 @@ them added.
             --region "$AWS_REGION" \
             --name "$CLUSTER_NAME"
 
-      - uses: Alfresco/alfresco-build-tools/.github/actions/flux-operator-bootstrap@v18.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/flux-operator-bootstrap@v18.28.3
         with:
           cluster-type: aws
           # ...

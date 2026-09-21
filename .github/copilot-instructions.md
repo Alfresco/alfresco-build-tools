@@ -12,8 +12,8 @@ This repository contains shared/reusable CI configurations for GitHub Actions se
 - **release/minor**: New actions or backward-compatible improvements
 - **release/major**: Breaking changes requiring users to update their workflows
 
-When referencing internal actions in workflow YAML files, **always use the latest released tag** (e.g., `v9.2.0`),
-the release workflow will automatically update these references during releases.
+When referencing internal actions in workflow YAML files, use the `$/` self-repository syntax (e.g., `$/.github/actions/action-name`)
+rather than an owner/repo reference — see "Internal vs External Action References" below.
 
 ### Documentation Requirements (CRITICAL)
 
@@ -78,23 +78,23 @@ Input tables are not necessary — a YAML snippet with inline comments is suffic
 
 **For reusable workflows and composite actions referencing actions within this repository:**
 
-- **MUST** use SHA pins: `Alfresco/alfresco-build-tools/.github/actions/action-name@<40-char-sha>`
-- **NEVER** use version tags: `Alfresco/alfresco-build-tools/.github/actions/action-name@v17.7.0`
-- SHA pins are managed **automatically by the release process** — do not set them manually
-- The release workflow creates a release candidate commit (SHA_RC) from the current HEAD, then the final release commit pins refs to SHA_RC — growing consistent depth by +2 levels per release cycle
+- **MUST** use the `$/` self-repository syntax: `$/.github/actions/action-name`
+- **NEVER** use an owner/repo reference (`Alfresco/alfresco-build-tools/.github/actions/action-name@<ref>`), whether SHA- or tag-pinned, and never append `@<ref>` to a `$/` reference — it always resolves to the commit currently running
+- `$/` requires GitHub Actions runner 2.336.0 or newer (GitHub-hosted runners already meet this)
 
 **Examples:**
 
-✅ **Correct (SHA pin):**
+✅ **Correct (`$/` self-reference):**
 
 ```yaml
-- uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
+- uses: $/.github/actions/setup-java-build
 ```
 
-❌ **Incorrect (version tag):**
+❌ **Incorrect (owner/repo reference, any ref style):**
 
 ```yaml
 - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v17.7.0
+- uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
 ```
 
 **For external actions (from other repositories):**
@@ -121,7 +121,6 @@ by itself justify inclusion.
 - Add tests to `.github/tests/` for new actions when applicable
 - Add new actions to existing workflow tests in `.github/workflows/tests.yml`
   if there are no side effects, secrets required, or external resources needed
-- Test actions locally using the `test/local-actions` label
 - Ensure actions work on both `ubuntu-latest` and `ubuntu-24.04-arm` runners
 - Validate backward compatibility for existing actions
 
@@ -159,10 +158,8 @@ pre-commit run --all-files
 
 - Releases are triggered automatically when PRs are merged to master
 - The released version is determined from PR labels (`release/major`, `release/minor`, `release/patch`)
-- Actions will automatically be updated with the release tag by the release workflow itself, no need to do it manually
+- Internal action references use the `$/` self-repository syntax and resolve to the released commit on their own; `release.sh` only bumps the version tags used in the `docs/` examples
 - Release notes are auto-generated from PR titles and descriptions
-- The `release.sh` script automatically pins all internal references to the SHA of the release candidate commit
-- **CRITICAL**: Internal references must use SHA pins (not version tags); these are managed automatically by the release process — do not set them manually
 
 ### Pull Request Guidelines
 
@@ -223,7 +220,7 @@ GitHub Agentic Workflows (AWF) are markdown-based workflows that use AI agents (
 ## Common Pitfalls to Avoid
 
 - **Never** skip version bumping for functional changes
-- **CRITICAL**: Never use version tags for internal action references (`Alfresco/alfresco-build-tools/.github/...`) - always use SHA pins (managed automatically by the release process)
+- **CRITICAL**: Never use an owner/repo reference for internal actions (`Alfresco/alfresco-build-tools/.github/...`) - always use the `$/` self-repository syntax, with no `@ref` suffix
 - **Don't** use `latest` tags for external actions - always pin versions
 - **Avoid** hardcoding repository-specific values in reusable actions
 - **Don't** merge PRs with user-facing changes (new features or enhancements) without updating `docs/README.md`
@@ -238,7 +235,7 @@ Before opening or reviewing a PR, verify:
 2. ✅ **Validation passed**: `.github/scripts/check_readme.sh` runs successfully
 3. ✅ **Version label**: Appropriate `release/patch|minor|major` label added
 4. ✅ **Pre-commit hooks**: All checks pass
-5. ✅ **Internal references**: Use SHA pins (managed by release process), not version tags
+5. ✅ **Internal references**: Use the `$/` self-repository syntax, not an owner/repo reference
 6. ✅ **Reusability**: New actions solve a problem multiple callers realistically need, with generic names/inputs/behavior, not just an extraction from one workflow
 
 ## Useful Commands
@@ -253,14 +250,14 @@ pre-commit run --all-files
 # Test specific action locally
 cd .github/actions/action-name && bats tests/
 
-# Find all internal action references (should use SHA pins, not version tags)
+# Find all internal action references (the correct $/ format)
+grep -r '\$/\.github/actions/' .github/ --include="*.yml"
+
+# Check for forbidden owner/repo references to this repo (should return no results)
 grep -r "Alfresco/alfresco-build-tools/.github" .github/ --include="*.yml"
 
-# Check for forbidden version tags in internal references (should return no results)
-grep -r "Alfresco/alfresco-build-tools/.github.*@v[0-9]" .github/ --include="*.yml"
-
-# Find all SHA-pinned internal references (the correct format)
-grep -r "alfresco-build-tools.*@[0-9a-f]\{40\}" .github/ --include="*.yml"
+# Check for a $/ reference carrying an @ref suffix, which is invalid (should return no results)
+grep -rn '\$/[^ ]*@' .github --include="*.yml"
 
 # Check for undocumented actions
 diff <(ls .github/actions) <(grep -o "### [^#]*" docs/README.md | sed 's/### //')

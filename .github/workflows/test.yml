@@ -21,9 +21,6 @@ jobs:
         uses: ./.github/actions/pre-commit
       - name: Ensure SHA pinned actions
         uses: hyland/github-actions-ensure-sha-pinned-actions@7957efb76aba0eec7580a9c0392d3e5bec381359 # v2.0.1
-        with:
-          allowlist: |
-            Alfresco/alfresco-build-tools/*
   test:
     runs-on: ${{ matrix.os }}
     needs: build
@@ -35,13 +32,6 @@ jobs:
           - ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Switch to local actions when requested
-        if: contains(github.event.pull_request.labels.*.name, 'test/local-actions')
-        run: |
-          find .github/actions -name "action.yml" -type f \
-            -exec sed -i 's|uses: Alfresco/alfresco-build-tools/\.github/actions/\([^@]*\)@\([0-9a-f]\{40\}\|v[0-9]\+\.[0-9]\+\.[0-9]\+\)|uses: ./.github/actions/\1|g' {} \;
-          git diff
-
       - name: Test HTTP latency
         uses: ./.github/actions/http-latency
         with:

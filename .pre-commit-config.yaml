@@ -45,7 +45,6 @@ repos:
     rev: v1.2.0
     hooks:
       - id: gha-sha-convert
-        args: [--allowlist, 'Alfresco/alfresco-build-tools/*']
         exclude: ^\.github/tests/
 
   - repo: local
@@ -58,14 +57,12 @@ repos:
         files: ^\.github/workflows/.*\.md$
         stages: [pre-commit]
 
-      - id: check-action-nesting-depth
-        name: Check GitHub Actions nesting depth
-        language: python
-        entry: python .github/scripts/check_action_nesting.py
-        args: [--max-depth, '3']
+      - id: check-self-ref-no-version
+        name: Ensure $/ refs carry no @ref suffix
+        language: system
+        entry: bash -c '! grep -rn "\$/[^ ]*@" .github --include="*.yml"'
         pass_filenames: false
         files: ^\.github/(actions|workflows)/.*\.ya?ml$
-        additional_dependencies: [pyyaml]
 
       - id: check-readme-missing-entries
         name: Check README entries for GitHub Actions missing entries
