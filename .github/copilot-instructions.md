@@ -253,11 +253,9 @@ cd .github/actions/action-name && bats tests/
 # Find all internal action references (the correct $/ format)
 grep -r '\$/\.github/actions/' .github/ --include="*.yml"
 
-# Check for forbidden owner/repo references to this repo (should return no results)
-grep -r "Alfresco/alfresco-build-tools/.github" .github/ --include="*.yml"
-
-# Check for a $/ reference carrying an @ref suffix, which is invalid (should return no results)
-grep -rn '\$/[^ ]*@' .github --include="*.yml"
+# Check for forbidden owner/repo references to this repo, or a $/ reference carrying an invalid
+# @ref suffix (should return no results; enforced by the check-self-ref-syntax pre-commit hook)
+grep -rEn "Alfresco/alfresco-build-tools/\.github|\$/[^ ]*@" .github --include="*.yml" --include="*.yaml"
 
 # Check for undocumented actions
 diff <(ls .github/actions) <(grep -o "### [^#]*" docs/README.md | sed 's/### //')
