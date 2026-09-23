@@ -1,6 +1,6 @@
 ---
 name: pimp-my-readme
-description: "Create or upgrade a repository's README.md to a standard layout: title, CI/release/license badges, purpose, related repositories, a table of contents, a copy-paste quickstart, a configuration table, and a testing section. Use when the user asks to write, fix, update, or standardize a README, or invokes /pimp-my-readme."
+description: "Create or upgrade a repository's README.md to a standard layout: title, CI/release/license badges, purpose, related repositories, a table of contents, a copy-paste quickstart, a testing section, and a configuration table when the project has parameters to document. Use when the user asks to write, fix, update, or standardize a README, or invokes /pimp-my-readme."
 ---
 
 # Pimp My Readme
@@ -44,10 +44,11 @@ standard sections around it, and add it to the table of contents too.
 Add, directly under the title:
 
 - One GitHub Actions badge per workflow file in `.github/workflows/` whose
-  `on:` triggers on `push` or `pull_request` against the default branch (no
-  `branches` filter, or a filter that includes it), or on `schedule`. Skip
-  workflows that only run on `workflow_dispatch`, `workflow_call`, tags, or
-  releases.
+  `on:` triggers on `push` or `pull_request` against the default branch, or
+  on `schedule`. For `push`, that means no `branches` filter and no
+  tag-only `tags` filter, or a `branches` filter that includes the default
+  branch. Skip workflows that only run on `workflow_dispatch`,
+  `workflow_call`, tags, or releases.
 
   ```markdown
   [![<workflow name>](https://github.com/<owner>/<repo>/actions/workflows/<file>/badge.svg)](https://github.com/<owner>/<repo>/actions/workflows/<file>)

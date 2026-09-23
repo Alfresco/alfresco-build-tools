@@ -33,8 +33,9 @@ and follow it to migrate this composite action from requirements.txt/pip to uv.
 
 Create or upgrade a repository's `README.md` to a standard layout: title, CI/release/license
 badges, a short purpose statement, related repositories, a table of contents, a copy-paste
-quickstart, a configuration table, and a testing section. Works on a repo with no README as
-well as one that already has content, keeping any section outside the template where it is.
+quickstart, a testing section, and a configuration table when the project has parameters to
+document. Works on a repo with no README as well as one that already has content, keeping
+any section outside the template where it is.
 
 Copy-paste this into your agent:
 
