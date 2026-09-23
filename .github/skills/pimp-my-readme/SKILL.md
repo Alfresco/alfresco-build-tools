@@ -116,10 +116,12 @@ the section out.
 
 Before finishing:
 
-- Run the Quickstart and Testing commands that are local and safe to run —
-  building, running unit tests, linting, `--help`. Never run anything that
-  deploys, publishes, pushes, needs credentials, or reaches a remote system
-  beyond fetching dependencies. List any command you skipped as unverified.
+- List the Quickstart and Testing commands you'd run to check them (build,
+  unit tests, lint, `--help`), and ask the user which ones to run before
+  running any of them. Never propose one that deploys, publishes, pushes,
+  needs credentials, or reaches a remote system beyond fetching
+  dependencies. Run only what the user approves, and list the rest as
+  unverified.
 - If a command fails because the README described it wrong, fix the README.
   If it fails because the project itself is broken, say so — don't paper
   over it.
