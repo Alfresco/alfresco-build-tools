@@ -1,0 +1,60 @@
+name: Cloudsmith Docker Auth (OIDC)
+description: >
+  Authenticates to Cloudsmith via GitHub OIDC and logs in to the Cloudsmith Docker
+  registry, so `docker push <registry>/...` works for the rest of the job. Reusable
+  across repos: no long-lived secret; the service slug is derived from the repository
+  by default.
+
+# The caller job MUST grant `id-token: write` so GitHub can mint the OIDC token that is
+# exchanged for a short-lived Cloudsmith token. `vars.CLOUDSMITH_NAMESPACE` is a GitHub
+# organisation variable and does not need to be set per-repo.
+#
+# Reuses the generic `cloudsmith-auth` action via the `$/` self-repository reference,
+# which resolves to this repo at the same ref (cross-repo safe). For non-Docker
+# registries use `cloudsmith-auth` directly.
+
+inputs:
+  oidc-namespace:
+    description: Cloudsmith organisation namespace (the org-level CLOUDSMITH_NAMESPACE GitHub variable).
+    required: true
+  oidc-service-slug:
+    description: >
+      Cloudsmith OIDC service-account slug. When empty it is derived from
+      `github.repository` by lower-casing and replacing `/` and `.` with `-`
+      (e.g. `Alfresco/hxp-frontend-apps` -> `alfresco-hxp-frontend-apps`).
+    required: false
+    default: ""
+  registry:
+    description: Cloudsmith Docker registry host.
+    required: false
+    default: docker.artifacts.hyland.dev
+  verify-auth:
+    description: When "true", run `cloudsmith whoami` during setup to fail early on misconfiguration.
+    required: false
+    default: "false"
+
+outputs:
+  service-slug:
+    description: The resolved Cloudsmith service-account slug.
+    value: ${{ steps.auth.outputs.service-slug }}
+  registry:
+    description: The Cloudsmith Docker registry host.
+    value: ${{ inputs.registry }}
+
+runs:
+  using: composite
+  steps:
+    - name: Authenticate with Cloudsmith
+      id: auth
+      uses: $/.github/actions/cloudsmith-auth
+      with:
+        oidc-namespace: ${{ inputs.oidc-namespace }}
+        oidc-service-slug: ${{ inputs.oidc-service-slug }}
+        verify-auth: ${{ inputs.verify-auth }}
+
+    - name: Cloudsmith Docker login
+      uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ steps.auth.outputs.service-slug }}
+        password: ${{ env.CLOUDSMITH_API_KEY }}
