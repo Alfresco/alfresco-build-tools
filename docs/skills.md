@@ -29,6 +29,20 @@ Fetch https://raw.githubusercontent.com/Alfresco/alfresco-build-tools/master/.gi
 and follow it to migrate this composite action from requirements.txt/pip to uv.
 ```
 
+### pimp-my-readme
+
+Create or upgrade a repository's `README.md` to a standard layout: title, CI/release/license
+badges, a short purpose statement, related repositories, a table of contents, a copy-paste
+quickstart, a configuration table, and a testing section. Works on a repo with no README as
+well as one that already has content, keeping any section outside the template where it is.
+
+Copy-paste this into your agent:
+
+```text
+Fetch https://raw.githubusercontent.com/Alfresco/alfresco-build-tools/master/.github/skills/pimp-my-readme/SKILL.md
+and follow it to create or upgrade this repo's README.md.
+```
+
 ### pimp-my-repo
 
 Bootstrap the standard configuration files a full-featured GitHub repository should have. It
