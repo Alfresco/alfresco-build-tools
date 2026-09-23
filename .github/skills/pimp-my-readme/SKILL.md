@@ -17,21 +17,20 @@ In this order:
 1. `# <project name>` — the repo name, unless the current README already uses
    a nicer display name.
 2. A badges line right under the title (see [Badges](#badges) below).
-3. One or a few sentences on what the project is and why it exists. Not a
-   feature list.
-4. `## Features` — only when the project's purpose is broad enough that one
-   or two sentences undersell it. A bullet list.
-5. `## Related repositories` — see [Related repositories](#related-repositories)
+3. The intro, as plain paragraphs with no heading of their own: one or a
+   few sentences on what the project is and why it exists, then a paragraph
+   naming the project's main features, only when its purpose is broad
+   enough that the first paragraph undersells it, then the related
+   repositories list — see [Related repositories](#related-repositories)
    below.
-6. `## Contents` — a table of contents for every `##` and `###` heading that
+4. `## Contents` — a table of contents for every `##` and `###` heading that
    follows it (nested bullets for `###`), using GitHub's anchor slugs. Leave
-   out the title, the intro, Features, Related repositories, and Contents
-   itself.
-7. `## Quickstart` — see [Quickstart](#quickstart) below.
-8. `## Configuration` — only when the project has configuration parameters.
+   out the title, the intro, and Contents itself.
+5. `## Quickstart` — see [Quickstart](#quickstart) below.
+6. `## Configuration` — only when the project has configuration parameters.
    A table: `| Name | Description | Default | Required |`. Use `-` when
    there's no default.
-9. `## Testing` — what test suites exist and the command to run each one
+7. `## Testing` — what test suites exist and the command to run each one
    locally. If there are no automated tests, say so in one line and list any
    lint or pre-commit checks instead.
 
@@ -75,8 +74,9 @@ shields.io can't read it and renders "repo not found".
 
 ## Related repositories
 
-List other repositories the reader of this one is likely to also need, as
-`[owner/repo](url) - one-line description`.
+Right after the intro, with no heading of its own, list other repositories
+the reader of this one is likely to also need, as `[owner/repo](url) -
+one-line description`.
 
 Find candidates by checking the git repos checked out as siblings of this
 one (`../*`) for ones that reference this repo or are referenced by it —
@@ -85,8 +85,8 @@ image names, or links already in the docs. Also keep any related
 repositories already linked in the current README.
 
 Show the candidate list to the user and ask them to add or remove entries
-before writing the section. Only drop the section entirely once the user
-confirms there really are none.
+before writing it. Only leave it out entirely once the user confirms there
+really are none.
 
 ## Quickstart
 
