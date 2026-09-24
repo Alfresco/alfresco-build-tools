@@ -182,7 +182,7 @@ in this order and stop at the first match:
        permissions:
          contents: read # bump to write only if you enable auto-commit below
        steps:
-         - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v19.0.0
+         - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v19.0.1
            with:
              auto-commit: "false" # set to "true" (and permissions.contents above to write) to auto-commit fixups
    ```
