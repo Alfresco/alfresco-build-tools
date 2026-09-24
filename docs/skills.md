@@ -12,6 +12,25 @@ instructions.
 Agents discover skills automatically from the `description` field, so keep it specific
 about **what the skill does** and **when to use it**.
 
+## Installing a skill
+
+From a checkout of this repo, the simplest way to make a skill available to your agent
+is to paste this into it:
+
+```text
+Symlink .github/skills/<skill-name> from this checkout into your personal skills
+directory, so it stays in sync with the repo.
+```
+
+For Claude Code, that means:
+
+```bash
+ln -s "$(pwd)/.github/skills/<skill-name>" ~/.claude/skills/<skill-name>
+```
+
+Without a checkout, copy the "Copy-paste this into your agent" snippet from the
+skill's entry below instead.
+
 ## Available skills
 
 ### migrate-action-to-uv
