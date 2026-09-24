@@ -6,8 +6,7 @@ description: >
   by default.
 
 # The caller job MUST grant `id-token: write` so GitHub can mint the OIDC token that is
-# exchanged for a short-lived Cloudsmith token. `vars.CLOUDSMITH_NAMESPACE` is a GitHub
-# organisation variable and does not need to be set per-repo.
+# exchanged for a short-lived Cloudsmith token.
 #
 # Reuses the generic `cloudsmith-auth` action via the `$/` self-repository reference,
 # which resolves to this repo at the same ref (cross-repo safe). For non-Docker
