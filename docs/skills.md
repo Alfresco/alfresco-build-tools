@@ -25,6 +25,7 @@ directory, so it stays in sync with the repo.
 For Claude Code, that means:
 
 ```bash
+mkdir -p ~/.claude/skills
 ln -s "$(pwd)/.github/skills/<skill-name>" ~/.claude/skills/<skill-name>
 ```
 
