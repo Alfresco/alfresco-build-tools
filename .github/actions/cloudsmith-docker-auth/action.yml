@@ -5,17 +5,11 @@ description: >
   across repos: no long-lived secret; the service slug is derived from the repository
   by default.
 
-# The caller job MUST grant `id-token: write` so GitHub can mint the OIDC token that is
-# exchanged for a short-lived Cloudsmith token.
-#
-# Reuses the generic `cloudsmith-auth` action via the `$/` self-repository reference,
-# which resolves to this repo at the same ref (cross-repo safe). For non-Docker
-# registries use `cloudsmith-auth` directly.
-
 inputs:
   oidc-namespace:
-    description: Cloudsmith organisation namespace (the org-level CLOUDSMITH_NAMESPACE GitHub variable).
-    required: true
+    description: Cloudsmith organisation namespace.
+    required: false
+    default: hyland
   oidc-service-slug:
     description: >
       Cloudsmith OIDC service-account slug. When empty it is derived from

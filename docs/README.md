@@ -547,9 +547,9 @@ Consumer repositories should pin the reference to a commit SHA rather than a tag
 
 ### cloudsmith-auth
 
-Authenticates a job to Cloudsmith over GitHub OIDC — no long-lived secret — and exports a short-lived token to the job for any package manager (npm, pip, NuGet, or a manual Docker login). It wraps [`cloudsmith-io/cloudsmith-cli-action`](https://github.com/cloudsmith-io/cloudsmith-cli-action) and derives the Cloudsmith service-account slug from the repository (`github.repository` lower-cased with `/` and `.` → `-`, e.g. `alfresco-hxp-frontend-apps`). Pass `oidc-service-slug` only to override that default.
+Authenticates a job to Cloudsmith over GitHub OIDC — no long-lived secret — and exports a short-lived token to the job for any package manager (npm, pip, NuGet, or a manual Docker login). It wraps [`cloudsmith-io/cloudsmith-cli-action`](https://github.com/cloudsmith-io/cloudsmith-cli-action), defaults the Cloudsmith namespace to `hyland`
 
-Prerequisites: the repo is on the Cloudsmith allowlist (a service account exists — see [Self-Service: Add Your Repository to Cloudsmith Access](https://hyland.atlassian.net/wiki/spaces/cix/pages/4214627116)), the **calling job** grants `id-token: write`, and the org variable `vars.CLOUDSMITH_NAMESPACE` is available (it is, org-wide).
+Prerequisites: the repository has a Cloudsmith service account and the **calling job** grants `id-token: write`.
 
 After the action runs, `CLOUDSMITH_API_KEY` and `CLOUDSMITH_USERNAME` are exported (masked) to the job. In a later `run:` step reference them as shell variables (`$CLOUDSMITH_API_KEY`), never as `${{ }}` expressions.
 
@@ -560,8 +560,6 @@ permissions:
 
 steps:
   - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@v19.0.0
-    with:
-      oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
 
   - name: Configure npm for Cloudsmith
     run: |
@@ -569,13 +567,11 @@ steps:
       npm config set //npm.artifacts.hyland.dev/<repo>/:_authToken "$CLOUDSMITH_API_KEY"
 ```
 
-For a Docker registry login prefer [cloudsmith-docker-auth](#cloudsmith-docker-auth), which wraps this same OIDC auth. Consumer repositories should pin the reference to a commit SHA rather than a tag — see [Actions SHA pinning](#actions-sha-pinning).
+For a Docker registry login prefer [cloudsmith-docker-auth](#cloudsmith-docker-auth), which wraps this same OIDC auth.
 
 ### cloudsmith-docker-auth
 
-Authenticates to Cloudsmith over GitHub OIDC and logs in to the Cloudsmith Docker registry, so `docker push <registry>/...` works for the rest of the job. A thin wrapper over [cloudsmith-auth](#cloudsmith-auth) (reused via the `$/` self-repository reference): no long-lived secret, and the service-account slug is derived from the repository by default. The `docker login` username is that service slug (exposed as the `service-slug` output), not `CLOUDSMITH_USERNAME`.
-
-Prerequisites are the same as [cloudsmith-auth](#cloudsmith-auth): an allowlisted repo, the **calling job** grants `id-token: write`, and `vars.CLOUDSMITH_NAMESPACE` is available.
+Authenticates to Cloudsmith over GitHub OIDC and logs in to the Cloudsmith Docker registry, so `docker push <registry>/...` works for the rest of the job. A thin wrapper over [cloudsmith-auth](#cloudsmith-auth). The `docker login` username is that service slug (exposed as the `service-slug` output), not `CLOUDSMITH_USERNAME`.
 
 ```yaml
 permissions:
@@ -585,14 +581,11 @@ permissions:
 steps:
   - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-docker-auth@v19.0.0
     with:
-      oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       # registry: docker.artifacts.hyland.dev   # optional, this is the default
 
   # Image path: docker.artifacts.hyland.dev/<repo>/<image>:<tag>
   - run: docker push docker.artifacts.hyland.dev/<repo>/my-image:1.0.0
 ```
-
-Consumer repositories should pin the reference to a commit SHA rather than a tag — see [Actions SHA pinning](#actions-sha-pinning).
 
 ### configure-git-author
 

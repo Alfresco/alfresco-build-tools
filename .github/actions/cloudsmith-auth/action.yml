@@ -4,22 +4,11 @@ description: >
   for Docker, npm, pip or NuGet — any Cloudsmith registry. Reusable across repos: no
   long-lived secret, the service-account slug is derived from the repository by default.
 
-# The caller job MUST grant `id-token: write` so GitHub can mint the OIDC token
-# that is exchanged for a short-lived Cloudsmith token. `vars.CLOUDSMITH_NAMESPACE`
-# is a GitHub organisation variable and does not need to be set per-repo.
-#
-# This action ONLY authenticates. It exports the credential (masked) to the job so
-# any later step can consume it:
-#   - CLOUDSMITH_API_KEY  — the short-lived token
-#   - CLOUDSMITH_USERNAME — the package-manager username (npm/pip/NuGet)
-# Do the registry-specific login in the caller, or in a thin wrapper such as
-# cloudsmith-docker-auth. NOTE: for `docker login` the username is the service slug
-# (this action's `service-slug` output), NOT CLOUDSMITH_USERNAME.
-
 inputs:
   oidc-namespace:
-    description: Cloudsmith organisation namespace (the org-level CLOUDSMITH_NAMESPACE GitHub variable).
-    required: true
+    description: Cloudsmith organisation namespace.
+    required: false
+    default: hyland
   oidc-service-slug:
     description: >
       Cloudsmith OIDC service-account slug. When empty it is derived from
