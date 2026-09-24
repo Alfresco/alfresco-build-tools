@@ -44,10 +44,11 @@ Add, directly under the title:
 
 - One GitHub Actions badge per workflow file in `.github/workflows/` whose
   `on:` triggers on `push` or `pull_request` against the default branch, or
-  on `schedule`. For `push`, that means no `branches` filter and no
-  tag-only `tags` filter, or a `branches` filter that includes the default
-  branch. Skip workflows that only run on `workflow_dispatch`,
-  `workflow_call`, tags, or releases.
+  on `schedule`. A trigger targets the default branch when it has no
+  `branches`/`branches-ignore` filter, a `branches` filter that includes
+  it, or a `branches-ignore` filter that doesn't exclude it — and, for
+  `push`, no tag-only `tags` filter. Skip workflows that only run on
+  `workflow_dispatch`, `workflow_call`, tags, or releases.
 
   ```markdown
   [![<workflow name>](https://github.com/<owner>/<repo>/actions/workflows/<file>/badge.svg)](https://github.com/<owner>/<repo>/actions/workflows/<file>)
@@ -67,10 +68,12 @@ Add, directly under the title:
   [![License](https://img.shields.io/github/license/<owner>/<repo>)](LICENSE)
   ```
 
-Get the owner, repo, and default branch from `gh repo view --json
-nameWithOwner,defaultBranchRef` (fall back to `git remote show origin` if
-`gh` isn't set up). Skip the shields.io badges entirely on a private repo —
-shields.io can't read it and renders "repo not found".
+Get the owner, repo, default branch, and visibility from `gh repo view
+--json nameWithOwner,defaultBranchRef,visibility` (fall back to `git remote
+show origin` for owner/repo/branch, and treat visibility as unknown, if
+`gh` isn't set up). Skip the shields.io badges entirely when the repo is
+private or its visibility is unknown — shields.io can't read a private repo
+and renders "repo not found".
 
 ## Related repositories
 
