@@ -1,0 +1,48 @@
+name: Cloudsmith Auth (OIDC)
+description: >
+  Mints a short-lived Cloudsmith token via GitHub OIDC. Registry-agnostic: use it
+  for Docker, npm, pip or NuGet — any Cloudsmith registry. Reusable across repos: no
+  long-lived secret, the service-account slug is derived from the repository by default.
+
+inputs:
+  oidc-namespace:
+    description: Cloudsmith organisation namespace.
+    required: true
+  oidc-service-slug:
+    description: >
+      Cloudsmith OIDC service-account slug. When empty it is derived from
+      `github.repository` by lower-casing and replacing `/` and `.` with `-`
+      (e.g. `Alfresco/hxp-frontend-apps` -> `alfresco-hxp-frontend-apps`).
+    required: false
+    default: ""
+  verify-auth:
+    description: When "true", run `cloudsmith whoami` during setup to fail early on misconfiguration.
+    required: false
+    default: "false"
+
+outputs:
+  service-slug:
+    description: The resolved Cloudsmith service-account slug.
+    value: ${{ steps.slug.outputs.service-slug }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve Cloudsmith service slug
+      id: slug
+      shell: bash
+      env:
+        SLUG_INPUT: ${{ inputs.oidc-service-slug }}
+      run: |
+        set -euo pipefail
+        # Cloudsmith slug convention: lower-cased repo path with '/' and '.' as '-'. No GitHub context provides it.
+        slug="${SLUG_INPUT:-$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]' | tr '/.' '-')}"
+        echo "service-slug=${slug}" >> "$GITHUB_OUTPUT"
+
+    - name: Authenticate with Cloudsmith
+      uses: cloudsmith-io/cloudsmith-cli-action@ad73fafb92e3e29a5166c529464c2df7658a608e # v3.1.0
+      with:
+        oidc-namespace: ${{ inputs.oidc-namespace }}
+        oidc-service-slug: ${{ steps.slug.outputs.service-slug }}
+        export-auth-token: "true"
+        verify-auth: ${{ inputs.verify-auth }}

@@ -41,6 +41,8 @@ Here follows the list of GitHub Actions topics available in the current document
   - [awf-run-command](#awf-run-command)
   - [calculate-next-internal-version](#calculate-next-internal-version)
   - [check-pr-description](#check-pr-description)
+  - [cloudsmith-auth](#cloudsmith-auth)
+  - [cloudsmith-docker-auth](#cloudsmith-docker-auth)
   - [configure-git-author](#configure-git-author)
   - [dependabot-workflow-run-automation](#dependabot-workflow-run-automation)
   - [dependabot-missing-actions-check](#dependabot-missing-actions-check)
@@ -542,6 +544,51 @@ The action reads `github.event.pull_request.body`, so the consumer workflow must
 Automated PRs are skipped two ways: by author (`*[bot]` plus the `skip-authors` globs) and by head branch (`skip-branches` globs, matched against `github.head_ref`). Branch matching also catches automation that runs under a normal service-account login. The `skip-branches` default covers Dependabot, Renovate, updatecli, Flux image-update, release-please, changesets, Snyk, Mend/WhiteSource, propagation (`pr-*`) and generic `automated-*` / `automation/*` branches.
 
 Consumer repositories should pin the reference to a commit SHA rather than a tag, as recommended in [Actions SHA pinning](#actions-sha-pinning) (the `@v18.16.0` above is a placeholder that the release process keeps in sync within this repo). The `min-chars` and `min-words` inputs must be non-negative integers.
+
+### cloudsmith-auth
+
+Authenticates a job to Cloudsmith over GitHub OIDC — no long-lived secret — and exports a short-lived token to the job for any package manager (npm, pip, NuGet, or a manual Docker login). It wraps [`cloudsmith-io/cloudsmith-cli-action`](https://github.com/cloudsmith-io/cloudsmith-cli-action).
+
+Prerequisites: the repository has a Cloudsmith service account and the **calling job** grants `id-token: write`.
+
+After the action runs, `CLOUDSMITH_API_KEY` and `CLOUDSMITH_USERNAME` are exported (masked) to the job. In a later `run:` step reference them as shell variables (`$CLOUDSMITH_API_KEY`), never as `${{ }}` expressions.
+
+```yaml
+permissions:
+  id-token: write
+  contents: read
+
+steps:
+  - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@v19.0.0
+    with:
+      oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
+
+  - name: Configure npm for Cloudsmith
+    run: |
+      npm config set @alfresco:registry https://npm.artifacts.hyland.dev/<repo>/
+      npm config set //npm.artifacts.hyland.dev/<repo>/:_authToken "$CLOUDSMITH_API_KEY"
+```
+
+For a Docker registry login prefer [cloudsmith-docker-auth](#cloudsmith-docker-auth), which wraps this same OIDC auth.
+
+### cloudsmith-docker-auth
+
+Authenticates to Cloudsmith over GitHub OIDC and logs in to the Cloudsmith Docker registry, so `docker push <registry>/...` works for the rest of the job. A thin wrapper over [cloudsmith-auth](#cloudsmith-auth). The `docker login` username is that service slug (exposed as the `service-slug` output), not `CLOUDSMITH_USERNAME`.
+
+```yaml
+permissions:
+  id-token: write
+  contents: read
+
+steps:
+  - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-docker-auth@v19.0.0
+    with:
+      oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
+      # registry: docker.artifacts.hyland.dev   # optional, this is the default
+
+  # Image path: docker.artifacts.hyland.dev/<repo>/<image>:<tag>
+  - run: docker push docker.artifacts.hyland.dev/<repo>/my-image:1.0.0
+```
 
 ### configure-git-author
 
