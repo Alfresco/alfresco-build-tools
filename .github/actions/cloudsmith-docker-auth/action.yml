@@ -8,8 +8,7 @@ description: >
 inputs:
   oidc-namespace:
     description: Cloudsmith organisation namespace.
-    required: false
-    default: hyland
+    required: true
   oidc-service-slug:
     description: >
       Cloudsmith OIDC service-account slug. When empty it is derived from

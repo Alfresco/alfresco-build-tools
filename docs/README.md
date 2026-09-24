@@ -547,7 +547,7 @@ Consumer repositories should pin the reference to a commit SHA rather than a tag
 
 ### cloudsmith-auth
 
-Authenticates a job to Cloudsmith over GitHub OIDC — no long-lived secret — and exports a short-lived token to the job for any package manager (npm, pip, NuGet, or a manual Docker login). It wraps [`cloudsmith-io/cloudsmith-cli-action`](https://github.com/cloudsmith-io/cloudsmith-cli-action), defaults the Cloudsmith namespace to `hyland`
+Authenticates a job to Cloudsmith over GitHub OIDC — no long-lived secret — and exports a short-lived token to the job for any package manager (npm, pip, NuGet, or a manual Docker login). It wraps [`cloudsmith-io/cloudsmith-cli-action`](https://github.com/cloudsmith-io/cloudsmith-cli-action).
 
 Prerequisites: the repository has a Cloudsmith service account and the **calling job** grants `id-token: write`.
 
@@ -560,6 +560,8 @@ permissions:
 
 steps:
   - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@v19.0.0
+    with:
+      oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
 
   - name: Configure npm for Cloudsmith
     run: |
@@ -581,6 +583,7 @@ permissions:
 steps:
   - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-docker-auth@v19.0.0
     with:
+      oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       # registry: docker.artifacts.hyland.dev   # optional, this is the default
 
   # Image path: docker.artifacts.hyland.dev/<repo>/<image>:<tag>
