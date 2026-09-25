@@ -12,6 +12,26 @@ instructions.
 Agents discover skills automatically from the `description` field, so keep it specific
 about **what the skill does** and **when to use it**.
 
+## Installing a skill
+
+From a checkout of this repo, the simplest way to make a skill available to your agent
+is to paste this into it:
+
+```text
+Symlink .github/skills/<skill-name> from this checkout into your personal skills
+directory, so it stays in sync with the repo.
+```
+
+For Claude Code, that means:
+
+```bash
+mkdir -p ~/.claude/skills
+ln -s "$(pwd)/.github/skills/<skill-name>" ~/.claude/skills/<skill-name>
+```
+
+Without a checkout, copy the "Copy-paste this into your agent" snippet from the
+skill's entry below instead.
+
 ## Available skills
 
 ### migrate-action-to-uv
@@ -27,6 +47,21 @@ Copy-paste this into your agent:
 ```text
 Fetch https://raw.githubusercontent.com/Alfresco/alfresco-build-tools/master/.github/skills/migrate-action-to-uv/SKILL.md
 and follow it to migrate this composite action from requirements.txt/pip to uv.
+```
+
+### pimp-my-readme
+
+Create or upgrade a repository's `README.md` to a standard layout: title, CI/release/license
+badges, a short purpose statement, related repositories, a table of contents, a copy-paste
+quickstart, a testing section, and a configuration table when the project has parameters to
+document. Works on a repo with no README as well as one that already has content, keeping
+any section outside the template where it is.
+
+Copy-paste this into your agent:
+
+```text
+Fetch https://raw.githubusercontent.com/Alfresco/alfresco-build-tools/master/.github/skills/pimp-my-readme/SKILL.md
+and follow it to create or upgrade this repo's README.md.
 ```
 
 ### pimp-my-repo
