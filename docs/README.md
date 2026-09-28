@@ -1967,9 +1967,10 @@ Check out, builds a maven project and docker images, generating a new alpha vers
           git-username: ${{ secrets.BOT_GITHUB_USERNAME }}
 ```
 
-When `sonar-token` is set, the action checks out the full history (`fetch-depth: 0`),
-which Sonar needs to compute the PR diff. Callers that do not run an analysis keep
-the default shallow checkout.
+The action checks out the full history (`fetch-depth: 0`), which Sonar needs to compute
+the PR diff, under the same conditions that make it run the analysis: `sonar-token` is
+set, the pull request is not a draft, and it does not carry the `skip-tests-label`. Runs
+that would not be analysed keep the default shallow checkout.
 
 #### Preview option for maven-build-and-tag
 
@@ -2798,7 +2799,7 @@ already checked out. Since Sonar needs the full history to compute the PR diff, 
 calling job **must** check out with `fetch-depth: 0`:
 
 ```yaml
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 ```

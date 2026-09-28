@@ -110,10 +110,13 @@ runs:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         # Sonar needs the full history to compute the PR diff from git, so only
-        # pay for it when the caller actually runs an analysis. The quotes are
-        # mandatory: a numeric 0 is falsy in a GitHub expression, so && 0 || 1
-        # would always yield 1 and the full fetch would never happen.
-        fetch-depth: ${{ inputs.sonar-token != '' && '0' || '1' }}
+        # pay for it when the caller actually runs an analysis: these are the
+        # conditions gating the analysis below. SKIP_TESTS is not set yet at
+        # this point, but maven-configure derives it from this same label, so
+        # reading the label here matches the gate. The quotes are mandatory: a
+        # numeric 0 is falsy in a GitHub expression, so && 0 || 1 would always
+        # yield 1 and the full fetch would never happen.
+        fetch-depth: ${{ inputs.sonar-token != '' && github.event.pull_request.draft == false && !contains(github.event.pull_request.labels.*.name, inputs.skip-tests-label) && '0' || '1' }}
 
     - uses: $/.github/actions/maven-configure
       id: maven-configure
