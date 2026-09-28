@@ -2793,15 +2793,18 @@ Run Sonar Scanner to load JaCoCo report on SonarCloud.
           java-version: '21'
 ```
 
-This action does not check out the sources: it runs on a workspace the caller has
-already checked out, and adding a checkout here would clean the workspace and delete
-the `target/` artifacts it downloads. Since Sonar needs the full history to compute
-the PR diff, the action restores it itself (`git fetch --unshallow` plus the remote
-branch refs) when the caller's checkout was shallow.
+This action does not check out the sources: it analyses a workspace the caller has
+already checked out. Since Sonar needs the full history to compute the PR diff, the
+calling job **must** check out with `fetch-depth: 0`:
 
-That fetch reuses the credentials `actions/checkout` persists in the workspace, so a
-caller that checks out with `persist-credentials: false` must provide the full history
-itself, with `fetch-depth: 0` on its own checkout.
+```yaml
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+```
+
+Without it the action fails with an explicit error, rather than letting the scan
+silently degrade to a whole-file analysis instead of a diff.
 
 ### sonar-scanner
 
