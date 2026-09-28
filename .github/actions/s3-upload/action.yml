@@ -1,5 +1,5 @@
 name: Deploy artifacts to S3 Bucket
-description: Deploys a local directory of artifacts to S3, or copies from one S3 location to another.
+description: Deploys a local file or directory of artifacts to S3, or copies an object or prefix from one S3 location to another.
 
 inputs:
   aws-region:
@@ -9,7 +9,7 @@ inputs:
     description: AWS role ARN to assume for deployment
     required: true
   source:
-    description: Local directory or s3:// URI to copy from. Takes precedence over deploy-dir if both are set.
+    description: Local file/directory or s3:// URI (object or prefix) to copy from. A single file/object is placed under destination; a directory/prefix is copied recursively. Takes precedence over deploy-dir if both are set.
     required: false
     default: ""
   deploy-dir:
@@ -58,32 +58,4 @@ runs:
         S3_BUCKET: ${{ inputs.s3-bucket }}
         S3_PATH: ${{ inputs.s3-path }}
       run: |
-        if [ -n "${DESTINATION}" ]; then
-          s3_destination="${DESTINATION}"
-        else
-          echo "::warning::s3-bucket and s3-path are deprecated, use destination instead"
-          if [ -z "${S3_BUCKET}" ]; then
-            echo "::error::Either destination (preferred) or s3-bucket must be set"
-            exit 1
-          fi
-          if [ -n "${S3_PATH}" ]; then
-            s3_destination="s3://${S3_BUCKET}/${S3_PATH}"
-          else
-            s3_destination="s3://${S3_BUCKET}"
-          fi
-        fi
-        if [[ "${s3_destination}" != s3://* ]]; then
-          echo "::error::destination must be an s3:// URI, got ${s3_destination}"
-          exit 1
-        fi
-        if [ -z "${SOURCE}" ]; then
-          echo "::warning::deploy-dir is deprecated, use source instead"
-        fi
-        source_path="${SOURCE:-${DEPLOY_DIR}}"
-        if [[ "${source_path}" == s3://* ]]; then
-          echo "Copying from ${source_path} to ${s3_destination}"
-          aws s3 cp --acl private --recursive --copy-props "${COPY_PROPS}" "${source_path}" "${s3_destination}"
-        else
-          echo "Uploading from ${source_path} to ${s3_destination}"
-          aws s3 cp --acl private --recursive "${source_path}" "${s3_destination}"
-        fi
+        "${{ github.action_path }}/s3-upload.sh"

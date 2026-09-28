@@ -1,6 +1,10 @@
 #!/usr/bin/env bats
 
 setup() {
+  bats_load_library bats-support
+  bats_load_library bats-assert
+  bats_load_library bats-file
+
   TEST_TMPDIR="$(mktemp -d)"
   SUT="$TEST_TMPDIR/jira_delete_release_by_name.sh"
   cp "$BATS_TEST_DIRNAME/../jira_delete_release_by_name.sh" "$SUT"
@@ -61,77 +65,33 @@ teardown() {
   rm -rf "$TEST_TMPDIR"
 }
 
-# --- tiny assertion helpers (vanilla) ---
-
-assert_status() {
-  local expected="$1"
-  if [[ "$status" -ne "$expected" ]]; then
-    echo "Expected status $expected, got $status" >&2
-    echo "Output:" >&2
-    echo "$output" >&2
-    return 1
-  fi
-}
-
-assert_output_contains() {
-  local needle="$1"
-  if [[ "$output" != *"$needle"* ]]; then
-    echo "Expected output to contain: $needle" >&2
-    echo "Output:" >&2
-    echo "$output" >&2
-    return 1
-  fi
-}
-
-assert_file_contains() {
-  local file="$1"
-  local needle="$2"
-  if ! grep -Fq -- "$needle" "$file"; then
-    echo "Expected file $file to contain: $needle" >&2
-    echo "File content:" >&2
-    cat "$file" >&2
-    return 1
-  fi
-}
-
-refute_file_contains() {
-  local file="$1"
-  local needle="$2"
-  if grep -Fq -- "$needle" "$file"; then
-    echo "Expected file $file NOT to contain: $needle" >&2
-    echo "File content:" >&2
-    cat "$file" >&2
-    return 1
-  fi
-}
-
 # --- Tests ---
 
 @test "exit 2 when release name missing" {
   run "$SUT"
-  assert_status 2
-  assert_output_contains "Usage:"
+  assert_failure 2
+  assert_output --partial "Usage:"
 }
 
 @test "exit 3 when JIRA_API_TOKEN missing" {
   unset JIRA_API_TOKEN
   run "$SUT" "Test - FF"
-  assert_status 3
-  assert_output_contains "JIRA_API_TOKEN environment variable is not set"
+  assert_failure 3
+  assert_output --partial "JIRA_API_TOKEN environment variable is not set"
 }
 
 @test "exit 4 when jq is missing" {
   run env PATH="$MOCKBIN:$MINBIN" "$SUT" "Test - FF"
-  assert_status 4
-  assert_output_contains "jq is required"
+  assert_failure 4
+  assert_output --partial "jq is required"
 }
 
 @test "exit 5 on Jira API errorMessages" {
   export MOCK_VERSIONS_JSON='{"errorMessages":["No permission"],"errors":{}}'
   run "$SUT" "Test - FF"
-  assert_status 5
-  assert_output_contains "Jira API error"
-  assert_output_contains "No permission"
+  assert_failure 5
+  assert_output --partial "Jira API error"
+  assert_output --partial "No permission"
 }
 
 @test "exit 6 when version name not found" {
@@ -139,8 +99,8 @@ refute_file_contains() {
     {"id":"100","name":"Other","released":false,"archived":false}
   ]'
   run "$SUT" "Test - FF"
-  assert_status 6
-  assert_output_contains "No version found with exact name"
+  assert_failure 6
+  assert_output --partial "No version found with exact name"
 }
 
 @test "exit 7 when multiple versions share same name" {
@@ -149,9 +109,9 @@ refute_file_contains() {
     {"id":"102","name":"Test - FF","released":true,"archived":false}
   ]'
   run "$SUT" "Test - FF"
-  assert_status 7
-  assert_output_contains "Found 2 match(es)"
-  assert_output_contains "Refusing to delete"
+  assert_failure 7
+  assert_output --partial "Found 2 match(es)"
+  assert_output --partial "Refusing to delete"
 }
 
 @test "abort on prompt does not call DELETE" {
@@ -160,9 +120,9 @@ refute_file_contains() {
   ]'
 
   run bash -c "printf 'n\n' | \"$SUT\" \"Test - FF\""
-  assert_status 0
-  assert_output_contains "Aborted."
-  refute_file_contains "$CURL_LOG" " -X DELETE "
+  assert_success
+  assert_output --partial "Aborted."
+  assert_file_not_contains "$CURL_LOG" " -X DELETE "
 }
 
 @test "happy path: confirm yes deletes and returns 0 on HTTP 204" {
@@ -172,8 +132,8 @@ refute_file_contains() {
   export MOCK_DELETE_HTTP_CODE="204"
 
   run bash -c "printf 'y\n' | \"$SUT\" \"Test - FF\""
-  assert_status 0
-  assert_output_contains "Deleted successfully"
+  assert_success
+  assert_output --partial "Deleted successfully"
   assert_file_contains "$CURL_LOG" "/rest/api/3/version/12345"
 }
 
@@ -184,6 +144,6 @@ refute_file_contains() {
   export MOCK_DELETE_HTTP_CODE="500"
 
   run bash -c "printf 'y\n' | \"$SUT\" \"Test - FF\""
-  assert_status 8
-  assert_output_contains "Delete failed (HTTP 500)"
+  assert_failure 8
+  assert_output --partial "Delete failed (HTTP 500)"
 }
