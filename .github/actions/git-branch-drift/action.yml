@@ -1,0 +1,37 @@
+name: Git branch drift
+description: Asserts the remote branch head still matches an expected SHA, detecting commits pushed since the run started
+inputs:
+  expected-sha:
+    description: SHA the branch head is expected to be at. Defaults to the current pull request head SHA, or the current commit SHA.
+    required: false
+    default: ${{ github.event.pull_request.head.sha || github.sha }}
+  branch:
+    description: Branch to check on the remote. Defaults to the current pull request head ref, or the current ref.
+    required: false
+    default: ${{ github.event.pull_request.head.ref || github.ref_name }}
+  remote:
+    description: Git remote to check.
+    required: false
+    default: origin
+  fail-on-mismatch:
+    description: Fail the step when the remote head does not match expected-sha. Set to 'false' to only report the mismatch via outputs.
+    required: false
+    default: 'true'
+outputs:
+  changed:
+    description: "'true' if the remote branch head no longer matches expected-sha, 'false' otherwise"
+    value: ${{ steps.check.outputs.changed }}
+  remote-sha:
+    description: The SHA currently found on the remote branch
+    value: ${{ steps.check.outputs.remote-sha }}
+runs:
+  using: composite
+  steps:
+    - id: check
+      shell: bash
+      env:
+        EXPECTED_SHA: ${{ inputs.expected-sha }}
+        BRANCH: ${{ inputs.branch }}
+        REMOTE: ${{ inputs.remote }}
+        FAIL_ON_MISMATCH: ${{ inputs.fail-on-mismatch }}
+      run: ${{ github.action_path }}/git-branch-drift.sh
