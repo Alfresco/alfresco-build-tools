@@ -2410,7 +2410,7 @@ Resolve preview name based on the PR number and run number:
 
 ### s3-upload
 
-Uploads a local directory of artifacts to an S3 bucket, or copies artifacts from one S3 location to another. The caller is responsible for preparing the deploy directory with the artifacts before invoking this action.
+Uploads a local file or directory of artifacts to an S3 bucket, or copies an object or prefix from one S3 location to another. The caller is responsible for preparing the source artifacts before invoking this action. When `source` is a single local file or a single S3 object, it's placed under `destination` using its own file name; a local directory or S3 prefix is copied recursively into `destination` instead.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/s3-upload@v19.1.0
