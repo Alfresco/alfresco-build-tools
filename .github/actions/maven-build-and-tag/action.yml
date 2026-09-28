@@ -108,6 +108,12 @@ runs:
   using: composite
   steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        # Sonar needs the full history to compute the PR diff from git, so only
+        # pay for it when the caller actually runs an analysis. The quotes are
+        # mandatory: a numeric 0 is falsy in a GitHub expression, so && 0 || 1
+        # would always yield 1 and the full fetch would never happen.
+        fetch-depth: ${{ inputs.sonar-token != '' && '0' || '1' }}
 
     - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@fc0ce0bb2dcd4fcb8a66a0ec6ea150f76d720651
       id: maven-configure
