@@ -1,5 +1,5 @@
 name: Deploy artifacts to S3 Bucket
-description: Deploys a local directory of artifacts to S3, or copies from one S3 location to another.
+description: Deploys a local file or directory of artifacts to S3, or copies an object or prefix from one S3 location to another.
 
 inputs:
   aws-region:
