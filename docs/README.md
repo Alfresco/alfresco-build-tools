@@ -1968,9 +1968,14 @@ Check out, builds a maven project and docker images, generating a new alpha vers
 ```
 
 The action checks out the full history (`fetch-depth: 0`), which Sonar needs to compute
-the PR diff, under the same conditions that make it run the analysis: `sonar-token` is
-set, the pull request is not a draft, and it does not carry the `skip-tests-label`. Runs
-that would not be analysed keep the default shallow checkout.
+the PR diff. It does so when either `sonar-token` is set, so the action runs the analysis
+itself, or `full-history` is `'true'`. Either way, the pull request must not be a draft
+and must not carry the `skip-tests-label`. Runs that would not be analysed keep the
+default shallow checkout.
+
+Set `full-history: 'true'` when Sonar runs in a later step of the calling workflow instead
+of inside this action. On a shallow clone Sonar reads a truncated history and blames the
+pull request for commits that came from elsewhere.
 
 #### Preview option for maven-build-and-tag
 
