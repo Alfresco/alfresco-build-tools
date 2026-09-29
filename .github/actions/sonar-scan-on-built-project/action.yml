@@ -62,8 +62,6 @@ runs:
     - name: Check the workspace is ready for Sonar
       shell: bash
       run: |
-        # Compare the output, not the exit code: inside a .git directory the
-        # command succeeds and prints "false".
         if [ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" != "true" ]; then
           echo "::error::This action analyses sources the caller has already checked out, and Sonar needs the full history: check out with 'fetch-depth: 0' in the job that calls it."
           exit 1
