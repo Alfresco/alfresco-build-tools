@@ -59,10 +59,6 @@ inputs:
 runs:
   using: composite
   steps:
-    # This action runs on a workspace it did not create, and checking out the
-    # sources is the caller's responsibility, not this action's. Sonar needs the
-    # full history to compute the PR diff, so state that requirement up front
-    # instead of letting the scan silently degrade to a whole-file analysis.
     - name: Check the workspace is ready for Sonar
       shell: bash
       run: |
