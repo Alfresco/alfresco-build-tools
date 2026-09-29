@@ -59,7 +59,7 @@ jobs:
       - name: Update chart version
         uses: $/.github/actions/helm-update-chart-version
         with:
-          new-version: ${{ env.VERSION }}
+          new-version: ${{ steps.next-release.outputs.next-prerelease }}
           chart-dir: ${{ inputs.chart-dir }}
           helm-docs-version: ${{ inputs.helm-docs-version }}
 
@@ -67,7 +67,7 @@ jobs:
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           add-options: -u
-          commit-message: "release $VERSION"
+          commit-message: "release ${{ steps.next-release.outputs.next-prerelease }}"
 
       - name: Create local tag
         run: git tag -a "$VERSION" -m "Release version $VERSION"

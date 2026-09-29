@@ -230,7 +230,7 @@ runs:
       with:
         username: ${{ inputs.git-username }}
         add-options: -u
-        commit-message: "release $VERSION"
+        commit-message: "release ${{ steps.update-pom-to-next-version.outputs.next-prerelease }}"
 
     - name: Create and push tag
       if: github.event_name == 'push'
