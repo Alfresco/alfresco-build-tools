@@ -95,6 +95,12 @@ inputs:
     description: 'SonarCloud organization'
     required: false
     default: 'alfresco'
+  full-history:
+    description: >-
+      Check out the full history. Needed when the caller runs its own Sonar analysis
+      after this action, since Sonar computes the PR diff from git.
+    required: false
+    default: 'false'
 
 outputs:
   version:
@@ -108,6 +114,9 @@ runs:
   using: composite
   steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        # Sonar needs the full history to compute the PR diff from git
+        fetch-depth: ${{ (inputs.sonar-token != '' || inputs.full-history == 'true') && github.event.pull_request.draft == false && !contains(github.event.pull_request.labels.*.name, inputs.skip-tests-label) && '0' || '1' }}
 
     - uses: $/.github/actions/maven-configure
       id: maven-configure

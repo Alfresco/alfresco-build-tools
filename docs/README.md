@@ -1967,6 +1967,16 @@ Check out, builds a maven project and docker images, generating a new alpha vers
           git-username: ${{ secrets.BOT_GITHUB_USERNAME }}
 ```
 
+The action checks out the full history (`fetch-depth: 0`), which Sonar needs to compute
+the PR diff. It does so when either `sonar-token` is set, so the action runs the analysis
+itself, or `full-history` is `'true'`. Either way, the pull request must not be a draft
+and must not carry the `skip-tests-label`. Runs that would not be analysed keep the
+default shallow checkout.
+
+Set `full-history: 'true'` when Sonar runs in a later step of the calling workflow instead
+of inside this action. On a shallow clone Sonar reads a truncated history and blames the
+pull request for commits that came from elsewhere.
+
 #### Preview option for maven-build-and-tag
 
 There is a possibility to publish snapshot maven artifacts and docker images from an open PR.
@@ -2788,6 +2798,19 @@ Run Sonar Scanner to load JaCoCo report on SonarCloud.
           maven-version: '3.8.8'
           java-version: '21'
 ```
+
+This action does not check out the sources: it analyses a workspace the caller has
+already checked out. Since Sonar needs the full history to compute the PR diff, the
+calling job **must** check out with `fetch-depth: 0`:
+
+```yaml
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+```
+
+Without it the action fails with an explicit error, rather than letting the scan
+silently degrade to a whole-file analysis instead of a diff.
 
 ### sonar-scanner
 
