@@ -323,7 +323,7 @@ jobs:
       # listing comes back empty and no PR is ever closed. The fixture resolves to
       # this repository, so the default GITHUB_TOKEN read access is enough and no
       # other repo is touched.
-      - uses: ./.github/actions/close-orphaned-preview-prs
+      - uses: $/.github/actions/close-orphaned-preview-prs
         id: close-orphaned-derived
         with:
           source-pr-number: "1"
