@@ -1,0 +1,14 @@
+# Fixture for the close-orphaned-preview-prs test in test.yml.
+# Two rules, a URL with and without a .git suffix, all pointing at this repository:
+# exercises URL stripping, multi-rule union and de-duplication while keeping the
+# resolved target readable by the default GITHUB_TOKEN.
+apiVersion: updatebot.jenkins-x.io/v1alpha1
+kind: UpdateConfig
+spec:
+  rules:
+    - urls:
+        - https://github.com/Alfresco/alfresco-build-tools
+      reusePullRequest: true
+    - urls:
+        - https://github.com/Alfresco/alfresco-build-tools.git
+      reusePullRequest: true
