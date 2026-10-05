@@ -332,7 +332,7 @@ jobs:
           updatebot-config: .github/tests/close-orphaned-preview-prs/updatebot-preview.yaml
           label-prefix: close-orphaned-preview-prs-test-no-match-
 
-      - uses: ./.github/actions/close-orphaned-preview-prs
+      - uses: $/.github/actions/close-orphaned-preview-prs
         id: close-orphaned-explicit
         with:
           source-pr-number: "1"
