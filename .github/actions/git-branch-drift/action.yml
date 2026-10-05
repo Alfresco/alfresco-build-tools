@@ -6,9 +6,9 @@ inputs:
     required: false
     default: ${{ github.event.pull_request.head.sha || github.sha }}
   branch:
-    description: Branch to check on the remote. Defaults to the current pull request head ref, or the current ref.
+    description: Branch to check on the remote. Defaults to the current pull request head ref, or the current ref when it is a branch. Must be set explicitly otherwise (e.g. on a tag run).
     required: false
-    default: ${{ github.event.pull_request.head.ref || github.ref_name }}
+    default: ${{ github.event.pull_request.head.ref || (github.ref_type == 'branch' && github.ref_name || '') }}
   remote:
     description: Git remote to check.
     required: false

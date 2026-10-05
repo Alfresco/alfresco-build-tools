@@ -55,7 +55,7 @@ Brief description of what the action does.
 
 Additional notes or configuration details.
 
-**Note**: Always replace `@ref` with the most recent released tag (e.g., `@v9.1.0`).
+**Note**: Always replace `@ref` with the most recent released tag (e.g., `@v9.1.0`). Look it up with `git tag --sort=-v:refname | head -1` after fetching tags, and use it in every new example, including ones added while the branch is behind `master`.
 
 Input tables are not necessary — a YAML snippet with inline comments is sufficient to document inputs and their defaults.
 
@@ -231,7 +231,7 @@ GitHub Agentic Workflows (AWF) are markdown-based workflows that use AI agents (
 
 Before opening or reviewing a PR, verify:
 
-1. ✅ **Documentation updated**: `docs/README.md` reflects all user-facing changes (new features or enhancements); skip for bug fixes
+1. ✅ **Documentation updated**: `docs/README.md` reflects all user-facing changes (new features or enhancements), with examples pinned to the latest released tag; skip for bug fixes
 2. ✅ **Validation passed**: `.github/scripts/check_readme.sh` runs successfully
 3. ✅ **Version label**: Appropriate `release/patch|minor|major` label added
 4. ✅ **Pre-commit hooks**: All checks pass

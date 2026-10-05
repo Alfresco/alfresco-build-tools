@@ -6,6 +6,10 @@ if [ -z "$EXPECTED_SHA" ]; then
 fi
 
 BRANCH="${BRANCH#refs/heads/}"
+if [ -z "$BRANCH" ]; then
+  echo "::error::This action only supports runs on a branch; set the 'branch' input to the branch to watch."
+  exit 1
+fi
 
 REMOTE_SHA=$(git ls-remote "$REMOTE" "refs/heads/$BRANCH" | cut -f1)
 if [ -z "$REMOTE_SHA" ]; then

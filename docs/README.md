@@ -955,12 +955,19 @@ jobs:
 Asserts that a branch's remote head still matches an expected SHA, to detect commits pushed to it since the run started (e.g. concurrent merges to `master` during a release). Fails the step by default when a mismatch is found; set `fail-on-mismatch: 'false'` to only report it via the `changed` output.
 
 ```yaml
-    - uses: Alfresco/alfresco-build-tools/.github/actions/git-branch-drift@v18.25.0
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-branch-drift@v19.3.0
       with:
         expected-sha: ${{ github.sha }}  # optional, defaults to the current pull request head SHA, or the current commit SHA
         branch: master  # optional, defaults to the pull request head ref or the current ref
         remote: origin  # optional, default: origin
         fail-on-mismatch: 'true'  # optional, default: 'true'
+```
+
+Only runs on a branch are supported: the step fails when the default `branch` is empty (e.g. on a tag run) or missing on the remote. To use it in a workflow that can also run on tags, skip it there:
+
+```yaml
+    - uses: Alfresco/alfresco-build-tools/.github/actions/git-branch-drift@v19.3.0
+      if: github.ref_type == 'branch'
 ```
 
 Relies on the credentials `actions/checkout` persists to reach the remote; a checkout with `persist-credentials: false` needs its own authentication (e.g. `github-https-auth`).

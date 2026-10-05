@@ -69,6 +69,14 @@ mock_ls_remote() {
     [[ "$output" == *"not found on remote"* ]]
 }
 
+@test "fails when no branch is given, e.g. on a tag run" {
+    export BRANCH=""
+    mock_ls_remote "1111111111111111111111111111111111111111"
+    run git-branch-drift.sh
+    [ "$status" -ne 0 ]
+    [[ "$output" == *"only supports runs on a branch"* ]]
+}
+
 @test "falls back to local HEAD when expected-sha is empty" {
     export EXPECTED_SHA=""
     git() {
