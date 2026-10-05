@@ -52,12 +52,16 @@ closed_count=0
 
 for repo in "${repos[@]}"; do
   echo "Looking for open PRs labelled '$source_label' in $repo..."
-  pr_numbers=$(gh pr list \
+  if ! pr_numbers=$(gh pr list \
     --repo "$repo" \
     --label "$source_label" \
     --state open \
     --json number \
-    --jq '.[].number')
+    --jq '.[].number'); then
+    echo "::warning::Failed to list open preview PRs in $repo"
+    failed=1
+    continue
+  fi
 
   if [ -z "$pr_numbers" ]; then
     echo "No open preview PRs found in $repo"
