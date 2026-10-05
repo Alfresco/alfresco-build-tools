@@ -33,16 +33,20 @@ runs:
           ${{ runner.os }}-${{ inputs.cache-key-prefix }}-
     - name: "Install ${{ inputs.maven-settings }}"
       shell: bash
+      env:
+        MAVEN_SETTINGS: ${{ inputs.maven-settings }}
+        SKIP_DEFAULT_SETTINGS: ${{ inputs.skip-default-settings }}
+        ACTION_PATH: ${{ github.action_path }}
       run: |
         mkdir -p ~/.m2
-        if [ -f "${{ inputs.maven-settings }}" ]; then
-          echo "Installing Maven settings file found in the repository: ${{ inputs.maven-settings }}"
-          cp "${{ inputs.maven-settings }}" ~/.m2/settings.xml
-        elif [ "${{ inputs.skip-default-settings }}" = "true" ]; then
+        if [ -f "$MAVEN_SETTINGS" ]; then
+          echo "Installing Maven settings file found in the repository: $MAVEN_SETTINGS"
+          cp "$MAVEN_SETTINGS" ~/.m2/settings.xml
+        elif [ "$SKIP_DEFAULT_SETTINGS" = "true" ]; then
           echo "No repository settings file found and skip-default-settings=true; not installing the bundled default settings.xml"
         else
-          echo "Maven settings file: ${{ inputs.maven-settings }} not found in the repository. Installing the default one"
-          cp "${{ github.action_path }}/settings.xml" ~/.m2/settings.xml
+          echo "Maven settings file: $MAVEN_SETTINGS not found in the repository. Installing the default one"
+          cp "$ACTION_PATH/settings.xml" ~/.m2/settings.xml
         fi
     - name: "Set up Java"
       uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
