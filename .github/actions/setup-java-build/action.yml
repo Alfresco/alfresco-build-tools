@@ -13,6 +13,10 @@ inputs:
     description: the location of the custom Maven settings.xml file to install
     default: ".ci.settings.xml"
     required: false
+  skip-default-settings:
+    description: when no custom settings file is found, skip installing the bundled default settings.xml (for repos that only use public Maven Central and need no authentication)
+    default: "false"
+    required: false
   cache-key-prefix:
     description: the prefix for the maven repository cache key (eg. to handle multiple maven caches within the same repository)
     default: "maven"
@@ -34,9 +38,11 @@ runs:
         if [ -f "${{ inputs.maven-settings }}" ]; then
           echo "Installing Maven settings file found in the repository: ${{ inputs.maven-settings }}"
           cp "${{ inputs.maven-settings }}" ~/.m2/settings.xml
+        elif [ "${{ inputs.skip-default-settings }}" = "true" ]; then
+          echo "No repository settings file found and skip-default-settings=true; not installing the bundled default settings.xml"
         else
           echo "Maven settings file: ${{ inputs.maven-settings }} not found in the repository. Installing the default one"
-          cp ${{ github.action_path }}/settings.xml ~/.m2/settings.xml
+          cp "${{ github.action_path }}/settings.xml" ~/.m2/settings.xml
         fi
     - name: "Set up Java"
       uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
