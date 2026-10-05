@@ -1,6 +1,12 @@
 # Bash scripts testing
 
-Shell scripts used by composite actions are tested with [Bats](https://bats-core.readthedocs.io/), using [bats-support](https://github.com/bats-core/bats-support), [bats-assert](https://github.com/bats-core/bats-assert) and [bats-file](https://github.com/bats-core/bats-file) for assertions (`assert_success`, `assert_failure`, `assert_output`, `assert_file_contains`, ...). Test files live next to the action they cover, in a `tests/` subfolder (e.g. `.github/actions/<action-name>/tests/*.bats`).
+Shell scripts used by composite actions are tested with [Bats](https://bats-core.readthedocs.io/), using these assertion libraries:
+
+- [bats-support](https://github.com/bats-core/bats-support): a shared dependency, no assertions of its own
+- [bats-assert](https://github.com/bats-core/bats-assert): `assert_success`, `assert_failure [N]`, `assert_output [--partial|--regexp] TEXT`, `refute_output`, `assert_line`/`refute_line`
+- [bats-file](https://github.com/bats-core/bats-file): `assert_file_exist`, `assert_file_contains FILE REGEX`, `assert_file_not_contains`, `assert_dir_exist`, ...
+
+Test files live next to the action they cover, in a `tests/` subfolder (e.g. `.github/actions/<action-name>/tests/*.bats`).
 
 ## CI behavior
 
