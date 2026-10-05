@@ -59,6 +59,9 @@ Additional notes or configuration details.
 
 Input tables are not necessary — a YAML snippet with inline comments is sufficient to document inputs and their defaults.
 
+Wrap prose in `docs/README.md` at 80 columns. Code blocks that can't be wrapped
+(e.g. `uses:` lines) are exempt; put long inline YAML comments on their own line.
+
 **Run validation script** to ensure all actions are documented:
 
 ```bash
