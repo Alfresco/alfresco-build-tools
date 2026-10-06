@@ -62,4 +62,4 @@ runs:
         UPDATEBOT_CONFIG: ${{ inputs.updatebot-config }}
         LABEL_PREFIX: ${{ inputs.label-prefix }}
         SOURCE_REPO_NAME: ${{ inputs.source-repo-name }}
-      run: ${{ github.action_path }}/close-orphaned-preview-prs.sh
+      run: ${{ github.action_path }}/github-close-orphaned-preview-prs.sh

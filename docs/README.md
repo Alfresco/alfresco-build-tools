@@ -41,7 +41,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [awf-run-command](#awf-run-command)
   - [calculate-next-internal-version](#calculate-next-internal-version)
   - [check-pr-description](#check-pr-description)
-  - [close-orphaned-preview-prs](#close-orphaned-preview-prs)
+  - [github-close-orphaned-preview-prs](#github-close-orphaned-preview-prs)
   - [cloudsmith-auth](#cloudsmith-auth)
   - [cloudsmith-docker-auth](#cloudsmith-docker-auth)
   - [configure-git-author](#configure-git-author)
@@ -546,7 +546,7 @@ Automated PRs are skipped two ways: by author (`*[bot]` plus the `skip-authors` 
 
 Consumer repositories should pin the reference to a commit SHA rather than a tag, as recommended in [Actions SHA pinning](#actions-sha-pinning) (the `@v18.16.0` above is a placeholder that the release process keeps in sync within this repo). The `min-chars` and `min-words` inputs must be non-negative integers.
 
-### close-orphaned-preview-prs
+### github-close-orphaned-preview-prs
 
 Closes open downstream preview PRs labelled `preview-source-pr-<N>` once the source PR that produced them is no longer open. It is the cleanup counterpart to the preview PRs created by [jx-updatebot-pr](#jx-updatebot-pr), and suits both an on-close cleanup workflow and the post-creation guard of a propagation job (a propagation build queued before the source PR is merged can create a preview PR after the cleanup job has already finished).
 
@@ -568,7 +568,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/close-orphaned-preview-prs@v19.2.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-close-orphaned-preview-prs@v19.2.0
         with:
           source-pr-number: ${{ github.event.pull_request.number }}
           source-pr-state: ${{ github.event.pull_request.merged == true && 'MERGED' || 'CLOSED' }}
@@ -580,7 +580,7 @@ jobs:
 Pass `downstream-repos` to bypass the updatebot config, for example when the propagation targets are not declared there or no checkout is available. It accepts a whitespace- or comma-separated list of `owner/repo` entries or GitHub URLs, and then `updatebot-config` is ignored:
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/close-orphaned-preview-prs@v19.2.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-close-orphaned-preview-prs@v19.2.0
         with:
           source-pr-number: ${{ github.event.pull_request.number }}
           source-pr-state: CLOSED

@@ -318,22 +318,22 @@ jobs:
           fi
       # endregion
 
-      # region close-orphaned-preview-prs
+      # region github-close-orphaned-preview-prs
       # The label prefix is deliberately one that matches nothing, so the PR
       # listing comes back empty and no PR is ever closed. The fixture resolves to
       # this repository, so the default GITHUB_TOKEN read access is enough and no
       # other repo is touched.
-      - uses: $/.github/actions/close-orphaned-preview-prs
-        id: close-orphaned-derived
+      - uses: $/.github/actions/github-close-orphaned-preview-prs
+        id: github-close-orphaned-derived
         with:
           source-pr-number: "1"
           source-pr-state: MERGED
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          updatebot-config: .github/tests/close-orphaned-preview-prs/updatebot-preview.yaml
-          label-prefix: close-orphaned-preview-prs-test-no-match-
+          updatebot-config: .github/tests/github-close-orphaned-preview-prs/updatebot-preview.yaml
+          label-prefix: github-close-orphaned-preview-prs-test-no-match-
 
-      - uses: $/.github/actions/close-orphaned-preview-prs
-        id: close-orphaned-explicit
+      - uses: $/.github/actions/github-close-orphaned-preview-prs
+        id: github-close-orphaned-explicit
         with:
           source-pr-number: "1"
           source-pr-state: CLOSED
@@ -341,14 +341,14 @@ jobs:
           downstream-repos: |
             https://github.com/Alfresco/alfresco-build-tools.git
             Alfresco/alfresco-build-tools/
-          label-prefix: close-orphaned-preview-prs-test-no-match-
+          label-prefix: github-close-orphaned-preview-prs-test-no-match-
 
-      - name: Assert close-orphaned-preview-prs resolved its downstream repos
+      - name: Assert github-close-orphaned-preview-prs resolved its downstream repos
         env:
-          DERIVED: ${{ steps.close-orphaned-derived.outputs.downstream-repos }}
-          DERIVED_COUNT: ${{ steps.close-orphaned-derived.outputs.closed-count }}
-          EXPLICIT: ${{ steps.close-orphaned-explicit.outputs.downstream-repos }}
-          EXPLICIT_COUNT: ${{ steps.close-orphaned-explicit.outputs.closed-count }}
+          DERIVED: ${{ steps.github-close-orphaned-derived.outputs.downstream-repos }}
+          DERIVED_COUNT: ${{ steps.github-close-orphaned-derived.outputs.closed-count }}
+          EXPLICIT: ${{ steps.github-close-orphaned-explicit.outputs.downstream-repos }}
+          EXPLICIT_COUNT: ${{ steps.github-close-orphaned-explicit.outputs.closed-count }}
         run: |
           # Both inputs describe the same repository in different spellings, so
           # normalisation and de-duplication must collapse them to a single entry.
