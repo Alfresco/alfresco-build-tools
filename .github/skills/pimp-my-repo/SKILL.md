@@ -1,6 +1,6 @@
 ---
 name: pimp-my-repo
-description: "Bootstrap a full-featured GitHub repository's standard configuration. Use when: setting up a new repository, adding a missing Dependabot or pre-commit config, or standardizing an existing repo. Generates .github/dependabot.yml from the ecosystems the repo actually uses, a baseline .pre-commit-config.yaml, ensures every workflow SHA-pins its third-party actions, ignores .claude in .gitignore, sets up .github/copilot-instructions.md with a thin CLAUDE.md importing it, and hardens workflow secret scoping and permissions."
+description: "Bootstrap a full-featured GitHub repository's standard configuration. Use when: setting up a new repository, adding a missing Dependabot or pre-commit config, or standardizing an existing repo. Generates .github/dependabot.yml from the ecosystems the repo actually uses, a baseline .pre-commit-config.yaml, ensures every workflow SHA-pins its third-party actions, ignores .claude in .gitignore, sets up .github/copilot-instructions.md with a thin CLAUDE.md importing it, hardens workflow secret scoping and permissions, and names every workflow step."
 ---
 
 # Pimp My Repo
@@ -18,6 +18,7 @@ already configured correctly; merge rather than overwrite.
 4. **Gitignore** — common ignores for the repo's stack, plus Claude Code artifacts.
 5. **AI assistant instructions** — `.github/copilot-instructions.md` with a thin `CLAUDE.md`.
 6. **Secrets & permissions** — least-privilege secret scoping and workflow permissions.
+7. **Step names** — every workflow step has a short `name:`.
 
 ## 1. Dependabot config
 
@@ -358,3 +359,11 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}   # step-level: scoped to where it's used
         run: npm publish
 ```
+
+## 7. Step names in workflows
+
+Give every workflow step a `name:`, including one-line `uses:` and `run:` steps.
+
+- Keep names short: `Checkout`, `Setup Java`, `Setup Go`, `Pre-commit`, `Compose up`, `Upload jar`.
+- A step that checks something starts with `Verify` (e.g. `Verify login`).
+- Name the step for what it does, not for the command or action behind it.
