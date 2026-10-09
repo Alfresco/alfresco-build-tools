@@ -1056,19 +1056,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/github-close-orphaned-preview-prs@v19.2.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-close-orphaned-preview-prs@v19.4.0
         with:
           source-pr-number: ${{ github.event.pull_request.number }}
           source-pr-state: ${{ github.event.pull_request.merged == true && 'MERGED' || 'CLOSED' }}
           github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           updatebot-config: .jx/updatebot-preview.yaml # optional, default: .jx/updatebot-preview.yaml
           label-prefix: preview-source-pr- # optional, default: preview-source-pr-
-```
-
-Pass `downstream-repos` to bypass the updatebot config, for example when the propagation targets are not declared there or no checkout is available. It accepts a whitespace- or comma-separated list of `owner/repo` entries or GitHub URLs, and then `updatebot-config` is ignored:
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/github-close-orphaned-preview-prs@v19.2.0
         with:
           source-pr-number: ${{ github.event.pull_request.number }}
           source-pr-state: CLOSED

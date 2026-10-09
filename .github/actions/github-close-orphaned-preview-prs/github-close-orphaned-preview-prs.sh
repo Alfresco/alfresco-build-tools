@@ -4,7 +4,7 @@ set -eo pipefail
 # Strip any URL prefix/suffix so "https://github.com/owner/repo.git", "owner/repo/"
 # and "owner/repo" all resolve alike, then drop blanks and duplicates.
 normalize_repos() {
-  sed -e 's|^https\{0,1\}://[^/]*/||' -e 's|\.git$||' -e 's|/*$||' |
+  sed -e 's|^https\{0,1\}://[^/]*/||' -e 's|/*$||' -e 's|\.git$||' |
     awk 'NF && !seen[$0]++'
 }
 
@@ -72,7 +72,7 @@ for repo in "${repos[@]}"; do
     echo "Closing PR #$pr in $repo"
     if ! gh pr close "$pr" \
       --repo "$repo" \
-      --comment "Automatically closed: source PR #${SOURCE_PR_NUMBER} in ${source_repo_name} was ${close_reason}."; then
+      --comment "Automatically closed: source PR ${GITHUB_REPOSITORY}#${SOURCE_PR_NUMBER} (${source_repo_name}) was ${close_reason}."; then
       echo "::warning::Failed to close PR #$pr in $repo"
       failed=1
     else
