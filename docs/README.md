@@ -63,6 +63,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [git-commit-changes](#git-commit-changes)
   - [git-latest-tag](#git-latest-tag)
   - [github-check-upcoming-runs](#github-check-upcoming-runs)
+  - [github-close-orphaned-preview-prs](#github-close-orphaned-preview-prs)
   - [github-deployment-create](#github-deployment-create)
   - [github-deployment-status-update](#github-deployment-status-update)
   - [github-deployments-delete](#github-deployments-delete)
@@ -1064,6 +1065,50 @@ With proper concurrency logic in place, the latest run might have been cancelled
           github-token: ${{ secrets.MY_GITHUB_TOKEN }}
           workflow: my-workflow.yml
 ```
+
+### github-close-orphaned-preview-prs
+
+Closes open downstream preview PRs labelled `preview-source-pr-<N>` once the source PR that produced them is no longer open. It is the cleanup counterpart to the preview PRs created by [jx-updatebot-pr](#jx-updatebot-pr), and suits both an on-close cleanup workflow and the post-creation guard of a propagation job (a propagation build queued before the source PR is merged can create a preview PR after the cleanup job has already finished).
+
+By default the downstream repositories are derived from `.jx/updatebot-preview.yaml`, so the cleanup targets stay in sync with the propagation targets instead of being duplicated. This requires the calling job to have checked out the repository.
+
+```yaml
+name: Cleanup on PR closed
+
+permissions:
+  contents: read
+  pull-requests: write
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  close-preview-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-close-orphaned-preview-prs@v19.4.0
+        with:
+          source-pr-number: ${{ github.event.pull_request.number }}
+          source-pr-state: ${{ github.event.pull_request.merged == true && 'MERGED' || 'CLOSED' }}
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          updatebot-config: .jx/updatebot-preview.yaml # optional, default: .jx/updatebot-preview.yaml
+          label-prefix: preview-source-pr- # optional, default: preview-source-pr-
+        with:
+          source-pr-number: ${{ github.event.pull_request.number }}
+          source-pr-state: CLOSED
+          github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          downstream-repos: |
+            Alfresco/first-downstream
+            Alfresco/second-downstream
+```
+
+`source-pr-state` is compared against `MERGED`; any other value is reported as closed in the comment left on each PR. The comment names the source repository, taken from `github.repository` unless `source-repo-name` overrides it. `github-token` needs `pull-requests:write` on the **downstream** repositories, so the default `GITHUB_TOKEN` is not sufficient — use `secrets.BOT_GITHUB_TOKEN`.
+
+A repository whose PRs cannot be closed does not stop the others being processed; the step logs a warning per failure and fails once every repository has been attempted.
+
+Two outputs are exposed: `downstream-repos`, the space-separated list of repositories that were resolved, and `closed-count`, the number of PRs that were closed.
 
 ### github-deployment-create
 

@@ -1,0 +1,65 @@
+name: Close orphaned preview PRs
+description: >
+  Closes open downstream preview PRs labelled "<label-prefix><N>" when the source PR
+  that produced them is no longer open. Companion cleanup for the preview PRs created
+  by jx-updatebot-pr, for both the on-close cleanup job and the post-creation guard of
+  a propagation job.
+inputs:
+  source-pr-number:
+    description: Number of the source PR that the downstream preview PRs reference
+    required: true
+  source-pr-state:
+    description: >
+      State of the source PR. "MERGED" is reported as merged in the closing comment,
+      anything else as closed.
+    required: true
+  github-token:
+    description: Token with pull-requests:write on the downstream repositories
+    required: true
+  downstream-repos:
+    description: >
+      Whitespace- or comma-separated list of downstream repositories to clean up, as
+      "owner/repo" or as a GitHub URL. When empty, the list is derived from
+      `updatebot-config`, which keeps it in sync with the propagation targets instead
+      of duplicating them.
+    required: false
+    default: ''
+  updatebot-config:
+    description: >
+      Updatebot config to derive the downstream repositories from when
+      `downstream-repos` is empty. Requires the calling job to have checked out the
+      repository.
+    required: false
+    default: .jx/updatebot-preview.yaml
+  label-prefix:
+    description: Prefix of the label identifying preview PRs by source PR number
+    required: false
+    default: preview-source-pr-
+  source-repo-name:
+    description: >
+      Name of the source repository as it appears in the closing comment. Defaults to
+      the short name of the calling repository.
+    required: false
+    default: ''
+outputs:
+  downstream-repos:
+    description: Space-separated list of the downstream repositories that were resolved
+    value: ${{ steps.close.outputs.downstream-repos }}
+  closed-count:
+    description: Number of preview PRs that were closed
+    value: ${{ steps.close.outputs.closed-count }}
+runs:
+  using: composite
+  steps:
+    - name: Close labelled preview PRs in downstream repos
+      id: close
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        SOURCE_PR_NUMBER: ${{ inputs.source-pr-number }}
+        SOURCE_PR_STATE: ${{ inputs.source-pr-state }}
+        DOWNSTREAM_REPOS: ${{ inputs.downstream-repos }}
+        UPDATEBOT_CONFIG: ${{ inputs.updatebot-config }}
+        LABEL_PREFIX: ${{ inputs.label-prefix }}
+        SOURCE_REPO_NAME: ${{ inputs.source-repo-name }}
+      run: ${{ github.action_path }}/github-close-orphaned-preview-prs.sh
