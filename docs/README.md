@@ -1077,7 +1077,6 @@ name: Cleanup on PR closed
 
 permissions:
   contents: read
-  pull-requests: write
 
 on:
   pull_request:
@@ -1104,7 +1103,7 @@ jobs:
             Alfresco/second-downstream
 ```
 
-`source-pr-state` is compared against `MERGED`; any other value is reported as closed in the comment left on each PR. The comment names the source repository, taken from `github.repository` unless `source-repo-name` overrides it. `github-token` needs `pull-requests:write` on the **downstream** repositories, so the default `GITHUB_TOKEN` is not sufficient — use `secrets.BOT_GITHUB_TOKEN`.
+`source-pr-state` is compared against `MERGED`; any other value is reported as closed in the comment left on each PR. The comment names the source repository, taken from `github.repository` unless `source-repo-name` overrides it. `secrets.BOT_GITHUB_TOKEN` must have **Pull requests: read and write** access on every **downstream** repository: the action uses it to list open preview PRs, close them, and add a comment. The workflow-level `permissions` block above applies only to the default `GITHUB_TOKEN`, not to `BOT_GITHUB_TOKEN`.
 
 A repository whose PRs cannot be closed does not stop the others being processed; the step logs a warning per failure and fails once every repository has been attempted.
 
