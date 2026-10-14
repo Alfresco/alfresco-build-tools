@@ -39,11 +39,6 @@ fi
 
 source_label="${LABEL_PREFIX}${SOURCE_PR_NUMBER}"
 source_repo_name="${SOURCE_REPO_NAME:-${GITHUB_REPOSITORY##*/}}"
-if [ "$SOURCE_PR_STATE" = "MERGED" ]; then
-  close_reason=merged
-else
-  close_reason=closed
-fi
 
 # Collected rather than fatal, so one unreachable repository doesn't leave the
 # remaining ones uncleaned. The step still fails at the end.
@@ -72,7 +67,7 @@ for repo in "${repos[@]}"; do
     echo "Closing PR #$pr in $repo"
     if ! gh pr close "$pr" \
       --repo "$repo" \
-      --comment "Automatically closed: source PR ${GITHUB_REPOSITORY}#${SOURCE_PR_NUMBER} (${source_repo_name}) was ${close_reason}."; then
+      --comment "Automatically closed: source PR ${GITHUB_REPOSITORY}#${SOURCE_PR_NUMBER} (${source_repo_name}) was ${SOURCE_PR_STATE}."; then
       echo "::warning::Failed to close PR #$pr in $repo"
       failed=1
     else
