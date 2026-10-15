@@ -1913,7 +1913,7 @@ Set up Java and Maven version and compute common maven options including setting
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-configure@v19.4.0
         with:
           java-version: '21'
-          maven-version: '3.8.8'
+          maven-version: '3.10.0'
          # maven-settings-path: '.ci.settings.xml' # optional
          # maven-setup-cache-key-suffix: 'my-suffix' # optional suffix for the Maven setup cache key
 ```
@@ -1928,7 +1928,7 @@ Create the project Dependency Graph
     restore-artifact-pattern: 'm2*'
     restore-artifact-path: '~./m2/com/groupId'
     java-version: '21'
-    maven-version: '3.8.8'
+    maven-version: '3.10.0'
     maven-args: '-Dmaven.test.skip=true' #sample mvn args
     maven-settings-path: '.ci.settings.xml' # optional path to maven settings, defaults to 'settings.xml' for retrocompatiblity
     maven-username: ${{ secrets.MAVEN_USERNAME }}
@@ -1954,7 +1954,7 @@ Builds a maven project using the provided command.
           maven-resolver-transport-options: '-Dmaven.wagon.http.pool=false'
           maven-username: ${{ secrets.MAVEN_USERNAME }}
           maven-password: ${{ secrets.MAVEN_PASSWORD }}
-          maven-version: '3.8.8'
+          maven-version: '3.10.0'
           quay-username: ${{ secrets.QUAY_USERNAME }}
           quay-password: ${{ secrets.QUAY_PASSWORD }}
           ghcr-username: ${{ secrets.GHCR_USERNAME }}
@@ -2132,7 +2132,7 @@ Updates POM files to the next pre-release, commits changes and creates a Git tag
 - uses: ./.github/actions/maven-tag
   with:
     java-version: '21'
-    maven-version: '3.8.8'
+    maven-version: '3.10.0'
     prerelease-type: 'alpha'
     maven-username: ${{ secrets.MAVEN_USERNAME }}
     maven-password: ${{ secrets.MAVEN_PASSWORD }}
@@ -2762,7 +2762,7 @@ share the same key, or to force a fresh cache.
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-maven@v19.4.0
         with:
-          version: "3.9.9"
+          version: "3.10.0"
           # cache-key-suffix: "my-suffix" # optional
 ```
 
@@ -2836,7 +2836,7 @@ Run Sonar Scanner to load JaCoCo report on SonarCloud.
           maven-password: ${{ secrets.MAVEN_PASSWORD }}
           ghcr-username: ${{ secrets.GITHUB_USERNAME }}
           ghcr-password: ${{ secrets.GITHUB_TOKEN }}
-          maven-version: '3.8.8'
+          maven-version: '3.10.0'
           java-version: '21'
 ```
 

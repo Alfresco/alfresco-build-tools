@@ -93,17 +93,17 @@ jobs:
       #region Test setup-maven
       - uses: ./.github/actions/setup-maven
         with:
-          version: 3.9.9
+          version: 3.10.0
       - uses: ./.github/tests/actions/test-setup-maven
         with:
-          expected-version: 3.9.9
+          expected-version: 3.10.0
 
       - uses: ./.github/actions/setup-maven
         with:
-          version: 3.8.8
+          version: 3.9.16
       - uses: ./.github/tests/actions/test-setup-maven
         with:
-          expected-version: 3.8.8
+          expected-version: 3.9.16
 
       - name: Test setup-maven rejects invalid version
         id: setup-maven-invalid
@@ -123,7 +123,7 @@ jobs:
         id: maven-configure
         with:
           java-version: 17
-          maven-version: 3.9.9
+          maven-version: 3.10.0
       - uses: ./.github/tests/actions/test-maven-configure
         with:
           maven-options: ${{ steps.maven-configure.outputs.maven-options }}
