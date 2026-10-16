@@ -318,6 +318,58 @@ jobs:
           fi
       # endregion
 
+      # region github-close-orphaned-preview-prs
+      # The label prefix is deliberately one that matches nothing, so the PR
+      # listing comes back empty and no PR is ever closed. The fixture resolves to
+      # this repository, so the default GITHUB_TOKEN read access is enough and no
+      # other repo is touched.
+      - uses: $/.github/actions/github-close-orphaned-preview-prs
+        id: github-close-orphaned-derived
+        with:
+          source-pr-number: "1"
+          source-pr-state: MERGED
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          updatebot-config: .github/tests/github-close-orphaned-preview-prs/updatebot-preview.yaml
+          label-prefix: github-close-orphaned-preview-prs-test-no-match-
+
+      - uses: $/.github/actions/github-close-orphaned-preview-prs
+        id: github-close-orphaned-explicit
+        with:
+          source-pr-number: "1"
+          source-pr-state: CLOSED
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          downstream-repos: |
+            https://github.com/Alfresco/alfresco-build-tools.git
+            Alfresco/alfresco-build-tools/
+          label-prefix: github-close-orphaned-preview-prs-test-no-match-
+
+      - name: Assert github-close-orphaned-preview-prs resolved its downstream repos
+        env:
+          DERIVED: ${{ steps.github-close-orphaned-derived.outputs.downstream-repos }}
+          DERIVED_COUNT: ${{ steps.github-close-orphaned-derived.outputs.closed-count }}
+          EXPLICIT: ${{ steps.github-close-orphaned-explicit.outputs.downstream-repos }}
+          EXPLICIT_COUNT: ${{ steps.github-close-orphaned-explicit.outputs.closed-count }}
+        run: |
+          # Both inputs describe the same repository in different spellings, so
+          # normalisation and de-duplication must collapse them to a single entry.
+          expected="Alfresco/alfresco-build-tools"
+          status=0
+          check() {
+            echo "$1: repos='$2' closed-count='$3'"
+            if [ "$2" != "$expected" ]; then
+              echo "::error::$1 resolved '$2', expected '$expected'"
+              status=1
+            fi
+            if [ "$3" != "0" ]; then
+              echo "::error::$1 closed-count is '$3', expected 0"
+              status=1
+            fi
+          }
+          check derived "$DERIVED" "$DERIVED_COUNT"
+          check explicit "$EXPLICIT" "$EXPLICIT_COUNT"
+          exit "$status"
+      # endregion
+
       - uses: ./.github/actions/get-branch-name-v2
         id: branch-info
       - name: Show current branches
