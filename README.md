@@ -20,7 +20,7 @@ For pre-commit hooks documentation, see the [Pre-commit Hooks section](docs/pre-
 
 For Python scripts testing guidelines, see the [Python Testing documentation](.github/tests/python-scripts/README.md).
 
-For GitHub Copilot instructions and development guidelines, see [`.github/copilot-instructions.md`](.github/copilot-instructions.md).
+For AI assistant instructions and development guidelines, see [`AGENTS.md`](AGENTS.md).
 
 ## Release
 

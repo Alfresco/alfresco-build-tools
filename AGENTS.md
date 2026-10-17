@@ -1,4 +1,4 @@
-# GitHub Copilot Instructions for alfresco-build-tools
+# Agent Instructions for alfresco-build-tools
 
 This repository contains shared/reusable CI configurations for GitHub Actions serving the Alfresco organization and broader community.
 
@@ -266,9 +266,9 @@ diff <(ls .github/actions) <(grep -o "### [^#]*" docs/README.md | sed 's/### //'
 
 ## Additional Resources
 
-- [Security Guidelines](../docs/security.md)
-- [Terraform Workflows](../docs/terraform.md)
-- [Pre-commit Hooks Documentation](../docs/pre-commit-hooks.md)
+- [Security Guidelines](docs/security.md)
+- [Terraform Workflows](docs/terraform.md)
+- [Pre-commit Hooks Documentation](docs/pre-commit-hooks.md)
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
 - [Semantic Versioning](https://semver.org/)
 
