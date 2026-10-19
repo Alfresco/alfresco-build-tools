@@ -1,6 +1,6 @@
 ---
 name: pimp-my-repo
-description: "Bootstrap a full-featured GitHub repository's standard configuration. Use when: setting up a new repository, adding a missing Dependabot or pre-commit config, or standardizing an existing repo. Generates .github/dependabot.yml from the ecosystems the repo actually uses, a baseline .pre-commit-config.yaml, ensures every workflow SHA-pins its third-party actions, ignores .claude in .gitignore, sets up .github/copilot-instructions.md with a thin CLAUDE.md importing it, hardens workflow secret scoping and permissions, and names every workflow step."
+description: "Bootstrap a full-featured GitHub repository's standard configuration. Use when: setting up a new repository, adding a missing Dependabot or pre-commit config, or standardizing an existing repo. Generates .github/dependabot.yml from the ecosystems the repo actually uses, a baseline .pre-commit-config.yaml, ensures every workflow SHA-pins its third-party actions, ignores .claude in .gitignore, sets up AGENTS.md with a thin CLAUDE.md importing it, hardens workflow secret scoping and permissions, and names every workflow step."
 ---
 
 # Pimp My Repo
@@ -16,7 +16,7 @@ already configured correctly; merge rather than overwrite.
 3. **SHA-pinning** — every workflow references third-party actions by commit SHA; any
    Dockerfile pins its base images by digest.
 4. **Gitignore** — common ignores for the repo's stack, plus Claude Code artifacts.
-5. **AI assistant instructions** — `.github/copilot-instructions.md` with a thin `CLAUDE.md`.
+5. **AI assistant instructions** — `AGENTS.md` with a thin `CLAUDE.md`.
 6. **Secrets & permissions** — least-privilege secret scoping and workflow permissions.
 7. **Step names** — every workflow step has a short `name:`.
 
@@ -297,22 +297,25 @@ duplicate or reorder what's already there.
 ## 5. AI assistant instructions
 
 Keep repo guidance in a **single shared source of truth**. The actual instructions live
-in `.github/copilot-instructions.md`; `CLAUDE.md` is a thin file that imports them via
-Claude's native `@` syntax rather than duplicating content.
+in `AGENTS.md` at the repo root, which GitHub Copilot code review, Codex and other agents
+read directly. `CLAUDE.md` only imports it via Claude's native `@` syntax.
 
-If `.github/copilot-instructions.md` is missing, generate it with the agent's `/init`
-operation, which documents the codebase (purpose, layout, build/test commands,
-conventions). Then arrange the result into the single-source layout:
+If `AGENTS.md` is missing, generate it with the agent's `/init` operation, which
+documents the codebase (purpose, layout, build/test commands, conventions). Then arrange
+the result into the single-source layout:
 
-- Put the generated instructions in `.github/copilot-instructions.md`.
-- Make `CLAUDE.md` at the repo root contain only the import:
+- Put the generated instructions in `AGENTS.md`.
+- Make `CLAUDE.md` at the repo root contain only the import line, with no title or
+  other content:
 
   ```markdown
-  @.github/copilot-instructions.md
+  @AGENTS.md
   ```
 
-If `CLAUDE.md` already holds real content, move it into `.github/copilot-instructions.md`
-and replace `CLAUDE.md` with the single import line.
+If the repo uses the older layout (real content in `.github/copilot-instructions.md`
+and/or `CLAUDE.md`), migrate it: merge that content into `AGENTS.md`, reduce `CLAUDE.md`
+to the import line, and delete `.github/copilot-instructions.md`. Update any links to the
+old file, for example in `README.md`.
 
 ## 6. Secrets and permissions in workflows
 

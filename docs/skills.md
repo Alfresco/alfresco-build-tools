@@ -71,9 +71,8 @@ generates a `.github/dependabot.yml` tailored to the ecosystems the repo actuall
 (`github-actions` always included, grouping always enabled), adds a baseline
 `.pre-commit-config.yaml` with the standard hooks, ensures every workflow SHA-pins its
 third-party actions, ignores `.claude` in `.gitignore`, sets up AI assistant
-instructions (`.github/copilot-instructions.md` with a thin `CLAUDE.md` importing it),
-and hardens how workflows scope secrets and permissions.
-It also names every workflow step.
+instructions (`AGENTS.md` with a thin `CLAUDE.md` importing it), hardens how workflows
+scope secrets and permissions, and names every workflow step.
 
 Copy-paste this into your agent:
 
