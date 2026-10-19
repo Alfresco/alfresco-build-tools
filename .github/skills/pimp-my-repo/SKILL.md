@@ -161,15 +161,21 @@ in this order and stop at the first match:
 2. **No single main workflow, but one is clearly dedicated to linting/static checks**
    (e.g. named `lint.yml`, or a job doing `actionlint`/`yamllint`/similar). Add
    `pre-commit` as a job there instead of creating a new file.
-3. **Neither applies** (several unrelated workflows, none a natural home). Create a new
-   `.github/workflows/pre-checks.yml` dedicated to it:
+3. **Neither applies** (no workflows yet, or several unrelated ones with none a natural
+   home). Create a new workflow, named by the repo's age (`git rev-list --count HEAD`):
 
-   Replace `<default-branch>` with the repo's actual default branch (e.g. `git remote
-   show origin | sed -n 's/HEAD branch: //p'`).
+   - **10 commits or fewer** (new repo): `ci.yml`, so it becomes the main workflow that
+     later build/test jobs join.
+   - **More than 10 commits** (established repo): `pre-commit.yml`, dedicated to this job
+     and leaving the existing workflows alone.
+
+   Match the extension the existing workflows use (`.yml` or `.yaml`), defaulting to
+   `.yml`. Replace `<default-branch>` with the repo's actual default branch (e.g.
+   `git remote show origin | sed -n 's/HEAD branch: //p'`).
 
    ```yaml
-   # .github/workflows/pre-checks.yml
-   name: pre-checks
+   # .github/workflows/ci.yml (or pre-commit.yml)
+   name: ci # or pre-commit
 
    on:
      pull_request:
