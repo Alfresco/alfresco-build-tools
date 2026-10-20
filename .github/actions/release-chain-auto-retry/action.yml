@@ -1,0 +1,51 @@
+name: Release chain auto-retry
+description: Re-runs the failed jobs of a release workflow run when every failure is retryable, and reports when it is not.
+inputs:
+  config-path:
+    description: Path to the retry configuration file, read from the default branch of the repository being watched.
+    required: false
+    default: .github/release-auto-retry.yml
+  github-token:
+    description: Token used to read the run and to re-run its failed jobs. Needs actions write.
+    required: false
+    default: ${{ github.token }}
+outputs:
+  decision:
+    description: "'retry', 'escalate' or 'none'"
+    value: ${{ steps.decide.outputs.decision }}
+  reason:
+    description: One sentence explaining the decision, suitable for a notification body
+    value: ${{ steps.decide.outputs.reason }}
+  failed-jobs:
+    description: Newline-separated display names of the jobs that failed on this attempt
+    value: ${{ steps.decide.outputs.failed-jobs }}
+  attempt:
+    description: The attempt number that just failed
+    value: ${{ steps.decide.outputs.attempt }}
+  max-attempts:
+    description: The configured attempt budget
+    value: ${{ steps.decide.outputs.max-attempts }}
+runs:
+  using: composite
+  steps:
+    - id: decide
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        REPOSITORY: ${{ github.repository }}
+        CONFIG_PATH: ${{ inputs.config-path }}
+        RUN_ID: ${{ github.event.workflow_run.id }}
+        RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+        HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      run: ${{ github.action_path }}/release-chain-auto-retry.sh
+
+    - name: Re-run failed jobs
+      if: steps.decide.outputs.decision == 'retry'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        REPOSITORY: ${{ github.repository }}
+        RUN_ID: ${{ github.event.workflow_run.id }}
+      # --repo is required because a watcher has no checkout for gh to read a remote from.
+      run: gh run rerun "$RUN_ID" --failed --repo "$REPOSITORY"

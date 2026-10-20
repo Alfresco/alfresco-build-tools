@@ -111,6 +111,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [process-coverage-report](#process-coverage-report)
   - [pipenv](#pipenv)
   - [rancher](#rancher)
+  - [release-chain-auto-retry](#release-chain-auto-retry)
   - [release-notes-aggregator](#release-notes-aggregator)
   - [reportportal-prepare](#reportportal-prepare)
   - [reportportal-summarize](#reportportal-summarize)
@@ -2343,6 +2344,87 @@ AWS credentials are required only when registering the cluster.
           aws-secret-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: "us-east-2"
 ```
+
+### release-chain-auto-retry
+
+Re-runs the failed jobs of a release workflow run when every failure is retryable, and reports when it is not.
+Designed for the ACS release chain, where a single flaky test job silently stops the downstream release.
+
+Add it to a `workflow_run` watcher on the default branch. The watcher covers maintenance branches too,
+because `workflow_run` always executes from the default branch while its `branches:` filter applies to the
+triggering run.
+
+```yaml
+name: Release chain auto-retry
+
+on:
+  workflow_run:
+    workflows: ["Master/Release branch workflow"] # the name: of the workflow to watch, not its filename
+    types: [completed]
+    branches: [master, "release/**"]
+
+permissions:
+  actions: write
+
+jobs:
+  retry:
+    if: contains(fromJSON('["failure","timed_out"]'), github.event.workflow_run.conclusion)
+    runs-on: ubuntu-latest
+    # Lifted to env because the secrets context cannot be read from a step condition.
+    env:
+      TEAMS_WEBHOOK: ${{ secrets.TEAMS_WEBHOOK }}
+    steps:
+      - id: retry
+        uses: Alfresco/alfresco-build-tools/.github/actions/release-chain-auto-retry@v19.5.0
+
+      - name: Report to Teams
+        if: steps.retry.outputs.decision == 'escalate' && env.TEAMS_WEBHOOK != ''
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v19.5.0
+        with:
+          webhook-url: ${{ secrets.TEAMS_WEBHOOK }}
+          title: Release chain stopped in ${{ github.repository }}
+          message: ${{ steps.retry.outputs.reason }}
+          skip_checkout: "true"
+
+      - name: Fail visibly when no Teams webhook is configured
+        if: steps.retry.outputs.decision == 'escalate' && env.TEAMS_WEBHOOK == ''
+        env:
+          REASON: ${{ steps.retry.outputs.reason }}
+        run: |
+          echo "::error::$REASON"
+          exit 1
+```
+
+The job-level `if:` is what keeps this cheap: it is evaluated before a runner is allocated, so a successful
+release run costs no minutes.
+
+Reporting is left to the caller rather than built into the action, so a repository can send the escalation
+wherever it already sends alerts. The pair of steps above keeps an escalation visible before a webhook has
+been set up: without the secret the job fails with the reason in the log, which is at least as loud as a
+notification nobody configured.
+
+Behaviour is configured per repository in `.github/release-auto-retry.yml`, read from the default branch.
+A missing file means the action does nothing, so the watcher can be merged before the rollout is decided.
+
+```yaml
+max-attempts: 3        # optional, default: 3 - TOTAL attempts, so 3 permits two retries
+non-retryable-jobs:    # required - jobs that must never be re-run automatically
+  - Parse commit metadata
+  - Push to Nexus
+  - Update alfresco-enterprise-repo
+```
+
+Entries under `non-retryable-jobs` are job **display names** and are matched on the whole name. A job nested
+through a reusable workflow is reported as `run_ci / Parse commit metadata`, which does not match a
+`Parse commit metadata` entry, so test jobs do not need listing.
+
+The action re-runs failed jobs inside the existing run rather than starting a new one, so the attempt counter
+is kept by GitHub and the next attempt triggers the watcher again by itself. It stops and reports when a
+non-retryable job failed or the budget is spent, and does nothing when the branch has moved on since the run
+started, because a re-run replays the original commit.
+
+Outputs are `decision` (`retry`, `escalate` or `none`), `reason`, `failed-jobs`, `attempt` and `max-attempts`.
+See [Release chain auto-retry](release-auto-retry.md) for the full design and the known limitations.
 
 ### release-notes-aggregator
 
