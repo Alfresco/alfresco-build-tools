@@ -3,6 +3,11 @@ set -euo pipefail
 
 : "${GITHUB_OUTPUT:?GITHUB_OUTPUT is not set (this script must run in a GitHub Actions step)}"
 
+if [ "${GITHUB_EVENT_NAME:-}" != "workflow_run" ]; then
+  echo "::error::This action only works on a workflow_run event, not on ${GITHUB_EVENT_NAME:-an unknown event}"
+  exit 1
+fi
+
 MAX_ATTEMPTS=""
 FAILED=""
 
@@ -22,15 +27,39 @@ decide() {
     echo "$delim"
   } >> "$GITHUB_OUTPUT"
   echo "$2"
+  # Every outcome lands in the job summary, so a decision not to retry is still visible.
+  if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+    echo "**$1**: $2" >> "$GITHUB_STEP_SUMMARY"
+  fi
   exit 0
 }
 
-CONFIG=$(gh api "repos/$REPOSITORY/contents/$CONFIG_PATH" -H "Accept: application/vnd.github.raw" 2>/dev/null) || CONFIG=""
-if [ -z "$CONFIG" ]; then
+# Returns 2 on an HTTP 404 so callers can tell "it is not there" from "the API call failed",
+# which otherwise both look like an empty answer and stall the release silently.
+api() {
+  local stderr status out
+  stderr=$(mktemp)
+  if out=$(gh api "$@" 2>"$stderr"); then
+    rm -f "$stderr"
+    printf '%s' "$out"
+    return 0
+  fi
+  status=1
+  grep -q 'HTTP 404' "$stderr" && status=2
+  cat "$stderr" >&2
+  rm -f "$stderr"
+  return "$status"
+}
+
+STATUS=0
+CONFIG=$(api "repos/$REPOSITORY/contents/$CONFIG_PATH" -H "Accept: application/vnd.github.raw") || STATUS=$?
+if [ "$STATUS" -eq 2 ]; then
   decide none "No $CONFIG_PATH on the default branch, so auto-retry is not configured for $REPOSITORY."
+elif [ "$STATUS" -ne 0 ]; then
+  echo "::error::Could not read $CONFIG_PATH from $REPOSITORY"
+  exit 1
 fi
 
-# yq only converts to JSON; jq does the reading, because a hyphenated key is awkward to address in yq.
 CONFIG_JSON=$(yq -o=json '.' <<<"$CONFIG")
 
 MAX_ATTEMPTS=$(jq -r '."max-attempts" // 3' <<<"$CONFIG_JSON")
@@ -45,25 +74,32 @@ if [ -z "$DENY" ]; then
   exit 1
 fi
 
-FAILED=$(gh api "repos/$REPOSITORY/actions/runs/$RUN_ID/attempts/$RUN_ATTEMPT/jobs" --paginate \
+FAILED=$(api "repos/$REPOSITORY/actions/runs/$RUN_ID/attempts/$RUN_ATTEMPT/jobs" --paginate \
   --jq '.jobs[] | select(.conclusion == "failure" or .conclusion == "timed_out") | .name') || {
   echo "::error::Could not list the jobs of attempt $RUN_ATTEMPT of run $RUN_ID"
   exit 1
 }
 
 if [ -z "$FAILED" ]; then
-  decide none "Run $RUN_ID failed without any job reporting a failure, so there is nothing to re-run."
+  decide escalate "$REPOSITORY run $RUN_ID failed without any job reporting a failure, so re-running it would change nothing."
 fi
 
 # -F -x so a job matches a denylist entry only on the whole name, never as a substring.
 BLOCKED=$(grep -Fx -f <(printf '%s\n' "$DENY") <<<"$FAILED") || BLOCKED=""
 if [ -n "$BLOCKED" ]; then
-  decide escalate "Not retrying $REPOSITORY run $RUN_ID: $(printf '%s' "$BLOCKED" | paste -sd, - | sed 's/,/, /g') must not be re-run automatically."
+  # jq quotes each name, so a job name that itself contains a comma stays readable.
+  BLOCKED_LIST=$(printf '%s\n' "$BLOCKED" | jq -Rrs 'rtrimstr("\n") | split("\n") | map(tojson) | join(", ")')
+  decide escalate "Not retrying $REPOSITORY run $RUN_ID: $BLOCKED_LIST must not be re-run automatically."
 fi
 
-TIP=$(gh api "repos/$REPOSITORY/commits/$HEAD_BRANCH" --jq '.sha' 2>/dev/null) || TIP=""
-if [ -z "$TIP" ]; then
+# git/ref/heads is exact, where commits/<branch> would also match a tag of the same name.
+STATUS=0
+TIP=$(api "repos/$REPOSITORY/git/ref/heads/$HEAD_BRANCH" --jq '.object.sha') || STATUS=$?
+if [ "$STATUS" -eq 2 ]; then
   decide none "Branch $HEAD_BRANCH no longer exists, so run $RUN_ID has nothing left to release."
+elif [ "$STATUS" -ne 0 ]; then
+  echo "::error::Could not read branch $HEAD_BRANCH of $REPOSITORY"
+  exit 1
 fi
 if [ "$TIP" != "$HEAD_SHA" ]; then
   decide none "Branch $HEAD_BRANCH moved to $TIP since $HEAD_SHA was built, so a newer run supersedes this one."

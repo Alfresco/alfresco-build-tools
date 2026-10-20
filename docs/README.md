@@ -111,7 +111,6 @@ Here follows the list of GitHub Actions topics available in the current document
   - [process-coverage-report](#process-coverage-report)
   - [pipenv](#pipenv)
   - [rancher](#rancher)
-  - [release-chain-auto-retry](#release-chain-auto-retry)
   - [release-notes-aggregator](#release-notes-aggregator)
   - [reportportal-prepare](#reportportal-prepare)
   - [reportportal-summarize](#reportportal-summarize)
@@ -141,6 +140,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [update-project-base-tag](#update-project-base-tag)
   - [validate-maven-versions](#validate-maven-versions)
   - [veracode](#veracode)
+  - [workflow-run-auto-retry](#workflow-run-auto-retry)
   - [xvfb-record](#xvfb-record)
 - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
   - [branch-promotion-prs](#branch-promotion-prs)
@@ -2345,87 +2345,6 @@ AWS credentials are required only when registering the cluster.
           aws-region: "us-east-2"
 ```
 
-### release-chain-auto-retry
-
-Re-runs the failed jobs of a release workflow run when every failure is retryable, and reports when it is not.
-Designed for the ACS release chain, where a single flaky test job silently stops the downstream release.
-
-Add it to a `workflow_run` watcher on the default branch. The watcher covers maintenance branches too,
-because `workflow_run` always executes from the default branch while its `branches:` filter applies to the
-triggering run.
-
-```yaml
-name: Release chain auto-retry
-
-on:
-  workflow_run:
-    workflows: ["Master/Release branch workflow"] # the name: of the workflow to watch, not its filename
-    types: [completed]
-    branches: [master, "release/**"]
-
-permissions:
-  actions: write
-
-jobs:
-  retry:
-    if: contains(fromJSON('["failure","timed_out"]'), github.event.workflow_run.conclusion)
-    runs-on: ubuntu-latest
-    # Lifted to env because the secrets context cannot be read from a step condition.
-    env:
-      TEAMS_WEBHOOK: ${{ secrets.TEAMS_WEBHOOK }}
-    steps:
-      - id: retry
-        uses: Alfresco/alfresco-build-tools/.github/actions/release-chain-auto-retry@v19.5.0
-
-      - name: Report to Teams
-        if: steps.retry.outputs.decision == 'escalate' && env.TEAMS_WEBHOOK != ''
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v19.5.0
-        with:
-          webhook-url: ${{ secrets.TEAMS_WEBHOOK }}
-          title: Release chain stopped in ${{ github.repository }}
-          message: ${{ steps.retry.outputs.reason }}
-          skip_checkout: "true"
-
-      - name: Fail visibly when no Teams webhook is configured
-        if: steps.retry.outputs.decision == 'escalate' && env.TEAMS_WEBHOOK == ''
-        env:
-          REASON: ${{ steps.retry.outputs.reason }}
-        run: |
-          echo "::error::$REASON"
-          exit 1
-```
-
-The job-level `if:` is what keeps this cheap: it is evaluated before a runner is allocated, so a successful
-release run costs no minutes.
-
-Reporting is left to the caller rather than built into the action, so a repository can send the escalation
-wherever it already sends alerts. The pair of steps above keeps an escalation visible before a webhook has
-been set up: without the secret the job fails with the reason in the log, which is at least as loud as a
-notification nobody configured.
-
-Behaviour is configured per repository in `.github/release-auto-retry.yml`, read from the default branch.
-A missing file means the action does nothing, so the watcher can be merged before the rollout is decided.
-
-```yaml
-max-attempts: 3        # optional, default: 3 - TOTAL attempts, so 3 permits two retries
-non-retryable-jobs:    # required - jobs that must never be re-run automatically
-  - Parse commit metadata
-  - Push to Nexus
-  - Update alfresco-enterprise-repo
-```
-
-Entries under `non-retryable-jobs` are job **display names** and are matched on the whole name. A job nested
-through a reusable workflow is reported as `run_ci / Parse commit metadata`, which does not match a
-`Parse commit metadata` entry, so test jobs do not need listing.
-
-The action re-runs failed jobs inside the existing run rather than starting a new one, so the attempt counter
-is kept by GitHub and the next attempt triggers the watcher again by itself. It stops and reports when a
-non-retryable job failed or the budget is spent, and does nothing when the branch has moved on since the run
-started, because a re-run replays the original commit.
-
-Outputs are `decision` (`retry`, `escalate` or `none`), `reason`, `failed-jobs`, `attempt` and `max-attempts`.
-See [Release chain auto-retry](release-auto-retry.md) for the full design and the known limitations.
-
 ### release-notes-aggregator
 
 The action allows to aggregate an external release note into the current one
@@ -3048,6 +2967,108 @@ This way, the agent-based scan results will be added in the latest promoted scan
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
           srcclr-project-ext: '' # optional, allows for directing scan results to Veracode project named: <default project name>/<srcclr-project-ext>
 ```
+
+### workflow-run-auto-retry
+
+Re-runs the failed jobs of a completed workflow run when every failure is
+retryable, and reports when it is not. Useful for a chain of dependent
+workflows, where one flaky job stops everything downstream until somebody
+presses "Re-run failed jobs" by hand.
+
+Add it to a `workflow_run` watcher on the default branch. The watcher covers
+maintenance branches too, because `workflow_run` always executes from the
+default branch while its `branches:` filter applies to the triggering run.
+
+```yaml
+name: Auto-retry
+
+on:
+  workflow_run:
+    # the name: of the workflow to watch, not its filename
+    workflows: ["Master/Release branch workflow"]
+    types: [completed]
+    branches: [master, "release/**"]
+
+permissions:
+  actions: write    # re-run the failed jobs
+  contents: read    # read the configuration file and the branch tip
+
+jobs:
+  retry:
+    if: contains(fromJSON('["failure","timed_out"]'), github.event.workflow_run.conclusion)
+    runs-on: ubuntu-latest
+    # Lifted to env because the secrets context cannot be read from a step condition.
+    env:
+      TEAMS_WEBHOOK: ${{ secrets.TEAMS_WEBHOOK }}
+    steps:
+      - id: retry
+        uses: Alfresco/alfresco-build-tools/.github/actions/workflow-run-auto-retry@v19.5.0
+
+      - name: Report to Teams
+        if: steps.retry.outputs.decision == 'escalate' && env.TEAMS_WEBHOOK != ''
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v19.5.0
+        with:
+          webhook-url: ${{ secrets.TEAMS_WEBHOOK }}
+          # without this the card is green, worked out from the watcher's own jobs
+          status: failure
+          title: Release stopped in ${{ github.repository }}
+          message: ${{ steps.retry.outputs.reason }}
+          skip_checkout: "true"
+          card-actions: >-
+            [{"type":"Action.OpenUrl","title":"View run","url":"${{ github.event.workflow_run.html_url }}"}]
+
+      - name: Fail visibly when no Teams webhook is configured
+        if: steps.retry.outputs.decision == 'escalate' && env.TEAMS_WEBHOOK == ''
+        env:
+          REASON: ${{ steps.retry.outputs.reason }}
+        run: |
+          echo "::error::$REASON"
+          exit 1
+```
+
+Both permissions are required. Naming any permission sets every unnamed one to
+`none`, so a watcher with only `actions: write` cannot read the configuration
+file and behaves as though the repository were not configured at all.
+
+The job-level `if:` is what keeps this cheap: it is evaluated before a runner
+is allocated, so a successful run costs no minutes.
+
+Reporting is left to the caller rather than built into the action, so a
+repository can send the escalation wherever it already sends alerts. The pair
+of steps above keeps an escalation visible before a webhook has been set up:
+without the secret the job fails with the reason in the log.
+
+Behaviour is configured per repository in
+`.github/workflow-run-auto-retry.yml`, read from the default branch. A missing
+file means the action does nothing, so the watcher can be merged before the
+rollout is decided.
+
+```yaml
+# optional, default: 3 - TOTAL attempts, so 3 permits two retries
+max-attempts: 3
+# required - jobs that must never be re-run automatically
+non-retryable-jobs:
+  - Push to Nexus
+  - Update downstream repository
+```
+
+Entries under `non-retryable-jobs` are job **display names** and are matched on
+the whole name. A job nested through a reusable workflow is reported as
+`run_ci / Push to Nexus`, which does not match a `Push to Nexus` entry, so test
+jobs do not need listing.
+
+The action re-runs failed jobs inside the existing run rather than starting a
+new one, so the attempt counter is kept by GitHub and the next attempt triggers
+the watcher again by itself. It stops and reports when a non-retryable job
+failed, when no job reported a failure at all, or when the budget is spent, and
+does nothing when the branch has moved on since the run started, because a
+re-run replays the original commit.
+
+Outputs are `decision` (`retry`, `escalate` or `none`), `reason`,
+`failed-jobs`, `attempt` and `max-attempts`. See
+[Workflow run auto-retry](workflow-run-auto-retry.md) for the full design and
+the known limitations.
+
 
 ### xvfb-record
 

@@ -1,12 +1,12 @@
-name: Release chain auto-retry
-description: Re-runs the failed jobs of a release workflow run when every failure is retryable, and reports when it is not.
+name: Workflow run auto-retry
+description: Re-runs the failed jobs of a completed workflow run when every failure is retryable, and reports when it is not.
 inputs:
   config-path:
     description: Path to the retry configuration file, read from the default branch of the repository being watched.
     required: false
-    default: .github/release-auto-retry.yml
+    default: .github/workflow-run-auto-retry.yml
   github-token:
-    description: Token used to read the run and to re-run its failed jobs. Needs actions write.
+    description: Token used to read the configuration and the run, and to re-run its failed jobs. Needs actions write and contents read.
     required: false
     default: ${{ github.token }}
 outputs:
@@ -38,7 +38,7 @@ runs:
         RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
         HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-      run: ${{ github.action_path }}/release-chain-auto-retry.sh
+      run: ${{ github.action_path }}/workflow-run-auto-retry.sh
 
     - name: Re-run failed jobs
       if: steps.decide.outputs.decision == 'retry'
