@@ -2,10 +2,8 @@
 title: Workflow run auto-retry
 ---
 
-# Workflow run auto-retry
-
-Re-runs the failed jobs of a completed workflow run when every failure is
-retryable, and reports when it is not.
+Re-runs the failed jobs of a completed workflow run, unless any of them is
+listed as non-retryable, in which case it reports instead.
 
 ## Problem
 
@@ -103,9 +101,10 @@ The action returns `retry`, `escalate` or `none`, in this order:
    permission problem.
 2. **No job reported a failure** — `escalate`. The run failed without a failed
    job, so re-running changes nothing and a human needs to look.
-3. **A non-retryable job failed** — `escalate`. Checked before the branch
-   check, so a partially completed release always reports rather than going
-   quiet.
+3. **A non-retryable job failed** — `escalate`. One listed job stops the
+   whole retry, because `gh run rerun --failed` re-runs every failed job and
+   cannot pick one. Checked before the branch check, so a partially completed
+   release always reports rather than going quiet.
 4. **The branch has moved on** — `none`. A re-run replays the original commit,
    not the branch tip, so a newer run has already superseded this one.
 5. **The attempt budget is spent** — `escalate`.

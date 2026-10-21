@@ -2970,10 +2970,10 @@ This way, the agent-based scan results will be added in the latest promoted scan
 
 ### workflow-run-auto-retry
 
-Re-runs the failed jobs of a completed workflow run when every failure is
-retryable, and reports when it is not. Useful for a chain of dependent
-workflows, where one flaky job stops everything downstream until somebody
-presses "Re-run failed jobs" by hand.
+Re-runs the failed jobs of a completed workflow run, unless any of them is
+listed as non-retryable, in which case it reports instead. Useful for a chain
+of dependent workflows, where one flaky job stops everything downstream until
+somebody presses "Re-run failed jobs" by hand.
 
 Add it to a `workflow_run` watcher on the default branch. The watcher covers
 maintenance branches too, because `workflow_run` always executes from the
@@ -3068,7 +3068,6 @@ Outputs are `decision` (`retry`, `escalate` or `none`), `reason`,
 `failed-jobs`, `attempt` and `max-attempts`. See
 [Workflow run auto-retry](workflow-run-auto-retry.md) for the full design and
 the known limitations.
-
 
 ### xvfb-record
 

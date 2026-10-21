@@ -1,5 +1,5 @@
 name: Workflow run auto-retry
-description: Re-runs the failed jobs of a completed workflow run when every failure is retryable, and reports when it is not.
+description: Re-runs the failed jobs of a completed workflow run, unless any of them is listed as non-retryable, in which case it reports instead.
 inputs:
   config-path:
     description: Path to the retry configuration file, read from the default branch of the repository being watched.
