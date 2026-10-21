@@ -98,10 +98,9 @@ in sync.
 The action returns `retry`, `escalate` or `none`, in this order:
 
 1. **No configuration file on the default branch** — `none`. The action is
-   inert until a repository opts in. A private repository answers 404 rather
-   than 403 when the token has no `contents: read`, so this outcome cannot
-   tell a missing file from a missing permission and says both, with a
-   warning annotation on the run.
+   inert until a repository opts in. A token missing `contents: read` is
+   refused with 403 rather than 404, so this outcome is never a disguised
+   permission problem.
 2. **No job reported a failure** — `escalate`. The run failed without a failed
    job, so re-running changes nothing and a human needs to look.
 3. **A non-retryable job failed** — `escalate`. Checked before the branch
@@ -186,6 +185,8 @@ than assumed:
 | Does an explicit `permissions:` block survive a read-only repository default? | Yes |
 | Can `GITHUB_TOKEN` re-run failed jobs? | Yes |
 | Does a `GITHUB_TOKEN`-initiated re-run fire a fresh `workflow_run` event? | Yes |
+| Is `contents: read` required alongside `actions: write`? | Yes, both reads are refused without it |
+| Does a token missing `contents: read` get 403 or 404? | 403, on a private repository |
 | Does the attempt budget stop the cascade? | Yes, no run after the budget |
 
 The fourth answer is what makes the budget necessary: each retry is watched

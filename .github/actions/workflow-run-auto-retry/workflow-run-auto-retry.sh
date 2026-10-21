@@ -54,10 +54,8 @@ api() {
 STATUS=0
 CONFIG=$(api "repos/$REPOSITORY/contents/$CONFIG_PATH" -H "Accept: application/vnd.github.raw") || STATUS=$?
 if [ "$STATUS" -eq 2 ]; then
-  # A private repository answers 404 rather than 403 when the token has no contents:read,
-  # so a missing file and a missing permission look identical here. Say both.
-  echo "::warning::$CONFIG_PATH was not found in $REPOSITORY. If it should be there, check that the watcher grants contents: read."
-  decide none "No $CONFIG_PATH on the default branch of $REPOSITORY, or this token cannot read it, so auto-retry is not configured."
+  # A token without contents:read gets 403 here, not 404, so a 404 really is a missing file.
+  decide none "No $CONFIG_PATH on the default branch, so auto-retry is not configured for $REPOSITORY."
 elif [ "$STATUS" -ne 0 ]; then
   echo "::error::Could not read $CONFIG_PATH from $REPOSITORY"
   exit 1
