@@ -1,6 +1,6 @@
 ---
 name: pimp-my-repo
-description: "Bootstrap a full-featured GitHub repository's standard configuration. Use when: setting up a new repository, adding a missing Dependabot or pre-commit config, or standardizing an existing repo. Generates .github/dependabot.yml from the ecosystems the repo actually uses, a baseline .pre-commit-config.yaml, ensures every workflow SHA-pins its third-party actions, ignores .claude in .gitignore, sets up AGENTS.md with a thin CLAUDE.md importing it, hardens workflow secret scoping and permissions, and names every workflow step."
+description: "Bootstrap or standardize a GitHub repository's baseline configuration: Dependabot, pre-commit, SHA-pinned actions, .gitignore, AGENTS.md, and workflow hardening. Use when setting up a new repo, adding a missing Dependabot or pre-commit config, or bringing an existing repo up to standard."
 ---
 
 # Pimp My Repo
@@ -19,6 +19,7 @@ already configured correctly; merge rather than overwrite.
 5. **AI assistant instructions** — `AGENTS.md` with a thin `CLAUDE.md`.
 6. **Secrets & permissions** — least-privilege secret scoping and workflow permissions.
 7. **Step names** — every workflow step has a short `name:`.
+8. **`if:` conditions** — no redundant `${{ }}` wrapper around `if:` expressions.
 
 ## 1. Dependabot config
 
@@ -376,3 +377,24 @@ Give every workflow step a `name:`, including one-line `uses:` and `run:` steps.
 - Keep names short: `Checkout`, `Setup Java`, `Setup Go`, `Pre-commit`, `Compose up`, `Upload jar`.
 - A step that checks something starts with `Verify` (e.g. `Verify login`).
 - Name the step for what it does, not for the command or action behind it.
+
+## 8. `if:` conditions in workflows
+
+GitHub evaluates `if:` as an expression already, so a `${{ }}` wrapper around the whole
+condition is noise. Strip it from job- and step-level `if:` in every workflow and
+composite action:
+
+```yaml
+# before
+if: ${{ github.event_name == 'push' && inputs.publish }}
+# after
+if: github.event_name == 'push' && inputs.publish
+```
+
+- **Keep the wrapper when the condition starts with `!`**: YAML reads a bare leading
+  `!` as a tag, so `if: !cancelled()` doesn't parse. Wrap any existing bare one as
+  `if: ${{ !cancelled() }}`.
+- **Fix conditions that mix `${{ }}` with text outside it**, such as
+  `if: ${{ a }} && ${{ b }}`. GitHub treats the result as a non-empty string, so it is
+  always true. Rewrite it as one expression: `if: a && b`.
+- Leave `${{ }}` alone everywhere else (`with:`, `env:`, `run:`, …), where it is required.

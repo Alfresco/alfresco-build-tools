@@ -66,13 +66,8 @@ and follow it to create or upgrade this repo's README.md.
 
 ### pimp-my-repo
 
-Bootstrap the standard configuration files a full-featured GitHub repository should have. It
-generates a `.github/dependabot.yml` tailored to the ecosystems the repo actually uses
-(`github-actions` always included, grouping always enabled), adds a baseline
-`.pre-commit-config.yaml` with the standard hooks, ensures every workflow SHA-pins its
-third-party actions, ignores `.claude` in `.gitignore`, sets up AI assistant
-instructions (`AGENTS.md` with a thin `CLAUDE.md` importing it), hardens how workflows
-scope secrets and permissions, and names every workflow step.
+Bootstrap or standardize a repository's baseline configuration: Dependabot,
+pre-commit, SHA-pinned actions, `.gitignore`, `AGENTS.md`, and workflow hardening.
 
 Copy-paste this into your agent:
 
