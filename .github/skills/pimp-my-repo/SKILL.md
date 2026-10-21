@@ -391,9 +391,9 @@ if: ${{ github.event_name == 'push' && inputs.publish }}
 if: github.event_name == 'push' && inputs.publish
 ```
 
-- **Keep the wrapper when the condition starts with `!`**: YAML reads a leading `!` as a
-  tag, so `if: !cancelled()` breaks. Quoting it (`if: "!cancelled()"`) works too, but
-  leave whichever form is already there.
+- **Keep the wrapper when the condition starts with `!`**: YAML reads a bare leading
+  `!` as a tag, so `if: !cancelled()` doesn't parse. Wrap any existing bare one as
+  `if: ${{ !cancelled() }}`.
 - **Fix conditions that mix `${{ }}` with text outside it**, such as
   `if: ${{ a }} && ${{ b }}`. GitHub treats the result as a non-empty string, so it is
   always true. Rewrite it as one expression: `if: a && b`.
