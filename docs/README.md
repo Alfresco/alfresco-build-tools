@@ -647,6 +647,11 @@ GitHub App token to re-run jobs, comment, approve the PR, and enable auto-merge 
 a pull request. The GitHub App must have write access to actions, repository contents, and pull requests. The merge
 method must be `merge`, `rebase`, or `squash`.
 
+Retrying is delegated to [workflow-run-auto-retry](#workflow-run-auto-retry), so the attempt budget and the re-run
+itself have one implementation. Two consequences: a run that failed without any job reporting a failure mentions the
+maintainers instead of being re-run, and a run whose branch has moved on since it started is left alone, because a
+re-run would replay the original commit.
+
 ### dependabot-missing-actions-check
 
 This action checks if all GitHub Actions are listed in the
@@ -2991,7 +2996,7 @@ on:
 
 permissions:
   actions: write    # re-run the failed jobs
-  contents: read    # read the configuration file and the branch tip
+  contents: read    # read the branch tip
 
 jobs:
   retry:
@@ -3003,6 +3008,13 @@ jobs:
     steps:
       - id: retry
         uses: Alfresco/alfresco-build-tools/.github/actions/workflow-run-auto-retry@v19.5.0
+        with:
+          # display names of jobs that must never be re-run automatically
+          non-retryable-jobs: |
+            Push to Nexus
+            Update downstream repository
+          # optional, default: 3 - TOTAL attempts, so 3 permits two retries
+          max-attempts: 3
 
       - name: Report to Teams
         if: steps.retry.outputs.decision == 'escalate' && env.TEAMS_WEBHOOK != ''
@@ -3016,58 +3028,52 @@ jobs:
           skip_checkout: "true"
           card-actions: >-
             [{"type":"Action.OpenUrl","title":"View run","url":"${{ github.event.workflow_run.html_url }}"}]
-
-      - name: Fail visibly when no Teams webhook is configured
-        if: steps.retry.outputs.decision == 'escalate' && env.TEAMS_WEBHOOK == ''
-        env:
-          REASON: ${{ steps.retry.outputs.reason }}
-        run: |
-          echo "::error::$REASON"
-          exit 1
 ```
 
 Both permissions are required. Naming any permission sets every unnamed one to
-`none`, so a watcher with only `actions: write` cannot read the configuration
-file and behaves as though the repository were not configured at all.
+`none`, so a watcher with only `actions: write` cannot read the branch tip.
 
 The job-level `if:` is what keeps this cheap: it is evaluated before a runner
 is allocated, so a successful run costs no minutes.
 
-Reporting is left to the caller rather than built into the action, so a
-repository can send the escalation wherever it already sends alerts. The pair
-of steps above keeps an escalation visible before a webhook has been set up:
-without the secret the job fails with the reason in the log.
+The action decides and the caller reports, so a repository can send the
+escalation wherever it already sends alerts. The pair of steps above keeps an
+escalation visible before a webhook has been set up: without the secret the
+job fails with the reason in the log.
 
-Behaviour is configured per repository in
-`.github/workflow-run-auto-retry.yml`, read from the default branch. A missing
-file means the action does nothing, so the watcher can be merged before the
-rollout is decided.
+It returns `decision`, in this order:
 
-```yaml
-# optional, default: 3 - TOTAL attempts, so 3 permits two retries
-max-attempts: 3
-# required - jobs that must never be re-run automatically
-non-retryable-jobs:
-  - Push to Nexus
-  - Update downstream repository
-```
+1. **No job reported a failure** — `escalate`. The run failed without a failed
+   job, so re-running changes nothing and a human needs to look.
+2. **A non-retryable job failed** — `escalate`. One listed job stops the whole
+   retry, because `gh run rerun --failed` re-runs every failed job and cannot
+   pick one.
+3. **The branch has moved on** — `none`. A re-run replays the original commit,
+   not the branch tip, so a newer run already supersedes this one.
+4. **The attempt budget is spent** — `escalate`.
+5. Otherwise — `retry`.
+
+Every outcome is written to the job summary. Any API error other than a 404
+fails the step, so a token or rate-limit problem cannot look like a healthy
+no-op.
 
 Entries under `non-retryable-jobs` are job **display names** and are matched on
 the whole name. A job nested through a reusable workflow is reported as
 `run_ci / Push to Nexus`, which does not match a `Push to Nexus` entry, so test
-jobs do not need listing.
-
-The action re-runs failed jobs inside the existing run rather than starting a
-new one, so the attempt counter is kept by GitHub and the next attempt triggers
-the watcher again by itself. It stops and reports when a non-retryable job
-failed, when no job reported a failure at all, or when the budget is spent, and
-does nothing when the branch has moved on since the run started, because a
-re-run replays the original commit.
+jobs do not need listing. A job that was gated and did not run reports
+`skipped`, not `failure`, so it never blocks a retry.
 
 Outputs are `decision` (`retry`, `escalate` or `none`), `reason`,
-`failed-jobs`, `attempt` and `max-attempts`. See
-[Workflow run auto-retry](workflow-run-auto-retry.md) for the full design and
-the known limitations.
+`failed-jobs`, `attempt` and `max-attempts`.
+
+Known limitations:
+
+- `gh run rerun --failed` has no per-job form, so one flaky job re-runs every
+  failed job in that attempt.
+- A `workflow_run` watcher only fires once it is on the default branch, so it
+  does nothing until merged.
+- Do not point this and `dependabot-workflow-run-automation` at the same
+  workflow. Both would re-run the same attempt, and their budgets differ.
 
 ### xvfb-record
 

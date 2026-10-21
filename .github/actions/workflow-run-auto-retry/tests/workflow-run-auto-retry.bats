@@ -2,16 +2,6 @@ setup() {
     DIR="$( cd "$( dirname "$BATS_TEST_FILENAME" )" >/dev/null 2>&1 && pwd )"
     PATH="$DIR/..:$PATH"
 
-    # The script shells out to yq, so the real one has to parse the real YAML fixtures.
-    if ! command -v yq >/dev/null; then
-        # Skipping on a laptop is fine; skipping the whole suite in CI would pass by default.
-        if [ -n "${CI:-}" ]; then
-            echo "yq is required to run these tests in CI" >&2
-            return 1
-        fi
-        skip "yq is not installed"
-    fi
-
     export GITHUB_OUTPUT="$BATS_TMPDIR/github_output_${RANDOM}"
     export GITHUB_STEP_SUMMARY="$BATS_TMPDIR/github_summary_${RANDOM}"
     > "$GITHUB_OUTPUT"
@@ -19,17 +9,14 @@ setup() {
 
     export GITHUB_EVENT_NAME="workflow_run"
     export REPOSITORY="Alfresco/alfresco-community-repo"
-    export CONFIG_PATH=".github/workflow-run-auto-retry.yml"
     export RUN_ID="123"
     export RUN_ATTEMPT="1"
     export HEAD_BRANCH="master"
     export HEAD_SHA="aaaaaaa"
 
-    export MOCK_CONFIG='max-attempts: 3
-non-retryable-jobs:
-  - "Parse commit metadata"
-  - "Push to Nexus"'
-    export MOCK_CONFIG_STATUS="ok"
+    export MAX_ATTEMPTS="3"
+    export NON_RETRYABLE_JOBS='Parse commit metadata
+Push to Nexus'
     export MOCK_JOBS='{"jobs":[
         {"name":"Parse commit metadata","conclusion":"success"},
         {"name":"run_ci / PMD Scan","conclusion":"failure"},
@@ -59,7 +46,7 @@ assert_failed_jobs() {
     [ "$actual" = "$expected" ] || { echo "Expected failed-jobs '${expected}', got '${actual}'" >&2; return 1; }
 }
 
-# Stands in for the three read-only API calls, keyed on the path. It applies the real jq to a real
+# Stands in for the two read-only API calls, keyed on the path. It applies the real jq to a real
 # JSON fixture so the --jq filters in the script are exercised rather than assumed.
 mock_gh() {
     gh() {
@@ -74,12 +61,6 @@ mock_gh() {
         done
 
         case "$url" in
-            */contents/*)
-                case "$MOCK_CONFIG_STATUS" in
-                    missing) echo "gh: Not Found (HTTP 404)" >&2; return 1 ;;
-                    error) echo "gh: Bad credentials (HTTP 401)" >&2; return 1 ;;
-                esac
-                body="$MOCK_CONFIG" ;;
             */actions/runs/*)
                 body="$MOCK_JOBS" ;;
             */git/ref/heads/*)
@@ -113,7 +94,6 @@ mock_gh() {
 
 @test "a timed out job counts as a failure" {
     export MOCK_JOBS='{"jobs":[{"name":"run_ci / Integration tests","conclusion":"timed_out"}]}'
-    mock_gh
     run workflow-run-auto-retry.sh
     [ "$status" -eq 0 ]
     assert_output_var "decision" "retry"
@@ -126,33 +106,14 @@ mock_gh() {
         {"name":"Parse commit metadata","conclusion":"success"},
         {"name":"run_ci / Unit tests","conclusion":"cancelled"}
     ]}'
-    mock_gh
     run workflow-run-auto-retry.sh
     [ "$status" -eq 0 ]
     assert_output_var "decision" "escalate"
     [[ "$output" == *"without any job reporting a failure"* ]]
 }
 
-@test "does nothing when the repository has no configuration file" {
-    export MOCK_CONFIG_STATUS="missing"
-    mock_gh
-    run workflow-run-auto-retry.sh
-    [ "$status" -eq 0 ]
-    assert_output_var "decision" "none"
-    assert_failed_jobs ""
-}
-
-@test "fails when the configuration cannot be read" {
-    export MOCK_CONFIG_STATUS="error"
-    mock_gh
-    run workflow-run-auto-retry.sh
-    [ "$status" -ne 0 ]
-    [[ "$output" == *"::error::Could not read"* ]]
-}
-
 @test "fails when the branch tip cannot be read" {
     export MOCK_TIP_STATUS="error"
-    mock_gh
     run workflow-run-auto-retry.sh
     [ "$status" -ne 0 ]
     [[ "$output" == *"::error::Could not read branch"* ]]
@@ -160,7 +121,6 @@ mock_gh() {
 
 @test "escalates when a non-retryable job failed" {
     export MOCK_JOBS='{"jobs":[{"name":"Push to Nexus","conclusion":"failure"}]}'
-    mock_gh
     run workflow-run-auto-retry.sh
     [ "$status" -eq 0 ]
     assert_output_var "decision" "escalate"
@@ -172,17 +132,14 @@ mock_gh() {
         {"name":"run_ci / PMD Scan","conclusion":"failure"},
         {"name":"Push to Nexus","conclusion":"failure"}
     ]}'
-    mock_gh
     run workflow-run-auto-retry.sh
     [ "$status" -eq 0 ]
     assert_output_var "decision" "escalate"
 }
 
 @test "a job name containing a comma is reported intact" {
-    export MOCK_CONFIG='non-retryable-jobs:
-  - "Release, tag and push"'
+    export NON_RETRYABLE_JOBS="Release, tag and push"
     export MOCK_JOBS='{"jobs":[{"name":"Release, tag and push","conclusion":"failure"}]}'
-    mock_gh
     run workflow-run-auto-retry.sh
     [ "$status" -eq 0 ]
     assert_output_var "decision" "escalate"
@@ -191,10 +148,21 @@ mock_gh() {
 
 @test "a nested job sharing a denylisted name is still retried" {
     export MOCK_JOBS='{"jobs":[{"name":"run_ci / Parse commit metadata","conclusion":"failure"}]}'
-    mock_gh
     run workflow-run-auto-retry.sh
     [ "$status" -eq 0 ]
     assert_output_var "decision" "retry"
+}
+
+@test "blank lines and indentation in non-retryable-jobs are ignored" {
+    export NON_RETRYABLE_JOBS='
+  Push to Nexus
+
+      Parse commit metadata
+'
+    export MOCK_JOBS='{"jobs":[{"name":"Push to Nexus","conclusion":"failure"}]}'
+    run workflow-run-auto-retry.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "decision" "escalate"
 }
 
 @test "escalates when the attempt budget is spent" {
@@ -213,7 +181,6 @@ mock_gh() {
 
 @test "does not retry a run whose branch has moved on" {
     export MOCK_TIP="bbbbbbb"
-    mock_gh
     run workflow-run-auto-retry.sh
     [ "$status" -eq 0 ]
     assert_output_var "decision" "none"
@@ -222,29 +189,23 @@ mock_gh() {
 
 @test "does not retry a run whose branch was deleted" {
     export MOCK_TIP_STATUS="missing"
-    mock_gh
     run workflow-run-auto-retry.sh
     [ "$status" -eq 0 ]
     assert_output_var "decision" "none"
     [[ "$output" == *"no longer exists"* ]]
 }
 
-@test "max-attempts defaults to 3 when not configured" {
-    export MOCK_CONFIG='non-retryable-jobs:
-  - "Push to Nexus"'
-    mock_gh
+@test "max-attempts defaults to 3 when empty" {
+    export MAX_ATTEMPTS=""
     run workflow-run-auto-retry.sh
     [ "$status" -eq 0 ]
     assert_output_var "decision" "retry"
     assert_output_var "max-attempts" "3"
 }
 
-@test "max-attempts is read from a hyphenated YAML key" {
-    export MOCK_CONFIG='max-attempts: 5
-non-retryable-jobs:
-  - "Push to Nexus"'
+@test "a higher max-attempts extends the budget" {
+    export MAX_ATTEMPTS="5"
     export RUN_ATTEMPT="4"
-    mock_gh
     run workflow-run-auto-retry.sh
     [ "$status" -eq 0 ]
     assert_output_var "decision" "retry"
@@ -252,28 +213,36 @@ non-retryable-jobs:
 }
 
 @test "fails when max-attempts is not a number" {
-    export MOCK_CONFIG='max-attempts: "two"
-non-retryable-jobs: ["x"]'
-    mock_gh
+    export MAX_ATTEMPTS="two"
     run workflow-run-auto-retry.sh
     [ "$status" -ne 0 ]
     [[ "$output" == *"::error::"* ]]
 }
 
 @test "fails when max-attempts is zero" {
-    export MOCK_CONFIG='max-attempts: 0
-non-retryable-jobs: ["x"]'
-    mock_gh
+    export MAX_ATTEMPTS="0"
     run workflow-run-auto-retry.sh
     [ "$status" -ne 0 ]
 }
 
-@test "fails when no non-retryable jobs are configured" {
-    export MOCK_CONFIG='max-attempts: 3'
-    mock_gh
+@test "an empty denylist retries every failure" {
+    export NON_RETRYABLE_JOBS=""
+    export MOCK_JOBS='{"jobs":[
+        {"name":"Push to Nexus","conclusion":"failure"},
+        {"name":"run_ci / PMD Scan","conclusion":"failure"}
+    ]}'
     run workflow-run-auto-retry.sh
-    [ "$status" -ne 0 ]
-    [[ "$output" == *"non-retryable-jobs"* ]]
+    [ "$status" -eq 0 ]
+    assert_output_var "decision" "retry"
+}
+
+@test "an empty denylist does not match every job as a blank pattern" {
+    export NON_RETRYABLE_JOBS='
+'
+    export MOCK_JOBS='{"jobs":[{"name":"Push to Nexus","conclusion":"failure"}]}'
+    run workflow-run-auto-retry.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "decision" "retry"
 }
 
 @test "fails when not triggered by a workflow_run event" {
@@ -285,7 +254,6 @@ non-retryable-jobs: ["x"]'
 
 @test "writes the decision to the job summary" {
     export MOCK_TIP="bbbbbbb"
-    mock_gh
     run workflow-run-auto-retry.sh
     [ "$status" -eq 0 ]
     grep -q "^\*\*none\*\*: Branch master moved" "$GITHUB_STEP_SUMMARY"

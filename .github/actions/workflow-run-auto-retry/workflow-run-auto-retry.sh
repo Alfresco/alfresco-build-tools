@@ -8,7 +8,6 @@ if [ "${GITHUB_EVENT_NAME:-}" != "workflow_run" ]; then
   exit 1
 fi
 
-MAX_ATTEMPTS=""
 FAILED=""
 
 emit() {
@@ -51,29 +50,16 @@ api() {
   return "$status"
 }
 
-STATUS=0
-CONFIG=$(api "repos/$REPOSITORY/contents/$CONFIG_PATH" -H "Accept: application/vnd.github.raw") || STATUS=$?
-if [ "$STATUS" -eq 2 ]; then
-  # A token without contents:read gets 403 here, not 404, so a 404 really is a missing file.
-  decide none "No $CONFIG_PATH on the default branch, so auto-retry is not configured for $REPOSITORY."
-elif [ "$STATUS" -ne 0 ]; then
-  echo "::error::Could not read $CONFIG_PATH from $REPOSITORY"
-  exit 1
-fi
-
-CONFIG_JSON=$(yq -o=json '.' <<<"$CONFIG")
-
-MAX_ATTEMPTS=$(jq -r '."max-attempts" // 3' <<<"$CONFIG_JSON")
+MAX_ATTEMPTS="${MAX_ATTEMPTS:-}"
+[ -n "$MAX_ATTEMPTS" ] || MAX_ATTEMPTS=3
 if ! [[ "$MAX_ATTEMPTS" =~ ^[0-9]+$ ]] || [ "$MAX_ATTEMPTS" -lt 1 ]; then
-  echo "::error::max-attempts in $CONFIG_PATH must be a positive whole number, found '$MAX_ATTEMPTS'"
+  echo "::error::max-attempts must be a positive whole number, found '$MAX_ATTEMPTS'"
   exit 1
 fi
 
-DENY=$(jq -r '."non-retryable-jobs"[]? // empty' <<<"$CONFIG_JSON")
-if [ -z "$DENY" ]; then
-  echo "::error::$CONFIG_PATH must list at least one entry under non-retryable-jobs"
-  exit 1
-fi
+# One job name per line, with blank lines and stray indentation from the YAML block ignored.
+# Leaving it empty means nothing is off limits, which is what a pull request watcher wants.
+DENY=$(printf '%s\n' "${NON_RETRYABLE_JOBS:-}" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | sed '/^$/d')
 
 FAILED=$(api "repos/$REPOSITORY/actions/runs/$RUN_ID/attempts/$RUN_ATTEMPT/jobs" --paginate \
   --jq '.jobs[] | select(.conclusion == "failure" or .conclusion == "timed_out") | .name') || {
@@ -86,7 +72,11 @@ if [ -z "$FAILED" ]; then
 fi
 
 # -F -x so a job matches a denylist entry only on the whole name, never as a substring.
-BLOCKED=$(grep -Fx -f <(printf '%s\n' "$DENY") <<<"$FAILED") || BLOCKED=""
+# An empty denylist is skipped, because an empty pattern line would match every job.
+BLOCKED=""
+if [ -n "$DENY" ]; then
+  BLOCKED=$(grep -Fx -f <(printf '%s\n' "$DENY") <<<"$FAILED") || BLOCKED=""
+fi
 if [ -n "$BLOCKED" ]; then
   # jq quotes each name, so a job name that itself contains a comma stays readable.
   BLOCKED_LIST=$(printf '%s\n' "$BLOCKED" | jq -Rrs 'rtrimstr("\n") | split("\n") | map(tojson) | join(", ")')
@@ -94,7 +84,6 @@ if [ -n "$BLOCKED" ]; then
 fi
 
 # git/ref/heads is exact, where commits/<branch> would also match a tag of the same name.
-# Reading the config above proved contents:read works, so a 404 here is a real deletion.
 STATUS=0
 TIP=$(api "repos/$REPOSITORY/git/ref/heads/$HEAD_BRANCH" --jq '.object.sha') || STATUS=$?
 if [ "$STATUS" -eq 2 ]; then

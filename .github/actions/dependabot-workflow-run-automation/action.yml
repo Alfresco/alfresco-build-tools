@@ -79,31 +79,23 @@ runs:
           -f commit_id="$HEAD_SHA"
         gh pr merge "$PR_NUMBER" --auto "--${MERGE_METHOD}" --match-head-commit "$HEAD_SHA"
 
+    # Retrying and counting attempts lives in workflow-run-auto-retry, so there is one copy of it.
     - name: Re-run failed jobs
+      id: auto-retry
       if: >-
         ${{
           github.event.workflow_run.event == 'pull_request' &&
           github.event.workflow_run.actor.login == 'dependabot[bot]' &&
           github.event.workflow_run.conclusion == 'failure' &&
-          github.event.workflow_run.run_attempt < fromJSON(inputs.max-attempts) &&
           steps.pull-request.outputs.number != ''
         }}
-      shell: bash
-      env:
-        GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        GH_REPO: ${{ github.repository }}
-        RUN_ID: ${{ github.event.workflow_run.id }}
-      run: gh run rerun "$RUN_ID" --failed
+      uses: $/.github/actions/workflow-run-auto-retry
+      with:
+        max-attempts: ${{ inputs.max-attempts }}
+        github-token: ${{ steps.app-token.outputs.token }}
 
     - name: Notify maintainers of persistent failure
-      if: >-
-        ${{
-          github.event.workflow_run.event == 'pull_request' &&
-          github.event.workflow_run.actor.login == 'dependabot[bot]' &&
-          github.event.workflow_run.conclusion == 'failure' &&
-          github.event.workflow_run.run_attempt >= fromJSON(inputs.max-attempts) &&
-          steps.pull-request.outputs.number != ''
-        }}
+      if: steps.auto-retry.outputs.decision == 'escalate'
       shell: bash
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}

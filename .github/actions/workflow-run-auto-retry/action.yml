@@ -1,12 +1,16 @@
 name: Workflow run auto-retry
 description: Re-runs the failed jobs of a completed workflow run, unless any of them is listed as non-retryable, in which case it reports instead.
 inputs:
-  config-path:
-    description: Path to the retry configuration file, read from the default branch of the repository being watched.
+  non-retryable-jobs:
+    description: Job display names that must never be re-run automatically, one per line. Matched on the whole name. Empty means every failure is retryable.
     required: false
-    default: .github/workflow-run-auto-retry.yml
+    default: ""
+  max-attempts:
+    description: Total attempts allowed, counting the original run, so 3 permits two retries.
+    required: false
+    default: "3"
   github-token:
-    description: Token used to read the configuration and the run, and to re-run its failed jobs. Needs actions write and contents read.
+    description: Token used to read the run and the branch, and to re-run the failed jobs. Needs actions write and contents read.
     required: false
     default: ${{ github.token }}
 outputs:
@@ -33,7 +37,8 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.github-token }}
         REPOSITORY: ${{ github.repository }}
-        CONFIG_PATH: ${{ inputs.config-path }}
+        MAX_ATTEMPTS: ${{ inputs.max-attempts }}
+        NON_RETRYABLE_JOBS: ${{ inputs.non-retryable-jobs }}
         RUN_ID: ${{ github.event.workflow_run.id }}
         RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
         HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
