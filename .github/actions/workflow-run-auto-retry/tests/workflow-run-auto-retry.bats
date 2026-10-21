@@ -3,7 +3,14 @@ setup() {
     PATH="$DIR/..:$PATH"
 
     # The script shells out to yq, so the real one has to parse the real YAML fixtures.
-    command -v yq >/dev/null || skip "yq is not installed"
+    if ! command -v yq >/dev/null; then
+        # Skipping on a laptop is fine; skipping the whole suite in CI would pass by default.
+        if [ -n "${CI:-}" ]; then
+            echo "yq is required to run these tests in CI" >&2
+            return 1
+        fi
+        skip "yq is not installed"
+    fi
 
     export GITHUB_OUTPUT="$BATS_TMPDIR/github_output_${RANDOM}"
     export GITHUB_STEP_SUMMARY="$BATS_TMPDIR/github_summary_${RANDOM}"
@@ -113,7 +120,7 @@ mock_gh() {
     assert_failed_jobs "run_ci / Integration tests"
 }
 
-@test "skipped and successful jobs are not treated as failures" {
+@test "escalates when only skipped, successful and cancelled jobs are present" {
     export MOCK_JOBS='{"jobs":[
         {"name":"Push to Nexus","conclusion":"skipped"},
         {"name":"Parse commit metadata","conclusion":"success"},

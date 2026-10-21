@@ -54,7 +54,10 @@ api() {
 STATUS=0
 CONFIG=$(api "repos/$REPOSITORY/contents/$CONFIG_PATH" -H "Accept: application/vnd.github.raw") || STATUS=$?
 if [ "$STATUS" -eq 2 ]; then
-  decide none "No $CONFIG_PATH on the default branch, so auto-retry is not configured for $REPOSITORY."
+  # A private repository answers 404 rather than 403 when the token has no contents:read,
+  # so a missing file and a missing permission look identical here. Say both.
+  echo "::warning::$CONFIG_PATH was not found in $REPOSITORY. If it should be there, check that the watcher grants contents: read."
+  decide none "No $CONFIG_PATH on the default branch of $REPOSITORY, or this token cannot read it, so auto-retry is not configured."
 elif [ "$STATUS" -ne 0 ]; then
   echo "::error::Could not read $CONFIG_PATH from $REPOSITORY"
   exit 1
@@ -93,6 +96,7 @@ if [ -n "$BLOCKED" ]; then
 fi
 
 # git/ref/heads is exact, where commits/<branch> would also match a tag of the same name.
+# Reading the config above proved contents:read works, so a 404 here is a real deletion.
 STATUS=0
 TIP=$(api "repos/$REPOSITORY/git/ref/heads/$HEAD_BRANCH" --jq '.object.sha') || STATUS=$?
 if [ "$STATUS" -eq 2 ]; then

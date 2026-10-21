@@ -98,7 +98,10 @@ in sync.
 The action returns `retry`, `escalate` or `none`, in this order:
 
 1. **No configuration file on the default branch** — `none`. The action is
-   inert until a repository opts in.
+   inert until a repository opts in. A private repository answers 404 rather
+   than 403 when the token has no `contents: read`, so this outcome cannot
+   tell a missing file from a missing permission and says both, with a
+   warning annotation on the run.
 2. **No job reported a failure** — `escalate`. The run failed without a failed
    job, so re-running changes nothing and a human needs to look.
 3. **A non-retryable job failed** — `escalate`. Checked before the branch
