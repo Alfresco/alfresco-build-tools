@@ -30122,9 +30122,6 @@ function parse(inputsJson) {
 function getArgs() {
     // Required inputs
     const token = core.getInput('token');
-    const workflowRef = core.getInput('workflow');
-    // Optional inputs, with defaults
-    const ref = core.getInput('ref') || github.context.ref;
     const [owner, repo] = [github.context.repo.owner, github.context.repo.repo];
     // Decode inputs, this MUST be a valid JSON string
     const inputs = parse(core.getInput('inputs'));
@@ -30270,7 +30267,7 @@ class WorkflowHandler {
                 (0, debug_1.debug)('Release Notes update in status error', error);
                 throw error;
             }
-            (0, debug_1.debug)(`Conclusion`, `Release notes for the external repo ${this.externalRepo} was aggregated successfully`);
+            (0, debug_1.debug)('Conclusion', `Release notes for the external repo ${this.externalRepo} was aggregated successfully`);
         });
     }
 }

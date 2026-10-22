@@ -130,8 +130,8 @@ by itself justify inclusion.
   commit it after changing sources or the lockfile, and add new ones to the
   matrix (and `paths:` filters) in `.github/workflows/js-action-ci.yml`
 - JavaScript/TypeScript actions share the Node.js version in the root `.nvmrc`:
-  keep each `runs.using` (`nodeXX`) and build target in sync with it, and don't
-  add per-action `.nvmrc` files
+  keep each `runs.using` (`nodeXX`), build target and `@types/node` major
+  version in sync with it, and don't add per-action `.nvmrc` files
 
 ## Code Quality Standards
 
