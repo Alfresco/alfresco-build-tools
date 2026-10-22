@@ -144,7 +144,7 @@ Here follows the list of GitHub Actions topics available in the current document
 - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
   - [branch-promotion-prs](#branch-promotion-prs)
   - [helm-publish-new-package-version](#helm-publish-new-package-version)
-  - [javascript-action-check-dist](#javascript-action-check-dist)
+  - [js-action-check-dist](#js-action-check-dist)
   - [repository-mirror](#repository-mirror)
   - [stale-pr-cleanup](#stale-pr-cleanup)
   - [reusable-release](#reusable-release)
@@ -3054,7 +3054,7 @@ Calculates the new alpha version, creates new git tag and publishes the new pack
     secrets: inherit
 ```
 
-### javascript-action-check-dist
+### js-action-check-dist
 
 Checks that the committed `dist/` bundle of a JavaScript or TypeScript action
 matches its sources. It deletes the bundle, runs `npm ci` and the build script,
@@ -3072,7 +3072,7 @@ on:
 
 jobs:
   check-dist:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/reusable-javascript-action-check-dist.yml@v19.5.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/reusable-js-action-check-dist.yml@v19.5.0
     with:
       working-directory: . # optional, default: .
       node-version: '24' # optional
