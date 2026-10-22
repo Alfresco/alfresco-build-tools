@@ -1,4 +1,4 @@
-name: Reusable Node check dist
+name: Reusable JavaScript action check dist
 
 on:
   workflow_call:

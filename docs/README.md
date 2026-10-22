@@ -144,7 +144,7 @@ Here follows the list of GitHub Actions topics available in the current document
 - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
   - [branch-promotion-prs](#branch-promotion-prs)
   - [helm-publish-new-package-version](#helm-publish-new-package-version)
-  - [node-check-dist](#node-check-dist)
+  - [javascript-action-check-dist](#javascript-action-check-dist)
   - [repository-mirror](#repository-mirror)
   - [stale-pr-cleanup](#stale-pr-cleanup)
   - [reusable-release](#reusable-release)
@@ -3054,26 +3054,25 @@ Calculates the new alpha version, creates new git tag and publishes the new pack
     secrets: inherit
 ```
 
-### node-check-dist
+### javascript-action-check-dist
 
-Checks that the committed build output of a Node.js project, such as the
-`dist/index.js` bundle of a JavaScript or TypeScript action, matches its
-sources. It deletes the build output, runs `npm ci` and the build script, and
-fails if the result differs from what is committed. On failure, it uploads the
-rebuilt output as an artifact that you can download and commit.
+Checks that the committed `dist/` bundle of a JavaScript or TypeScript action
+matches its sources. It deletes the bundle, runs `npm ci` and the build script,
+and fails if the result differs from what is committed. On failure, it uploads
+the rebuilt bundle as an artifact that you can download and commit.
 
 This catches broken builds and output that was not rebuilt after a change to
 the sources or the lockfile, such as a Dependabot dependency bump.
 
 ```yaml
-name: Check dist
+name: JavaScript action check dist
 
 on:
   pull_request:
 
 jobs:
   check-dist:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/reusable-node-check-dist.yml@v19.5.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/reusable-javascript-action-check-dist.yml@v19.5.0
     with:
       working-directory: . # optional, default: .
       node-version: '24' # optional
