@@ -62,3 +62,22 @@ updates:
     commit-message:
       prefix: "feat(deps)"
       prefix-development: "chore(deps)"
+
+  - package-ecosystem: "npm"
+    directories:
+      - "/.github/actions/dispatch-resume-workflow"
+      - "/.github/actions/release-notes-aggregator"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "javascript"
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "feat(deps)"
+      prefix-development: "chore(deps)"
+    groups:
+      npm-packages:
+        patterns:
+          - "*"
