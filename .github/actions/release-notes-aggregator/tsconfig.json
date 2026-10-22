@@ -1,11 +1,13 @@
 {
   "compilerOptions": {
     "target": "es6",
-    "module": "commonjs",
+    "lib": ["es2022"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "rootDir": "./src",
     "strict": true,
-    "noImplicitAny": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
   "exclude": ["node_modules"]
 }

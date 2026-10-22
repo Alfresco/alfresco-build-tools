@@ -4,7 +4,7 @@
   "description": "GitHub Action to aggregate release notes from multiple repositories",
   "main": "dist/index.js",
   "scripts": {
-    "build": "esbuild src/main.ts --bundle --platform=node --target=node24 --outfile=dist/index.js",
+    "build": "tsc --noEmit && esbuild src/main.ts --bundle --platform=node --target=node24 --outfile=dist/index.js",
     "lint": "eslint src/",
     "lint-fix": "eslint src/ --fix",
     "test": "vitest run"
