@@ -3028,6 +3028,20 @@ jobs:
           skip_checkout: "true"
           card-actions: >-
             [{"type":"Action.OpenUrl","title":"View run","url":"${{ github.event.workflow_run.html_url }}"}]
+
+      # until the Teams webhook secret exists, failing here is how an escalation stays visible
+      - name: Fail when no Teams webhook is configured
+        if: steps.retry.outputs.decision == 'escalate' && env.TEAMS_WEBHOOK == ''
+        env:
+          REASON: ${{ steps.retry.outputs.reason }}
+          FAILED_JOBS: ${{ steps.retry.outputs.failed-jobs }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+        run: |
+          echo "::error::$REASON"
+          echo "Failed jobs:"
+          echo "$FAILED_JOBS"
+          echo "Run: $RUN_URL"
+          exit 1
 ```
 
 Both permissions are required. Naming any permission sets every unnamed one to
