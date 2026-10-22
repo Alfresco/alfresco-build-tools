@@ -15,14 +15,13 @@
  * limitations under the License.
  */
 
-import * as core from '@actions/core'
 import * as github from '@actions/github'
 import { debug } from './debug'
 
 export class WorkflowHandler {
   private octokit: any
-  private releaseNotesExternal: string = '';
-  private aggregatedReleaseNotes: string = '';
+  private releaseNotesExternal: string = ''
+  private aggregatedReleaseNotes: string = ''
 
   constructor(token: string,
     private owner: string,
@@ -43,9 +42,9 @@ export class WorkflowHandler {
         repo: this.externalRepo,
         tag_name: this.generateRNtoVersion,
         previous_tag_name: this.generateRNfromVersion,
-      });
+      })
 
-      this.releaseNotesExternal = releaseNotesExternalResponse.data.body;
+      this.releaseNotesExternal = releaseNotesExternalResponse.data.body
       debug('Release Notes External', this.releaseNotesExternal)
 
     } catch (error: any) {
@@ -57,14 +56,14 @@ export class WorkflowHandler {
   async aggregateExternalReleaseToCurrentReleaseNotes(): Promise<void> {
     try {
       const currentRelease = await this.octokit.rest.repos.getRelease({
-          owner: this.owner,
-          repo: this.repo,
-          release_id: this.releaseId,
-      });
-      debug('Current Release Notes:', currentRelease.data.body);
+        owner: this.owner,
+        repo: this.repo,
+        release_id: this.releaseId,
+      })
+      debug('Current Release Notes:', currentRelease.data.body)
 
       // concatenate the external release to the current by using the repo name as a header
-      this.aggregatedReleaseNotes = `${currentRelease.data.body}\n\n---\n\n## ${this.externalRepo}\n\n${this.releaseNotesExternal}`;
+      this.aggregatedReleaseNotes = `${currentRelease.data.body}\n\n---\n\n## ${this.externalRepo}\n\n${this.releaseNotesExternal}`
     } catch (error: any) {
       debug('Release Notes aggregation in status error', error)
       throw error
@@ -74,19 +73,19 @@ export class WorkflowHandler {
   async updateReleaseNotes(): Promise<void> {
     try {
       await this.octokit.rest.repos.updateRelease({
-          owner: this.owner,
-          repo: this.repo,
-          release_id: this.releaseId,
-          body: this.aggregatedReleaseNotes,
-          draft: false,
-          prerelease: false,
-      });
+        owner: this.owner,
+        repo: this.repo,
+        release_id: this.releaseId,
+        body: this.aggregatedReleaseNotes,
+        draft: false,
+        prerelease: false,
+      })
     } catch (error: any) {
       debug('Release Notes update in status error', error)
       throw error
     }
 
-    debug(`Conclusion`,`Release notes for the external repo ${this.externalRepo} was aggregated successfully`);
+    debug('Conclusion', `Release notes for the external repo ${this.externalRepo} was aggregated successfully`)
 
   }
 

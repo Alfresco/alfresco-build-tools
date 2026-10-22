@@ -144,6 +144,7 @@ Here follows the list of GitHub Actions topics available in the current document
 - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
   - [branch-promotion-prs](#branch-promotion-prs)
   - [helm-publish-new-package-version](#helm-publish-new-package-version)
+  - [js-action-ci](#js-action-ci)
   - [repository-mirror](#repository-mirror)
   - [stale-pr-cleanup](#stale-pr-cleanup)
   - [reusable-release](#reusable-release)
@@ -3051,6 +3052,41 @@ Calculates the new alpha version, creates new git tag and publishes the new pack
       helm-charts-repo: Activiti/activiti-cloud-helm-charts
       helm-charts-repo-branch: gh-pages
     secrets: inherit
+```
+
+### js-action-ci
+
+Lints and tests a JavaScript or TypeScript action and checks that its
+committed `dist/` bundle matches its sources. It runs `npm ci`, then the lint
+and test scripts if `package.json` defines them, then rebuilds the bundle. It
+fails if lint or tests fail or the rebuilt bundle differs from what is
+committed. On a bundle mismatch, it uploads the rebuilt bundle as an artifact
+that you can download and commit.
+
+This catches lint errors, failing tests, broken builds, and output that was not
+rebuilt after a change to the sources or the lockfile, such as a Dependabot
+dependency bump.
+
+```yaml
+name: JavaScript actions CI
+
+on:
+  pull_request:
+
+jobs:
+  ci:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/reusable-js-action-ci.yml@v19.5.0
+    with:
+      working-directory: . # optional, default: .
+      node-version: '24' # optional
+      # optional, instead of node-version, path from the repository root
+      # node-version-file: .nvmrc
+      # optional, default: lint, skipped if package.json doesn't define it
+      lint-script: lint
+      # optional, default: test, skipped if package.json doesn't define it
+      test-script: test
+      build-script: build # optional, default: build
+      dist-directory: dist # optional, default: dist
 ```
 
 ### repository-mirror

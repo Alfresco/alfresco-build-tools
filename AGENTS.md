@@ -126,6 +126,12 @@ by itself justify inclusion.
   if there are no side effects, secrets required, or external resources needed
 - Ensure actions work on both `ubuntu-latest` and `ubuntu-24.04-arm` runners
 - Validate backward compatibility for existing actions
+- JavaScript/TypeScript actions run from a committed `dist/` bundle: rebuild and
+  commit it after changing sources or the lockfile, and add new ones to the
+  matrix (and `paths:` filters) in `.github/workflows/js-action-ci.yml`
+- JavaScript/TypeScript actions share the Node.js version in the root `.nvmrc`:
+  keep each `runs.using` (`nodeXX`), build target and `@types/node` major
+  version in sync with it, and don't add per-action `.nvmrc` files
 
 ## Code Quality Standards
 

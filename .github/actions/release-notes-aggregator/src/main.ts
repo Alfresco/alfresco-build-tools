@@ -25,13 +25,13 @@ async function run(): Promise<void> {
     const workflowHandler = new WorkflowHandler(args.token, args.owner, args.repo, args.externalRepo, args.generateRNfromVersion, args.generateRNtoVersion, args.releaseId)
 
     try {
-      await workflowHandler.generateReleaseNotesFromExternalRepo();
+      await workflowHandler.generateReleaseNotesFromExternalRepo()
 
-      await workflowHandler.aggregateExternalReleaseToCurrentReleaseNotes();
+      await workflowHandler.aggregateExternalReleaseToCurrentReleaseNotes()
 
-      await workflowHandler.updateReleaseNotes();
+      await workflowHandler.updateReleaseNotes()
     } catch(e: any) {
-      core.warning(`Failed to generate the external release note: ${e.message}`);
+      core.warning(`Failed to generate the external release note: ${e.message}`)
     }
 
   } catch (error: any) {

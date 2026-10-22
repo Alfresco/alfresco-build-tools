@@ -24304,7 +24304,7 @@ async function run() {
         warning(`Failed to get workflow status: ${e.message}`);
       }
       if (conclusion === "success" /* SUCCESS */) {
-        info(`Workflow run is already successful`);
+        info("Workflow run is already successful");
       } else {
         const status = await workflowHandler.rerunFailedJobs();
         info(`Response status ${status}`);
