@@ -31,9 +31,6 @@ function parse(inputsJson: string) {
 export function getArgs() {
   // Required inputs
   const token = core.getInput('token')
-  const workflowRef = core.getInput('workflow')
-  // Optional inputs, with defaults
-  const ref = core.getInput('ref')   || github.context.ref
   const [owner, repo] = [github.context.repo.owner, github.context.repo.repo]
 
   // Decode inputs, this MUST be a valid JSON string

@@ -1,4 +1,4 @@
-name: JavaScript actions check dist
+name: JavaScript actions CI
 
 on:
   push:
@@ -6,23 +6,23 @@ on:
     paths:
       - ".github/actions/dispatch-resume-workflow/**"
       - ".github/actions/release-notes-aggregator/**"
-      - ".github/workflows/js-action-check-dist.yml"
-      - ".github/workflows/reusable-js-action-check-dist.yml"
+      - ".github/workflows/js-action-ci.yml"
+      - ".github/workflows/reusable-js-action-ci.yml"
       - ".nvmrc"
   pull_request:
     branches: [ master ]
     paths:
       - ".github/actions/dispatch-resume-workflow/**"
       - ".github/actions/release-notes-aggregator/**"
-      - ".github/workflows/js-action-check-dist.yml"
-      - ".github/workflows/reusable-js-action-check-dist.yml"
+      - ".github/workflows/js-action-ci.yml"
+      - ".github/workflows/reusable-js-action-ci.yml"
       - ".nvmrc"
 
 permissions:
   contents: read
 
 jobs:
-  check-dist:
+  ci:
     name: ${{ matrix.action }}
     strategy:
       fail-fast: false
@@ -30,7 +30,7 @@ jobs:
         action:
           - dispatch-resume-workflow
           - release-notes-aggregator
-    uses: ./.github/workflows/reusable-js-action-check-dist.yml
+    uses: ./.github/workflows/reusable-js-action-ci.yml
     with:
       working-directory: .github/actions/${{ matrix.action }}
       node-version-file: .nvmrc

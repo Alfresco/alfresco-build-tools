@@ -6,7 +6,8 @@
   "scripts": {
     "build": "ncc build src/main.ts -o dist",
     "lint": "eslint src/",
-    "lint-fix": "eslint src/ --fix"
+    "lint-fix": "eslint src/ --fix",
+    "test": "vitest run"
   },
   "keywords": [
     "github",
@@ -21,6 +22,7 @@
     "@typescript-eslint/parser": "7.7.0",
     "@vercel/ncc": "0.38.1",
     "eslint": "8.57.0",
-    "typescript": "5.4.5"
+    "typescript": "5.4.5",
+    "vitest": "5.0.5"
   }
 }

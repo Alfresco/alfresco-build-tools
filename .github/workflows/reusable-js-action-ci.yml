@@ -1,4 +1,4 @@
-name: Reusable JavaScript actions check dist
+name: Reusable JavaScript actions CI
 
 on:
   workflow_call:
@@ -16,6 +16,16 @@ on:
         description: "File to read the Node.js version from (e.g. .nvmrc), relative to the repository root"
         required: false
         type: string
+      lint-script:
+        description: "npm script that runs the linter, skipped if package.json doesn't define it"
+        required: false
+        type: string
+        default: "lint"
+      test-script:
+        description: "npm script that runs the tests, skipped if package.json doesn't define it"
+        required: false
+        type: string
+        default: "test"
       build-script:
         description: "npm script that writes the dist directory"
         required: false
@@ -31,13 +41,15 @@ permissions:
   contents: read
 
 jobs:
-  check-dist:
-    name: Check dist
+  ci:
+    name: Lint, test and check dist
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}
     env:
+      LINT_SCRIPT: ${{ inputs.lint-script }}
+      TEST_SCRIPT: ${{ inputs.test-script }}
       BUILD_SCRIPT: ${{ inputs.build-script }}
       DIST_DIRECTORY: ${{ inputs.dist-directory }}
     steps:
@@ -53,6 +65,10 @@ jobs:
       - run: rm -rf "$DIST_DIRECTORY"
 
       - run: npm ci
+
+      - run: npm run --if-present "$LINT_SCRIPT"
+
+      - run: npm run --if-present "$TEST_SCRIPT"
 
       - run: npm run "$BUILD_SCRIPT"
 

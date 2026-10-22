@@ -144,7 +144,7 @@ Here follows the list of GitHub Actions topics available in the current document
 - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
   - [branch-promotion-prs](#branch-promotion-prs)
   - [helm-publish-new-package-version](#helm-publish-new-package-version)
-  - [js-action-check-dist](#js-action-check-dist)
+  - [js-action-ci](#js-action-ci)
   - [repository-mirror](#repository-mirror)
   - [stale-pr-cleanup](#stale-pr-cleanup)
   - [reusable-release](#reusable-release)
@@ -3054,30 +3054,37 @@ Calculates the new alpha version, creates new git tag and publishes the new pack
     secrets: inherit
 ```
 
-### js-action-check-dist
+### js-action-ci
 
-Checks that the committed `dist/` bundle of a JavaScript or TypeScript action
-matches its sources. It deletes the bundle, runs `npm ci` and the build script,
-and fails if the result differs from what is committed. On failure, it uploads
-the rebuilt bundle as an artifact that you can download and commit.
+Lints and tests a JavaScript or TypeScript action and checks that its
+committed `dist/` bundle matches its sources. It runs `npm ci`, then the lint
+and test scripts if `package.json` defines them, then rebuilds the bundle. It
+fails if lint or tests fail or the rebuilt bundle differs from what is
+committed. On a bundle mismatch, it uploads the rebuilt bundle as an artifact
+that you can download and commit.
 
-This catches broken builds and output that was not rebuilt after a change to
-the sources or the lockfile, such as a Dependabot dependency bump.
+This catches lint errors, failing tests, broken builds, and output that was not
+rebuilt after a change to the sources or the lockfile, such as a Dependabot
+dependency bump.
 
 ```yaml
-name: JavaScript actions check dist
+name: JavaScript actions CI
 
 on:
   pull_request:
 
 jobs:
-  check-dist:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/reusable-js-action-check-dist.yml@v19.5.0
+  ci:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/reusable-js-action-ci.yml@v19.5.0
     with:
       working-directory: . # optional, default: .
       node-version: '24' # optional
       # optional, instead of node-version, path from the repository root
       # node-version-file: .nvmrc
+      # optional, default: lint, skipped if package.json doesn't define it
+      lint-script: lint
+      # optional, default: test, skipped if package.json doesn't define it
+      test-script: test
       build-script: build # optional, default: build
       dist-directory: dist # optional, default: dist
 ```
