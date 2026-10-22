@@ -80,6 +80,10 @@ jobs:
           # Matrix callers share one run, so artifact names must be unique per directory
           artifact="dist-$(echo "$WORKING_DIRECTORY/$DIST_DIRECTORY" | tr -c 'A-Za-z0-9._\n-' '-')"
           echo "artifact=$artifact" >> "$GITHUB_OUTPUT"
+          if [ ! -d "$DIST_DIRECTORY" ]; then
+            echo "::error::'npm run $BUILD_SCRIPT' did not create $DIST_DIRECTORY."
+            exit 1
+          fi
           if [ -n "$(git status --porcelain -- "$DIST_DIRECTORY")" ]; then
             echo "::error::$DIST_DIRECTORY is out of date. Run 'npm run $BUILD_SCRIPT' and commit the result, or download the '$artifact' artifact."
             git status --porcelain -- "$DIST_DIRECTORY"
