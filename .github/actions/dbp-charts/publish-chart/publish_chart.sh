@@ -14,7 +14,7 @@ echo '---'
 
 git config --global user.name "${GH_USERNAME}"
 git config --global user.email "${GH_EMAIL}"
-git clone https://"${GH_TOKEN}"@github.com/Alfresco/charts.git
+git clone https://x-access-token:"${GH_TOKEN}"@github.com/Alfresco/charts.git
 echo using PROJECT_NAME="${PROJECT_NAME}",HELM_REPO="${HELM_REPO}"
 mkdir repo
 helm package --dependency-update --destination repo helm/"${PROJECT_NAME}"
