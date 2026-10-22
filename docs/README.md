@@ -3065,7 +3065,7 @@ This catches broken builds and output that was not rebuilt after a change to
 the sources or the lockfile, such as a Dependabot dependency bump.
 
 ```yaml
-name: JavaScript action check dist
+name: JavaScript actions check dist
 
 on:
   pull_request:

@@ -1,4 +1,4 @@
-name: Reusable JavaScript action check dist
+name: Reusable JavaScript actions check dist
 
 on:
   workflow_call:

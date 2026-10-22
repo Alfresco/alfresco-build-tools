@@ -1,4 +1,4 @@
-name: JavaScript action check dist
+name: JavaScript actions check dist
 
 on:
   push:
