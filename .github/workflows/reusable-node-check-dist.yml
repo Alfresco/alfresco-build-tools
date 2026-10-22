@@ -1,0 +1,78 @@
+name: Reusable Node check dist
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: "Directory containing package.json, package-lock.json and the dist directory"
+        required: false
+        type: string
+        default: "."
+      node-version:
+        description: "Node.js version to build with"
+        required: false
+        type: string
+      node-version-file:
+        description: "File to read the Node.js version from (e.g. .nvmrc), relative to the repository root"
+        required: false
+        type: string
+      build-script:
+        description: "npm script that writes the dist directory"
+        required: false
+        type: string
+        default: "build"
+      dist-directory:
+        description: "Build output directory, relative to working-directory"
+        required: false
+        type: string
+        default: "dist"
+
+permissions:
+  contents: read
+
+jobs:
+  check-dist:
+    name: Check dist
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    env:
+      BUILD_SCRIPT: ${{ inputs.build-script }}
+      DIST_DIRECTORY: ${{ inputs.dist-directory }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ inputs.node-version }}
+          node-version-file: ${{ inputs.node-version-file }}
+          cache: npm
+          cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+
+      - run: rm -rf "$DIST_DIRECTORY"
+
+      - run: npm ci
+
+      - run: npm run "$BUILD_SCRIPT"
+
+      - name: Compare dist
+        id: diff
+        env:
+          WORKING_DIRECTORY: ${{ inputs.working-directory }}
+        run: |
+          # Matrix callers share one run, so artifact names must be unique per directory
+          artifact="dist-$(echo "$WORKING_DIRECTORY/$DIST_DIRECTORY" | tr -c 'A-Za-z0-9._\n-' '-')"
+          echo "artifact=$artifact" >> "$GITHUB_OUTPUT"
+          if [ -n "$(git status --porcelain -- "$DIST_DIRECTORY")" ]; then
+            echo "::error::$DIST_DIRECTORY is out of date. Run 'npm run $BUILD_SCRIPT' and commit the result, or download the '$artifact' artifact."
+            git status --porcelain -- "$DIST_DIRECTORY"
+            git diff --ignore-space-at-eol --stat -- "$DIST_DIRECTORY"
+            exit 1
+          fi
+
+      - if: failure() && steps.diff.outcome == 'failure'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ steps.diff.outputs.artifact }}
+          path: ${{ inputs.working-directory }}/${{ inputs.dist-directory }}/

@@ -144,6 +144,7 @@ Here follows the list of GitHub Actions topics available in the current document
 - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
   - [branch-promotion-prs](#branch-promotion-prs)
   - [helm-publish-new-package-version](#helm-publish-new-package-version)
+  - [node-check-dist](#node-check-dist)
   - [repository-mirror](#repository-mirror)
   - [stale-pr-cleanup](#stale-pr-cleanup)
   - [reusable-release](#reusable-release)
@@ -3051,6 +3052,35 @@ Calculates the new alpha version, creates new git tag and publishes the new pack
       helm-charts-repo: Activiti/activiti-cloud-helm-charts
       helm-charts-repo-branch: gh-pages
     secrets: inherit
+```
+
+### node-check-dist
+
+Checks that the committed build output of a Node.js project, such as the
+`dist/index.js` bundle of a JavaScript or TypeScript action, matches its
+sources. It deletes the build output, runs `npm ci` and the build script, and
+fails if the result differs from what is committed. On failure, it uploads the
+rebuilt output as an artifact that you can download and commit.
+
+This catches broken builds and output that was not rebuilt after a change to
+the sources or the lockfile, such as a Dependabot dependency bump.
+
+```yaml
+name: Check dist
+
+on:
+  pull_request:
+
+jobs:
+  check-dist:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/reusable-node-check-dist.yml@v19.5.0
+    with:
+      working-directory: . # optional, default: .
+      node-version: '24' # optional
+      # optional, instead of node-version, path from the repository root
+      # node-version-file: .nvmrc
+      build-script: build # optional, default: build
+      dist-directory: dist # optional, default: dist
 ```
 
 ### repository-mirror

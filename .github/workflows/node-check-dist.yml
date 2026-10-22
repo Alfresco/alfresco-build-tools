@@ -1,0 +1,36 @@
+name: Node check dist
+
+on:
+  push:
+    branches: [ master ]
+    paths:
+      - ".github/actions/dispatch-resume-workflow/**"
+      - ".github/actions/release-notes-aggregator/**"
+      - ".github/workflows/node-check-dist.yml"
+      - ".github/workflows/reusable-node-check-dist.yml"
+      - ".nvmrc"
+  pull_request:
+    branches: [ master ]
+    paths:
+      - ".github/actions/dispatch-resume-workflow/**"
+      - ".github/actions/release-notes-aggregator/**"
+      - ".github/workflows/node-check-dist.yml"
+      - ".github/workflows/reusable-node-check-dist.yml"
+      - ".nvmrc"
+
+permissions:
+  contents: read
+
+jobs:
+  check-dist:
+    name: ${{ matrix.action }}
+    strategy:
+      fail-fast: false
+      matrix:
+        action:
+          - dispatch-resume-workflow
+          - release-notes-aggregator
+    uses: ./.github/workflows/reusable-node-check-dist.yml
+    with:
+      working-directory: .github/actions/${{ matrix.action }}
+      node-version-file: .nvmrc
