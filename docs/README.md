@@ -71,6 +71,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [github-https-auth](#github-https-auth)
   - [github-list-changes](#github-list-changes)
   - [github-pr-check-metadata](#github-pr-check-metadata)
+  - [github-pr-workflows-match](#github-pr-workflows-match)
   - [github-require-secrets](#github-require-secrets)
   - [github-trigger-approved-pr](#github-trigger-approved-pr)
   - [github-trigger-labeled-pr](#github-trigger-labeled-pr)
@@ -1268,6 +1269,44 @@ On this sample, if the commit was merged with a PR opened by Dependabot, **and**
 The `deploy` job only runs if result is not true, so deploys are skipped when merging these PRs.
 
 The main benefit is to save CI/CD resources and time by skipping unnecessary deploys for automated dependency updates that only affect GitHub Actions workflows.
+
+### github-pr-workflows-match
+
+Checks whether a pull request from `head-branch` into `base-branch` would
+trigger any `pull_request` workflow. Use it to skip opening automated PRs that
+no CI workflow cares about.
+
+The action reads the workflow files from `head-branch`. It keeps the ones with
+a `pull_request` trigger whose `branches` / `branches-ignore` filters match
+`base-branch`. It then checks their `paths` / `paths-ignore` filters against
+the files changed between the merge base and `head-branch`, using GitHub's
+filter pattern syntax. It ignores activity `types`.
+
+The checkout needs both branches from `remote`, with enough history to find
+their merge base:
+
+```yaml
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - id: pr-workflows
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-workflows-match@v19.6.0
+        with:
+          base-branch: production
+          head-branch: develop
+          remote: origin # optional, default: origin
+      - if: steps.pr-workflows.outputs.triggered == 'true'
+        run: echo "Would run ${{ steps.pr-workflows.outputs.workflows }}"
+```
+
+Outputs:
+
+- `triggered`: `true` if at least one workflow would run. It is also `true`
+  when no `pull_request` workflow targets `base-branch`, since there is nothing
+  to filter on. It is `false` when the branches have no changes.
+- `workflows`: JSON array of the workflow files that would run.
+
+A workflow file that can't be parsed counts as one that would run.
 
 ### github-require-secrets
 
@@ -3022,10 +3061,19 @@ jobs:
       draft-pr: false
       reviewers: 'user1,user2,user3' # optional - comma or newline-separated list of GitHub usernames
       team-reviewers: 'team1,team2' # optional - comma or newline-separated list of GitHub teams
+      skip-if-no-pr-workflow-triggered: true # optional, default: false
       github-app-client-id: ${{ vars.GH_APP_MY_APP_CLIENT_ID }} # GitHub App client ID
     secrets:
       github-app-private-key: ${{ secrets.GH_APP_MY_APP_PRIVATE_KEY }} # GitHub App private key (PEM)
 ```
+
+With `skip-if-no-pr-workflow-triggered: true`, the workflow skips creating or
+updating the PR for a target branch when its pending changes would not trigger
+any `pull_request` workflow targeting that branch. Use it when PR workflows
+have different `paths` filters for different branches. See
+[github-pr-workflows-match](#github-pr-workflows-match) for how the check works.
+Skipped changes still reach the target branch with the next PR the workflow
+creates.
 
 Using a token/PAT (fallback):
 

@@ -1,0 +1,43 @@
+name: "github-pr-workflows-match"
+description: "Check whether a pull request from one branch into another would trigger any pull_request workflow"
+
+inputs:
+  base-branch:
+    description: "Branch the pull request would target"
+    required: true
+  head-branch:
+    description: "Branch the pull request would come from"
+    required: true
+  remote:
+    description: "Git remote holding both branches, fetched with enough history to find their merge base"
+    required: false
+    default: "origin"
+
+outputs:
+  triggered:
+    description: "true if at least one pull_request workflow would run, or if no pull_request workflow targets the base branch"
+    value: ${{ steps.match.outputs.triggered }}
+  workflows:
+    description: "JSON array of the workflow files that would run"
+    value: ${{ steps.match.outputs.workflows }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: "3.11"
+        cache-dependency-path: "${{ github.action_path }}/requirements.txt"
+
+    - name: Install python dependencies
+      shell: bash
+      run: python -m pip install -r "${{ github.action_path }}/requirements.txt"
+
+    - name: Match pull_request workflows
+      id: match
+      shell: bash
+      env:
+        BASE_BRANCH: ${{ inputs.base-branch }}
+        HEAD_BRANCH: ${{ inputs.head-branch }}
+        REMOTE: ${{ inputs.remote }}
+      run: python "${{ github.action_path }}/action.py"
