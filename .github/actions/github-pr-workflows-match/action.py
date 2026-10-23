@@ -104,7 +104,8 @@ def evaluate(workflows: Dict[str, str], base_branch: str, changed_files: List[st
         print("No changes between branches")
         return False, []
 
-    targeting = 0
+    over_limit = len(changed_files) > GITHUB_DIFF_FILE_LIMIT
+    targets_branch = False
     matched = []
     for path, content in sorted(workflows.items()):
         try:
@@ -115,17 +116,16 @@ def evaluate(workflows: Dict[str, str], base_branch: str, changed_files: List[st
             continue
         if trigger is None or not branch_matches(trigger, base_branch):
             continue
-        targeting += 1
-        if len(changed_files) > GITHUB_DIFF_FILE_LIMIT or paths_match(trigger, changed_files):
+        targets_branch = True
+        if over_limit or paths_match(trigger, changed_files):
             print(f"{path}: would run")
             matched.append(path)
         else:
             print(f"{path}: skipped by path filters")
 
-    if targeting == 0 and not matched:
+    if not targets_branch and not matched:
         print(f"No pull_request workflow targets {base_branch}")
-        return True, []
-    return bool(matched), matched
+    return bool(matched) or not targets_branch, matched
 
 
 def git(*args: str) -> str:

@@ -3,6 +3,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
+import yaml
 
 WORKFLOWS_DIR = ".github/workflows"
 
@@ -80,8 +81,6 @@ def test_filters_match_last_matching_pattern_wins(action_module, patterns, value
     ],
 )
 def test_pull_request_trigger(action_module, workflow, expected):
-    import yaml
-
     assert action_module.pull_request_trigger(yaml.safe_load(workflow)) == expected
 
 
@@ -230,12 +229,12 @@ def promotion_clone(tmp_path):
     [
         ({"README.md": "docs"}, "false", []),
         ({"eks/main.tf": "resource"}, "true", [f"{WORKFLOWS_DIR}/terraform.yml"]),
+        ({f"{WORKFLOWS_DIR}/lint.yml": "on: pull_request\n"}, "true", [f"{WORKFLOWS_DIR}/lint.yml"]),
     ],
 )
 def test_main_writes_outputs(action_module, promotion_clone, monkeypatch, tmp_path, source_changes, triggered, matched):
     clone = promotion_clone(source_changes)
     output = tmp_path / "github_output"
-    output.touch()
     monkeypatch.chdir(clone)
     monkeypatch.setenv("BASE_BRANCH", "rancher-prod")
     monkeypatch.setenv("HEAD_BRANCH", "develop")
@@ -247,18 +246,3 @@ def test_main_writes_outputs(action_module, promotion_clone, monkeypatch, tmp_pa
     lines = output.read_text().splitlines()
     assert f"triggered={triggered}" in lines
     assert f"workflows={json.dumps(matched)}" in lines
-
-
-def test_main_reads_workflows_from_head_branch(action_module, promotion_clone, monkeypatch, tmp_path):
-    clone = promotion_clone({f"{WORKFLOWS_DIR}/lint.yml": "on: pull_request\n"})
-    output = tmp_path / "github_output"
-    output.touch()
-    monkeypatch.chdir(clone)
-    monkeypatch.setenv("BASE_BRANCH", "rancher-prod")
-    monkeypatch.setenv("HEAD_BRANCH", "develop")
-    monkeypatch.setenv("REMOTE", "origin")
-    monkeypatch.setenv("GITHUB_OUTPUT", str(output))
-
-    action_module.main()
-
-    assert f"workflows={json.dumps([f'{WORKFLOWS_DIR}/lint.yml'])}" in output.read_text().splitlines()
