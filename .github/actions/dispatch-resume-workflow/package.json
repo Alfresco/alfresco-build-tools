@@ -4,7 +4,7 @@
   "description": "Trigger running GitHub Actions workflows and wait for result",
   "main": "dist/index.js",
   "scripts": {
-    "build": "esbuild src/main.ts --bundle --platform=node --target=node24 --outfile=dist/index.js",
+    "build": "tsc --noEmit && esbuild src/main.ts --bundle --platform=node --target=node24 --outfile=dist/index.js",
     "lint": "eslint src/",
     "lint-fix": "eslint src/ --fix",
     "test": "vitest run"
@@ -21,9 +21,9 @@
     "@actions/core": "3.0.1",
     "@actions/github": "9.1.1",
     "@types/node": "24.19.2",
-    "@typescript-eslint/eslint-plugin": "7.7.0",
-    "@typescript-eslint/parser": "7.7.0",
-    "esbuild": "0.28.0",
+    "@typescript-eslint/eslint-plugin": "8.72.0",
+    "@typescript-eslint/parser": "8.72.0",
+    "esbuild": "0.28.2",
     "eslint": "8.57.0",
     "typescript": "5.4.5",
     "vitest": "5.0.5"
