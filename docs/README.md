@@ -140,6 +140,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [update-project-base-tag](#update-project-base-tag)
   - [validate-maven-versions](#validate-maven-versions)
   - [veracode](#veracode)
+  - [workflow-run-auto-retry](#workflow-run-auto-retry)
   - [xvfb-record](#xvfb-record)
 - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
   - [branch-promotion-prs](#branch-promotion-prs)
@@ -645,6 +646,11 @@ at the completed run's head SHA. It uses the workflow's `GITHUB_TOKEN` only to r
 GitHub App token to re-run jobs, comment, approve the PR, and enable auto-merge because the default token cannot approve
 a pull request. The GitHub App must have write access to actions, repository contents, and pull requests. The merge
 method must be `merge`, `rebase`, or `squash`.
+
+Retrying is delegated to [workflow-run-auto-retry](#workflow-run-auto-retry), so the attempt budget and the re-run
+itself have one implementation. Two consequences: a run that failed without any job reporting a failure mentions the
+maintainers instead of being re-run, and a run whose branch has moved on since it started is left alone, because a
+re-run would replay the original commit.
 
 ### dependabot-missing-actions-check
 
@@ -2966,6 +2972,122 @@ This way, the agent-based scan results will be added in the latest promoted scan
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
           srcclr-project-ext: '' # optional, allows for directing scan results to Veracode project named: <default project name>/<srcclr-project-ext>
 ```
+
+### workflow-run-auto-retry
+
+Re-runs the failed jobs of a completed workflow run, unless any of them is
+listed as non-retryable, in which case it reports instead. Useful for a chain
+of dependent workflows, where one flaky job stops everything downstream until
+somebody presses "Re-run failed jobs" by hand.
+
+Add it to a `workflow_run` watcher on the default branch. The watcher covers
+maintenance branches too, because `workflow_run` always executes from the
+default branch while its `branches:` filter applies to the triggering run.
+
+```yaml
+name: Auto-retry
+
+on:
+  workflow_run:
+    # the name: of the workflow to watch, not its filename
+    workflows: ["Master/Release branch workflow"]
+    types: [completed]
+    branches: [master, "release/**"]
+
+permissions:
+  actions: write    # re-run the failed jobs
+  contents: read    # read the branch tip
+
+jobs:
+  retry:
+    if: contains(fromJSON('["failure","timed_out"]'), github.event.workflow_run.conclusion)
+    runs-on: ubuntu-latest
+    # Lifted to env because the secrets context cannot be read from a step condition.
+    env:
+      TEAMS_WEBHOOK: ${{ secrets.TEAMS_WEBHOOK }}
+    steps:
+      - id: retry
+        uses: Alfresco/alfresco-build-tools/.github/actions/workflow-run-auto-retry@v19.5.0
+        with:
+          # display names of jobs that must never be re-run automatically
+          non-retryable-jobs: |
+            Push to Nexus
+            Update downstream repository
+          # optional, default: 3 - TOTAL attempts, so 3 permits two retries
+          max-attempts: 3
+
+      - name: Report to Teams
+        if: steps.retry.outputs.decision == 'escalate' && env.TEAMS_WEBHOOK != ''
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v19.5.0
+        with:
+          webhook-url: ${{ secrets.TEAMS_WEBHOOK }}
+          # without this the card is green, worked out from the watcher's own jobs
+          status: failure
+          title: Release stopped in ${{ github.repository }}
+          message: ${{ steps.retry.outputs.reason }}
+          skip_checkout: "true"
+          card-actions: >-
+            [{"type":"Action.OpenUrl","title":"View run","url":"${{ github.event.workflow_run.html_url }}"}]
+
+      # until the Teams webhook secret exists, failing here is how an escalation stays visible
+      - name: Fail when no Teams webhook is configured
+        if: steps.retry.outputs.decision == 'escalate' && env.TEAMS_WEBHOOK == ''
+        env:
+          REASON: ${{ steps.retry.outputs.reason }}
+          FAILED_JOBS: ${{ steps.retry.outputs.failed-jobs }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+        run: |
+          echo "::error::$REASON"
+          echo "Failed jobs:"
+          echo "$FAILED_JOBS"
+          echo "Run: $RUN_URL"
+          exit 1
+```
+
+Both permissions are required. Naming any permission sets every unnamed one to
+`none`, so a watcher with only `actions: write` cannot read the branch tip.
+
+The job-level `if:` is what keeps this cheap: it is evaluated before a runner
+is allocated, so a successful run costs no minutes.
+
+The action decides and the caller reports, so a repository can send the
+escalation wherever it already sends alerts. The pair of steps above keeps an
+escalation visible before a webhook has been set up: without the secret the
+job fails with the reason in the log.
+
+It returns `decision`, in this order:
+
+1. **No job reported a failure** — `escalate`. The run failed without a failed
+   job, so re-running changes nothing and a human needs to look.
+2. **A non-retryable job failed** — `escalate`. One listed job stops the whole
+   retry, because `gh run rerun --failed` re-runs every failed job and cannot
+   pick one.
+3. **The branch has moved on** — `none`. A re-run replays the original commit,
+   not the branch tip, so a newer run already supersedes this one.
+4. **The attempt budget is spent** — `escalate`.
+5. Otherwise — `retry`.
+
+Every outcome is written to the job summary. Any API error other than a 404
+fails the step, so a token or rate-limit problem cannot look like a healthy
+no-op.
+
+Entries under `non-retryable-jobs` are job **display names** and are matched on
+the whole name. A job nested through a reusable workflow is reported as
+`run_ci / Push to Nexus`, which does not match a `Push to Nexus` entry, so test
+jobs do not need listing. A job that was gated and did not run reports
+`skipped`, not `failure`, so it never blocks a retry.
+
+Outputs are `decision` (`retry`, `escalate` or `none`), `reason`,
+`failed-jobs`, `attempt` and `max-attempts`.
+
+Known limitations:
+
+- `gh run rerun --failed` has no per-job form, so one flaky job re-runs every
+  failed job in that attempt.
+- A `workflow_run` watcher only fires once it is on the default branch, so it
+  does nothing until merged.
+- Do not point this and `dependabot-workflow-run-automation` at the same
+  workflow. Both would re-run the same attempt, and their budgets differ.
 
 ### xvfb-record
 

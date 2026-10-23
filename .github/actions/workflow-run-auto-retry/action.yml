@@ -1,0 +1,56 @@
+name: Workflow run auto-retry
+description: Re-runs the failed jobs of a completed workflow run, unless any of them is listed as non-retryable, in which case it reports instead.
+inputs:
+  non-retryable-jobs:
+    description: Job display names that must never be re-run automatically, one per line. Matched on the whole name. Empty means every failure is retryable.
+    required: false
+    default: ""
+  max-attempts:
+    description: Total attempts allowed, counting the original run, so 3 permits two retries.
+    required: false
+    default: "3"
+  github-token:
+    description: Token used to read the run and the branch, and to re-run the failed jobs. Needs actions write and contents read.
+    required: false
+    default: ${{ github.token }}
+outputs:
+  decision:
+    description: "'retry', 'escalate' or 'none'"
+    value: ${{ steps.decide.outputs.decision }}
+  reason:
+    description: One sentence explaining the decision, suitable for a notification body
+    value: ${{ steps.decide.outputs.reason }}
+  failed-jobs:
+    description: Newline-separated display names of the jobs that failed on this attempt
+    value: ${{ steps.decide.outputs.failed-jobs }}
+  attempt:
+    description: The attempt number that just failed
+    value: ${{ steps.decide.outputs.attempt }}
+  max-attempts:
+    description: The configured attempt budget
+    value: ${{ steps.decide.outputs.max-attempts }}
+runs:
+  using: composite
+  steps:
+    - id: decide
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        REPOSITORY: ${{ github.repository }}
+        MAX_ATTEMPTS: ${{ inputs.max-attempts }}
+        NON_RETRYABLE_JOBS: ${{ inputs.non-retryable-jobs }}
+        RUN_ID: ${{ github.event.workflow_run.id }}
+        RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+        HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      run: ${{ github.action_path }}/workflow-run-auto-retry.sh
+
+    - name: Re-run failed jobs
+      if: steps.decide.outputs.decision == 'retry'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        REPOSITORY: ${{ github.repository }}
+        RUN_ID: ${{ github.event.workflow_run.id }}
+      # --repo is required because a watcher has no checkout for gh to read a remote from.
+      run: gh run rerun "$RUN_ID" --failed --repo "$REPOSITORY"
