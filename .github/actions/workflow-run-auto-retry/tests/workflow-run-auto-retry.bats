@@ -25,6 +25,7 @@ Push to Nexus'
     ]}'
     export MOCK_TIP="aaaaaaa"
     export MOCK_TIP_STATUS="ok"
+    export MOCK_RUN_STATUS="completed"
 
     mock_gh
 }
@@ -46,7 +47,7 @@ assert_failed_jobs() {
     [ "$actual" = "$expected" ] || { echo "Expected failed-jobs '${expected}', got '${actual}'" >&2; return 1; }
 }
 
-# Stands in for the two read-only API calls, keyed on the path. It applies the real jq to a real
+# Stands in for the read-only API calls, keyed on the path. It applies the real jq to a real
 # JSON fixture so the --jq filters in the script are exercised rather than assumed.
 mock_gh() {
     gh() {
@@ -61,8 +62,10 @@ mock_gh() {
         done
 
         case "$url" in
-            */actions/runs/*)
+            */actions/runs/*/jobs)
                 body="$MOCK_JOBS" ;;
+            */actions/runs/*)
+                body="{\"run_attempt\":${MOCK_RUN_ATTEMPT:-$RUN_ATTEMPT},\"status\":\"$MOCK_RUN_STATUS\"}" ;;
             */git/ref/heads/*)
                 case "$MOCK_TIP_STATUS" in
                     missing) echo "gh: Not Found (HTTP 404)" >&2; return 1 ;;
@@ -250,6 +253,22 @@ mock_gh() {
     run workflow-run-auto-retry.sh
     [ "$status" -ne 0 ]
     [[ "$output" == *"only works on a workflow_run event"* ]]
+}
+
+@test "ignores a stale event when the run has a newer attempt" {
+    export MOCK_RUN_ATTEMPT="3"
+    run workflow-run-auto-retry.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "decision" "none"
+    [[ "$output" == *"attempt 3"* ]]
+}
+
+@test "ignores a run that is in progress again" {
+    export MOCK_RUN_STATUS="in_progress"
+    run workflow-run-auto-retry.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "decision" "none"
+    [[ "$output" == *"in_progress"* ]]
 }
 
 @test "writes the decision to the job summary" {

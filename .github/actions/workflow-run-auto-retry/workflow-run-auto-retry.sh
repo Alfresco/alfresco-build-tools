@@ -61,6 +61,19 @@ fi
 # Leaving it empty means nothing is off limits, which is what a pull request watcher wants.
 DENY=$(printf '%s\n' "${NON_RETRYABLE_JOBS:-}" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | sed '/^$/d')
 
+# gh run rerun acts on the run's latest attempt, so an event for an older attempt must not decide.
+LIVE=$(api "repos/$REPOSITORY/actions/runs/$RUN_ID" --jq '"\(.run_attempt) \(.status)"') || {
+  echo "::error::Could not read run $RUN_ID of $REPOSITORY"
+  exit 1
+}
+read -r LIVE_ATTEMPT LIVE_STATUS <<<"$LIVE"
+if [ "$LIVE_ATTEMPT" != "$RUN_ATTEMPT" ]; then
+  decide none "Run $RUN_ID is already on attempt $LIVE_ATTEMPT, so this event for attempt $RUN_ATTEMPT is stale."
+fi
+if [ "$LIVE_STATUS" != "completed" ]; then
+  decide none "Run $RUN_ID is $LIVE_STATUS again, so another retry is already under way."
+fi
+
 FAILED=$(api "repos/$REPOSITORY/actions/runs/$RUN_ID/attempts/$RUN_ATTEMPT/jobs" --paginate \
   --jq '.jobs[] | select(.conclusion == "failure" or .conclusion == "timed_out") | .name') || {
   echo "::error::Could not list the jobs of attempt $RUN_ATTEMPT of run $RUN_ID"
