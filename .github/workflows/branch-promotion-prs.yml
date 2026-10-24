@@ -31,6 +31,10 @@ on:
         description: 'A comma or newline-separated list of GitHub teams to request as reviewers'
         type: string
         required: false
+      skip-if-no-pr-workflow-triggered:
+        description: 'Skip creating or updating the PR for a target branch when its pending changes would not trigger any pull_request workflow targeting that branch'
+        type: boolean
+        default: false
       github-app-client-id:
         description: 'GitHub App client ID (or App ID) used to mint a short-lived token for creating PRs. Provide together with the github-app-private-key secret to use GitHub App authentication instead of gh-token.'
         type: string
@@ -67,6 +71,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ matrix.branch }}
+          fetch-depth: ${{ inputs.skip-if-no-pr-workflow-triggered && '0' || '1' }}
           token: ${{ steps.app-token.outputs.token || secrets.gh-token }}
 
       - name: Reset promotion branch
@@ -74,7 +79,16 @@ jobs:
           git fetch origin ${{ inputs.source-branch }}
           git reset --hard origin/${{ inputs.source-branch }}
 
+      - name: Check pull_request workflows
+        id: pr-workflows
+        if: inputs.skip-if-no-pr-workflow-triggered
+        uses: $/.github/actions/github-pr-workflows-match
+        with:
+          base-branch: ${{ matrix.branch }}
+          head-branch: ${{ inputs.source-branch }}
+
       - name: Create Pull Request
+        if: steps.pr-workflows.outputs.triggered != 'false'
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           branch: ${{ inputs.source-branch }}

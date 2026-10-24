@@ -31,6 +31,7 @@ updates:
   - package-ecosystem: "pip"
     directories:
       - "/.github/actions/pipenv"
+      - "/.github/actions/github-pr-workflows-match"
       - "/.github/actions/jira-get-or-create-release"
       - "/.github/actions/jira-set-fix-version"
       - "/.github/tests/python-scripts/*"
