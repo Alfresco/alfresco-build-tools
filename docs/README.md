@@ -2190,7 +2190,7 @@ define that profile:
         <distributionManagement>
             <repository>
                 <id>alfresco-releases</id>
-                <url>https://maven.cloudsmith.io/hyland/alfresco-internal-releases/</url>
+                <url>https://artifacts.hyland.dev/basic/alfresco-internal-releases/maven/</url>
             </repository>
         </distributionManagement>
     </profile>
