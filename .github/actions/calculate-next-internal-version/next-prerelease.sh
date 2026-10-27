@@ -12,7 +12,7 @@ git fetch --tags --quiet
 FIRST_PRERELEASE_SUFFIX="-${PRERELEASE_TYPE}.1"
 
 echo "Next version: $NEXT_VERSION"
-LATEST_PRERELEASE="$(git tag --sort=-creatordate | grep -m 1  "^$NEXT_VERSION\-$PRERELEASE_TYPE\.[[:digit:]]\{1,4\}$" | cat)"
+LATEST_PRERELEASE="$(git tag --sort=-version:refname | grep -m 1  "^$NEXT_VERSION\-$PRERELEASE_TYPE\.[[:digit:]]\{1,4\}$" | cat)"
 if [ -n "$LATEST_PRERELEASE" ]; then
   echo "Latest prerelease version found: $LATEST_PRERELEASE"
   NEXT_PRERELEASE="$(pysemver bump prerelease "$LATEST_PRERELEASE")"
