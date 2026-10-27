@@ -2164,8 +2164,7 @@ A lightweight Maven release action that sets the release version, deploys the ar
           commit-message-prefix: '[skip ci]'  # optional, default: '[skip ci]'
           post-version-command: 'mvn generate-sources'  # optional, runs after each "versions:set" call (release version and next development version)
           fail-on-concurrent-commits: 'true'  # optional, default: 'true'
-          # optional, default: '' (disabled)
-          prerelease-deployment-repository: alfresco-releases::https://artifacts.hyland.dev/basic/alfresco-internal-releases/maven/
+          prerelease-profile: prerelease  # optional, default: '' (disabled)
           prerelease-version-marker: '-A.'  # optional, default: '-A.'
 ```
 
@@ -2178,11 +2177,24 @@ a concurrent merge to `master`), preventing the release commits from being
 pushed onto an unexpected base. Set `fail-on-concurrent-commits: 'false'` to
 disable this check.
 
-When `prerelease-deployment-repository` is set and `release-version` contains
-`prerelease-version-marker`, the release is deployed there instead of the
-`distributionManagement` repository, through `-DaltReleaseDeploymentRepository`.
-Use the `id::url` form with maven-deploy-plugin 3.x and `id::default::url` with
-2.x. The id must match a `<server>` in the Maven settings.
+When `prerelease-profile` is set and `release-version` contains
+`prerelease-version-marker`, that profile is activated together with
+`release-profile`. Use it to deploy prereleases somewhere else by overriding
+`distributionManagement` in the pom:
+
+```xml
+<profiles>
+    <profile>
+        <id>prerelease</id>
+        <distributionManagement>
+            <repository>
+                <id>alfresco-releases</id>
+                <url>https://artifacts.hyland.dev/basic/alfresco-internal-releases/maven/</url>
+            </repository>
+        </distributionManagement>
+    </profile>
+</profiles>
+```
 
 ### maven-tag
 

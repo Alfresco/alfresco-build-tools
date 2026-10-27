@@ -35,9 +35,9 @@ inputs:
     required: false
     description: Fail the release if new commits appeared on the branch since the run started.
     default: 'true'
-  prerelease-deployment-repository:
+  prerelease-profile:
     required: false
-    description: Repository to deploy prerelease versions to instead of the distributionManagement one, as "id::url" (maven-deploy-plugin 3.x) or "id::default::url" (2.x). Disabled when empty.
+    description: Maven profile activated, together with release-profile, when the release version is a prerelease (e.g. to deploy it to a different repository). Disabled when empty.
     default: ''
   prerelease-version-marker:
     required: false
@@ -60,17 +60,18 @@ runs:
       run: ${{ inputs.post-version-command }}
       shell: bash
 
-    - name: "Select deployment repository"
-      id: deployment-repository
+    - name: "Select release profiles"
+      id: release-profiles
       env:
         RELEASE_VERSION: ${{ inputs.release-version }}
-        PRERELEASE_REPOSITORY: ${{ inputs.prerelease-deployment-repository }}
+        RELEASE_PROFILE: ${{ inputs.release-profile }}
+        PRERELEASE_PROFILE: ${{ inputs.prerelease-profile }}
         PRERELEASE_MARKER: ${{ inputs.prerelease-version-marker }}
-      run: ${{ github.action_path }}/prerelease-deployment-arg.sh
+      run: ${{ github.action_path }}/release-profiles.sh
       shell: bash
 
     - name: "Deploy release version ${{ inputs.release-version }}"
-      run: mvn -B -ntp clean deploy -P ${{ inputs.release-profile }} -Dproject.revision.key=${{ github.sha }} ${{ inputs.maven-args }} ${{ steps.deployment-repository.outputs.maven-arg }}
+      run: mvn -B -ntp clean deploy -P ${{ steps.release-profiles.outputs.profiles }} -Dproject.revision.key=${{ github.sha }} ${{ inputs.maven-args }}
       shell: bash
 
     - name: "Check for concurrent commits before committing the release"
