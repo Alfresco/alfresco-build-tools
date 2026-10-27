@@ -170,6 +170,8 @@ If the build also pulls from a repository that Cloudsmith doesn't proxy (GitHub
 Packages, for example), exclude its id from the mirror:
 `<mirrorOf>*,!github</mirrorOf>`.
 
+### Both
+
 In `dependency-graph.yml`, drop the `maven-username` / `maven-password` inputs
 fed from `NEXUS_*` secrets on `maven-dependency-scan`. They only set
 `MAVEN_USERNAME` / `MAVEN_PASSWORD`, which the settings no longer read.
@@ -189,7 +191,9 @@ registries:
 ```
 
 Keep the registry name so the `registries:` entries under each update still
-match.
+match. In a public repo, point the registry at
+`https://artifacts.hyland.dev/public/alfresco-public/maven/` instead and drop
+`username` / `password`.
 
 ## Phase 2: Push
 
