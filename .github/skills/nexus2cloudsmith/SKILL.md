@@ -267,6 +267,25 @@ mapping table, and drop `<snapshotRepository>`:
 For an enterprise repo, use `Alfresco Enterprise Releases` and the
 `alfresco-enterprise-releases` URL.
 
+Add a `prerelease` profile that sends `-A.x` releases to
+`alfresco-internal-releases`. It reuses the `alfresco-releases` server, so no
+new credentials are needed:
+
+```xml
+<profiles>
+    <profile>
+        <id>prerelease</id>
+        <distributionManagement>
+            <repository>
+                <id>alfresco-releases</id>
+                <name>Alfresco Internal Releases</name>
+                <url>https://artifacts.hyland.dev/basic/alfresco-internal-releases/maven/</url>
+            </repository>
+        </distributionManagement>
+    </profile>
+</profiles>
+```
+
 ### `.ci.settings.xml`
 
 Replace the Nexus deploy servers (`alfresco-public-releases`,
@@ -290,22 +309,19 @@ mirror server:
   `MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}`, whether they sit at job or
   workflow level, once the Step 0 grep shows nothing else reads them.
 - Rename "Nexus" to "Cloudsmith" in job names and comments.
-- Send `-A.x` releases to `alfresco-internal-releases` by overriding the
-  deploy target when the version contains `-A.`. It reuses the
-  `alfresco-releases` server, so no new credentials are needed:
+- Turn on the `prerelease` profile for `-A.x` versions. `maven-release-slim`
+  does it when `prerelease-profile` is set (its `prerelease-version-marker`
+  defaults to `-A.`):
 
   ```yaml
   - uses: Alfresco/alfresco-build-tools/.github/actions/maven-release-slim@vX.Y.Z
     with:
       release-version: ${{ env.RELEASE_VERSION }}
-      maven-args: >-
-        -DskipTests
-        ${{ contains(env.RELEASE_VERSION, '-A.') && '-DaltReleaseDeploymentRepository=alfresco-releases::https://artifacts.hyland.dev/basic/alfresco-internal-releases/maven/' || '' }}
+      prerelease-profile: prerelease
   ```
 
-  The `id::url` form needs maven-deploy-plugin 3.x. With 2.x, use
-  `alfresco-releases::default::<url>`. If the job runs `mvn deploy` directly,
-  add the same property to that command.
+  If the job runs `mvn deploy` directly, add `-Pprerelease` to that command
+  when the version contains `-A.`.
 
 ### Docs
 
