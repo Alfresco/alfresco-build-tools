@@ -32,11 +32,10 @@ Then check the GitHub repository visibility, because that drives both phases:
 gh repo view --json visibility --jq .visibility
 ```
 
-- **`PUBLIC`**: pulling must need no credentials, even if the repo
-  authenticates to Nexus today. Many public repos resolve from the Nexus
-  `internal` group with `NEXUS_*` credentials only because nobody removed
-  them, and their `pull_request` builds run code from forks. Follow the
-  public path in Phase 1 instead of copying the existing auth.
+- **`PUBLIC`**: Alfresco artifacts must come from the anonymous
+  `alfresco-public` repository, even if the repo uses the Nexus `internal`
+  group today. Many public repos do so only because nobody cleaned it up.
+  Follow the public path in Phase 1 instead of copying the existing setup.
 - **`PRIVATE` / `INTERNAL`**: builds can resolve from the `internal` group
   with credentials. Follow the internal path in Phase 1.
 
@@ -54,28 +53,50 @@ cloudsmith list repos hyland --page-size 500
 cloudsmith list pkgs hyland/alfresco-internal -q "name:<artifactId>" -F json
 ```
 
-If a repository the migration needs is missing from the list (a snapshot
-repository, for example), stop and tell the user. Don't point a pom at it.
+If a repository the migration needs is missing from the list, stop and tell
+the user. Don't point a pom at it.
 Without the CLI, use the table as is.
 
 ## URL mapping
 
+The repository roles come from the
+[Maven Repositories](https://hyland.atlassian.net/wiki/spaces/TECH/pages/4303717170/Maven+Repositories)
+page in Confluence. If you can read it, check it for changes first.
+
 | Nexus | Cloudsmith | Auth |
 | --- | --- | --- |
 | `nexus/content/groups/public` | `https://artifacts.hyland.dev/public/alfresco-public/maven/` | anonymous |
+| Maven Central, public repos | `https://artifacts.hyland.dev/basic/cic-ext-pull-through/maven/` | cloudsmith-auth |
 | `nexus/content/groups/public-snapshots` | remove it | n/a |
 | `nexus/content/groups/internal` | `https://artifacts.hyland.dev/basic/alfresco-internal/maven/` | cloudsmith-auth |
-| `nexus/content/repositories/releases` | `https://artifacts.hyland.dev/basic/alfresco-community-releases/maven/` | cloudsmith-auth |
-| `nexus/content/repositories/enterprise-releases` | `https://artifacts.hyland.dev/basic/alfresco-enterprise-releases/maven/` | cloudsmith-auth |
+| `nexus/content/repositories/releases`, GA and M versions | `https://artifacts.hyland.dev/basic/alfresco-community-releases/maven/` | cloudsmith-auth |
+| `nexus/content/repositories/enterprise-releases`, GA and M versions | `https://artifacts.hyland.dev/basic/alfresco-enterprise-releases/maven/` | cloudsmith-auth |
+| any release repository, `-A.x` versions | `https://artifacts.hyland.dev/basic/alfresco-internal-releases/maven/` | cloudsmith-auth |
 | any `*-snapshots` deploy repository | none: drop it | n/a |
+
+Push targets:
+
+- GA and M releases go to `alfresco-community-releases` (community repos) or
+  `alfresco-enterprise-releases` (enterprise repos).
+- Every `-A.x` release goes to `alfresco-internal-releases`, community or
+  enterprise, along with internal tools and unreleased products.
+
+`alfresco-public`, `alfresco-internal` and `cic-ext-pull-through` are pull
+only. `alfresco-private` serves customers and partners: never use it in CI.
 
 If the repo uses a Nexus repository that is not in this table (thirdparty,
 for example), stop and ask the user for the target. Don't guess one.
 
-Cloudsmith has no snapshot repository. Once `<snapshotRepository>` is gone,
-any `mvn deploy` of a `-SNAPSHOT` version fails. Look for jobs that do this
-(for example a `publish_snapshot_artifacts` job, or a phase switched to
-`deploy` on pushes to master), tell the user, and ask whether to remove them.
+Cloudsmith has no snapshot repositories, by design: mutable artifacts make
+builds non-deterministic. Projects publish `-A.x` versions instead of
+`-SNAPSHOT`, on demand or at most weekly on a schedule. Never release on
+every push to master, so don't turn a snapshot job into an `-A.x` release.
+Once `<snapshotRepository>` is gone, any `mvn deploy` of a
+`-SNAPSHOT` version fails, so remove jobs that do this (for example a
+`publish_snapshot_artifacts` job and its entries in other jobs' `needs:`), and
+switch a phase that becomes `deploy` on pushes to master back to `verify`.
+Don't point `<snapshotRepository>` at a Cloudsmith repository: the
+`activiti-*-snapshots` ones serve another purpose.
 
 Binary downloads from `nexus.alfresco.com/nexus/service/local/...` (in
 Dockerfiles or CI scripts) are not Maven resolution and are out of scope.
@@ -130,15 +151,42 @@ every plugin slows the build down:
 ```
 
 Remove any `alfresco-internal` profile, mirror or server from the settings
-file used for builds, and drop the `NEXUS_*` env from build jobs. Don't add
-`cloudsmith-auth` to them: jobs that run on `pull_request` execute untrusted
-code, so they must stay credential-free. Only the release job authenticates,
-in Phase 2.
+files, and drop the `NEXUS_*` env from build jobs.
 
-Prove the build needs no credentials by resolving with an empty settings file
-(see Verify). If something only resolves from `internal`, stop and tell the
-user which artifacts. Don't fall back to authenticating: the dependency has
-to be published publicly or dropped.
+Maven Central comes through the private `cic-ext-pull-through` proxy, not
+`alfresco-internal`: it serves only Central, so enterprise artifacts can't
+leak into a community build. `.ci.settings.xml` mirrors only `central`, so
+`alfresco-public` stays anonymous:
+
+```xml
+<settings>
+    <mirrors>
+        <mirror>
+            <id>cic-ext-pull-through</id>
+            <name>Maven Central through Cloudsmith</name>
+            <url>https://artifacts.hyland.dev/basic/cic-ext-pull-through/maven/</url>
+            <mirrorOf>central</mirrorOf>
+        </mirror>
+    </mirrors>
+
+    <servers>
+        <!-- Exported by the cloudsmith-auth action -->
+        <server>
+            <id>cic-ext-pull-through</id>
+            <username>${env.CLOUDSMITH_USERNAME}</username>
+            <password>${env.CLOUDSMITH_API_KEY}</password>
+        </server>
+    </servers>
+</settings>
+```
+
+In the workflows, grant `id-token: write` and add `cloudsmith-auth` after
+`setup-java-build` in every job that runs Maven, as in the private path below.
+
+Prove that `alfresco-public` and Maven Central are enough by resolving with an
+empty settings file (see Verify). If something only resolves from
+`internal`, stop and tell the user which artifacts. Don't switch to
+`alfresco-internal`: the dependency has to be published publicly or dropped.
 
 ### Private / internal repo
 
@@ -244,13 +292,15 @@ Keep one `<repository>` in `distributionManagement` and drop
 ```
 
 For an enterprise repo, use `Alfresco Enterprise Releases` and the
-`alfresco-enterprise-releases` URL.
+`alfresco-enterprise-releases` URL. In both cases `-A.x` releases go to
+`alfresco-internal-releases` instead: see "Release workflow" below.
 
 ### `.ci.settings.xml`
 
 Replace the Nexus deploy servers (`alfresco-public-releases`,
 `alfresco-public-snapshots`, `alfresco-enterprise-releases`,
-`alfresco-enterprise-snapshots`, ...) with one server:
+`alfresco-enterprise-snapshots`, ...) with one server, next to the Phase 1
+mirror server:
 
 ```xml
 <server>
@@ -269,6 +319,22 @@ Replace the Nexus deploy servers (`alfresco-public-releases`,
   `MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}`, whether they sit at job or
   workflow level. Check that nothing else still reads them first.
 - Rename "Nexus" to "Cloudsmith" in job names and comments.
+- Send `-A.x` releases to `alfresco-internal-releases`
+  by overriding the deploy target when the version contains `-A.`. It reuses
+  the `alfresco-releases` server, so no new credentials are needed:
+
+  ```yaml
+  - uses: Alfresco/alfresco-build-tools/.github/actions/maven-release-slim@vX.Y.Z
+    with:
+      release-version: ${{ env.RELEASE_VERSION }}
+      maven-args: >-
+        -DskipTests
+        ${{ contains(env.RELEASE_VERSION, '-A.') && '-DaltReleaseDeploymentRepository=alfresco-releases::https://artifacts.hyland.dev/basic/alfresco-internal-releases/maven/' || '' }}
+  ```
+
+  The `id::url` form needs maven-deploy-plugin 3.x. With 2.x, use
+  `alfresco-releases::default::<url>`. If the job runs `mvn deploy` directly,
+  add the same property to that command.
 
 ### Docs
 
@@ -279,7 +345,8 @@ repository go to `https://artifacts.hyland.dev/public/alfresco-public/maven/`.
 
 - Use the `artifacts.hyland.dev` URLs. Never use raw `cloudsmith.io` URLs.
 - Keep repository and server ids neutral: `alfresco-public`,
-  `alfresco-internal`, `alfresco-releases`. Don't put "cloudsmith" in ids.
+  `alfresco-internal`, `alfresco-releases`, or the Cloudsmith repository name
+  (`cic-ext-pull-through`). Don't put "cloudsmith" in ids.
 - Comments must name ids that actually exist in the file.
 - Pin `cloudsmith-auth` to a release tag (`@vX.Y.Z`). alfresco-build-tools
   releases are immutable, so a tag is as safe as a SHA. If the repo already pins
