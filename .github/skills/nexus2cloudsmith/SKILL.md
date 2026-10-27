@@ -53,24 +53,25 @@ cloudsmith list pkgs hyland/alfresco-internal -q "name:<artifactId>" -F json
 
 ## URL mapping
 
-The repository roles come from the
-[Maven Repositories](https://hyland.atlassian.net/wiki/spaces/TECH/pages/4303717170/Maven+Repositories)
-page in Confluence. If you can read it, check it for changes first.
+The repository roles and URLs come from the Confluence pages listed under
+[Sources](#sources). If you can read them, check them for changes first.
 
 | Nexus | Cloudsmith | Auth |
 | --- | --- | --- |
 | `nexus/content/groups/public` | `https://artifacts.hyland.dev/public/alfresco-public/maven/` | anonymous |
 | Maven Central, public repos | `https://artifacts.hyland.dev/basic/cic-ext-pull-through/maven/` | cloudsmith-auth |
 | `nexus/content/groups/internal` | `https://artifacts.hyland.dev/basic/alfresco-internal/maven/` | cloudsmith-auth |
-| `nexus/content/repositories/releases`, GA and M versions | `https://artifacts.hyland.dev/basic/alfresco-community-releases/maven/` | cloudsmith-auth |
-| `nexus/content/repositories/enterprise-releases`, GA and M versions | `https://artifacts.hyland.dev/basic/alfresco-enterprise-releases/maven/` | cloudsmith-auth |
-| any release repository, `-A.x` versions (also internal tools, unreleased products) | `https://artifacts.hyland.dev/basic/alfresco-internal-releases/maven/` | cloudsmith-auth |
+| `nexus/content/repositories/releases`, GA and M versions | `https://maven.cloudsmith.io/hyland/alfresco-community-releases/` | cloudsmith-auth |
+| `nexus/content/repositories/enterprise-releases`, GA and M versions | `https://maven.cloudsmith.io/hyland/alfresco-enterprise-releases/` | cloudsmith-auth |
+| any release repository, `-A.x` versions (also internal tools, unreleased products) | `https://maven.cloudsmith.io/hyland/alfresco-internal-releases/` | cloudsmith-auth |
 | any `*-snapshots` repository | drop it | n/a |
 
 `alfresco-public`, `alfresco-internal` and `cic-ext-pull-through` are pull
-only. `alfresco-private` serves customers and partners: never use it in CI.
-For a Nexus repository not in this table (thirdparty, for example), stop and
-ask the user for the target.
+only. Deploys go to Cloudsmith's native Maven endpoint,
+`maven.cloudsmith.io/hyland/<repository>/`: the `artifacts.hyland.dev/basic/`
+URLs are for downloading only. `alfresco-private` serves customers and
+partners: never use it in CI. For a Nexus repository not in this table
+(thirdparty, for example), stop and ask the user for the target.
 
 Cloudsmith has no snapshot repositories, by design: mutable artifacts make
 builds non-deterministic. Projects release `-A.x` versions instead, on demand
@@ -265,7 +266,7 @@ mapping table, and drop `<snapshotRepository>`:
     <repository>
         <id>alfresco-releases</id>
         <name>Alfresco Community Releases</name>
-        <url>https://artifacts.hyland.dev/basic/alfresco-community-releases/maven/</url>
+        <url>https://maven.cloudsmith.io/hyland/alfresco-community-releases/</url>
     </repository>
 </distributionManagement>
 ```
@@ -285,7 +286,7 @@ new credentials are needed:
             <repository>
                 <id>alfresco-releases</id>
                 <name>Alfresco Internal Releases</name>
-                <url>https://artifacts.hyland.dev/basic/alfresco-internal-releases/maven/</url>
+                <url>https://maven.cloudsmith.io/hyland/alfresco-internal-releases/</url>
             </repository>
         </distributionManagement>
     </profile>
@@ -338,7 +339,8 @@ repository go to `https://artifacts.hyland.dev/public/alfresco-public/maven/`.
 
 ## Rules
 
-- Use the `artifacts.hyland.dev` URLs. Never use raw `cloudsmith.io` URLs.
+- Pull from the `artifacts.hyland.dev` URLs and deploy to the
+  `maven.cloudsmith.io/hyland/` ones. Never use any other `cloudsmith.io` URL.
 - Keep repository and server ids neutral: `alfresco-public`,
   `alfresco-internal`, `alfresco-releases`, or the Cloudsmith repository name
   (`cic-ext-pull-through`). Don't put "cloudsmith" in ids, and only name ids
@@ -379,3 +381,11 @@ Open one PR per phase, titled like the existing ones:
 `[<JIRA-ID>] Cloudsmith Migration - Phase 1 (Pull) - <repo>` or
 `... Phase 2 (Push) - <repo>`. Ask the user for the Jira ID if you don't have
 it.
+
+## Sources
+
+- [Maven Repositories](https://hyland.atlassian.net/wiki/spaces/TECH/pages/4303717170/Maven+Repositories):
+  what each Cloudsmith repository is for, and which ones pull or push.
+- [Cloudsmith Alfresco Consumption](https://hyland.atlassian.net/wiki/spaces/cix/pages/4313722570/Cloudsmith+Alfresco+Consumption):
+  OIDC authentication and the `maven.cloudsmith.io` upload endpoint. It is
+  still a draft.
