@@ -40,6 +40,24 @@ gh repo view --json visibility --jq .visibility
 - **`PRIVATE` / `INTERNAL`**: builds can resolve from the `internal` group
   with credentials. Follow the internal path in Phase 1.
 
+### Check the Cloudsmith workspace
+
+If the `cloudsmith` CLI is installed and logged in (`cloudsmith whoami`), use
+it to confirm the targets below still exist before relying on the table:
+
+```bash
+# Repositories in the workspace (the namespace is "hyland")
+cloudsmith list repos hyland --page-size 500
+
+# Whether an artifact is available in a repository. "display_source: upstream"
+# means Cloudsmith proxied it from an upstream such as Maven Central.
+cloudsmith list pkgs hyland/alfresco-internal -q "name:<artifactId>" -F json
+```
+
+If a repository the migration needs is missing from the list (a snapshot
+repository, for example), stop and tell the user. Don't point a pom at it.
+Without the CLI, use the table as is.
+
 ## URL mapping
 
 | Nexus | Cloudsmith | Auth |
