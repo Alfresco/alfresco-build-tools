@@ -85,8 +85,9 @@ profile or mirror instead), and delete the public snapshots repository:
 </repository>
 ```
 
-Put Maven Central first in `<pluginRepositories>`. Cloudsmith doesn't serve
-Central content, so asking it first for every plugin slows the build down:
+Put Maven Central first in `<pluginRepositories>`. The public
+`alfresco-public` repository doesn't proxy Central, so asking it first for
+every plugin slows the build down:
 
 ```xml
 <pluginRepositories>
@@ -101,7 +102,11 @@ Central content, so asking it first for every plugin slows the build down:
     </pluginRepository>
     <pluginRepository>
         <id>alfresco-public</id>
-        <!-- same URL as the repository above -->
+        <name>Alfresco Public Repository</name>
+        <url>https://artifacts.hyland.dev/public/alfresco-public/maven/</url>
+        <snapshots>
+            <enabled>false</enabled>
+        </snapshots>
     </pluginRepository>
 </pluginRepositories>
 ```
@@ -145,6 +150,14 @@ credentials:
     </servers>
 </settings>
 ```
+
+`mirrorOf *` is fine here: the `alfresco-internal` repository proxies Maven
+Central.
+
+The mirror overrides any repositories declared in `pom.xml` during CI, but
+local builds still use them. Apply the URL mapping table to every
+`<repository>` and `<pluginRepository>` in the poms that still points at
+`artifacts.alfresco.com`, and delete the snapshot-only ones.
 
 Remove `<server>` entries whose repository no longer exists (the other
 internal, public and thirdparty ids). Keep the deploy servers that still use
