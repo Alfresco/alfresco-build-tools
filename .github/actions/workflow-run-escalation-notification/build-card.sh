@@ -37,19 +37,20 @@ else
 fi
 
 # One bullet per job so the list stays readable past the two or three a FactSet row can hold.
-JOBS=$(printf '%s\n' "${FAILED_JOBS:-}" | sed -E 's/^[[:space:]]*//; s/[[:space:]]*$//; /^$/d; s/^/- /')
+JOBS=$(printf '%s\n' "${FAILED_JOBS:-}" \
+  | sed -E 's/^[[:space:]]*//; s/[[:space:]]*$//; /^$/d; s/\\/\\\\/g; s/[][*`]/\\&/g; s/^/- /')
 [ -n "$JOBS" ] || JOBS="- none reported"
 
-# These defaults live here rather than in action.yml so there is one copy to keep right.
+# Defaults come from action.yml, so an empty value here means the caller meant it.
 BODY=$(jq -n -c \
-  --arg heading "${HEADING:-Release chain blocked}" \
+  --arg heading "${HEADING:-}" \
   --arg position "${POSITION:-}" \
   --arg message "$(printf '%s %s' "$HEADLINE" "${DOWNSTREAM:-}" | sed 's/[[:space:]]*$//')" \
   --arg repository "${REPOSITORY:-}" \
   --arg branch "${BRANCH:-}" \
   --arg workflow "${WORKFLOW:-}" \
   --arg attempts "$ATTEMPTS" \
-  --arg upstream "${UPSTREAM_VERSION:-Unknown}" \
+  --arg version "${RELEASE_VERSION:-}" \
   --arg jobs "$JOBS" \
   --arg cc "${CC:-}" \
   '[
@@ -57,16 +58,18 @@ BODY=$(jq -n -c \
       {type: "Column", width: "auto", items: [
         {type: "TextBlock", text: "🔴", size: "large", spacing: "none"}]},
       {type: "Column", width: "stretch", items: (
-        [{type: "TextBlock", text: $heading, size: "large", weight: "bolder", wrap: true, spacing: "none"}]
+        (if $heading == "" then []
+         else [{type: "TextBlock", text: $heading, size: "large", weight: "bolder", wrap: true, spacing: "none"}] end)
         + (if $position == "" then []
            else [{type: "TextBlock", text: $position, isSubtle: true, wrap: true, spacing: "none"}] end))}]},
     {type: "TextBlock", spacing: "medium", wrap: true, text: $message},
-    {type: "FactSet", spacing: "medium", facts: [
+    {type: "FactSet", spacing: "medium", facts: ([
       {title: "Repository", value: $repository},
       {title: "Branch", value: $branch},
       {title: "Workflow", value: $workflow},
-      {title: "Attempt", value: $attempts},
-      {title: "Upstream version", value: $upstream}]},
+      {title: "Attempt", value: $attempts}]
+      + (if $version == "" then []
+         else [{title: "Release version", value: $version}] end))},
     {type: "Container", spacing: "medium", items: [
       {type: "TextBlock", text: "Failed jobs", weight: "bolder", spacing: "none"},
       {type: "TextBlock", wrap: true, spacing: "small", text: $jobs}]}

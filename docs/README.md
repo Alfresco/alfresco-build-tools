@@ -3073,16 +3073,12 @@ jobs:
 
       - name: Report to Teams
         if: steps.retry.outputs.decision == 'escalate' && env.TEAMS_WEBHOOK != ''
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v19.8.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/workflow-run-escalation-notification@v19.8.0
         with:
           webhook-url: ${{ secrets.TEAMS_WEBHOOK }}
-          # without this the card is green, worked out from the watcher's own jobs
-          status: failure
-          title: Release stopped in ${{ github.repository }}
-          message: ${{ steps.retry.outputs.reason-text }}
-          skip_checkout: "true"
-          card-actions: >-
-            [{"type":"Action.OpenUrl","title":"View run","url":"${{ github.event.workflow_run.html_url }}"}]
+          reason-code: ${{ steps.retry.outputs.reason-code }}
+          failed-jobs: ${{ steps.retry.outputs.failed-jobs }}
+          max-attempts: ${{ steps.retry.outputs.max-attempts }}
 
       # until the Teams webhook secret exists, failing here is how an escalation stays visible
       - name: Fail when no Teams webhook is configured
@@ -3203,9 +3199,11 @@ run, so only the decision itself has to be passed in. The action therefore only
 works on a `workflow_run` event and fails the step on any other. Each failed job
 gets its own bullet.
 
-`heading` defaults to `Release chain blocked` and `upstream-version` to
-`Unknown`; pass the latter once the caller can work out which version was being
-propagated. `position` and `cc` are left off the card when empty.
+`heading` defaults to `Release chain blocked` and `release-version` to
+`Unknown`. `release-version` is the version this repository was releasing when
+the run failed, which the caller has to work out; pass it empty to leave the row
+off. `position` and `cc` are also left off the card when empty, and markdown
+characters in a job name are escaped so the list renders as written.
 
 `cc` is plain text on its own. To actually ping someone, list them in
 `mention-users` or `mention-tags` and put the matching `<at>name</at>` markup in

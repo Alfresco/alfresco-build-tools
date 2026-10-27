@@ -12,9 +12,9 @@ inputs:
     required: false
     default: ""
   heading:
-    description: Card heading, shown next to the red status dot. Defaults to 'Release chain blocked'
+    description: Card heading, shown next to the red status dot
     required: false
-    default: ""
+    default: Release chain blocked
   position:
     description: One line describing where this repository sits in the chain, shown under the heading
     required: false
@@ -23,20 +23,20 @@ inputs:
     description: One sentence naming what stops until this is fixed, appended to the generated first sentence
     required: false
     default: ""
-  upstream-version:
-    description: The version being propagated, when the caller can work it out. Defaults to 'Unknown'
+  release-version:
+    description: The version this repository was releasing when the run failed. Pass an empty value to leave the row off the card
     required: false
-    default: ""
+    default: Unknown
   cc:
     description: Closing line naming who should pick this up. Include the <at>name</at> markup of anything listed in mention-users or mention-tags
     required: false
     default: ""
   mention-users:
-    description: 'Comma-separated list of users to mention in format "display name|email"'
+    description: 'Comma or newline separated list of users to mention in format "display name|email"'
     required: false
     default: ''
   mention-tags:
-    description: 'Comma-separated list of Teams tags to mention in format "tag name|tag id"'
+    description: 'Comma or newline separated list of Teams tags to mention in format "tag name|tag id"'
     required: false
     default: ''
   max-attempts:
@@ -60,7 +60,7 @@ runs:
         HEADING: ${{ inputs.heading }}
         POSITION: ${{ inputs.position }}
         DOWNSTREAM: ${{ inputs.downstream }}
-        UPSTREAM_VERSION: ${{ inputs.upstream-version }}
+        RELEASE_VERSION: ${{ inputs.release-version }}
         CC: ${{ inputs.cc }}
         REPOSITORY: ${{ github.repository }}
         BRANCH: ${{ github.event.workflow_run.head_branch }}

@@ -7,16 +7,22 @@ ENTITIES="${ENTITIES:-[]}"
 
 check_array() {
     if [ "$(jq -r 'type' <<<"$2" 2>/dev/null)" != "array" ]; then
-        echo "::error::$1 must be a JSON array (e.g. '[{\"type\":\"TextBlock\",\"text\":\"hi\"}]'), got: $2"
+        echo "::error::$1 must be a JSON array (e.g. '$3'), got: $2"
         exit 1
     fi
 }
 
-check_array card-body "$CARD_BODY"
-check_array card-actions "$CARD_ACTIONS"
+check_array card-body "$CARD_BODY" '[{"type":"TextBlock","text":"hi"}]'
+check_array card-actions "$CARD_ACTIONS" '[{"type":"Action.OpenUrl","title":"View run","url":"https://example.com"}]'
+
+# printf is a shell builtin, so jq's argument length is not a limit on the card.
+# The body still arrives in an environment variable, which Linux caps at 128 KiB.
+body_file="$(mktemp)"
+trap 'rm -f "$body_file"' EXIT
+printf '%s' "$CARD_BODY" > "$body_file"
 
 PAYLOAD="$(jq -n \
-    --argjson body "$CARD_BODY" \
+    --slurpfile body "$body_file" \
     --argjson actions "$CARD_ACTIONS" \
     --argjson entities "$ENTITIES" \
     --arg color "${COLOR:-808080}" \
@@ -26,7 +32,7 @@ PAYLOAD="$(jq -n \
             contentType: "application/vnd.microsoft.card.adaptive",
             content: {
                 type: "AdaptiveCard",
-                body: $body,
+                body: $body[0],
                 actions: $actions,
                 backgroundImage: {
                     url: "https://singlecolorimage.com/get/\($color)/2x2",
@@ -47,11 +53,10 @@ fi
 
 : "${WEBHOOK_URL:?webhook-url is required}"
 
-# A card with a long log block can go past the shell's limit on a single argument,
-# so the payload travels as a file rather than on the command line.
+# curl reads the payload from a file for the same reason.
 payload_file="$(mktemp)"
 response_file="$(mktemp)"
-trap 'rm -f "$payload_file" "$response_file"' EXIT
+trap 'rm -f "$body_file" "$payload_file" "$response_file"' EXIT
 printf '%s' "$PAYLOAD" > "$payload_file"
 
 http_code="$(curl -sS -o "$response_file" -w '%{http_code}' \

@@ -12,11 +12,11 @@ inputs:
     required: false
     default: '[]'
   mention-users:
-    description: 'Comma-separated list of users to mention in format "display name|email" (e.g.: "John Doe|john.doe@example.com,Jane Doe|jane.doe@example.com")'
+    description: 'Comma or newline separated list of users to mention in format "display name|email" (e.g.: "John Doe|john.doe@example.com,Jane Doe|jane.doe@example.com")'
     required: false
     default: ''
   mention-tags:
-    description: 'Comma-separated list of Teams tags to mention in format "tag name|tag id" (e.g.: "Security Champions|base64IdIncluding==")'
+    description: 'Comma or newline separated list of Teams tags to mention in format "tag name|tag id" (e.g.: "Security Champions|base64IdIncluding==")'
     required: false
     default: ''
   status:

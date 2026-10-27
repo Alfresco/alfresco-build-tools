@@ -202,3 +202,23 @@ payload() {
     [ "$status" -ne 0 ]
     [[ "$output" == *"webhook-url is required"* ]]
 }
+
+@test "transform-mentions accepts a newline separated list" {
+    export USERS=$'Alice|alice@x.com\nBob|bob@x.com\n'
+    export TAGS=""
+
+    run transform-mentions.sh
+
+    [ "$status" -eq 0 ]
+    [ "$(sed 's/^result=//' <<<"$output" | jq -c '[.[].mentioned.name]')" = '["Alice","Bob"]' ]
+}
+
+@test "transform-mentions ignores a blank entry after a trailing separator" {
+    export USERS='John|a@b.c, '
+    export TAGS=""
+
+    run transform-mentions.sh
+
+    [ "$status" -eq 0 ]
+    [ "$(sed 's/^result=//' <<<"$output" | jq -c '[.[].mentioned.name]')" = '["John"]' ]
+}

@@ -9,6 +9,7 @@ setup() {
     export REASON_CODE="attempts-exhausted"
     export ATTEMPT="3"
     export MAX_ATTEMPTS="3"
+    export RELEASE_VERSION="Unknown"
     export FAILED_JOBS="Repository - PostgreSQL 15.17 tests"
     export HEADING="Release chain blocked"
     export POSITION="Hop 2 of 5 - alfresco-enterprise-repo"
@@ -74,21 +75,21 @@ jobs_block() {
     [ "$(message)" = "Automated retries were exhausted." ]
 }
 
-@test "the first attempt reports no automated retries" {
+@test "the first attempt is reported as one of the budget" {
     export ATTEMPT="1"
     run build-card.sh
     [ "$status" -eq 0 ]
     [ "$(fact Attempt)" = "1 of 3" ]
 }
 
-@test "a single retry is reported in the singular" {
+@test "a later attempt is counted against the budget" {
     export ATTEMPT="2"
     run build-card.sh
     [ "$status" -eq 0 ]
     [ "$(fact Attempt)" = "2 of 3" ]
 }
 
-@test "several retries are reported in the plural" {
+@test "the last attempt of the budget is reported as such" {
     run build-card.sh
     [ "$status" -eq 0 ]
     [ "$(fact Attempt)" = "3 of 3" ]
@@ -102,17 +103,17 @@ jobs_block() {
     [ "$(fact Workflow)" = "Master/Release branch workflow" ]
 }
 
-@test "the upstream version defaults to Unknown" {
+@test "the release version is shown as the action passes it" {
     run build-card.sh
     [ "$status" -eq 0 ]
-    [ "$(fact 'Upstream version')" = "Unknown" ]
+    [ "$(fact 'Release version')" = "Unknown" ]
 }
 
-@test "a known upstream version is used" {
-    export UPSTREAM_VERSION="26.2.0.147 (alfresco-community-repo)"
+@test "a known release version is used" {
+    export RELEASE_VERSION="26.2.0.147 (alfresco-community-repo)"
     run build-card.sh
     [ "$status" -eq 0 ]
-    [ "$(fact 'Upstream version')" = "26.2.0.147 (alfresco-community-repo)" ]
+    [ "$(fact 'Release version')" = "26.2.0.147 (alfresco-community-repo)" ]
 }
 
 @test "each failed job becomes its own bullet" {
@@ -211,4 +212,32 @@ two"
     run build-card.sh
     [ "$status" -eq 0 ]
     [ "$(fact Attempt)" = "3" ]
+}
+
+@test "an empty release version leaves its row off the card" {
+    export RELEASE_VERSION=""
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(body | jq -r '[.[] | select(.type=="FactSet").facts[].title] | join(" ")')" = "Repository Branch Workflow Attempt" ]
+}
+
+@test "markdown characters in a job name are escaped" {
+    export FAILED_JOBS="build [linux]"
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(jobs_block)" = '- build \[linux\]' ]
+}
+
+@test "an empty heading leaves its block off the card" {
+    export HEADING=""
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(body | jq -r '[.[0].columns[1].items[].text] | join(" ")')" = "Hop 2 of 5 - alfresco-enterprise-repo" ]
+}
+
+@test "a backslash in a job name is escaped before anything else" {
+    export FAILED_JOBS='weird\name'
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(jobs_block)" = '- weird\\name' ]
 }
