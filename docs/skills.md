@@ -55,7 +55,7 @@ Migrate a Maven repository's CI from the Alfresco Nexus (`artifacts.alfresco.com
 to Cloudsmith (`artifacts.hyland.dev`). It covers both phases: pulling dependencies
 from Cloudsmith, and deploying releases there through the
 [cloudsmith-auth](README.md#cloudsmith-auth) OIDC action instead of the Nexus
-secrets. It handles public/community and internal/enterprise repos.
+secrets. Public repos end up pulling with no credentials at all.
 
 Copy-paste this into your agent:
 

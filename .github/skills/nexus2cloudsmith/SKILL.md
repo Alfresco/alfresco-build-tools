@@ -26,15 +26,19 @@ grep -rn -i -E "artifacts\.alfresco\.com|nexus|MAVEN_USERNAME|MAVEN_PASSWORD" \
   --include=pom.xml --include="*settings*.xml" --include="*.yml" --include="*.yaml" --include="*.md" .
 ```
 
-Then decide what kind of repo it is, because that drives both phases:
+Then check the GitHub repository visibility, because that drives both phases:
 
-- **Public / community**: every dependency comes from Maven Central or the
-  public Alfresco group. Builds need no credentials. The usual sign is an
-  `alfresco-public` repository in `pom.xml` and an empty settings file for
-  ordinary builds.
-- **Internal / enterprise**: builds resolve from the `internal` group and need
-  credentials. The usual sign is a `.ci.settings.xml` with an `alfresco-internal`
-  profile or mirror.
+```bash
+gh repo view --json visibility --jq .visibility
+```
+
+- **`PUBLIC`**: pulling must need no credentials, even if the repo
+  authenticates to Nexus today. Many public repos resolve from the Nexus
+  `internal` group with `NEXUS_*` credentials only because nobody removed
+  them, and their `pull_request` builds run code from forks. Follow the
+  public path in Phase 1 instead of copying the existing auth.
+- **`PRIVATE` / `INTERNAL`**: builds can resolve from the `internal` group
+  with credentials. Follow the internal path in Phase 1.
 
 ## URL mapping
 
@@ -61,10 +65,11 @@ Leave them and mention them to the user.
 
 ## Phase 1: Pull
 
-### Public / community repo
+### Public repo
 
 In `pom.xml`, change the `alfresco-public` `<repository>` and
-`<pluginRepository>` URLs, and delete the public snapshots repository:
+`<pluginRepository>` URLs (add them if the repo relied on a settings-file
+profile or mirror instead), and delete the public snapshots repository:
 
 ```xml
 <repository>
@@ -101,11 +106,18 @@ Central content, so asking it first for every plugin slows the build down:
 </pluginRepositories>
 ```
 
-Don't add `cloudsmith-auth` to build jobs. The public repository resolves
-anonymously, and jobs that run on `pull_request` execute untrusted code, so
-they must stay credential-free.
+Remove any `alfresco-internal` profile, mirror or server from the settings
+file used for builds, and drop the `NEXUS_*` env from build jobs. Don't add
+`cloudsmith-auth` to them: jobs that run on `pull_request` execute untrusted
+code, so they must stay credential-free. Only the release job authenticates,
+in Phase 2.
 
-### Internal / enterprise repo
+Prove the build needs no credentials by resolving with an empty settings file
+(see Verify). If something only resolves from `internal`, stop and tell the
+user which artifacts. Don't fall back to authenticating: the dependency has
+to be published publicly or dropped.
+
+### Private / internal repo
 
 In `.ci.settings.xml`, replace the `alfresco-internal` profile and its
 repositories with a single mirror, and point its server at the Cloudsmith
@@ -251,11 +263,16 @@ repository go to `https://artifacts.hyland.dev/public/alfresco-public/maven/`.
 # No Nexus left
 grep -rn "artifacts.alfresco.com" . --exclude-dir=.git
 
-# Public repos: resolves with no credentials
-mvn -B -s .github/empty-settings.xml dependency:resolve dependency:resolve-plugins
+# Public repos: resolves with no credentials and an empty local repository
+echo '<settings/>' > "${TMPDIR:-/tmp}/empty-settings.xml"
+mvn -B -s "${TMPDIR:-/tmp}/empty-settings.xml" \
+  -Dmaven.repo.local="$(mktemp -d)" dependency:go-offline
 ```
 
-For internal repos, the build can only be checked in CI because it needs the
+The fresh local repository matters: a warm `~/.m2` hides artifacts that only
+came from an authenticated repository.
+
+For private repos, the build can only be checked in CI because it needs the
 OIDC token. Run pre-commit (and `actionlint` if the repo uses it) before
 pushing.
 
