@@ -234,17 +234,11 @@ In `dependency-graph.yml`, drop the `maven-username` / `maven-password` inputs
 fed from `NEXUS_*` secrets on `maven-dependency-scan`. They only set
 `MAVEN_USERNAME` / `MAVEN_PASSWORD`, which the settings no longer read.
 
-If `.github/dependabot.yml` declares a Nexus `maven-repository` registry:
-
-- In a private repo, delete it, together with its name in the `registries:`
-  list of each update (drop the list if it becomes empty). The Alfresco org
-  has an org-level Maven registry for `alfresco-internal` that Dependabot uses
-  in every private and internal repo, authenticated with OIDC, so no secrets
-  are needed.
-- In a public repo, point it at
-  `https://artifacts.hyland.dev/public/alfresco-public/maven/` and drop
-  `username` / `password`. Keep the registry name so the `registries:` entries
-  under each update still match.
+If `.github/dependabot.yml` declares a Nexus `maven-repository` registry,
+delete it, together with its name in the `registries:` list of each update
+(drop the list if it becomes empty). Private and internal repos get
+`alfresco-internal` from an org-level registry that authenticates with OIDC.
+Public repos resolve from the `alfresco-public` repository in their pom.
 
 ## Phase 2: Push
 
