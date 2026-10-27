@@ -28,12 +28,13 @@ if ! [[ "${ATTEMPT:-}" =~ ^[0-9]+$ ]] || [ "$ATTEMPT" -lt 1 ]; then
   exit 1
 fi
 
-RETRIES=$((ATTEMPT - 1))
-case "$RETRIES" in
-  0) ATTEMPTS="1 total (no automated retries)" ;;
-  1) ATTEMPTS="$ATTEMPT total (1 original + 1 automated retry)" ;;
-  *) ATTEMPTS="$ATTEMPT total (1 original + $RETRIES automated retries)" ;;
-esac
+# A manual re-run bumps run_attempt too, so the card reports the number rather than
+# claiming how many of the attempts were automated.
+if [[ "${MAX_ATTEMPTS:-}" =~ ^[0-9]+$ ]] && [ "$MAX_ATTEMPTS" -ge 1 ]; then
+  ATTEMPTS="$ATTEMPT of $MAX_ATTEMPTS"
+else
+  ATTEMPTS="$ATTEMPT"
+fi
 
 # One bullet per job so the list stays readable past the two or three a FactSet row can hold.
 JOBS=$(printf '%s\n' "${FAILED_JOBS:-}" | sed -E 's/^[[:space:]]*//; s/[[:space:]]*$//; /^$/d; s/^/- /')
@@ -64,7 +65,7 @@ BODY=$(jq -n -c \
       {title: "Repository", value: $repository},
       {title: "Branch", value: $branch},
       {title: "Workflow", value: $workflow},
-      {title: "Attempts", value: $attempts},
+      {title: "Attempt", value: $attempts},
       {title: "Upstream version", value: $upstream}]},
     {type: "Container", spacing: "medium", items: [
       {type: "TextBlock", text: "Failed jobs", weight: "bolder", spacing: "none"},

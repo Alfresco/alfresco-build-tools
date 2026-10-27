@@ -155,114 +155,127 @@ runs:
       run: |
         ${{ github.action_path }}/compute-extra-body.sh >> $GITHUB_OUTPUT
 
+    - name: Compute card body
+      id: compute-card-body
+      shell: bash
+      env:
+        BODY: >-
+        [
+          {
+            "type": "TextBlock",
+            "size": "medium",
+            "weight": "bolder",
+            "text": "${{ inputs.title || format('Notification on {0} on branch [`{1}`]({2}/{3}/tree/{4})', steps.compute-event.outputs.result, steps.get-branch-name.outputs.branch-name, github.server_url, github.repository, steps.get-branch-name.outputs.branch-name) }}",
+            "style": "heading",
+            "wrap": true
+          },
+          {
+            "type": "ColumnSet",
+            "columns": [
+              {
+                "type": "Column",
+                "items": [
+                  {
+                    "type": "Image",
+                    "style": "person",
+                    "url": "${{ steps.compute-actor-urls.outputs.actor_avatar_url }}",
+                    "altText": "${{ github.triggering_actor }}",
+                    "size": "small"
+                  }
+                ],
+                "width": "auto"
+              },
+              {
+                "type": "Column",
+                "items": [
+                  {
+                    "type": "TextBlock",
+                    "text": "[${{ github.triggering_actor }}](${{ steps.compute-actor-urls.outputs.actor_url }})"
+                  }
+                ]
+              },
+              {
+                "type": "Column",
+                "items": [
+                  {
+                    "type": "Image",
+                    "style": "person",
+                    "url": "https://slack.github.com/static/img/favicon-neutral.png",
+                    "altText": "GitHub",
+                    "size": "small"
+                  }
+                ],
+                "width": "auto"
+              },
+              {
+                "type": "Column",
+                "items": [
+                  {
+                    "type": "TextBlock",
+                    "text": "[${{ github.repository }}](${{ github.server_url }}/${{ github.repository }})"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "ColumnSet",
+            "columns": [
+              {
+                "type": "Column",
+                "items": [
+                  {
+                    "type": "TextBlock",
+                    "text": "**Action**: [${{ steps.compute-workflow-title.outputs.result }}](${{ steps.compute-run-link.outputs.result }})"
+                  }
+                ]
+              },
+              {
+                "type": "Column",
+                "items": [
+                  {
+                    "type": "TextBlock",
+                    "text": "**Commit**: [`${{ steps.compute-small-sha.outputs.result }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "ColumnSet",
+            "columns": [
+              {
+                "type": "Column",
+                "items": [
+                  {
+                    "type": "TextBlock",
+                    "text": "**Message**"
+                  },
+                  {
+                    "type": "TextBlock",
+                    "text": "${{ steps.compute-message.outputs.result }} ",
+                    "wrap": true
+                  }
+                ]
+              }
+            ]
+          }${{ steps.compute-extra-body.outputs.result }}
+        ]
+      run: |
+        if ! jq -e . >/dev/null 2>&1 <<<"${BODY}"; then
+          echo "::error::Computed Teams card body is not valid JSON, check title and message for unescaped quotes"
+          echo "${BODY}"
+          exit 1
+        fi
+        echo "result=$(jq -c . <<<"${BODY}")" >> $GITHUB_OUTPUT
+
     - name: Send teams notification
       uses: $/.github/actions/send-teams-card
       with:
         webhook-url: ${{ inputs.webhook-url }}
+        card-body: ${{ steps.compute-card-body.outputs.result }}
         card-actions: ${{ inputs.card-actions }}
         mention-users: ${{ inputs.mention-users }}
         mention-tags: ${{ inputs.mention-tags }}
         status: ${{ inputs.status }}
         dry-run: ${{ inputs.dry-run }}
-        card-body: >-
-          [
-            {
-              "type": "TextBlock",
-              "size": "medium",
-              "weight": "bolder",
-              "text": "${{ inputs.title || format('Notification on {0} on branch [`{1}`]({2}/{3}/tree/{4})', steps.compute-event.outputs.result, steps.get-branch-name.outputs.branch-name, github.server_url, github.repository, steps.get-branch-name.outputs.branch-name) }}",
-              "style": "heading",
-              "wrap": true
-            },
-            {
-              "type": "ColumnSet",
-              "columns": [
-                {
-                  "type": "Column",
-                  "items": [
-                    {
-                      "type": "Image",
-                      "style": "person",
-                      "url": "${{ steps.compute-actor-urls.outputs.actor_avatar_url }}",
-                      "altText": "${{ github.triggering_actor }}",
-                      "size": "small"
-                    }
-                  ],
-                  "width": "auto"
-                },
-                {
-                  "type": "Column",
-                  "items": [
-                    {
-                      "type": "TextBlock",
-                      "text": "[${{ github.triggering_actor }}](${{ steps.compute-actor-urls.outputs.actor_url }})"
-                    }
-                  ]
-                },
-                {
-                  "type": "Column",
-                  "items": [
-                    {
-                      "type": "Image",
-                      "style": "person",
-                      "url": "https://slack.github.com/static/img/favicon-neutral.png",
-                      "altText": "GitHub",
-                      "size": "small"
-                    }
-                  ],
-                  "width": "auto"
-                },
-                {
-                  "type": "Column",
-                  "items": [
-                    {
-                      "type": "TextBlock",
-                      "text": "[${{ github.repository }}](${{ github.server_url }}/${{ github.repository }})"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "ColumnSet",
-              "columns": [
-                {
-                  "type": "Column",
-                  "items": [
-                    {
-                      "type": "TextBlock",
-                      "text": "**Action**: [${{ steps.compute-workflow-title.outputs.result }}](${{ steps.compute-run-link.outputs.result }})"
-                    }
-                  ]
-                },
-                {
-                  "type": "Column",
-                  "items": [
-                    {
-                      "type": "TextBlock",
-                      "text": "**Commit**: [`${{ steps.compute-small-sha.outputs.result }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "ColumnSet",
-              "columns": [
-                {
-                  "type": "Column",
-                  "items": [
-                    {
-                      "type": "TextBlock",
-                      "text": "**Message**"
-                    },
-                    {
-                      "type": "TextBlock",
-                      "text": "${{ steps.compute-message.outputs.result }} ",
-                      "wrap": true
-                    }
-                  ]
-                }
-              ]
-            }${{ steps.compute-extra-body.outputs.result }}
-          ]

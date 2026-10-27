@@ -2572,7 +2572,7 @@ which is what [send-teams-notification](#send-teams-notification) builds. A
 watcher's own branch, commit and run link rather than the run that failed.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-card@v19.7.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-card@v19.7.2
         with:
           webhook-url: ${{ secrets.MSTEAMS_WEBHOOK }}
           card-body: ${{ steps.build-card.outputs.body }}
@@ -3164,24 +3164,26 @@ link all refer to the failed run.
 
 ```yaml
       - id: retry
-        uses: Alfresco/alfresco-build-tools/.github/actions/workflow-run-auto-retry@v19.7.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/workflow-run-auto-retry@v19.7.2
         with:
           non-retryable-jobs: |
             Push to Nexus
 
       - name: Report to Teams
         if: steps.retry.outputs.decision == 'escalate'
-        uses: Alfresco/alfresco-build-tools/.github/actions/workflow-run-escalation-notification@v19.7.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/workflow-run-escalation-notification@v19.7.2
         with:
           webhook-url: ${{ secrets.TEAMS_WEBHOOK }}
           reason-code: ${{ steps.retry.outputs.reason-code }}
           failed-jobs: ${{ steps.retry.outputs.failed-jobs }}
+          max-attempts: ${{ steps.retry.outputs.max-attempts }}
           # the two per-repository lines
           position: Hop 2 of 5 - alfresco-enterprise-repo
           downstream: >-
             Nothing propagates to alfresco-enterprise-share, acs-packaging or
             acs-community-packaging until this is resolved.
-          cc: "cc: @release-duty - please take a look when you can."
+          cc: "cc: <at>Release Duty</at> - please take a look when you can."
+          mention-tags: Release Duty|<base64 tag id>
 ```
 
 The first sentence of the message is generated from `reason-code`, so the card
@@ -3204,6 +3206,17 @@ gets its own bullet.
 `heading` defaults to `Release chain blocked` and `upstream-version` to
 `Unknown`; pass the latter once the caller can work out which version was being
 propagated. `position` and `cc` are left off the card when empty.
+
+`cc` is plain text on its own. To actually ping someone, list them in
+`mention-users` or `mention-tags` and put the matching `<at>name</at>` markup in
+the `cc` line, the same way `send-teams-notification` expects it in `message`.
+See [send-teams-notification](#send-teams-notification) for how to find a tag
+id.
+
+Pass `max-attempts` to have the card read "Attempt 3 of 3" rather than just the
+number. The attempt itself comes from the event, and counts manual re-runs as
+well as automated ones, so the card reports which attempt failed rather than
+claiming how many retries were automated.
 
 ### xvfb-record
 

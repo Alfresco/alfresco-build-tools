@@ -8,6 +8,7 @@ setup() {
     export GITHUB_EVENT_NAME="workflow_run"
     export REASON_CODE="attempts-exhausted"
     export ATTEMPT="3"
+    export MAX_ATTEMPTS="3"
     export FAILED_JOBS="Repository - PostgreSQL 15.17 tests"
     export HEADING="Release chain blocked"
     export POSITION="Hop 2 of 5 - alfresco-enterprise-repo"
@@ -77,20 +78,20 @@ jobs_block() {
     export ATTEMPT="1"
     run build-card.sh
     [ "$status" -eq 0 ]
-    [ "$(fact Attempts)" = "1 total (no automated retries)" ]
+    [ "$(fact Attempt)" = "1 of 3" ]
 }
 
 @test "a single retry is reported in the singular" {
     export ATTEMPT="2"
     run build-card.sh
     [ "$status" -eq 0 ]
-    [ "$(fact Attempts)" = "2 total (1 original + 1 automated retry)" ]
+    [ "$(fact Attempt)" = "2 of 3" ]
 }
 
 @test "several retries are reported in the plural" {
     run build-card.sh
     [ "$status" -eq 0 ]
-    [ "$(fact Attempts)" = "3 total (1 original + 2 automated retries)" ]
+    [ "$(fact Attempt)" = "3 of 3" ]
 }
 
 @test "run details are taken from the triggering run" {
@@ -203,4 +204,11 @@ two"
     run build-card.sh
     [ "$status" -eq 0 ]
     [ "$(body | jq '.[-1].type')" = '"Container"' ]
+}
+
+@test "the attempt stands alone without a max" {
+    unset MAX_ATTEMPTS
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(fact Attempt)" = "3" ]
 }

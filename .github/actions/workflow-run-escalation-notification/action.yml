@@ -28,7 +28,19 @@ inputs:
     required: false
     default: ""
   cc:
-    description: Closing line naming who should pick this up
+    description: Closing line naming who should pick this up. Include the <at>name</at> markup of anything listed in mention-users or mention-tags
+    required: false
+    default: ""
+  mention-users:
+    description: 'Comma-separated list of users to mention in format "display name|email"'
+    required: false
+    default: ''
+  mention-tags:
+    description: 'Comma-separated list of Teams tags to mention in format "tag name|tag id"'
+    required: false
+    default: ''
+  max-attempts:
+    description: The 'max-attempts' output of workflow-run-auto-retry, used to word the attempt count
     required: false
     default: ""
   dry-run:
@@ -43,6 +55,7 @@ runs:
       env:
         REASON_CODE: ${{ inputs.reason-code }}
         ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+        MAX_ATTEMPTS: ${{ inputs.max-attempts }}
         FAILED_JOBS: ${{ inputs.failed-jobs }}
         HEADING: ${{ inputs.heading }}
         POSITION: ${{ inputs.position }}
@@ -58,6 +71,8 @@ runs:
       with:
         webhook-url: ${{ inputs.webhook-url }}
         card-body: ${{ steps.card.outputs.body }}
+        mention-users: ${{ inputs.mention-users }}
+        mention-tags: ${{ inputs.mention-tags }}
         # Nothing failed in the watcher itself, so the colour has to be stated.
         status: failure
         dry-run: ${{ inputs.dry-run }}

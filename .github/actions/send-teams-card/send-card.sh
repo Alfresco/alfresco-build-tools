@@ -47,10 +47,16 @@ fi
 
 : "${WEBHOOK_URL:?webhook-url is required}"
 
+# A card with a long log block can go past the shell's limit on a single argument,
+# so the payload travels as a file rather than on the command line.
+payload_file="$(mktemp)"
 response_file="$(mktemp)"
+trap 'rm -f "$payload_file" "$response_file"' EXIT
+printf '%s' "$PAYLOAD" > "$payload_file"
+
 http_code="$(curl -sS -o "$response_file" -w '%{http_code}' \
     -X POST -H 'Content-Type: application/json' \
-    --data-raw "$PAYLOAD" "$WEBHOOK_URL")"
+    --data-binary "@$payload_file" "$WEBHOOK_URL")"
 
 echo "Response status: ${http_code}"
 cat "$response_file" && echo
