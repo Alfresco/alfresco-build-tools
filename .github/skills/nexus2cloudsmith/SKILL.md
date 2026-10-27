@@ -50,8 +50,14 @@ Then decide what kind of repo it is, because that drives both phases:
 If the repo uses a Nexus repository that is not in this table (thirdparty,
 for example), stop and ask the user for the target. Don't guess one.
 
-Cloudsmith has no snapshot repository. If a job deploys snapshots, tell the
-user and ask whether to remove that job.
+Cloudsmith has no snapshot repository. Once `<snapshotRepository>` is gone,
+any `mvn deploy` of a `-SNAPSHOT` version fails. Look for jobs that do this
+(for example a `publish_snapshot_artifacts` job, or a phase switched to
+`deploy` on pushes to master), tell the user, and ask whether to remove them.
+
+Binary downloads from `nexus.alfresco.com/nexus/service/local/...` (in
+Dockerfiles or CI scripts) are not Maven resolution and are out of scope.
+Leave them and mention them to the user.
 
 ## Phase 1: Pull
 
@@ -142,11 +148,23 @@ permissions:
   contents: read
 
 steps:
-  - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@<sha> # vX.Y.Z
-  - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@<sha> # vX.Y.Z
+  - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@vX.Y.Z
+  - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@vX.Y.Z
     with:
       oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
 ```
+
+If the build also pulls from a repository that Cloudsmith doesn't proxy (GitHub
+Packages, for example), exclude its id from the mirror:
+`<mirrorOf>*,!github</mirrorOf>`.
+
+In `dependency-graph.yml`, drop the `maven-username` / `maven-password` inputs
+fed from `NEXUS_*` secrets on `maven-dependency-scan`. They only set
+`MAVEN_USERNAME` / `MAVEN_PASSWORD`, which the settings no longer read.
+
+`.github/dependabot.yml` may declare a Nexus `maven-repository` registry with
+`NEXUS_*` secrets. Dependabot can't use OIDC, so don't guess a replacement:
+point it out to the user and ask.
 
 ## Phase 2: Push
 
@@ -203,12 +221,12 @@ repository go to `https://artifacts.hyland.dev/public/alfresco-public/maven/`.
 - Keep repository and server ids neutral: `alfresco-public`,
   `alfresco-internal`, `alfresco-releases`. Don't put "cloudsmith" in ids.
 - Comments must name ids that actually exist in the file.
-- Pin `cloudsmith-auth` to a full 40-character commit SHA with the version as a
-  trailing comment. Use the same alfresco-build-tools ref as the repo's other
-  build-tools actions when that ref already has `cloudsmith-auth`. Otherwise
-  look up the latest release with
-  `gh api repos/Alfresco/alfresco-build-tools/releases/latest`, then
-  `gh api repos/Alfresco/alfresco-build-tools/commits/<tag> --jq .sha`.
+- Pin `cloudsmith-auth` to a release tag (`@vX.Y.Z`). alfresco-build-tools
+  releases are immutable, so a tag is as safe as a SHA. If the repo already pins
+  build-tools actions by SHA, a full 40-character SHA with a `# vX.Y.Z` comment
+  is fine too. Use the same ref as the repo's other build-tools actions when
+  that ref already has `cloudsmith-auth`. Otherwise use the latest release:
+  `gh api repos/Alfresco/alfresco-build-tools/releases/latest --jq .tag_name`.
 - Reference `CLOUDSMITH_USERNAME` / `CLOUDSMITH_API_KEY` only as
   `${env.…}` in settings files or `$VAR` in shell. Never as `${{ }}`.
 - `cloudsmith-auth` needs `id-token: write` on the calling job, or the token
