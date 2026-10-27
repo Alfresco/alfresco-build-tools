@@ -165,6 +165,10 @@ empty settings file (see Verify). If something only resolves from
 `internal`, stop and tell the user which artifacts. Don't switch to
 `alfresco-internal`: the dependency has to be published publicly or dropped.
 
+Known limitation: GitHub gives no OIDC token to PRs from forks, so their builds
+fail at `cloudsmith-auth`. There is no fallback yet. Mention it to the user
+but don't work around it.
+
 ### Private repo
 
 In `.ci.settings.xml`, replace the `alfresco-internal` profile and its
@@ -210,12 +214,14 @@ them. Apply the URL mapping table to every `<repository>` and
 Grant `id-token: write` and add
 [`cloudsmith-auth`](https://github.com/Alfresco/alfresco-build-tools/blob/master/docs/README.md#cloudsmith-auth) right after
 `setup-java-build` in **every** job that runs Maven, including
-`dependency-graph.yml`:
+`dependency-graph.yml`. Add `id-token: write` to the job's existing
+`permissions:` and keep the scopes already there: any scope a `permissions:`
+block leaves out becomes `none`, so a release job would lose `contents: write`.
 
 ```yaml
 permissions:
   id-token: write
-  contents: read
+  contents: read  # keep whatever the job already had
 
 steps:
   - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@vX.Y.Z
@@ -316,7 +322,9 @@ mirror server:
   ```yaml
   - uses: Alfresco/alfresco-build-tools/.github/actions/maven-release-slim@vX.Y.Z
     with:
+      token: ${{ steps.app-token.outputs.token }}
       release-version: ${{ env.RELEASE_VERSION }}
+      development-version: ${{ env.DEVELOPMENT_VERSION }}
       prerelease-profile: prerelease
   ```
 
@@ -348,7 +356,7 @@ repository go to `https://artifacts.hyland.dev/public/alfresco-public/maven/`.
 
 ```bash
 # No Nexus left
-git grep -n "artifacts.alfresco.com"
+git grep -n -E "artifacts\.alfresco\.com|NEXUS_(USERNAME|PASSWORD)"
 
 # Public repos: resolves with no credentials and an empty local repository
 scratch="${TMPDIR:-/tmp}/nexus2cloudsmith"
