@@ -35,6 +35,14 @@ inputs:
     required: false
     description: Fail the release if new commits appeared on the branch since the run started.
     default: 'true'
+  prerelease-deployment-repository:
+    required: false
+    description: Repository to deploy prerelease versions to instead of the distributionManagement one, as "id::url" (maven-deploy-plugin 3.x) or "id::default::url" (2.x). Disabled when empty.
+    default: ''
+  prerelease-version-marker:
+    required: false
+    description: Text in the release version that marks it as a prerelease.
+    default: '-A.'
 
 runs:
   using: composite
@@ -52,8 +60,17 @@ runs:
       run: ${{ inputs.post-version-command }}
       shell: bash
 
+    - name: "Select deployment repository"
+      id: deployment-repository
+      env:
+        RELEASE_VERSION: ${{ inputs.release-version }}
+        PRERELEASE_REPOSITORY: ${{ inputs.prerelease-deployment-repository }}
+        PRERELEASE_MARKER: ${{ inputs.prerelease-version-marker }}
+      run: ${{ github.action_path }}/prerelease-deployment-arg.sh
+      shell: bash
+
     - name: "Deploy release version ${{ inputs.release-version }}"
-      run: mvn -B -ntp clean deploy -P ${{ inputs.release-profile }} -Dproject.revision.key=${{ github.sha }} ${{ inputs.maven-args }}
+      run: mvn -B -ntp clean deploy -P ${{ inputs.release-profile }} -Dproject.revision.key=${{ github.sha }} ${{ inputs.maven-args }} ${{ steps.deployment-repository.outputs.maven-arg }}
       shell: bash
 
     - name: "Check for concurrent commits before committing the release"
