@@ -162,9 +162,22 @@ In `dependency-graph.yml`, drop the `maven-username` / `maven-password` inputs
 fed from `NEXUS_*` secrets on `maven-dependency-scan`. They only set
 `MAVEN_USERNAME` / `MAVEN_PASSWORD`, which the settings no longer read.
 
-`.github/dependabot.yml` may declare a Nexus `maven-repository` registry with
-`NEXUS_*` secrets. Dependabot can't use OIDC, so don't guess a replacement:
-point it out to the user and ask.
+If `.github/dependabot.yml` declares a Nexus `maven-repository` registry,
+point it at the same Cloudsmith repository as the build. Dependabot can't use
+OIDC and only expands Dependabot secrets (not `vars`), so it uses two
+Dependabot secrets that must exist in the repo or org:
+
+```yaml
+registries:
+  maven-alfresco-internal:
+    type: maven-repository
+    url: https://artifacts.hyland.dev/basic/alfresco-internal/maven/
+    username: ${{ secrets.DEPENDABOT_CLOUDSMITH_USERNAME }}
+    password: ${{ secrets.DEPENDABOT_CLOUDSMITH_API_KEY }}
+```
+
+Keep the registry name so the `registries:` entries under each update still
+match.
 
 ## Phase 2: Push
 
