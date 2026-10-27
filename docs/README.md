@@ -141,6 +141,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [validate-maven-versions](#validate-maven-versions)
   - [veracode](#veracode)
   - [workflow-run-auto-retry](#workflow-run-auto-retry)
+  - [workflow-run-escalation-notification](#workflow-run-escalation-notification)
   - [xvfb-record](#xvfb-record)
 - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
   - [branch-promotion-prs](#branch-promotion-prs)
@@ -2629,10 +2630,15 @@ To get the necessary data for mentions:
 
 #### Custom card content
 
-Beyond the standard card, callers can extend it with their own Adaptive Card content via two optional inputs (both default to an empty array, so existing usages are unaffected):
+Beyond the standard card, callers can extend it with their own Adaptive Card content via three optional inputs (all default to an empty array, so existing usages are unaffected):
 
 - `card-actions`: JSON array of [Adaptive Card actions](https://learn.microsoft.com/en-us/adaptive-cards/schema-explorer/action-open-url) rendered as buttons at the bottom of the card
 - `card-extra-body`: JSON array of Adaptive Card body elements (e.g. a `FactSet` or a monospace `TextBlock`) appended after the message
+- `card-body`: JSON array of Adaptive Card body elements **replacing** the standard ones. The
+  caller then owns the whole body, while the action still supplies the colour, the mentions, the
+  buttons and the send itself. `card-extra-body` is appended after it. Use this when the default
+  layout does not fit, for example on a `workflow_run` watcher, where the standard card describes
+  the watcher rather than the run that failed. `title` and `message` are unused when it is set.
 
 Sample usage with custom buttons and body elements:
 
@@ -3044,7 +3050,7 @@ jobs:
           # without this the card is green, worked out from the watcher's own jobs
           status: failure
           title: Release stopped in ${{ github.repository }}
-          message: ${{ steps.retry.outputs.reason }}
+          message: ${{ steps.retry.outputs.reason-text }}
           skip_checkout: "true"
           card-actions: >-
             [{"type":"Action.OpenUrl","title":"View run","url":"${{ github.event.workflow_run.html_url }}"}]
@@ -3053,7 +3059,7 @@ jobs:
       - name: Fail when no Teams webhook is configured
         if: steps.retry.outputs.decision == 'escalate' && env.TEAMS_WEBHOOK == ''
         env:
-          REASON: ${{ steps.retry.outputs.reason }}
+          REASON: ${{ steps.retry.outputs.reason-text }}
           FAILED_JOBS: ${{ steps.retry.outputs.failed-jobs }}
           RUN_URL: ${{ github.event.workflow_run.html_url }}
         run: |
@@ -3097,8 +3103,14 @@ the whole name. A job nested through a reusable workflow is reported as
 jobs do not need listing. A job that was gated and did not run reports
 `skipped`, not `failure`, so it never blocks a retry.
 
-Outputs are `decision` (`retry`, `escalate` or `none`), `reason`,
-`failed-jobs`, `attempt` and `max-attempts`.
+Outputs are `decision` (`retry`, `escalate` or `none`), `reason-code`,
+`reason-text`, `failed-jobs`, `attempt` and `max-attempts`. `reason-code` says
+which of the three escalations happened, as a fixed value:
+`attempts-exhausted`, `non-retryable` or `nothing-to-retry`, and empty for any
+other decision. Branch on it rather than matching `reason-text`, which is prose
+and may be reworded. See
+[workflow-run-escalation-notification](#workflow-run-escalation-notification)
+for a Teams card built from it.
 
 Known limitations:
 
@@ -3108,6 +3120,57 @@ Known limitations:
   does nothing until merged.
 - Do not point this and `dependabot-workflow-run-automation` at the same
   workflow. Both would re-run the same attempt, and their budgets differ.
+
+### workflow-run-escalation-notification
+
+Sends a Teams card describing a workflow run that
+[workflow-run-auto-retry](#workflow-run-auto-retry) escalated. Pair the two in
+the same watcher: one decides, the other reports.
+
+The standard `send-teams-notification` card cannot be used directly from a
+`workflow_run` watcher, because it describes the watcher's own run rather than
+the run that failed. This action builds its own card body instead, so the
+branch, the workflow and the run link all refer to the failed run.
+
+```yaml
+      - id: retry
+        uses: Alfresco/alfresco-build-tools/.github/actions/workflow-run-auto-retry@v19.7.1
+        with:
+          non-retryable-jobs: |
+            Push to Nexus
+
+      - name: Report to Teams
+        if: steps.retry.outputs.decision == 'escalate'
+        uses: Alfresco/alfresco-build-tools/.github/actions/workflow-run-escalation-notification@v19.7.1
+        with:
+          webhook-url: ${{ secrets.TEAMS_WEBHOOK }}
+          reason-code: ${{ steps.retry.outputs.reason-code }}
+          failed-jobs: ${{ steps.retry.outputs.failed-jobs }}
+          # the two per-repository lines
+          position: Hop 2 of 5 - alfresco-enterprise-repo
+          downstream: >-
+            Nothing propagates to alfresco-enterprise-share, acs-packaging or
+            acs-community-packaging until this is resolved.
+          cc: "cc: @release-duty - please take a look when you can."
+```
+
+The first sentence of the message is generated from `reason-code`, so the card
+says why no retry is coming:
+
+| `reason-code` | Sentence |
+| --- | --- |
+| `attempts-exhausted` | Automated retries were exhausted. |
+| `non-retryable` | A job that must not be re-run automatically failed, so no retry was attempted. |
+| `nothing-to-retry` | The run failed without any job reporting a failure, so a retry would change nothing. |
+
+`downstream` is appended to it. Any other `reason-code` fails the step, because
+it means the caller is reporting something that is not an escalation.
+
+The repository, branch, workflow and attempt count all come from the triggering
+run, so only the decision itself has to be passed in. Each failed job gets its
+own bullet.
+`upstream-version` defaults to `Unknown`; pass it once the caller can work out
+which version was being propagated.
 
 ### xvfb-record
 

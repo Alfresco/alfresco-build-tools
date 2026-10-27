@@ -14,9 +14,14 @@ emit() {
   echo "$1=$2" >> "$GITHUB_OUTPUT"
 }
 
+# Only an escalation sets this, because only a caller reporting one has to word
+# its own message. Every other outcome is explained by the text alone.
+REASON_CODE=""
+
 decide() {
   emit decision "$1"
-  emit reason "$2"
+  emit reason-code "$REASON_CODE"
+  emit reason-text "$2"
   emit attempt "$RUN_ATTEMPT"
   emit max-attempts "$MAX_ATTEMPTS"
   local delim="EOF_${RANDOM}${RANDOM}"
@@ -31,6 +36,11 @@ decide() {
     echo "**$1**: $2" >> "$GITHUB_STEP_SUMMARY"
   fi
   exit 0
+}
+
+escalate() {
+  REASON_CODE="$1"
+  decide escalate "$2"
 }
 
 # Returns 2 on an HTTP 404 so callers can tell "it is not there" from "the API call failed",
@@ -81,7 +91,7 @@ FAILED=$(api "repos/$REPOSITORY/actions/runs/$RUN_ID/attempts/$RUN_ATTEMPT/jobs"
 }
 
 if [ -z "$FAILED" ]; then
-  decide escalate "$REPOSITORY run $RUN_ID failed without any job reporting a failure, so re-running it would change nothing."
+  escalate nothing-to-retry "$REPOSITORY run $RUN_ID failed without any job reporting a failure, so re-running it would change nothing."
 fi
 
 # -F -x so a job matches a denylist entry only on the whole name, never as a substring.
@@ -93,7 +103,7 @@ fi
 if [ -n "$BLOCKED" ]; then
   # jq quotes each name, so a job name that itself contains a comma stays readable.
   BLOCKED_LIST=$(printf '%s\n' "$BLOCKED" | jq -Rrs 'rtrimstr("\n") | split("\n") | map(tojson) | join(", ")')
-  decide escalate "Not retrying $REPOSITORY run $RUN_ID: $BLOCKED_LIST must not be re-run automatically."
+  escalate non-retryable "Not retrying $REPOSITORY run $RUN_ID: $BLOCKED_LIST must not be re-run automatically."
 fi
 
 # git/ref/heads is exact, where commits/<branch> would also match a tag of the same name.
@@ -110,7 +120,7 @@ if [ "$TIP" != "$HEAD_SHA" ]; then
 fi
 
 if [ "$RUN_ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
-  decide escalate "$REPOSITORY run $RUN_ID still failing after attempt $RUN_ATTEMPT of $MAX_ATTEMPTS, the retry budget is spent."
+  escalate attempts-exhausted "$REPOSITORY run $RUN_ID still failing after attempt $RUN_ATTEMPT of $MAX_ATTEMPTS, the retry budget is spent."
 fi
 
 decide retry "Attempt $RUN_ATTEMPT of $MAX_ATTEMPTS failed on retryable jobs only, re-running them."

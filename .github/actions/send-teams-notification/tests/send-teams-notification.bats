@@ -412,3 +412,62 @@ BATS
     [ "$status" -eq 1 ]
     [[ "$output" == *"must be a JSON array"* ]]
 }
+
+# compute-card-body.sh tests
+
+@test "compute-card-body with default empty array" {
+    export CARD_BODY='[]'
+
+    run compute-card-body.sh
+
+    [ "$status" -eq 0 ]
+    [ "$output" = 'result=[]' ]
+}
+
+@test "compute-card-body unset defaults to empty" {
+    unset CARD_BODY
+
+    run compute-card-body.sh
+
+    [ "$status" -eq 0 ]
+    [ "$output" = 'result=[]' ]
+}
+
+@test "compute-card-body with multiple elements is compacted onto one line" {
+    export CARD_BODY='[
+      {"type": "TextBlock", "text": "one"},
+      {"type": "TextBlock", "text": "two"}
+    ]'
+
+    run compute-card-body.sh
+
+    [ "$status" -eq 0 ]
+    [ "$output" = 'result=[{"type":"TextBlock","text":"one"},{"type":"TextBlock","text":"two"}]' ]
+}
+
+@test "compute-card-body keeps non-ASCII text intact" {
+    export CARD_BODY='[{"type":"TextBlock","text":"🔴 Release chain blocked"}]'
+
+    run compute-card-body.sh
+
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"🔴 Release chain blocked"* ]]
+}
+
+@test "compute-card-body rejects a JSON object" {
+    export CARD_BODY='{"type":"TextBlock"}'
+
+    run compute-card-body.sh
+
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"must be a JSON array"* ]]
+}
+
+@test "compute-card-body rejects invalid JSON" {
+    export CARD_BODY='not json'
+
+    run compute-card-body.sh
+
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"must be a JSON array"* ]]
+}

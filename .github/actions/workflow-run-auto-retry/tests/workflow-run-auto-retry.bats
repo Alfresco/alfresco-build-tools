@@ -112,6 +112,7 @@ mock_gh() {
     run workflow-run-auto-retry.sh
     [ "$status" -eq 0 ]
     assert_output_var "decision" "escalate"
+    assert_output_var "reason-code" "nothing-to-retry"
     [[ "$output" == *"without any job reporting a failure"* ]]
 }
 
@@ -127,6 +128,7 @@ mock_gh() {
     run workflow-run-auto-retry.sh
     [ "$status" -eq 0 ]
     assert_output_var "decision" "escalate"
+    assert_output_var "reason-code" "non-retryable"
     [[ "$output" == *"Push to Nexus"* ]]
 }
 
@@ -173,6 +175,7 @@ mock_gh() {
     run workflow-run-auto-retry.sh
     [ "$status" -eq 0 ]
     assert_output_var "decision" "escalate"
+    assert_output_var "reason-code" "attempts-exhausted"
 }
 
 @test "retries on the last attempt still within budget" {
@@ -180,6 +183,14 @@ mock_gh() {
     run workflow-run-auto-retry.sh
     [ "$status" -eq 0 ]
     assert_output_var "decision" "retry"
+}
+
+@test "a decision that is not an escalation reports no reason code" {
+    export MOCK_TIP="bbbbbbb"
+    run workflow-run-auto-retry.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "decision" "none"
+    assert_output_var "reason-code" ""
 }
 
 @test "does not retry a run whose branch has moved on" {

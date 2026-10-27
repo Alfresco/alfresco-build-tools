@@ -1,0 +1,66 @@
+name: Workflow run escalation notification
+description: Sends a Teams card describing a workflow run that workflow-run-auto-retry escalated.
+inputs:
+  webhook-url:
+    description: Microsoft Teams Incoming Webhooks URL
+    required: true
+  reason-code:
+    description: The 'reason-code' output of workflow-run-auto-retry, one of 'attempts-exhausted', 'non-retryable' or 'nothing-to-retry'
+    required: true
+  failed-jobs:
+    description: The 'failed-jobs' output of workflow-run-auto-retry, one display name per line
+    required: false
+    default: ""
+  heading:
+    description: Card heading, shown next to the red status dot
+    required: false
+    default: Release chain blocked
+  position:
+    description: One line describing where this repository sits in the chain, shown under the heading
+    required: false
+    default: ""
+  downstream:
+    description: One sentence naming what stops until this is fixed, appended to the generated first sentence
+    required: false
+    default: ""
+  upstream-version:
+    description: The version being propagated, when the caller can work it out
+    required: false
+    default: Unknown
+  cc:
+    description: Closing line naming who should pick this up
+    required: false
+    default: ""
+  dry-run:
+    description: Build the card and print it without sending
+    required: false
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - id: card
+      shell: bash
+      env:
+        REASON_CODE: ${{ inputs.reason-code }}
+        ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+        FAILED_JOBS: ${{ inputs.failed-jobs }}
+        HEADING: ${{ inputs.heading }}
+        POSITION: ${{ inputs.position }}
+        DOWNSTREAM: ${{ inputs.downstream }}
+        UPSTREAM_VERSION: ${{ inputs.upstream-version }}
+        CC: ${{ inputs.cc }}
+        REPOSITORY: ${{ github.repository }}
+        BRANCH: ${{ github.event.workflow_run.head_branch }}
+        WORKFLOW: ${{ github.event.workflow_run.name }}
+      run: ${{ github.action_path }}/build-card.sh
+
+    - uses: $/.github/actions/send-teams-notification
+      with:
+        webhook-url: ${{ inputs.webhook-url }}
+        card-body: ${{ steps.card.outputs.body }}
+        # Nothing failed in the watcher itself, so the colour has to be stated.
+        status: failure
+        skip_checkout: "true"
+        dry-run: ${{ inputs.dry-run }}
+        card-actions: >-
+          [{"type":"Action.OpenUrl","title":"View failed run","url":"${{ github.event.workflow_run.html_url }}"}]

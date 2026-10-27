@@ -42,6 +42,10 @@ inputs:
     description: 'JSON array of Adaptive Card body elements (e.g. a FactSet or monospace log block) appended after the message'
     required: false
     default: '[]'
+  card-body:
+    description: 'JSON array of Adaptive Card body elements replacing the default ones. Empty keeps the default card. card-extra-body is still appended.'
+    required: false
+    default: '[]'
   skip_checkout:
     description: If the internal checkout action should be skipped or not
     required: false
@@ -208,11 +212,21 @@ runs:
       run: |
         ${{ github.action_path }}/compute-extra-body.sh >> $GITHUB_OUTPUT
 
+    - name: Compute card body
+      id: compute-card-body
+      shell: bash
+      env:
+        CARD_BODY: ${{ inputs.card-body }}
+      run: |
+        ${{ github.action_path }}/compute-card-body.sh >> $GITHUB_OUTPUT
+
     - name: Send teams notification
       shell: bash
       env:
         WEBHOOK_URL: ${{ inputs.webhook-url }}
         DRY_RUN: ${{ inputs.dry-run }}
+        CARD_BODY: ${{ steps.compute-card-body.outputs.result }}
+        EXTRA_BODY: ${{ inputs.card-extra-body }}
         PAYLOAD: >-
           {
             "type": "message",
@@ -339,6 +353,12 @@ runs:
           }
       run: |
         set -euo pipefail
+
+        # A caller that brings its own body gets the envelope only: colour, mentions and actions.
+        if [ "${CARD_BODY}" != "[]" ]; then
+          PAYLOAD="$(jq --argjson body "${CARD_BODY}" --argjson extra "${EXTRA_BODY}" \
+            '.attachments[0].content.body = ($body + $extra)' <<<"${PAYLOAD}")"
+        fi
 
         if ! jq -e . >/dev/null 2>&1 <<<"${PAYLOAD}"; then
           echo "::error::Computed Teams payload is not valid JSON"
