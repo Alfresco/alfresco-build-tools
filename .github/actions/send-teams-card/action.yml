@@ -1,0 +1,97 @@
+name: Send Teams card
+description: Sends a ready-made Adaptive Card body to a Microsoft Teams webhook, supplying the envelope, the status colour and any mentions.
+inputs:
+  webhook-url:
+    description: Microsoft Teams Incoming Webhooks URL
+    required: true
+  card-body:
+    description: 'JSON array of Adaptive Card body elements making up the whole card'
+    required: true
+  card-actions:
+    description: 'JSON array of Adaptive Card actions rendered as buttons at the bottom of the card'
+    required: false
+    default: '[]'
+  mention-users:
+    description: 'Comma-separated list of users to mention in format "display name|email" (e.g.: "John Doe|john.doe@example.com,Jane Doe|jane.doe@example.com")'
+    required: false
+    default: ''
+  mention-tags:
+    description: 'Comma-separated list of Teams tags to mention in format "tag name|tag id" (e.g.: "Security Champions|base64IdIncluding==")'
+    required: false
+    default: ''
+  status:
+    description: 'The workflow status setting the card colour: if not filled, it will be computed based on the completed steps status'
+    required: false
+    default: ''
+  dry-run:
+    description: Build the payload and print it without sending
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Compute workflow status
+      id: compute-workflow-status
+      if: ${{ inputs.status == '' }}
+      shell: bash
+      run: |
+        API_URL="${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs?per_page=100"
+
+        RUNS=$(curl -s -H "Authorization: token ${{ github.token }}" "${API_URL}")
+
+        failure=$(echo $RUNS | \
+        jq -r '.jobs[].steps[] | select(.status == "completed" and .conclusion == "failure").conclusion' | \
+        wc -l)
+
+        cancelled=$(echo $RUNS | \
+        jq -r '.jobs[].steps[] | select(.status == "completed" and .conclusion == "cancelled").conclusion' | \
+        wc -l)
+
+        if [ "${failure}" -gt 0 ]; then
+          status="failure"
+        elif [ "${cancelled}" -gt 0 ]; then
+          status="cancelled"
+        else
+          status="success"
+        fi
+
+        echo "status=${status}" >> $GITHUB_OUTPUT
+
+    - name: Compute color
+      shell: bash
+      id: compute-color
+      env:
+        STATUS: ${{ inputs.status || steps.compute-workflow-status.outputs.status }}
+      run: |
+        COLOR=808080
+        case $STATUS in
+          success)
+            COLOR=36A64F
+            ;;
+          failure)
+            COLOR=A30200
+            ;;
+        esac
+        echo "result=$COLOR" >> $GITHUB_OUTPUT
+
+    - name: Transform mentions to JSON entities
+      id: transform-mentions
+      shell: bash
+      env:
+        USERS: ${{ inputs.mention-users }}
+        TAGS: ${{ inputs.mention-tags }}
+      run: |
+        ${{ github.action_path }}/transform-mentions.sh >> $GITHUB_OUTPUT
+
+    - name: Send card
+      shell: bash
+      env:
+        WEBHOOK_URL: ${{ inputs.webhook-url }}
+        CARD_BODY: ${{ inputs.card-body }}
+        CARD_ACTIONS: ${{ inputs.card-actions }}
+        ENTITIES: ${{ steps.transform-mentions.outputs.result }}
+        COLOR: ${{ steps.compute-color.outputs.result }}
+        DRY_RUN: ${{ inputs.dry-run }}
+      run: |
+        ${{ github.action_path }}/send-card.sh

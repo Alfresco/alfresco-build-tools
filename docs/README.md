@@ -116,6 +116,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [reportportal-summarize](#reportportal-summarize)
   - [resolve-preview-name](#resolve-preview-name)
   - [s3-upload](#s3-upload)
+  - [send-teams-card](#send-teams-card)
   - [send-teams-notification](#send-teams-notification)
   - [setup-checkov](#setup-checkov)
   - [setup-docker](#setup-docker)
@@ -2559,6 +2560,37 @@ To copy artifacts between S3 locations instead of uploading from a local directo
 
 `deploy-dir` is deprecated in favor of `source`, and `s3-bucket`/`s3-path` are deprecated in favor of `destination`; the old inputs still work as a fallback when the new ones are not set.
 
+### send-teams-card
+
+Sends a ready-made Adaptive Card to a Teams webhook. The caller owns the whole
+card body; this action supplies the message envelope, the status colour, any
+mention entities and the send itself.
+
+Use it when the card has to describe something other than the running workflow,
+which is what [send-teams-notification](#send-teams-notification) builds. A
+`workflow_run` watcher is the usual case: the standard card would report the
+watcher's own branch, commit and run link rather than the run that failed.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-card@v19.7.1
+        with:
+          webhook-url: ${{ secrets.MSTEAMS_WEBHOOK }}
+          card-body: ${{ steps.build-card.outputs.body }}
+          # optional, default: computed from the completed steps
+          status: failure
+          card-actions: >-
+            [{"type":"Action.OpenUrl","title":"View run","url":"https://example.com"}]
+```
+
+`card-body` is a JSON array of Adaptive Card body elements and is required.
+`card-actions` renders as buttons at the bottom. `mention-users` and
+`mention-tags` work as they do in
+[send-teams-notification](#send-teams-notification), and the body has to carry
+its own `<at>name</at>` markup for each one.
+
+`send-teams-notification` is built on this action, so there is no reason to use
+both: pick the one that matches how much of the card you want to own.
+
 ### send-teams-notification
 
 Sends a teams notification with a pre-defined payload.
@@ -2630,15 +2662,12 @@ To get the necessary data for mentions:
 
 #### Custom card content
 
-Beyond the standard card, callers can extend it with their own Adaptive Card content via three optional inputs (all default to an empty array, so existing usages are unaffected):
+Beyond the standard card, callers can extend it with their own Adaptive Card
+content via two optional inputs (both default to an empty array, so existing
+usages are unaffected):
 
 - `card-actions`: JSON array of [Adaptive Card actions](https://learn.microsoft.com/en-us/adaptive-cards/schema-explorer/action-open-url) rendered as buttons at the bottom of the card
 - `card-extra-body`: JSON array of Adaptive Card body elements (e.g. a `FactSet` or a monospace `TextBlock`) appended after the message
-- `card-body`: JSON array of Adaptive Card body elements **replacing** the standard ones. The
-  caller then owns the whole body, while the action still supplies the colour, the mentions, the
-  buttons and the send itself. `card-extra-body` is appended after it. Use this when the default
-  layout does not fit, for example on a `workflow_run` watcher, where the standard card describes
-  the watcher rather than the run that failed. `title` and `message` are unused when it is set.
 
 Sample usage with custom buttons and body elements:
 
@@ -3127,10 +3156,11 @@ Sends a Teams card describing a workflow run that
 [workflow-run-auto-retry](#workflow-run-auto-retry) escalated. Pair the two in
 the same watcher: one decides, the other reports.
 
-The standard `send-teams-notification` card cannot be used directly from a
+The standard `send-teams-notification` card cannot be used from a
 `workflow_run` watcher, because it describes the watcher's own run rather than
-the run that failed. This action builds its own card body instead, so the
-branch, the workflow and the run link all refer to the failed run.
+the run that failed. This action builds its own card body and posts it with
+[send-teams-card](#send-teams-card), so the branch, the workflow and the run
+link all refer to the failed run.
 
 ```yaml
       - id: retry
@@ -3167,10 +3197,13 @@ says why no retry is coming:
 it means the caller is reporting something that is not an escalation.
 
 The repository, branch, workflow and attempt count all come from the triggering
-run, so only the decision itself has to be passed in. Each failed job gets its
-own bullet.
-`upstream-version` defaults to `Unknown`; pass it once the caller can work out
-which version was being propagated.
+run, so only the decision itself has to be passed in. The action therefore only
+works on a `workflow_run` event and fails the step on any other. Each failed job
+gets its own bullet.
+
+`heading` defaults to `Release chain blocked` and `upstream-version` to
+`Unknown`; pass the latter once the caller can work out which version was being
+propagated. `position` and `cc` are left off the card when empty.
 
 ### xvfb-record
 

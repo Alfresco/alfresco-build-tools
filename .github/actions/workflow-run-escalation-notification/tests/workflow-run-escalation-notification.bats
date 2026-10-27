@@ -5,6 +5,7 @@ setup() {
     export GITHUB_OUTPUT="$BATS_TEST_TMPDIR/output"
     : > "$GITHUB_OUTPUT"
 
+    export GITHUB_EVENT_NAME="workflow_run"
     export REASON_CODE="attempts-exhausted"
     export ATTEMPT="3"
     export FAILED_JOBS="Repository - PostgreSQL 15.17 tests"
@@ -174,4 +175,32 @@ two"
     run build-card.sh
     [ "$status" -eq 1 ]
     [[ "$output" == *"attempt must be"* ]]
+}
+
+@test "a card is only built for a workflow_run event" {
+    export GITHUB_EVENT_NAME="push"
+    run build-card.sh
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"only works on a workflow_run event"* ]]
+}
+
+@test "a missing attempt is rejected rather than assumed" {
+    unset ATTEMPT
+    run build-card.sh
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"attempt must be a positive whole number"* ]]
+}
+
+@test "an empty position leaves the heading on its own" {
+    export POSITION=""
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(body | jq '.[0].columns[1].items | length')" -eq 1 ]
+}
+
+@test "an empty cc adds no trailing block" {
+    export CC=""
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(body | jq '.[-1].type')" = '"Container"' ]
 }

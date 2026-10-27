@@ -42,10 +42,6 @@ inputs:
     description: 'JSON array of Adaptive Card body elements (e.g. a FactSet or monospace log block) appended after the message'
     required: false
     default: '[]'
-  card-body:
-    description: 'JSON array of Adaptive Card body elements replacing the default ones. Empty keeps the default card. card-extra-body is still appended.'
-    required: false
-    default: '[]'
   skip_checkout:
     description: If the internal checkout action should be skipped or not
     required: false
@@ -56,50 +52,6 @@ runs:
   steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       if: inputs.skip_checkout == 'false'
-
-    - name: Compute workflow status
-      id: compute-workflow-status
-      if: ${{ inputs.status == '' }}
-      shell: bash
-      run: |
-        API_URL="${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs?per_page=100"
-
-        RUNS=$(curl -s -H "Authorization: token ${{ github.token }}" "${API_URL}")
-
-        failure=$(echo $RUNS | \
-        jq -r '.jobs[].steps[] | select(.status == "completed" and .conclusion == "failure").conclusion' | \
-        wc -l)
-
-        cancelled=$(echo $RUNS | \
-        jq -r '.jobs[].steps[] | select(.status == "completed" and .conclusion == "cancelled").conclusion' | \
-        wc -l)
-
-        if [ "${failure}" -gt 0 ]; then
-          status="failure"
-        elif [ "${cancelled}" -gt 0 ]; then
-          status="cancelled"
-        else
-          status="success"
-        fi
-
-        echo "status=${status}" >> $GITHUB_OUTPUT
-
-    - name: Compute color
-      shell: bash
-      id: compute-color
-      env:
-        STATUS: ${{ inputs.status || steps.compute-workflow-status.outputs.status }}
-      run: |
-        COLOR=808080
-        case $STATUS in
-          success)
-            COLOR=36A64F
-            ;;
-          failure)
-            COLOR=A30200
-            ;;
-        esac
-        echo "result=$COLOR" >> $GITHUB_OUTPUT
 
     - name: Compute small sha
       id: compute-small-sha
@@ -175,15 +127,6 @@ runs:
       id: get-branch-name
       uses: $/.github/actions/get-branch-name-v2
 
-    - name: Transform mentions to JSON entities
-      id: transform-mentions
-      shell: bash
-      env:
-        USERS: ${{ inputs.mention-users }}
-        TAGS: ${{ inputs.mention-tags }}
-      run: |
-        ${{ github.action_path }}/transform-mentions.sh >> $GITHUB_OUTPUT
-
     - name: Compute actor URLs
       id: compute-actor-urls
       shell: bash
@@ -212,180 +155,114 @@ runs:
       run: |
         ${{ github.action_path }}/compute-extra-body.sh >> $GITHUB_OUTPUT
 
-    - name: Compute card body
-      id: compute-card-body
-      shell: bash
-      env:
-        CARD_BODY: ${{ inputs.card-body }}
-      run: |
-        ${{ github.action_path }}/compute-card-body.sh >> $GITHUB_OUTPUT
-
     - name: Send teams notification
-      shell: bash
-      env:
-        WEBHOOK_URL: ${{ inputs.webhook-url }}
-        DRY_RUN: ${{ inputs.dry-run }}
-        CARD_BODY: ${{ steps.compute-card-body.outputs.result }}
-        EXTRA_BODY: ${{ inputs.card-extra-body }}
-        PAYLOAD: >-
-          {
-            "type": "message",
-            "attachments": [
-              {
-                "contentType": "application/vnd.microsoft.card.adaptive",
-                "content": {
-                  "type": "AdaptiveCard",
-                  "body": [
+      uses: $/.github/actions/send-teams-card
+      with:
+        webhook-url: ${{ inputs.webhook-url }}
+        card-actions: ${{ inputs.card-actions }}
+        mention-users: ${{ inputs.mention-users }}
+        mention-tags: ${{ inputs.mention-tags }}
+        status: ${{ inputs.status }}
+        dry-run: ${{ inputs.dry-run }}
+        card-body: >-
+          [
+            {
+              "type": "TextBlock",
+              "size": "medium",
+              "weight": "bolder",
+              "text": "${{ inputs.title || format('Notification on {0} on branch [`{1}`]({2}/{3}/tree/{4})', steps.compute-event.outputs.result, steps.get-branch-name.outputs.branch-name, github.server_url, github.repository, steps.get-branch-name.outputs.branch-name) }}",
+              "style": "heading",
+              "wrap": true
+            },
+            {
+              "type": "ColumnSet",
+              "columns": [
+                {
+                  "type": "Column",
+                  "items": [
+                    {
+                      "type": "Image",
+                      "style": "person",
+                      "url": "${{ steps.compute-actor-urls.outputs.actor_avatar_url }}",
+                      "altText": "${{ github.triggering_actor }}",
+                      "size": "small"
+                    }
+                  ],
+                  "width": "auto"
+                },
+                {
+                  "type": "Column",
+                  "items": [
                     {
                       "type": "TextBlock",
-                      "size": "medium",
-                      "weight": "bolder",
-                      "text": "${{ inputs.title || format('Notification on {0} on branch [`{1}`]({2}/{3}/tree/{4})', steps.compute-event.outputs.result, steps.get-branch-name.outputs.branch-name, github.server_url, github.repository, steps.get-branch-name.outputs.branch-name) }}",
-                      "style": "heading",
-                      "wrap": true
-                    },
+                      "text": "[${{ github.triggering_actor }}](${{ steps.compute-actor-urls.outputs.actor_url }})"
+                    }
+                  ]
+                },
+                {
+                  "type": "Column",
+                  "items": [
                     {
-                      "type": "ColumnSet",
-                      "columns": [
-                        {
-                          "type": "Column",
-                          "items": [
-                            {
-                              "type": "Image",
-                              "style": "person",
-                              "url": "${{ steps.compute-actor-urls.outputs.actor_avatar_url }}",
-                              "altText": "${{ github.triggering_actor }}",
-                              "size": "small"
-                            }
-                          ],
-                          "width": "auto"
-                        },
-                        {
-                          "type": "Column",
-                          "items": [
-                            {
-                              "type": "TextBlock",
-                              "text": "[${{ github.triggering_actor }}](${{ steps.compute-actor-urls.outputs.actor_url }})"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "Column",
-                          "items": [
-                            {
-                              "type": "Image",
-                              "style": "person",
-                              "url": "https://slack.github.com/static/img/favicon-neutral.png",
-                              "altText": "GitHub",
-                              "size": "small"
-                            }
-                          ],
-                          "width": "auto"
-                        },
-                        {
-                          "type": "Column",
-                          "items": [
-                            {
-                              "type": "TextBlock",
-                              "text": "[${{ github.repository }}](${{ github.server_url }}/${{ github.repository }})"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "ColumnSet",
-                      "columns": [
-                        {
-                          "type": "Column",
-                          "items": [
-                            {
-                              "type": "TextBlock",
-                              "text": "**Action**: [${{ steps.compute-workflow-title.outputs.result }}](${{ steps.compute-run-link.outputs.result }})"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "Column",
-                          "items": [
-                            {
-                              "type": "TextBlock",
-                              "text": "**Commit**: [`${{ steps.compute-small-sha.outputs.result }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "ColumnSet",
-                      "columns": [
-                        {
-                          "type": "Column",
-                          "items": [
-                            {
-                              "type": "TextBlock",
-                              "text": "**Message**"
-                            },
-                            {
-                              "type": "TextBlock",
-                              "text": "${{ steps.compute-message.outputs.result }} ",
-                              "wrap": true
-                            }
-                          ]
-                        }
-                      ]
-                    }${{ steps.compute-extra-body.outputs.result }}
+                      "type": "Image",
+                      "style": "person",
+                      "url": "https://slack.github.com/static/img/favicon-neutral.png",
+                      "altText": "GitHub",
+                      "size": "small"
+                    }
                   ],
-                  "actions": ${{ inputs.card-actions || '[]' }},
-                  "backgroundImage": {
-                    "url": "https://singlecolorimage.com/get/${{ steps.compute-color.outputs.result }}/2x2",
-                    "fillMode": "RepeatHorizontally"
-                  },
-                  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-                  "version": "1.5",
-                  "msteams": {
-                    "width": "full",
-                    "entities": ${{ steps.transform-mentions.outputs.result }}
-                  }
+                  "width": "auto"
+                },
+                {
+                  "type": "Column",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "[${{ github.repository }}](${{ github.server_url }}/${{ github.repository }})"
+                    }
+                  ]
                 }
-              }
-            ]
-          }
-      run: |
-        set -euo pipefail
-
-        # A caller that brings its own body gets the envelope only: colour, mentions and actions.
-        if [ "${CARD_BODY}" != "[]" ]; then
-          PAYLOAD="$(jq --argjson body "${CARD_BODY}" --argjson extra "${EXTRA_BODY}" \
-            '.attachments[0].content.body = ($body + $extra)' <<<"${PAYLOAD}")"
-        fi
-
-        if ! jq -e . >/dev/null 2>&1 <<<"${PAYLOAD}"; then
-          echo "::error::Computed Teams payload is not valid JSON"
-          echo "${PAYLOAD}"
-          exit 1
-        fi
-
-        if [ -n "${DRY_RUN}" ] && [ "${DRY_RUN}" != "false" ]; then
-          echo "Dry run - skipping notification send. Payload:"
-          jq . <<<"${PAYLOAD}"
-          exit 0
-        fi
-
-        response_file="$(mktemp)"
-        http_code="$(curl -sS -o "${response_file}" -w '%{http_code}' \
-          -X POST -H 'Content-Type: application/json' \
-          --data-raw "${PAYLOAD}" "${WEBHOOK_URL}")"
-
-        echo "Response status: ${http_code}"
-        cat "${response_file}" && echo
-
-        case "${http_code}" in
-          200 | 202)
-            echo "Notification sent to Microsoft Teams"
-            ;;
-          *)
-            echo "::error::Failed to send notification to Microsoft Teams (HTTP ${http_code})"
-            exit 1
-            ;;
-        esac
+              ]
+            },
+            {
+              "type": "ColumnSet",
+              "columns": [
+                {
+                  "type": "Column",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "**Action**: [${{ steps.compute-workflow-title.outputs.result }}](${{ steps.compute-run-link.outputs.result }})"
+                    }
+                  ]
+                },
+                {
+                  "type": "Column",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "**Commit**: [`${{ steps.compute-small-sha.outputs.result }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "ColumnSet",
+              "columns": [
+                {
+                  "type": "Column",
+                  "items": [
+                    {
+                      "type": "TextBlock",
+                      "text": "**Message**"
+                    },
+                    {
+                      "type": "TextBlock",
+                      "text": "${{ steps.compute-message.outputs.result }} ",
+                      "wrap": true
+                    }
+                  ]
+                }
+              ]
+            }${{ steps.compute-extra-body.outputs.result }}
+          ]
