@@ -304,10 +304,11 @@ mirror server:
 - Rename "Nexus" to "Cloudsmith" in job names and comments.
 - Turn on the `prerelease` profile for `-A.x` versions. `maven-release-slim`
   does it when `prerelease-profile` is set (its `prerelease-version-marker`
-  defaults to `-A.`):
+  defaults to `-A.`). The input needs v19.8.0 or later, so bump the action if
+  the repo pins an older one:
 
   ```yaml
-  - uses: Alfresco/alfresco-build-tools/.github/actions/maven-release-slim@vX.Y.Z
+  - uses: Alfresco/alfresco-build-tools/.github/actions/maven-release-slim@v19.8.0
     with:
       token: ${{ steps.app-token.outputs.token }}
       release-version: ${{ env.RELEASE_VERSION }}
