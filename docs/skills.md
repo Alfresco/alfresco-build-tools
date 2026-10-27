@@ -49,6 +49,21 @@ Fetch https://raw.githubusercontent.com/Alfresco/alfresco-build-tools/master/.gi
 and follow it to migrate this composite action from requirements.txt/pip to uv.
 ```
 
+### nexus2cloudsmith
+
+Migrate a Maven repository's CI from the Alfresco Nexus (`artifacts.alfresco.com`)
+to Cloudsmith (`artifacts.hyland.dev`). It covers both phases: pulling dependencies
+from Cloudsmith, and deploying releases there through the
+[cloudsmith-auth](README.md#cloudsmith-auth) OIDC action instead of the Nexus
+secrets. It handles public/community and internal/enterprise repos.
+
+Copy-paste this into your agent:
+
+```text
+Fetch https://raw.githubusercontent.com/Alfresco/alfresco-build-tools/master/.github/skills/nexus2cloudsmith/SKILL.md
+and follow it to migrate this repo from Nexus to Cloudsmith.
+```
+
 ### pimp-my-readme
 
 Create or upgrade a repository's `README.md` to a standard layout: title, CI/release/license
