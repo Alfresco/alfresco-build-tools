@@ -2180,7 +2180,8 @@ disable this check.
 When `prerelease-profile` is set and `release-version` contains
 `prerelease-version-marker`, that profile is activated together with
 `release-profile`. Use it to deploy prereleases somewhere else by overriding
-`distributionManagement` in the pom:
+`distributionManagement` in the pom. The release fails if the pom doesn't
+define that profile:
 
 ```xml
 <profiles>
