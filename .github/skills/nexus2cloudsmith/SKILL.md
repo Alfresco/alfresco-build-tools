@@ -145,7 +145,7 @@ stays anonymous:
     <mirrors>
         <mirror>
             <id>cic-ext-pull-through</id>
-            <name>Maven Central through Cloudsmith</name>
+            <name>Maven Central</name>
             <url>https://artifacts.hyland.dev/basic/cic-ext-pull-through/maven/</url>
             <mirrorOf>central</mirrorOf>
         </mirror>
@@ -307,7 +307,8 @@ mirror server:
 - Remove `MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}` and
   `MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}`, whether they sit at job or
   workflow level, once the Step 0 grep shows nothing else reads them.
-- Rename "Nexus" to "Cloudsmith" in job names and comments.
+- Drop "Nexus" from job names and comments rather than renaming it to
+  "Cloudsmith".
 - Turn on the `prerelease` profile for `-A.x` versions. `maven-release-slim`
   does it when `prerelease-profile` is set (its `prerelease-version-marker`
   defaults to `-A.`). The input needs v19.8.0 or later, so bump the action if
@@ -339,8 +340,12 @@ repository go to `https://artifacts.hyland.dev/public/alfresco-public/maven/`.
   URL, as in the Phase 2 examples.
 - Keep repository and server ids neutral: `alfresco-public`,
   `alfresco-internal`, `alfresco-releases`, or the Cloudsmith repository name
-  (`cic-ext-pull-through`). Don't put "cloudsmith" in ids, and only name ids
-  in comments that exist in the file.
+  (`cic-ext-pull-through`). Only name ids in comments that exist in the
+  file.
+- Don't name Cloudsmith in ids, names, job names or comments, so the next
+  registry move doesn't mean renaming them. Use it only where it can't be
+  avoided: URLs, the `cloudsmith-auth` step and the `CLOUDSMITH_*`
+  variables it exports.
 - Pin `cloudsmith-auth` to the same ref as the repo's other build-tools
   actions if that ref already has it. Otherwise use the latest release
   (`gh api repos/Alfresco/alfresco-build-tools/releases/latest --jq .tag_name`).
