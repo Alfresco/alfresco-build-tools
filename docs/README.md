@@ -71,6 +71,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [github-https-auth](#github-https-auth)
   - [github-list-changes](#github-list-changes)
   - [github-pr-check-metadata](#github-pr-check-metadata)
+  - [github-pr-label-from-branch](#github-pr-label-from-branch)
   - [github-require-secrets](#github-require-secrets)
   - [github-trigger-approved-pr](#github-trigger-approved-pr)
   - [github-trigger-labeled-pr](#github-trigger-labeled-pr)
@@ -1275,6 +1276,57 @@ On this sample, if the commit was merged with a PR opened by Dependabot, **and**
 The `deploy` job only runs if result is not true, so deploys are skipped when merging these PRs.
 
 The main benefit is to save CI/CD resources and time by skipping unnecessary deploys for automated dependency updates that only affect GitHub Actions workflows.
+
+### github-pr-label-from-branch
+
+Adds labels to a pull request based on the prefix of its branch name, so that it
+lands in the right category of the
+[automatically generated release notes](https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes).
+It complements [enforce-pr-conventions](#enforce-pr-conventions), which validates
+the branch names.
+
+The default mapping labels `feature/` and `improvement/` branches with
+`enhancement`, and `fix/` branches with `bug`. Other branches are left unlabeled.
+
+```yaml
+on:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-label-from-branch@v19.9.0
+```
+
+Running only on `opened` and `reopened` lets maintainers remove a label without it
+being added back on the next push.
+
+The mapping can be customized with one `<branch-prefix>: <label>` entry per line.
+Every matching entry adds its label, prefixes are matched literally and
+case-sensitively, and lines starting with `#` are ignored:
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-pr-label-from-branch@v19.9.0
+        with:
+          mapping: |
+            feature/: enhancement
+            fix/: bug
+            bug/: bug
+            docs/: documentation
+```
+
+Labels missing from the repository are reported as a warning rather than created.
+The `labels` output holds the JSON array of the labels applied.
+
+The action only supports the `pull_request` event and skips pull requests opened
+from forks and by Dependabot: their `GITHUB_TOKEN` is read-only. Do not use it with
+`pull_request_target`, which would grant a write token to workflows triggered by
+untrusted pull requests. Labels added with the `GITHUB_TOKEN` do not trigger
+`labeled` workflows.
 
 ### github-require-secrets
 
