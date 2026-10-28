@@ -256,6 +256,7 @@ through `maven.cloudsmith.io`, Cloudsmith's Maven upload endpoint:
     <repository>
         <id>alfresco-releases</id>
         <name>Alfresco Community Releases</name>
+        <!-- TODO: switch to maven.artifacts.hyland.dev once its DNS record exists -->
         <url>https://maven.cloudsmith.io/hyland/alfresco-community-releases/</url>
     </repository>
 </distributionManagement>
@@ -276,6 +277,7 @@ new credentials are needed:
             <repository>
                 <id>alfresco-releases</id>
                 <name>Alfresco Internal Releases</name>
+                <!-- TODO: switch to maven.artifacts.hyland.dev once its DNS record exists -->
                 <url>https://maven.cloudsmith.io/hyland/alfresco-internal-releases/</url>
             </repository>
         </distributionManagement>
@@ -332,7 +334,9 @@ repository go to `https://artifacts.hyland.dev/public/alfresco-public/maven/`.
 
 - Pull from the `artifacts.hyland.dev` URLs and deploy to
   `https://maven.cloudsmith.io/hyland/<repository>/`. Use no other
-  `cloudsmith.io` URL.
+  `cloudsmith.io` URL. `maven.artifacts.hyland.dev` will replace the deploy
+  URL once its DNS record exists, so keep the TODO comment above each deploy
+  URL, as in the Phase 2 examples.
 - Keep repository and server ids neutral: `alfresco-public`,
   `alfresco-internal`, `alfresco-releases`, or the Cloudsmith repository name
   (`cic-ext-pull-through`). Don't put "cloudsmith" in ids, and only name ids
