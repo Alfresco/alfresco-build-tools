@@ -38,7 +38,7 @@ fi
 
 # One bullet per job so the list stays readable past the two or three a FactSet row can hold.
 JOBS=$(printf '%s\n' "${FAILED_JOBS:-}" \
-  | sed -E 's/^[[:space:]]*//; s/[[:space:]]*$//; /^$/d; s/\\/\\\\/g; s/[][*`]/\\&/g; s/^/- /')
+  | sed -E 's/^[[:space:]]*//; s/[[:space:]]*$//; /^$/d; s/\\/\\\\/g; s/[][*`_]/\\&/g; s/^/- /')
 [ -n "$JOBS" ] || JOBS="- none reported"
 
 # Defaults come from action.yml, so an empty value here means the caller meant it.

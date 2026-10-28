@@ -3202,8 +3202,10 @@ gets its own bullet.
 `heading` defaults to `Release chain blocked` and `release-version` to
 `Unknown`. `release-version` is the version this repository was releasing when
 the run failed, which the caller has to work out; pass it empty to leave the row
-off. `position` and `cc` are also left off the card when empty, and markdown
-characters in a job name are escaped so the list renders as written.
+off. `position` and `cc` are also left off the card when empty.
+
+Job names are escaped for `\`, `*`, `_`, `` ` ``, `[` and `]`, so a name
+carrying any of those renders as written rather than as markdown.
 
 `cc` is plain text on its own. To actually ping someone, list them in
 `mention-users` or `mention-tags` and put the matching `<at>name</at>` markup in

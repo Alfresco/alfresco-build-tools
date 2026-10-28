@@ -241,3 +241,10 @@ two"
     [ "$status" -eq 0 ]
     [ "$(jobs_block)" = '- weird\\name' ]
 }
+
+@test "underscores in a job name are escaped" {
+    export FAILED_JOBS="run_ci / PMD Scan"
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(jobs_block)" = '- run\_ci / PMD Scan' ]
+}
