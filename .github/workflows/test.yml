@@ -90,6 +90,27 @@ jobs:
           expected-version: ${{ steps.setup-helm-docs-fixed-version.outputs.version }}
       #endregion
 
+      #region Test setup-helm
+      - uses: ./.github/actions/setup-helm
+        id: setup-helm-version
+        with:
+          version: 3.19.0
+      - name: Check helm version from version input
+        run: |
+          [ "${{ steps.setup-helm-version.outputs.version }}" = "3.19.0" ]
+          [ "$(helm version --template '{{ .Version }}')" = "v3.19.0" ]
+      - name: Create .tool-versions for setup-helm
+        run: printf 'nodejs 24.11.0\nhelm 4.2.3\n' > "$RUNNER_TEMP/.tool-versions"
+      - uses: ./.github/actions/setup-helm
+        id: setup-helm-version-file
+        with:
+          version-file: ${{ runner.temp }}/.tool-versions
+      - name: Check helm version from version-file input
+        run: |
+          [ "${{ steps.setup-helm-version-file.outputs.version }}" = "4.2.3" ]
+          [ "$(helm version --template '{{ .Version }}')" = "v4.2.3" ]
+      #endregion
+
       #region Test setup-maven
       - uses: ./.github/actions/setup-maven
         with:

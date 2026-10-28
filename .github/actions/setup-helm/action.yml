@@ -1,0 +1,23 @@
+name: 'Setup Helm'
+description: 'Install Helm from get.helm.sh, verify its checksum and add it to the PATH.'
+inputs:
+  version:
+    description: 'Version of Helm to install (e.g. 4.2.3). Defaults to the latest stable release when neither version nor version-file is set'
+    required: false
+  version-file:
+    description: 'Path to a .tool-versions file (asdf format) to read the Helm version from. Mutually exclusive with version'
+    required: false
+outputs:
+  version:
+    description: 'Version of Helm that was installed'
+    value: ${{ steps.setup-helm.outputs.version }}
+runs:
+  using: "composite"
+  steps:
+    - name: Install Helm
+      id: setup-helm
+      shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+        VERSION_FILE: ${{ inputs.version-file }}
+      run: ${{ github.action_path }}/setup-helm.sh

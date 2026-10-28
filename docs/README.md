@@ -121,6 +121,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [setup-docker](#setup-docker)
   - [setup-fluxcli](#setup-fluxcli)
   - [setup-github-release-binary](#setup-github-release-binary)
+  - [setup-helm](#setup-helm)
   - [setup-helm-docs](#setup-helm-docs)
   - [setup-java-build](#setup-java-build)
   - [setup-jx-release-version](#setup-jx-release-version)
@@ -2715,6 +2716,36 @@ checksum verification is performed but warning is emitted to ease configuration.
         #     "linux_arm64":"d41d8cd98f00b204eec4b0d6f8f6f1427b"
         #   }
 ```
+
+### setup-helm
+
+Install Helm from get.helm.sh, verify the download against its published
+SHA-256 checksum and add it to the PATH, taking precedence over the Helm
+preinstalled on the runner.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm@v19.8.0
+        with:
+          # optional, default: latest stable release
+          version: "4.2.3"
+```
+
+To keep the version in a single place, read it from an asdf-style
+`.tool-versions` file at the root of the repository instead:
+
+```text
+helm 4.2.3
+```
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm@v19.8.0
+        with:
+          version-file: .tool-versions
+```
+
+Set only one of `version` or `version-file`. Without either, the action
+installs the latest stable release. The installed version is available as the
+`version` output.
 
 ### setup-helm-docs
 
