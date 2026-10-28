@@ -13,7 +13,7 @@ trim() {
 
 write_labels_output() {
   if [ -n "${GITHUB_OUTPUT:-}" ]; then
-    printf 'labels=%s\n' "$(jq -cn '$ARGS.positional' --args "$@")" >> "$GITHUB_OUTPUT"
+    printf 'labels=%s\n' "$(jq -cn '$ARGS.positional' --args -- "$@")" >> "$GITHUB_OUTPUT"
   fi
 }
 
@@ -126,7 +126,7 @@ if [ "${#to_apply[@]}" -eq 0 ]; then
   exit 0
 fi
 
-if ! jq -n '{labels: $ARGS.positional}' --args "${to_apply[@]}" |
+if ! jq -n '{labels: $ARGS.positional}' --args -- "${to_apply[@]}" |
   gh api --method POST "repos/$GITHUB_REPOSITORY/issues/$pr_number/labels" --input - --silent; then
   echo "::error::Failed to label pull request #$pr_number, check the job grants 'pull-requests: write'"
   exit 1

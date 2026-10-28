@@ -203,10 +203,37 @@ applied_labels() {
     [[ "$output" == *"only supports the pull_request event"* ]]
 }
 
-@test "fails when the labels cannot be applied" {
+@test "fails when the repository labels cannot be listed" {
     export GH_FAIL=1
 
     run "$SCRIPT"
 
     [ "$status" -ne 0 ]
+    [[ "$output" == *"Failed to list the labels"* ]]
+}
+
+@test "fails when the labels cannot be applied" {
+    cat > "$WORK_DIR/bin/gh" <<'EOF'
+#!/bin/bash
+if [[ "$*" == *"--method POST"* ]]; then
+    exit 1
+fi
+printf '%s\n' "$REPO_LABELS"
+EOF
+
+    run "$SCRIPT"
+
+    [ "$status" -ne 0 ]
+    [[ "$output" == *"Failed to label pull request #42"* ]]
+}
+
+@test "applies labels starting with a hyphen" {
+    export REPO_LABELS='-wip'
+    export MAPPING='feature/: -wip'
+
+    run "$SCRIPT"
+
+    [ "$status" -eq 0 ]
+    [ "$(applied_labels)" = '["-wip"]' ]
+    grep -qx 'labels=\["-wip"\]' "$GITHUB_OUTPUT"
 }
