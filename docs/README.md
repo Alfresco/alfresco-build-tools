@@ -43,6 +43,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [check-pr-description](#check-pr-description)
   - [cloudsmith-auth](#cloudsmith-auth)
   - [cloudsmith-docker-auth](#cloudsmith-docker-auth)
+  - [cloudsmith-maven-promote](#cloudsmith-maven-promote)
   - [configure-git-author](#configure-git-author)
   - [dependabot-workflow-run-automation](#dependabot-workflow-run-automation)
   - [dependabot-missing-actions-check](#dependabot-missing-actions-check)
@@ -594,6 +595,29 @@ steps:
   # Image path: docker.artifacts.hyland.dev/<repo>/<image>:<tag>
   - run: docker push docker.artifacts.hyland.dev/<repo>/my-image:1.0.0
 ```
+
+### cloudsmith-maven-promote
+
+Moves an exact Maven group and release version from staging to releases in the same Cloudsmith organization. It reads every result page before moving packages, waits for synchronization and download readiness, rejects quarantined or failed packages, and verifies the destination. Reruns resume partial promotions; an empty source and destination fails. Existing release coordinates are never overwritten. Run it after the release's sanity checks.
+
+```yaml
+permissions:
+  contents: read
+  id-token: write
+steps:
+  - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@v19.9.1
+    with:
+      oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
+  - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-maven-promote@v19.9.1
+    with:
+      namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
+      source-repository: activiti-staging
+      destination-repository: activiti-releases
+      group: org.activiti
+      version: "9.1.0"
+```
+
+The OIDC service account needs Write on both repositories and permission to move its own packages from staging (`move_own`), or the repository's minimum move privilege. The account belongs to the workflow repository: an Activiti release orchestrated by `Activiti/activiti-scripts` uses `activiti-activiti-scripts`, even when it checks out `Activiti/Activiti`. Release repositories should keep replacement disabled. The action requires Python 3 and the token exported by `cloudsmith-auth`.
 
 ### configure-git-author
 
@@ -2132,6 +2156,12 @@ using a custom settings.xml, you probably want to provide also
 ### maven-release
 
 Used to release Activiti projects. Update versions in POM files, create git tags and publish Maven artifacts to staging repository.
+
+Set `maven-deploy-plugin-major-version: "3"` for projects using Maven Deploy Plugin 3.x; the default preserves the 2.x alternative repository syntax. Set `cloudsmith-namespace` to also publish to the same staging repository slug in Cloudsmith. This opt-in requires Deploy Plugin 3.x, job permission `id-token: write`, and a Maven settings server with id `cloudsmith`, username `${env.CLOUDSMITH_USERNAME}` and password `${env.CLOUDSMITH_API_KEY}`. Both deploy lifecycles, including attached sources and GPG signatures, must succeed before the release commit and tag are created. The Cloudsmith upload uses ten parallel transfers with repository id `cloudsmith`. Staging must allow the publishing account to replace its own packages so a partial upload can be retried.
+
+The existing-tag guard skips both publishers. Enable dual publishing for new release versions; backfill historical tags separately. Nexus staging remains the dependency source while dual publishing is being validated.
+
+Use `maven-version: "3.10.0"` to match Activiti's tested Maven/Resolver version. Cloudsmith OIDC authentication runs after the Nexus build, immediately before the second deployment, so a long initial build does not consume the upload token's lifetime.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/maven-release@v19.9.1

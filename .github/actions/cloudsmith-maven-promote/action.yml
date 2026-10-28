@@ -1,0 +1,37 @@
+name: Promote Cloudsmith Maven release
+description: Wait for a Maven group/version to finish synchronizing, then move its packages from staging to releases.
+
+inputs:
+  namespace:
+    description: Cloudsmith organization namespace. Authenticate with cloudsmith-auth before calling this action.
+    required: true
+  source-repository:
+    description: Staging repository slug.
+    required: true
+  destination-repository:
+    description: Release repository slug in the same organization.
+    required: true
+  group:
+    description: Exact Maven groupId to promote; subgroups are excluded.
+    required: true
+  version:
+    description: Exact Maven release version to promote.
+    required: true
+  timeout-seconds:
+    description: Maximum wait for package synchronization in each repository.
+    required: false
+    default: "600"
+
+runs:
+  using: composite
+  steps:
+    - name: Promote Maven packages
+      shell: bash
+      env:
+        CLOUDSMITH_NAMESPACE: ${{ inputs.namespace }}
+        SOURCE_REPOSITORY: ${{ inputs.source-repository }}
+        DESTINATION_REPOSITORY: ${{ inputs.destination-repository }}
+        MAVEN_GROUP: ${{ inputs.group }}
+        RELEASE_VERSION: ${{ inputs.version }}
+        TIMEOUT_SECONDS: ${{ inputs.timeout-seconds }}
+      run: python3 "${{ github.action_path }}/promote.py"

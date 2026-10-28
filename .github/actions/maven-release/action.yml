@@ -17,6 +17,14 @@ inputs:
   staging-repository:
     description: "The id of the staging repository where the release artifacts will be stored"
     required: true
+  cloudsmith-namespace:
+    description: "Opt in to also deploy to the same staging repository in this Cloudsmith namespace. Requires id-token: write, a cloudsmith Maven server and Maven Deploy Plugin 3.x."
+    required: false
+    default: ""
+  maven-deploy-plugin-major-version:
+    description: "Major version of the project's Maven Deploy Plugin, used to select the alternative repository syntax."
+    required: false
+    default: "2"
   github-token:
     description: "The token used to clone the repository"
     required: true
@@ -54,6 +62,10 @@ inputs:
     description: the desired Java distribution
     required: false
     default: "temurin"
+  maven-version:
+    description: "Optional Maven version to install. Empty preserves the runner's Maven."
+    required: false
+    default: ""
 
 runs:
   using: composite
@@ -89,6 +101,12 @@ runs:
         distribution: ${{ inputs.java-distribution }}
         cache: 'maven'
 
+    - name: Set up Maven
+      if: steps.check-tag.outputs.exists == 'false' && inputs.maven-version != ''
+      uses: $/.github/actions/setup-maven
+      with:
+        version: ${{ inputs.maven-version }}
+
     - name: Configure Maven settings
       if: steps.check-tag.outputs.exists == 'false'
       shell: bash
@@ -119,7 +137,7 @@ runs:
       run: |
         ${{ github.action_path }}/update-pom-version.sh "$RELEASE_VERSION" "$EXTRA_REPLACEMENTS"
 
-    - name: maven-build-and-upload
+    - name: Deploy release to Nexus staging
       if: steps.check-tag.outputs.exists == 'false'
       working-directory: ${{ env.REPO_DIR }}
       shell: bash
@@ -132,18 +150,30 @@ runs:
         NEXUS_URL: "${{ inputs.nexus-url }}"
         STAGING_REPOSITORY_ID: ${{ inputs.staging-repository }}
         JAVA_VERSION: "${{ inputs.java-version }}"
-      run: |
-        echo "Deploying to repository $STAGING_REPOSITORY_ID"
-        mvn clean deploy \
-          -DperformRelease \
-          -DskipTests \
-          -Dmaven.compiler.release="${JAVA_VERSION}" \
-          -Dmaven.artifact.threads=30 \
-          --batch-mode \
-          -DaltReleaseDeploymentRepository=nexus-releases-staging-fixed::default::"${NEXUS_URL}"/content/repositories/"$STAGING_REPOSITORY_ID " \
-          -Dhttp.keepAlive=false \
-          -Dmaven.wagon.http.pool=false \
-          -Dmaven.wagon.httpconnectionManager.ttlSeconds=120
+        CLOUDSMITH_NAMESPACE: ${{ inputs.cloudsmith-namespace }}
+        MAVEN_DEPLOY_PLUGIN_MAJOR_VERSION: ${{ inputs.maven-deploy-plugin-major-version }}
+      run: bash "${{ github.action_path }}/deploy.sh" nexus
+
+    - name: Authenticate with Cloudsmith
+      if: steps.check-tag.outputs.exists == 'false' && inputs.cloudsmith-namespace != ''
+      uses: $/.github/actions/cloudsmith-auth
+      with:
+        oidc-namespace: ${{ inputs.cloudsmith-namespace }}
+
+    - name: Deploy release to Cloudsmith staging
+      if: steps.check-tag.outputs.exists == 'false' && inputs.cloudsmith-namespace != ''
+      working-directory: ${{ env.REPO_DIR }}
+      shell: bash
+      env:
+        GPG_PASSPHRASE: ${{ inputs.gpg-passphrase }}
+        NEXUS_USERNAME: ${{ inputs.nexus-username }}
+        NEXUS_PASSWORD: ${{ inputs.nexus-password }}
+        NEXUS_URL: ${{ inputs.nexus-url }}
+        STAGING_REPOSITORY_ID: ${{ inputs.staging-repository }}
+        JAVA_VERSION: ${{ inputs.java-version }}
+        CLOUDSMITH_NAMESPACE: ${{ inputs.cloudsmith-namespace }}
+        MAVEN_DEPLOY_PLUGIN_MAJOR_VERSION: ${{ inputs.maven-deploy-plugin-major-version }}
+      run: bash "${{ github.action_path }}/deploy.sh" cloudsmith
 
     - name: Commit changes
       if: steps.check-tag.outputs.exists == 'false'
