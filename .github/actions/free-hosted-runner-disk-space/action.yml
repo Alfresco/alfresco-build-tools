@@ -76,11 +76,11 @@ runs:
         pids=()
 
         remove_in_background() {
-          local label="$1" path="$2" keep_dir="${3:-false}"
+          local label="$1" path="$2" keep_dir="${3:-}"
           if [[ -d "$path" ]]; then
             echo "Removing $label ($path) in the background..."
             [[ "$diagnose" == 'true' ]] && du -sh "$path" 2>/dev/null || true
-            if [[ "$keep_dir" == 'true' ]]; then
+            if [[ "$keep_dir" == '--keep-dir' ]]; then
               sudo bash -c 'shopt -s dotglob nullglob; rm -rf -- "$1"/*' _ "$path" &
             else
               sudo rm -rf "$path" &
@@ -98,7 +98,7 @@ runs:
         [[ ${{ inputs.remove-swift }} == 'true' ]] && remove_in_background "Swift toolchain and libraries" "$SWIFT_ROOT"
         [[ ${{ inputs.remove-powershell }} == 'true' ]] && remove_in_background "PowerShell Core installation" "$POWERSHELL_ROOT"
         # Some actions assume the folder always exists on the hosted runner
-        [[ ${{ inputs.remove-tools-cache }} == 'true' ]] && remove_in_background "tools and dependencies cache" "$AGENT_TOOLSDIRECTORY" true
+        [[ ${{ inputs.remove-tools-cache }} == 'true' ]] && remove_in_background "tools and dependencies cache" "$AGENT_TOOLSDIRECTORY" --keep-dir
 
         if [[ ${{ inputs.remove-docker-images }} == 'true' ]]; then
           echo "Removing cached Docker images in the background..."
