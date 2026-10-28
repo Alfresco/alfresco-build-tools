@@ -76,7 +76,6 @@ jobs:
         run: test "$TOTAL_SIZE_BEFORE" -lt "$(df --total --output=avail | tail -1)"
       - name: Assert that the tool cache is empty but still exists
         run: |
-          test -d "$RUNNER_TOOL_CACHE"
           test -w "$RUNNER_TOOL_CACHE"
           test -z "$(ls -A "$RUNNER_TOOL_CACHE")"
 
