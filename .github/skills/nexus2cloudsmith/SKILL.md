@@ -67,7 +67,9 @@ The repository roles and URLs come from the Confluence pages listed under
 | any `*-snapshots` repository | drop it | n/a |
 
 `alfresco-public`, `alfresco-internal` and `cic-ext-pull-through` are pull
-only. The `artifacts.hyland.dev/basic/` URLs work for deploying too.
+only. `artifacts.hyland.dev` is a download-only domain, so deploys to the
+release repositories go to `https://maven.cloudsmith.io/hyland/<repository>/`
+instead (see Phase 2).
 `alfresco-private` serves customers and partners: never use it in CI. For a
 Nexus repository not in this table (thirdparty, for example), stop and ask
 the user for the target.
@@ -244,15 +246,17 @@ Public repos resolve from the `alfresco-public` repository in their pom.
 
 ### `pom.xml`
 
-Keep one `<repository>` in `distributionManagement`, with the GA URL from the
-mapping table, and drop `<snapshotRepository>`:
+Keep one `<repository>` in `distributionManagement`, pointing at the GA
+repository from the mapping table, and drop `<snapshotRepository>`. Deploy
+through `maven.cloudsmith.io`, Cloudsmith's Maven upload endpoint:
+`artifacts.hyland.dev` serves downloads only and refuses uploads with a 403.
 
 ```xml
 <distributionManagement>
     <repository>
         <id>alfresco-releases</id>
         <name>Alfresco Community Releases</name>
-        <url>https://artifacts.hyland.dev/basic/alfresco-community-releases/maven/</url>
+        <url>https://maven.cloudsmith.io/hyland/alfresco-community-releases/</url>
     </repository>
 </distributionManagement>
 ```
@@ -272,7 +276,7 @@ new credentials are needed:
             <repository>
                 <id>alfresco-releases</id>
                 <name>Alfresco Internal Releases</name>
-                <url>https://artifacts.hyland.dev/basic/alfresco-internal-releases/maven/</url>
+                <url>https://maven.cloudsmith.io/hyland/alfresco-internal-releases/</url>
             </repository>
         </distributionManagement>
     </profile>
@@ -326,8 +330,9 @@ repository go to `https://artifacts.hyland.dev/public/alfresco-public/maven/`.
 
 ## Rules
 
-- Use the `artifacts.hyland.dev` URLs, for pulling and deploying. Never use
-  raw `cloudsmith.io` URLs.
+- Pull from the `artifacts.hyland.dev` URLs and deploy to
+  `https://maven.cloudsmith.io/hyland/<repository>/`. Use no other
+  `cloudsmith.io` URL.
 - Keep repository and server ids neutral: `alfresco-public`,
   `alfresco-internal`, `alfresco-releases`, or the Cloudsmith repository name
   (`cic-ext-pull-through`). Don't put "cloudsmith" in ids, and only name ids
@@ -374,6 +379,5 @@ it.
 - [Maven Repositories](https://hyland.atlassian.net/wiki/spaces/TECH/pages/4303717170/Maven+Repositories):
   what each Cloudsmith repository is for, and which ones pull or push.
 - [Cloudsmith Alfresco Consumption](https://hyland.atlassian.net/wiki/spaces/cix/pages/4313722570/Cloudsmith+Alfresco+Consumption):
-  OIDC authentication and the Dependabot account. It is still a draft: its
-  `maven.cloudsmith.io` upload endpoint isn't needed, `artifacts.hyland.dev`
-  accepts deploys.
+  OIDC authentication, the Dependabot account and the `maven.cloudsmith.io`
+  upload endpoint. It is still a draft.
