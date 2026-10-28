@@ -2719,18 +2719,23 @@ checksum verification is performed but warning is emitted to ease configuration.
 
 ### setup-helm
 
-Install a specific version of Helm from get.helm.sh, verify the download
-against its published SHA-256 checksum and add it to the PATH, taking
-precedence over the Helm preinstalled on the runner.
+Install Helm from get.helm.sh, verify the download against its published
+SHA-256 checksum and add it to the PATH, taking precedence over the Helm
+preinstalled on the runner.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm@v19.8.0
         with:
+          # optional, default: latest stable release
           version: "4.2.3"
 ```
 
 To keep the version in a single place, read it from an asdf-style
-`.tool-versions` file instead:
+`.tool-versions` file at the root of the repository instead:
+
+```text
+helm 4.2.3
+```
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-helm@v19.8.0
@@ -2738,8 +2743,9 @@ To keep the version in a single place, read it from an asdf-style
           version-file: .tool-versions
 ```
 
-Set either `version` or `version-file`, not both. The installed version is
-available as the `version` output.
+Set only one of `version` or `version-file`. Without either, the action
+installs the latest stable release. The installed version is available as the
+`version` output.
 
 ### setup-helm-docs
 

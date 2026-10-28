@@ -1,8 +1,8 @@
 name: 'Setup Helm'
-description: 'Install a specific version of Helm from get.helm.sh, verify its checksum and add it to the PATH.'
+description: 'Install Helm from get.helm.sh, verify its checksum and add it to the PATH.'
 inputs:
   version:
-    description: 'Version of Helm to install (e.g. 4.2.3). Mutually exclusive with version-file'
+    description: 'Version of Helm to install (e.g. 4.2.3). Defaults to the latest stable release when neither version nor version-file is set'
     required: false
   version-file:
     description: 'Path to a .tool-versions file (asdf format) to read the Helm version from. Mutually exclusive with version'

@@ -11,8 +11,8 @@ fail() {
   exit 1
 }
 
-if [[ -z "$VERSION" && -z "$VERSION_FILE" ]] || [[ -n "$VERSION" && -n "$VERSION_FILE" ]]; then
-  fail "Set either version or version-file"
+if [[ -n "$VERSION" && -n "$VERSION_FILE" ]]; then
+  fail "Set only one of version or version-file"
 fi
 
 if [[ -n "$VERSION_FILE" ]]; then
@@ -20,6 +20,9 @@ if [[ -n "$VERSION_FILE" ]]; then
   # asdf .tool-versions: "<tool> <version> [fallback...]", with # comments
   VERSION=$(awk '{ sub(/#.*/, "") } $1 == "helm" { print $2; exit }' "$VERSION_FILE")
   [[ -n "$VERSION" ]] || fail "No helm version found in $VERSION_FILE"
+elif [[ -z "$VERSION" ]]; then
+  VERSION=$(curl -fsSL "$BASE_URL/helm-latest-version")
+  echo "Resolved latest stable helm version: $VERSION"
 fi
 
 VERSION=${VERSION#v}

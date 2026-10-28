@@ -81,11 +81,14 @@ EOF
     [[ "$output" == *"$VERSION_FILE not found"* ]]
 }
 
-@test "fails when neither version nor version file is set" {
+@test "installs the latest stable release when no version is set" {
+    publish_fake_helm 4.3.1
+    echo "v4.3.1" > "$WORK_DIR/mirror/helm-latest-version"
+
     run "$SCRIPT"
 
-    [ "$status" -ne 0 ]
-    [[ "$output" == *"Set either version or version-file"* ]]
+    [ "$status" -eq 0 ]
+    grep -qx "version=4.3.1" "$GITHUB_OUTPUT"
 }
 
 @test "fails when both version and version file are set" {
@@ -96,7 +99,7 @@ EOF
     run "$SCRIPT"
 
     [ "$status" -ne 0 ]
-    [[ "$output" == *"Set either version or version-file"* ]]
+    [[ "$output" == *"Set only one of version or version-file"* ]]
 }
 
 @test "rejects a version that is not an exact release" {
