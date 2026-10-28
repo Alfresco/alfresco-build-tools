@@ -35,6 +35,14 @@ inputs:
     required: false
     description: Fail the release if new commits appeared on the branch since the run started.
     default: 'true'
+  prerelease-profile:
+    required: false
+    description: Maven profile activated, together with release-profile, when the release version is a prerelease (e.g. to deploy it to a different repository). Disabled when empty.
+    default: ''
+  prerelease-version-marker:
+    required: false
+    description: Text in the release version that marks it as a prerelease.
+    default: '-A.'
 
 runs:
   using: composite
@@ -52,8 +60,18 @@ runs:
       run: ${{ inputs.post-version-command }}
       shell: bash
 
+    - name: "Select release profiles"
+      id: release-profiles
+      env:
+        RELEASE_VERSION: ${{ inputs.release-version }}
+        RELEASE_PROFILE: ${{ inputs.release-profile }}
+        PRERELEASE_PROFILE: ${{ inputs.prerelease-profile }}
+        PRERELEASE_MARKER: ${{ inputs.prerelease-version-marker }}
+      run: ${{ github.action_path }}/release-profiles.sh
+      shell: bash
+
     - name: "Deploy release version ${{ inputs.release-version }}"
-      run: mvn -B -ntp clean deploy -P ${{ inputs.release-profile }} -Dproject.revision.key=${{ github.sha }} ${{ inputs.maven-args }}
+      run: mvn -B -ntp clean deploy -P ${{ steps.release-profiles.outputs.profiles }} -Dproject.revision.key=${{ github.sha }} ${{ inputs.maven-args }}
       shell: bash
 
     - name: "Check for concurrent commits before committing the release"
