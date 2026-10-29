@@ -850,8 +850,10 @@ directories. Hosted runners bundle a lot of [pre-installed
 software](https://github.com/actions/runner-images), some of which may not be
 needed for your specific workflow.
 
-It's usually a good idea to run this action at the very beginning of your job to
-maximize the amount of freed up space for the rest of your workflow steps.
+Hosted runners already start with more than 80 GB of free disk space, so only
+use this action in jobs that actually run out of space. When you do, run it at
+the very beginning of your job to maximize the amount of freed up space for the
+rest of your workflow steps.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v19.10.0
@@ -868,9 +870,6 @@ By default, it will remove the following SDKs and tools:
 
 The tools cache (most common versions of setup-something actions) is kept by
 default, since removing it means `setup-*` actions download their tools again.
-
-Hosted runners already start with more than 80 GB of free disk space, so only
-use this action when a job actually runs out of space.
 
 You can override the default behavior by adding one or more of the following inputs:
 

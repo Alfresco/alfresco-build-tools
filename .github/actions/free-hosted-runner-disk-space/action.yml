@@ -134,7 +134,7 @@ runs:
         to_remove="${{ inputs.remove-paths }}"
         if [[ -n "$to_remove" ]]; then
           for item in $to_remove; do
-            [[ -e "$item" ]] || { echo "$item not found, skipping"; continue; }
+            [[ -e "$item" || -L "$item" ]] || { echo "$item not found, skipping"; continue; }
             echo "Removing $item in the background..."
             [[ "$diagnose" == 'true' ]] && du -sh "$item" 2>/dev/null || true
             remove_path "$item"
