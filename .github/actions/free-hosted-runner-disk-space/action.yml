@@ -12,7 +12,7 @@ inputs:
   remove-tools-cache:
     description: Removes tools and dependencies cached
     required: false
-    default: 'true'
+    default: 'false'
   remove-android:
     description: Removes Android SDKs and Tools
     required: false
@@ -37,6 +37,10 @@ inputs:
     description: Additional collection of files/folders to be removed, separated by spaces
     default: ''
     required: false
+  async:
+    description: Deletes in the background without waiting for the removal to complete, so freed space becomes available gradually
+    required: false
+    default: 'true'
   diagnose-top-offenders-enabled:
     description: Runs diagnostic steps to list top disk space offenders before and after cleanup, and reports the size of each folder before it is removed
     required: false
@@ -72,20 +76,37 @@ runs:
         POWERSHELL_ROOT: /usr/local/share/powershell
       run: |
         diagnose="${{ inputs.diagnose-top-offenders-enabled }}"
+        async="${{ inputs.async }}"
         overall_start=$(date +%s)
         pids=()
 
-        remove_in_background() {
-          local label="$1" path="$2" keep_dir="${3:-}"
-          if [[ -d "$path" ]]; then
-            echo "Removing $label ($path) in the background..."
-            [[ "$diagnose" == 'true' ]] && du -sh "$path" 2>/dev/null || true
+        remove_path() {
+          local path="$1" keep_dir="${2:-}" trash
+          if [[ "$async" == 'true' ]]; then
+            # Renaming is instant on the same filesystem, so later steps never see a half-deleted path
+            trash=$(sudo mktemp -d -p "$(dirname "$path")" .trash.XXXXXX)
+            if [[ "$keep_dir" == '--keep-dir' ]]; then
+              sudo find "$path" -mindepth 1 -maxdepth 1 -exec mv -t "$trash" {} +
+            else
+              sudo mv "$path" "$trash/"
+            fi
+            nohup setsid sudo rm -rf "$trash" >/dev/null 2>&1 &
+          else
             if [[ "$keep_dir" == '--keep-dir' ]]; then
               sudo bash -c 'shopt -s dotglob nullglob; rm -rf -- "$1"/*' _ "$path" &
             else
               sudo rm -rf "$path" &
             fi
             pids+=("$!")
+          fi
+        }
+
+        remove_in_background() {
+          local label="$1" path="$2" keep_dir="${3:-}"
+          if [[ -d "$path" ]]; then
+            echo "Removing $label ($path) in the background..."
+            [[ "$diagnose" == 'true' ]] && du -sh "$path" 2>/dev/null || true
+            remove_path "$path" "$keep_dir"
           else
             echo "$path not found, skipping $label"
           fi
@@ -102,17 +123,21 @@ runs:
 
         if [[ ${{ inputs.remove-docker-images }} == 'true' ]]; then
           echo "Removing cached Docker images in the background..."
-          sudo docker image prune --all --force &
-          pids+=("$!")
+          if [[ "$async" == 'true' ]]; then
+            nohup setsid sudo docker image prune --all --force >/dev/null 2>&1 &
+          else
+            sudo docker image prune --all --force &
+            pids+=("$!")
+          fi
         fi
 
         to_remove="${{ inputs.remove-paths }}"
         if [[ -n "$to_remove" ]]; then
           for item in $to_remove; do
+            [[ -e "$item" ]] || { echo "$item not found, skipping"; continue; }
             echo "Removing $item in the background..."
             [[ "$diagnose" == 'true' ]] && du -sh "$item" 2>/dev/null || true
-            sudo rm -rf "$item" &
-            pids+=("$!")
+            remove_path "$item"
           done
         fi
 
@@ -122,7 +147,7 @@ runs:
         done
 
         overall_end=$(date +%s)
-        echo "Done removing unwanted software in $((overall_end - overall_start)) seconds."
+        echo "Removal step finished in $((overall_end - overall_start)) seconds."
 
         if [[ "$failed" -eq 1 ]]; then
           echo "One or more removal commands failed." >&2

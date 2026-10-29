@@ -865,7 +865,12 @@ By default, it will remove the following SDKs and tools:
 - CodeQL
 - Swift
 - Powershell
-- Tools cache (most common versions of setup-something actions)
+
+The tools cache (most common versions of setup-something actions) is kept by
+default, since removing it means `setup-*` actions download their tools again.
+
+Hosted runners already start with more than 80 GB of free disk space, so only
+use this action when a job actually runs out of space.
 
 You can override the default behavior by adding one or more of the following inputs:
 
@@ -878,7 +883,20 @@ You can override the default behavior by adding one or more of the following inp
           remove-codeql: false
           remove-swift: false
           remove-powershell: false
-          remove-tools-cache: false
+          # set to true to also remove the tools cache, default: false
+          remove-tools-cache: true
+```
+
+The removal runs in the background and the step returns right away, so the
+workflow doesn't wait for it to complete. Each path is renamed first, so it
+disappears immediately, while the freed space becomes available gradually
+during the next seconds. If a following step needs all the space straight
+away, set `async` to `false` to wait for the removal to complete.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v19.10.0
+        with:
+          async: false
 ```
 
 There is an additional input `diagnose-top-offenders-enabled` which when set to `true` will
