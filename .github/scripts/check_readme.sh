@@ -5,6 +5,7 @@ set -e
 # or not at all, e.g. deprecated ones
 excluded_actions=(
   dbp-charts
+  get-branch-name
 )
 
 actions_dir=".github/actions"

@@ -55,7 +55,6 @@ Here follows the list of GitHub Actions topics available in the current document
   - [flux-operator-bootstrap](#flux-operator-bootstrap)
   - [free-hosted-runner-disk-space](#free-hosted-runner-disk-space)
   - [get-branch-name-v2](#get-branch-name-v2)
-  - [get-branch-name](#get-branch-name)
   - [get-build-info](#get-build-info)
   - [gh-cache-cleanup-on-merge](#gh-cache-cleanup-on-merge)
   - [git-branch-drift](#git-branch-drift)
@@ -924,12 +923,8 @@ Handle additional PR events (requires `pull-requests: read` permission):
           additional-pr-events: true
 ```
 
-### get-branch-name
-
-Deprecated, use [get-branch-name-v2](#get-branch-name-v2) instead.
-
-Legacy version that exports the branch name as an environment variable, which
-pollutes the environment of all the following steps:
+Legacy version with environment variable (deprecated - use outputs instead to
+avoid polluting the environment of all the following steps):
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-branch-name@v19.10.0
