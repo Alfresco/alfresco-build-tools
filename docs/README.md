@@ -892,7 +892,20 @@ disappears immediately, while the freed space becomes available gradually
 during the next minute. A single low priority process does the deletion, so it
 doesn't compete with your job for disk I/O. If a following step needs all the
 space straight away, set `async` to `false` to wait for the removal to
-complete.
+complete, or wait for the `removal-pids` output (the PIDs of the removal
+processes still running) to exit:
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v19.10.0
+        id: free-disk-space
+      - name: Wait for the removal to complete
+        env:
+          REMOVAL_PIDS: ${{ steps.free-disk-space.outputs.removal-pids }}
+        run: |
+          for pid in $REMOVAL_PIDS; do
+            while [[ -d "/proc/$pid" ]]; do sleep 1; done
+          done
+```
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v19.10.0
@@ -901,8 +914,8 @@ complete.
 ```
 
 There is an additional input `diagnose-top-offenders-enabled` which when set to `true` will
-run a disk usage analysis and print the top offenders before and after the cleanup, and also
-report the size of each folder before it is removed (this is disabled by default since
+run a disk usage analysis and print the top offenders before the cleanup (and after it
+when `async` is `false`), and also report the size of each folder before it is removed (this is disabled by default since
 computing it adds a full extra directory scan per folder).
 
 ```yaml

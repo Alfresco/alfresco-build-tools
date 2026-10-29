@@ -42,9 +42,14 @@ inputs:
     required: false
     default: 'true'
   diagnose-top-offenders-enabled:
-    description: Runs diagnostic steps to list top disk space offenders before and after cleanup, and reports the size of each folder before it is removed
+    description: Runs diagnostic steps to list top disk space offenders before cleanup (and after it when async is false), and reports the size of each folder before it is removed
     required: false
     default: 'false'
+
+outputs:
+  removal-pids:
+    description: Space-separated PIDs of the background removal processes still running when the step ends (empty when async is false). Wait until none is alive for the freed space to be fully available
+    value: ${{ steps.remove.outputs.removal-pids }}
 
 runs:
   using: composite
@@ -63,10 +68,11 @@ runs:
     - name: Run optional diagnostic of top offenders before cleanup
       if: inputs.diagnose-top-offenders-enabled == 'true'
       run: |
-        sudo du -h --max-depth=4 /usr /opt | sort -hr 2>/dev/null | head -n 20 || true
+        sudo du -h --max-depth=4 /usr /opt 2>/dev/null | sort -hr | head -n 20 || true
       shell: bash
 
     - name: Remove unwanted software
+      id: remove
       env:
         DOTNET_ROOT: /usr/share/dotnet
         ANDROID_ROOT: /usr/local/lib/android
@@ -81,25 +87,22 @@ runs:
         pids=()
         trash_dirs=()
 
+        # Low priority, so the removal doesn't compete with the job for disk I/O
+        run_detached() {
+          nohup setsid sudo ionice -c2 -n7 nice -n 10 "$@" >/dev/null 2>&1 &
+          pids+=("$!")
+        }
+
+        # Renaming is instant on the same filesystem, so later steps never see a half-deleted path
         remove_path() {
           local path="$1" keep_dir="${2:-}" trash
-          if [[ "$async" == 'true' ]]; then
-            # Renaming is instant on the same filesystem, so later steps never see a half-deleted path
-            trash=$(sudo mktemp -d -p "$(dirname "$path")" .trash.XXXXXX)
-            if [[ "$keep_dir" == '--keep-dir' ]]; then
-              sudo find "$path" -mindepth 1 -maxdepth 1 -exec mv -t "$trash" {} +
-            else
-              sudo mv "$path" "$trash/"
-            fi
-            trash_dirs+=("$trash")
+          trash=$(sudo mktemp -d -p "$(dirname "$path")" .trash.XXXXXX)
+          if [[ "$keep_dir" == '--keep-dir' ]]; then
+            sudo find "$path" -mindepth 1 -maxdepth 1 -exec mv -t "$trash" {} +
           else
-            if [[ "$keep_dir" == '--keep-dir' ]]; then
-              sudo bash -c 'shopt -s dotglob nullglob; rm -rf -- "$1"/*' _ "$path" &
-            else
-              sudo rm -rf "$path" &
-            fi
-            pids+=("$!")
+            sudo mv "$path" "$trash/"
           fi
+          trash_dirs+=("$trash")
         }
 
         remove_in_background() {
@@ -124,12 +127,7 @@ runs:
 
         if [[ ${{ inputs.remove-docker-images }} == 'true' ]]; then
           echo "Removing cached Docker images in the background..."
-          if [[ "$async" == 'true' ]]; then
-            nohup setsid sudo docker image prune --all --force >/dev/null 2>&1 &
-          else
-            sudo docker image prune --all --force &
-            pids+=("$!")
-          fi
+          run_detached docker image prune --all --force
         fi
 
         to_remove="${{ inputs.remove-paths }}"
@@ -142,15 +140,18 @@ runs:
           done
         fi
 
-        # One low priority worker, so the removal doesn't compete with the job for disk I/O
         if [[ "${#trash_dirs[@]}" -gt 0 ]]; then
-          nohup setsid sudo ionice -c2 -n7 nice -n 10 rm -rf "${trash_dirs[@]}" >/dev/null 2>&1 &
+          run_detached rm -rf "${trash_dirs[@]}"
         fi
 
         failed=0
-        for pid in "${pids[@]}"; do
-          wait "$pid" || failed=1
-        done
+        if [[ "$async" == 'true' ]]; then
+          echo "removal-pids=${pids[*]}" >> "$GITHUB_OUTPUT"
+        else
+          for pid in "${pids[@]}"; do
+            wait "$pid" || failed=1
+          done
+        fi
 
         overall_end=$(date +%s)
         echo "Removal step finished in $((overall_end - overall_start)) seconds."
@@ -162,9 +163,10 @@ runs:
       shell: bash
 
     - name: Run optional diagnostic of top offenders after cleanup
-      if: inputs.diagnose-top-offenders-enabled == 'true'
+      # In async mode the removal is still running, so the sizes would not be meaningful
+      if: inputs.diagnose-top-offenders-enabled == 'true' && inputs.async != 'true'
       run: |
-        sudo du -h --max-depth=4 /usr /opt | sort -hr 2>/dev/null | head -n 20 || true
+        sudo du -h --max-depth=4 /usr /opt 2>/dev/null | sort -hr | head -n 20 || true
       shell: bash
 
     - name: Runner system report after cleanup
