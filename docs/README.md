@@ -118,6 +118,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [s3-upload](#s3-upload)
   - [send-teams-card](#send-teams-card)
   - [send-teams-notification](#send-teams-notification)
+  - [send-teams-workflow-run-notification](#send-teams-workflow-run-notification)
   - [setup-checkov](#setup-checkov)
   - [setup-docker](#setup-docker)
   - [setup-fluxcli](#setup-fluxcli)
@@ -142,7 +143,6 @@ Here follows the list of GitHub Actions topics available in the current document
   - [validate-maven-versions](#validate-maven-versions)
   - [veracode](#veracode)
   - [workflow-run-auto-retry](#workflow-run-auto-retry)
-  - [workflow-run-escalation-notification](#workflow-run-escalation-notification)
   - [xvfb-record](#xvfb-record)
 - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
   - [branch-promotion-prs](#branch-promotion-prs)
@@ -2567,12 +2567,10 @@ card body; this action supplies the message envelope, the status colour, any
 mention entities and the send itself.
 
 Use it when the card has to describe something other than the running workflow,
-which is what [send-teams-notification](#send-teams-notification) builds. A
-`workflow_run` watcher is the usual case: the standard card would report the
-watcher's own branch, commit and run link rather than the run that failed.
+which is what [send-teams-notification](#send-teams-notification) builds.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-card@v19.7.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-card@v19.9.1
         with:
           webhook-url: ${{ secrets.MSTEAMS_WEBHOOK }}
           card-body: ${{ steps.build-card.outputs.body }}
@@ -2587,9 +2585,6 @@ watcher's own branch, commit and run link rather than the run that failed.
 `mention-tags` work as they do in
 [send-teams-notification](#send-teams-notification), and the body has to carry
 its own `<at>name</at>` markup for each one.
-
-`send-teams-notification` is built on this action, so there is no reason to use
-both: pick the one that matches how much of the card you want to own.
 
 ### send-teams-notification
 
@@ -2684,6 +2679,71 @@ Sample usage with custom buttons and body elements:
           [{"type":"FactSet","facts":[{"title":"Cluster","value":"my-env"}]},
            {"type":"TextBlock","fontType":"Monospace","wrap":true,"text":"...log tail..."}]
 ```
+
+### send-teams-workflow-run-notification
+
+Sends a Teams card describing the run that triggered a `workflow_run` event.
+`send-teams-notification` cannot be used from a `workflow_run` watcher, because
+it describes the watcher's own run rather than the run that failed. This action
+builds its own card body and posts it with [send-teams-card](#send-teams-card),
+so the branch, the workflow and the run link all refer to the triggering run.
+
+It pairs with [workflow-run-auto-retry](#workflow-run-auto-retry): one decides,
+the other reports.
+
+```yaml
+      - id: retry
+        uses: Alfresco/alfresco-build-tools/.github/actions/workflow-run-auto-retry@v19.9.1
+        with:
+          non-retryable-jobs: |
+            Push to Nexus
+
+      - name: Report to Teams
+        if: steps.retry.outputs.decision == 'escalate'
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-workflow-run-notification@v19.9.1
+        with:
+          webhook-url: ${{ secrets.TEAMS_WEBHOOK }}
+          reason-code: ${{ steps.retry.outputs.reason-code }}
+          failed-jobs: ${{ steps.retry.outputs.failed-jobs }}
+          max-attempts: ${{ steps.retry.outputs.max-attempts }}
+          # optional, default: Workflow run failed
+          title: Release chain blocked
+          subtitle: Hop 2 of 5 - alfresco-enterprise-repo
+          message: >-
+            Nothing propagates to alfresco-enterprise-share, acs-packaging or
+            acs-community-packaging until this is resolved.
+          facts: |
+            Release version|26.2.0
+          footer: "cc: <at>Release Duty</at> - please take a look when you can."
+          mention-tags: Release Duty|<base64 tag id>
+```
+
+The first sentence of the message is generated from `reason-code`, and
+`message` is appended to it:
+
+| `reason-code` | Sentence |
+| --- | --- |
+| `attempts-exhausted` | Automated retries were exhausted. |
+| `non-retryable` | A job that must not be re-run automatically failed, so no retry was attempted. |
+| `nothing-to-retry` | The run failed without any job reporting a failure, so a retry would change nothing. |
+
+Without `workflow-run-auto-retry`, leave `reason-code` empty and set `message`.
+One of the two is required. Any other `reason-code` fails the step.
+
+The repository, branch, workflow and attempt come from the triggering run, so
+the action fails the step on any event other than `workflow_run`. Pass
+`max-attempts` to have the card read "Attempt 3 of 3" rather than just the
+number. The attempt counts manual re-runs as well as automated ones.
+
+`facts` adds rows after the run details, one `title|value` per line. Each line
+in `failed-jobs` gets its own bullet, with `\`, `*`, `_`, `` ` ``, `[` and `]`
+escaped so the name renders as written. `subtitle`, `facts` and `footer` are
+left off the card when empty.
+
+`footer` is plain text on its own. To ping someone, list them in
+`mention-users` or `mention-tags` and put the matching `<at>name</at>` markup in
+`footer`. See [send-teams-notification](#send-teams-notification) for how to
+find a tag id.
 
 ### setup-checkov
 
@@ -3073,7 +3133,7 @@ jobs:
 
       - name: Report to Teams
         if: steps.retry.outputs.decision == 'escalate' && env.TEAMS_WEBHOOK != ''
-        uses: Alfresco/alfresco-build-tools/.github/actions/workflow-run-escalation-notification@v19.8.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-workflow-run-notification@v19.9.1
         with:
           webhook-url: ${{ secrets.TEAMS_WEBHOOK }}
           reason-code: ${{ steps.retry.outputs.reason-code }}
@@ -3134,7 +3194,7 @@ which of the three escalations happened, as a fixed value:
 `attempts-exhausted`, `non-retryable` or `nothing-to-retry`, and empty for any
 other decision. Branch on it rather than matching `reason-text`, which is prose
 and may be reworded. See
-[workflow-run-escalation-notification](#workflow-run-escalation-notification)
+[send-teams-workflow-run-notification](#send-teams-workflow-run-notification)
 for a Teams card built from it.
 
 Known limitations:
@@ -3145,78 +3205,6 @@ Known limitations:
   does nothing until merged.
 - Do not point this and `dependabot-workflow-run-automation` at the same
   workflow. Both would re-run the same attempt, and their budgets differ.
-
-### workflow-run-escalation-notification
-
-Sends a Teams card describing a workflow run that
-[workflow-run-auto-retry](#workflow-run-auto-retry) escalated. Pair the two in
-the same watcher: one decides, the other reports.
-
-The standard `send-teams-notification` card cannot be used from a
-`workflow_run` watcher, because it describes the watcher's own run rather than
-the run that failed. This action builds its own card body and posts it with
-[send-teams-card](#send-teams-card), so the branch, the workflow and the run
-link all refer to the failed run.
-
-```yaml
-      - id: retry
-        uses: Alfresco/alfresco-build-tools/.github/actions/workflow-run-auto-retry@v19.7.2
-        with:
-          non-retryable-jobs: |
-            Push to Nexus
-
-      - name: Report to Teams
-        if: steps.retry.outputs.decision == 'escalate'
-        uses: Alfresco/alfresco-build-tools/.github/actions/workflow-run-escalation-notification@v19.7.2
-        with:
-          webhook-url: ${{ secrets.TEAMS_WEBHOOK }}
-          reason-code: ${{ steps.retry.outputs.reason-code }}
-          failed-jobs: ${{ steps.retry.outputs.failed-jobs }}
-          max-attempts: ${{ steps.retry.outputs.max-attempts }}
-          # the two per-repository lines
-          position: Hop 2 of 5 - alfresco-enterprise-repo
-          downstream: >-
-            Nothing propagates to alfresco-enterprise-share, acs-packaging or
-            acs-community-packaging until this is resolved.
-          cc: "cc: <at>Release Duty</at> - please take a look when you can."
-          mention-tags: Release Duty|<base64 tag id>
-```
-
-The first sentence of the message is generated from `reason-code`, so the card
-says why no retry is coming:
-
-| `reason-code` | Sentence |
-| --- | --- |
-| `attempts-exhausted` | Automated retries were exhausted. |
-| `non-retryable` | A job that must not be re-run automatically failed, so no retry was attempted. |
-| `nothing-to-retry` | The run failed without any job reporting a failure, so a retry would change nothing. |
-
-`downstream` is appended to it. Any other `reason-code` fails the step, because
-it means the caller is reporting something that is not an escalation.
-
-The repository, branch, workflow and attempt count all come from the triggering
-run, so only the decision itself has to be passed in. The action therefore only
-works on a `workflow_run` event and fails the step on any other. Each failed job
-gets its own bullet.
-
-`heading` defaults to `Release chain blocked` and `release-version` to
-`Unknown`. `release-version` is the version this repository was releasing when
-the run failed, which the caller has to work out; pass it empty to leave the row
-off. `position` and `cc` are also left off the card when empty.
-
-Job names are escaped for `\`, `*`, `_`, `` ` ``, `[` and `]`, so a name
-carrying any of those renders as written rather than as markdown.
-
-`cc` is plain text on its own. To actually ping someone, list them in
-`mention-users` or `mention-tags` and put the matching `<at>name</at>` markup in
-the `cc` line, the same way `send-teams-notification` expects it in `message`.
-See [send-teams-notification](#send-teams-notification) for how to find a tag
-id.
-
-Pass `max-attempts` to have the card read "Attempt 3 of 3" rather than just the
-number. The attempt itself comes from the event, and counts manual re-runs as
-well as automated ones, so the card reports which attempt failed rather than
-claiming how many retries were automated.
 
 ### xvfb-record
 

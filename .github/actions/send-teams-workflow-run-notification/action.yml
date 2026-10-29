@@ -1,34 +1,35 @@
-name: Workflow run escalation notification
-description: Sends a Teams card describing a workflow run that workflow-run-auto-retry escalated.
+name: Send Teams workflow run notification
+description: Sends a Teams card describing the workflow run that triggered a workflow_run event, rather than the run sending it.
 inputs:
   webhook-url:
     description: Microsoft Teams Incoming Webhooks URL
     required: true
   reason-code:
-    description: The 'reason-code' output of workflow-run-auto-retry, one of 'attempts-exhausted', 'non-retryable' or 'nothing-to-retry'
-    required: true
+    description: The 'reason-code' output of workflow-run-auto-retry, one of 'attempts-exhausted', 'non-retryable' or 'nothing-to-retry'. Generates the first sentence of the message. Required unless message is set
+    required: false
+    default: ""
   failed-jobs:
-    description: The 'failed-jobs' output of workflow-run-auto-retry, one display name per line
+    description: Display names of the jobs that failed, one per line, such as the 'failed-jobs' output of workflow-run-auto-retry
     required: false
     default: ""
-  heading:
-    description: Card heading, shown next to the red status dot
+  title:
+    description: Card title, shown next to the red status dot
     required: false
-    default: Release chain blocked
-  position:
-    description: One line describing where this repository sits in the chain, shown under the heading
-    required: false
-    default: ""
-  downstream:
-    description: One sentence naming what stops until this is fixed, appended to the generated first sentence
+    default: Workflow run failed
+  subtitle:
+    description: One line shown under the title
     required: false
     default: ""
-  release-version:
-    description: The version this repository was releasing when the run failed. Pass an empty value to leave the row off the card
+  message:
+    description: Message text, appended to the sentence generated from reason-code. Required unless reason-code is set
     required: false
-    default: Unknown
-  cc:
-    description: Closing line naming who should pick this up. Include the <at>name</at> markup of anything listed in mention-users or mention-tags
+    default: ""
+  facts:
+    description: 'Newline separated list of extra rows in format "title|value", shown after the run details (e.g.: "Release version|26.2.0")'
+    required: false
+    default: ""
+  footer:
+    description: Closing line, e.g. naming who should pick this up. Include the <at>name</at> markup of anything listed in mention-users or mention-tags
     required: false
     default: ""
   mention-users:
@@ -57,11 +58,11 @@ runs:
         ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
         MAX_ATTEMPTS: ${{ inputs.max-attempts }}
         FAILED_JOBS: ${{ inputs.failed-jobs }}
-        HEADING: ${{ inputs.heading }}
-        POSITION: ${{ inputs.position }}
-        DOWNSTREAM: ${{ inputs.downstream }}
-        RELEASE_VERSION: ${{ inputs.release-version }}
-        CC: ${{ inputs.cc }}
+        TITLE: ${{ inputs.title }}
+        SUBTITLE: ${{ inputs.subtitle }}
+        MESSAGE: ${{ inputs.message }}
+        FACTS: ${{ inputs.facts }}
+        FOOTER: ${{ inputs.footer }}
         REPOSITORY: ${{ github.repository }}
         BRANCH: ${{ github.event.workflow_run.head_branch }}
         WORKFLOW: ${{ github.event.workflow_run.name }}

@@ -35,28 +35,9 @@ runs:
       id: compute-workflow-status
       if: ${{ inputs.status == '' }}
       shell: bash
-      run: |
-        API_URL="${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/jobs?per_page=100"
-
-        RUNS=$(curl -s -H "Authorization: token ${{ github.token }}" "${API_URL}")
-
-        failure=$(echo $RUNS | \
-        jq -r '.jobs[].steps[] | select(.status == "completed" and .conclusion == "failure").conclusion' | \
-        wc -l)
-
-        cancelled=$(echo $RUNS | \
-        jq -r '.jobs[].steps[] | select(.status == "completed" and .conclusion == "cancelled").conclusion' | \
-        wc -l)
-
-        if [ "${failure}" -gt 0 ]; then
-          status="failure"
-        elif [ "${cancelled}" -gt 0 ]; then
-          status="cancelled"
-        else
-          status="success"
-        fi
-
-        echo "status=${status}" >> $GITHUB_OUTPUT
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: ${{ github.action_path }}/compute-status.sh >> "$GITHUB_OUTPUT"
 
     - name: Compute color
       shell: bash

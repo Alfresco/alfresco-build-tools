@@ -222,3 +222,78 @@ payload() {
     [ "$status" -eq 0 ]
     [ "$(sed 's/^result=//' <<<"$output" | jq -c '[.[].mentioned.name]')" = '["John"]' ]
 }
+
+# compute-status.sh tests
+
+mock_gh() {
+    mkdir -p "$BATS_TEST_TMPDIR/bin"
+    cat > "$BATS_TEST_TMPDIR/bin/gh" <<'MOCK'
+#!/usr/bin/env bash
+echo "$*" > "$BATS_TEST_TMPDIR/gh-args"
+[ -n "${MOCK_GH_FAIL:-}" ] && { echo "gh: HTTP 403" >&2; exit 1; }
+printf '%s' "$MOCK_CONCLUSIONS"
+MOCK
+    chmod +x "$BATS_TEST_TMPDIR/bin/gh"
+    PATH="$BATS_TEST_TMPDIR/bin:$PATH"
+    export GITHUB_REPOSITORY="Alfresco/example" GITHUB_RUN_ID="42"
+}
+
+@test "compute-status reports failure when any completed step failed" {
+    mock_gh
+    export MOCK_CONCLUSIONS=$'success\ncancelled\nfailure\nskipped'
+
+    run compute-status.sh
+
+    [ "$status" -eq 0 ]
+    [ "$output" = "status=failure" ]
+}
+
+@test "compute-status reports cancelled when a step was cancelled and none failed" {
+    mock_gh
+    export MOCK_CONCLUSIONS=$'success\ncancelled\nskipped'
+
+    run compute-status.sh
+
+    [ "$status" -eq 0 ]
+    [ "$output" = "status=cancelled" ]
+}
+
+@test "compute-status reports success otherwise" {
+    mock_gh
+    export MOCK_CONCLUSIONS=$'success\nskipped'
+
+    run compute-status.sh
+
+    [ "$status" -eq 0 ]
+    [ "$output" = "status=success" ]
+}
+
+@test "compute-status matches whole conclusions only" {
+    mock_gh
+    export MOCK_CONCLUSIONS=$'startup_failure_ignored\nsuccess'
+
+    run compute-status.sh
+
+    [ "$status" -eq 0 ]
+    [ "$output" = "status=success" ]
+}
+
+@test "compute-status reads every page of jobs for the current run" {
+    mock_gh
+    export MOCK_CONCLUSIONS="success"
+
+    run compute-status.sh
+
+    [ "$status" -eq 0 ]
+    [[ "$(cat "$BATS_TEST_TMPDIR/gh-args")" == *"--paginate repos/Alfresco/example/actions/runs/42/jobs"* ]]
+}
+
+@test "compute-status fails rather than guessing when the API call fails" {
+    mock_gh
+    export MOCK_GH_FAIL=1
+
+    run compute-status.sh
+
+    [ "$status" -ne 0 ]
+    [[ "$output" != *"status="* ]]
+}

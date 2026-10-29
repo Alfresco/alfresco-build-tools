@@ -9,12 +9,12 @@ setup() {
     export REASON_CODE="attempts-exhausted"
     export ATTEMPT="3"
     export MAX_ATTEMPTS="3"
-    export RELEASE_VERSION="Unknown"
+    export FACTS=""
     export FAILED_JOBS="Repository - PostgreSQL 15.17 tests"
-    export HEADING="Release chain blocked"
-    export POSITION="Hop 2 of 5 - alfresco-enterprise-repo"
-    export DOWNSTREAM="Nothing propagates downstream until this is resolved."
-    export CC="cc: release duty"
+    export TITLE="Release chain blocked"
+    export SUBTITLE="Hop 2 of 5 - alfresco-enterprise-repo"
+    export MESSAGE="Nothing propagates downstream until this is resolved."
+    export FOOTER="cc: release duty"
     export REPOSITORY="Alfresco/alfresco-enterprise-repo"
     export BRANCH="release/26.2"
     export WORKFLOW="Master/Release branch workflow"
@@ -26,6 +26,10 @@ body() {
 
 fact() {
     body | jq -r --arg t "$1" '.[] | select(.type=="FactSet").facts[] | select(.title==$t).value'
+}
+
+fact_titles() {
+    body | jq -r '[.[] | select(.type=="FactSet").facts[].title] | join(",")'
 }
 
 message() {
@@ -62,17 +66,39 @@ jobs_block() {
     [[ "$(message)" == "The run failed without any job reporting a failure, so a retry would change nothing."* ]]
 }
 
-@test "the downstream sentence is appended to the generated one" {
+@test "the message is appended to the generated sentence" {
     run build-card.sh
     [ "$status" -eq 0 ]
-    [[ "$(message)" == *"Nothing propagates downstream until this is resolved." ]]
+    [ "$(message)" = "Automated retries were exhausted. Nothing propagates downstream until this is resolved." ]
 }
 
-@test "an empty downstream sentence leaves no trailing space" {
-    export DOWNSTREAM=""
+@test "an empty message leaves no trailing space" {
+    export MESSAGE=""
     run build-card.sh
     [ "$status" -eq 0 ]
     [ "$(message)" = "Automated retries were exhausted." ]
+}
+
+@test "without a reason code the message stands alone" {
+    export REASON_CODE=""
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(message)" = "Nothing propagates downstream until this is resolved." ]
+}
+
+@test "fails when neither a reason code nor a message is given" {
+    export REASON_CODE=""
+    export MESSAGE=""
+    run build-card.sh
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"reason-code or message is required"* ]]
+}
+
+@test "fails on a reason code that is not an escalation" {
+    export REASON_CODE="retry"
+    run build-card.sh
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"reason-code must be"* ]]
 }
 
 @test "the first attempt is reported as one of the budget" {
@@ -95,6 +121,13 @@ jobs_block() {
     [ "$(fact Attempt)" = "3 of 3" ]
 }
 
+@test "the attempt stands alone without a max" {
+    unset MAX_ATTEMPTS
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(fact Attempt)" = "3" ]
+}
+
 @test "run details are taken from the triggering run" {
     run build-card.sh
     [ "$status" -eq 0 ]
@@ -103,17 +136,44 @@ jobs_block() {
     [ "$(fact Workflow)" = "Master/Release branch workflow" ]
 }
 
-@test "the release version is shown as the action passes it" {
+@test "no facts leaves only the run details" {
     run build-card.sh
     [ "$status" -eq 0 ]
-    [ "$(fact 'Release version')" = "Unknown" ]
+    [ "$(fact_titles)" = "Repository,Branch,Workflow,Attempt" ]
 }
 
-@test "a known release version is used" {
-    export RELEASE_VERSION="26.2.0.147 (alfresco-community-repo)"
+@test "facts are added after the run details in the given order" {
+    export FACTS="Release version|26.2.0.147
+Owner|release duty"
     run build-card.sh
     [ "$status" -eq 0 ]
-    [ "$(fact 'Release version')" = "26.2.0.147 (alfresco-community-repo)" ]
+    [ "$(fact_titles)" = "Repository,Branch,Workflow,Attempt,Release version,Owner" ]
+    [ "$(fact 'Release version')" = "26.2.0.147" ]
+}
+
+@test "a fact value keeps commas and later separators" {
+    export FACTS="Modules|repo, share|community"
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(fact Modules)" = "repo, share|community" ]
+}
+
+@test "blank lines and padding around facts are ignored" {
+    export FACTS="
+  Release version | 26.2.0.147
+
+"
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(fact_titles)" = "Repository,Branch,Workflow,Attempt,Release version" ]
+    [ "$(fact 'Release version')" = "26.2.0.147" ]
+}
+
+@test "fails on a fact without a separator" {
+    export FACTS="Release version 26.2.0.147"
+    run build-card.sh
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"facts entry 'Release version 26.2.0.147'"* ]]
 }
 
 @test "each failed job becomes its own bullet" {
@@ -151,18 +211,25 @@ two"
     [ "$(jobs_block)" = "- none reported" ]
 }
 
-@test "fails on a reason code that is not an escalation" {
-    export REASON_CODE="retry"
+@test "markdown characters in a job name are escaped" {
+    export FAILED_JOBS='build [linux] *nightly* `x`'
     run build-card.sh
-    [ "$status" -eq 1 ]
-    [[ "$output" == *"reason-code must be"* ]]
+    [ "$status" -eq 0 ]
+    [ "$(jobs_block)" = '- build \[linux\] \*nightly\* \`x\`' ]
 }
 
-@test "fails when no reason code is given" {
-    unset REASON_CODE
+@test "a backslash in a job name is escaped before anything else" {
+    export FAILED_JOBS='weird\name'
     run build-card.sh
-    [ "$status" -eq 1 ]
-    [[ "$output" == *"reason-code must be"* ]]
+    [ "$status" -eq 0 ]
+    [ "$(jobs_block)" = '- weird\\name' ]
+}
+
+@test "underscores in a job name are escaped" {
+    export FAILED_JOBS="run_ci / PMD Scan"
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(jobs_block)" = '- run\_ci / PMD Scan' ]
 }
 
 @test "fails when attempt is not a positive number" {
@@ -179,13 +246,6 @@ two"
     [[ "$output" == *"attempt must be"* ]]
 }
 
-@test "a card is only built for a workflow_run event" {
-    export GITHUB_EVENT_NAME="push"
-    run build-card.sh
-    [ "$status" -eq 1 ]
-    [[ "$output" == *"only works on a workflow_run event"* ]]
-}
-
 @test "a missing attempt is rejected rather than assumed" {
     unset ATTEMPT
     run build-card.sh
@@ -193,58 +253,42 @@ two"
     [[ "$output" == *"attempt must be a positive whole number"* ]]
 }
 
-@test "an empty position leaves the heading on its own" {
-    export POSITION=""
+@test "a card is only built for a workflow_run event" {
+    export GITHUB_EVENT_NAME="push"
     run build-card.sh
-    [ "$status" -eq 0 ]
-    [ "$(body | jq '.[0].columns[1].items | length')" -eq 1 ]
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"only works on a workflow_run event"* ]]
 }
 
-@test "an empty cc adds no trailing block" {
-    export CC=""
+@test "the title and subtitle head the card" {
     run build-card.sh
     [ "$status" -eq 0 ]
-    [ "$(body | jq '.[-1].type')" = '"Container"' ]
+    [ "$(body | jq -r '[.[0].columns[1].items[].text] | join(",")')" = "Release chain blocked,Hop 2 of 5 - alfresco-enterprise-repo" ]
 }
 
-@test "the attempt stands alone without a max" {
-    unset MAX_ATTEMPTS
+@test "an empty subtitle leaves the title on its own" {
+    export SUBTITLE=""
     run build-card.sh
     [ "$status" -eq 0 ]
-    [ "$(fact Attempt)" = "3" ]
+    [ "$(body | jq -r '[.[0].columns[1].items[].text] | join(",")')" = "Release chain blocked" ]
 }
 
-@test "an empty release version leaves its row off the card" {
-    export RELEASE_VERSION=""
+@test "an empty title leaves its block off the card" {
+    export TITLE=""
     run build-card.sh
     [ "$status" -eq 0 ]
-    [ "$(body | jq -r '[.[] | select(.type=="FactSet").facts[].title] | join(" ")')" = "Repository Branch Workflow Attempt" ]
+    [ "$(body | jq -r '[.[0].columns[1].items[].text] | join(",")')" = "Hop 2 of 5 - alfresco-enterprise-repo" ]
 }
 
-@test "markdown characters in a job name are escaped" {
-    export FAILED_JOBS="build [linux]"
+@test "the footer closes the card" {
     run build-card.sh
     [ "$status" -eq 0 ]
-    [ "$(jobs_block)" = '- build \[linux\]' ]
+    [ "$(body | jq -r '.[-1].text')" = "cc: release duty" ]
 }
 
-@test "an empty heading leaves its block off the card" {
-    export HEADING=""
+@test "an empty footer adds no trailing block" {
+    export FOOTER=""
     run build-card.sh
     [ "$status" -eq 0 ]
-    [ "$(body | jq -r '[.[0].columns[1].items[].text] | join(" ")')" = "Hop 2 of 5 - alfresco-enterprise-repo" ]
-}
-
-@test "a backslash in a job name is escaped before anything else" {
-    export FAILED_JOBS='weird\name'
-    run build-card.sh
-    [ "$status" -eq 0 ]
-    [ "$(jobs_block)" = '- weird\\name' ]
-}
-
-@test "underscores in a job name are escaped" {
-    export FAILED_JOBS="run_ci / PMD Scan"
-    run build-card.sh
-    [ "$status" -eq 0 ]
-    [ "$(jobs_block)" = '- run\_ci / PMD Scan' ]
+    [ "$(body | jq -r '.[-1].type')" = "Container" ]
 }
