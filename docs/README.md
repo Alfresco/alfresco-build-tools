@@ -118,6 +118,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [resolve-preview-name](#resolve-preview-name)
   - [s3-upload](#s3-upload)
   - [send-teams-notification](#send-teams-notification)
+  - [send-teams-workflow-run-notification](#send-teams-workflow-run-notification)
   - [setup-checkov](#setup-checkov)
   - [setup-docker](#setup-docker)
   - [setup-fluxcli](#setup-fluxcli)
@@ -2615,6 +2616,11 @@ To copy artifacts between S3 locations instead of uploading from a local directo
 
 Sends a teams notification with a pre-defined payload.
 
+On a `workflow_run` event the card describes the run that triggered the
+workflow, not the workflow doing the sending: the branch, commit, workflow
+name and the link to the failing attempt all come from
+`github.event.workflow_run`. On every other event nothing changes.
+
 ```yml
       uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v19.10.0
       with:
@@ -2702,6 +2708,66 @@ Sample usage with custom buttons and body elements:
           [{"type":"FactSet","facts":[{"title":"Cluster","value":"my-env"}]},
            {"type":"TextBlock","fontType":"Monospace","wrap":true,"text":"...log tail..."}]
 ```
+
+### send-teams-workflow-run-notification
+
+Sends a Teams card about the run that triggered a `workflow_run` event, rather
+than the run doing the sending. Pairs with
+[workflow-run-auto-retry](#workflow-run-auto-retry): that action decides
+whether a failure needs a person, this one words the card.
+
+```yaml
+      - name: Report to Teams
+        if: steps.retry.outputs.decision == 'escalate'
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-workflow-run-notification@v19.9.1
+        with:
+          webhook-url: ${{ secrets.TEAMS_WEBHOOK }}
+          reason-code: ${{ steps.retry.outputs.reason-code }}
+          failed-jobs: ${{ steps.retry.outputs.failed-jobs }}
+          max-attempts: ${{ steps.retry.outputs.max-attempts }}
+          # optional, all of these
+          title: Release chain blocked
+          subtitle: Hop 1 of 5 - alfresco-community-repo
+          message: Nothing propagates to alfresco-enterprise-repo until this is resolved.
+          facts: |
+            Release version|${{ steps.version.outputs.release }}
+          footer: "cc: release duty - please pick this up."
+```
+
+It only works on a `workflow_run` event, and fails the step on any other,
+because the branch and the attempt come from the run that triggered the
+watcher.
+
+The card is built by [send-teams-notification](#send-teams-notification), so
+the branch, commit, actor, workflow name and the link to the failing attempt
+are the standard ones. This action supplies the title, the explanation and a
+block listing the failed jobs.
+
+`reason-code` chooses the first sentence:
+
+| `reason-code` | Card says |
+| --- | --- |
+| `attempts-exhausted` | Automated retries were exhausted. |
+| `non-retryable` | A job that must not be re-run automatically failed, so no retry was attempted. |
+| `nothing-to-retry` | The run failed without any job reporting a failure, so a retry would change nothing. |
+
+`message` is appended to it, so the two read as one paragraph. Without
+`workflow-run-auto-retry`, leave `reason-code` empty and word the whole thing
+in `message`; one of the two is required, and any other `reason-code` fails
+the step.
+
+`subtitle` leads the message, for telling apart repositories that send the
+same card. `facts` adds one row per `title|value` line, after the attempt;
+a value keeps any further `|`, so `Modules|repo, share|community` reads as
+written. Pass `max-attempts` to show the attempt as "3 of 3" rather than "3".
+
+Job names in `failed-jobs` are listed one per bullet and escaped for `\`,
+`*`, `_`, `` ` ``, `[` and `]`, so a name carrying any of those renders as
+written rather than as markdown.
+
+`footer` is a closing line. To make it ping rather than read as plain text,
+pass `mention-users` or `mention-tags` and include the matching
+`<at>name</at>` in the `footer` text.
 
 ### setup-checkov
 
@@ -3121,22 +3187,18 @@ jobs:
 
       - name: Report to Teams
         if: steps.retry.outputs.decision == 'escalate' && env.TEAMS_WEBHOOK != ''
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v19.10.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-workflow-run-notification@v19.10.0
         with:
           webhook-url: ${{ secrets.TEAMS_WEBHOOK }}
-          # without this the card is green, worked out from the watcher's own jobs
-          status: failure
-          title: Release stopped in ${{ github.repository }}
-          message: ${{ steps.retry.outputs.reason }}
-          skip_checkout: "true"
-          card-actions: >-
-            [{"type":"Action.OpenUrl","title":"View run","url":"${{ github.event.workflow_run.html_url }}"}]
+          reason-code: ${{ steps.retry.outputs.reason-code }}
+          failed-jobs: ${{ steps.retry.outputs.failed-jobs }}
+          max-attempts: ${{ steps.retry.outputs.max-attempts }}
 
       # until the Teams webhook secret exists, failing here is how an escalation stays visible
       - name: Fail when no Teams webhook is configured
         if: steps.retry.outputs.decision == 'escalate' && env.TEAMS_WEBHOOK == ''
         env:
-          REASON: ${{ steps.retry.outputs.reason }}
+          REASON: ${{ steps.retry.outputs.reason-text }}
           FAILED_JOBS: ${{ steps.retry.outputs.failed-jobs }}
           RUN_URL: ${{ github.event.workflow_run.html_url }}
         run: |
@@ -3180,8 +3242,15 @@ the whole name. A job nested through a reusable workflow is reported as
 jobs do not need listing. A job that was gated and did not run reports
 `skipped`, not `failure`, so it never blocks a retry.
 
-Outputs are `decision` (`retry`, `escalate` or `none`), `reason`,
-`failed-jobs`, `attempt` and `max-attempts`.
+Outputs are `decision` (`retry`, `escalate` or `none`), `reason-code`,
+`reason-text`, `failed-jobs`, `attempt` and `max-attempts`.
+
+`reason-text` is one sentence suitable for a log or a notification body.
+`reason-code` is set only on an escalation, to `attempts-exhausted`,
+`non-retryable` or `nothing-to-retry`, so a caller can word its own message
+without parsing prose.
+[send-teams-workflow-run-notification](#send-teams-workflow-run-notification)
+takes it directly.
 
 Known limitations:
 

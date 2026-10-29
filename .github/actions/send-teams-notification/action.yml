@@ -101,7 +101,7 @@ runs:
       id: compute-small-sha
       shell: bash
       env:
-        GITHUB_LONG_SHA: ${{ github.sha }}
+        GITHUB_LONG_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
       run: |
         SMALL_SHA=${GITHUB_LONG_SHA:0:6}
         echo "result=$SMALL_SHA" >> $GITHUB_OUTPUT
@@ -152,24 +152,36 @@ runs:
       shell: bash
       env:
         REPO_URL: ${{ github.server_url }}/${{ github.repository }}
-        WORKFLOW: ${{ github.workflow }}
+        RUN_ID: ${{ github.event.workflow_run.id || github.run_id }}
+        RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt || github.run_attempt }}
       run: |
-        RESULT="$REPO_URL/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT"
+        RESULT="$REPO_URL/actions/runs/$RUN_ID/attempts/$RUN_ATTEMPT"
         echo "result=$RESULT" >> $GITHUB_OUTPUT
 
     - name: Compute workflow title
       id: compute-workflow-title
       shell: bash
+      env:
+        WORKFLOW: ${{ github.event.workflow_run.name || github.workflow }}
+        RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt || github.run_attempt }}
       run: |
-        RESULT="$GITHUB_WORKFLOW"
-        if [[ "$GITHUB_RUN_ATTEMPT" != '1' ]]; then
-          RESULT+=" (attempt #$GITHUB_RUN_ATTEMPT)"
+        RESULT="$WORKFLOW"
+        if [[ "$RUN_ATTEMPT" != '1' ]]; then
+          RESULT+=" (attempt #$RUN_ATTEMPT)"
         fi
         echo "result=$RESULT" >> $GITHUB_OUTPUT
 
     - name: Get branch name
       id: get-branch-name
       uses: $/.github/actions/get-branch-name-v2
+
+    - name: Compute branch name
+      id: compute-branch-name
+      shell: bash
+      env:
+        BRANCH_NAME: ${{ github.event.workflow_run.head_branch || steps.get-branch-name.outputs.branch-name }}
+      run: |
+        echo "result=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
     - name: Transform mentions to JSON entities
       id: transform-mentions
@@ -226,7 +238,7 @@ runs:
                       "type": "TextBlock",
                       "size": "medium",
                       "weight": "bolder",
-                      "text": "${{ inputs.title || format('Notification on {0} on branch [`{1}`]({2}/{3}/tree/{4})', steps.compute-event.outputs.result, steps.get-branch-name.outputs.branch-name, github.server_url, github.repository, steps.get-branch-name.outputs.branch-name) }}",
+                      "text": "${{ inputs.title || format('Notification on {0} on branch [`{1}`]({2}/{3}/tree/{4})', steps.compute-event.outputs.result, steps.compute-branch-name.outputs.result, github.server_url, github.repository, steps.compute-branch-name.outputs.result) }}",
                       "style": "heading",
                       "wrap": true
                     },
@@ -296,7 +308,7 @@ runs:
                           "items": [
                             {
                               "type": "TextBlock",
-                              "text": "**Commit**: [`${{ steps.compute-small-sha.outputs.result }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})"
+                              "text": "**Commit**: [`${{ steps.compute-small-sha.outputs.result }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.event.workflow_run.head_sha || github.sha }})"
                             }
                           ]
                         }
