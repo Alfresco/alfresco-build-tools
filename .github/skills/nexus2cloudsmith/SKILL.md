@@ -11,6 +11,11 @@ description: "Migrate a Maven repository's CI from the Alfresco Nexus (artifacts
 - Workflows pass `secrets.NEXUS_USERNAME` / `secrets.NEXUS_PASSWORD` to Maven
 - A Jira ticket asks for "Cloudsmith Migration - Phase 1 (Pull)" or "Phase 2 (Push)"
 
+Nexus becomes a frozen archive: versions published before the cutover stay
+there, but new releases (Alfresco 26.3.0 onwards and the components released
+with it) go only to Cloudsmith. A repo needs Phase 1 as soon as it depends on
+any of them.
+
 The migration has two phases, usually one PR each:
 
 1. **Pull**: resolve dependencies and plugins from Cloudsmith.
@@ -64,6 +69,8 @@ The repository roles and URLs come from the Confluence pages listed under
 | `nexus/content/repositories/releases`, GA and M versions | `https://artifacts.hyland.dev/basic/alfresco-community-releases/maven/` | cloudsmith-auth |
 | `nexus/content/repositories/enterprise-releases`, GA and M versions | `https://artifacts.hyland.dev/basic/alfresco-enterprise-releases/maven/` | cloudsmith-auth |
 | any release repository, `-A.x` versions (also internal tools, unreleased products) | `https://artifacts.hyland.dev/basic/alfresco-internal-releases/maven/` | cloudsmith-auth |
+| `nexus/content/repositories/activiti-releases` | `https://artifacts.hyland.dev/public/activiti-releases/maven/` | anonymous |
+| `nexus/content/repositories/activiti-enterprise-releases` | `https://artifacts.hyland.dev/basic/activiti-enterprise-releases/maven/` | cloudsmith-auth |
 | any `*-snapshots` repository | drop it | n/a |
 
 `alfresco-public`, `alfresco-internal` and `cic-ext-pull-through` are pull
@@ -74,13 +81,18 @@ instead (see Phase 2).
 Nexus repository not in this table (thirdparty, for example), stop and ask
 the user for the target.
 
-Cloudsmith has no snapshot repositories, by design: mutable artifacts make
+The Alfresco repositories have no snapshots, by design: mutable artifacts make
 builds non-deterministic. Projects release `-A.x` versions instead, on demand
 or at most weekly on a schedule, never on every push to master. Remove jobs
 that deploy `-SNAPSHOT` versions (for example `publish_snapshot_artifacts`
 and its entries in other jobs' `needs:`), and switch a phase that becomes
 `deploy` on pushes to master back to `verify`. The `activiti-*-snapshots`
 repositories serve another purpose: don't use them.
+
+Before removing a snapshot job, read the scripts and Maven profiles it runs.
+If they also publish something else, such as a `-Pinternal` profile pushing a
+`:latest` Docker image, tell the user what stops being published instead of
+dropping it silently.
 
 Binary downloads from `nexus.alfresco.com/nexus/service/local/...` (in
 Dockerfiles or CI scripts) are not Maven resolution and are out of scope.
@@ -214,9 +226,10 @@ them. Apply the URL mapping table to every `<repository>` and
 ### All repos
 
 Grant `id-token: write` and add
-[`cloudsmith-auth`](https://github.com/Alfresco/alfresco-build-tools/blob/master/docs/README.md#cloudsmith-auth) right after
-`setup-java-build` in **every** job that runs Maven, including
-`dependency-graph.yml`. Add `id-token: write` to the job's existing
+[`cloudsmith-auth`](https://github.com/Alfresco/alfresco-build-tools/blob/master/docs/README.md#cloudsmith-auth) before the
+first step that runs Maven in **every** job that runs it, including
+`dependency-graph.yml`. Put it after `setup-java-build` where the job has
+one; `maven-dependency-scan` sets up Java itself. Add `id-token: write` to the job's existing
 `permissions:` and keep the scopes already there: any scope a `permissions:`
 block leaves out becomes `none`, so a release job would lose `contents: write`.
 
@@ -285,6 +298,11 @@ new credentials are needed:
 </profiles>
 ```
 
+A module whose own `distributionManagement` matches the root's should drop
+it and inherit. If a module has to keep its own block, give it its own
+`prerelease` profile too: the module's block wins over the profile it
+inherits, so its `-A.x` releases would otherwise land in the GA repository.
+
 ### `.ci.settings.xml`
 
 Replace the Nexus deploy servers (`alfresco-public-releases`,
@@ -326,10 +344,25 @@ mirror server:
   If the job runs `mvn deploy` directly, add `-Pprerelease` to that command
   when the version contains `-A.`.
 
+### Testing the deploy before merge
+
+PR CI skips the release job, so the deploy path only runs on a real release.
+If the user wants to try it from the PR branch:
+
+- Release an `-A.x` version, so the package lands in
+  `alfresco-internal-releases` and not in a GA repository.
+- Before merge, revert the test `RELEASE_VERSION` and the branch added to the
+  release job's `if:`.
+- Squash-merge, so the release plugin's `[skip ci]` commits don't reach the
+  default branch.
+- Ask the user to delete the test tag and the test package in Cloudsmith.
+
 ### Docs
 
-Update the README and any docs that mention Nexus. Browse links for the public
-repository go to `https://artifacts.hyland.dev/public/alfresco-public/maven/`.
+Update the README and any docs that mention Nexus. Reword them without naming
+a registry ("deploy to the Maven repository") rather than replacing "Nexus"
+with "Cloudsmith". Browse links for the public repository go to
+`https://artifacts.hyland.dev/public/alfresco-public/maven/`.
 
 ## Rules
 
@@ -341,8 +374,10 @@ repository go to `https://artifacts.hyland.dev/public/alfresco-public/maven/`.
 - Keep repository and server ids neutral: `alfresco-public`,
   `alfresco-internal`, `alfresco-releases`, or the Cloudsmith repository name
   (`cic-ext-pull-through`). Only name ids in comments that exist in the
-  file.
-- Don't name Cloudsmith in ids, names, job names or comments, so the next
+  file. Exception: projects generated with the In-Process Alfresco SDK, and
+  the SDK itself, keep the archetype's ids (`alfresco-plugin-public`,
+  `alfresco-private-repository`).
+- Don't name Cloudsmith in ids, names, job names, comments or docs, so the next
   registry move doesn't mean renaming them. Use it only where it can't be
   avoided: URLs, the `cloudsmith-auth` step and the `CLOUDSMITH_*`
   variables it exports.
@@ -380,8 +415,8 @@ pushing.
 
 Open one PR per phase, titled like the existing ones:
 `[<JIRA-ID>] Cloudsmith Migration - Phase 1 (Pull) - <repo>` or
-`... Phase 2 (Push) - <repo>`. Ask the user for the Jira ID if you don't have
-it.
+`... Phase 2 (Push) - <repo>`, with no colon after the bracket. Ask the user
+for the Jira ID if you don't have it.
 
 ## Sources
 
@@ -390,3 +425,6 @@ it.
 - [Cloudsmith Alfresco Consumption](https://hyland.atlassian.net/wiki/spaces/cix/pages/4313722570/Cloudsmith+Alfresco+Consumption):
   OIDC authentication, the Dependabot account and the `maven.cloudsmith.io`
   upload endpoint. It is still a draft.
+- [Migrating your CI to the Hyland artifact repository for Alfresco](https://community.hyland.com/discussion/501538/migrating-your-ci-to-the-hyland-artifact-repository-for-alfresco):
+  the public guide for customers and community users, with the Activiti
+  repositories and the Nexus archive cutover.
