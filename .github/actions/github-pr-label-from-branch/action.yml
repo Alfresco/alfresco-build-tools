@@ -1,0 +1,34 @@
+name: Label PR from branch name
+description: >
+  Adds labels to a pull request based on the prefix of its branch name, e.g. to
+  categorize the pull request in generated release notes.
+inputs:
+  mapping:
+    description: >
+      Newline-separated list of "<branch-prefix>: <label>" entries. Every entry whose
+      prefix matches the start of the branch name adds its label, so a prefix can be
+      listed several times to add several labels. Matching is literal and
+      case-sensitive. Blank lines and lines starting with "#" are ignored.
+    required: false
+    default: |
+      feature/: enhancement
+      improvement/: enhancement
+      fix/: bug
+  github-token:
+    description: Token with pull-requests:write permission on the repository
+    required: false
+    default: ${{ github.token }}
+outputs:
+  labels:
+    description: JSON array of the labels applied to the pull request
+    value: ${{ steps.label.outputs.labels }}
+runs:
+  using: composite
+  steps:
+    - name: Label PR from branch name
+      id: label
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        MAPPING: ${{ inputs.mapping }}
+      run: ${{ github.action_path }}/github-pr-label-from-branch.sh
