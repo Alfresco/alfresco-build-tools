@@ -88,7 +88,7 @@ while IFS= read -r folder; do
   done
   action_name=$(basename "$folder")
   search_string="### $action_name"
-  if ! grep -q "$search_string" "$readme_file"; then
+  if ! grep -qxF "$search_string" "$readme_file"; then
     echo "No entry found for $search_string in $readme_file"
     missing_entries=$((missing_entries + 1))
   fi
