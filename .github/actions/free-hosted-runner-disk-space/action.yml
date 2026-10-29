@@ -79,6 +79,7 @@ runs:
         async="${{ inputs.async }}"
         overall_start=$(date +%s)
         pids=()
+        trash_dirs=()
 
         remove_path() {
           local path="$1" keep_dir="${2:-}" trash
@@ -90,7 +91,7 @@ runs:
             else
               sudo mv "$path" "$trash/"
             fi
-            nohup setsid sudo rm -rf "$trash" >/dev/null 2>&1 &
+            trash_dirs+=("$trash")
           else
             if [[ "$keep_dir" == '--keep-dir' ]]; then
               sudo bash -c 'shopt -s dotglob nullglob; rm -rf -- "$1"/*' _ "$path" &
@@ -139,6 +140,11 @@ runs:
             [[ "$diagnose" == 'true' ]] && du -sh "$item" 2>/dev/null || true
             remove_path "$item"
           done
+        fi
+
+        # One low priority worker, so the removal doesn't compete with the job for disk I/O
+        if [[ "${#trash_dirs[@]}" -gt 0 ]]; then
+          nohup setsid sudo ionice -c2 -n7 nice -n 10 rm -rf "${trash_dirs[@]}" >/dev/null 2>&1 &
         fi
 
         failed=0

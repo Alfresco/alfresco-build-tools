@@ -889,8 +889,10 @@ You can override the default behavior by adding one or more of the following inp
 The removal runs in the background and the step returns right away, so the
 workflow doesn't wait for it to complete. Each path is renamed first, so it
 disappears immediately, while the freed space becomes available gradually
-during the next seconds. If a following step needs all the space straight
-away, set `async` to `false` to wait for the removal to complete.
+during the next minute. A single low priority process does the deletion, so it
+doesn't compete with your job for disk I/O. If a following step needs all the
+space straight away, set `async` to `false` to wait for the removal to
+complete.
 
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v19.10.0
