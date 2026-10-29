@@ -2727,23 +2727,17 @@ The first sentence of the message is generated from `reason-code`, and
 | `non-retryable` | A job that must not be re-run automatically failed, so no retry was attempted. |
 | `nothing-to-retry` | The run failed without any job reporting a failure, so a retry would change nothing. |
 
-Without `workflow-run-auto-retry`, leave `reason-code` empty and set `message`.
-One of the two is required. Any other `reason-code` fails the step.
-
-The repository, branch, workflow and attempt come from the triggering run, so
-the action fails the step on any event other than `workflow_run`. Pass
-`max-attempts` to have the card read "Attempt 3 of 3" rather than just the
-number. The attempt counts manual re-runs as well as automated ones.
-
-`facts` adds rows after the run details, one `title|value` per line. Each line
-in `failed-jobs` gets its own bullet, with `\`, `*`, `_`, `` ` ``, `[` and `]`
-escaped so the name renders as written. `subtitle`, `facts` and `footer` are
-left off the card when empty.
-
-`footer` is plain text on its own. To ping someone, list them in
-`mention-users` or `mention-tags` and put the matching `<at>name</at>` markup in
-`footer`. See [send-teams-notification](#send-teams-notification) for how to
-find a tag id.
+- Without `workflow-run-auto-retry`, leave `reason-code` empty and set
+  `message` instead.
+- Repository, branch, workflow and attempt come from the `workflow_run` event,
+  so the action fails on any other event.
+- Pass `max-attempts` to show the attempt as "3 of 3" instead of "3".
+- `facts` adds one row per `title|value` line.
+- `failed-jobs` takes one job name per line and shows each as a bullet.
+- `subtitle`, `facts` and `footer` are left off the card when empty.
+- To ping someone, list them in `mention-users` or `mention-tags` and put
+  `<at>name</at>` in `footer`. See
+  [send-teams-notification](#send-teams-notification) for how to find a tag id.
 
 ### setup-checkov
 
