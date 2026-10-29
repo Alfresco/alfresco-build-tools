@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPORT_ON="${REPORT_ON:-triggering-run}"
+ON_WORKFLOW_RUN="${ON_WORKFLOW_RUN:-triggering}"
 
 # A typo here would quietly report the wrong run, so reject anything unexpected.
-case "$REPORT_ON" in
-  triggering-run|self) ;;
-  *) echo "::error::report-on must be 'triggering-run' or 'self', found '$REPORT_ON'"; exit 1 ;;
+case "$ON_WORKFLOW_RUN" in
+  triggering|self) ;;
+  *) echo "::error::on-workflow-run must be 'triggering' or 'self', found '$ON_WORKFLOW_RUN'"; exit 1 ;;
 esac
 
 # The card always describes one run. On a workflow_run event that is the run which
 # triggered this one, unless the caller asks for the watcher itself.
-if [ "${GITHUB_EVENT_NAME:-}" = "workflow_run" ] && [ "$REPORT_ON" != "self" ]; then
+if [ "${GITHUB_EVENT_NAME:-}" = "workflow_run" ] && [ "$ON_WORKFLOW_RUN" != "self" ]; then
   SHA="${WR_SHA:-}"
   BRANCH="${WR_BRANCH:-}"
   RUN_ID="${WR_RUN_ID:-}"

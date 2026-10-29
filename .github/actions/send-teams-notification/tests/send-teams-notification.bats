@@ -526,7 +526,7 @@ key() {
 @test "a watcher can ask for its own run instead of the trigger" {
     run_context
     export GITHUB_EVENT_NAME="workflow_run"
-    export REPORT_ON="self"
+    export ON_WORKFLOW_RUN="self"
 
     run resolve-run-context.sh
 
@@ -540,7 +540,7 @@ key() {
 @test "asking for the trigger explicitly matches the default" {
     run_context
     export GITHUB_EVENT_NAME="workflow_run"
-    export REPORT_ON="triggering-run"
+    export ON_WORKFLOW_RUN="triggering"
 
     run resolve-run-context.sh
 
@@ -549,10 +549,10 @@ key() {
     [ "$(key branch)" = "release/25.5" ]
 }
 
-@test "report-on changes nothing outside a workflow_run event" {
+@test "on-workflow-run changes nothing outside a workflow_run event" {
     run_context
     export GITHUB_EVENT_NAME="push"
-    export REPORT_ON="self"
+    export ON_WORKFLOW_RUN="self"
 
     run resolve-run-context.sh
 
@@ -560,13 +560,13 @@ key() {
     [ "$(key sha)" = "$SELF_SHA" ]
 }
 
-@test "rejects a report-on nobody implemented" {
+@test "rejects an on-workflow-run nobody implemented" {
     run_context
     export GITHUB_EVENT_NAME="workflow_run"
-    export REPORT_ON="selff"
+    export ON_WORKFLOW_RUN="selff"
 
     run resolve-run-context.sh
 
     [ "$status" -ne 0 ]
-    [[ "$output" == *"report-on must be"* ]]
+    [[ "$output" == *"on-workflow-run must be"* ]]
 }

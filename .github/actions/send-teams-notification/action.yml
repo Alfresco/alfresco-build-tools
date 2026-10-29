@@ -26,10 +26,10 @@ inputs:
     description: 'The workflow status: if not filled, it will be computed based on the completed steps status'
     required: false
     default: ''
-  report-on:
-    description: "Which run the card describes on a workflow_run event: 'triggering-run' (the default) or 'self' for the run sending the card"
+  on-workflow-run:
+    description: "Which run the card describes: 'triggering' (the default) or 'self', the run sending the card. Has no effect on other events."
     required: false
-    default: triggering-run
+    default: triggering
   mention-users:
     description: 'Comma-separated list of users to mention in format "display name|email" (e.g.: "John Doe|john.doe@example.com,Jane Doe|jane.doe@example.com")'
     required: false
@@ -150,7 +150,7 @@ runs:
       id: run-context
       shell: bash
       env:
-        REPORT_ON: ${{ inputs.report-on }}
+        ON_WORKFLOW_RUN: ${{ inputs.on-workflow-run }}
         REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         WR_SHA: ${{ github.event.workflow_run.head_sha }}
         WR_BRANCH: ${{ github.event.workflow_run.head_branch }}

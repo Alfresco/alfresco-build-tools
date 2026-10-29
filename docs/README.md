@@ -2623,9 +2623,9 @@ from `github.event.workflow_run`. On every other event it is the run this
 action is part of, and nothing changes. The choice is made once, in
 `resolve-run-context.sh`.
 
-Set `report-on: self` to describe the sending run instead, for a watcher
-reporting on its own failure. It is ignored on every other event, and any
-other value fails the step.
+Set `on-workflow-run: self` to describe the sending run instead, for a
+watcher reporting on its own failure. It has no effect on other events, and
+any other value fails the step.
 
 ```yml
       uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v19.10.0
