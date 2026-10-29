@@ -2965,12 +2965,17 @@ entry `release.baseTag.$PROJECT` with the value specified in the input `tag`.
 Validates Maven dependency graph versions to ensure all target includes artifacts versions align
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/validate-maven-versions@v19.8.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/validate-maven-versions@v19.9.1
         with:
           maven-username: ${{ secrets.NEXUS_USERNAME }}
           maven-password: ${{ secrets.NEXUS_PASSWORD }}
           m2-settings-xml: settings.xml
+          # comma-separated groupId:artifactId:version patterns
+          target-includes: org.example:my-bom:*,org.example:my-library:*
 ```
+
+`target-includes` is required and has no default value: the action fails when
+it is not set.
 
 ### veracode
 
