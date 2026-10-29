@@ -29,8 +29,6 @@ inputs:
 runs:
   using: composite
   steps:
-    # Composite actions don't enforce required inputs: without this check an empty
-    # target-includes would make depgraph validate the whole dependency graph
     - name: Check target-includes
       if: inputs.target-includes == ''
       run: |
