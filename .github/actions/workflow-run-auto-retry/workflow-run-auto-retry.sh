@@ -14,9 +14,13 @@ emit() {
   echo "$1=$2" >> "$GITHUB_OUTPUT"
 }
 
+# Writes every output and ends the run. Only an escalation carries a code, because
+# only a caller that has to word its own message needs to tell the cases apart.
 decide() {
-  emit decision "$1"
-  emit reason "$2"
+  local decision="$1" code="$2" text="$3"
+  emit decision "$decision"
+  emit reason-code "$code"
+  emit reason-text "$text"
   emit attempt "$RUN_ATTEMPT"
   emit max-attempts "$MAX_ATTEMPTS"
   local delim="EOF_${RANDOM}${RANDOM}"
@@ -25,10 +29,10 @@ decide() {
     [ -n "$FAILED" ] && printf '%s\n' "$FAILED"
     echo "$delim"
   } >> "$GITHUB_OUTPUT"
-  echo "$2"
+  echo "$text"
   # Every outcome lands in the job summary, so a decision not to retry is still visible.
   if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
-    echo "**$1**: $2" >> "$GITHUB_STEP_SUMMARY"
+    echo "**$decision**: $text" >> "$GITHUB_STEP_SUMMARY"
   fi
   exit 0
 }
@@ -68,10 +72,10 @@ LIVE=$(api "repos/$REPOSITORY/actions/runs/$RUN_ID" --jq '"\(.run_attempt) \(.st
 }
 read -r LIVE_ATTEMPT LIVE_STATUS <<<"$LIVE"
 if [ "$LIVE_ATTEMPT" != "$RUN_ATTEMPT" ]; then
-  decide none "Run $RUN_ID is already on attempt $LIVE_ATTEMPT, so this event for attempt $RUN_ATTEMPT is stale."
+  decide none "" "Run $RUN_ID is already on attempt $LIVE_ATTEMPT, so this event for attempt $RUN_ATTEMPT is stale."
 fi
 if [ "$LIVE_STATUS" != "completed" ]; then
-  decide none "Run $RUN_ID is $LIVE_STATUS again, so another retry is already under way."
+  decide none "" "Run $RUN_ID is $LIVE_STATUS again, so another retry is already under way."
 fi
 
 FAILED=$(api "repos/$REPOSITORY/actions/runs/$RUN_ID/attempts/$RUN_ATTEMPT/jobs" --paginate \
@@ -81,7 +85,7 @@ FAILED=$(api "repos/$REPOSITORY/actions/runs/$RUN_ID/attempts/$RUN_ATTEMPT/jobs"
 }
 
 if [ -z "$FAILED" ]; then
-  decide escalate "$REPOSITORY run $RUN_ID failed without any job reporting a failure, so re-running it would change nothing."
+  decide escalate nothing-to-retry "$REPOSITORY run $RUN_ID failed without any job reporting a failure, so re-running it would change nothing."
 fi
 
 # -F -x so a job matches a denylist entry only on the whole name, never as a substring.
@@ -93,24 +97,24 @@ fi
 if [ -n "$BLOCKED" ]; then
   # jq quotes each name, so a job name that itself contains a comma stays readable.
   BLOCKED_LIST=$(printf '%s\n' "$BLOCKED" | jq -Rrs 'rtrimstr("\n") | split("\n") | map(tojson) | join(", ")')
-  decide escalate "Not retrying $REPOSITORY run $RUN_ID: $BLOCKED_LIST must not be re-run automatically."
+  decide escalate non-retryable "Not retrying $REPOSITORY run $RUN_ID: $BLOCKED_LIST must not be re-run automatically."
 fi
 
 # git/ref/heads is exact, where commits/<branch> would also match a tag of the same name.
 STATUS=0
 TIP=$(api "repos/$REPOSITORY/git/ref/heads/$HEAD_BRANCH" --jq '.object.sha') || STATUS=$?
 if [ "$STATUS" -eq 2 ]; then
-  decide none "Branch $HEAD_BRANCH no longer exists, so run $RUN_ID has nothing left to release."
+  decide none "" "Branch $HEAD_BRANCH no longer exists, so run $RUN_ID has nothing left to release."
 elif [ "$STATUS" -ne 0 ]; then
   echo "::error::Could not read branch $HEAD_BRANCH of $REPOSITORY"
   exit 1
 fi
 if [ "$TIP" != "$HEAD_SHA" ]; then
-  decide none "Branch $HEAD_BRANCH moved to $TIP since $HEAD_SHA was built, so a newer run supersedes this one."
+  decide none "" "Branch $HEAD_BRANCH moved to $TIP since $HEAD_SHA was built, so a newer run supersedes this one."
 fi
 
 if [ "$RUN_ATTEMPT" -ge "$MAX_ATTEMPTS" ]; then
-  decide escalate "$REPOSITORY run $RUN_ID still failing after attempt $RUN_ATTEMPT of $MAX_ATTEMPTS, the retry budget is spent."
+  decide escalate attempts-exhausted "$REPOSITORY run $RUN_ID still failing after attempt $RUN_ATTEMPT of $MAX_ATTEMPTS, the retry budget is spent."
 fi
 
-decide retry "Attempt $RUN_ATTEMPT of $MAX_ATTEMPTS failed on retryable jobs only, re-running them."
+decide retry "" "Attempt $RUN_ATTEMPT of $MAX_ATTEMPTS failed on retryable jobs only, re-running them."
