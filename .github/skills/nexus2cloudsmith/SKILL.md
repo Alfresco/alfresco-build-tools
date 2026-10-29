@@ -148,9 +148,11 @@ costs a 404 from `alfresco-public` first:
 
 Remove any `alfresco-internal` profile, mirror or server from the settings
 files, and drop the `NEXUS_*` env from build jobs. In `.ci.settings.xml`,
-mirror only `central` to `cic-ext-pull-through`. It serves only Central, so
-enterprise artifacts can't leak into a community build, and `alfresco-public`
-stays anonymous:
+mirror only `central` to `cic-ext-pull-through`. Every CI job that runs Maven,
+the release included, must resolve Central through it rather than from Maven
+Central directly: supply-chain policy requires all Central downloads to pass
+through Cloudsmith. It serves only Central, so enterprise artifacts can't leak
+into a community build, and `alfresco-public` stays anonymous:
 
 ```xml
 <settings>
@@ -174,14 +176,17 @@ stays anonymous:
 </settings>
 ```
 
-Prove that `alfresco-public` and Maven Central are enough by resolving with an
-empty settings file (see Verify). If something only resolves from
+Prove that `alfresco-public` and Maven Central are enough by resolving locally
+with an empty settings file (see Verify). That is a local check only: don't
+run CI jobs with empty settings, as that skips `cic-ext-pull-through`. If
+something only resolves from
 `internal`, stop and tell the user which artifacts. Don't switch to
 `alfresco-internal`: the dependency has to be published publicly or dropped.
 
 Known limitation: GitHub gives no OIDC token to PRs from forks, so their builds
-fail at `cloudsmith-auth`. There is no fallback yet. Mention it to the user
-but don't work around it.
+fail at `cloudsmith-auth`. PRs from forks aren't supported for now. Mention it
+to the user, but don't work around it by skipping `cloudsmith-auth` or
+`cic-ext-pull-through`.
 
 ### Private repo
 
