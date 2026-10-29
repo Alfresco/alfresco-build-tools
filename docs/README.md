@@ -856,7 +856,7 @@ the very beginning of your job to maximize the amount of freed up space for the
 rest of your workflow steps.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v19.10.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v19.11.0
 ```
 
 By default, it will remove the following SDKs and tools:
@@ -874,7 +874,7 @@ default, since removing it means `setup-*` actions download their tools again.
 You can override the default behavior by adding one or more of the following inputs:
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v19.10.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v19.11.0
         with:
           remove-android: false
           remove-dotnet: false
@@ -896,7 +896,7 @@ complete, or wait for the `removal-pids` output (the PIDs of the removal
 processes still running) to exit:
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v19.10.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v19.11.0
         id: free-disk-space
       - name: Wait for the removal to complete
         env:
@@ -908,7 +908,7 @@ processes still running) to exit:
 ```
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v19.10.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v19.11.0
         with:
           async: false
 ```
@@ -919,7 +919,7 @@ when `async` is `false`), and also report the size of each folder before it is r
 computing it adds a full extra directory scan per folder).
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v19.10.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v19.11.0
         with:
           diagnose-top-offenders-enabled: true
 ```
