@@ -2616,10 +2616,16 @@ To copy artifacts between S3 locations instead of uploading from a local directo
 
 Sends a teams notification with a pre-defined payload.
 
-On a `workflow_run` event the card describes the run that triggered the
-workflow, not the workflow doing the sending: the branch, commit, workflow
-name and the link to the failing attempt all come from
-`github.event.workflow_run`. On every other event nothing changes.
+The card describes one run. On a `workflow_run` event that is the run which
+triggered the workflow rather than the workflow doing the sending, so the
+branch, commit, workflow name and the link to the failing attempt all come
+from `github.event.workflow_run`. On every other event it is the run this
+action is part of, and nothing changes. The choice is made once, in
+`resolve-run-context.sh`.
+
+Set `report-on: self` to describe the sending run instead, for a watcher
+reporting on its own failure. It is ignored on every other event, and any
+other value fails the step.
 
 ```yml
       uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v19.10.0

@@ -26,6 +26,10 @@ inputs:
     description: 'The workflow status: if not filled, it will be computed based on the completed steps status'
     required: false
     default: ''
+  report-on:
+    description: "Which run the card describes on a workflow_run event: 'triggering-run' (the default) or 'self' for the run sending the card"
+    required: false
+    default: triggering-run
   mention-users:
     description: 'Comma-separated list of users to mention in format "display name|email" (e.g.: "John Doe|john.doe@example.com,Jane Doe|jane.doe@example.com")'
     required: false
@@ -97,15 +101,6 @@ runs:
         esac
         echo "result=$COLOR" >> $GITHUB_OUTPUT
 
-    - name: Compute small sha
-      id: compute-small-sha
-      shell: bash
-      env:
-        GITHUB_LONG_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
-      run: |
-        SMALL_SHA=${GITHUB_LONG_SHA:0:6}
-        echo "result=$SMALL_SHA" >> $GITHUB_OUTPUT
-
     - name: Compute needs
       id: compute-needs
       shell: bash
@@ -147,41 +142,28 @@ runs:
         fi
         echo "result=$RESULT" >> $GITHUB_OUTPUT
 
-    - name: Compute run link
-      id: compute-run-link
-      shell: bash
-      env:
-        REPO_URL: ${{ github.server_url }}/${{ github.repository }}
-        RUN_ID: ${{ github.event.workflow_run.id || github.run_id }}
-        RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt || github.run_attempt }}
-      run: |
-        RESULT="$REPO_URL/actions/runs/$RUN_ID/attempts/$RUN_ATTEMPT"
-        echo "result=$RESULT" >> $GITHUB_OUTPUT
-
-    - name: Compute workflow title
-      id: compute-workflow-title
-      shell: bash
-      env:
-        WORKFLOW: ${{ github.event.workflow_run.name || github.workflow }}
-        RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt || github.run_attempt }}
-      run: |
-        RESULT="$WORKFLOW"
-        if [[ "$RUN_ATTEMPT" != '1' ]]; then
-          RESULT+=" (attempt #$RUN_ATTEMPT)"
-        fi
-        echo "result=$RESULT" >> $GITHUB_OUTPUT
-
     - name: Get branch name
       id: get-branch-name
       uses: $/.github/actions/get-branch-name-v2
 
-    - name: Compute branch name
-      id: compute-branch-name
+    - name: Resolve run context
+      id: run-context
       shell: bash
       env:
-        BRANCH_NAME: ${{ github.event.workflow_run.head_branch || steps.get-branch-name.outputs.branch-name }}
+        REPORT_ON: ${{ inputs.report-on }}
+        REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+        WR_SHA: ${{ github.event.workflow_run.head_sha }}
+        WR_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        WR_RUN_ID: ${{ github.event.workflow_run.id }}
+        WR_RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+        WR_WORKFLOW: ${{ github.event.workflow_run.name }}
+        SELF_SHA: ${{ github.sha }}
+        SELF_BRANCH: ${{ steps.get-branch-name.outputs.branch-name }}
+        SELF_RUN_ID: ${{ github.run_id }}
+        SELF_RUN_ATTEMPT: ${{ github.run_attempt }}
+        SELF_WORKFLOW: ${{ github.workflow }}
       run: |
-        echo "result=$BRANCH_NAME" >> $GITHUB_OUTPUT
+        ${{ github.action_path }}/resolve-run-context.sh >> $GITHUB_OUTPUT
 
     - name: Transform mentions to JSON entities
       id: transform-mentions
@@ -238,7 +220,7 @@ runs:
                       "type": "TextBlock",
                       "size": "medium",
                       "weight": "bolder",
-                      "text": "${{ inputs.title || format('Notification on {0} on branch [`{1}`]({2}/{3}/tree/{4})', steps.compute-event.outputs.result, steps.compute-branch-name.outputs.result, github.server_url, github.repository, steps.compute-branch-name.outputs.result) }}",
+                      "text": "${{ inputs.title || format('Notification on {0} on branch [`{1}`]({2}/{3}/tree/{4})', steps.compute-event.outputs.result, steps.run-context.outputs.branch, github.server_url, github.repository, steps.run-context.outputs.branch) }}",
                       "style": "heading",
                       "wrap": true
                     },
@@ -299,7 +281,7 @@ runs:
                           "items": [
                             {
                               "type": "TextBlock",
-                              "text": "**Action**: [${{ steps.compute-workflow-title.outputs.result }}](${{ steps.compute-run-link.outputs.result }})"
+                              "text": "**Action**: [${{ steps.run-context.outputs.workflow-title }}](${{ steps.run-context.outputs.run-link }})"
                             }
                           ]
                         },
@@ -308,7 +290,7 @@ runs:
                           "items": [
                             {
                               "type": "TextBlock",
-                              "text": "**Commit**: [`${{ steps.compute-small-sha.outputs.result }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.event.workflow_run.head_sha || github.sha }})"
+                              "text": "**Commit**: [`${{ steps.run-context.outputs.small-sha }}`](${{ github.server_url }}/${{ github.repository }}/commit/${{ steps.run-context.outputs.sha }})"
                             }
                           ]
                         }

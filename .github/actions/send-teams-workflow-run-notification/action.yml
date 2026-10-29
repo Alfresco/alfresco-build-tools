@@ -41,11 +41,11 @@ inputs:
     required: false
     default: ""
   mention-users:
-    description: 'Comma or newline separated list of users to mention in format "display name|email". The footer input has to contain the matching <at>display name</at>.'
+    description: 'Comma-separated list of users to mention in format "display name|email". The footer input has to contain the matching <at>display name</at>.'
     required: false
     default: ""
   mention-tags:
-    description: 'Comma or newline separated list of Teams tags to mention in format "tag name|tag id". The footer input has to contain the matching <at>tag name</at>.'
+    description: 'Comma-separated list of Teams tags to mention in format "tag name|tag id". The footer input has to contain the matching <at>tag name</at>.'
     required: false
     default: ""
   dry-run:

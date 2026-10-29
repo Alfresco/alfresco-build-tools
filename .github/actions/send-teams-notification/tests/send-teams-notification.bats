@@ -45,6 +45,40 @@ BATS
     [ "$output" = "$expected_output" ]
 }
 
+@test "a percent sign in the message survives" {
+    export BLOCK_MESSAGE="100% complete"
+
+    run compute-message.sh
+
+    [ "$status" -eq 0 ]
+
+    expected_output=$(cat << BATS
+result<<EOF
+100% complete
+EOF
+BATS
+)
+
+    [ "$output" = "$expected_output" ]
+}
+
+@test "a printf placeholder in the message is not expanded" {
+    export BLOCK_MESSAGE="coverage a%db then 80%s"
+
+    run compute-message.sh
+
+    [ "$status" -eq 0 ]
+
+    expected_output=$(cat << BATS
+result<<EOF
+coverage a%db then 80%s
+EOF
+BATS
+)
+
+    [ "$output" = "$expected_output" ]
+}
+
 @test "pull_request teams message" {
     export EVENT_NAME=pull_request
 
@@ -411,4 +445,128 @@ BATS
 
     [ "$status" -eq 1 ]
     [[ "$output" == *"must be a JSON array"* ]]
+}
+
+# resolve-run-context.sh tests
+
+run_context() {
+    export REPO_URL="https://github.com/Alfresco/example"
+    export WR_SHA="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    export WR_BRANCH="release/25.5"
+    export WR_RUN_ID="111"
+    export WR_RUN_ATTEMPT="3"
+    export WR_WORKFLOW="Master/Release branch workflow"
+    export SELF_SHA="bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    export SELF_BRANCH="master"
+    export SELF_RUN_ID="222"
+    export SELF_RUN_ATTEMPT="1"
+    export SELF_WORKFLOW="Auto-retry"
+}
+
+key() {
+    grep "^$1=" <<<"$output" | cut -d= -f2-
+}
+
+@test "a workflow_run event describes the run that triggered it" {
+    run_context
+    export GITHUB_EVENT_NAME="workflow_run"
+
+    run resolve-run-context.sh
+
+    [ "$status" -eq 0 ]
+    [ "$(key sha)" = "$WR_SHA" ]
+    [ "$(key branch)" = "release/25.5" ]
+    [ "$(key run-link)" = "https://github.com/Alfresco/example/actions/runs/111/attempts/3" ]
+    [ "$(key workflow-title)" = "Master/Release branch workflow (attempt #3)" ]
+}
+
+@test "any other event describes the run this action is part of" {
+    run_context
+    export GITHUB_EVENT_NAME="push"
+
+    run resolve-run-context.sh
+
+    [ "$status" -eq 0 ]
+    [ "$(key sha)" = "$SELF_SHA" ]
+    [ "$(key branch)" = "master" ]
+    [ "$(key run-link)" = "https://github.com/Alfresco/example/actions/runs/222/attempts/1" ]
+    [ "$(key workflow-title)" = "Auto-retry" ]
+}
+
+@test "an event nobody thought about falls back to this run" {
+    run_context
+    export GITHUB_EVENT_NAME="schedule"
+
+    run resolve-run-context.sh
+
+    [ "$status" -eq 0 ]
+    [ "$(key sha)" = "$SELF_SHA" ]
+}
+
+@test "the small sha is the first six characters" {
+    run_context
+    export GITHUB_EVENT_NAME="push"
+    export SELF_SHA="ed25e9f1c0deadbeef"
+
+    run resolve-run-context.sh
+
+    [ "$(key small-sha)" = "ed25e9" ]
+}
+
+@test "a first attempt carries no attempt suffix" {
+    run_context
+    export GITHUB_EVENT_NAME="workflow_run"
+    export WR_RUN_ATTEMPT="1"
+
+    run resolve-run-context.sh
+
+    [ "$(key workflow-title)" = "Master/Release branch workflow" ]
+}
+
+@test "a watcher can ask for its own run instead of the trigger" {
+    run_context
+    export GITHUB_EVENT_NAME="workflow_run"
+    export REPORT_ON="self"
+
+    run resolve-run-context.sh
+
+    [ "$status" -eq 0 ]
+    [ "$(key sha)" = "$SELF_SHA" ]
+    [ "$(key branch)" = "master" ]
+    [ "$(key run-link)" = "https://github.com/Alfresco/example/actions/runs/222/attempts/1" ]
+    [ "$(key workflow-title)" = "Auto-retry" ]
+}
+
+@test "asking for the trigger explicitly matches the default" {
+    run_context
+    export GITHUB_EVENT_NAME="workflow_run"
+    export REPORT_ON="triggering-run"
+
+    run resolve-run-context.sh
+
+    [ "$status" -eq 0 ]
+    [ "$(key sha)" = "$WR_SHA" ]
+    [ "$(key branch)" = "release/25.5" ]
+}
+
+@test "report-on changes nothing outside a workflow_run event" {
+    run_context
+    export GITHUB_EVENT_NAME="push"
+    export REPORT_ON="self"
+
+    run resolve-run-context.sh
+
+    [ "$status" -eq 0 ]
+    [ "$(key sha)" = "$SELF_SHA" ]
+}
+
+@test "rejects a report-on nobody implemented" {
+    run_context
+    export GITHUB_EVENT_NAME="workflow_run"
+    export REPORT_ON="selff"
+
+    run resolve-run-context.sh
+
+    [ "$status" -ne 0 ]
+    [[ "$output" == *"report-on must be"* ]]
 }

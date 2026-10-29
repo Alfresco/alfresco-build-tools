@@ -29,7 +29,7 @@ fi
 
 if [ -n "$COMPUTED_MESSAGE" ]; then
   COMPUTED_MESSAGE="${COMPUTED_MESSAGE}"
-  COMPUTED_MESSAGE=$(printf "${COMPUTED_MESSAGE}" | sed -z 's/\n/\\n/g' | sed -r 's/"/\\\"/g' | sed -e 's/\r//g')
+  COMPUTED_MESSAGE=$(printf "%b" "${COMPUTED_MESSAGE}" | sed -z 's/\n/\\n/g' | sed -r 's/"/\\\"/g' | sed -e 's/\r//g')
   # avoid error if message is too long (total message must be less than 3001 characters)
   COMPUTED_MESSAGE=${COMPUTED_MESSAGE:0:3000}
   echo 'result<<EOF'
