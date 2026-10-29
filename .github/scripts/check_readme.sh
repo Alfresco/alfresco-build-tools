@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
 
+# Action folders (relative to the actions dir) that are documented collectively
+# or not at all, e.g. deprecated ones
+excluded_actions=(
+  dbp-charts
+)
+
 actions_dir=".github/actions"
 readme_file="docs/README.md"
 missing_entries=0
@@ -51,6 +57,10 @@ while [ $# -gt 0 ]; do
       exit 2
       ;;
   esac
+done
+
+for excluded_action in "${excluded_actions[@]}"; do
+  exclude_paths+=("$actions_dir/$excluded_action")
 done
 
 if [ ! -d "$actions_dir" ]; then
