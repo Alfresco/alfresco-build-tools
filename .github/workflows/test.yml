@@ -65,19 +65,37 @@ jobs:
       # free-hosted-runner-disk-space action usage and test
       - name: Check available disk space before running free-hosted-runner-disk-space action
         id: free-hosted-runner-disk-space
-        run: echo "total_size_before=$(df --total --output=avail | tail -1)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "total_size_before=$(df --total --output=avail | tail -1)" >> "$GITHUB_OUTPUT"
+          echo "started_at=$(date +%s)" >> "$GITHUB_OUTPUT"
       - name: Free up disk space on the runner
         uses: ./.github/actions/free-hosted-runner-disk-space
-        with:
-          diagnose-top-offenders-enabled: 'true'
+      - name: Assert that the action returned before the removal completed
+        env:
+          STARTED_AT: ${{ steps.free-hosted-runner-disk-space.outputs.started_at }}
+        run: |
+          elapsed=$(( $(date +%s) - STARTED_AT ))
+          echo "Action took ${elapsed}s"
+          test "$elapsed" -lt 10
+      - name: Assert that the removed paths are gone right away
+        run: test ! -e /usr/share/dotnet
+      - name: Assert that tools cache is kept by default
+        run: test -d "$AGENT_TOOLSDIRECTORY"
       - name: Assert that space available on the runner has increased
         env:
           TOTAL_SIZE_BEFORE: ${{ steps.free-hosted-runner-disk-space.outputs.total_size_before }}
-        run: test "$TOTAL_SIZE_BEFORE" -lt "$(df --total --output=avail | tail -1)"
-      - name: Assert that the tool cache is empty but still exists
         run: |
-          test -w "$RUNNER_TOOL_CACHE"
-          test -z "$(ls -A "$RUNNER_TOOL_CACHE")"
+          for _ in $(seq 60); do
+            test "$TOTAL_SIZE_BEFORE" -lt "$(df --total --output=avail | tail -1)" && exit 0
+            sleep 5
+          done
+          echo "Available space did not increase" >&2
+          exit 1
+      - name: Run the action again with diagnostics and the tools cache removal
+        uses: ./.github/actions/free-hosted-runner-disk-space
+        with:
+          remove-tools-cache: true
+          diagnose-top-offenders-enabled: 'true'
 
       #region Test setup-helm-docs
       - uses: ./.github/actions/setup-helm-docs
