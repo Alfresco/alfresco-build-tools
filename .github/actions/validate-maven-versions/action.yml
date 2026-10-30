@@ -4,7 +4,6 @@ inputs:
   target-includes:
     required: true
     description: list of target includes artifacts separated by comma
-    default: com.alfresco.process:alfresco-process-version:*
   module:
     required: false
     description: The Maven module name to use for validating dependencies. Defaults to '.'
@@ -30,6 +29,13 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Check target-includes
+      if: inputs.target-includes == ''
+      run: |
+        echo "::error::target-includes is required: set it to the comma-separated artifacts whose versions must align"
+        exit 1
+      shell: bash
+
     - name: Resolve dependencies
       run: |
         mvn -B -s $GITHUB_WORKSPACE/${{ inputs.m2-settings-xml }} dependency:resolve
