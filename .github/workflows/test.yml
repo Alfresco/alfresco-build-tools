@@ -66,15 +66,44 @@ jobs:
       - name: Check available disk space before running free-hosted-runner-disk-space action
         id: free-hosted-runner-disk-space
         run: echo "total_size_before=$(df --total --output=avail | tail -1)" >> "$GITHUB_OUTPUT"
+      # Async on the x64 runner, sync on the arm one, so both modes are covered
       - name: Free up disk space on the runner
+        id: free-up-disk-space
         uses: ./.github/actions/free-hosted-runner-disk-space
         with:
-          diagnose-top-offenders-enabled: 'true'
+          async: ${{ matrix.os == 'ubuntu-latest' }}
+      - name: Assert that the action returned before the removal completed
+        if: matrix.os == 'ubuntu-latest'
+        run: ls -d /usr/share/.trash.*
+      - name: Assert that the removed paths are gone right away
+        run: test ! -e /usr/share/dotnet
+      - name: Assert that tools cache is kept by default
+        run: test -n "$(ls -A "$AGENT_TOOLSDIRECTORY")"
+      - name: Wait for the background removal to complete
+        if: matrix.os == 'ubuntu-latest'
+        env:
+          REMOVAL_PIDS: ${{ steps.free-up-disk-space.outputs.removal-pids }}
+        run: |
+          test -n "$REMOVAL_PIDS"
+          for pid in $REMOVAL_PIDS; do
+            while [[ -d "/proc/$pid" ]]; do sleep 1; done
+          done
+      - name: Assert that no removal is left running or pending
+        if: matrix.os == 'ubuntu-24.04-arm'
+        env:
+          REMOVAL_PIDS: ${{ steps.free-up-disk-space.outputs.removal-pids }}
+        run: |
+          test -z "$REMOVAL_PIDS"
+          test -z "$(ls -d /usr/share/.trash.* 2>/dev/null)"
       - name: Assert that space available on the runner has increased
         env:
           TOTAL_SIZE_BEFORE: ${{ steps.free-hosted-runner-disk-space.outputs.total_size_before }}
         run: test "$TOTAL_SIZE_BEFORE" -lt "$(df --total --output=avail | tail -1)"
-      - name: Assert that the tool cache is empty but still exists
+      - name: Run the action again with the tools cache removal
+        uses: ./.github/actions/free-hosted-runner-disk-space
+        with:
+          remove-tools-cache: true
+      - name: Assert that the tools cache is empty but still exists
         run: |
           test -w "$RUNNER_TOOL_CACHE"
           test -z "$(ls -A "$RUNNER_TOOL_CACHE")"
