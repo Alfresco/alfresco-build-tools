@@ -474,6 +474,24 @@ jobs:
     secrets: inherit
 ```
 
+### Terraform version of the pre-commit workflow
+
+The pre-commit workflow installs Terraform using, in order of precedence:
+
+- the content of a `.terraform-version` file at the repository root
+- the first `required_version` constraint found in the `*.tf` files
+- the `terraform_version` input, which defaults to the version bundled in
+  Dependabot's updater; an empty string installs the latest release
+
+```yaml
+jobs:
+  pre-commit:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v19.12.0
+    with:
+      # optional - only used when the repository does not pin a version
+      terraform_version: 1.15.0
+```
+
 ### Authenticating to private terraform modules
 
 When the terraform code references modules in private GitHub repositories, the

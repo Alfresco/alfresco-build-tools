@@ -52,3 +52,10 @@ targets:
     spec:
       file: .github/workflows/terraform.yml
       key: '$.on.workflow_call.inputs.terraform_version.default'
+  update-pre-commit-file:
+    name: 'Update default terraform_version of the pre-commit workflow'
+    scmid: 'github'
+    kind: yaml
+    spec:
+      file: .github/workflows/terraform-pre-commit.yml
+      key: '$.on.workflow_call.inputs.terraform_version.default'
