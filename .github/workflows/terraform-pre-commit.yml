@@ -22,7 +22,7 @@ on:
       terraform_version:
         description: |
           the Terraform version (or version constraint) to use when the repository does not pin one itself.
-          A .terraform-version file or a required_version constraint take precedence.
+          A .terraform-version file at the repository root takes precedence.
           Defaults to the version used by Dependabot, an empty string installs the latest release.
         type: string
         required: false
@@ -82,8 +82,6 @@ jobs:
           version=""
           if [ -f .terraform-version ]; then
             version=$(tr -d '[:space:]' < .terraform-version)
-          else
-            version=$(grep -rhE '^\s*required_version\s*=' --include='*.tf' --exclude-dir='.terraform' . | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/' | tr -d ',' || true)
           fi
           echo "terraform_version=${version:-$DEFAULT_TERRAFORM_VERSION}" >> "$GITHUB_OUTPUT"
 
