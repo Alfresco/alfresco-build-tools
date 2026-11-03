@@ -35,9 +35,9 @@ on:
         default: false
       terraform_version:
         description: |
-          the Terraform version (or version constraint) to use when the root module does not pin one itself
-          (required_version, .terraform-version, .tfswitchrc or .tool-versions take precedence).
-          Defaults to the version used by Dependabot, set to an empty string to use the latest release.
+          the Terraform version (or version constraint) to use when the root module does not pin one itself.
+          A remote/cloud workspace version, required_version, .terraform-version, .tfswitchrc or .tool-versions take precedence.
+          Defaults to the version used by Dependabot, an empty string falls back to the state file version, then the latest release.
         type: string
         required: false
         default: '1.16.4'

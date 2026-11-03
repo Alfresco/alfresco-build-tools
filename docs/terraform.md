@@ -368,17 +368,21 @@ default whenever Dependabot moves to a newer Terraform.
 
 A repository can override it, in order of precedence:
 
-- a `required_version` constraint, `.tfswitchrc`, `.terraform-version` or
-  `.tool-versions` file in the root module, which always wins
+- a version set in a remote/cloud workspace, or a `required_version`
+  constraint, `.tfswitchrc`, `.terraform-version` or `.tool-versions` file in
+  the root module, which always win over the input
 - the `terraform_version` input (a version or a constraint like `~> 1.14`);
-  an empty string uses the latest release
+  an empty string falls back to the version that last wrote the state, then
+  to the latest release
 
 ```yaml
 jobs:
   invoke-terraform:
     uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v19.11.0
     with:
-      terraform_version: 1.15.0  # optional - defaults to the Dependabot version
+      # optional - defaults to the Dependabot version, does not override a
+      # version configured in a remote/cloud workspace
+      terraform_version: 1.15.0
     secrets: inherit
 ```
 
