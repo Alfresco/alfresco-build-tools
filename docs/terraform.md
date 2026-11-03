@@ -375,6 +375,10 @@ A repository can override it, in order of precedence:
   an empty string falls back to the version that last wrote the state, then
   to the latest release
 
+To keep CI aligned with Dependabot, avoid `required_version` in the root
+module. When it is present, the workflow prints a warning annotation, because
+the constraint silently overrides the `terraform_version` input.
+
 ```yaml
 jobs:
   invoke-terraform:
