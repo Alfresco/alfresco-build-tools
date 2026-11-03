@@ -52,12 +52,12 @@ runs:
         ref: ${{ steps.checkout-ref.outputs.ref }}
 
     - name: Set up Python ${{ inputs.python-version }}
-      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
       with:
         python-version: ${{ inputs.python-version }}
 
     - name: Install uv
-      uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
       with:
         working-directory: ${{ github.action_path }}
 
@@ -86,7 +86,7 @@ runs:
     - name: Commit changes
       id: auto-commit-action
       if: inputs.auto-commit == 'true' && steps.pre-commit.outcome == 'failure'
-      uses: iarekylew00t/verified-bot-commit@42a042b0407248f3c0acac00c389e729e3476e86 # v2.3.5
+      uses: iarekylew00t/verified-bot-commit@1ee4374942e5c5f814e9b3121d766cbe45cea360 # v2.3.6
       with:
         ref: ${{ steps.checkout-ref.outputs.ref }}
         message: '[pre-commit] Auto-commit fixups'
