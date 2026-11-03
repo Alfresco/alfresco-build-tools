@@ -358,6 +358,34 @@ jobs:
       GITHUB_TOKEN_PRIVATE_KEY: ${{ secrets.MY_GITHUB_APP_PRIVATE_KEY }}
 ```
 
+### Terraform version
+
+The workflow sets the Terraform version in a single place: the
+`terraform_version` input, which defaults to the version bundled in
+Dependabot's updater so that lockfile updates match CI. An updatecli job
+(`.updatecli/manifests/terraform_dependabot.yaml`) opens a PR to bump the
+default whenever Dependabot moves to a newer Terraform.
+
+A repository can override it, in order of precedence:
+
+- a version set in a remote/cloud workspace, or a `required_version`
+  constraint, `.tfswitchrc`, `.terraform-version` or `.tool-versions` file in
+  the root module, which always win over the input
+- the `terraform_version` input (a version or a constraint like `~> 1.14`);
+  an empty string falls back to the version that last wrote the state, then
+  to the latest release
+
+```yaml
+jobs:
+  invoke-terraform:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v19.11.0
+    with:
+      # optional - defaults to the Dependabot version, does not override a
+      # version configured in a remote/cloud workspace
+      terraform_version: 1.15.0
+    secrets: inherit
+```
+
 ### kubectl support
 
 The terraform workflow can optionally install `kubectl` CLI tool to make it
