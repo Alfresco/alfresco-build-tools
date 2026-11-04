@@ -57,8 +57,41 @@ while IFS= read -r FACT; do
   fi
 done <<<"${FACTS:-}"
 
+# One entry per line, so the rest of the script never has to think about the comma form.
+csv_lines() { printf '%s\n' "${1:-}" | tr ',' '\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//; /^$/d'; }
+
+# An entry carrying an email is somebody Teams can mention, a bare one is shown as written.
+# That is the same rule the mention list downstream already goes by.
+CC_TEXT=""
+CC_USERS=""
+while IFS= read -r ENTRY; do
+  SHOWN="$ENTRY"
+  if [[ "$ENTRY" == *"|"* ]]; then
+    NAME="${ENTRY%|*}"
+    ID="${ENTRY#*|}"
+    if [ -n "$NAME" ] && [ -n "$ID" ]; then
+      CC_TEXT="${CC_TEXT}${CC_TEXT:+, }<at>${NAME}</at>"
+      CC_USERS="${CC_USERS}${ENTRY}"$'\n'
+      continue
+    fi
+    # Half an entry cannot be mentioned, and a card that goes out beats one that fails.
+    echo "::warning::cc entry '$ENTRY' is not \"display name|email\", showing it as plain text"
+    SHOWN="${NAME:-$ID}"
+  fi
+  [ -n "$SHOWN" ] || continue
+  # Escaped like the job names, so an underscore in a handle is not read as markdown.
+  CC_TEXT="${CC_TEXT}${CC_TEXT:+, }$(printf '%s' "$SHOWN" | sed -E 's/\\/\\\\/g; s/[][*`_]/\\&/g')"
+done < <(csv_lines "${CC:-}")
+
+[ -z "$CC_TEXT" ] || CC_TEXT="cc: $CC_TEXT"
+
+# Everyone mentioned on the cc line needs an entity too, or Teams renders the <at> as text.
+MENTIONS=$(printf '%s\n%s' "$(csv_lines "${MENTION_USERS:-}")" "$CC_USERS" \
+  | sed '/^$/d' | awk '!seen[$0]++' | paste -sd, -)
+
 EXTRA=$(jq -n -c \
   --arg attempts "$ATTEMPTS" \
+  --arg cc "$CC_TEXT" \
   --arg facts "${FACTS:-}" \
   --arg jobs "$JOBS" \
   --arg footer "${FOOTER:-}" \
@@ -70,6 +103,8 @@ EXTRA=$(jq -n -c \
       {type: "Container", spacing: "medium", items: [
          {type: "TextBlock", text: "Failed jobs", weight: "bolder", spacing: "none"},
          {type: "TextBlock", wrap: true, spacing: "small", text: $jobs}]}]
+   + (if $cc == "" then []
+      else [{type: "TextBlock", spacing: "medium", wrap: true, text: $cc}] end)
    + (if $footer == "" then []
       else [{type: "TextBlock", spacing: "medium", wrap: true, isSubtle: true, text: $footer}] end)')
 
@@ -80,4 +115,5 @@ EXTRA=$(jq -n -c \
   printf '%s\n' "$BODY"
   echo "$delim"
   echo "extra-body=$EXTRA"
+  echo "mention-users=$MENTIONS"
 } >> "$GITHUB_OUTPUT"

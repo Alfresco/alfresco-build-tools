@@ -23,6 +23,11 @@ decide() {
   emit reason-text "$text"
   emit attempt "$RUN_ATTEMPT"
   emit max-attempts "$MAX_ATTEMPTS"
+  # Only an escalation has anything to compare, so a stale event or a plain retry skips the lookup.
+  if [ "$decision" = "escalate" ]; then
+    resolve_anchor
+  fi
+  emit last-successful-sha "$ANCHOR"
   local delim="EOF_${RANDOM}${RANDOM}"
   {
     echo "failed-jobs<<${delim}"
@@ -38,20 +43,44 @@ decide() {
 }
 
 # Returns 2 on an HTTP 404 so callers can tell "it is not there" from "the API call failed",
-# which otherwise both look like an empty answer and stall the release silently.
+# which otherwise both look like an empty answer and stall the release silently. A transient
+# 5xx is not an answer either, so give the API a few tries before believing it.
 api() {
-  local stderr status out
+  local stderr status out attempt=1
   stderr=$(mktemp)
-  if out=$(gh api "$@" 2>"$stderr"); then
+  while :; do
+    if out=$(gh api "$@" 2>"$stderr"); then
+      rm -f "$stderr"
+      printf '%s' "$out"
+      return 0
+    fi
+    if [ "$attempt" -lt "${API_MAX_ATTEMPTS:-3}" ] && grep -qE 'HTTP 5[0-9][0-9]|Server Error' "$stderr"; then
+      sleep $(( attempt * ${API_RETRY_DELAY:-2} ))
+      attempt=$(( attempt + 1 ))
+      continue
+    fi
+    status=1
+    if grep -q 'HTTP 404' "$stderr"; then
+      status=2
+    fi
+    cat "$stderr" >&2
     rm -f "$stderr"
-    printf '%s' "$out"
+    return "$status"
+  done
+}
+
+# The newest green run of this workflow on this branch, which is where a caller starts working
+# out what went into the release that is now stuck. Best effort: empty is a usable answer.
+ANCHOR=""
+resolve_anchor() {
+  if [ -z "${WORKFLOW_ID:-}" ]; then
+    echo "::warning::The event carries no workflow id, so last-successful-sha is empty"
     return 0
   fi
-  status=1
-  grep -q 'HTTP 404' "$stderr" && status=2
-  cat "$stderr" >&2
-  rm -f "$stderr"
-  return "$status"
+  ANCHOR=$(api "repos/$REPOSITORY/actions/workflows/$WORKFLOW_ID/runs?branch=${HEAD_BRANCH}&status=success&per_page=20" \
+    --jq "[.workflow_runs[] | select(.run_number < ${RUN_NUMBER:-0}) | .head_sha] | first // empty") || ANCHOR=""
+  # A branch releasing for the first time has no earlier success, which is not an error.
+  [ -n "$ANCHOR" ] || echo "::warning::No earlier successful run of this workflow on $HEAD_BRANCH, so last-successful-sha is empty"
 }
 
 MAX_ATTEMPTS="${MAX_ATTEMPTS:-}"

@@ -40,8 +40,12 @@ inputs:
     description: A closing line, e.g. naming who should pick this up
     required: false
     default: ""
+  cc:
+    description: 'Comma-separated people to name on a cc line of their own, such as the cc output of dependency-chain-changes. An entry in "display name|email" format is mentioned, with the <at> marker written for you; an entry without a "|" is shown as plain text.'
+    required: false
+    default: ""
   mention-users:
-    description: 'Comma-separated list of users to mention in format "display name|email". The footer input has to contain the matching <at>display name</at>.'
+    description: 'Comma-separated list of users to mention in format "display name|email". The footer input has to contain the matching <at>display name</at>. Prefer cc, which writes the line for you.'
     required: false
     default: ""
   mention-tags:
@@ -68,6 +72,8 @@ runs:
         FACTS: ${{ inputs.facts }}
         MAX_ATTEMPTS: ${{ inputs.max-attempts }}
         FOOTER: ${{ inputs.footer }}
+        CC: ${{ inputs.cc }}
+        MENTION_USERS: ${{ inputs.mention-users }}
         BRANCH: ${{ github.event.workflow_run.head_branch }}
         ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
       run: ${{ github.action_path }}/build-card.sh
@@ -78,7 +84,7 @@ runs:
         title: ${{ steps.card.outputs.title }}
         message: ${{ steps.card.outputs.message }}
         card-extra-body: ${{ steps.card.outputs.extra-body }}
-        mention-users: ${{ inputs.mention-users }}
+        mention-users: ${{ steps.card.outputs.mention-users }}
         mention-tags: ${{ inputs.mention-tags }}
         # Nothing failed in the watcher itself, so the colour has to be stated.
         status: failure

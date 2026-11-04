@@ -23,9 +23,18 @@ Push to Nexus'
         {"name":"Push to Nexus","conclusion":"skipped"},
         {"name":"run_ci / Repository - MariaDB ${{ matrix.version }} tests","conclusion":"skipped"}
     ]}'
+    export API_RETRY_DELAY="0"
     export MOCK_TIP="aaaaaaa"
     export MOCK_TIP_STATUS="ok"
     export MOCK_RUN_STATUS="completed"
+
+    export WORKFLOW_ID="999"
+    export RUN_NUMBER="42"
+    export MOCK_RUNS_STATUS="ok"
+    export MOCK_WORKFLOW_RUNS='{"workflow_runs":[
+        {"run_number":41,"head_sha":"ggggggg"},
+        {"run_number":38,"head_sha":"fffffff"}
+    ]}'
 
     mock_gh
 }
@@ -62,6 +71,11 @@ mock_gh() {
         done
 
         case "$url" in
+            */actions/workflows/*/runs*)
+                if [ "$MOCK_RUNS_STATUS" = "error" ]; then
+                    echo "gh: Internal Server Error (HTTP 500)" >&2; return 1
+                fi
+                body="$MOCK_WORKFLOW_RUNS" ;;
             */actions/runs/*/jobs)
                 body="$MOCK_JOBS" ;;
             */actions/runs/*)
@@ -69,7 +83,13 @@ mock_gh() {
             */git/ref/heads/*)
                 case "$MOCK_TIP_STATUS" in
                     missing) echo "gh: Not Found (HTTP 404)" >&2; return 1 ;;
-                    error) echo "gh: Internal Server Error (HTTP 500)" >&2; return 1 ;;
+                    error) echo "gh: Forbidden (HTTP 403)" >&2; return 1 ;;
+                    flaky)
+                        echo x >> "$MOCK_TIP_CALLS"
+                        if [ "$(wc -l < "$MOCK_TIP_CALLS")" -lt 3 ]; then
+                            echo "gh: Internal Server Error (HTTP 500)" >&2; return 1
+                        fi ;;
+                    always-5xx) echo "gh: Bad Gateway (HTTP 502)" >&2; return 1 ;;
                 esac
                 body="{\"object\":{\"sha\":\"$MOCK_TIP\"}}" ;;
             *)
@@ -282,4 +302,72 @@ mock_gh() {
     run workflow-run-auto-retry.sh
     [ "$status" -eq 0 ]
     grep -q "^\*\*none\*\*: Branch master moved" "$GITHUB_STEP_SUMMARY"
+}
+
+@test "an escalation reports the last successful sha" {
+    export MOCK_JOBS='{"jobs":[{"name":"Push to Nexus","conclusion":"failure"}]}'
+    run workflow-run-auto-retry.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "decision" "escalate"
+    assert_output_var "last-successful-sha" "ggggggg"
+}
+
+@test "only a success older than the failing run can be the anchor" {
+    export RUN_NUMBER="39"
+    export MOCK_JOBS='{"jobs":[{"name":"Push to Nexus","conclusion":"failure"}]}'
+    run workflow-run-auto-retry.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "last-successful-sha" "fffffff"
+}
+
+@test "the anchor is empty when the branch has no earlier successful run" {
+    export MOCK_WORKFLOW_RUNS='{"workflow_runs":[]}'
+    export MOCK_JOBS='{"jobs":[{"name":"Push to Nexus","conclusion":"failure"}]}'
+    run workflow-run-auto-retry.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "decision" "escalate"
+    assert_output_var "last-successful-sha" ""
+    [[ "$output" == *"::warning::No earlier successful run"* ]]
+}
+
+@test "a failed anchor lookup leaves it empty without failing the step" {
+    export MOCK_RUNS_STATUS="error"
+    export MOCK_JOBS='{"jobs":[{"name":"Push to Nexus","conclusion":"failure"}]}'
+    run workflow-run-auto-retry.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "decision" "escalate"
+    assert_output_var "last-successful-sha" ""
+}
+
+@test "a decision other than escalate does not look the anchor up" {
+    run workflow-run-auto-retry.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "decision" "retry"
+    assert_output_var "last-successful-sha" ""
+}
+
+@test "a transient 5xx is retried and the run continues" {
+    export MOCK_TIP_STATUS="flaky"
+    export MOCK_TIP_CALLS="$BATS_TMPDIR/tip_calls_${RANDOM}"
+    > "$MOCK_TIP_CALLS"
+    run workflow-run-auto-retry.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "decision" "retry"
+    [ "$(wc -l < "$MOCK_TIP_CALLS")" -eq 3 ]
+    rm -f "$MOCK_TIP_CALLS"
+}
+
+@test "a 5xx that never clears still fails the step" {
+    export MOCK_TIP_STATUS="always-5xx"
+    run workflow-run-auto-retry.sh
+    [ "$status" -ne 0 ]
+    [[ "$output" == *"::error::Could not read branch"* ]]
+}
+
+@test "a 404 is not retried and is told apart from an error" {
+    export MOCK_TIP_STATUS="missing"
+    run workflow-run-auto-retry.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "decision" "none"
+    [[ "$output" == *"no longer exists"* ]]
 }
