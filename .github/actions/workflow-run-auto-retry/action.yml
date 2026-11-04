@@ -32,6 +32,9 @@ outputs:
   max-attempts:
     description: The configured attempt budget
     value: ${{ steps.decide.outputs.max-attempts }}
+  last-successful-sha:
+    description: Head commit of the newest earlier successful run of the watched workflow on this branch. Set only on an escalation, and empty when there is no such run.
+    value: ${{ steps.decide.outputs.last-successful-sha }}
 runs:
   using: composite
   steps:
@@ -46,6 +49,8 @@ runs:
         RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
         HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
         HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        WORKFLOW_ID: ${{ github.event.workflow_run.workflow_id }}
+        RUN_NUMBER: ${{ github.event.workflow_run.run_number }}
       run: ${{ github.action_path }}/workflow-run-auto-retry.sh
 
     - name: Re-run failed jobs

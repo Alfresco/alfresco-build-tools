@@ -262,3 +262,111 @@ Owner|release duty"
     [ "$status" -ne 0 ]
     [[ "$output" == *"GITHUB_OUTPUT is not set"* ]]
 }
+
+cc_line() {
+    extra_body | jq -r '[.[] | select(.type=="TextBlock" and .isSubtle == null)] | first | .text // ""'
+}
+
+mention_users() {
+    grep '^mention-users=' "$GITHUB_OUTPUT" | cut -d= -f2-
+}
+
+@test "no cc line and no mentions when cc is not set" {
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(cc_line)" = "" ]
+    [ "$(mention_users)" = "" ]
+}
+
+@test "an entry with an email becomes an at marker and an entity" {
+    export CC="Jakub Kochman|jakub.kochman@hyland.com,Luis Medalhas|LuisFilipe.ValenteMedalhas@hyland.com"
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(cc_line)" = "cc: <at>Jakub Kochman</at>, <at>Luis Medalhas</at>" ]
+    [ "$(mention_users)" = "Jakub Kochman|jakub.kochman@hyland.com,Luis Medalhas|LuisFilipe.ValenteMedalhas@hyland.com" ]
+}
+
+@test "an entry without an email is shown as text and mentions nobody" {
+    export CC="Jakub Kochman|jakub.kochman@hyland.com,@gerardolenski,@damianujma"
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(cc_line)" = "cc: <at>Jakub Kochman</at>, @gerardolenski, @damianujma" ]
+    [ "$(mention_users)" = "Jakub Kochman|jakub.kochman@hyland.com" ]
+}
+
+@test "the order given is the order shown" {
+    export CC="@gerardolenski,Jakub Kochman|jakub.kochman@hyland.com"
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(cc_line)" = "cc: @gerardolenski, <at>Jakub Kochman</at>" ]
+}
+
+@test "plain entries alone still produce a cc line" {
+    export CC="@gerardolenski"
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(cc_line)" = "cc: @gerardolenski" ]
+    [ "$(mention_users)" = "" ]
+}
+
+@test "an underscore in a plain entry is escaped rather than read as markdown" {
+    export CC="@some_user_name"
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(cc_line)" = 'cc: @some\_user\_name' ]
+}
+
+@test "mention-users and cc are merged without repeating anyone" {
+    export MENTION_USERS="Jakub Kochman|jakub.kochman@hyland.com"
+    export CC="Jakub Kochman|jakub.kochman@hyland.com,Luis Medalhas|LuisFilipe.ValenteMedalhas@hyland.com"
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(mention_users)" = "Jakub Kochman|jakub.kochman@hyland.com,Luis Medalhas|LuisFilipe.ValenteMedalhas@hyland.com" ]
+}
+
+@test "the cc line sits above the footer" {
+    export CC="@gerardolenski"
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    texts=$(extra_body | jq -r '[.[] | select(.type=="TextBlock") | .text] | join("~")')
+    [[ "$texts" == *"cc: @gerardolenski~cc: release duty"* ]]
+}
+
+@test "a cc entry with a separator but no email degrades to plain text" {
+    export CC="Alice A|alice.a@hyland.com,Jakub Kochman|"
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(cc_line)" = "cc: <at>Alice A</at>, Jakub Kochman" ]
+    [ "$(mention_users)" = "Alice A|alice.a@hyland.com" ]
+    [[ "$output" == *"::warning::cc entry"* ]]
+}
+
+@test "a cc entry with an email but no name degrades to plain text" {
+    export CC="|alice.a@hyland.com"
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(cc_line)" = "cc: alice.a@hyland.com" ]
+    [ "$(mention_users)" = "" ]
+}
+
+@test "a cc entry that is only a separator is dropped" {
+    export CC="|,Alice A|alice.a@hyland.com"
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(cc_line)" = "cc: <at>Alice A</at>" ]
+}
+
+@test "blank entries and stray spaces in cc are ignored" {
+    export CC=" Jakub Kochman|jakub.kochman@hyland.com ,, @gerardolenski , "
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(cc_line)" = "cc: <at>Jakub Kochman</at>, @gerardolenski" ]
+}
+
+@test "an empty cc leaves the footer alone, so a group mention still goes out" {
+    export MENTION_TAGS="Release Duty|dGFnaWQ="
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(cc_line)" = "" ]
+    extra_body | jq -e '[.[] | select(.isSubtle == true) | .text] | index("cc: release duty - please pick this up.")' >/dev/null
+}

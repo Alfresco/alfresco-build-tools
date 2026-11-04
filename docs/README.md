@@ -46,6 +46,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [configure-git-author](#configure-git-author)
   - [dependabot-workflow-run-automation](#dependabot-workflow-run-automation)
   - [dependabot-missing-actions-check](#dependabot-missing-actions-check)
+  - [dependency-chain-changes](#dependency-chain-changes)
   - [dbp-charts](#dbp-charts)
   - [dispatch-resume-workflow](#dispatch-resume-workflow)
   - [docker-dump-containers-logs](#docker-dump-containers-logs)
@@ -669,6 +670,100 @@ Nowdays, dependabot supports glob patterns, so this action is not strictly neces
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/dependabot-missing-actions-check@v19.12.1
 ```
+
+### dependency-chain-changes
+
+Lists the changes between two refs, and where a pinned upstream version moved
+between them, repeats that in the repository the version came from.
+
+It answers "whose work is sitting in this build" in a chain of repositories that
+release into one another by bumping a version. Only commits with a pull request
+behind them are reported, so version bumps, release-plugin commits and other
+direct pushes drop out by themselves.
+
+```yaml
+      - id: changes
+        uses: Alfresco/alfresco-build-tools/.github/actions/dependency-chain-changes@v19.12.0
+        with:
+          from-ref: ${{ steps.retry.outputs.last-successful-sha }}
+          to-ref: ${{ github.event.workflow_run.head_sha }}
+          mention-domain: example.com
+          upstream: |
+            Alfresco/acs-packaging | Alfresco/alfresco-enterprise-repo | pom.xml | <dependency\.alfresco-enterprise-repo\.version>([^<]*)< | {version}
+            Alfresco/alfresco-enterprise-repo | Alfresco/alfresco-community-repo | pom.xml | <dependency\.alfresco-community-repo\.version>([^<]*)< | {version}
+```
+
+Each `upstream` line is one dependency edge:
+
+```text
+consumer-repo | upstream-repo | version-file | regex | ref-template
+```
+
+The regex needs exactly one capture group holding the version, so any file format
+works - a Maven property, a JSON field, a Gradle property. The template turns that
+version into a ref in the upstream repo, `{version}` being the captured value.
+A line whose first non-blank character is `#` is a comment, so a `#` inside a regex is
+safe. The caller declares every edge it wants
+followed, including the ones below the first hop.
+
+`mention-domain` splits the people found into two outputs. Those whose commit email
+is in that domain come back in `mentionable` as `Display Name|email` pairs.
+Everyone else comes back in `plain` as `@login`, which is more use to a reader than
+an unlinked name. Leave the domain empty and everybody lands in `plain`.
+
+GitHub matches a commit to an account by its author email, so a commit made with an
+address registered on no account has no login at all. Such a person is listed in
+`plain` under the name from the commit instead, unlinked, rather than being left out. `cc` is the
+two joined, which is what the `cc` input of
+[send-teams-workflow-run-notification](#send-teams-workflow-run-notification)
+expects; use `mentionable` and `plain` only if you need the split yourself.
+
+When a bot opened the pull request, the bot is named in `bots` and whoever merged
+it is the person reported in `people`.
+
+`max-depth` bounds how far the walk follows the chain, and `truncated` is `true` when
+it stopped early, so a short list is not mistaken for a complete one. `count` says how
+many changes were found. There is no cap on the number of changes: `compare` returns at
+most 250 commits per call, and the visited set stops a repository being walked twice, so
+the walk is already bounded by the shape of the chain rather than by a number.
+A partial list must not read as the whole story, so surface `truncated` on the card
+rather than letting a cut-off list look complete - the wiring below shows one way.
+
+Three actions make up one watcher: `workflow-run-auto-retry` decides and hands over
+the anchor, this one works out who is behind the changes since then, and
+`send-teams-workflow-run-notification` puts them on the card.
+
+```yaml
+      - id: retry
+        uses: Alfresco/alfresco-build-tools/.github/actions/workflow-run-auto-retry@v19.12.0
+        with:
+          non-retryable-jobs: |
+            Push to Nexus
+
+      - id: changes
+        # An escalation with no earlier green run has nothing to compare against.
+        if: steps.retry.outputs.decision == 'escalate' && steps.retry.outputs.last-successful-sha != ''
+        uses: Alfresco/alfresco-build-tools/.github/actions/dependency-chain-changes@v19.12.0
+        with:
+          from-ref: ${{ steps.retry.outputs.last-successful-sha }}
+          to-ref: ${{ github.event.workflow_run.head_sha }}
+          mention-domain: example.com
+
+      - if: steps.retry.outputs.decision == 'escalate'
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-workflow-run-notification@v19.12.0
+        with:
+          webhook-url: ${{ secrets.TEAMS_WEBHOOK }}
+          reason-code: ${{ steps.retry.outputs.reason-code }}
+          failed-jobs: ${{ steps.retry.outputs.failed-jobs }}
+          max-attempts: ${{ steps.retry.outputs.max-attempts }}
+          cc: ${{ steps.changes.outputs.cc }}
+          footer: "release duty - please pick this up."
+          facts: |
+            Author list|${{ steps.changes.outputs.truncated == 'true' && 'partial, limit reached' || 'complete' }}
+```
+
+`cc` is empty when the step above was skipped, which leaves the card unchanged
+rather than failing, so the escalation still goes out.
 
 ### dbp-charts
 
@@ -2775,6 +2870,24 @@ written rather than as markdown.
 pass `mention-users` or `mention-tags` and include the matching
 `<at>name</at>` in the `footer` text.
 
+`cc` adds a line of its own, above the footer, for naming the people behind
+the change rather than whoever is on duty. It takes the `cc` output of
+[dependency-chain-changes](#dependency-chain-changes) directly:
+
+```yaml
+          cc: ${{ steps.changes.outputs.cc }}
+```
+
+Each entry is one person, and its shape decides how they appear. A
+`display name|email` entry is mentioned, with the `<at>` marker and the
+matching entity written for you, so the footer does not have to name anybody.
+An entry with no `|` is shown as plain text, escaped the same way as the job
+names, for somebody who cannot be mentioned. An entry missing either half, such as
+`Name|`, is shown as plain text with a warning rather than failing the step, because
+a card that goes out beats one that does not. They are listed in the order
+given. Anyone named in both `mention-users` and `cc` is mentioned once. With
+`cc` unset, the card is exactly what it was before.
+
 ### setup-checkov
 
 Set up a specific version of Checkov and add it to the PATH.
@@ -3238,9 +3351,9 @@ It returns `decision`, in this order:
 4. **The attempt budget is spent** — `escalate`.
 5. Otherwise — `retry`.
 
-Every outcome is written to the job summary. Any API error other than a 404
-fails the step, so a token or rate-limit problem cannot look like a healthy
-no-op.
+Every outcome is written to the job summary. A 5xx is retried up to three times
+before being believed. Any API error other than a 404 then fails the step, so a token
+or rate-limit problem cannot look like a healthy no-op.
 
 Entries under `non-retryable-jobs` are job **display names** and are matched on
 the whole name. A job nested through a reusable workflow is reported as
@@ -3249,7 +3362,16 @@ jobs do not need listing. A job that was gated and did not run reports
 `skipped`, not `failure`, so it never blocks a retry.
 
 Outputs are `decision` (`retry`, `escalate` or `none`), `reason-code`,
-`reason-text`, `failed-jobs`, `attempt` and `max-attempts`.
+`reason-text`, `failed-jobs`, `attempt`, `max-attempts` and
+`last-successful-sha`.
+
+`last-successful-sha` is the head commit of the newest earlier successful run
+of the watched workflow on the same branch, which is where
+[dependency-chain-changes](#dependency-chain-changes) starts when working out
+who to tell. It is looked up only on an escalation, so a stale event or a
+plain retry does not pay for the call, and it is empty on any other decision.
+It is also empty, with a warning, when the branch has no earlier successful
+run or the lookup fails; the escalation still goes out.
 
 `reason-text` is one sentence suitable for a log or a notification body.
 `reason-code` is set only on an escalation, to `attempts-exhausted`,
