@@ -113,30 +113,11 @@ edge() {
     assert_output_var "people" "erin"
 }
 
-@test "splits mentionable from plain on the email domain" {
-    run dependency-chain-changes.sh
-    [ "$status" -eq 0 ]
-    assert_output_var "mentionable" "Alice A|alice.a@hyland.com"
-    assert_output_var "plain" "@bob"
-}
-
-@test "an address outside the domain stays a plain handle" {
-    export MOCK_COMPARE_ROOT='{"commits":[
-        {"sha":"ffffffffff","html_url":"u/5","author":{"login":"tiago"},
-         "commit":{"message":"ACS-9 thing (#13)","author":{"name":"Tiago S","email":"tiago@gmail.com"}}}
-    ]}'
-    run dependency-chain-changes.sh
-    [ "$status" -eq 0 ]
-    assert_output_var "mentionable" ""
-    assert_output_var "plain" "@tiago"
-}
-
-@test "without a mention domain everybody is plain" {
+@test "without a mention domain everybody keeps their handle" {
     export MENTION_DOMAIN=""
     run dependency-chain-changes.sh
     [ "$status" -eq 0 ]
-    assert_output_var "mentionable" ""
-    assert_output_var "plain" "@alice,@bob"
+    assert_output_var "cc" "@alice,@bob"
 }
 
 @test "names the bot and mentions whoever merged its pull request" {
@@ -148,7 +129,7 @@ edge() {
     [ "$status" -eq 0 ]
     assert_output_var "bots" "dependabot[bot]"
     assert_output_var "people" "dave"
-    assert_output_var "plain" "@dave"
+    assert_output_var "cc" "@dave"
 }
 
 @test "follows an upstream whose pinned version moved" {
@@ -229,6 +210,60 @@ $(edge)
     assert_output_var "truncated" "true"
 }
 
+@test "the default depth covers the chain without being asked" {
+    unset MAX_DEPTH
+    export UPSTREAM="$(edge)"
+    run dependency-chain-changes.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "people" "alice,bob,carol"
+    assert_output_var "truncated" "false"
+}
+
+# The script and the documented input must not drift apart.
+@test "the documented default matches the one the script falls back to" {
+    local declared
+    declared=$(awk '/^  max-depth:/{f=1; next}
+                    f && /^  [a-z-]+:/{exit}
+                    f && /^    default:/{gsub(/[^0-9]/, ""); print; exit}' "$DIR/../action.yml")
+    [ "$declared" = "4" ] || { echo "action.yml declares max-depth default $declared" >&2; return 1; }
+    grep -q 'MAX_DEPTH="${MAX_DEPTH:-4}"' "$DIR/../dependency-chain-changes.sh"
+}
+
+@test "pull-requests-only false reports the commits no pull request produced" {
+    export PULL_REQUESTS_ONLY="false"
+    run dependency-chain-changes.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "count" "3"
+    assert_output_var "people" "alfresco-build,alice,bob"
+}
+
+@test "a commit with no pull request behind it carries a null pr" {
+    export PULL_REQUESTS_ONLY="false"
+    run dependency-chain-changes.sh
+    [ "$status" -eq 0 ]
+    [ "$(changes_json | jq -r '[.[] | select(.pr == null) | .login] | join(",")')" = "alfresco-build" ]
+    [ "$(changes_json | jq '[.[] | select(.pr != null)] | length')" = "2" ]
+}
+
+@test "a bot commit with no pull request is not looked up" {
+    export PULL_REQUESTS_ONLY="false"
+    export MOCK_COMPARE_ROOT='{"commits":[
+        {"sha":"1111111111","html_url":"u/6","author":{"login":"release[bot]"},
+         "commit":{"message":"[skip ci] prepare release 1.0.1","author":{"name":"release[bot]","email":"r@example.com"}}}
+    ]}'
+    run dependency-chain-changes.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "bots" "release[bot]"
+    assert_output_var "people" ""
+}
+
+@test "rejects a pull-requests-only that is not a boolean" {
+    export PULL_REQUESTS_ONLY="yes"
+    run dependency-chain-changes.sh
+    [ "$status" -eq 1 ]
+    [[ "$output" == *"pull-requests-only must be true or false"* ]]
+}
+
 @test "rejects a max-depth that is not a positive number" {
     export MAX_DEPTH="0"
     run dependency-chain-changes.sh
@@ -242,13 +277,13 @@ $(edge)
     [ "$status" -ne 0 ]
 }
 
-@test "cc joins the mentionable and plain lists" {
+@test "an address in the mention domain carries its email, the rest keep their handle" {
     run dependency-chain-changes.sh
     [ "$status" -eq 0 ]
     assert_output_var "cc" "Alice A|alice.a@hyland.com,@bob"
 }
 
-@test "cc carries no stray separator when nobody is mentionable" {
+@test "an address outside the domain stays a plain handle, with no stray separator" {
     export MOCK_COMPARE_ROOT='{"commits":[
         {"sha":"ffffffffff","html_url":"u/5","author":{"login":"tiago"},
          "commit":{"message":"ACS-9 thing (#13)","author":{"name":"Tiago S","email":"tiago@gmail.com"}}}
@@ -258,7 +293,7 @@ $(edge)
     assert_output_var "cc" "@tiago"
 }
 
-@test "cc carries no stray separator when everybody is mentionable" {
+@test "everybody mentionable leaves no trailing separator" {
     export MOCK_COMPARE_ROOT='{"commits":[
         {"sha":"ffffffffff","html_url":"u/5","author":{"login":"alice"},
          "commit":{"message":"ACS-9 thing (#13)","author":{"name":"Alice A","email":"alice.a@hyland.com"}}}
@@ -282,7 +317,6 @@ $(edge)
     ]}'
     run dependency-chain-changes.sh
     [ "$status" -eq 0 ]
-    assert_output_var "plain" "Old Laptop"
     assert_output_var "cc" "Old Laptop"
 }
 
@@ -293,8 +327,7 @@ $(edge)
     ]}'
     run dependency-chain-changes.sh
     [ "$status" -eq 0 ]
-    assert_output_var "mentionable" "Old Laptop|old.laptop@hyland.com"
-    assert_output_var "plain" ""
+    assert_output_var "cc" "Old Laptop|old.laptop@hyland.com"
 }
 
 @test "a hash inside an edge regex is not taken for a comment" {

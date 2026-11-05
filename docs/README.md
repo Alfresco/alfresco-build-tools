@@ -674,9 +674,10 @@ Nowdays, dependabot supports glob patterns, so this action is not strictly neces
 ### dependency-chain-changes
 
 Lists who changed what between two refs, following the chain into any upstream
-repository whose pinned version moved in that range. Only commits with a pull
-request behind them count, so version bumps and release-plugin commits drop out
-by themselves.
+repository whose pinned version moved in that range. By default only commits with
+a pull request behind them count, so automated version bumps and direct pushes
+drop out by themselves. This example is using `workflow-run-auto-retry` to get a
+ref range input.
 
 ```yaml
       - id: retry
@@ -718,17 +719,17 @@ is a comment.
 
 | output | |
 | --- | --- |
-| `cc` | `mentionable` and `plain` joined - wire this one |
-| `mentionable` | `Display Name\|email` for commit emails in `mention-domain`, which Teams can mention |
-| `plain` | `@login` for everyone else, or the commit name when GitHub knows no account |
+| `cc` | everyone, in one list: `Display Name\|email` for a commit email in `mention-domain` so Teams can mention it, `@login` for anyone else, or the commit name when GitHub knows no account |
 | `people`, `bots` | logins, humans and bots separately |
 | `changes` | the whole list as JSON: repo, sha, login, name, email, kind, pr, title, url |
 | `count`, `truncated` | how many, and whether anything was left out: `max-depth`, a comparison longer than one API page, or an upstream version the action could not read |
 
 A commit counts as a change only when its subject carries the pull request number that
-GitHub stamps on a squash or merge commit. Everything else in the range is the pipeline
-talking to itself. Editing that number out of the merge box, or merging by rebase, drops
-the author from the list.
+GitHub stamps on a squash or merge commit, on the assumption that everything else in the
+range is the pipeline talking to itself. Editing that number out of the merge box, or
+merging by rebase, drops the author from the list. Set `pull-requests-only: false` to
+report every commit in the range instead, where `pr` is null for the ones with no pull
+request behind them.
 
 When a bot opened the pull request, the bot is named in `bots` and whoever merged it
 is reported in `people`, so a Dependabot bump still has a human attached. An empty
@@ -2843,9 +2844,10 @@ pass `mention-users` or `mention-tags` and include the matching
 `cc` adds a line above the footer naming the people behind the change, and takes the
 `cc` output of [dependency-chain-changes](#dependency-chain-changes) directly. Each
 entry is one person: `display name|email` is mentioned, with the `<at>` marker and the
-matching entity written for you; anything without a `|` is shown as plain text, in the
-order given. A half entry such as `Name|` degrades to plain text with a warning rather
-than failing the step. Anyone named in both `mention-users` and `cc` is mentioned once.
+matching entity written for you; a `@handle` becomes a link to that profile on
+`GITHUB_SERVER_URL`; anything else is shown as plain text, in the order given. A half
+entry such as `Name|` degrades to plain text with a warning rather than failing the
+step. Anyone named in both `mention-users` and `cc` is mentioned once.
 
 ### setup-checkov
 
