@@ -64,6 +64,7 @@ csv_lines() { printf '%s\n' "${1:-}" | tr ',' '\n' | sed 's/^[[:space:]]*//; s/[
 # That is the same rule the mention list downstream already goes by.
 CC_TEXT=""
 CC_USERS=""
+SERVER="${GITHUB_SERVER_URL:-https://github.com}"
 while IFS= read -r ENTRY; do
   SHOWN="$ENTRY"
   if [[ "$ENTRY" == *"|"* ]]; then
@@ -80,7 +81,12 @@ while IFS= read -r ENTRY; do
   fi
   [ -n "$SHOWN" ] || continue
   # Escaped like the job names, so an underscore in a handle is not read as markdown.
-  CC_TEXT="${CC_TEXT}${CC_TEXT:+, }$(printf '%s' "$SHOWN" | sed -E 's/\\/\\\\/g; s/[][*`_]/\\&/g')"
+  SHOWN_MD=$(printf '%s' "$SHOWN" | sed -E 's/\\/\\\\/g; s/[][*`_]/\\&/g')
+  # Only a handle has a profile to point at, so a bare display name is left as text.
+  if [[ "$SHOWN" =~ ^@[A-Za-z0-9-]+$ ]]; then
+    SHOWN_MD="[${SHOWN_MD}](${SERVER}/${SHOWN#@})"
+  fi
+  CC_TEXT="${CC_TEXT}${CC_TEXT:+, }${SHOWN_MD}"
 done < <(csv_lines "${CC:-}")
 
 [ -z "$CC_TEXT" ] || CC_TEXT="cc: $CC_TEXT"

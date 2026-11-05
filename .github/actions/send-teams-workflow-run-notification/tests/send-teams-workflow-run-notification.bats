@@ -290,7 +290,7 @@ mention_users() {
     export CC="Jakub Kochman|jakub.kochman@hyland.com,@gerardolenski,@damianujma"
     run build-card.sh
     [ "$status" -eq 0 ]
-    [ "$(cc_line)" = "cc: <at>Jakub Kochman</at>, @gerardolenski, @damianujma" ]
+    [ "$(cc_line)" = "cc: <at>Jakub Kochman</at>, [@gerardolenski](https://github.com/gerardolenski), [@damianujma](https://github.com/damianujma)" ]
     [ "$(mention_users)" = "Jakub Kochman|jakub.kochman@hyland.com" ]
 }
 
@@ -298,14 +298,14 @@ mention_users() {
     export CC="@gerardolenski,Jakub Kochman|jakub.kochman@hyland.com"
     run build-card.sh
     [ "$status" -eq 0 ]
-    [ "$(cc_line)" = "cc: @gerardolenski, <at>Jakub Kochman</at>" ]
+    [ "$(cc_line)" = "cc: [@gerardolenski](https://github.com/gerardolenski), <at>Jakub Kochman</at>" ]
 }
 
 @test "plain entries alone still produce a cc line" {
     export CC="@gerardolenski"
     run build-card.sh
     [ "$status" -eq 0 ]
-    [ "$(cc_line)" = "cc: @gerardolenski" ]
+    [ "$(cc_line)" = "cc: [@gerardolenski](https://github.com/gerardolenski)" ]
     [ "$(mention_users)" = "" ]
 }
 
@@ -314,6 +314,28 @@ mention_users() {
     run build-card.sh
     [ "$status" -eq 0 ]
     [ "$(cc_line)" = 'cc: @some\_user\_name' ]
+}
+
+@test "a handle keeps its hyphens and points at the profile" {
+    export CC="@dpatel-alfresco"
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(cc_line)" = 'cc: [@dpatel-alfresco](https://github.com/dpatel-alfresco)' ]
+}
+
+@test "an enterprise server is linked to instead of github.com" {
+    export CC="@gerardolenski"
+    export GITHUB_SERVER_URL="https://github.example.com"
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(cc_line)" = 'cc: [@gerardolenski](https://github.example.com/gerardolenski)' ]
+}
+
+@test "a display name with no handle is shown as text, not as a link" {
+    export CC="Old Laptop"
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(cc_line)" = "cc: Old Laptop" ]
 }
 
 @test "mention-users and cc are merged without repeating anyone" {
@@ -329,7 +351,7 @@ mention_users() {
     run build-card.sh
     [ "$status" -eq 0 ]
     texts=$(extra_body | jq -r '[.[] | select(.type=="TextBlock") | .text] | join("~")')
-    [[ "$texts" == *"cc: @gerardolenski~cc: release duty"* ]]
+    [[ "$texts" == *"cc: [@gerardolenski](https://github.com/gerardolenski)~cc: release duty"* ]]
 }
 
 @test "a cc entry with a separator but no email degrades to plain text" {
@@ -360,7 +382,7 @@ mention_users() {
     export CC=" Jakub Kochman|jakub.kochman@hyland.com ,, @gerardolenski , "
     run build-card.sh
     [ "$status" -eq 0 ]
-    [ "$(cc_line)" = "cc: <at>Jakub Kochman</at>, @gerardolenski" ]
+    [ "$(cc_line)" = "cc: <at>Jakub Kochman</at>, [@gerardolenski](https://github.com/gerardolenski)" ]
 }
 
 @test "an empty cc leaves the footer alone, so a group mention still goes out" {

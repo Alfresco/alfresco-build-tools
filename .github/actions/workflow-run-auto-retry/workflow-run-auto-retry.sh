@@ -43,8 +43,8 @@ decide() {
 }
 
 # Returns 2 on an HTTP 404 so callers can tell "it is not there" from "the API call failed",
-# which otherwise both look like an empty answer and stall the release silently. A transient
-# 5xx is not an answer either, so give the API a few tries before believing it.
+# which otherwise both look like an empty answer. A transient 5xx is not an answer either,
+# so give the API a few tries before believing it.
 api() {
   local stderr status out attempt=1
   stderr=$(mktemp)

@@ -6,10 +6,10 @@ inputs:
     required: false
     default: ${{ github.repository }}
   from-ref:
-    description: The last known good ref. Anything git resolves - a tag, a branch or a sha.
+    description: Start of the range, not itself included. Anything git resolves - a tag, a branch or a sha.
     required: true
   to-ref:
-    description: The ref being investigated, usually the one that failed.
+    description: End of the range, included. Anything git resolves - a tag, a branch or a sha.
     required: true
   upstream:
     description: |
@@ -20,13 +20,24 @@ inputs:
     required: false
     default: ""
   mention-domain:
-    description: Email domain whose addresses are worth mentioning. Empty puts everyone in `plain`.
+    description: Email domain whose addresses are paired with a display name in `cc`. Empty leaves everyone as a handle.
     required: false
     default: ""
   max-depth:
-    description: How many repositories deep to follow the chain, counting the first one.
+    description: >-
+      How many repositories deep to follow the chain, counting the first one. Set it to the
+      longest path through the edge list, or the walk stops early and reports truncated. In a
+      diamond, where two repositories pin the same upstream at different versions, each path
+      walks that upstream separately, so this is also what caps the recursion.
     required: false
-    default: "3"
+    default: "4"
+  pull-requests-only:
+    description: >-
+      Report only commits carrying a pull request number, which is what GitHub stamps on a
+      squash or merge commit. Set to false to report every commit in the range, including
+      automated version bumps and direct pushes, in which case `pr` is null for those rows.
+    required: false
+    default: "true"
   github-token:
     description: Token used to read commits, file contents and pull requests. Needs contents read on every repository in the chain.
     required: false
@@ -36,25 +47,24 @@ outputs:
     description: Comma-separated GitHub logins of the humans involved, including whoever merged a bot's pull request
     value: ${{ steps.collect.outputs.people }}
   bots:
-    description: Comma-separated logins of the bots whose pull requests are in range
+    description: Comma-separated logins of the bots whose changes are in range, which are those whose login ends in `[bot]`
     value: ${{ steps.collect.outputs.bots }}
-  mentionable:
-    description: "`Display Name|email` pairs for the people whose address matches mention-domain"
-    value: ${{ steps.collect.outputs.mentionable }}
-  plain:
-    description: "`@login` for everyone who is not in `mentionable`"
-    value: ${{ steps.collect.outputs.plain }}
   cc:
-    description: mentionable and plain joined into one list, ready for the cc input of send-teams-workflow-run-notification
+    description: >-
+      Everyone involved, as one comma-separated list ready for the cc input of
+      send-teams-workflow-run-notification. An address matching mention-domain appears as
+      `Display Name|email` so Teams can mention it, anyone else as `@login`.
     value: ${{ steps.collect.outputs.cc }}
   changes:
-    description: Every change found, as a JSON array with repo, sha, login, name, email, kind, pr, title and url
+    description: Every change found, as a JSON array with repo, sha, login, name, email, kind, pr, title and url. `pr` is null when the commit has no pull request behind it
     value: ${{ steps.collect.outputs.changes }}
   count:
     description: How many changes were found
     value: ${{ steps.collect.outputs.count }}
   truncated:
-    description: "'true' when a limit was reached, so the list is incomplete"
+    description: >-
+      'true' when something was left out: max-depth, a comparison longer than one page of
+      the compare API, or an upstream version that could not be read
     value: ${{ steps.collect.outputs.truncated }}
 runs:
   using: composite
@@ -69,4 +79,5 @@ runs:
         UPSTREAM: ${{ inputs.upstream }}
         MENTION_DOMAIN: ${{ inputs.mention-domain }}
         MAX_DEPTH: ${{ inputs.max-depth }}
+        PULL_REQUESTS_ONLY: ${{ inputs.pull-requests-only }}
       run: ${{ github.action_path }}/dependency-chain-changes.sh

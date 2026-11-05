@@ -6,9 +6,14 @@ set -euo pipefail
 : "${FROM_REF:?from-ref is required}"
 : "${TO_REF:?to-ref is required}"
 
-MAX_DEPTH="${MAX_DEPTH:-3}"
+MAX_DEPTH="${MAX_DEPTH:-4}"
 MENTION_DOMAIN="${MENTION_DOMAIN:-}"
 UPSTREAM="${UPSTREAM:-}"
+PR_ONLY="${PULL_REQUESTS_ONLY:-true}"
+case "$PR_ONLY" in
+  true|false) ;;
+  *) echo "::error::pull-requests-only must be true or false, found '$PR_ONLY'"; exit 1 ;;
+esac
 
 require_positive() {
   [[ "$2" =~ ^[0-9]+$ ]] && [ "$2" -ge 1 ] && return 0
@@ -18,8 +23,8 @@ require_positive() {
 require_positive max-depth "$MAX_DEPTH"
 
 # Returns 2 on an HTTP 404 so callers can tell "it is not there" from "the API call failed",
-# which otherwise both look like an empty answer and stall the release silently. A transient
-# 5xx is not an answer either, so give the API a few tries before believing it.
+# which otherwise both look like an empty answer. A transient 5xx is not an answer either,
+# so give the API a few tries before believing it.
 api() {
   local stderr status out attempt=1
   stderr=$(mktemp)
@@ -53,15 +58,12 @@ TRUNCATED=false
 read_version() {
   local repo="$1" ref="$2" file="$3" regex="$4" content
   content=$(api "repos/$repo/contents/${file}?ref=${ref}" --jq '.content') || return 1
-  printf '%s' "$content" | base64 --decode | RX="$regex" python3 -c '
-import os, re, sys
-m = re.search(os.environ["RX"], sys.stdin.read())
-sys.stdout.write(m.group(1) if m else "")
-'
+  printf '%s' "$content" | base64 --decode \
+    | jq -Rrs --arg rx "$regex" '[ match($rx) | .captures[0].string ] | first // ""'
 }
 
-# A commit with no pull request behind it is the pipeline talking to itself - a version bump,
-# a release-plugin commit, a direct push - so the subject is what tells humans apart from bots.
+# The subject is the only place GitHub records a pull request number, and by default a commit
+# without one is the pipeline talking to itself rather than somebody's work.
 collect() {
   local repo="$1" from="$2" to="$3" cmp
   cmp=$(api "repos/$repo/compare/${from}...${to}") || {
@@ -74,20 +76,22 @@ collect() {
     TRUNCATED=true
   fi
   local rows
-  rows=$(printf '%s' "$cmp" | jq -c --arg repo "$repo" '
+  rows=$(printf '%s' "$cmp" | jq -c --arg repo "$repo" --argjson pr_only "$PR_ONLY" '
     [ .commits[]
       | (.commit.message | split("\n")[0]) as $subject
-      | select($subject | test("\\(#[0-9]+\\)$") or test("^Merge pull request #[0-9]+"))
       | ( if ($subject | test("\\(#[0-9]+\\)$"))
           then ($subject | capture("\\(#(?<pr>[0-9]+)\\)$"))
-          else ($subject | capture("^Merge pull request #(?<pr>[0-9]+)")) end ) as $m
+          elif ($subject | test("^Merge pull request #[0-9]+"))
+          then ($subject | capture("^Merge pull request #(?<pr>[0-9]+)"))
+          else null end ) as $m
+      | select($pr_only == false or $m != null)
       | { repo: $repo,
           sha: .sha[0:9],
           login: (.author.login // ""),
           name: .commit.author.name,
           email: (.commit.author.email // ""),
           kind: (if (.author.login // "") | endswith("[bot]") then "bot" else "user" end),
-          pr: ($m.pr | tonumber),
+          pr: (if $m == null then null else ($m.pr | tonumber) end),
           title: ($subject | sub(" \\(#[0-9]+\\)$"; "")),
           url: .html_url } ]')
   CHANGES=$(jq -c --argjson new "$rows" '. + $new' <<<"$CHANGES")
@@ -123,6 +127,7 @@ walk() {
   done <<<"$EDGES"
 }
 
+# trims leading and trailing whitespace from a string
 trim() { local s="$1"; s="${s#"${s%%[![:space:]]*}"}"; printf '%s' "${s%"${s##*[![:space:]]}"}"; }
 
 EDGES=$(printf '%s\n' "$UPSTREAM" | sed 's/^[[:space:]]*#.*//' | grep -v '^[[:space:]]*$' || true)
@@ -130,7 +135,7 @@ EDGES=$(printf '%s\n' "$UPSTREAM" | sed 's/^[[:space:]]*#.*//' | grep -v '^[[:sp
 walk "$REPOSITORY" "$FROM_REF" "$TO_REF" 1
 
 # Somebody merged the bot's pull request, and that person is the one who can act on it.
-for pr in $(jq -r '.[] | select(.kind == "bot") | "\(.repo)#\(.pr)"' <<<"$CHANGES" | sort -u); do
+for pr in $(jq -r '.[] | select(.kind == "bot" and .pr != null) | "\(.repo)#\(.pr)"' <<<"$CHANGES" | sort -u); do
   merger=$(api "repos/${pr%%#*}/pulls/${pr##*#}" --jq '.merged_by.login // ""') || merger=""
   [ -n "$merger" ] || continue
   CHANGES=$(jq -c --arg k "$pr" --arg m "$merger" \
@@ -163,10 +168,8 @@ PLAIN=$(jq -r --arg d "$MENTION_DOMAIN" '
 emit people "$(jq -r '(map(select(.kind == "user") | .login) + map(.merged_by // empty))
   | map(select(. != "")) | unique | join(",")' <<<"$CHANGES")"
 emit bots "$(jq -r 'map(select(.kind == "bot") | .login) | unique | join(",")' <<<"$CHANGES")"
-emit mentionable "$MENTIONABLE"
-# The one list a notification wants: everyone, each in whichever form can reach them.
+# One list, each person in whichever form can reach them.
 emit cc "$(printf '%s,%s' "$MENTIONABLE" "$PLAIN" | sed 's/^,//; s/,$//')"
-emit plain "$PLAIN"
 emit truncated "$TRUNCATED"
 emit count "$(jq 'length' <<<"$CHANGES")"
 emit_block changes "$(jq -c '.' <<<"$CHANGES")"
