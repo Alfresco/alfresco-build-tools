@@ -673,16 +673,18 @@ Nowdays, dependabot supports glob patterns, so this action is not strictly neces
 
 ### dependency-chain-changes
 
-Lists the changes between two refs, and where a pinned upstream version moved
-between them, repeats that in the repository the version came from.
-
-It answers "whose work is sitting in this build" in a chain of repositories that
-release into one another by bumping a version. Only commits with a pull request
-behind them are reported, so version bumps, release-plugin commits and other
-direct pushes drop out by themselves.
+Lists who changed what between two refs, following the chain into any upstream
+repository whose pinned version moved in that range. Only commits with a pull
+request behind them count, so version bumps and release-plugin commits drop out
+by themselves.
 
 ```yaml
+      - id: retry
+        uses: Alfresco/alfresco-build-tools/.github/actions/workflow-run-auto-retry@v19.12.0
+
       - id: changes
+        # No earlier green run means there is nothing to compare against.
+        if: steps.retry.outputs.decision == 'escalate' && steps.retry.outputs.last-successful-sha != ''
         uses: Alfresco/alfresco-build-tools/.github/actions/dependency-chain-changes@v19.12.0
         with:
           from-ref: ${{ steps.retry.outputs.last-successful-sha }}
@@ -691,63 +693,6 @@ direct pushes drop out by themselves.
           upstream: |
             Alfresco/acs-packaging | Alfresco/alfresco-enterprise-repo | pom.xml | <dependency\.alfresco-enterprise-repo\.version>([^<]*)< | {version}
             Alfresco/alfresco-enterprise-repo | Alfresco/alfresco-community-repo | pom.xml | <dependency\.alfresco-community-repo\.version>([^<]*)< | {version}
-```
-
-Each `upstream` line is one dependency edge:
-
-```text
-consumer-repo | upstream-repo | version-file | regex | ref-template
-```
-
-The regex needs exactly one capture group holding the version, so any file format
-works - a Maven property, a JSON field, a Gradle property. The template turns that
-version into a ref in the upstream repo, `{version}` being the captured value.
-A line whose first non-blank character is `#` is a comment, so a `#` inside a regex is
-safe. The caller declares every edge it wants
-followed, including the ones below the first hop.
-
-`mention-domain` splits the people found into two outputs. Those whose commit email
-is in that domain come back in `mentionable` as `Display Name|email` pairs.
-Everyone else comes back in `plain` as `@login`, which is more use to a reader than
-an unlinked name. Leave the domain empty and everybody lands in `plain`.
-
-GitHub matches a commit to an account by its author email, so a commit made with an
-address registered on no account has no login at all. Such a person is listed in
-`plain` under the name from the commit instead, unlinked, rather than being left out. `cc` is the
-two joined, which is what the `cc` input of
-[send-teams-workflow-run-notification](#send-teams-workflow-run-notification)
-expects; use `mentionable` and `plain` only if you need the split yourself.
-
-When a bot opened the pull request, the bot is named in `bots` and whoever merged
-it is the person reported in `people`.
-
-`max-depth` bounds how far the walk follows the chain, and `truncated` is `true` when
-it stopped early, so a short list is not mistaken for a complete one. `count` says how
-many changes were found. There is no cap on the number of changes: `compare` returns at
-most 250 commits per call, and the visited set stops a repository being walked twice, so
-the walk is already bounded by the shape of the chain rather than by a number.
-A partial list must not read as the whole story, so surface `truncated` on the card
-rather than letting a cut-off list look complete - the wiring below shows one way.
-
-Three actions make up one watcher: `workflow-run-auto-retry` decides and hands over
-the anchor, this one works out who is behind the changes since then, and
-`send-teams-workflow-run-notification` puts them on the card.
-
-```yaml
-      - id: retry
-        uses: Alfresco/alfresco-build-tools/.github/actions/workflow-run-auto-retry@v19.12.0
-        with:
-          non-retryable-jobs: |
-            Push to Nexus
-
-      - id: changes
-        # An escalation with no earlier green run has nothing to compare against.
-        if: steps.retry.outputs.decision == 'escalate' && steps.retry.outputs.last-successful-sha != ''
-        uses: Alfresco/alfresco-build-tools/.github/actions/dependency-chain-changes@v19.12.0
-        with:
-          from-ref: ${{ steps.retry.outputs.last-successful-sha }}
-          to-ref: ${{ github.event.workflow_run.head_sha }}
-          mention-domain: example.com
 
       - if: steps.retry.outputs.decision == 'escalate'
         uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-workflow-run-notification@v19.12.0
@@ -755,15 +700,40 @@ the anchor, this one works out who is behind the changes since then, and
           webhook-url: ${{ secrets.TEAMS_WEBHOOK }}
           reason-code: ${{ steps.retry.outputs.reason-code }}
           failed-jobs: ${{ steps.retry.outputs.failed-jobs }}
-          max-attempts: ${{ steps.retry.outputs.max-attempts }}
           cc: ${{ steps.changes.outputs.cc }}
-          footer: "release duty - please pick this up."
           facts: |
-            Author list|${{ steps.changes.outputs.truncated == 'true' && 'partial, limit reached' || 'complete' }}
+            Author list|${{ steps.changes.outputs.truncated == 'true' && 'partial' || 'complete' }}
 ```
 
-`cc` is empty when the step above was skipped, which leaves the card unchanged
-rather than failing, so the escalation still goes out.
+Each `upstream` line is one dependency edge. The caller declares every edge it wants
+followed, including those below the first hop:
+
+```text
+consumer-repo | upstream-repo | version-file | regex | ref-template
+```
+
+The regex needs exactly one capture group holding the version, so any file format
+works. `{version}` in the template is that captured value. A line starting with `#`
+is a comment.
+
+| output | |
+| --- | --- |
+| `cc` | `mentionable` and `plain` joined - wire this one |
+| `mentionable` | `Display Name\|email` for commit emails in `mention-domain`, which Teams can mention |
+| `plain` | `@login` for everyone else, or the commit name when GitHub knows no account |
+| `people`, `bots` | logins, humans and bots separately |
+| `changes` | the whole list as JSON: repo, sha, login, name, email, kind, pr, title, url |
+| `count`, `truncated` | how many, and whether anything was left out: `max-depth`, a comparison longer than one API page, or an upstream version the action could not read |
+
+A commit counts as a change only when its subject carries the pull request number that
+GitHub stamps on a squash or merge commit. Everything else in the range is the pipeline
+talking to itself. Editing that number out of the merge box, or merging by rebase, drops
+the author from the list.
+
+When a bot opened the pull request, the bot is named in `bots` and whoever merged it
+is reported in `people`, so a Dependabot bump still has a human attached. An empty
+`cc`, including when the step was skipped, leaves the card unchanged rather than
+failing.
 
 ### dbp-charts
 
@@ -2870,23 +2840,12 @@ written rather than as markdown.
 pass `mention-users` or `mention-tags` and include the matching
 `<at>name</at>` in the `footer` text.
 
-`cc` adds a line of its own, above the footer, for naming the people behind
-the change rather than whoever is on duty. It takes the `cc` output of
-[dependency-chain-changes](#dependency-chain-changes) directly:
-
-```yaml
-          cc: ${{ steps.changes.outputs.cc }}
-```
-
-Each entry is one person, and its shape decides how they appear. A
-`display name|email` entry is mentioned, with the `<at>` marker and the
-matching entity written for you, so the footer does not have to name anybody.
-An entry with no `|` is shown as plain text, escaped the same way as the job
-names, for somebody who cannot be mentioned. An entry missing either half, such as
-`Name|`, is shown as plain text with a warning rather than failing the step, because
-a card that goes out beats one that does not. They are listed in the order
-given. Anyone named in both `mention-users` and `cc` is mentioned once. With
-`cc` unset, the card is exactly what it was before.
+`cc` adds a line above the footer naming the people behind the change, and takes the
+`cc` output of [dependency-chain-changes](#dependency-chain-changes) directly. Each
+entry is one person: `display name|email` is mentioned, with the `<at>` marker and the
+matching entity written for you; anything without a `|` is shown as plain text, in the
+order given. A half entry such as `Name|` degrades to plain text with a warning rather
+than failing the step. Anyone named in both `mention-users` and `cc` is mentioned once.
 
 ### setup-checkov
 
@@ -3365,13 +3324,11 @@ Outputs are `decision` (`retry`, `escalate` or `none`), `reason-code`,
 `reason-text`, `failed-jobs`, `attempt`, `max-attempts` and
 `last-successful-sha`.
 
-`last-successful-sha` is the head commit of the newest earlier successful run
-of the watched workflow on the same branch, which is where
-[dependency-chain-changes](#dependency-chain-changes) starts when working out
-who to tell. It is looked up only on an escalation, so a stale event or a
-plain retry does not pay for the call, and it is empty on any other decision.
-It is also empty, with a warning, when the branch has no earlier successful
-run or the lookup fails; the escalation still goes out.
+`last-successful-sha` is the head commit of the newest earlier successful run of the
+watched workflow on the same branch, which is where
+[dependency-chain-changes](#dependency-chain-changes) starts. It is looked up only on
+an escalation, and is empty - with a warning - when there is no such run or the
+lookup fails.
 
 `reason-text` is one sentence suitable for a log or a notification body.
 `reason-code` is set only on an escalation, to `attempts-exhausted`,

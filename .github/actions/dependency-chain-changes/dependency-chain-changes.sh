@@ -68,6 +68,11 @@ collect() {
     echo "::warning::Could not compare ${from}...${to} in $repo, skipping it"
     return 0
   }
+  # The compare endpoint stops at 250 commits, and a partial list must not read as the whole story.
+  if [ "$(jq -r '(.total_commits // 0) > (.commits | length)' <<<"$cmp")" = "true" ]; then
+    echo "::warning::${from}...${to} in $repo is longer than one page of the compare API, so this list is partial"
+    TRUNCATED=true
+  fi
   local rows
   rows=$(printf '%s' "$cmp" | jq -c --arg repo "$repo" '
     [ .commits[]
@@ -105,9 +110,15 @@ walk() {
     consumer="$(trim "$consumer")"; up="$(trim "$up")"; file="$(trim "$file")"
     regex="$(trim "$regex")"; template="$(trim "$template")"
     [ "$consumer" = "$repo" ] || continue
-    v_from=$(read_version "$repo" "$from" "$file" "$regex") || continue
-    v_to=$(read_version "$repo" "$to" "$file" "$regex") || continue
-    [ -n "$v_from" ] && [ -n "$v_to" ] && [ "$v_from" != "$v_to" ] || continue
+    # An unreadable version is not the same as one that did not move, so say the walk fell short.
+    if ! v_from=$(read_version "$repo" "$from" "$file" "$regex") \
+      || ! v_to=$(read_version "$repo" "$to" "$file" "$regex") \
+      || [ -z "$v_from" ] || [ -z "$v_to" ]; then
+      echo "::warning::Could not read the $up version from $file in $repo, so its changes are missing"
+      TRUNCATED=true
+      continue
+    fi
+    [ "$v_from" != "$v_to" ] || continue
     walk "$up" "${template//\{version\}/$v_from}" "${template//\{version\}/$v_to}" "$((depth + 1))"
   done <<<"$EDGES"
 }
@@ -133,7 +144,7 @@ emit_block() {
 }
 
 # Only a company address resolves to a Teams account, so anyone else keeps their GitHub handle,
-# which is more use to a reader than an unlinked display name.
+# which is more useful to a reader than an unlinked display name.
 MENTIONABLE=$(jq -r --arg d "$MENTION_DOMAIN" '
   if $d == "" then empty else
     map(select(.kind == "user" and (.email | ascii_downcase | endswith("@" + ($d | ascii_downcase)))))

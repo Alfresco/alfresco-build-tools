@@ -342,6 +342,15 @@ BATS
     [ "$output" = 'result=[{"type":"mention","text":"<at>John Doe</at>","mentioned":{"id":"john.doe@example.com","name":"John Doe"}},{"type":"mention","text":"<at>Jane Smith</at>","mentioned":{"id":"jane.smith@example.com","name":"Jane Smith"}}]' ]
 }
 
+@test "transform-mentions escapes a quote in a display name" {
+    export USERS='Alice "A"|alice.a@example.com'
+    export TAGS=""
+    run transform-mentions.sh
+    [ "$status" -eq 0 ]
+    [ "$output" = 'result=[{"type":"mention","text":"<at>Alice \"A\"</at>","mentioned":{"id":"alice.a@example.com","name":"Alice \"A\""}}]' ]
+    [ "$(echo "${output#result=}" | jq -r '.[0].mentioned.name')" = 'Alice "A"' ]
+}
+
 @test "transform-mentions with single tag" {
     export USERS=""
     export TAGS="Security|TagId123=="
