@@ -67,6 +67,9 @@ mock_gh() {
                     *) body="$MOCK_COMPARE_UP" ;;
                 esac ;;
             *"/contents/"*)
+                if [ "${MOCK_VERSION_FAILS:-}" = "true" ]; then
+                    echo "gh: Not Found (HTTP 404)" >&2; return 1
+                fi
                 local v="$MOCK_VERSION_TO"
                 case "$url" in *"ref=$FROM_REF"*) v="$MOCK_VERSION_FROM" ;; esac
                 body="{\"content\":\"$(printf '<dependency.up.version>%s</dependency.up.version>' "$v" | base64)\"}" ;;
@@ -197,6 +200,33 @@ $(edge)
     [ "$status" -eq 0 ]
     assert_output_var "count" "0"
     [[ "$output" == *"::warning::"* ]]
+}
+
+@test "says the list is partial when the comparison is longer than one page" {
+    export MOCK_COMPARE_ROOT="$(jq -c '. + {total_commits: 400}' <<<"$MOCK_COMPARE_ROOT")"
+    run dependency-chain-changes.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "people" "alice,bob"
+    assert_output_var "truncated" "true"
+    [[ "$output" == *"longer than one page"* ]]
+}
+
+@test "says the list is partial when an upstream version cannot be read" {
+    export UPSTREAM="$(edge)"
+    export MOCK_VERSION_FAILS="true"
+    run dependency-chain-changes.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "people" "alice,bob"
+    assert_output_var "truncated" "true"
+    [[ "$output" == *"Could not read the Alfresco/alfresco-enterprise-repo version"* ]]
+}
+
+@test "says the list is partial when the version regex matches nothing" {
+    export UPSTREAM='Alfresco/acs-packaging | Alfresco/alfresco-enterprise-repo | pom.xml | <nothing\.here>([^<]*)< | {version}'
+    run dependency-chain-changes.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "people" "alice,bob"
+    assert_output_var "truncated" "true"
 }
 
 @test "rejects a max-depth that is not a positive number" {

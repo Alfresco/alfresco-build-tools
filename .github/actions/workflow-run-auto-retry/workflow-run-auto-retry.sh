@@ -77,7 +77,7 @@ resolve_anchor() {
     echo "::warning::The event carries no workflow id, so last-successful-sha is empty"
     return 0
   fi
-  ANCHOR=$(api "repos/$REPOSITORY/actions/workflows/$WORKFLOW_ID/runs?branch=${HEAD_BRANCH}&status=success&per_page=20" \
+  ANCHOR=$(api "repos/$REPOSITORY/actions/workflows/$WORKFLOW_ID/runs?branch=${HEAD_BRANCH}&status=success&per_page=100" \
     --jq "[.workflow_runs[] | select(.run_number < ${RUN_NUMBER:-0}) | .head_sha] | first // empty") || ANCHOR=""
   # A branch releasing for the first time has no earlier success, which is not an error.
   [ -n "$ANCHOR" ] || echo "::warning::No earlier successful run of this workflow on $HEAD_BRANCH, so last-successful-sha is empty"
