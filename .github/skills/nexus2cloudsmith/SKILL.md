@@ -36,6 +36,16 @@ Keep the grep output: later steps check it instead of searching again. The
 visibility picks the Phase 1 path: `PUBLIC` follows "Public repo",
 `PRIVATE` / `INTERNAL` follows "Private repo".
 
+For a public repo, also look for `-A.x` versions of other Alfresco projects:
+
+```bash
+git grep -n -E "<[^>]*version>[^<]*-A\.[0-9]+<" -- '*pom.xml'
+```
+
+Those are published to `alfresco-internal-releases`, which `alfresco-public`
+doesn't serve. A repo with any of them follows "Public repo with `-A.x`
+dependencies" below.
+
 ### Check the Cloudsmith workspace
 
 If the `cloudsmith` CLI is installed and logged in (`cloudsmith whoami`),
@@ -180,8 +190,20 @@ Prove that `alfresco-public` and Maven Central are enough by resolving locally
 with an empty settings file (see Verify). That is a local check only: don't
 run CI jobs with empty settings, as that skips `cic-ext-pull-through`. If
 something only resolves from
-`internal`, stop and tell the user which artifacts. Don't switch to
-`alfresco-internal`: the dependency has to be published publicly or dropped.
+`internal` and isn't an `-A.x` release of another Alfresco project, stop and
+tell the user which artifacts. Don't switch to `alfresco-internal`: the
+dependency has to be published publicly or dropped.
+
+#### Public repo with `-A.x` dependencies
+
+`-A.x` releases of other Alfresco projects live in `alfresco-internal-releases`
+and are not served by `alfresco-public`, so the builds fail with "Could not
+find artifact ... in cic-ext-pull-through". Keep the pom repositories on
+`alfresco-public`, so outside users build as before, but make CI resolve
+everything through `alfresco-internal` with the single mirror and server from
+"Private repo" below, instead of the `cic-ext-pull-through` one. It proxies
+Maven Central too, so the supply-chain rule still holds. Switch back to the
+`cic-ext-pull-through` mirror once the repo depends on GA versions only.
 
 Known limitation: GitHub gives no OIDC token to PRs from forks, so their builds
 fail at `cloudsmith-auth`. PRs from forks aren't supported for now. Mention it
@@ -308,6 +330,9 @@ it and inherit. If a module has to keep its own block, give it its own
 `prerelease` profile too: the module's block wins over the profile it
 inherits, so its `-A.x` releases would otherwise land in the GA repository.
 
+Public repos that consume these `-A.x` releases must pull from
+`alfresco-internal` in CI (see "Public repo with `-A.x` dependencies").
+
 ### `.ci.settings.xml`
 
 Replace the Nexus deploy servers (`alfresco-public-releases`,
@@ -410,7 +435,9 @@ rm -rf "$scratch"
 ```
 
 The empty local repository matters: a warm `~/.m2` hides artifacts that only
-came from an authenticated repository.
+came from an authenticated repository. This check can't resolve `-A.x`
+dependencies of other Alfresco projects: they need the OIDC token, so check
+them in CI.
 
 For private repos, the build can only be checked in CI because it needs the
 OIDC token. Run pre-commit (and `actionlint` if the repo uses it) before
