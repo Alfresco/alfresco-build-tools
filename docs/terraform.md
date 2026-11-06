@@ -360,20 +360,23 @@ jobs:
 
 ### Terraform version
 
-The workflow sets the Terraform version in a single place: the
-`terraform_version` input, which defaults to the version bundled in
-Dependabot's updater so that lockfile updates match CI. An updatecli job
-(`.updatecli/manifests/terraform_dependabot.yaml`) opens a PR to bump the
-default whenever Dependabot moves to a newer Terraform.
+Both the `terraform.yml` and `terraform-pre-commit.yml` workflows set the
+Terraform version in a single place: the `terraform_version` input, which
+defaults to the version bundled in Dependabot's updater so that lockfile
+updates match CI. An updatecli job (`.updatecli/manifests/terraform_dependabot.yaml`)
+opens a PR to bump both defaults whenever Dependabot moves to a newer Terraform.
 
 A repository can override it, in order of precedence:
 
-- a version set in a remote/cloud workspace, or a `required_version`
-  constraint, `.tfswitchrc`, `.terraform-version` or `.tool-versions` file in
-  the root module, which always win over the input
+- a version pinned by the repository itself, which always wins over the input:
+  - `terraform.yml`: a version set in a remote/cloud workspace, or a
+    `required_version` constraint, `.tfswitchrc`, `.terraform-version` or
+    `.tool-versions` file in the root module
+  - `terraform-pre-commit.yml`: a `.terraform-version` file at the repository
+    root, kept for backward compatibility
 - the `terraform_version` input (a version or a constraint like `~> 1.14`);
-  an empty string falls back to the version that last wrote the state, then
-  to the latest release
+  an empty string falls back to the latest release (`terraform.yml` first uses
+  the version that last wrote the state)
 
 ```yaml
 jobs:
