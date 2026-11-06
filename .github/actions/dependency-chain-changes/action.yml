@@ -1,0 +1,83 @@
+name: Dependency chain changes
+description: Lists the changes between two refs and, where a pinned upstream version moved, repeats that across the repositories it came from.
+inputs:
+  repository:
+    description: Repository to start from, as owner/name.
+    required: false
+    default: ${{ github.repository }}
+  from-ref:
+    description: Start of the range, not itself included. Anything git resolves - a tag, a branch or a sha.
+    required: true
+  to-ref:
+    description: End of the range, included. Anything git resolves - a tag, a branch or a sha.
+    required: true
+  upstream:
+    description: |
+      Dependency edges, one per line, as
+      `consumer-repo | upstream-repo | version-file | regex | ref-template`.
+      The regex needs one capture group holding the version, and the template turns that
+      version into a ref in the upstream repo. Empty means do not follow anything.
+    required: false
+    default: ""
+  mention-domain:
+    description: Email domain whose addresses are paired with a display name in `cc`. Empty leaves everyone as a handle.
+    required: false
+    default: ""
+  max-depth:
+    description: >-
+      How many repositories deep to follow the chain, counting the first one. Set it to the
+      longest path through the edge list, or the walk stops early and reports truncated. In a
+      diamond, where two repositories pin the same upstream at different versions, each path
+      walks that upstream separately, so this is also what caps the recursion.
+    required: false
+    default: "4"
+  pull-requests-only:
+    description: >-
+      Report only commits carrying a pull request number, which is what GitHub stamps on a
+      squash or merge commit. Set to false to report every commit in the range, including
+      automated version bumps and direct pushes, in which case `pr` is null for those rows.
+    required: false
+    default: "true"
+  github-token:
+    description: Token used to read commits, file contents and pull requests. Needs contents read on every repository in the chain.
+    required: false
+    default: ${{ github.token }}
+outputs:
+  people:
+    description: Comma-separated GitHub logins of the humans involved, including whoever merged a bot's pull request
+    value: ${{ steps.collect.outputs.people }}
+  bots:
+    description: Comma-separated logins of the bots whose changes are in range, which are those whose login ends in `[bot]`
+    value: ${{ steps.collect.outputs.bots }}
+  cc:
+    description: >-
+      Everyone involved, as one comma-separated list ready for the cc input of
+      send-teams-workflow-run-notification. An address matching mention-domain appears as
+      `Display Name|email` so Teams can mention it, anyone else as `@login`.
+    value: ${{ steps.collect.outputs.cc }}
+  changes:
+    description: Every change found, as a JSON array with repo, sha, login, name, email, kind, pr, title and url. `pr` is null when the commit has no pull request behind it
+    value: ${{ steps.collect.outputs.changes }}
+  count:
+    description: How many changes were found
+    value: ${{ steps.collect.outputs.count }}
+  truncated:
+    description: >-
+      'true' when something was left out: max-depth, a comparison longer than one page of
+      the compare API, or an upstream version that could not be read
+    value: ${{ steps.collect.outputs.truncated }}
+runs:
+  using: composite
+  steps:
+    - id: collect
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        REPOSITORY: ${{ inputs.repository }}
+        FROM_REF: ${{ inputs.from-ref }}
+        TO_REF: ${{ inputs.to-ref }}
+        UPSTREAM: ${{ inputs.upstream }}
+        MENTION_DOMAIN: ${{ inputs.mention-domain }}
+        MAX_DEPTH: ${{ inputs.max-depth }}
+        PULL_REQUESTS_ONLY: ${{ inputs.pull-requests-only }}
+      run: ${{ github.action_path }}/dependency-chain-changes.sh

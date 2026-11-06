@@ -46,6 +46,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [configure-git-author](#configure-git-author)
   - [dependabot-workflow-run-automation](#dependabot-workflow-run-automation)
   - [dependabot-missing-actions-check](#dependabot-missing-actions-check)
+  - [dependency-chain-changes](#dependency-chain-changes)
   - [dbp-charts](#dbp-charts)
   - [dispatch-resume-workflow](#dispatch-resume-workflow)
   - [docker-dump-containers-logs](#docker-dump-containers-logs)
@@ -669,6 +670,71 @@ Nowdays, dependabot supports glob patterns, so this action is not strictly neces
 ```yaml
       - uses: Alfresco/alfresco-build-tools/.github/actions/dependabot-missing-actions-check@v19.12.1
 ```
+
+### dependency-chain-changes
+
+Lists who changed what between two refs, following the chain into any upstream
+repository whose pinned version moved in that range. By default only commits with
+a pull request behind them count, so automated version bumps and direct pushes
+drop out by themselves. This example is using `workflow-run-auto-retry` to get a
+ref range input.
+
+```yaml
+      - id: retry
+        uses: Alfresco/alfresco-build-tools/.github/actions/workflow-run-auto-retry@v19.12.0
+
+      - id: changes
+        # No earlier green run means there is nothing to compare against.
+        if: steps.retry.outputs.decision == 'escalate' && steps.retry.outputs.last-successful-sha != ''
+        uses: Alfresco/alfresco-build-tools/.github/actions/dependency-chain-changes@v19.12.0
+        with:
+          from-ref: ${{ steps.retry.outputs.last-successful-sha }}
+          to-ref: ${{ github.event.workflow_run.head_sha }}
+          mention-domain: example.com
+          upstream: |
+            Alfresco/acs-packaging | Alfresco/alfresco-enterprise-repo | pom.xml | <dependency\.alfresco-enterprise-repo\.version>([^<]*)< | {version}
+            Alfresco/alfresco-enterprise-repo | Alfresco/alfresco-community-repo | pom.xml | <dependency\.alfresco-community-repo\.version>([^<]*)< | {version}
+
+      - if: steps.retry.outputs.decision == 'escalate'
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-workflow-run-notification@v19.12.0
+        with:
+          webhook-url: ${{ secrets.TEAMS_WEBHOOK }}
+          reason-code: ${{ steps.retry.outputs.reason-code }}
+          failed-jobs: ${{ steps.retry.outputs.failed-jobs }}
+          cc: ${{ steps.changes.outputs.cc }}
+          facts: |
+            Author list|${{ steps.changes.outputs.truncated == 'true' && 'partial' || 'complete' }}
+```
+
+Each `upstream` line is one dependency edge. The caller declares every edge it wants
+followed, including those below the first hop:
+
+```text
+consumer-repo | upstream-repo | version-file | regex | ref-template
+```
+
+The regex needs exactly one capture group holding the version, so any file format
+works. `{version}` in the template is that captured value. A line starting with `#`
+is a comment.
+
+| output | |
+| --- | --- |
+| `cc` | everyone, in one list: `Display Name\|email` for a commit email in `mention-domain` so Teams can mention it, `@login` for anyone else, or the commit name when GitHub knows no account |
+| `people`, `bots` | logins, humans and bots separately |
+| `changes` | the whole list as JSON: repo, sha, login, name, email, kind, pr, title, url |
+| `count`, `truncated` | how many, and whether anything was left out: `max-depth`, a comparison longer than one API page, or an upstream version the action could not read |
+
+A commit counts as a change only when its subject carries the pull request number that
+GitHub stamps on a squash or merge commit, on the assumption that everything else in the
+range is the pipeline talking to itself. Editing that number out of the merge box, or
+merging by rebase, drops the author from the list. Set `pull-requests-only: false` to
+report every commit in the range instead, where `pr` is null for the ones with no pull
+request behind them.
+
+When a bot opened the pull request, the bot is named in `bots` and whoever merged it
+is reported in `people`, so a Dependabot bump still has a human attached. An empty
+`cc`, including when the step was skipped, leaves the card unchanged rather than
+failing.
 
 ### dbp-charts
 
@@ -2775,6 +2841,14 @@ written rather than as markdown.
 pass `mention-users` or `mention-tags` and include the matching
 `<at>name</at>` in the `footer` text.
 
+`cc` adds a line above the footer naming the people behind the change, and takes the
+`cc` output of [dependency-chain-changes](#dependency-chain-changes) directly. Each
+entry is one person: `display name|email` is mentioned, with the `<at>` marker and the
+matching entity written for you; a `@handle` becomes a link to that profile on
+`GITHUB_SERVER_URL`; anything else is shown as plain text, in the order given. A half
+entry such as `Name|` degrades to plain text with a warning rather than failing the
+step. Anyone named in both `mention-users` and `cc` is mentioned once.
+
 ### setup-checkov
 
 Set up a specific version of Checkov and add it to the PATH.
@@ -3238,9 +3312,9 @@ It returns `decision`, in this order:
 4. **The attempt budget is spent** — `escalate`.
 5. Otherwise — `retry`.
 
-Every outcome is written to the job summary. Any API error other than a 404
-fails the step, so a token or rate-limit problem cannot look like a healthy
-no-op.
+Every outcome is written to the job summary. A 5xx is retried up to three times
+before being believed. Any API error other than a 404 then fails the step, so a token
+or rate-limit problem cannot look like a healthy no-op.
 
 Entries under `non-retryable-jobs` are job **display names** and are matched on
 the whole name. A job nested through a reusable workflow is reported as
@@ -3249,7 +3323,14 @@ jobs do not need listing. A job that was gated and did not run reports
 `skipped`, not `failure`, so it never blocks a retry.
 
 Outputs are `decision` (`retry`, `escalate` or `none`), `reason-code`,
-`reason-text`, `failed-jobs`, `attempt` and `max-attempts`.
+`reason-text`, `failed-jobs`, `attempt`, `max-attempts` and
+`last-successful-sha`.
+
+`last-successful-sha` is the head commit of the newest earlier successful run of the
+watched workflow on the same branch, which is where
+[dependency-chain-changes](#dependency-chain-changes) starts. It is looked up only on
+an escalation, and is empty - with a warning - when there is no such run or the
+lookup fails.
 
 `reason-text` is one sentence suitable for a log or a notification body.
 `reason-code` is set only on an escalation, to `attempts-exhausted`,

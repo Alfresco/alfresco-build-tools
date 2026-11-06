@@ -1,7 +1,6 @@
 #!/bin/bash -e
 
-ENTITIES="["
-FIRST=true
+ENTITIES=()
 
 function add_entity() {
   local TYPE=$1
@@ -9,11 +8,6 @@ function add_entity() {
   if [ -n "$ITEMS" ]; then
     IFS=',' read -ra ARRAY <<< "$ITEMS"
     for ITEM in "${ARRAY[@]}"; do
-      if [ "$FIRST" = false ]; then
-        ENTITIES+=","
-      fi
-      FIRST=false
-
       if [[ ! "$ITEM" =~ \| ]]; then
         echo "Error: Input '$ITEM' does not contain the expected format with a '|' separator" >&2
         exit 1
@@ -21,14 +15,10 @@ function add_entity() {
       NAME="${ITEM%|*}"
       ID="${ITEM#*|}"
 
-      case $TYPE in
-        user)
-          ENTITIES+="{\"type\":\"mention\",\"text\":\"<at>${NAME}</at>\",\"mentioned\":{\"id\":\"${ID}\",\"name\":\"${NAME}\"}}"
-          ;;
-        tag)
-          ENTITIES+="{\"type\":\"mention\",\"text\":\"<at>${NAME}</at>\",\"mentioned\":{\"id\":\"${ID}\",\"name\":\"${NAME}\",\"type\":\"tag\"}}"
-          ;;
-      esac
+      # Built with jq because a display name is free text and a quote in it would break the payload.
+      ENTITIES+=("$(jq -n -c --arg name "$NAME" --arg id "$ID" --arg type "$TYPE" \
+        '{type: "mention", text: "<at>\($name)</at>",
+          mentioned: ({id: $id, name: $name} + (if $type == "tag" then {type: "tag"} else {} end))}')")
     done
   fi
 }
@@ -36,5 +26,4 @@ function add_entity() {
 add_entity "user" "$USERS"
 add_entity "tag" "$TAGS"
 
-ENTITIES+="]"
-echo "result=${ENTITIES}"
+echo "result=$(printf '%s\n' "${ENTITIES[@]}" | jq -s -c '.')"
