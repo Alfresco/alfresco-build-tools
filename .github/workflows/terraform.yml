@@ -516,6 +516,16 @@ jobs:
         with:
           ref: ${{ github.event_name == 'issue_comment' && env.PR_CHECKOUT_REF || '' }}
 
+      - name: Warn about required_version overriding the default Terraform version
+        env:
+          TERRAFORM_ROOT_PATH: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
+        run: |
+          matches=$(grep -nE '^\s*required_version\s*=' "$TERRAFORM_ROOT_PATH"/*.tf || true)
+          if [ -n "$matches" ]; then
+            echo "::warning title=required_version overrides terraform_version::The root module $TERRAFORM_ROOT_PATH sets required_version, so the terraform_version input (default ${TERRAFORM_VERSION:-latest}) is ignored. Remove it to run the workflow Terraform version."
+            echo "$matches"
+          fi
+
       - name: Install OIDC Client from Core Package
         if: ${{ inputs.create_oidc_token_file }}
         run: npm install @actions/core@1.11.0 @actions/http-client@2.2.3
