@@ -3453,8 +3453,8 @@ jobs:
   stale:
     uses: Alfresco/alfresco-build-tools/.github/workflows/stale-pr-cleanup.yml@v19.12.1
     with:
-      stale-days: 60 # optional, default: 60
-      close-after-stale-days: 30 # optional, default: 30
+      stale-days: 30 # optional, default: 30
+      close-after-stale-days: 15 # optional, default: 15
       exempt-pr-labels: "keep-open,dependencies" # optional, default: "keep-open,dependencies"
       operations-per-run: 100 # optional, default: 100
       debug-only: false # optional, default: false
