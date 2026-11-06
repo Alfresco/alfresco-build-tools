@@ -42,9 +42,7 @@ For a public repo, also look for `-A.x` versions of other Alfresco projects:
 git grep -n -E "<[^>]+\.version>[^<]*-A\.[0-9]+<" -- '*pom.xml'
 ```
 
-Those are published to `alfresco-internal-releases`, which `alfresco-public`
-doesn't serve. A repo with any of them follows "Public repo with `-A.x`
-dependencies" below.
+A repo with any of them follows "Public repo with `-A.x` dependencies" below.
 
 The grep only matches version properties. It skips the project's and the
 parent's own `<version>`, which can be `-A.x` without any `-A.x` dependency,
@@ -213,8 +211,7 @@ find artifact ... in cic-ext-pull-through". Keep the pom repositories on
 `alfresco-public`, so outside users build as before, but make CI resolve
 everything through `alfresco-internal` with the single mirror and server from
 "Private repo" below, instead of the `cic-ext-pull-through` one. It proxies
-Maven Central too, so the supply-chain rule still holds. Switch back to the
-`cic-ext-pull-through` mirror once the repo depends on GA versions only.
+Maven Central too, so the supply-chain rule still holds.
 
 Known limitation: GitHub gives no OIDC token to PRs from forks, so their builds
 fail at `cloudsmith-auth`. PRs from forks aren't supported for now. Mention it
