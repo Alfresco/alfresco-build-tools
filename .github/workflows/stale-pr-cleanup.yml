@@ -7,12 +7,12 @@ on:
         description: "Number of days before a PR is marked as stale"
         required: false
         type: number
-        default: 60
+        default: 30
       close-after-stale-days:
         description: "Number of days after stale label before closing the PR"
         required: false
         type: number
-        default: 30
+        default: 15
       exempt-pr-labels:
         description: "Comma-separated list of labels that exempt a PR from being marked as stale"
         required: false
