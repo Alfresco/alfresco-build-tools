@@ -39,12 +39,23 @@ visibility picks the Phase 1 path: `PUBLIC` follows "Public repo",
 For a public repo, also look for `-A.x` versions of other Alfresco projects:
 
 ```bash
-git grep -n -E "<[^>]*version>[^<]*-A\.[0-9]+<" -- '*pom.xml'
+git grep -n -E "<[^>]+\.version>[^<]*-A\.[0-9]+<" -- '*pom.xml'
 ```
 
 Those are published to `alfresco-internal-releases`, which `alfresco-public`
 doesn't serve. A repo with any of them follows "Public repo with `-A.x`
 dependencies" below.
+
+The grep only matches version properties. It skips the project's and the
+parent's own `<version>`, which can be `-A.x` without any `-A.x` dependency,
+and it misses literal `<version>` values inside `<dependency>` blocks, so read
+those too.
+
+No match today doesn't mean none later. List the Alfresco dependencies
+(`org.alfresco*` groupIds) and ask whether their projects publish `-A.x`
+releases, or whether the repo's bump automation (Dependabot, updatecli) tracks
+them. If so, follow "Public repo with `-A.x` dependencies" now: the first bump
+to an `-A.x` version would otherwise break CI.
 
 ### Check the Cloudsmith workspace
 
