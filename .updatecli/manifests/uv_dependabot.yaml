@@ -1,0 +1,55 @@
+name: uv version used by Dependabot
+
+pipelineid: uv-dependabot
+
+scms:
+  github:
+    kind: 'github'
+    spec:
+      user: '{{ requiredEnv "UPDATECLI_USERNAME" }}'
+      email: '{{ requiredEnv "UPDATECLI_EMAIL" }}'
+      username: '{{ requiredEnv "UPDATECLI_USERNAME" }}'
+      token: '{{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}'
+      owner: '{{ requiredEnv "UPDATECLI_REPO_OWNER" }}'
+      repository: '{{ requiredEnv "UPDATECLI_REPO_NAME" }}'
+      branch: '{{ requiredEnv "UPDATECLI_REPO_BRANCH" }}'
+      commitusingapi: true
+      commitmessage:
+        type: 'build(deps)'
+        message: 'bump uv to {{ source "dependabotUv" }}'
+
+actions:
+  open-pull-request:
+    kind: 'github/pullrequest'
+    scmid: 'github'
+    spec:
+      automerge: true
+      mergemethod: squash
+      draft: false
+      title: 'build(deps): bump uv to {{ source "dependabotUv" }}'
+      description: 'Align the uv version required by the pre-commit action with the one bundled in the Dependabot updater.'
+      labels:
+        - dependencies
+        - release/patch
+
+sources:
+  dependabotUv:
+    name: uv version bundled in dependabot-core
+    kind: file
+    spec:
+      file: https://raw.githubusercontent.com/dependabot/dependabot-core/main/uv/Dockerfile
+      matchpattern: 'FROM ghcr\.io/astral-sh/uv:(\d+\.\d+\.\d+) AS uv'
+    transformers:
+      - findsubmatch:
+          pattern: 'FROM ghcr\.io/astral-sh/uv:(\d+\.\d+\.\d+) AS uv'
+          captureindex: 1
+
+targets:
+  update-required-version:
+    name: 'Update uv required-version of the pre-commit action'
+    scmid: 'github'
+    kind: file
+    spec:
+      file: .github/actions/pre-commit/pyproject.toml
+      matchpattern: 'required-version = "[^"]*"'
+      replacepattern: 'required-version = "=={{ source "dependabotUv" }}"'
