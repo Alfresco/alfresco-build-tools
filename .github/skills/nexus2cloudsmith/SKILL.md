@@ -283,9 +283,15 @@ through `maven.cloudsmith.io`, Cloudsmith's Maven upload endpoint:
 For an enterprise repo, use `Alfresco Enterprise Releases` and the
 `alfresco-enterprise-releases` URL.
 
-Add a `prerelease` profile that sends `-A.x` releases to
-`alfresco-internal-releases`. It reuses the `alfresco-releases` server, so no
-new credentials are needed:
+A public repo skips the `prerelease` profile below: its `-A.x` releases go to
+`alfresco-community-releases` with the GA ones, never to
+`alfresco-internal-releases`, which community users can't read. For the same
+reason, never make a public repo pull from `alfresco-internal`: it could
+silently pull in enterprise-only dependencies and break community builds.
+
+For private and internal repos, add a `prerelease` profile that sends `-A.x`
+releases to `alfresco-internal-releases`. It reuses the `alfresco-releases`
+server, so no new credentials are needed:
 
 ```xml
 <profiles>
@@ -332,7 +338,8 @@ mirror server:
   workflow level, once the Step 0 grep shows nothing else reads them.
 - Drop "Nexus" from job names and comments rather than renaming it to
   "Cloudsmith".
-- Turn on the `prerelease` profile for `-A.x` versions. `maven-release-slim`
+- Private and internal repos: turn on the `prerelease` profile for `-A.x`
+  versions (public repos have none). `maven-release-slim`
   does it when `prerelease-profile` is set (its `prerelease-version-marker`
   defaults to `-A.`). The input needs v19.8.0 or later, so bump the action if
   the repo pins an older one:
@@ -355,7 +362,9 @@ PR CI skips the release job, so the deploy path only runs on a real release.
 If the user wants to try it from the PR branch:
 
 - Release an `-A.x` version, so the package lands in
-  `alfresco-internal-releases` and not in a GA repository.
+  `alfresco-internal-releases` and not in a GA repository. A public repo has
+  no such repository: its `-A.x` goes to `alfresco-community-releases`, so
+  ask the user before releasing one.
 - Before merge, revert the test `RELEASE_VERSION` and the branch added to the
   release job's `if:`.
 - Squash-merge, so the release plugin's `[skip ci]` commits don't reach the
