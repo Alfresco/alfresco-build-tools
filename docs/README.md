@@ -3727,7 +3727,7 @@ quay.expires-after=2w
 ```
 
 For the supported time formats, please check the [RedHat official
-documentation](https://access.redhat.com/documentation/it-it/red_hat_quay/3.2/html/use_red_hat_quay/working_with_tags#tag-expiration).
+documentation](https://docs.redhat.com/en/documentation/red_hat_quay/3.2/html/use_red_hat_quay/working_with_tags#tag-expiration).
 
 An example step which computes the label could be:
 
