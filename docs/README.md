@@ -3125,7 +3125,12 @@ Validates Maven dependency graph versions to ensure all target includes artifact
           maven-username: ${{ secrets.NEXUS_USERNAME }}
           maven-password: ${{ secrets.NEXUS_PASSWORD }}
           m2-settings-xml: settings.xml
+          # comma-separated groupId:artifactId:version patterns
+          target-includes: org.example:my-bom:*,org.example:my-library:*
 ```
+
+`target-includes` is required and has no default value: the action fails when
+it is not set.
 
 ### veracode
 
