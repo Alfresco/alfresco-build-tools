@@ -182,6 +182,9 @@ run CI jobs with empty settings, as that skips `cic-ext-pull-through`. If
 something only resolves from
 `internal`, stop and tell the user which artifacts. Don't switch to
 `alfresco-internal`: the dependency has to be published publicly or dropped.
+This includes `-A.x` releases of other community projects found only in
+`alfresco-internal-releases`: they have to be republished to
+`alfresco-community-releases`, which `alfresco-public` serves.
 
 Known limitation: GitHub gives no OIDC token to PRs from forks, so their builds
 fail at `cloudsmith-auth`. PRs from forks aren't supported for now. Mention it
