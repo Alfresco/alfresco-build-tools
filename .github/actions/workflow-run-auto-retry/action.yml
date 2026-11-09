@@ -17,9 +17,12 @@ outputs:
   decision:
     description: "'retry', 'escalate' or 'none'"
     value: ${{ steps.decide.outputs.decision }}
-  reason:
+  reason-code:
+    description: "On an escalation, which case it was: 'attempts-exhausted', 'non-retryable' or 'nothing-to-retry'. Empty otherwise."
+    value: ${{ steps.decide.outputs.reason-code }}
+  reason-text:
     description: One sentence explaining the decision, suitable for a notification body
-    value: ${{ steps.decide.outputs.reason }}
+    value: ${{ steps.decide.outputs.reason-text }}
   failed-jobs:
     description: Newline-separated display names of the jobs that failed on this attempt
     value: ${{ steps.decide.outputs.failed-jobs }}

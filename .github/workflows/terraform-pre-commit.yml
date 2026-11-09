@@ -19,6 +19,14 @@ on:
         description: optional comma or newline-separated list of repositories to scope the GitHub App token to. When empty, the token can access all repositories the App installation is granted on github_app_repositories_owner.
         type: string
         required: false
+      terraform_version:
+        description: |
+          the Terraform version (or version constraint) to use when the repository does not pin one itself.
+          A .terraform-version file at the repository root takes precedence.
+          Defaults to the version used by Dependabot, an empty string installs the latest release.
+        type: string
+        required: false
+        default: '1.16.4'
     secrets:
       BOT_GITHUB_TOKEN:
         required: false
@@ -68,7 +76,14 @@ jobs:
 
       - name: Detect terraform version
         id: detect-terraform-version
-        run: echo "terraform_version=$(cat .terraform-version)" >> "$GITHUB_OUTPUT"
+        env:
+          DEFAULT_TERRAFORM_VERSION: ${{ inputs.terraform_version }}
+        run: |
+          version=""
+          if [ -f .terraform-version ]; then
+            version=$(tr -d '[:space:]' < .terraform-version)
+          fi
+          echo "terraform_version=${version:-$DEFAULT_TERRAFORM_VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Install tflint
         uses: terraform-linters/setup-tflint@6ffdbaa3be476b3431f7275c26966ef32ff60337 # v6.3.2

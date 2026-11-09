@@ -1,0 +1,87 @@
+name: Send Teams workflow run notification
+description: >
+  Sends a Teams card about the run that triggered a workflow_run event, rather
+  than the run doing the sending. Pairs with workflow-run-auto-retry, which
+  decides whether a failure needs a person.
+
+inputs:
+  webhook-url:
+    description: Microsoft Teams Incoming Webhooks URL
+    required: true
+  reason-code:
+    description: "The 'reason-code' output of workflow-run-auto-retry: 'attempts-exhausted', 'non-retryable' or 'nothing-to-retry'. Supplies the first sentence of the message. Required unless message is set."
+    required: false
+    default: ""
+  failed-jobs:
+    description: Display names of the jobs that failed, one per line, such as the 'failed-jobs' output of workflow-run-auto-retry
+    required: false
+    default: ""
+  title:
+    description: Card title, stated without the branch, which is appended
+    required: false
+    default: Workflow run failed
+  subtitle:
+    description: One line shown above the message, e.g. 'Hop 1 of 5 - alfresco-community-repo'
+    required: false
+    default: ""
+  message:
+    description: Message text, appended to the sentence generated from reason-code. Required unless reason-code is set
+    required: false
+    default: ""
+  facts:
+    description: 'Extra rows shown after the attempt, one "title|value" per line (e.g. "Release version|26.2.0")'
+    required: false
+    default: ""
+  max-attempts:
+    description: The attempt budget, so the card can read '2 of 3' rather than '2'
+    required: false
+    default: ""
+  footer:
+    description: A closing line, e.g. naming who should pick this up
+    required: false
+    default: ""
+  mention-users:
+    description: 'Comma-separated list of users to mention in format "display name|email". The footer input has to contain the matching <at>display name</at>.'
+    required: false
+    default: ""
+  mention-tags:
+    description: 'Comma-separated list of Teams tags to mention in format "tag name|tag id". The footer input has to contain the matching <at>tag name</at>.'
+    required: false
+    default: ""
+  dry-run:
+    description: Do not actually send the message
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Build card
+      id: card
+      shell: bash
+      env:
+        REASON_CODE: ${{ inputs.reason-code }}
+        FAILED_JOBS: ${{ inputs.failed-jobs }}
+        TITLE: ${{ inputs.title }}
+        SUBTITLE: ${{ inputs.subtitle }}
+        MESSAGE: ${{ inputs.message }}
+        FACTS: ${{ inputs.facts }}
+        MAX_ATTEMPTS: ${{ inputs.max-attempts }}
+        FOOTER: ${{ inputs.footer }}
+        BRANCH: ${{ github.event.workflow_run.head_branch }}
+        ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+      run: ${{ github.action_path }}/build-card.sh
+
+    - uses: $/.github/actions/send-teams-notification
+      with:
+        webhook-url: ${{ inputs.webhook-url }}
+        title: ${{ steps.card.outputs.title }}
+        message: ${{ steps.card.outputs.message }}
+        card-extra-body: ${{ steps.card.outputs.extra-body }}
+        mention-users: ${{ inputs.mention-users }}
+        mention-tags: ${{ inputs.mention-tags }}
+        # Nothing failed in the watcher itself, so the colour has to be stated.
+        status: failure
+        # A watcher has no use for a checkout of the repo it is reporting on.
+        skip_checkout: "true"
+        dry-run: ${{ inputs.dry-run }}

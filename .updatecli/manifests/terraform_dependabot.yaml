@@ -1,0 +1,61 @@
+name: Terraform version used by Dependabot
+
+pipelineid: terraform-dependabot
+
+scms:
+  github:
+    kind: 'github'
+    spec:
+      user: '{{ requiredEnv "UPDATECLI_USERNAME" }}'
+      email: '{{ requiredEnv "UPDATECLI_EMAIL" }}'
+      username: '{{ requiredEnv "UPDATECLI_USERNAME" }}'
+      token: '{{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}'
+      owner: '{{ requiredEnv "UPDATECLI_REPO_OWNER" }}'
+      repository: '{{ requiredEnv "UPDATECLI_REPO_NAME" }}'
+      branch: '{{ requiredEnv "UPDATECLI_REPO_BRANCH" }}'
+      commitusingapi: true
+      commitmessage:
+        type: 'build(deps)'
+        message: 'bump terraform to {{ source "dependabotTerraform" }}'
+
+actions:
+  open-pull-request:
+    kind: 'github/pullrequest'
+    scmid: 'github'
+    spec:
+      automerge: true
+      mergemethod: squash
+      draft: false
+      title: 'build(deps): bump terraform to {{ source "dependabotTerraform" }}'
+      description: 'Align the default Terraform version of the reusable workflow with the one bundled in the Dependabot updater.'
+      labels:
+        - dependencies
+        - release/minor
+
+sources:
+  dependabotTerraform:
+    name: Terraform version bundled in dependabot-core
+    kind: file
+    spec:
+      file: https://raw.githubusercontent.com/dependabot/dependabot-core/main/terraform/Dockerfile
+      matchpattern: 'ARG TERRAFORM_VERSION=(\d+\.\d+\.\d+)'
+    transformers:
+      - findsubmatch:
+          pattern: 'ARG TERRAFORM_VERSION=(\d+\.\d+\.\d+)'
+          captureindex: 1
+
+targets:
+  update-file:
+    name: 'Update default terraform_version'
+    scmid: 'github'
+    kind: yaml
+    spec:
+      file: .github/workflows/terraform.yml
+      key: '$.on.workflow_call.inputs.terraform_version.default'
+  update-pre-commit-file:
+    name: 'Update default terraform_version of the pre-commit workflow'
+    scmid: 'github'
+    kind: yaml
+    spec:
+      file: .github/workflows/terraform-pre-commit.yml
+      key: '$.on.workflow_call.inputs.terraform_version.default'

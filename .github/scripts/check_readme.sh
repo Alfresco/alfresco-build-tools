@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e
 
+# Action folders (relative to the actions dir) that are documented collectively
+# or not at all, e.g. deprecated ones
+excluded_actions=(
+  dbp-charts
+  get-branch-name
+)
+
 actions_dir=".github/actions"
 readme_file="docs/README.md"
 missing_entries=0
@@ -53,6 +60,10 @@ while [ $# -gt 0 ]; do
   esac
 done
 
+for excluded_action in "${excluded_actions[@]}"; do
+  exclude_paths+=("$actions_dir/$excluded_action")
+done
+
 if [ ! -d "$actions_dir" ]; then
   echo "Actions directory not found: $actions_dir"
   exit 2
@@ -88,7 +99,7 @@ while IFS= read -r folder; do
   done
   action_name=$(basename "$folder")
   search_string="### $action_name"
-  if ! grep -q "$search_string" "$readme_file"; then
+  if ! grep -qxF "$search_string" "$readme_file"; then
     echo "No entry found for $search_string in $readme_file"
     missing_entries=$((missing_entries + 1))
   fi

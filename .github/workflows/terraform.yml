@@ -33,6 +33,14 @@ on:
         type: boolean
         required: false
         default: false
+      terraform_version:
+        description: |
+          the Terraform version (or version constraint) to use when the root module does not pin one itself.
+          A remote/cloud workspace version, required_version, .terraform-version, .tfswitchrc or .tool-versions take precedence.
+          Defaults to the version used by Dependabot, an empty string falls back to the state file version, then the latest release.
+        type: string
+        required: false
+        default: '1.16.4'
       kubectl_version:
         description: the version of kubectl to install (if install_kubectl is true). If not set, the latest stable version will be installed.
         type: string
@@ -385,6 +393,7 @@ jobs:
       CUSTOM_SECRET_8: ${{ secrets.CUSTOM_SECRET_8 }}
       CUSTOM_SECRET_9: ${{ secrets.CUSTOM_SECRET_9 }}
       RESOURCE_NAME: ${{ vars.RESOURCE_NAME }}
+      TERRAFORM_VERSION: ${{ inputs.terraform_version }}
       TF_VAR_resource_name: ${{ vars.RESOURCE_NAME }}
       TERRAFORM_PRE_RUN: |
         set +x -euo pipefail
@@ -507,6 +516,16 @@ jobs:
         with:
           ref: ${{ github.event_name == 'issue_comment' && env.PR_CHECKOUT_REF || '' }}
 
+      - name: Warn about required_version overriding the default Terraform version
+        env:
+          TERRAFORM_ROOT_PATH: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
+        run: |
+          matches=$(grep -nE '^\s*required_version\s*=' "$TERRAFORM_ROOT_PATH"/*.tf || true)
+          if [ -n "$matches" ]; then
+            echo "::warning title=required_version overrides terraform_version::The root module $TERRAFORM_ROOT_PATH sets required_version, so the terraform_version input (default ${TERRAFORM_VERSION:-latest}) is ignored. Remove it to run the workflow Terraform version."
+            echo "$matches"
+          fi
+
       - name: Install OIDC Client from Core Package
         if: ${{ inputs.create_oidc_token_file }}
         run: npm install @actions/core@1.11.0 @actions/http-client@2.2.3
@@ -559,13 +578,13 @@ jobs:
 
       - name: Terraform validate
         if: needs.compute_basic_vars.outputs.terraform_operation == 'plan' && github.run_attempt == 1
-        uses: dflook/terraform-validate@29a791ea3e8c3a7c0157bb21aba5a6ca59a69d6d # v3.1.0
+        uses: dflook/terraform-validate@3577895932c19faa3b8df0e713de05870fc075d8 # v3.1.2
         with:
           path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
           backend_config: ${{ steps.backend-config.outputs.backend_config }}
 
       - name: Terraform plan
-        uses: dflook/terraform-plan@48e90468aecdd1d8ea21617d4cecf0cd7746ff1d # v3.1.0
+        uses: dflook/terraform-plan@738d3a75f0d801d280dca5eb7357b89c8383267f # v3.1.2
         if: needs.compute_basic_vars.outputs.terraform_operation == 'plan'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
@@ -576,7 +595,7 @@ jobs:
           backend_config: ${{ steps.backend-config.outputs.backend_config }}
 
       - name: Terraform apply
-        uses: dflook/terraform-apply@82a1042d40c66856406bf648832fc5d6b03ca74c # v3.1.0
+        uses: dflook/terraform-apply@9fdc48d2744ee0528495a136ad2cd31ad8208a67 # v3.1.2
         if: needs.compute_basic_vars.outputs.terraform_operation == 'apply'
         with:
           label: ${{ vars.RESOURCE_NAME }} ${{ needs.compute_basic_vars.outputs.terraform_root_path }}
@@ -588,7 +607,7 @@ jobs:
           backend_config: ${{ steps.backend-config.outputs.backend_config }}
 
       - name: Terraform destroy
-        uses: dflook/terraform-destroy@e800f4e75859cf422d7a1c6aa68480973ed55455 # v3.1.0
+        uses: dflook/terraform-destroy@90d912c5ee23843ead86960fb485ffa0e69b8537 # v3.1.2
         if: needs.compute_basic_vars.outputs.terraform_operation == 'destroy'
         with:
           path: ${{ needs.compute_basic_vars.outputs.terraform_root_path }}

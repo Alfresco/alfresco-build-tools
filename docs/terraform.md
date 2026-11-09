@@ -267,7 +267,7 @@ jobs:
   # and environment based on changed files in PRs/pushes against the default branch,
   # or branch name for other branches.
   invoke-terraform:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v19.10.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v19.12.2
     with:
       # Autodetected using the first changed folder (alphabetically) in PR/push
       #
@@ -293,7 +293,7 @@ jobs:
   # One job for a specific terraform folder/stack.
   # Environment can still be auto-detected based on changed tfvars files or branch name.
   invoke-terraform-infra:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v19.10.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v19.12.2
     with:
       terraform_root_path: infra
       terraform_default_env: develop
@@ -306,7 +306,7 @@ jobs:
   # a specific execution order (e.g. infra before k8s).
   invoke-terraform-k8s:
     needs: invoke-terraform-infra
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v19.10.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v19.12.2
     with:
       terraform_root_path: k8s
       terraform_default_env: develop
@@ -321,7 +321,7 @@ jobs:
   # which can be useful for simple repositories with a single stack and environment,
   # or for scheduled workflows.
   invoke-terraform-static:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v19.10.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v19.12.2
     with:
       terraform_root_path: infra
       terraform_env: production
@@ -329,7 +329,7 @@ jobs:
       tfvars_subfolder: vars
 
   invoke-terraform-custom-secrets:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v19.10.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v19.12.2
     with:
       terraform_root_path: infra
       terraform_default_env: develop
@@ -345,7 +345,7 @@ jobs:
 
   # Azure Storage backend with GitHub App token for private terraform modules
   invoke-terraform-aks:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v19.10.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v19.12.2
     with:
       terraform_root_path: infra
       terraform_default_env: develop
@@ -356,6 +356,41 @@ jobs:
     secrets:
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       GITHUB_TOKEN_PRIVATE_KEY: ${{ secrets.MY_GITHUB_APP_PRIVATE_KEY }}
+```
+
+### Terraform version
+
+Both the `terraform.yml` and `terraform-pre-commit.yml` workflows set the
+Terraform version in a single place: the `terraform_version` input, which
+defaults to the version bundled in Dependabot's updater so that lockfile
+updates match CI. An updatecli job (`.updatecli/manifests/terraform_dependabot.yaml`)
+opens a PR to bump both defaults whenever Dependabot moves to a newer Terraform.
+
+A repository can override it, in order of precedence:
+
+- a version pinned by the repository itself, which always wins over the input:
+  - `terraform.yml`: a version set in a remote/cloud workspace, or a
+    `required_version` constraint, `.tfswitchrc`, `.terraform-version` or
+    `.tool-versions` file in the root module
+  - `terraform-pre-commit.yml`: a `.terraform-version` file at the repository
+    root, kept for backward compatibility
+- the `terraform_version` input (a version or a constraint like `~> 1.14`);
+  an empty string falls back to the latest release (`terraform.yml` first uses
+  the version that last wrote the state)
+
+To keep CI aligned with Dependabot, avoid `required_version` in the root
+module. When it is present, the workflow prints a warning annotation, because
+the constraint silently overrides the `terraform_version` input.
+
+```yaml
+jobs:
+  invoke-terraform:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v19.12.2
+    with:
+      # optional - defaults to the Dependabot version, does not override a
+      # version configured in a remote/cloud workspace
+      terraform_version: 1.15.0
+    secrets: inherit
 ```
 
 ### kubectl support
@@ -376,7 +411,7 @@ Example:
 ```yaml
 jobs:
   invoke-terraform-k8s:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v19.10.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform.yml@v19.12.2
     with:
       terraform_root_path: k8s
       install_kubectl: true
@@ -440,7 +475,7 @@ permissions:
 
 jobs:
   pre-commit:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v19.10.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v19.12.2
     with:
       BOT_GITHUB_USERNAME: ${{ vars.BOT_GITHUB_USERNAME }}
     secrets: inherit
@@ -469,7 +504,7 @@ Example using the GitHub App authentication mode:
 ```yaml
 jobs:
   pre-commit:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v19.10.0
+    uses: Alfresco/alfresco-build-tools/.github/workflows/terraform-pre-commit.yml@v19.12.2
     with:
       github_app_repositories_owner: Alfresco
       github_app_client_id: ${{ vars.MY_GITHUB_APP_CLIENT_ID }}
