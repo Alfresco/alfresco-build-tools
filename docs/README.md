@@ -1241,10 +1241,11 @@ for PRs, but it requires providing a GitHub token.
 
 ### github-list-pr-authors
 
-Lists the people whose commits within pull requests landed in a repository between two refs.
-Each commit in the range is matched to its pull request by asking GitHub.
-Direct pushes are ignored. Commits created by bots are reported as who merged the PR, 
-not the bot itself.
+Lists the people whose commits within pull requests landed in a repository
+between two refs. Each commit in the range is matched to its merged pull request
+by asking GitHub. Direct pushes are ignored, and so is an open pull request that
+holds the commit but did not put it there. Commits created by bots are reported
+as who merged the PR, not the bot itself.
 
 ```yaml
       - id: retry
@@ -1277,13 +1278,16 @@ not the bot itself.
 | `count`, `truncated` | how many pull requests, and whether anything was left out: a comparison longer than one page of the compare API, or a lookup that failed |
 
 A pull request carries no email, so the address to mention comes from a commit
-in the range that the same account authored. An author with no such commit keeps
-their `@login`.
+in the range that the same account authored. Where somebody committed under two
+addresses, the one matching `mention-email-domain` is kept. An author with no
+such commit keeps their `@login`, and a comma or a pipe in a display name is
+replaced with a space so it cannot be read as a `cc` separator.
 
 When a bot opened the pull request, the bot is named in `bots` and whoever
 merged it is reported in `people`, so a Dependabot bump still has a human
-attached. An empty `cc`, including when the step was skipped, leaves the card
-unchanged rather than failing.
+attached, and somebody who also authored a pull request in the range is named
+once rather than again as a merger. An empty `cc`, including when the step was
+skipped, leaves the card unchanged rather than failing.
 
 Matching commits to pull requests costs one API call per commit in the range, so
 a range of a few hundred commits is a few hundred calls.

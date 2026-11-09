@@ -44,11 +44,15 @@ if [ "$(jq -r '(.total_commits // 0) > (.commits | length)' <<<"$COMPARE")" = "t
 fi
 
 # A pull request carries no email, so the address to mention comes from a commit in
-# range that the same account authored.
-IDENTITIES=$(jq -c '[ .commits[]
-  | select((.author.login // "") != "")
-  | { key: .author.login,
-      value: { name: .commit.author.name, email: (.commit.author.email // "") } } ]
+# range that the same account authored. Someone who commits under two addresses keeps
+# the one that can be mentioned.
+IDENTITIES=$(jq -c --arg d "$MENTION_EMAIL_DOMAIN" '
+  [ .commits[]
+    | select((.author.login // "") != "")
+    | { login: .author.login, name: .commit.author.name, email: (.commit.author.email // "") } ]
+  | group_by(.login)
+  | map( ( [ .[] | select($d != "" and (.email | ascii_downcase | endswith("@" + ($d | ascii_downcase)))) ][0] // .[-1] )
+         | { key: .login, value: { name: .name, email: .email } } )
   | from_entries' <<<"$COMPARE")
 
 CHANGES="[]"
@@ -60,9 +64,9 @@ for sha in $(jq -r '.commits[].sha' <<<"$COMPARE"); do
     TRUNCATED=true
     continue
   }
-  # An open pull request can also contain the commit, so a merged one wins.
+  # Only a merged pull request put the commit there. An open one holding it did not.
   row=$(jq -c --arg repo "$REPOSITORY" --arg sha "$sha" --argjson who "$IDENTITIES" '
-    ( ( [ .[] | select(.merged_at != null) ] + . )[0] // empty )
+    ( [ .[] | select(.merged_at != null) ][0] // empty )
     | (.user.login // "") as $login
     | { repo: $repo,
         pr: .number,
@@ -82,7 +86,11 @@ CHANGES=$(jq -c 'unique_by(.pr)' <<<"$CHANGES")
 
 # Somebody merged the bot's pull request, and that person is the one who can act on it.
 for pr in $(jq -r '.[] | select(.kind == "bot") | .pr' <<<"$CHANGES"); do
-  merger=$(api "repos/$REPOSITORY/pulls/$pr" --jq '.merged_by.login // ""') || merger=""
+  merger=$(api "repos/$REPOSITORY/pulls/$pr" --jq '.merged_by.login // ""') || {
+    echo "::warning::Could not look up who merged #$pr in $REPOSITORY"
+    TRUNCATED=true
+    continue
+  }
   [ -n "$merger" ] || continue
   CHANGES=$(jq -c --argjson p "$pr" --arg m "$merger" \
     'map(if .pr == $p then . + {merged_by: $m} else . end)' <<<"$CHANGES")
@@ -100,15 +108,21 @@ MENTIONABLE=$(jq -r --arg d "$MENTION_EMAIL_DOMAIN" '
   if $d == "" then empty else
     map(select(.kind == "user" and .email != ""
                and (.email | ascii_downcase | endswith("@" + ($d | ascii_downcase)))))
-    | unique_by(.email | ascii_downcase) | map("\(.name)|\(.email)") | join(",")
+    | unique_by(.email | ascii_downcase)
+    | map( ((.name | gsub("[,|]"; " ") | gsub("^ +| +$"; "") | gsub(" +"; " ")) as $n
+            | "\(if $n == "" then .login else $n end)|\(.email)") )
+    | join(",")
   end' <<<"$CHANGES")
 
 PLAIN=$(jq -r --arg d "$MENTION_EMAIL_DOMAIN" '
-  ( map(select(.kind == "user")
+  [ .[] | select(.kind == "user") | .login ] as $authors
+  | ( map(select(.kind == "user")
         | select($d == "" or .email == ""
                  or ((.email | ascii_downcase | endswith("@" + ($d | ascii_downcase))) | not))
         | "@" + .login)
-    + map(.merged_by // empty | select(. != "") | "@" + .) )
+    + map(.merged_by // empty
+          | select(. != "" and (($authors | index(.)) == null))
+          | "@" + .) )
   | map(select(. != "@")) | unique | join(",")' <<<"$CHANGES")
 
 emit people "$(jq -r '(map(select(.kind == "user") | .login) + map(.merged_by // empty))

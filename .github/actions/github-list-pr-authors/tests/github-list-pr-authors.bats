@@ -78,6 +78,9 @@ mock_gh() {
                 sha="${url#*/commits/}"; sha="${sha%%/*}"
                 body=$(jq -c --arg s "$sha" '.[$s] // []' <<<"$MOCK_PULLS") ;;
             *"/pulls/"*)
+                if [ "${MOCK_MERGER_FAILS:-}" = "true" ]; then
+                    echo "gh: Not Found (HTTP 404)" >&2; return 1
+                fi
                 body="{\"merged_by\":{\"login\":\"$MOCK_MERGED_BY\"}}" ;;
             *)
                 echo "unexpected gh invocation: $url" >&2; return 1 ;;
@@ -129,7 +132,7 @@ mock_gh() {
     assert_output_var "people" "alice"
 }
 
-@test "a merged pull request wins over an open one holding the same commit" {
+@test "a merged pull request is chosen over an open one holding the same commit" {
     export MOCK_PULLS='{
         "aaaaaaaaaa":[{"number":99,"title":"still open","html_url":"p/99",
                        "merged_at":null,"user":{"login":"mallory"}},
@@ -141,6 +144,89 @@ mock_gh() {
     run github-list-pr-authors.sh
     [ "$status" -eq 0 ]
     assert_output_var "people" "alice"
+}
+
+@test "a commit held only by an open pull request is not reported" {
+    export MOCK_PULLS='{
+        "aaaaaaaaaa":[{"number":99,"title":"still open","html_url":"p/99",
+                       "merged_at":null,"user":{"login":"mallory"}}],
+        "bbbbbbbbbb":[],
+        "cccccccccc":[]
+    }'
+    run github-list-pr-authors.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "count" "0"
+    assert_output_var "people" ""
+}
+
+@test "a company address survives a later commit under a noreply one" {
+    export MOCK_COMPARE='{"commits":[
+        {"sha":"aaaaaaaaaa","author":{"login":"alice"},
+         "commit":{"author":{"name":"Alice A","email":"alice.a@hyland.com"}}},
+        {"sha":"a2a2a2a2a2","author":{"login":"alice"},
+         "commit":{"author":{"name":"alice","email":"9+alice@users.noreply.github.com"}}}
+    ]}'
+    export MOCK_PULLS='{
+        "aaaaaaaaaa":[{"number":11,"title":"t","html_url":"p/11",
+                       "merged_at":"2026-01-01T00:00:00Z","user":{"login":"alice"}}],
+        "a2a2a2a2a2":[{"number":12,"title":"t2","html_url":"p/12",
+                       "merged_at":"2026-01-02T00:00:00Z","user":{"login":"alice"}}]
+    }'
+    run github-list-pr-authors.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "cc" "Alice A|alice.a@hyland.com"
+}
+
+@test "a comma in a display name does not split the cc list" {
+    export MOCK_COMPARE='{"commits":[
+        {"sha":"aaaaaaaaaa","author":{"login":"alice"},
+         "commit":{"author":{"name":"Appleby, Alice | A","email":"alice.a@hyland.com"}}}
+    ]}'
+    export MOCK_PULLS='{
+        "aaaaaaaaaa":[{"number":11,"title":"t","html_url":"p/11",
+                       "merged_at":"2026-01-01T00:00:00Z","user":{"login":"alice"}}]
+    }'
+    run github-list-pr-authors.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "cc" "Appleby Alice A|alice.a@hyland.com"
+}
+
+@test "somebody who authored a pull request is not repeated as a merger" {
+    export MOCK_COMPARE='{"commits":[
+        {"sha":"aaaaaaaaaa","author":{"login":"alice"},
+         "commit":{"author":{"name":"Alice A","email":"alice.a@hyland.com"}}},
+        {"sha":"1111111111","author":{"login":"dependabot[bot]"},
+         "commit":{"author":{"name":"dependabot[bot]","email":"49699333+dependabot[bot]@users.noreply.github.com"}}}
+    ]}'
+    export MOCK_PULLS='{
+        "aaaaaaaaaa":[{"number":11,"title":"t","html_url":"p/11",
+                       "merged_at":"2026-01-01T00:00:00Z","user":{"login":"alice"}}],
+        "1111111111":[{"number":14,"title":"bump","html_url":"p/14",
+                       "merged_at":"2026-01-03T00:00:00Z","user":{"login":"dependabot[bot]"}}]
+    }'
+    export MOCK_MERGED_BY="alice"
+    run github-list-pr-authors.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "cc" "Alice A|alice.a@hyland.com"
+    assert_output_var "people" "alice"
+}
+
+@test "says the list is partial when a merger lookup fails" {
+    export MOCK_COMPARE='{"commits":[
+        {"sha":"1111111111","author":{"login":"dependabot[bot]"},
+         "commit":{"author":{"name":"dependabot[bot]","email":"d@users.noreply.github.com"}}}
+    ]}'
+    export MOCK_PULLS='{
+        "1111111111":[{"number":14,"title":"bump","html_url":"p/14",
+                       "merged_at":"2026-01-03T00:00:00Z","user":{"login":"dependabot[bot]"}}]
+    }'
+    export MOCK_MERGER_FAILS="true"
+    run github-list-pr-authors.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "bots" "dependabot[bot]"
+    assert_output_var "people" ""
+    assert_output_var "truncated" "true"
+    [[ "$output" == *"Could not look up who merged"* ]]
 }
 
 @test "a direct push authored by a human is still left out" {
