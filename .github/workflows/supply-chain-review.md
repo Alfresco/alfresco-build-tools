@@ -8,7 +8,7 @@ permissions:
   contents: read
   pull-requests: read
 
-model: gpt-5-mini
+model: gpt-6-luna
 engine:
   id: copilot
 tools:
