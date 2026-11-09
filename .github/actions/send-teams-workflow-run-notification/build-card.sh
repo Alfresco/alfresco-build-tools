@@ -44,7 +44,7 @@ if [[ "${MAX_ATTEMPTS:-}" =~ ^[0-9]+$ ]] && [ "$MAX_ATTEMPTS" -ge 1 ]; then
   ATTEMPTS="$ATTEMPT of $MAX_ATTEMPTS"
 fi
 
-# One bullet per job so the list stays readable past the two or three a FactSet row can hold.
+# A bullet list with one bullet per job
 JOBS=$(printf '%s\n' "${FAILED_JOBS:-}" \
   | sed -E 's/^[[:space:]]*//; s/[[:space:]]*$//; /^$/d; s/\\/\\\\/g; s/[][*`_]/\\&/g; s/^/- /')
 [ -n "$JOBS" ] || JOBS="- none reported"
@@ -75,19 +75,20 @@ while IFS= read -r ENTRY; do
       CC_USERS="${CC_USERS}${ENTRY}"$'\n'
       continue
     fi
-    # Half an entry cannot be mentioned, and a card that goes out beats one that fails.
+    # Fallback to plaintext if not `name|id`
     echo "::warning::cc entry '$ENTRY' is not \"display name|email\", showing it as plain text"
     SHOWN="${NAME:-$ID}"
   fi
   [ -n "$SHOWN" ] || continue
-  # Escaped like the job names, so an underscore in a handle is not read as markdown.
+  # Escaped like the job names for markdown
   SHOWN_MD=$(printf '%s' "$SHOWN" | sed -E 's/\\/\\\\/g; s/[][*`_]/\\&/g')
   # Only a handle has a profile to point at, so a bare display name is left as text.
   if [[ "$SHOWN" =~ ^@[A-Za-z0-9-]+$ ]]; then
     SHOWN_MD="[${SHOWN_MD}](${SERVER}/${SHOWN#@})"
   fi
   CC_TEXT="${CC_TEXT}${CC_TEXT:+, }${SHOWN_MD}"
-done < <(csv_lines "${CC:-}")
+# Remove duplicate entries
+done < <(csv_lines "${CC:-}" | awk '!seen[$0]++')
 
 [ -z "$CC_TEXT" ] || CC_TEXT="cc: $CC_TEXT"
 

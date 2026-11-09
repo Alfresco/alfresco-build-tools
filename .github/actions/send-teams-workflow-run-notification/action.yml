@@ -41,7 +41,7 @@ inputs:
     required: false
     default: ""
   cc:
-    description: 'Comma-separated people to name on a cc line of their own, such as the cc output of dependency-chain-changes. An entry in "display name|email" format is mentioned, with the <at> marker written for you; an entry without a "|" is shown as plain text.'
+    description: 'Comma-separated people to name on a cc line of their own, such as the cc output of github-list-pr-authors. An entry in "display name|email" format is mentioned, with the <at> marker written for you; an entry without a "|" is shown as plain text.'
     required: false
     default: ""
   mention-users:

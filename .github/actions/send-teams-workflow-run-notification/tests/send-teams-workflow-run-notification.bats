@@ -378,6 +378,14 @@ mention_users() {
     [ "$(cc_line)" = "cc: <at>Alice A</at>" ]
 }
 
+@test "somebody named by two repositories is listed once" {
+    export CC="Jakub Kochman|jakub.kochman@hyland.com,@gerardolenski,Jakub Kochman|jakub.kochman@hyland.com,@gerardolenski"
+    run build-card.sh
+    [ "$status" -eq 0 ]
+    [ "$(cc_line)" = "cc: <at>Jakub Kochman</at>, [@gerardolenski](https://github.com/gerardolenski)" ]
+    [ "$(mention_users)" = "Jakub Kochman|jakub.kochman@hyland.com" ]
+}
+
 @test "blank entries and stray spaces in cc are ignored" {
     export CC=" Jakub Kochman|jakub.kochman@hyland.com ,, @gerardolenski , "
     run build-card.sh
