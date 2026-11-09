@@ -338,7 +338,7 @@ mirror server:
   the repo pins an older one:
 
   ```yaml
-  - uses: Alfresco/alfresco-build-tools/.github/actions/maven-release-slim@v19.12.1
+  - uses: Alfresco/alfresco-build-tools/.github/actions/maven-release-slim@v19.12.2
     with:
       token: ${{ steps.app-token.outputs.token }}
       release-version: ${{ env.RELEASE_VERSION }}
