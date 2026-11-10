@@ -70,6 +70,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [github-download-file](#github-download-file)
   - [github-https-auth](#github-https-auth)
   - [github-list-changes](#github-list-changes)
+  - [github-list-pr-authors](#github-list-pr-authors)
   - [github-pr-check-metadata](#github-pr-check-metadata)
   - [github-pr-label-from-branch](#github-pr-label-from-branch)
   - [github-require-secrets](#github-require-secrets)
@@ -1237,6 +1238,59 @@ for PRs, but it requires providing a GitHub token.
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 ```
+
+### github-list-pr-authors
+
+Lists the people whose commits within pull requests landed in a repository
+between two refs. Each commit in the range is matched to its merged pull request
+by asking GitHub. Direct pushes are ignored, and so is an open pull request that
+holds the commit but did not put it there. Commits created by bots are reported
+as who merged the PR, not the bot itself.
+
+```yaml
+      - id: retry
+        uses: Alfresco/alfresco-build-tools/.github/actions/workflow-run-auto-retry@v19.12.0
+
+      - id: authors
+        # No earlier green run means there is nothing to compare against.
+        if: steps.retry.outputs.decision == 'escalate' && steps.retry.outputs.last-successful-sha != ''
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-pr-authors@v19.12.0
+        with:
+          from-ref: ${{ steps.retry.outputs.last-successful-sha }}
+          to-ref: ${{ github.event.workflow_run.head_sha }}
+          # optional, default: '' - an empty domain leaves everyone as a handle
+          mention-email-domain: example.com
+
+      - if: steps.retry.outputs.decision == 'escalate'
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-workflow-run-notification@v19.12.0
+        with:
+          webhook-url: ${{ secrets.TEAMS_WEBHOOK }}
+          reason-code: ${{ steps.retry.outputs.reason-code }}
+          failed-jobs: ${{ steps.retry.outputs.failed-jobs }}
+          cc: ${{ steps.authors.outputs.cc }}
+```
+
+| output | |
+| --- | --- |
+| `cc` | everyone, in one list: `Display Name\|email` when the author's commit email is in `mention-email-domain` so Teams can mention them, `@login` otherwise |
+| `people`, `bots` | logins, humans and bots separately |
+| `changes` | the whole list as JSON: repo, pr, sha, login, name, email, kind, title, url |
+| `count`, `truncated` | how many pull requests, and whether anything was left out: a comparison longer than one page of the compare API, or a lookup that failed |
+
+A pull request carries no email, so the address to mention comes from a commit
+in the range that the same account authored. Where somebody committed under two
+addresses, the one matching `mention-email-domain` is kept. An author with no
+such commit keeps their `@login`, and a comma or a pipe in a display name is
+replaced with a space so it cannot be read as a `cc` separator.
+
+When a bot opened the pull request, the bot is named in `bots` and whoever
+merged it is reported in `people`, so a Dependabot bump still has a human
+attached, and somebody who also authored a pull request in the range is named
+once rather than again as a merger. An empty `cc`, including when the step was
+skipped, leaves the card unchanged rather than failing.
+
+Matching commits to pull requests costs one API call per commit in the range, so
+a range of a few hundred commits is a few hundred calls.
 
 ### github-pr-check-metadata
 
@@ -2775,6 +2829,15 @@ written rather than as markdown.
 pass `mention-users` or `mention-tags` and include the matching
 `<at>name</at>` in the `footer` text.
 
+`cc` adds a line above the footer naming the people behind the change, and takes the
+`cc` output of [github-list-pr-authors](#github-list-pr-authors) directly. Each
+entry is one person: `display name|email` is mentioned, with the `<at>` marker and the
+matching entity written for you; a `@handle` becomes a link to that profile on
+`GITHUB_SERVER_URL`; anything else is shown as plain text, in the order given. A half
+entry such as `Name|` degrades to plain text with a warning rather than failing the
+step. Anyone named in both `mention-users` and `cc` is mentioned once, and a repeated
+`cc` entry is shown once, so several `cc` outputs can be joined with a comma.
+
 ### setup-checkov
 
 Set up a specific version of Checkov and add it to the PATH.
@@ -3243,9 +3306,9 @@ It returns `decision`, in this order:
 4. **The attempt budget is spent** — `escalate`.
 5. Otherwise — `retry`.
 
-Every outcome is written to the job summary. Any API error other than a 404
-fails the step, so a token or rate-limit problem cannot look like a healthy
-no-op.
+Every outcome is written to the job summary. A 5xx is retried up to three times
+before being believed. Any API error other than a 404 then fails the step, so a token
+or rate-limit problem cannot look like a healthy no-op.
 
 Entries under `non-retryable-jobs` are job **display names** and are matched on
 the whole name. A job nested through a reusable workflow is reported as
@@ -3254,7 +3317,13 @@ jobs do not need listing. A job that was gated and did not run reports
 `skipped`, not `failure`, so it never blocks a retry.
 
 Outputs are `decision` (`retry`, `escalate` or `none`), `reason-code`,
-`reason-text`, `failed-jobs`, `attempt` and `max-attempts`.
+`reason-text`, `failed-jobs`, `attempt`, `max-attempts` and
+`last-successful-sha`.
+
+`last-successful-sha` is the head commit of the newest earlier successful run of the
+watched workflow on the same branch. It is looked up only on
+an escalation, and is empty - with a warning - when there is no such run or the
+lookup fails.
 
 `reason-text` is one sentence suitable for a log or a notification body.
 `reason-code` is set only on an escalation, to `attempts-exhausted`,

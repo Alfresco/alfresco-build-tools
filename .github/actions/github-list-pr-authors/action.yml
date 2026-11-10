@@ -1,0 +1,60 @@
+name: Github List PR Authors
+description: Lists the people whose pull requests landed in a repository between two refs.
+inputs:
+  repository:
+    description: Repository to look at, as owner/name.
+    required: false
+    default: ${{ github.repository }}
+  from-ref:
+    description: Start of the range, not itself included. Anything git resolves - a tag, a branch or a sha.
+    required: true
+  to-ref:
+    description: End of the range, included. Anything git resolves - a tag, a branch or a sha.
+    required: true
+  mention-email-domain:
+    description: >-
+      Email domain whose addresses are paired with a display name in `cc`, matched on the
+      commit email. Empty leaves everyone as a handle.
+    required: false
+    default: ""
+  github-token:
+    description: Token used to read commits and pull requests. Needs contents and pull-requests read on the repository.
+    required: false
+    default: ${{ github.token }}
+outputs:
+  people:
+    description: Comma-separated GitHub logins of the humans involved, including whoever merged a bot's pull request
+    value: ${{ steps.collect.outputs.people }}
+  bots:
+    description: Comma-separated logins of the bots whose pull requests are in range, which are those whose login ends in `[bot]`
+    value: ${{ steps.collect.outputs.bots }}
+  cc:
+    description: >-
+      Everyone involved, as one comma-separated list ready for the cc input of
+      send-teams-workflow-run-notification. An author whose commit email matches
+      mention-email-domain appears as `Display Name|email` so Teams can mention them,
+      anyone else as `@login`.
+    value: ${{ steps.collect.outputs.cc }}
+  changes:
+    description: Every pull request found, as a JSON array with repo, pr, sha, login, name, email, kind, title and url
+    value: ${{ steps.collect.outputs.changes }}
+  count:
+    description: How many pull requests were found
+    value: ${{ steps.collect.outputs.count }}
+  truncated:
+    description: >-
+      'true' when something was left out: a comparison longer than one page of the
+      compare API, or a lookup that failed
+    value: ${{ steps.collect.outputs.truncated }}
+runs:
+  using: composite
+  steps:
+    - id: collect
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        REPOSITORY: ${{ inputs.repository }}
+        FROM_REF: ${{ inputs.from-ref }}
+        TO_REF: ${{ inputs.to-ref }}
+        MENTION_EMAIL_DOMAIN: ${{ inputs.mention-email-domain }}
+      run: ${{ github.action_path }}/github-list-pr-authors.sh

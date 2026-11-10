@@ -44,7 +44,7 @@ if [[ "${MAX_ATTEMPTS:-}" =~ ^[0-9]+$ ]] && [ "$MAX_ATTEMPTS" -ge 1 ]; then
   ATTEMPTS="$ATTEMPT of $MAX_ATTEMPTS"
 fi
 
-# One bullet per job so the list stays readable past the two or three a FactSet row can hold.
+# A bullet list with one bullet per job
 JOBS=$(printf '%s\n' "${FAILED_JOBS:-}" \
   | sed -E 's/^[[:space:]]*//; s/[[:space:]]*$//; /^$/d; s/\\/\\\\/g; s/[][*`_]/\\&/g; s/^/- /')
 [ -n "$JOBS" ] || JOBS="- none reported"
@@ -57,8 +57,48 @@ while IFS= read -r FACT; do
   fi
 done <<<"${FACTS:-}"
 
+# One entry per line, so the rest of the script never has to think about the comma form.
+csv_lines() { printf '%s\n' "${1:-}" | tr ',' '\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//; /^$/d'; }
+
+# An entry carrying an email is somebody Teams can mention, a bare one is shown as written.
+# That is the same rule the mention list downstream already goes by.
+CC_TEXT=""
+CC_USERS=""
+SERVER="${GITHUB_SERVER_URL:-https://github.com}"
+while IFS= read -r ENTRY; do
+  SHOWN="$ENTRY"
+  if [[ "$ENTRY" == *"|"* ]]; then
+    NAME="${ENTRY%|*}"
+    ID="${ENTRY#*|}"
+    if [ -n "$NAME" ] && [ -n "$ID" ]; then
+      CC_TEXT="${CC_TEXT}${CC_TEXT:+, }<at>${NAME}</at>"
+      CC_USERS="${CC_USERS}${ENTRY}"$'\n'
+      continue
+    fi
+    # Fallback to plaintext if not `name|id`
+    echo "::warning::cc entry '$ENTRY' is not \"display name|email\", showing it as plain text"
+    SHOWN="${NAME:-$ID}"
+  fi
+  [ -n "$SHOWN" ] || continue
+  # Escaped like the job names for markdown
+  SHOWN_MD=$(printf '%s' "$SHOWN" | sed -E 's/\\/\\\\/g; s/[][*`_]/\\&/g')
+  # Only a handle has a profile to point at, so a bare display name is left as text.
+  if [[ "$SHOWN" =~ ^@[A-Za-z0-9-]+$ ]]; then
+    SHOWN_MD="[${SHOWN_MD}](${SERVER}/${SHOWN#@})"
+  fi
+  CC_TEXT="${CC_TEXT}${CC_TEXT:+, }${SHOWN_MD}"
+# Remove duplicate entries
+done < <(csv_lines "${CC:-}" | awk '!seen[$0]++')
+
+[ -z "$CC_TEXT" ] || CC_TEXT="cc: $CC_TEXT"
+
+# Everyone mentioned on the cc line needs an entity too, or Teams renders the <at> as text.
+MENTIONS=$(printf '%s\n%s' "$(csv_lines "${MENTION_USERS:-}")" "$CC_USERS" \
+  | sed '/^$/d' | awk '!seen[$0]++' | paste -sd, -)
+
 EXTRA=$(jq -n -c \
   --arg attempts "$ATTEMPTS" \
+  --arg cc "$CC_TEXT" \
   --arg facts "${FACTS:-}" \
   --arg jobs "$JOBS" \
   --arg footer "${FOOTER:-}" \
@@ -70,6 +110,8 @@ EXTRA=$(jq -n -c \
       {type: "Container", spacing: "medium", items: [
          {type: "TextBlock", text: "Failed jobs", weight: "bolder", spacing: "none"},
          {type: "TextBlock", wrap: true, spacing: "small", text: $jobs}]}]
+   + (if $cc == "" then []
+      else [{type: "TextBlock", spacing: "medium", wrap: true, text: $cc}] end)
    + (if $footer == "" then []
       else [{type: "TextBlock", spacing: "medium", wrap: true, isSubtle: true, text: $footer}] end)')
 
@@ -80,4 +122,5 @@ EXTRA=$(jq -n -c \
   printf '%s\n' "$BODY"
   echo "$delim"
   echo "extra-body=$EXTRA"
+  echo "mention-users=$MENTIONS"
 } >> "$GITHUB_OUTPUT"
