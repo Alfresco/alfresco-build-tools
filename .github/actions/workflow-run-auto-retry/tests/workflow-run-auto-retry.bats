@@ -60,10 +60,11 @@ assert_failed_jobs() {
 # JSON fixture so the --jq filters in the script are exercised rather than assumed.
 mock_gh() {
     gh() {
-        local url="" jq_expr="" use_jq=0 body=""
+        local url="" jq_expr="" use_jq=0 body="" paginate=0
         while [ $# -gt 0 ]; do
             case "$1" in
                 --jq) jq_expr="$2"; use_jq=1; shift 2 ;;
+                --paginate) paginate=1; shift ;;
                 -H) shift 2 ;;
                 repos/*) url="$1"; shift ;;
                 *) shift ;;
@@ -76,7 +77,16 @@ mock_gh() {
                     echo "gh: Internal Server Error (HTTP 500)" >&2; return 1
                 fi
                 body="$MOCK_WORKFLOW_RUNS" ;;
-            */actions/runs/*/jobs)
+            */actions/runs/*/jobs*)
+                # GitHub times out on a big page of a re-run attempt. --paginate asks for 100 unless told otherwise.
+                if [ -n "${MOCK_JOBS_MAX_PAGE:-}" ]; then
+                    local per_page=30
+                    [ "$paginate" -eq 1 ] && per_page=100
+                    [[ "$url" =~ per_page=([0-9]+) ]] && per_page="${BASH_REMATCH[1]}"
+                    if [ "$per_page" -gt "$MOCK_JOBS_MAX_PAGE" ]; then
+                        echo "gh: Server Error (HTTP 502)" >&2; return 1
+                    fi
+                fi
                 body="$MOCK_JOBS" ;;
             */actions/runs/*)
                 body="{\"run_attempt\":${MOCK_RUN_ATTEMPT:-$RUN_ATTEMPT},\"status\":\"$MOCK_RUN_STATUS\"}" ;;
@@ -362,6 +372,14 @@ mock_gh() {
     run workflow-run-auto-retry.sh
     [ "$status" -ne 0 ]
     [[ "$output" == *"::error::Could not read branch"* ]]
+}
+
+@test "lists the jobs in pages small enough for GitHub to answer in time" {
+    export MOCK_JOBS_MAX_PAGE=50
+    run workflow-run-auto-retry.sh
+    [ "$status" -eq 0 ]
+    assert_output_var "decision" "retry"
+    assert_failed_jobs "run_ci / PMD Scan"
 }
 
 @test "a 404 is not retried and is told apart from an error" {

@@ -107,7 +107,8 @@ if [ "$LIVE_STATUS" != "completed" ]; then
   decide none "" "Run $RUN_ID is $LIVE_STATUS again, so another retry is already under way."
 fi
 
-FAILED=$(api "repos/$REPOSITORY/actions/runs/$RUN_ID/attempts/$RUN_ATTEMPT/jobs" --paginate \
+# A page of 100 jobs of a re-run attempt can take over 10 s and get a 502 from GitHub, so ask for 10.
+FAILED=$(api "repos/$REPOSITORY/actions/runs/$RUN_ID/attempts/$RUN_ATTEMPT/jobs?per_page=10" --paginate \
   --jq '.jobs[] | select(.conclusion == "failure" or .conclusion == "timed_out") | .name') || {
   echo "::error::Could not list the jobs of attempt $RUN_ATTEMPT of run $RUN_ID"
   exit 1
