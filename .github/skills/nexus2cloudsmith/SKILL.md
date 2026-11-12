@@ -376,6 +376,26 @@ If the user wants to try it from the PR branch:
   default branch.
 - Ask the user to delete the test tag and the test package in Cloudsmith.
 
+### If auth or deploy is denied
+
+Access is granted in `HylandPlatformConfiguration/tf-config-cloudsmith`, in
+`locals-alfresco.tf`, not in the repo being migrated. Don't work around it in
+the workflow: raise a PR there, with the Jira key in the branch name.
+
+That repo is DevOps-only. If you can't find or open it (no local clone, `gh`
+returns 404), that is why: tell the user they lack access and must ask the
+DevOps team to make the change, giving them the repo name and the exact edit
+below. Don't try to reach it another way.
+
+- `cloudsmith-auth` fails (and the repo is not a fork): add the repo name, spelled
+  as GitHub spells it, to the read list (`alfresco_read_repositories`).
+- Deploy fails with 403: add the repo to `alfresco_publish_targets` with the
+  repositories it publishes to. Private and internal repos get
+  `["enterprise_releases", "internal_releases"]`. Public repos get
+  `["community_releases"]` only, never `internal_releases`.
+- Keep both lists sorted. Each target is a deliberate, reviewable grant: don't
+  add a broader write group to make the change smaller.
+
 ### Docs
 
 Update the README and any docs that mention Nexus, following the naming rule
