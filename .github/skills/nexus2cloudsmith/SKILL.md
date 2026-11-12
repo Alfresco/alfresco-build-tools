@@ -451,8 +451,18 @@ pushing.
 
 Open one PR per phase, titled like the existing ones:
 `[<JIRA-ID>] Cloudsmith Migration - Phase 1 (Pull) - <repo>` or
-`... Phase 2 (Push) - <repo>`, with no colon after the bracket. Ask the user
-for the Jira ID if you don't have it.
+`... Phase 2 (Push) - <repo>`, with no colon after the bracket. If one PR
+covers both, say `Phase 1 (Pull) and Phase 2 (Push)`. Ask the user for the
+Jira ID if you don't have it.
+
+Always name the phase in the title, never just "Cloudsmith Migration". A Pull
+PR deliberately leaves the deploy side on Nexus, and without the phase in the
+title reviewers flag that as a mistake. Open the description with the phase
+too, and list what stays on Nexus until the other phase, such as the
+`distributionManagement` URLs and the `NEXUS_*` secrets on the release job.
+
+When reviewing a migration PR, check its phase first and judge it against
+that phase only. If the title doesn't name a phase, ask for it.
 
 ## Sources
 
