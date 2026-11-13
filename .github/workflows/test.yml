@@ -20,7 +20,7 @@ jobs:
       - name: pre-commit checks
         uses: ./.github/actions/pre-commit
       - name: Ensure SHA pinned actions
-        uses: hyland/github-actions-ensure-sha-pinned-actions@7957efb76aba0eec7580a9c0392d3e5bec381359 # v2.0.1
+        uses: hyland/github-actions-ensure-sha-pinned-actions@9f71a10c9852b115cfcb146ec2d8d09e2b89593f # v2.1.1
   test:
     runs-on: ${{ matrix.os }}
     needs: build
