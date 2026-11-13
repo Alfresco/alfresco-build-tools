@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
     hooks:
       - id: check-yaml
         args: [--allow-multiple-documents]
@@ -17,7 +17,7 @@ repos:
         exclude: '(.*/dist/.*|\.github/workflows/.*\.lock\.yml$)'
 
   - repo: https://github.com/sirosen/check-jsonschema
-    rev: 0.37.4
+    rev: 39478bf2c099a58683d3f1aedf675105318b078d  # frozen: 0.39.0
     hooks:
       - id: check-dependabot
       - id: check-github-actions
@@ -25,13 +25,13 @@ repos:
         exclude: ^\.github/workflows/.*\.lock\.yml$
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.47.0
+    rev: cbcdc463be5464e25e3e955a511599a67b9b987f  # frozen: v0.50.0
     hooks:
     - id: markdownlint
       exclude: ^(\.github/workflows/.*\.lock\.yml|CLAUDE\.md)$
 
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.12
+    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca  # frozen: v1.7.12
     hooks:
       - id: actionlint
         args:
@@ -42,7 +42,7 @@ repos:
         exclude: ^(\.github/tests/|\.github/workflows/.*\.lock\.yml$)
 
   - repo: https://github.com/hyland/github-actions-ensure-sha-pinned-actions
-    rev: v1.2.0
+    rev: 9f71a10c9852b115cfcb146ec2d8d09e2b89593f  # frozen: v2.1.1
     hooks:
       - id: gha-sha-convert
         exclude: ^\.github/tests/
@@ -71,21 +71,21 @@ repos:
         pass_filenames: false
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.6
+    rev: ef6cf06c079dd6b299dfc720b0f14400c9d168e1  # frozen: v0.17.5
     hooks:
       - id: ruff-check
         args: [--fix]
       - id: ruff-format
 
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.11.0.1
+    rev: a6564f5d57444e123433a5c9af733e3975c77229  # frozen: v0.11.0.1-1
     hooks:
       - id: shellcheck
         args: [ "--severity=style" ]
         files: ^\.github/scripts/.*\.sh$
 
   - repo: https://github.com/thlorenz/doctoc
-    rev: v2.3.0
+    rev: facaad890e72966c88a6a5592f5b6a01c422deb2  # frozen: v2.5.0
     hooks:
       - id: doctoc
         args: [--maxlevel, '3', --github, --notitle]

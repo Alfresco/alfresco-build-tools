@@ -2425,6 +2425,28 @@ Additional inputs:
 | `auto-commit-files`    | Files to include in the auto-commit (new-line separated globs)                      | `"**"`    |
 | `python-version`       | Python version used to run pre-commit                                               | `"3.11"`  |
 | `skip_checkout`        | Skip the internal `actions/checkout` step                                           | `"false"` |
+| `require-frozen-revs`  | Fail before running any hook if a hook repo `rev` is not a commit SHA               | `"false"` |
+
+#### Requiring frozen hook revisions
+
+`pre-commit autoupdate --freeze` replaces each hook repo tag with the commit SHA
+it points to, keeping the tag in a `# frozen: vX.Y.Z` comment. A moved or
+re-pushed tag can then no longer change the code that runs in CI.
+
+Set `require-frozen-revs` to fail the job, before any hook runs, when a remote
+repo in `.pre-commit-config.yaml` is not pinned to a 40-character commit SHA.
+`local` and `meta` repos are skipped. Only the root `.pre-commit-config.yaml` is
+checked.
+
+```yml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v19.14.1
+        with:
+          require-frozen-revs: "true"
+```
+
+To fix a failure, run `pre-commit autoupdate --freeze` and commit the result.
+This check is opt-in for now and may become the default in a future major
+release.
 
 ### process-coverage-report
 
