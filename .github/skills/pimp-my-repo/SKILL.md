@@ -76,14 +76,15 @@ already exists, preserve existing `ignore`, `groups`, and custom `directories`.
 
 ## 2. Pre-commit config
 
-Add a baseline `.pre-commit-config.yaml` with the standard hooks (pin `rev`s to the
-latest release of each repo). Include language-specific hooks (black/isort/flake8,
-shellcheck, …) only for languages the repo actually uses.
+Add a baseline `.pre-commit-config.yaml` with the standard hooks, with every `rev`
+frozen to the commit SHA of the latest release of each repo (`rev: <sha>  # frozen: vX.Y.Z`),
+never a bare tag. Include language-specific hooks (black/isort/flake8, shellcheck, …) only
+for languages the repo actually uses.
 
 ```yaml
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
     hooks:
       - id: check-yaml
         args: [--allow-multiple-documents]
@@ -97,24 +98,24 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/sirosen/check-jsonschema
-    rev: 0.37.1
+    rev: 39478bf2c099a58683d3f1aedf675105318b078d  # frozen: 0.39.0
     hooks:
       - id: check-dependabot
       - id: check-github-actions
       - id: check-github-workflows
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.47.0
+    rev: cbcdc463be5464e25e3e955a511599a67b9b987f  # frozen: v0.50.0
     hooks:
       - id: markdownlint
 
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.12
+    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca  # frozen: v1.7.12
     hooks:
       - id: actionlint
 
   - repo: https://github.com/hyland/github-actions-ensure-sha-pinned-actions
-    rev: v1.2.0
+    rev: 9f71a10c9852b115cfcb146ec2d8d09e2b89593f  # frozen: v2.1.1
     hooks:
       - id: gha-sha-convert
         args: [--allowlist, 'Alfresco/alfresco-build-tools/*']
@@ -125,11 +126,11 @@ repos:
 If the repo contains non-trivial Python scripts — i.e. more than just CI glue under
 100 lines of code — suggest `ruff` for linting and formatting. Check the
 [releases page](https://github.com/astral-sh/ruff-pre-commit/releases) for the latest
-`rev` before adding it:
+`rev` (frozen to its commit SHA) before adding it:
 
 ```yaml
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.6
+    rev: ef6cf06c079dd6b299dfc720b0f14400c9d168e1  # frozen: v0.17.5
     hooks:
       - id: ruff-check
         args: [ --fix ]
@@ -208,17 +209,19 @@ command -v pre-commit
 ```
 
 - **If it's available**, install the hooks, bump the baseline `rev`s to each hook's
-  actual latest release, and run them across the whole repo, then fix anything that
-  fails before moving on:
+  actual latest release frozen to commit SHAs, and run them across the whole repo, then fix
+  anything that fails before moving on:
 
   ```bash
   pre-commit install
-  pre-commit autoupdate
+  pre-commit autoupdate --freeze
   pre-commit run --all-files
   ```
 
   The `rev`s in the baseline config above are a snapshot from when this skill was
-  written — `autoupdate` is what keeps them current instead of drifting stale from day one.
+  written — `autoupdate` keeps them current instead of drifting stale from day one, and
+  `--freeze` pins each one to a commit SHA so a moved or re-pushed tag can't change the code
+  that runs.
 
 - **If it's missing**, tell the user explicitly: running pre-commit locally means you
   catch (and fix) issues before pushing, instead of waiting on CI to fail. Ask them to
@@ -231,7 +234,7 @@ command -v pre-commit
   ```
 
   Then re-run the check above and proceed with `pre-commit install`, `pre-commit
-  autoupdate`, and `pre-commit run --all-files` once it's installed. If they decline,
+  autoupdate --freeze`, and `pre-commit run --all-files` once it's installed. If they decline,
   continue with the rest of the setup and note that the config is untested locally and
   the pinned `rev`s may be stale compared to upstream releases; enabling `auto-commit`
   on the CI job above still catches and fixes issues without a local install, though the
