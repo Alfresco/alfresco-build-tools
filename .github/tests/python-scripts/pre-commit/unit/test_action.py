@@ -61,7 +61,7 @@ def test_tag_rev_fails_and_names_repo(action_module, write_config, capsys):
 
 @pytest.mark.parametrize(
     "rev",
-    [SHA[:7], SHA.upper(), "master", SHA + "0", "abcdefg" + SHA[7:]],
+    [SHA[:7], SHA.upper(), "master", SHA + "0", "abcdefg" + SHA[7:], f'"{SHA}\\n"'],
 )
 def test_non_sha_revs_fail(action_module, write_config, rev):
     config = write_config(f"""

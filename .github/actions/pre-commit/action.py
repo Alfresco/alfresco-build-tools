@@ -4,7 +4,7 @@ from pathlib import Path
 
 import yaml
 
-SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+SHA_RE = re.compile(r"[0-9a-f]{40}")
 SKIPPED_REPOS = {"local", "meta"}
 
 
@@ -18,7 +18,7 @@ def main(config_path: str = ".pre-commit-config.yaml") -> int:
     unfrozen = [
         (repo.get("repo"), repo.get("rev"))
         for repo in config.get("repos") or []
-        if repo.get("repo") not in SKIPPED_REPOS and not SHA_RE.match(str(repo.get("rev") or ""))
+        if repo.get("repo") not in SKIPPED_REPOS and not SHA_RE.fullmatch(str(repo.get("rev") or ""))
     ]
 
     for url, rev in unfrozen:
