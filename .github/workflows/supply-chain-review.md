@@ -2,6 +2,7 @@
 on:
   slash_command:
     name: supply-chain-review
+    events: [pull_request_comment]
   reaction: rocket
 
 permissions:
