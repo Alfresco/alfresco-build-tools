@@ -466,10 +466,6 @@ For private repos, the build can only be checked in CI because it needs the
 OIDC token. Run pre-commit (and `actionlint` if the repo uses it) before
 pushing.
 
-After the first release from Phase 2, run the Step 0 `curl` for each community
-module's new version. A 404 means it went to a repository community builds
-can't read.
-
 ## PR
 
 Open one PR per phase, titled like the existing ones:
