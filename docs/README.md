@@ -3952,6 +3952,7 @@ jobs:
 
 - `trigger-labels`: JSON array of labels that should trigger validation when applied to a PR
 - `milestone-name`: Milestone to set on the PR when validation is triggered
+- `auto-merge` (optional, defaults to `true`): Whether to enable auto-merge after an approved Dependabot PR. Set to `false` to require manual merging after approval.
 
 **Secrets:**
 
@@ -3959,7 +3960,7 @@ jobs:
 
 **Behavior:**
 
-- When a PR review is submitted with "approved" state and the PR creator is `dependabot[bot]`, the workflow sets the specified milestone and enables auto-merge
+- When a PR review is submitted with "approved" state and the PR creator is `dependabot[bot]`, the workflow sets the specified milestone and enables auto-merge when `auto-merge` is `true` (the default). When set to `false`, the milestone is still set, but the PR is not configured for auto-merge.
 - When a PR is labeled with one of the specified trigger labels, the workflow sets the milestone to trigger validation workflows
 - Requires appropriate permissions: `contents: read`, `pull-requests: write`, `issues: write`
 
