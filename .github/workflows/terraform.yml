@@ -257,6 +257,10 @@ jobs:
           COMMENT_REQUESTS_PLAN: ${{ contains(github.event.comment.body, 'terraform plan') }}
           COMMENT_REQUESTS_APPLY: ${{ contains(github.event.comment.body, 'terraform apply') }}
           TERRAFORM_OPERATION_FROM_INPUTS: ${{ inputs.terraform_operation }}
+          TERRAFORM_ROOT_PATH: ${{ steps.detect-path.outputs.terraform_root_path || inputs.terraform_root_path }}
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.issue.number }}
         run: |
           # issue_comment is also fired by comments on plain issues
           if [[ "$IS_ISSUE_COMMENT_EVENT" == "true" ]] && [[ "$IS_PR_COMMENT" != "true" ]]; then
@@ -279,6 +283,22 @@ jobs:
           else
             echo "Unable to determine terraform operation from the current event and inputs. BUG?" >&2
             exit 1
+          fi
+
+          # issue_comment ignores the caller's branches/paths filters, so every stack in the repo
+          # receives the comment: only apply the stacks that posted a plan on this PR.
+          if [[ "$IS_ISSUE_COMMENT_EVENT" == "true" ]] && [[ "$operation" == "apply" ]] && [ -n "$TERRAFORM_ROOT_PATH" ]; then
+            plan_comments=$(gh api --paginate "repos/${REPOSITORY}/issues/${PR_NUMBER}/comments" --jq '
+              .[]
+              | select(.user.login == "github-actions[bot]")
+              | (.body | capture("^<!-- dflook/terraform-github-actions (?<header>\\{.*?\\}) -->")?.header | fromjson?)
+              | select(.label != null and (.label == env.TERRAFORM_ROOT_PATH or (.label | endswith(" " + env.TERRAFORM_ROOT_PATH))))
+              | .label')
+            if [ -z "$plan_comments" ]; then
+              echo "::notice::No terraform plan for '${TERRAFORM_ROOT_PATH}' on PR #${PR_NUMBER}, skipping terraform apply."
+              echo "terraform_operation=" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
           fi
 
           echo "Determined terraform operation: $operation"
