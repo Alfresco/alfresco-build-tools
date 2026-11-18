@@ -11,6 +11,11 @@ on:
         description: Milestone to set on the PR when validation is triggered
         required: true
         type: string
+      auto-merge:
+        description: Enable auto-merge after an approved Dependabot PR
+        required: false
+        type: boolean
+        default: true
     secrets:
       BOT_GITHUB_TOKEN:
         description: >
@@ -34,7 +39,7 @@ jobs:
           creator: ${{ env.DEPENDABOT_CREATOR }}
           github-token: ${{ secrets.BOT_GITHUB_TOKEN }}
           milestone-on-approval: ${{ inputs.milestone-name }}
-          auto-merge-on-approval: true
+          auto-merge-on-approval: ${{ inputs.auto-merge }}
 
       - name: Trigger validation on labeling when token is not readonly and milestone is set
         if: github.event_name == 'pull_request' && github.event.action == 'labeled' && github.secret_source == 'Actions' && inputs.milestone-name != ''

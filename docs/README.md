@@ -3883,7 +3883,7 @@ after a contributor approves the PR.
 
 #### Using the pr-review-check reusable workflow
 
-We provide a reusable workflow that automates PR review checks for Dependabot PRs and manual validation triggers. This workflow enables auto-merge on approval and validates PRs when specific labels are applied.
+We provide a reusable workflow that automates PR review checks for Dependabot PRs and manual validation triggers. By default, it enables auto-merge on approval and validates PRs when specific labels are applied. Set `auto-merge` to `false` to require manual merging after approval.
 
 ```yaml
 name: "PR Review check"
@@ -3904,6 +3904,8 @@ jobs:
     with:
       trigger-labels: '["CI", "preview", "skip-tests"]'
       milestone-name: 'Validating'
+      # Optional; defaults to true
+      auto-merge: false
     secrets:
       BOT_GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
 ```
