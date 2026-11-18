@@ -33,8 +33,23 @@ gh repo view --json visibility --jq .visibility
 ```
 
 Keep the grep output: later steps check it instead of searching again. The
-visibility picks the path in both phases: `PUBLIC` follows "Public repo",
+visibility picks the Phase 1 path: `PUBLIC` follows "Public repo",
 `PRIVATE` / `INTERNAL` follows "Private repo".
+
+Phase 2 follows who consumes each module's artifacts, not who can read the
+source. From the grep, note each module's Nexus `distributionManagement` URL.
+A module that deployed to `nexus/content/repositories/releases` is a
+community module, even in a private repo: its artifacts ship in the community
+distribution. Confirm it with its latest release, which returns 200 from
+`alfresco-public` without credentials:
+
+```bash
+curl -sI -o /dev/null -w '%{http_code}\n' \
+  https://artifacts.hyland.dev/public/alfresco-public/maven/<group/path>/<artifactId>/<version>/<artifactId>-<version>.pom
+```
+
+A module without a Nexus deploy URL follows the repo's visibility. If the two
+signals disagree, ask the user.
 
 ### Check the Cloudsmith workspace
 
@@ -66,19 +81,20 @@ The repository roles and URLs come from the Confluence pages listed under
 | `nexus/content/groups/public` | `https://artifacts.hyland.dev/public/alfresco-public/maven/` | anonymous |
 | Maven Central, public repos | `https://artifacts.hyland.dev/basic/cic-ext-pull-through/maven/` | cloudsmith-auth |
 | `nexus/content/groups/internal` | `https://artifacts.hyland.dev/basic/alfresco-internal/maven/` | cloudsmith-auth |
-| `nexus/content/repositories/releases`, GA and M versions | `https://artifacts.hyland.dev/basic/alfresco-community-releases/maven/` | cloudsmith-auth |
+| `nexus/content/repositories/releases`, GA, M and `-A.x` versions | `https://artifacts.hyland.dev/basic/alfresco-community-releases/maven/` | cloudsmith-auth |
 | `nexus/content/repositories/enterprise-releases`, GA and M versions | `https://artifacts.hyland.dev/basic/alfresco-enterprise-releases/maven/` | cloudsmith-auth |
-| any release repository, `-A.x` versions (see below), internal tools, unreleased products | `https://artifacts.hyland.dev/basic/alfresco-internal-releases/maven/` | cloudsmith-auth |
+| `nexus/content/repositories/enterprise-releases`, `-A.x` versions (see below), internal tools, unreleased products | `https://artifacts.hyland.dev/basic/alfresco-internal-releases/maven/` | cloudsmith-auth |
 | `nexus/content/repositories/activiti-releases` | `https://artifacts.hyland.dev/public/activiti-releases/maven/` | anonymous |
 | `nexus/content/repositories/activiti-enterprise-releases` | `https://artifacts.hyland.dev/basic/activiti-enterprise-releases/maven/` | cloudsmith-auth |
 | any `*-snapshots` repository | drop it | n/a |
 
-`-A.x` releases of private and internal repos go to
-`alfresco-internal-releases`, through the `prerelease` profile (Phase 2).
-Public repos have no such profile: their `-A.x` releases go to
-`alfresco-community-releases` with the GA ones, because community users can't
-read `alfresco-internal-releases`. For the same reason, a public repo never
-pulls from `alfresco-internal` or `alfresco-internal-releases`.
+`-A.x` releases of enterprise modules go to `alfresco-internal-releases`,
+through the `prerelease` profile (Phase 2). Community modules (every module of
+a public repo, and the private ones found in Step 0) have no such profile:
+their `-A.x` releases go to `alfresco-community-releases` with the GA ones,
+because community users can't read `alfresco-internal-releases`. For the same
+reason, a public repo never pulls from `alfresco-internal` or
+`alfresco-internal-releases`.
 
 `alfresco-public`, `alfresco-internal` and `cic-ext-pull-through` are pull
 only; deploys use a different host (see Phase 2). `alfresco-private` serves
@@ -296,9 +312,11 @@ through `maven.cloudsmith.io`, Cloudsmith's Maven upload endpoint:
 For an enterprise repo, use `Alfresco Enterprise Releases` and the
 `alfresco-enterprise-releases` URL.
 
-For private and internal repos only, add a `prerelease` profile that sends
-`-A.x` releases to `alfresco-internal-releases`. It reuses the
-`alfresco-releases` server, so no new credentials are needed:
+For enterprise modules only, add a `prerelease` profile that sends `-A.x`
+releases to `alfresco-internal-releases`. It reuses the `alfresco-releases`
+server, so no new credentials are needed. In a repo that mixes community and
+enterprise modules, put the profile in the enterprise modules' poms, not in a
+parent that community modules inherit:
 
 ```xml
 <profiles>
@@ -343,9 +361,9 @@ mirror server:
 - Remove `MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}` and
   `MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}`, whether they sit at job or
   workflow level, once the Step 0 grep shows nothing else reads them.
-- Private and internal repos: turn on the `prerelease` profile for `-A.x`
-  versions. [`maven-release-slim`][maven-release-slim] does it when
-  `prerelease-profile` is set. The input needs v19.8.0 or later, so bump the
+- Repos with a `prerelease` profile: turn it on for `-A.x` versions.
+  [`maven-release-slim`][maven-release-slim] does it when `prerelease-profile`
+  is set. The input needs v19.8.0 or later, so bump the
   action if the repo pins an older one:
 
   ```yaml
@@ -368,7 +386,7 @@ PR CI skips the release job, so the deploy path only runs on a real release.
 If the user wants to try it from the PR branch:
 
 - Release an `-A.x` version, so the package lands in
-  `alfresco-internal-releases` and not in a GA repository. In a public repo it
+  `alfresco-internal-releases` and not in a GA repository. A community module
   lands in `alfresco-community-releases`, so ask the user first.
 - Before merge, revert the test `RELEASE_VERSION` and the branch added to the
   release job's `if:`.
@@ -390,9 +408,9 @@ below. Don't try to reach it another way.
 - `cloudsmith-auth` fails (and the repo is not a fork): add the repo name, spelled
   as GitHub spells it, to the read list (`alfresco_read_repositories`).
 - Deploy fails with 403: add the repo to `alfresco_publish_targets` with the
-  repositories it publishes to. Private and internal repos get
-  `["enterprise_releases", "internal_releases"]`. Public repos get
-  `["community_releases"]` only, never `internal_releases`.
+  repositories its modules publish to: `community_releases` for community
+  modules, `enterprise_releases` and `internal_releases` for enterprise ones.
+  A public repo never gets `internal_releases`.
 - Keep both lists sorted. Each target is a deliberate, reviewable grant: don't
   add a broader write group to make the change smaller.
 
@@ -446,6 +464,10 @@ settings could resolve.
 For private repos, the build can only be checked in CI because it needs the
 OIDC token. Run pre-commit (and `actionlint` if the repo uses it) before
 pushing.
+
+After the first release from Phase 2, run the Step 0 `curl` for each community
+module's new version. A 404 means it went to a repository community builds
+can't read.
 
 ## PR
 
