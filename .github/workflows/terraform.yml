@@ -292,7 +292,7 @@ jobs:
               .[]
               | select(.user.login == "github-actions[bot]")
               | (.body | capture("^<!-- dflook/terraform-github-actions (?<header>\\{.*?\\}) -->")?.header | fromjson?)
-              | select(.label != null and (.label == env.TERRAFORM_ROOT_PATH or (.label | endswith(" " + env.TERRAFORM_ROOT_PATH))))
+              | select(.label != null and (.label | endswith(" " + env.TERRAFORM_ROOT_PATH)))
               | .label')
             if [ -z "$plan_comments" ]; then
               echo "::notice::No terraform plan for '${TERRAFORM_ROOT_PATH}' on PR #${PR_NUMBER}, skipping terraform apply."
