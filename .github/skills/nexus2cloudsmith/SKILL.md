@@ -5,12 +5,6 @@ description: "Migrate a Maven repository's CI from the Alfresco Nexus (artifacts
 
 # Migrate Maven CI from Nexus to Cloudsmith
 
-## When to Use
-
-- `pom.xml`, `.ci.settings.xml` or a workflow still points at `artifacts.alfresco.com/nexus`
-- Workflows pass `secrets.NEXUS_USERNAME` / `secrets.NEXUS_PASSWORD` to Maven
-- A Jira ticket asks for "Cloudsmith Migration - Phase 1 (Pull)" or "Phase 2 (Push)"
-
 Nexus becomes a frozen archive: versions published before the cutover stay
 there, but new releases (Alfresco 26.3.0 onwards and the components released
 with it) go only to Cloudsmith. A repo needs Phase 1 as soon as it depends on
@@ -21,8 +15,8 @@ The migration has two phases, usually one PR each:
 1. **Pull**: resolve dependencies and plugins from Cloudsmith.
 2. **Push**: deploy release artifacts to Cloudsmith.
 
-Do only the phase the user asked for. If they didn't say, check which one is
-already done and do the next one.
+Do only the phase the user asked for. If they didn't say, do the next one
+according to the Step 0 survey.
 
 ## Step 0: Survey the repo
 
@@ -32,24 +26,36 @@ git grep -n -i -E "artifacts\.alfresco\.com|nexus|cloudsmith|snapshot|MAVEN_USER
 gh repo view --json visibility --jq .visibility
 ```
 
-Keep the grep output: later steps check it instead of searching again. The
-visibility picks the Phase 1 path: `PUBLIC` follows "Public repo",
-`PRIVATE` / `INTERNAL` follows "Private repo".
+Keep the grep output: later steps check it instead of searching again. If
+`<repository>` or mirror URLs still point at Nexus, or no job has a
+`cloudsmith-auth` step, Phase 1 is next. If only the `distributionManagement`
+URLs and the `NEXUS_*` secrets of the release job remain, Phase 2 is next.
 
-Phase 2 follows who consumes each module's artifacts, not who can read the
-source. From the grep, note each module's Nexus `distributionManagement` URL.
-A module that deployed to `nexus/content/repositories/releases` is a
-community module, even in a private repo: its artifacts ship in the community
-distribution. Confirm it with its latest release, which returns 200 from
-`alfresco-public` without credentials:
+Phase 1 follows who can build the source, so it depends on the repo's
+visibility: `PUBLIC` follows "Public repo", `PRIVATE` / `INTERNAL` follows
+"Private repo".
+
+Phase 2 follows who consumes each module's artifacts, so it depends on the
+module's class. From the grep, note each module's Nexus
+`distributionManagement` URL:
+
+- `nexus/content/repositories/releases`: **community** module, even in a
+  private repo. Its artifacts ship in the community distribution.
+- `nexus/content/repositories/enterprise-releases`: **enterprise** module.
+- No Nexus deploy URL: community in a public repo, enterprise in a private or
+  internal one.
+
+Confirm a community module of a private repo with its latest release, which
+returns 200 from `alfresco-public` without credentials. One module per
+distinct deploy URL is enough:
 
 ```bash
 curl -sI -o /dev/null -w '%{http_code}\n' \
   https://artifacts.hyland.dev/public/alfresco-public/maven/<group/path>/<artifactId>/<version>/<artifactId>-<version>.pom
 ```
 
-A module without a Nexus deploy URL follows the repo's visibility. If the two
-signals disagree, ask the user.
+Ask the user when the signals conflict: an `enterprise-releases` module in a
+public repo, or a `releases` module whose release doesn't return 200.
 
 ### Check the Cloudsmith workspace
 
@@ -63,14 +69,6 @@ cloudsmith list repos hyland/<repository>
 If one is missing, stop and tell the user instead of pointing a pom at it.
 Without the CLI, trust the table below.
 
-When an artifact fails to resolve, check whether a repository has it.
-`display_source: upstream` means Cloudsmith proxied it, for example from
-Maven Central:
-
-```bash
-cloudsmith list pkgs hyland/alfresco-internal -q "name:<artifactId> version:<version>" -F json
-```
-
 ## URL mapping
 
 The repository roles and URLs come from the Confluence pages listed under
@@ -81,20 +79,12 @@ The repository roles and URLs come from the Confluence pages listed under
 | `nexus/content/groups/public` | `https://artifacts.hyland.dev/public/alfresco-public/maven/` | anonymous |
 | Maven Central, public repos | `https://artifacts.hyland.dev/basic/cic-ext-pull-through/maven/` | cloudsmith-auth |
 | `nexus/content/groups/internal` | `https://artifacts.hyland.dev/basic/alfresco-internal/maven/` | cloudsmith-auth |
-| `nexus/content/repositories/releases`, GA, M and `-A.x` versions | `https://artifacts.hyland.dev/basic/alfresco-community-releases/maven/` | cloudsmith-auth |
-| `nexus/content/repositories/enterprise-releases`, GA and M versions | `https://artifacts.hyland.dev/basic/alfresco-enterprise-releases/maven/` | cloudsmith-auth |
-| `nexus/content/repositories/enterprise-releases`, `-A.x` versions (see below), internal tools, unreleased products | `https://artifacts.hyland.dev/basic/alfresco-internal-releases/maven/` | cloudsmith-auth |
+| `nexus/content/repositories/releases` | `https://artifacts.hyland.dev/basic/alfresco-community-releases/maven/` | cloudsmith-auth |
+| `nexus/content/repositories/enterprise-releases` | `https://artifacts.hyland.dev/basic/alfresco-enterprise-releases/maven/` | cloudsmith-auth |
+| none: `-A.x` releases of enterprise modules, internal tools, unreleased products | `https://artifacts.hyland.dev/basic/alfresco-internal-releases/maven/` | cloudsmith-auth |
 | `nexus/content/repositories/activiti-releases` | `https://artifacts.hyland.dev/public/activiti-releases/maven/` | anonymous |
 | `nexus/content/repositories/activiti-enterprise-releases` | `https://artifacts.hyland.dev/basic/activiti-enterprise-releases/maven/` | cloudsmith-auth |
 | any `*-snapshots` repository | drop it | n/a |
-
-`-A.x` releases of enterprise modules go to `alfresco-internal-releases`,
-through the `prerelease` profile (Phase 2). Community modules (every module of
-a public repo, and the private ones found in Step 0) have no such profile:
-their `-A.x` releases go to `alfresco-community-releases` with the GA ones,
-because community users can't read `alfresco-internal-releases`. For the same
-reason, a public repo never pulls from `alfresco-internal` or
-`alfresco-internal-releases`.
 
 `alfresco-public`, `alfresco-internal` and `cic-ext-pull-through` are pull
 only; deploys use a different host (see Phase 2). `alfresco-private` serves
@@ -106,8 +96,7 @@ builds non-deterministic. Projects release `-A.x` versions instead, on demand
 or at most weekly on a schedule, never on every push to master. Remove jobs
 that deploy `-SNAPSHOT` versions (for example `publish_snapshot_artifacts`
 and its entries in other jobs' `needs:`), and switch a phase that becomes
-`deploy` on pushes to master back to `verify`. The `activiti-*-snapshots`
-repositories serve another purpose: don't use them.
+`deploy` on pushes to master back to `verify`.
 
 Before removing a snapshot job, read the scripts and Maven profiles it runs.
 If they also publish something else, such as a `-Pinternal` profile pushing a
@@ -121,6 +110,10 @@ Leave them and mention them to the user.
 ## Phase 1: Pull
 
 ### Public repo
+
+A public repo pulls only from `alfresco-public` and Maven Central, never from
+`alfresco-internal` or `alfresco-internal-releases`: community users can't
+read them.
 
 In `pom.xml`, change the `alfresco-public` `<repository>` and
 `<pluginRepository>` URLs (add them if the repo relied on a settings-file
@@ -198,11 +191,9 @@ community build, and `alfresco-public` stays anonymous:
 Prove that `alfresco-public` and Maven Central are enough by resolving locally
 with an empty settings file (see Verify). That is a local check only: don't
 run CI jobs with empty settings, as that skips `cic-ext-pull-through`. If
-something only resolves from `internal`, stop and tell the user which
-artifacts: the dependency has to be published publicly or dropped. This
-includes `-A.x` releases of other community projects found only in
-`alfresco-internal-releases`: they have to be republished to
-`alfresco-community-releases`, which `alfresco-public` serves.
+something only resolves from an authenticated repository, stop and tell the
+user which artifacts: they have to be published to a repository
+`alfresco-public` serves, or dropped.
 
 Known limitation: GitHub gives no OIDC token to PRs from forks, so their builds
 fail at `cloudsmith-auth`. PRs from forks aren't supported for now. Mention it
@@ -252,12 +243,12 @@ them. Apply the URL mapping table to every `<repository>` and
 ### All repos
 
 Grant `id-token: write` and add [`cloudsmith-auth`][cloudsmith-auth] before
-the first step that runs Maven in **every** job that runs it, including
-`dependency-graph.yml`. Put it after `setup-java-build` where the job has one;
-`maven-dependency-scan` sets up Java itself. Add `id-token: write` to the
-job's existing `permissions:` and keep the scopes already there: any scope a
-`permissions:` block leaves out becomes `none`, so a release job would lose
-`contents: write`.
+the first step that runs Maven in **every** job that runs it, including the
+release job and `dependency-graph.yml`. Put it after `setup-java-build` where
+the job has one; `maven-dependency-scan` sets up Java itself. Add
+`id-token: write` to the job's existing `permissions:` and keep the scopes
+already there: any scope a `permissions:` block leaves out becomes `none`, so
+a release job would lose `contents: write`.
 
 Pin `cloudsmith-auth` to the same ref as the repo's other build-tools actions
 if that ref already has it. Otherwise use the latest release
@@ -291,11 +282,21 @@ Public repos resolve from the `alfresco-public` repository in their pom.
 
 ## Phase 2: Push
 
+Each module deploys according to its class from Step 0:
+
+| Module class | GA and M versions | `-A.x` versions | `alfresco_publish_targets` |
+| --- | --- | --- | --- |
+| community | `alfresco-community-releases` | `alfresco-community-releases` | `community_releases` |
+| enterprise | `alfresco-enterprise-releases` | `alfresco-internal-releases`, through the `prerelease` profile | `enterprise_releases`, `internal_releases` |
+
+Community `-A.x` releases stay with the GA ones because community users can't
+read `alfresco-internal-releases`.
+
 ### `pom.xml`
 
 Keep one `<repository>` in `distributionManagement`, pointing at the GA
-repository from the mapping table, and drop `<snapshotRepository>`. Deploy
-through `maven.cloudsmith.io`, Cloudsmith's Maven upload endpoint:
+repository, and drop `<snapshotRepository>`. Deploy through
+`maven.cloudsmith.io`, Cloudsmith's Maven upload endpoint:
 `artifacts.hyland.dev` serves downloads only and refuses uploads with a 403.
 
 ```xml
@@ -309,14 +310,10 @@ through `maven.cloudsmith.io`, Cloudsmith's Maven upload endpoint:
 </distributionManagement>
 ```
 
-For an enterprise repo, use `Alfresco Enterprise Releases` and the
-`alfresco-enterprise-releases` URL.
-
-For enterprise modules only, add a `prerelease` profile that sends `-A.x`
-releases to `alfresco-internal-releases`. It reuses the `alfresco-releases`
-server, so no new credentials are needed. In a repo that mixes community and
-enterprise modules, put the profile in the enterprise modules' poms, not in a
-parent that community modules inherit:
+For enterprise modules, use `Alfresco Enterprise Releases` and the
+`alfresco-enterprise-releases` URL, and add a `prerelease` profile that sends
+`-A.x` releases to `alfresco-internal-releases`. It reuses the
+`alfresco-releases` server, so no new credentials are needed:
 
 ```xml
 <profiles>
@@ -334,10 +331,13 @@ parent that community modules inherit:
 </profiles>
 ```
 
-A module whose own `distributionManagement` matches the root's should drop
-it and inherit. If a module has to keep its own block, give it its own
-`prerelease` profile too: the module's block wins over the profile it
-inherits, so its `-A.x` releases would otherwise land in the GA repository.
+Put `distributionManagement`, and the `prerelease` profile for enterprise
+modules, in the highest pom whose inheriting modules all share one class, and
+drop module blocks that only repeat it. A module whose class differs from its
+parent's, or that has to keep its own `distributionManagement`, declares its
+own block and, if enterprise, its own `prerelease` profile: its block wins
+over an inherited profile, so its `-A.x` releases would otherwise land in the
+GA repository.
 
 ### `.ci.settings.xml`
 
@@ -356,14 +356,14 @@ mirror server:
 
 ### Release workflow
 
-- Give the release job `id-token: write` and the `cloudsmith-auth` step (see
-  "All repos" in Phase 1) if it doesn't have them yet.
+- Check that the release job has the Phase 1 `cloudsmith-auth` step and
+  `id-token: write`.
 - Remove `MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}` and
   `MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}`, whether they sit at job or
   workflow level, once the Step 0 grep shows nothing else reads them.
-- Repos with a `prerelease` profile: turn it on for `-A.x` versions.
-  [`maven-release-slim`][maven-release-slim] does it when `prerelease-profile`
-  is set. The input needs v19.8.0 or later, so bump the
+- Repos with enterprise modules: turn on the `prerelease` profile for `-A.x`
+  versions. [`maven-release-slim`][maven-release-slim] does it when
+  `prerelease-profile` is set. The input needs v19.8.0 or later, so bump the
   action if the repo pins an older one:
 
   ```yaml
@@ -385,9 +385,10 @@ mirror server:
 PR CI skips the release job, so the deploy path only runs on a real release.
 If the user wants to try it from the PR branch:
 
-- Release an `-A.x` version, so the package lands in
-  `alfresco-internal-releases` and not in a GA repository. A community module
-  lands in `alfresco-community-releases`, so ask the user first.
+- Release an `-A.x` version, so an enterprise module lands in
+  `alfresco-internal-releases` and not in a GA repository. A community
+  module's `-A.x` lands in `alfresco-community-releases`, so ask the user
+  first.
 - Before merge, revert the test `RELEASE_VERSION` and the branch added to the
   release job's `if:`.
 - Squash-merge, so the release plugin's `[skip ci]` commits don't reach the
@@ -400,17 +401,15 @@ Access is granted in `HylandPlatformConfiguration/tf-config-cloudsmith`, in
 `locals-alfresco.tf`, not in the repo being migrated. Don't work around it in
 the workflow: raise a PR there, with the Jira key in the branch name.
 
-That repo is DevOps-only. If you can't find or open it (no local clone, `gh`
-returns 404), that is why: tell the user they lack access and must ask the
-DevOps team to make the change, giving them the repo name and the exact edit
-below. Don't try to reach it another way.
+That repo is DevOps-only. If you can't open it (no local clone, `gh` returns
+404), the user lacks access: tell them to ask the DevOps team for the change,
+giving the repo name and the exact edit below. Don't try to reach it another
+way.
 
 - `cloudsmith-auth` fails (and the repo is not a fork): add the repo name, spelled
   as GitHub spells it, to the read list (`alfresco_read_repositories`).
 - Deploy fails with 403: add the repo to `alfresco_publish_targets` with the
-  repositories its modules publish to: `community_releases` for community
-  modules, `enterprise_releases` and `internal_releases` for enterprise ones.
-  A public repo never gets `internal_releases`.
+  targets of its module classes, from the Phase 2 table.
 - Keep both lists sorted. Each target is a deliberate, reviewable grant: don't
   add a broader write group to make the change smaller.
 
@@ -422,25 +421,19 @@ in Rules. Browse links for the public repository go to
 
 ## Rules
 
-- Pull from the `artifacts.hyland.dev` URLs and deploy to
-  `https://maven.cloudsmith.io/hyland/<repository>/`. Use no other
-  `cloudsmith.io` URL. `maven.artifacts.hyland.dev` will replace the deploy
-  URL once its DNS record exists, so keep the TODO comment above each deploy
-  URL, as in the Phase 2 examples.
-- Keep repository and server ids neutral: `alfresco-public`,
-  `alfresco-internal`, `alfresco-releases`, or the Cloudsmith repository name
-  (`cic-ext-pull-through`). Only name ids in comments that exist in the
-  file. Exception: projects generated with the In-Process Alfresco SDK, and
-  the SDK itself, keep the archetype's ids (`alfresco-plugin-public`,
-  `alfresco-private-repository`).
+- Use no `cloudsmith.io` URL other than the `maven.cloudsmith.io` deploy URLs
+  of Phase 2, and keep the TODO comment above each of them.
 - Don't name Cloudsmith in ids, names, job names, comments or docs, so the next
-  registry move doesn't mean renaming them. Where "Nexus" appears, reword
-  without naming a registry ("deploy to the Maven repository") rather than
-  replacing it with "Cloudsmith". Use "Cloudsmith" only where it can't be
+  registry move doesn't mean renaming them. Use neutral ids
+  (`alfresco-public`, `alfresco-internal`, `alfresco-releases`) or the
+  Cloudsmith repository name (`cic-ext-pull-through`). Where "Nexus" appears,
+  reword without naming a registry ("deploy to the Maven repository") rather
+  than replacing it with "Cloudsmith". Use "Cloudsmith" only where it can't be
   avoided: URLs, the `cloudsmith-auth` step and the `CLOUDSMITH_*` variables
-  it exports.
-- Use `CLOUDSMITH_USERNAME` / `CLOUDSMITH_API_KEY` only as `${env.…}` in
-  settings files.
+  it exports. Exception: projects generated with the In-Process Alfresco SDK,
+  and the SDK itself, keep the archetype's ids (`alfresco-plugin-public`,
+  `alfresco-private-repository`).
+- Only name ids in comments that exist in the file.
 
 ## Verify
 
@@ -461,6 +454,14 @@ came from an authenticated repository. Run it once all pom edits are done. On
 a failure, keep `$scratch/m2` for the retry: it only holds what the anonymous
 settings could resolve.
 
+When an artifact fails to resolve, check whether a repository has it.
+`display_source: upstream` means Cloudsmith proxied it, for example from
+Maven Central:
+
+```bash
+cloudsmith list pkgs hyland/alfresco-internal -q "name:<artifactId> version:<version>" -F json
+```
+
 For private repos, the build can only be checked in CI because it needs the
 OIDC token. Run pre-commit (and `actionlint` if the repo uses it) before
 pushing.
@@ -477,11 +478,10 @@ Open one PR per phase, titled like the existing ones:
 covers both, say `Phase 1 (Pull) and Phase 2 (Push)`. Ask the user for the
 Jira ID if you don't have it.
 
-Always name the phase in the title, never just "Cloudsmith Migration". A Pull
-PR deliberately leaves the deploy side on Nexus, and without the phase in the
-title reviewers flag that as a mistake. Open the description with the phase
-too, and list what stays on Nexus until the other phase, such as the
-`distributionManagement` URLs and the `NEXUS_*` secrets on the release job.
+Open the description with the phase too. A Pull PR leaves the deploy side on
+Nexus on purpose, so list what stays there until the other phase (the
+`distributionManagement` URLs, the `NEXUS_*` secrets on the release job), or
+reviewers flag it as a mistake.
 
 When reviewing a migration PR, check its phase first and judge it against
 that phase only. If the title doesn't name a phase, ask for it.
