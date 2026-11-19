@@ -173,6 +173,12 @@ the requested operation. When both are present, `terraform plan` takes precedenc
 requests. When a comment requesting `terraform plan` or `terraform apply` is made
 on a plain issue, the request is silently skipped, without failing the workflow.
 
+`issue_comment` events also ignore the `branches` and `paths` filters of the
+caller workflow, so in a repository with several Terraform stacks every stack
+receives the comment. A `terraform apply` request is skipped, without failing
+the workflow, when the pull request has no plan comment for the stack's
+`terraform_root_path`, since there is no plan to apply.
+
 Requesting `terraform plan` or `terraform apply` from a PR comment is allowed only
 while the pull request is still open, otherwise the workflow fails with an error.
 
