@@ -40,7 +40,7 @@ runs:
         echo "service-slug=${slug}" >> "$GITHUB_OUTPUT"
 
     - name: Authenticate with Cloudsmith
-      uses: cloudsmith-io/cloudsmith-cli-action@92b1383b22bbd36d804b858f273abcdf4d349f6b # v3.2.1
+      uses: cloudsmith-io/cloudsmith-cli-action@47384d5b769aec2c7dc513fafaa1c043d2993f40 # v3.2.3
       with:
         oidc-namespace: ${{ inputs.oidc-namespace }}
         oidc-service-slug: ${{ steps.slug.outputs.service-slug }}
