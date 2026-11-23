@@ -1,0 +1,12 @@
+github:
+  prefix: 'build(deps)'
+  message: 'bump bats-file to {{ source "lastRelease" }}'
+
+github_release:
+  owner: 'bats-core'
+  repo: 'bats-file'
+
+target:
+  file: '.github/tests/bats-libs.yml'
+  key: '$.bats_file'
+  trimprefix: 'v'

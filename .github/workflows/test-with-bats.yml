@@ -14,11 +14,21 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      - name: Read pinned bats lib versions
+        id: bats-libs
+        shell: bash
+        run: |
+          tr -d "\"'" < .github/tests/bats-libs.yml \
+            | sed -nE 's/^(bats_[a-z]+): *([^ #]+).*/\1=\2/p' >> "$GITHUB_OUTPUT"
+
       - name: Setup Bats and bats libs
         id: setup-bats
         uses: bats-core/bats-action@3566550e0f594451ac0f58fcbfdeca93aa29a45e # v4.1.0
         with:
           bats-version: 1.13.0
+          support-version: ${{ steps.bats-libs.outputs.bats_support }}
+          assert-version: ${{ steps.bats-libs.outputs.bats_assert }}
+          file-version: ${{ steps.bats-libs.outputs.bats_file }}
 
       - name: 🦇🦇🦇
         shell: bash

@@ -1,0 +1,12 @@
+github:
+  prefix: 'build(deps)'
+  message: 'bump bats-assert to {{ source "lastRelease" }}'
+
+github_release:
+  owner: 'bats-core'
+  repo: 'bats-assert'
+
+target:
+  file: '.github/tests/bats-libs.yml'
+  key: '$.bats_assert'
+  trimprefix: 'v'

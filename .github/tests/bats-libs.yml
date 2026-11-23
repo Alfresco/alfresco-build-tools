@@ -1,0 +1,5 @@
+# Bats assertion library versions used by CI (test-with-bats.yml) and by
+# .github/scripts/install-bats-libs.sh. Bumped by Updatecli.
+bats_support: 0.3.0
+bats_assert: 2.2.4
+bats_file: 0.4.0
