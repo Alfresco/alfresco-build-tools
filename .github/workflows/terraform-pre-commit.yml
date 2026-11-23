@@ -76,7 +76,7 @@ jobs:
 
       - name: Resolve default Terraform version
         id: default-terraform-version
-        uses: $/.github/actions/terraform-default-version
+        uses: $/.github/actions/resolve-terraform-version
         with:
           requested: ${{ inputs.terraform_version }}
 

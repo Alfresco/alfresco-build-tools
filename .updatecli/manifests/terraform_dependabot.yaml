@@ -51,6 +51,6 @@ targets:
     scmid: 'github'
     kind: file
     spec:
-      file: .github/actions/terraform-default-version/version
+      file: .github/actions/resolve-terraform-version/version
       matchpattern: '\d+\.\d+\.\d+'
       replacepattern: '{{ source "dependabotTerraform" }}'

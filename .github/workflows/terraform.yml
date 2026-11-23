@@ -445,7 +445,7 @@ jobs:
     steps:
       - name: Resolve Terraform version
         id: terraform-version
-        uses: $/.github/actions/terraform-default-version
+        uses: $/.github/actions/resolve-terraform-version
         with:
           requested: ${{ inputs.terraform_version }}
 

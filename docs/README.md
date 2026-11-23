@@ -153,7 +153,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [repository-mirror](#repository-mirror)
   - [stale-pr-cleanup](#stale-pr-cleanup)
   - [reusable-release](#reusable-release)
-  - [terraform-default-version](#terraform-default-version)
+  - [resolve-terraform-version](#resolve-terraform-version)
   - [terraform](#terraform)
 - [GitHub Agentic Workflows provided by us](#github-agentic-workflows-provided-by-us)
   - [General Introduction](#general-introduction)
@@ -3671,7 +3671,7 @@ and are only forwarded to the release command as the env vars above; the pushed
 commit author is now determined by the authentication token (PAT or GitHub App),
 not by these values.
 
-### terraform-default-version
+### resolve-terraform-version
 
 Resolves the Terraform version used by the reusable [terraform](terraform.md)
 workflows. The value `dependabot` maps to the default kept in sync with the
@@ -3679,7 +3679,7 @@ version bundled in the Dependabot updater; any other value, including an empty
 string, is returned unchanged.
 
 ```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/terraform-default-version@v19.16.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/resolve-terraform-version@v19.16.0
         id: terraform-version
         with:
           requested: dependabot  # optional, default: dependabot

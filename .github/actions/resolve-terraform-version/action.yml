@@ -1,4 +1,4 @@
-name: "Terraform default version"
+name: "Resolve Terraform version"
 description: "Resolve the Terraform version to use, mapping 'dependabot' to the default kept in sync with the Dependabot updater"
 
 inputs:

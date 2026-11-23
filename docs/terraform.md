@@ -364,7 +364,7 @@ Both the `terraform.yml` and `terraform-pre-commit.yml` workflows set the
 Terraform version in a single place: the `terraform_version` input, which
 defaults to `dependabot`, the version bundled in Dependabot's updater so that
 lockfile updates match CI. That version lives in
-`.github/actions/terraform-default-version/version`, and an updatecli job
+`.github/actions/resolve-terraform-version/version`, and an updatecli job
 (`.updatecli/manifests/terraform_dependabot.yaml`) opens a PR to bump it
 whenever Dependabot moves to a newer Terraform.
 
