@@ -47,8 +47,10 @@ sources:
   nodeImage:
     name: Node image of the latest KinD release for the Kubernetes version
     kind: http
+    dependson:
+      - kindVersion
     spec:
-      url: https://api.github.com/repos/kubernetes-sigs/kind/releases/latest
+      url: 'https://api.github.com/repos/kubernetes-sigs/kind/releases/tags/{{ source "kindVersion" }}'
       request:
         headers:
           Accept: application/vnd.github+json
