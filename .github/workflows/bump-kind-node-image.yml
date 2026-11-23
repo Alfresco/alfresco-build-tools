@@ -17,6 +17,8 @@ concurrency:
 
 jobs:
   bump:
+    # Only the default branch's reviewed manifest may run with the write-scoped app token.
+    if: github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-slim
     steps:
       - name: Validate Kubernetes version

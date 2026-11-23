@@ -32,17 +32,13 @@ actions:
 sources:
   kindVersion:
     name: Latest KinD release
-    kind: http
+    kind: githubrelease
     spec:
-      url: https://api.github.com/repos/kubernetes-sigs/kind/releases/latest
-      request:
-        headers:
-          Accept: application/vnd.github+json
-          Authorization: 'Bearer {{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}'
-    transformers:
-      - findsubmatch:
-          pattern: '"tag_name":\s*"(v\d+\.\d+\.\d+)"'
-          captureindex: 1
+      owner: kubernetes-sigs
+      repository: kind
+      token: '{{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}'
+      versionfilter:
+        kind: semver
   # Docker Hub tags get re-pushed, so the digest must come from the release notes of the KinD release in use.
   nodeImage:
     name: Node image of the latest KinD release for the Kubernetes version
