@@ -362,9 +362,11 @@ jobs:
 
 Both the `terraform.yml` and `terraform-pre-commit.yml` workflows set the
 Terraform version in a single place: the `terraform_version` input, which
-defaults to the version bundled in Dependabot's updater so that lockfile
-updates match CI. An updatecli job (`.updatecli/manifests/terraform_dependabot.yaml`)
-opens a PR to bump both defaults whenever Dependabot moves to a newer Terraform.
+defaults to `dependabot`, the version bundled in Dependabot's updater so that
+lockfile updates match CI. That version lives in
+`.github/actions/terraform-default-version/version`, and an updatecli job
+(`.updatecli/manifests/terraform_dependabot.yaml`) opens a PR to bump it
+whenever Dependabot moves to a newer Terraform.
 
 A repository can override it, in order of precedence:
 
@@ -374,9 +376,9 @@ A repository can override it, in order of precedence:
     `.tool-versions` file in the root module
   - `terraform-pre-commit.yml`: a `.terraform-version` file at the repository
     root, kept for backward compatibility
-- the `terraform_version` input (a version or a constraint like `~> 1.14`);
-  an empty string falls back to the latest release (`terraform.yml` first uses
-  the version that last wrote the state)
+- the `terraform_version` input (`dependabot`, a version or a constraint like
+  `~> 1.14`); an empty string falls back to the latest release
+  (`terraform.yml` first uses the version that last wrote the state)
 
 To keep CI aligned with Dependabot, avoid `required_version` in the root
 module. When it is present, the workflow prints a warning annotation, because

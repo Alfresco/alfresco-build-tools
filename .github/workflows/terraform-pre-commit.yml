@@ -23,10 +23,10 @@ on:
         description: |
           the Terraform version (or version constraint) to use when the repository does not pin one itself.
           A .terraform-version file at the repository root takes precedence.
-          Defaults to the version used by Dependabot, an empty string installs the latest release.
+          Defaults to 'dependabot', the version used by Dependabot. An empty string installs the latest release.
         type: string
         required: false
-        default: '1.16.4'
+        default: 'dependabot'
     secrets:
       BOT_GITHUB_TOKEN:
         required: false
@@ -74,10 +74,16 @@ jobs:
             echo "No private terraform module authentication configured"
           fi
 
+      - name: Resolve default Terraform version
+        id: default-terraform-version
+        uses: $/.github/actions/terraform-default-version
+        with:
+          requested: ${{ inputs.terraform_version }}
+
       - name: Detect terraform version
         id: detect-terraform-version
         env:
-          DEFAULT_TERRAFORM_VERSION: ${{ inputs.terraform_version }}
+          DEFAULT_TERRAFORM_VERSION: ${{ steps.default-terraform-version.outputs.version }}
         run: |
           version=""
           if [ -f .terraform-version ]; then
