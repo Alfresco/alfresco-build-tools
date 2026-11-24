@@ -3020,7 +3020,7 @@ LoadBalancer support.
         with:
           # Specify kind and k8s version to use.
           # see https://github.com/kubernetes-sigs/kind/releases
-          kind-version: v0.31.0
+          kind-version: v0.33.0
           kind-node-image: kindest/node:v1.35.8@sha256:07b2536e30b803ed61d1677a79df6115f798ce64c80f9e22f6ed45afd09323c0
 
           # Choose ingress controller:
