@@ -3021,7 +3021,7 @@ LoadBalancer support.
           # Specify kind and k8s version to use.
           # see https://github.com/kubernetes-sigs/kind/releases
           kind-version: v0.31.0
-          kind-node-image: kindest/node:v1.33.7@sha256:d26ef333bdb2cbe9862a0f7c3803ecc7b4303d8cea8e814b481b09949d353040
+          kind-node-image: kindest/node:v1.35.8@sha256:07b2536e30b803ed61d1677a79df6115f798ce64c80f9e22f6ed45afd09323c0
 
           # Choose ingress controller:
           # - To install ingress-nginx (default): optionally set `ingress-nginx-ref` to a tag.
