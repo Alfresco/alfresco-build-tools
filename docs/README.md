@@ -3014,6 +3014,10 @@ By default `ingress-nginx` is installed, but you can easily switch to Traefik by
 setting `traefik-enabled` to `true` and `cloud-provider-kind` to `true` for
 LoadBalancer support.
 
+The default `kind-version` and `kind-node-image` follow the Kubernetes version
+of Alfresco's EKS clusters, on the latest KinD release and its newest patch
+image for that version.
+
 ```yaml
       - name: Setup cluster
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-kind@v19.16.0

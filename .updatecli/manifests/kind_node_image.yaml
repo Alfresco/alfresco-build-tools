@@ -1,0 +1,98 @@
+name: KinD node image for a Kubernetes version
+
+pipelineid: kind-node-image
+
+scms:
+  github:
+    kind: 'github'
+    spec:
+      token: '{{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}'
+      owner: '{{ requiredEnv "UPDATECLI_REPO_OWNER" }}'
+      repository: '{{ requiredEnv "UPDATECLI_REPO_NAME" }}'
+      branch: '{{ requiredEnv "UPDATECLI_REPO_BRANCH" }}'
+      commitusingapi: true
+      commitmessage:
+        type: 'build(deps)'
+
+actions:
+  open-pull-request:
+    kind: 'github/pullrequest'
+    scmid: 'github'
+    spec:
+      draft: false
+      title: 'build(deps): bump KinD node image to Kubernetes {{ requiredEnv "KUBERNETES_VERSION" }}'
+      description: 'Move the setup-kind defaults to the KinD {{ source "kindVersion" }} node image for Kubernetes {{ requiredEnv "KUBERNETES_VERSION" }}, so KinD-based CI follows the EKS version. Image digest from https://github.com/kubernetes-sigs/kind/releases/tag/{{ source "kindVersion" }}'
+      labels:
+        - dependencies
+
+sources:
+  kindVersion:
+    name: Latest KinD release
+    kind: githubrelease
+    spec:
+      owner: kubernetes-sigs
+      repository: kind
+      token: '{{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}'
+      versionfilter:
+        kind: semver
+  # Docker Hub tags get re-pushed, so the digest must come from the release notes of the KinD release in use.
+  nodeImage:
+    name: Node image of the latest KinD release for the Kubernetes version
+    kind: http
+    dependson:
+      - kindVersion
+    spec:
+      url: 'https://api.github.com/repos/kubernetes-sigs/kind/releases/tags/{{ source "kindVersion" }}'
+      request:
+        headers:
+          Accept: application/vnd.github+json
+          Authorization: 'Bearer {{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}'
+    transformers:
+      - findsubmatch:
+          pattern: '(kindest/node:v{{ requiredEnv "KUBERNETES_VERSION" | replace "." "\\." }}\.\d+@sha256:[a-f0-9]{64})'
+          captureindex: 1
+
+# findsubmatch yields an empty value instead of failing when the KinD release has no image for the version.
+conditions:
+  nodeImageFound:
+    name: Latest KinD release ships a node image for the Kubernetes version
+    kind: shell
+    disablesourceinput: true
+    spec:
+      command: 'test -n "{{ source "nodeImage" }}"'
+
+targets:
+  actionKindVersion:
+    name: 'Update default kind-version of setup-kind'
+    scmid: 'github'
+    sourceid: kindVersion
+    kind: yaml
+    spec:
+      file: .github/actions/setup-kind/action.yml
+      key: '$.inputs.kind-version.default'
+  actionNodeImage:
+    name: 'Update default kind-node-image of setup-kind'
+    scmid: 'github'
+    sourceid: nodeImage
+    kind: yaml
+    spec:
+      file: .github/actions/setup-kind/action.yml
+      key: '$.inputs.kind-node-image.default'
+  docsKindVersion:
+    name: 'Update kind-version in the setup-kind docs example'
+    scmid: 'github'
+    sourceid: kindVersion
+    kind: file
+    spec:
+      file: docs/README.md
+      matchpattern: 'kind-version: v\d+\.\d+\.\d+'
+      replacepattern: 'kind-version: {{ source "kindVersion" }}'
+  docsNodeImage:
+    name: 'Update kind-node-image in the setup-kind docs example'
+    scmid: 'github'
+    sourceid: nodeImage
+    kind: file
+    spec:
+      file: docs/README.md
+      matchpattern: 'kindest/node:v\d+\.\d+\.\d+@sha256:[a-f0-9]{64}'
+      replacepattern: '{{ source "nodeImage" }}'
