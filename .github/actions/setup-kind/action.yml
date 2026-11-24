@@ -5,12 +5,12 @@ inputs:
     description: |
       The kind version to use. Versions available at:
       https://github.com/kubernetes-sigs/kind/releases
-    default: v0.31.0
+    default: v0.33.0
   kind-node-image:
     description: |
       The Kind docker node image to use. Should match the same kind version at:
       https://github.com/kubernetes-sigs/kind/releases
-    default: kindest/node:v1.34.3@sha256:08497ee19eace7b4b5348db5c6a1591d7752b164530a36f855cb0f2bdcbadd48
+    default: kindest/node:v1.35.8@sha256:07b2536e30b803ed61d1677a79df6115f798ce64c80f9e22f6ed45afd09323c0
   kind-wait:
     description: The duration to wait for the control plane to become ready
     default: 60s
@@ -126,7 +126,6 @@ runs:
         --repo https://kubernetes-sigs.github.io/metrics-server/
         --set args={--kubelet-insecure-tls}
         --namespace kube-system
-
     - name: Wait for Metrics Server to be ready
       shell: bash
       if: inputs.metrics == 'true'
@@ -159,7 +158,6 @@ runs:
         cloud-provider-kind
         --enable-lb-port-mapping=${{ inputs.cloud-provider-kind-enable-lb-port-mapping }}
         > /tmp/cloud-provider.log 2>&1 &
-
     - name: Create registries auth secret
       shell: bash
       if: inputs.import-docker-credentials-secret-name != ''
