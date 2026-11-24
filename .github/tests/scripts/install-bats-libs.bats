@@ -134,7 +134,7 @@ teardown() {
 }
 
 @test "the repository versions file pins all three libraries" {
-    run "$SCRIPT" --dest "$DEST" --versions-file "$BATS_TEST_DIRNAME/../bats-libs.yml"
+    run "$SCRIPT" --dest "$DEST" --versions-file "$BATS_TEST_DIRNAME/../bats-versions.yml"
 
     [ "$status" -eq 0 ]
     grep -q 'bats-core/bats-support/.*v[0-9]' "$CURL_LOG"

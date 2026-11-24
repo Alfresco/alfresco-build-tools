@@ -7,6 +7,6 @@ github_release:
   repo: 'bats-assert'
 
 target:
-  file: '.github/tests/bats-libs.yml'
+  file: '.github/tests/bats-versions.yml'
   key: '$.bats_assert'
   trimprefix: 'v'

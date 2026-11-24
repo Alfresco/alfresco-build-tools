@@ -7,6 +7,6 @@ github_release:
   repo: 'bats-support'
 
 target:
-  file: '.github/tests/bats-libs.yml'
+  file: '.github/tests/bats-versions.yml'
   key: '$.bats_support'
   trimprefix: 'v'

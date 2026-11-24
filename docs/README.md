@@ -120,6 +120,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [s3-upload](#s3-upload)
   - [send-teams-notification](#send-teams-notification)
   - [send-teams-workflow-run-notification](#send-teams-workflow-run-notification)
+  - [setup-bats](#setup-bats)
   - [setup-checkov](#setup-checkov)
   - [setup-docker](#setup-docker)
   - [setup-fluxcli](#setup-fluxcli)
@@ -148,6 +149,7 @@ Here follows the list of GitHub Actions topics available in the current document
   - [xvfb-record](#xvfb-record)
 - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
   - [branch-promotion-prs](#branch-promotion-prs)
+  - [bats](#bats)
   - [helm-publish-new-package-version](#helm-publish-new-package-version)
   - [js-action-ci](#js-action-ci)
   - [repository-mirror](#repository-mirror)
@@ -2860,6 +2862,27 @@ entry such as `Name|` degrades to plain text with a warning rather than failing 
 step. Anyone named in both `mention-users` and `cc` is mentioned once, and a repeated
 `cc` entry is shown once, so several `cc` outputs can be joined with a comma.
 
+### setup-bats
+
+Installs [Bats](https://github.com/bats-core/bats-core) and the bats-support,
+bats-assert and bats-file libraries, and returns the path to export as
+`BATS_LIB_PATH`. Versions default to the ones pinned in this repository, so
+they are bumped together with the release.
+
+```yaml
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-bats@v19.16.0
+        id: setup-bats
+        with:
+          bats-version: 1.13.0 # optional, default: pinned version
+          support-version: 0.3.0 # optional, default: pinned version
+          assert-version: 2.2.4 # optional, default: pinned version
+          file-version: 0.4.0 # optional, default: pinned version
+
+      - run: bats -r .
+        env:
+          BATS_LIB_PATH: ${{ steps.setup-bats.outputs.lib-path }}
+```
+
 ### setup-checkov
 
 Set up a specific version of Checkov and add it to the PATH.
@@ -3432,6 +3455,33 @@ Using a token/PAT (fallback):
       target-branches: '["staging", "production"]'
     secrets:
       gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
+```
+
+### bats
+
+Runs the [Bats](https://github.com/bats-core/bats-core) tests of the caller
+repository. It installs bats-core plus the bats-support, bats-assert and
+bats-file libraries, exposes them to `bats_load_library` through
+`BATS_LIB_PATH`, and runs `bats` on the given path.
+
+```yaml
+name: Bats tests
+
+on:
+  pull_request:
+
+jobs:
+  bats:
+    uses: Alfresco/alfresco-build-tools/.github/workflows/reusable-bats.yml@v19.16.0
+    with:
+      path: . # optional, default: .
+      # optional, default: -r --print-output-on-failure --formatter pretty
+      bats-args: -r --print-output-on-failure
+      # optional, the versions below default to the ones pinned in this repo
+      bats-version: 1.13.0
+      support-version: 0.3.0
+      assert-version: 2.2.4
+      file-version: 0.4.0
 ```
 
 ### helm-publish-new-package-version

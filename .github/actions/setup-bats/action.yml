@@ -1,0 +1,39 @@
+name: Setup Bats
+description: Installs bats-core and the bats-support, bats-assert and bats-file libraries at the versions pinned in this repository, unless overridden
+inputs:
+  bats-version:
+    description: bats-core version, defaults to the pinned one
+    required: false
+  support-version:
+    description: bats-support version, defaults to the pinned one
+    required: false
+  assert-version:
+    description: bats-assert version, defaults to the pinned one
+    required: false
+  file-version:
+    description: bats-file version, defaults to the pinned one
+    required: false
+outputs:
+  lib-path:
+    description: Value to export as BATS_LIB_PATH so bats_load_library finds the libraries
+    value: ${{ steps.bats.outputs.lib-path }}
+runs:
+  using: composite
+  steps:
+    - name: Read pinned bats versions
+      id: pinned
+      shell: bash
+      env:
+        VERSIONS_FILE: ${{ github.action_path }}/../../tests/bats-versions.yml
+      run: |
+        tr -d "\"'" < "$VERSIONS_FILE" \
+          | sed -nE 's/^(bats_[a-z]+): *([^ #]+).*/\1=\2/p' >> "$GITHUB_OUTPUT"
+
+    - name: Install Bats and bats libs
+      id: bats
+      uses: bats-core/bats-action@3566550e0f594451ac0f58fcbfdeca93aa29a45e # v4.1.0
+      with:
+        bats-version: ${{ inputs.bats-version || steps.pinned.outputs.bats_core }}
+        support-version: ${{ inputs.support-version || steps.pinned.outputs.bats_support }}
+        assert-version: ${{ inputs.assert-version || steps.pinned.outputs.bats_assert }}
+        file-version: ${{ inputs.file-version || steps.pinned.outputs.bats_file }}

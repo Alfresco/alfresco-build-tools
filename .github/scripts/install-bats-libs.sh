@@ -1,12 +1,12 @@
 #!/bin/bash
 set -euo pipefail
 
-# Installs the Bats libs pinned in .github/tests/bats-libs.yml, laid out like
+# Installs the Bats libs pinned in .github/tests/bats-versions.yml, laid out like
 # bats-core/bats-action. Must stay bash 3.2 compatible (macOS); progress goes
 # to stderr so `eval "$(...)"` only sees the BATS_LIB_PATH export.
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-versions_file="$script_dir/../tests/bats-libs.yml"
+versions_file="$script_dir/../tests/bats-versions.yml"
 dest="$HOME/.local/lib/bats"
 libs=(bats-support bats-assert bats-file)
 

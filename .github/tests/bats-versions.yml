@@ -1,0 +1,6 @@
+# Bats versions used by CI (setup-bats action); the library versions are also
+# read by .github/scripts/install-bats-libs.sh. Bumped by Updatecli.
+bats_core: 1.13.0
+bats_support: 0.3.0
+bats_assert: 2.2.4
+bats_file: 0.4.0
