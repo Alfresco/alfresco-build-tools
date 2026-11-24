@@ -1,0 +1,24 @@
+name: "Resolve Terraform version"
+description: "Resolve the Terraform version to use, mapping 'dependabot' to the default kept in sync with the Dependabot updater"
+
+inputs:
+  requested:
+    description: "The requested version: 'dependabot' for the default, or any other value (including empty) to pass through unchanged"
+    required: false
+    default: "dependabot"
+
+outputs:
+  version:
+    description: "The resolved Terraform version"
+    value: ${{ steps.resolve.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve version
+      id: resolve
+      env:
+        REQUESTED: ${{ inputs.requested }}
+        VERSION_FILE: ${{ github.action_path }}/version
+      run: "${{ github.action_path }}/resolve-terraform-version.sh"
+      shell: bash

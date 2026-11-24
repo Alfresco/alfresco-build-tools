@@ -23,11 +23,12 @@ actions:
     kind: 'github/pullrequest'
     scmid: 'github'
     spec:
-      automerge: true
+      merge:
+        strategy: auto
       mergemethod: squash
       draft: false
       title: 'build(deps): bump terraform to {{ source "dependabotTerraform" }}'
-      description: 'Align the default Terraform version of the reusable workflow with the one bundled in the Dependabot updater.'
+      description: 'Align the default Terraform version of the reusable workflows with the one bundled in the Dependabot updater.'
       labels:
         - dependencies
         - release/minor
@@ -46,16 +47,10 @@ sources:
 
 targets:
   update-file:
-    name: 'Update default terraform_version'
+    name: 'Update default Terraform version'
     scmid: 'github'
-    kind: yaml
+    kind: file
     spec:
-      file: .github/workflows/terraform.yml
-      key: '$.on.workflow_call.inputs.terraform_version.default'
-  update-pre-commit-file:
-    name: 'Update default terraform_version of the pre-commit workflow'
-    scmid: 'github'
-    kind: yaml
-    spec:
-      file: .github/workflows/terraform-pre-commit.yml
-      key: '$.on.workflow_call.inputs.terraform_version.default'
+      file: .github/actions/resolve-terraform-version/version
+      matchpattern: '\d+\.\d+\.\d+'
+      replacepattern: '{{ source "dependabotTerraform" }}'
