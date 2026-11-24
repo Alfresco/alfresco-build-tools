@@ -5,7 +5,7 @@ inputs:
     description: |
       The kind version to use. Versions available at:
       https://github.com/kubernetes-sigs/kind/releases
-    default: v0.31.0
+    default: v0.33.0
   kind-node-image:
     description: |
       The Kind docker node image to use. Should match the same kind version at:
@@ -126,7 +126,6 @@ runs:
         --repo https://kubernetes-sigs.github.io/metrics-server/
         --set args={--kubelet-insecure-tls}
         --namespace kube-system
-
     - name: Wait for Metrics Server to be ready
       shell: bash
       if: inputs.metrics == 'true'
@@ -159,7 +158,6 @@ runs:
         cloud-provider-kind
         --enable-lb-port-mapping=${{ inputs.cloud-provider-kind-enable-lb-port-mapping }}
         > /tmp/cloud-provider.log 2>&1 &
-
     - name: Create registries auth secret
       shell: bash
       if: inputs.import-docker-credentials-secret-name != ''
