@@ -1,0 +1,6 @@
+repository: acs-deployment
+branch: master
+workflows:
+  - .github/workflows/helm-community.yml
+  - .github/workflows/helm-enterprise.yml
+docs: true

@@ -1,0 +1,5 @@
+repository: alfresco-helm-charts
+branch: main
+workflows:
+  - .github/workflows/lint-test.yaml
+docs: false

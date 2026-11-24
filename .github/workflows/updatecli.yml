@@ -26,6 +26,7 @@ jobs:
     if: github.actor != 'dependabot[bot]'
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
+      setup-kind-consumers: ${{ steps.set-matrix.outputs.setup-kind-consumers }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -35,6 +36,9 @@ jobs:
           FILES_JSON=$(find .updatecli/values/github_releases -type f -exec basename {} \; | jq -R -s -c 'split("\n")[:-1]')
           echo "Files: $FILES_JSON"
           echo "matrix=$FILES_JSON" >> "$GITHUB_OUTPUT"
+          CONSUMERS_JSON=$(find .updatecli/values/setup_kind_consumers -type f -name '*.yaml' -exec basename {} .yaml \; | jq -R -s -c 'split("\n")[:-1]')
+          echo "setup-kind consumers: $CONSUMERS_JSON"
+          echo "setup-kind-consumers=$CONSUMERS_JSON" >> "$GITHUB_OUTPUT"
 
   update-github-releases:
     needs: build-matrix-github-releases
@@ -147,3 +151,40 @@ jobs:
             fi
             echo "::warning::$message"
           fi
+
+  update-setup-kind-consumers:
+    needs: build-matrix-github-releases
+    # The app token below can write to other repositories, so only reviewed manifests may use it.
+    # TODO: drop the feature branch once tested.
+    if: (github.ref_name == github.event.repository.default_branch || github.ref_name == 'propagate-setup-kind-to-consumers') && github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-slim
+    strategy:
+      fail-fast: false
+      matrix:
+        repository: ${{ fromJson(needs.build-matrix-github-releases.outputs.setup-kind-consumers) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # GITHUB_TOKEN can't write to other repositories, and the bump edits their workflow files.
+      - name: Create GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
+        with:
+          client-id: ${{ vars.GH_APP_ENGINEERING_CONTRIB_CLIENT_ID }}
+          private-key: ${{ secrets.GH_APP_ENGINEERING_CONTRIB_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ matrix.repository }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-workflows: write
+
+      - name: Install Updatecli
+        uses: ./.github/actions/setup-updatecli
+
+      - name: Run Updatecli
+        env:
+          UPDATECLI_GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          VALUES_FILE: .updatecli/values/setup_kind_consumers/${{ matrix.repository }}.yaml
+        run: updatecli pipeline apply -c .updatecli/templates/setup_kind_consumers.yaml -v "$VALUES_FILE"

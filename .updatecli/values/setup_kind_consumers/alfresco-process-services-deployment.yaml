@@ -1,0 +1,5 @@
+repository: alfresco-process-services-deployment
+branch: master
+workflows:
+  - .github/workflows/verify.yml
+docs: false
