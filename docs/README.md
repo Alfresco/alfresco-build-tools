@@ -3015,7 +3015,8 @@ setting `traefik-enabled` to `true` and `cloud-provider-kind` to `true` for
 LoadBalancer support.
 
 The default `kind-version` and `kind-node-image` follow the Kubernetes version
-of Alfresco's EKS clusters, and a minor release updates them when it changes.
+of Alfresco's EKS clusters, on the latest KinD release and its newest patch
+image for that version. Each update ships in a minor release.
 
 ```yaml
       - name: Setup cluster
