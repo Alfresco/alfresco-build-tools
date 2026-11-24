@@ -12,4 +12,18 @@ permissions:
 jobs:
   test:
     name: test
-    uses: ./.github/workflows/reusable-bats.yml
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Bats and bats libs
+        id: setup-bats
+        uses: ./.github/actions/setup-bats
+
+      - name: 🦇🦇🦇
+        shell: bash
+        env:
+          BATS_LIB_PATH: ${{ steps.setup-bats.outputs.lib-path }}
+          TERM: xterm
+        run: bats -r --print-output-on-failure --formatter pretty .

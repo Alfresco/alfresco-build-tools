@@ -10,7 +10,7 @@ Test files live next to the action they cover, in a `tests/` subfolder (e.g. `.g
 
 ## CI behavior
 
-`test-with-bats.yml` calls the reusable `reusable-bats.yml` workflow, which installs bats-core and the libraries above with the `setup-bats` action (a wrapper around [bats-core/bats-action](https://github.com/bats-core/bats-action)), exposes their path as `BATS_LIB_PATH`, then runs `bats -r .` from the repo root, picking up every `*.bats` file automatically.
+`test-with-bats.yml` installs bats-core and the libraries above with the `setup-bats` action (a wrapper around [bats-core/bats-action](https://github.com/bats-core/bats-action)), exposes their path as `BATS_LIB_PATH`, then runs `bats -r .` from the repo root, picking up every `*.bats` file automatically.
 
 The bats-core and library versions are pinned in [`bats-versions.yml`](bats-versions.yml), which both the `setup-bats` action and the local installer read. Updatecli opens a PR when a new release comes out.
 

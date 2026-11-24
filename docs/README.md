@@ -149,7 +149,6 @@ Here follows the list of GitHub Actions topics available in the current document
   - [xvfb-record](#xvfb-record)
 - [Reusable workflows provided by us](#reusable-workflows-provided-by-us)
   - [branch-promotion-prs](#branch-promotion-prs)
-  - [bats](#bats)
   - [helm-publish-new-package-version](#helm-publish-new-package-version)
   - [js-action-ci](#js-action-ci)
   - [repository-mirror](#repository-mirror)
@@ -3455,33 +3454,6 @@ Using a token/PAT (fallback):
       target-branches: '["staging", "production"]'
     secrets:
       gh-token: ${{ secrets.BOT_GITHUB_TOKEN }}
-```
-
-### bats
-
-Runs the [Bats](https://github.com/bats-core/bats-core) tests of the caller
-repository. It installs bats-core plus the bats-support, bats-assert and
-bats-file libraries, exposes them to `bats_load_library` through
-`BATS_LIB_PATH`, and runs `bats` on the given path.
-
-```yaml
-name: Bats tests
-
-on:
-  pull_request:
-
-jobs:
-  bats:
-    uses: Alfresco/alfresco-build-tools/.github/workflows/reusable-bats.yml@v19.16.0
-    with:
-      path: . # optional, default: .
-      # optional, default: -r --print-output-on-failure --formatter pretty
-      bats-args: -r --print-output-on-failure
-      # optional, the versions below default to the ones pinned in this repo
-      bats-version: 1.13.0
-      support-version: 0.3.0
-      assert-version: 2.2.4
-      file-version: 0.4.0
 ```
 
 ### helm-publish-new-package-version
