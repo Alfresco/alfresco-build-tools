@@ -2,6 +2,11 @@ name: Updatecli
 
 on:
   workflow_dispatch:
+    inputs:
+      kubernetes-version:
+        description: Kubernetes minor version the KinD node image must move to, e.g. 1.35. Defaults to the minor of the current setup-kind node image.
+        required: false
+        type: string
   schedule:
     - cron: '0 6 * * 1'
   push:
@@ -14,8 +19,6 @@ on:
 permissions:
     contents: write
     pull-requests: write
-    id-token: write   # This is required for requesting the JWT
-    deployments: write # This is required for deployment statuses management
 
 jobs:
   build-matrix-github-releases:
@@ -93,3 +96,54 @@ jobs:
           UPDATECLI_REPO_OWNER: ${{ github.repository_owner }}
           UPDATECLI_REPO_NAME: ${{ github.event.repository.name }}
           UPDATECLI_REPO_BRANCH: ${{ github.event.repository.default_branch }}
+
+  update-kind-node-image:
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-slim
+    concurrency:
+      group: ${{ github.workflow }}-kind-node-image
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Resolve Kubernetes version
+        id: version
+        env:
+          INPUT_VERSION: ${{ inputs.kubernetes-version }}
+        run: |
+          version="$INPUT_VERSION"
+          if [ -z "$version" ]; then
+            version=$(sed -nE 's/^[[:space:]]+default: kindest\/node:v([0-9]+\.[0-9]+)\..*/\1/p' .github/actions/setup-kind/action.yml)
+          fi
+          if [[ ! "$version" =~ ^1\.[0-9]+$ ]]; then
+            echo "::error::Kubernetes version must be a minor version like 1.35, got '$version'"
+            exit 1
+          fi
+          echo "kubernetes-version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Install Updatecli
+        uses: ./.github/actions/setup-updatecli
+
+      - name: Run Updatecli
+        env:
+          INPUT_VERSION: ${{ inputs.kubernetes-version }}
+          KUBERNETES_VERSION: ${{ steps.version.outputs.kubernetes-version }}
+          UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATECLI_REPO_OWNER: ${{ github.repository_owner }}
+          UPDATECLI_REPO_NAME: ${{ github.event.repository.name }}
+          UPDATECLI_REPO_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -o pipefail
+          updatecli pipeline apply -c .updatecli/manifests/kind_node_image.yaml | tee updatecli.log
+          # A failed condition only skips the pipeline and exits 0.
+          if ! grep -qE 'Skipped:[[:space:]]+0' updatecli.log; then
+            message="The latest KinD release has no node image for Kubernetes $KUBERNETES_VERSION"
+            # Only a requested version is an error: KinD regularly drops old minors.
+            if [ -n "$INPUT_VERSION" ]; then
+              echo "::error::$message"
+              exit 1
+            fi
+            echo "::warning::$message"
+          fi
