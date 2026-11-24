@@ -19,8 +19,6 @@ on:
 permissions:
     contents: write
     pull-requests: write
-    id-token: write   # This is required for requesting the JWT
-    deployments: write # This is required for deployment statuses management
 
 jobs:
   build-matrix-github-releases:
@@ -100,11 +98,8 @@ jobs:
           UPDATECLI_REPO_BRANCH: ${{ github.event.repository.default_branch }}
 
   update-kind-node-image:
-    # Only the default branch's reviewed manifest may run with the write-scoped app token.
-    if: github.ref_name == github.event.repository.default_branch && github.actor != 'dependabot[bot]'
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-slim
-    permissions:
-      contents: read
     concurrency:
       group: ${{ github.workflow }}-kind-node-image
       cancel-in-progress: false
@@ -128,16 +123,6 @@ jobs:
           fi
           echo "kubernetes-version=$version" >> "$GITHUB_OUTPUT"
 
-      # PRs opened with GITHUB_TOKEN don't trigger CI, and the bump must be tested by test-kind.
-      - name: Create GitHub App token
-        id: app-token
-        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
-        with:
-          client-id: ${{ vars.GH_APP_ENGINEERING_CONTRIB_CLIENT_ID }}
-          private-key: ${{ secrets.GH_APP_ENGINEERING_CONTRIB_PRIVATE_KEY }}
-          permission-contents: write
-          permission-pull-requests: write
-
       - name: Install Updatecli
         uses: ./.github/actions/setup-updatecli
 
@@ -145,9 +130,7 @@ jobs:
         env:
           INPUT_VERSION: ${{ inputs.kubernetes-version }}
           KUBERNETES_VERSION: ${{ steps.version.outputs.kubernetes-version }}
-          UPDATECLI_GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          UPDATECLI_USERNAME: ${{ vars.BOT_GITHUB_USERNAME }}
-          UPDATECLI_EMAIL: ${{ vars.BOT_GITHUB_EMAIL }}
+          UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           UPDATECLI_REPO_OWNER: ${{ github.repository_owner }}
           UPDATECLI_REPO_NAME: ${{ github.event.repository.name }}
           UPDATECLI_REPO_BRANCH: ${{ github.event.repository.default_branch }}
