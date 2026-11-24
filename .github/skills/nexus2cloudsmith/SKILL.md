@@ -367,7 +367,7 @@ mirror server:
   action if the repo pins an older one:
 
   ```yaml
-  - uses: Alfresco/alfresco-build-tools/.github/actions/maven-release-slim@v19.16.0
+  - uses: Alfresco/alfresco-build-tools/.github/actions/maven-release-slim@v19.17.0
     with:
       token: ${{ steps.app-token.outputs.token }}
       release-version: ${{ env.RELEASE_VERSION }}
