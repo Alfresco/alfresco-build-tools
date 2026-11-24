@@ -3016,7 +3016,7 @@ LoadBalancer support.
 
 The default `kind-version` and `kind-node-image` follow the Kubernetes version
 of Alfresco's EKS clusters, on the latest KinD release and its newest patch
-image for that version. Each update ships in a minor release.
+image for that version.
 
 ```yaml
       - name: Setup cluster

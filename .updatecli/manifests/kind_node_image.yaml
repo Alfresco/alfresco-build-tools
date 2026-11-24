@@ -24,7 +24,6 @@ actions:
       description: 'Move the setup-kind defaults to the KinD {{ source "kindVersion" }} node image for Kubernetes {{ requiredEnv "KUBERNETES_VERSION" }}, so KinD-based CI follows the EKS version. Image digest from https://github.com/kubernetes-sigs/kind/releases/tag/{{ source "kindVersion" }}'
       labels:
         - dependencies
-        - release/minor
 
 sources:
   kindVersion:
