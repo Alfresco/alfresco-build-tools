@@ -120,7 +120,6 @@ Here follows the list of GitHub Actions topics available in the current document
   - [s3-upload](#s3-upload)
   - [send-teams-notification](#send-teams-notification)
   - [send-teams-workflow-run-notification](#send-teams-workflow-run-notification)
-  - [setup-bats](#setup-bats)
   - [setup-checkov](#setup-checkov)
   - [setup-docker](#setup-docker)
   - [setup-fluxcli](#setup-fluxcli)
@@ -2860,27 +2859,6 @@ matching entity written for you; a `@handle` becomes a link to that profile on
 entry such as `Name|` degrades to plain text with a warning rather than failing the
 step. Anyone named in both `mention-users` and `cc` is mentioned once, and a repeated
 `cc` entry is shown once, so several `cc` outputs can be joined with a comma.
-
-### setup-bats
-
-Installs [Bats](https://github.com/bats-core/bats-core) and the bats-support,
-bats-assert and bats-file libraries, and returns the path to export as
-`BATS_LIB_PATH`. Versions default to the ones pinned in this repository, so
-they are bumped together with the release.
-
-```yaml
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-bats@v19.16.0
-        id: setup-bats
-        with:
-          bats-version: 1.13.0 # optional, default: pinned version
-          support-version: 0.3.0 # optional, default: pinned version
-          assert-version: 2.2.4 # optional, default: pinned version
-          file-version: 0.4.0 # optional, default: pinned version
-
-      - run: bats -r .
-        env:
-          BATS_LIB_PATH: ${{ steps.setup-bats.outputs.lib-path }}
-```
 
 ### setup-checkov
 
