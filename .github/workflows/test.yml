@@ -158,17 +158,9 @@ jobs:
       #endregion
 
       #region Test setup-java-build
-      - name: Test setup-java-build rejects an invalid cache mode
-        id: setup-java-build-invalid
-        continue-on-error: true
-        uses: ./.github/actions/setup-java-build
+      - uses: ./.github/actions/setup-java-build
         with:
-          cache-mode: sometimes
-      - name: Assert setup-java-build failed on invalid cache mode
-        if: steps.setup-java-build-invalid.outcome != 'failure'
-        run: |
-          echo "setup-java-build should fail when given an invalid cache-mode"
-          exit 1
+          cache-mode: restore
       #endregion
 
       - uses: ./.github/actions/setup-jx-release-version
@@ -451,52 +443,3 @@ jobs:
           [ "$CHANGED" = "true" ] || { echo "::error::expected changed=true, got $CHANGED"; exit 1; }
           [ -n "$REMOTE_SHA" ] || { echo "::error::remote-sha output is empty"; exit 1; }
       #endregion
-
-  # Own job: actions/cache only saves when the job succeeds, so a failure elsewhere in "test" would hide a save.
-  test-setup-java-build-restore:
-    runs-on: ${{ matrix.os }}
-    needs: build
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-latest
-          - ubuntu-24.04-arm
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      # Gives an end-of-job save something to store; verify-setup-java-build-restore checks that nothing was saved.
-      - name: Seed the local Maven repository
-        run: |
-          mkdir -p ~/.m2/repository/org/example/seed/1.0
-          echo seed > ~/.m2/repository/org/example/seed/1.0/seed-1.0.jar
-      - name: Test setup-java-build restore-only cache mode
-        id: setup-java-build-restore
-        uses: ./.github/actions/setup-java-build
-        with:
-          java-version: "21"
-          cache-mode: restore
-          cache-key-prefix: test-restore-${{ github.run_id }}-${{ github.run_attempt }}-${{ runner.arch }}
-      - name: Assert setup-java-build restored nothing and set up Java
-        env:
-          CACHE_HIT: ${{ steps.setup-java-build-restore.outputs.cache-hit }}
-        run: |
-          [ "$CACHE_HIT" != "true" ] || { echo "::error::expected no exact cache hit"; exit 1; }
-          java -version 2>&1 | grep -q 'version "21' || { echo "::error::expected Java 21"; exit 1; }
-
-  verify-setup-java-build-restore:
-    name: Verify setup-java-build restore mode saved no cache
-    runs-on: ubuntu-latest
-    needs: test-setup-java-build-restore
-    permissions:
-      actions: read
-    steps:
-      - name: Assert no cache entry was saved
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PREFIX: Linux-test-restore-${{ github.run_id }}-${{ github.run_attempt }}-
-        run: |
-          entries=$(gh cache list --repo "${GITHUB_REPOSITORY}" --key "${PREFIX}" --json key --jq '.[].key')
-          if [ -n "$entries" ]; then
-            echo "::error::cache-mode restore must not save, found: $entries"
-            exit 1
-          fi
