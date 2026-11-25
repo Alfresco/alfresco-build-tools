@@ -3026,7 +3026,8 @@ jobs:
 ```
 
 In `restore` mode the action warns when no cache entry matches the key prefix
-at all, since that means no job in the workflow saves one.
+at all. That is expected on the first run, before the saving job has finished.
+If it shows up on every run, no job in the workflow saves the cache.
 
 ### setup-jx-release-version
 

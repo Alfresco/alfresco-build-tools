@@ -78,8 +78,9 @@ runs:
       env:
         KEY_PREFIX: ${{ steps.key.outputs.prefix }}
       run: >
-        echo "::warning title=No Maven cache::No cache entry starts with ${KEY_PREFIX}.
-        Jobs using cache-mode restore never save, so one job in the workflow must use cache-mode restore-save."
+        echo "::warning title=No Maven cache::No Maven cache entry starts with ${KEY_PREFIX}.
+        This is expected on the first run; if it shows up on every run, make sure one job in the workflow
+        uses cache-mode restore-save, since restore jobs never save."
     - name: "Install ${{ inputs.maven-settings }}"
       shell: bash
       env:
