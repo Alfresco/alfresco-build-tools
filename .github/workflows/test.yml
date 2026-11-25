@@ -157,6 +157,12 @@ jobs:
           skip-tests: ${{ steps.maven-configure.outputs.skip-tests }}
       #endregion
 
+      #region Test setup-java-build
+      - uses: ./.github/actions/setup-java-build
+        with:
+          cache-mode: restore
+      #endregion
+
       - uses: ./.github/actions/setup-jx-release-version
       - uses: ./.github/actions/setup-kubepug
       - uses: ./.github/actions/rancher

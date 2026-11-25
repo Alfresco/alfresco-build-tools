@@ -2984,7 +2984,50 @@ Optionally, the custom `cache-key-prefix` can be provided. It will override the 
           java-distribution: "temurin" # optional
           maven-settings: ".ci.settings.xml" # optional
           cache-key-prefix: "alternate-maven" # optional
+          # optional, default: restore-save; also restore or none
+          cache-mode: "restore-save"
 ```
+
+The action exposes two outputs: `cache-hit` is `true` when an entry with the
+exact key was restored, and `cache-primary-key` is the key for the current
+`pom.xml` files.
+
+`cache-mode` controls the Maven repository cache:
+
+- `restore-save` (default) restores the cache and saves it at the end of the
+  job.
+- `restore` only restores it and never saves.
+- `none` skips the cache.
+
+GitHub cache entries are immutable, and with `restore-save` in several parallel
+jobs, whichever job finishes first saves its `~/.m2`. That is often a short job,
+such as a linter, that never resolved the build's dependencies, so the cache
+stays incomplete and every other job downloads them again. When a workflow has
+several Maven jobs, let one job that runs the full build use `restore-save`,
+and set `cache-mode: restore` on the others:
+
+```yaml
+jobs:
+  build:
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v19.17.0
+      - run: mvn -B -ntp install
+      # Runs before the cache is saved at the end of the job
+      - run: ./scripts/prune-maven-repository.sh
+  tests:
+    strategy:
+      matrix:
+        suite: [unit, integration]
+    steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v19.17.0
+        with:
+          cache-mode: restore
+      - run: mvn -B -ntp verify -P${{ matrix.suite }}
+```
+
+In `restore` mode the action warns when no cache entry matches the key prefix
+at all. That is expected on the first run, before the saving job has finished.
+If it shows up on every run, no job in the workflow saves the cache.
 
 ### setup-jx-release-version
 
