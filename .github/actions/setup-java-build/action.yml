@@ -22,10 +22,19 @@ inputs:
     description: the prefix for the maven repository cache key (eg. to handle multiple maven caches within the same repository)
     default: "maven"
     required: false
+  cache-mode:
+    description: not implemented yet
+    default: "restore-save"
+    required: false
+outputs:
+  cache-hit:
+    description: not implemented yet
+    value: ${{ steps.cache.outputs.cache-hit }}
 runs:
   using: composite
   steps:
     - name: "Cache local Maven repository"
+      id: cache
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/.m2/repository
